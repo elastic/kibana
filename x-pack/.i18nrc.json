@@ -22,7 +22,7 @@
     "xpack.cloud": "plugins/cloud",
     "xpack.cloudDefend": "plugins/cloud_defend",
     "xpack.cloudLinks": "plugins/cloud_integrations/cloud_links",
-    "xpack.cloudDataMigration": "plugins/cloud_integrations/cloud_data_migration",
+    "xpack.cloudDataMigration": "platform/plugins/private/cloud_integrations/cloud_data_migration",
     "xpack.csp": [
       "plugins/cloud_security_posture",
       "packages/kbn-cloud-security-posture-common",
@@ -34,7 +34,7 @@
     "xpack.datasetQuality": "plugins/observability_solution/dataset_quality",
     "xpack.dataUsage": "platform/plugins/private/data_usage",
     "xpack.discover": "plugins/discover_enhanced",
-    "xpack.crossClusterReplication": "plugins/cross_cluster_replication",
+    "xpack.crossClusterReplication": "platform/plugins/private/cross_cluster_replication",
     "xpack.elasticAssistant": "platform/packages/shared/kbn-elastic-assistant",
     "xpack.elasticAssistantCommon": "platform/packages/shared/kbn-elastic-assistant-common",
     "xpack.elasticAssistantPlugin": "solutions/security/plugins/elastic_assistant",
@@ -55,10 +55,10 @@
     "xpack.graph": [
       "plugins/graph"
     ],
-    "xpack.grokDebugger": "plugins/grokdebugger",
+    "xpack.grokDebugger": "platform/plugins/private/grokdebugger",
     "xpack.idxMgmt": "plugins/index_management",
     "xpack.idxMgmtPackage": "packages/index-management",
-    "xpack.indexLifecycleMgmt": "plugins/index_lifecycle_management",
+    "xpack.indexLifecycleMgmt": "platform/plugins/private/index_lifecycle_management",
     "xpack.infra": "plugins/observability_solution/infra",
     "xpack.logsDataAccess": "plugins/observability_solution/logs_data_access",
     "xpack.logsExplorer": "plugins/observability_solution/logs_explorer",
@@ -72,8 +72,8 @@
     "xpack.investigateApp": "solutions/observability/plugins/investigate_app",
     "xpack.kubernetesSecurity": "plugins/kubernetes_security",
     "xpack.lens": "plugins/lens",
-    "xpack.licenseApiGuard": "plugins/license_api_guard",
-    "xpack.licenseMgmt": "plugins/license_management",
+    "xpack.licenseApiGuard": "platform/plugins/private/license_api_guard",
+    "xpack.licenseMgmt": "platform/plugins/shared/license_management",
     "xpack.licensing": "plugins/licensing",
     "xpack.lists": "plugins/lists",
     "xpack.logstash": [
@@ -115,19 +115,19 @@
     "xpack.osquery": [
       "platform/plugins/shared/osquery"
     ],
-    "xpack.painlessLab": "plugins/painless_lab",
+    "xpack.painlessLab": "platform/plugins/private/painless_lab",
     "xpack.profiling": [
       "plugins/observability_solution/profiling"
     ],
-    "xpack.remoteClusters": "plugins/remote_clusters",
+    "xpack.remoteClusters": "platform/plugins/private/remote_clusters",
     "xpack.reporting": [
       "plugins/reporting"
     ],
     "xpack.rollupJobs": [
-      "packages/rollup",
-      "plugins/rollup"
+      "platform/packages/private/rollup",
+      "platform/plugins/private/rollup"
     ],
-    "xpack.runtimeFields": "plugins/runtime_fields",
+    "xpack.runtimeFields": "platform/plugins/private/runtime_fields",
     "xpack.screenshotting": "plugins/screenshotting",
     "xpack.searchSharedUI": "packages/search/shared_ui",
     "xpack.searchHomepage": "plugins/search_homepage",
@@ -137,7 +137,7 @@
     "xpack.searchPlayground": "plugins/search_playground",
     "xpack.searchInferenceEndpoints": "plugins/search_inference_endpoints",
     "xpack.searchAssistant": "plugins/search_assistant",
-    "xpack.searchProfiler": "plugins/searchprofiler",
+    "xpack.searchProfiler": "platform/plugins/shared/searchprofiler",
     "xpack.security": [
       "plugins/security",
       "packages/security"
@@ -154,7 +154,7 @@
       "solutions/observability/plugins/streams_app"
     ],
     "xpack.slo": "plugins/observability_solution/slo",
-    "xpack.snapshotRestore": "plugins/snapshot_restore",
+    "xpack.snapshotRestore": "platform/plugins/private/snapshot_restore",
     "xpack.spaces": "plugins/spaces",
     "xpack.savedObjectsTagging": [
       "plugins/saved_objects_tagging"
@@ -175,7 +175,7 @@
       "solutions/observability/plugins/ux"
     ],
     "xpack.urlDrilldown": "plugins/drilldowns/url_drilldown",
-    "xpack.watcher": "plugins/watcher"
+    "xpack.watcher": "platform/plugins/private/watcher"
   },
   "exclude": [
     "examples"

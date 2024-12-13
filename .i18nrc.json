@@ -13,7 +13,7 @@
     "cases": ["packages/kbn-cases-components"],
     "cellActions": "packages/kbn-cell-actions",
     "charts": "src/plugins/charts",
-    "console": "src/plugins/console",
+    "console": "src/platform/plugins/shared/console",
     "contentManagement": "packages/content-management",
     "core": ["src/core", "packages/core"],
     "customIntegrations": "src/plugins/custom_integrations",
@@ -29,7 +29,7 @@
       "packages/default-nav",
       "src/platform/packages/private/default-nav"
     ],
-    "devTools": "src/plugins/dev_tools",
+    "devTools": "src/platform/plugins/shared/dev_tools",
     "discover": ["src/plugins/discover", "packages/kbn-discover-utils", "packages/kbn-discover-contextual-components"],
     "savedSearch": "src/plugins/saved_search",
     "embeddableApi": "src/plugins/embeddable",
@@ -37,7 +37,8 @@
     "embeddableExamples": "examples/embeddable_examples",
     "esQuery": "packages/kbn-es-query/src",
     "kbnGridLayout": "packages/kbn-grid-layout",
-    "esUi": "src/plugins/es_ui_shared",
+    "esUi": "src/platform/plugins/shared/es_ui_shared",
+    "expandableFlyout": "packages/kbn-expandable-flyout",
     "expressionError": "src/plugins/expression_error",
     "expressionGauge": "src/plugins/chart_expressions/expression_gauge",
     "expressionHeatmap": "src/plugins/chart_expressions/expression_heatmap",
@@ -89,8 +90,9 @@
     "lists": "packages/kbn-securitysolution-list-utils/src",
     "exceptionList-components": "packages/kbn-securitysolution-exception-list-components/src",
     "management": [
-      "src/legacy/core_plugins/management",
-      "src/plugins/management",
+      "src/platform/plugins/shared/management",
+      "src/platform/packages/private/kbn-management",
+      "src/platform/packages/shared/kbn-management",
       "packages/kbn-management"
     ],
     "monaco": "packages/kbn-monaco/src",
@@ -155,7 +157,7 @@
     "unifiedHistogram": "src/plugins/unified_histogram",
     "unifiedDataTable": "packages/kbn-unified-data-table",
     "unsavedChangesBadge": "packages/kbn-unsaved-changes-badge",
-    "unsavedChangesPrompt": "packages/kbn-unsaved-changes-prompt",
+    "unsavedChangesPrompt": "src/platform/packages/shared/kbn-unsaved-changes-prompt",
     "managedContentBadge": "packages/kbn-managed-content-badge",
     "responseOpsRuleForm": "packages/response-ops/rule_form"
   },

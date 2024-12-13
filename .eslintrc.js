@@ -302,7 +302,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/cross_cluster_replication/**/*.{js,mjs,ts,tsx}'],
+      files: ['x-pack/platform/plugins/private/cross_cluster_replication/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'jsx-a11y/click-events-have-key-events': 'off',
       },

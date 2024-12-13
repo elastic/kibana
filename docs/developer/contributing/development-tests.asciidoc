@@ -60,7 +60,7 @@ You can generate code coverage report for a single plugin.
 
 [source,bash]
 ----
-yarn jest --coverage --config src/plugins/console/jest.config.js
+yarn jest --coverage --config src/platform/plugins/shared/console/jest.config.js
 ----
 
 Html report is available in target/kibana-coverage/jest/path/to/plugin
