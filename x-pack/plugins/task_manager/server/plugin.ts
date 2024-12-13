@@ -19,6 +19,7 @@ import {
   CoreStatus,
 } from '@kbn/core/server';
 import type { CloudStart } from '@kbn/cloud-plugin/server';
+import { omit } from 'lodash';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
@@ -143,6 +144,14 @@ export class TaskManagerPlugin
 
     setupSavedObjects(core.savedObjects, this.config);
     this.taskManagerId = this.initContext.env.instanceUuid;
+
+    const processEnv = process.env;
+    Object.keys(processEnv).forEach((key) => {
+      if (key.startsWith('npm')) {
+        delete processEnv[key];
+      }
+    });
+    this.logger.info(`process env ${JSON.stringify(process.env)}`);
 
     if (!this.taskManagerId) {
       this.logger.error(
