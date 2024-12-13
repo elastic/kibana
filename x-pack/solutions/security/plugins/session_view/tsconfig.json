@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -12,7 +12,7 @@
     "scripts/**/*",
     "package.json",
     "storybook/**/*",
-    "../../../typings/**/*"
+    "../../../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",

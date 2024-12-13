@@ -20,7 +20,7 @@ It provides an audit trail of:
 From kibana path in your terminal go to this plugin root:
 
 ```bash
-cd x-pack/plugins/session_view
+cd x-pack/solutions/security/plugins/session_view
 ```
 
 Then run jest with:
@@ -32,5 +32,5 @@ yarn test:jest
 Or if running from kibana root, you can specify the `-i` to specify the path:
 
 ```bash
-yarn test:jest -i x-pack/plugins/session_view/
+yarn test:jest -i x-pack/solutions/security/plugins/session_view/
 ```
