@@ -28,6 +28,7 @@ import { useMlApi } from '../../contexts/kibana';
 import type { SyncSavedObjectResponse, SyncResult } from '../../../../common/types/saved_objects';
 import { SyncList } from './sync_list';
 import { useToastNotificationService } from '../../services/toast_notification_service';
+import { SyncToAllSpacesWarning } from './sync_to_all_spaces_warning';
 
 export interface Props {
   onClose: () => void;
@@ -37,8 +38,8 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
   const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
   const [loading, setLoading] = useState(false);
   const [canSync, setCanSync] = useState(false);
+  const [canSyncToAllSpaces, setCanSyncToAllSpaces] = useState(true);
   const [syncResp, setSyncResp] = useState<SyncSavedObjectResponse | null>(null);
-  const [canSyncToAllSpaces, setCanSyncToAllSpaces] = useState<boolean>(true);
   const {
     savedObjects: { syncSavedObjects, canSyncToAllSpaces: canSyncToAllSpacesFunc },
   } = useMlApi();
@@ -46,7 +47,7 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
   async function loadSyncList(simulate: boolean = true) {
     setLoading(true);
     try {
-      const resp = await syncSavedObjects(simulate, canSyncToAllSpaces);
+      const resp = await syncSavedObjects(simulate);
       setSyncResp(resp);
 
       if (simulate === true) {
@@ -123,6 +124,12 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
               />
             </EuiText>
           </EuiCallOut>
+          {canSyncToAllSpaces === false && (
+            <>
+              <EuiSpacer size="s" />
+              <SyncToAllSpacesWarning />
+            </>
+          )}
           <EuiSpacer />
           <SyncList syncItems={syncResp} />
         </EuiFlyoutBody>
