@@ -14,6 +14,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   ALERT_RISK_SCORE,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import type { ExperimentalFeatures } from '../../../../common';
 import type {
@@ -221,6 +222,7 @@ export const calculateRiskScores = async ({
   alertSampleSizePerShard = 10_000,
   excludeAlertStatuses = [],
   experimentalFeatures,
+  excludeAlertTags = [],
 }: {
   assetCriticalityService: AssetCriticalityService;
   esClient: ElasticsearchClient;
@@ -239,11 +241,17 @@ export const calculateRiskScores = async ({
     if (!isEmpty(userFilter)) {
       filter.push(userFilter as QueryDslQueryContainer);
     }
+    if (excludeAlertTags.length > 0) {
+      filter.push({
+        bool: { must_not: { terms: { [ALERT_WORKFLOW_TAGS]: excludeAlertTags } } },
+      });
+    }
     const identifierTypes: IdentifierType[] = identifierType
       ? [identifierType]
       : experimentalFeatures.serviceEntityStoreEnabled
       ? ['host', 'user', 'service']
       : ['host', 'user'];
+
     const request = {
       size: 0,
       _source: false,
