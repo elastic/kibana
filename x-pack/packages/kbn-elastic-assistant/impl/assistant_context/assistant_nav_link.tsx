@@ -11,9 +11,9 @@ import ReactDOM from 'react-dom';
 import { createHtmlPortalNode, OutPortal, InPortal } from 'react-reverse-portal';
 import { EuiToolTip, EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ChromeStyle } from '@kbn/core-chrome-browser';
 import { useAssistantContext } from '.';
 import { AssistantAvatar } from '../..';
-import { ChromeStyle } from '@kbn/core-chrome-browser';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -29,15 +29,11 @@ const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assis
 });
 
 export const AssistantNavLink: FC = () => {
-  const {
-    chrome,
-    showAssistantOverlay,
-    assistantAvailability,
-  } = useAssistantContext();
+  const { chrome, showAssistantOverlay, assistantAvailability } = useAssistantContext();
   const portalNode = React.useMemo(() => createHtmlPortalNode(), []);
   const [chromeStyle, setChromeStyle] = useState<ChromeStyle | undefined>(undefined);
 
-  // useObserverable would change the order of re-renders that are tested against closely. 
+  // useObserverable would change the order of re-renders that are tested against closely.
   useEffect(() => {
     const s = chrome.getChromeStyle$().subscribe(setChromeStyle);
     return () => s.unsubscribe();
