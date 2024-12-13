@@ -99,7 +99,7 @@ const buildIdentityRiskFields = (identifierType: IdentifierType): FieldMap =>
   }, {} as FieldMap);
 
 export const riskScoreFieldMap: FieldMap = {
-  'event.ingested': {
+  '@timestamp': {
     type: 'date',
     array: false,
     required: false,
@@ -126,6 +126,11 @@ export const riskScoreFieldMap: FieldMap = {
     required: false,
   },
   ...buildIdentityRiskFields(RiskScoreEntity.user),
+  'event.ingested': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
 } as const;
 
 export const mappingComponentName = '.risk-score-mappings';

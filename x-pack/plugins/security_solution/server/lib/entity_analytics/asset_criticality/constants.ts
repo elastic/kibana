@@ -17,7 +17,7 @@ const assetCriticalityMapping = {
 };
 
 export const assetCriticalityFieldMap: FieldMap = {
-  'event.ingested': {
+  '@timestamp': {
     type: 'date',
     array: false,
     required: false,
@@ -55,6 +55,11 @@ export const assetCriticalityFieldMap: FieldMap = {
     required: false,
   },
   'user.asset.criticality': assetCriticalityMapping,
+  'event.ingested': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
 } as const;
 
 export const CRITICALITY_VALUES: { readonly [K in CriticalityValues as Uppercase<K>]: K } = {
