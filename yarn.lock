@@ -4104,6 +4104,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/charts-theme@link:packages/kbn-charts-theme":
+  version "0.0.0"
+  uid ""
+
 "@kbn/check-mappings-update-cli@link:packages/kbn-check-mappings-update-cli":
   version "0.0.0"
   uid ""

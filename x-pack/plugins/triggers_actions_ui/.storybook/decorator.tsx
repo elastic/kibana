@@ -97,6 +97,7 @@ export const StorybookContextDecorator: FC<PropsWithChildren<StorybookContextDec
               ruleTypeRegistry: getRuleTypeRegistry(),
               charts: {
                 theme: {
+                  // TODO: fix charts theme for storybook once borealis theme is default
                   useChartsBaseTheme: () => (darkMode ? DARK_THEME : LIGHT_THEME),
                   useSparklineOverrides: () => ({
                     lineSeriesStyle: {

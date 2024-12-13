@@ -6,8 +6,9 @@
  */
 
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import React, { createContext, useMemo, FC, PropsWithChildren } from 'react';
-import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
+import { LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 import { UptimeAppColors } from '../app/uptime_app';
 
 export interface UptimeThemeContextValues {
@@ -72,14 +73,15 @@ export const UptimeThemeContextProvider: FC<PropsWithChildren<ThemeContextProps>
       lightestShade: euiLightVars.euiColorLightestShade,
     };
   }
+  const baseTheme = useElasticChartsTheme();
   const value = useMemo(() => {
     return {
       colors,
       chartTheme: {
-        baseTheme: darkMode ? DARK_THEME : LIGHT_THEME,
+        baseTheme,
       },
     };
-  }, [colors, darkMode]);
+  }, [colors, baseTheme]);
 
   return <UptimeThemeContext.Provider value={value} children={children} />;
 };
