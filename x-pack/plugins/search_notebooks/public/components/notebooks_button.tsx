@@ -30,7 +30,7 @@ export const SearchNotebooksButton = ({
   if (activeView) {
     return (
       <EuiButton
-        color="accentSecondary"
+        color="primary"
         fill
         onClick={onClick}
         size="s"
@@ -47,7 +47,7 @@ export const SearchNotebooksButton = ({
   }
   return (
     <EuiButtonEmpty
-      color="accentSecondary"
+      color="primary"
       onClick={onClick}
       size="s"
       iconType="documentation"
