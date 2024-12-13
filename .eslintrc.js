@@ -1216,7 +1216,7 @@ module.exports = {
         'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/timelines/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
-        'packages/kbn-data-stream-adapter/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
         'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
       plugins: ['eslint-plugin-node', 'react'],
@@ -1316,7 +1316,7 @@ module.exports = {
             'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
-            'x-pack/packages/kbn-data-stream-adapter/**/*.{js,mjs,ts,tsx}',
+            'x-pack/x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
             'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
           ],
           rules: {
