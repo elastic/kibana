@@ -29,6 +29,7 @@ const PentagonShapeOnHover = styled(NodeShapeOnHoverSvg)`
 const NODE_WIDTH = 91;
 const NODE_HEIGHT = 88;
 
+// eslint-disable-next-line react/display-name
 export const PentagonNode: React.FC<NodeProps> = memo((props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
     props.data as EntityNodeViewModel;

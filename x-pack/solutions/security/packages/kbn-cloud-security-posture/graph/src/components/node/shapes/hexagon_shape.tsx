@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import type { HoverShapeProps, ShapeProps } from './types';
 
+// eslint-disable-next-line react/display-name
 export const HexagonHoverShape: React.FC<HoverShapeProps> = memo(({ stroke }) => (
   <path
     opacity="0.5"
@@ -17,6 +18,7 @@ export const HexagonHoverShape: React.FC<HoverShapeProps> = memo(({ stroke }) =>
   />
 ));
 
+// eslint-disable-next-line react/display-name
 export const HexagonShape: React.FC<ShapeProps> = memo(({ stroke, fill }) => (
   <path
     d="M31.75 1.74241C34.0705 0.402668 36.9295 0.402668 39.25 1.74241L65.891 17.1236C68.2115 18.4634 69.641 20.9393 69.641 23.6188V54.3812C69.641 57.0607 68.2115 59.5366 65.891 60.8764L39.25 76.2576C36.9295 77.5973 34.0705 77.5973 31.75 76.2576L5.10898 60.8764C2.78847 59.5366 1.35898 57.0607 1.35898 54.3812V23.6188C1.35898 20.9393 2.78847 18.4634 5.10898 17.1236L31.75 1.74241Z"

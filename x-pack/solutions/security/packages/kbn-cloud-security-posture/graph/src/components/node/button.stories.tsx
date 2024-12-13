@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable react/jsx-no-literals */
+
 import React from 'react';
 import { ThemeProvider } from '@emotion/react';
 import { Story } from '@storybook/react';

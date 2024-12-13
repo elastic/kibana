@@ -10,6 +10,7 @@ import { Handle, Position } from '@xyflow/react';
 import { LabelNodeContainer, LabelShape, HandleStyleOverride, LabelShapeOnHover } from './styles';
 import type { LabelNodeViewModel, NodeProps } from '../types';
 
+// eslint-disable-next-line react/display-name
 export const LabelNode: React.FC<NodeProps> = memo((props: NodeProps) => {
   const { id, color, label, interactive } = props.data as LabelNodeViewModel;
 

@@ -8,10 +8,12 @@
 import React, { memo } from 'react';
 import type { HoverShapeProps, ShapeProps } from './types';
 
+// eslint-disable-next-line react/display-name
 export const EllipseHoverShape: React.FC<HoverShapeProps> = memo(({ stroke }) => (
   <circle opacity="0.5" cx="45" cy="45" r="44.5" stroke={stroke} strokeDasharray="2 2" />
 ));
 
+// eslint-disable-next-line react/display-name
 export const EllipseShape: React.FC<ShapeProps> = memo(({ stroke, fill }) => (
   <circle cx="36" cy="36" r="35.5" fill={fill} stroke={stroke} />
 ));

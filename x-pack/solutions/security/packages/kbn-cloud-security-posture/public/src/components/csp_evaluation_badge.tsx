@@ -36,11 +36,20 @@ export const CspEvaluationBadge = ({ type }: Props) => (
     data-test-subj={`${type}_finding`}
   >
     {type === 'failed' ? (
-      <FormattedMessage id="xpack.csp.cspEvaluationBadge.failLabel" defaultMessage="Fail" />
+      <FormattedMessage
+        id="securitySolutionPackages.csp.cspEvaluationBadge.failLabel"
+        defaultMessage="Fail"
+      />
     ) : type === 'passed' ? (
-      <FormattedMessage id="xpack.csp.cspEvaluationBadge.passLabel" defaultMessage="Pass" />
+      <FormattedMessage
+        id="securitySolutionPackages.csp.cspEvaluationBadge.passLabel"
+        defaultMessage="Pass"
+      />
     ) : (
-      <FormattedMessage id="xpack.csp.cspEvaluationBadge.naLabel" defaultMessage="N/A" />
+      <FormattedMessage
+        id="securitySolutionPackages.csp.cspEvaluationBadge.naLabel"
+        defaultMessage="N/A"
+      />
     )}
   </EuiBadge>
 );

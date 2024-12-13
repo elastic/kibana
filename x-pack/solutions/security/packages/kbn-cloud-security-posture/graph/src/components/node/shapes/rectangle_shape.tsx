@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import type { HoverShapeProps, ShapeProps } from './types';
 
+// eslint-disable-next-line react/display-name
 export const RectangleHoverShape: React.FC<HoverShapeProps> = memo(({ stroke }) => (
   <rect
     opacity="0.5"
@@ -21,6 +22,7 @@ export const RectangleHoverShape: React.FC<HoverShapeProps> = memo(({ stroke }) 
   />
 ));
 
+// eslint-disable-next-line react/display-name
 export const RectangleShape: React.FC<ShapeProps> = memo(({ stroke, fill }) => (
   <rect x="1" y="0.5" width="63" height="63" rx="7.5" fill={fill} stroke={stroke} />
 ));

@@ -6,9 +6,8 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ThemeProvider } from '@emotion/react';
+import { ThemeProvider, css } from '@emotion/react';
 import { Story } from '@storybook/react';
-import { css } from '@emotion/react';
 import { EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
 import type { EntityNodeViewModel, NodeProps } from '..';
 import { Graph } from '..';
@@ -77,6 +76,7 @@ const useExpandButtonPopover = () => {
     closePopover();
   }, [closePopover]);
 
+  // eslint-disable-next-line react/display-name
   const PopoverComponent = memo(() => (
     <GraphPopover
       panelPaddingSize="s"
@@ -130,6 +130,7 @@ const useExpandButtonPopover = () => {
 const useNodePopover = () => {
   const { id, state, actions } = useGraphPopover('node-popover');
 
+  // eslint-disable-next-line react/display-name
   const PopoverComponent = memo(() => (
     <GraphPopover
       panelPaddingSize="s"
@@ -137,6 +138,7 @@ const useNodePopover = () => {
       isOpen={state.isOpen}
       anchorElement={state.anchorElement}
       closePopover={actions.closePopover}
+      // eslint-disable-next-line react/jsx-no-literals
     >
       TODO
     </GraphPopover>
@@ -160,17 +162,21 @@ const Template: Story = () => {
   const popovers = [expandNodePopover, nodePopover];
   const isPopoverOpen = popovers.some((popover) => popover.state.isOpen);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const popoverOpenWrapper = (cb: Function, ...args: any[]) => {
     [expandNodePopover.actions.closePopover, nodePopover.actions.closePopover].forEach(
       (closePopover) => {
         closePopover();
       }
     );
+    // eslint-disable-next-line prefer-spread
     cb.apply(null, args);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const expandButtonClickHandler = (...args: any[]) =>
     popoverOpenWrapper(expandNodePopover.onNodeExpandButtonClick, ...args);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const nodeClickHandler = (...args: any[]) => popoverOpenWrapper(nodePopover.onNodeClick, ...args);
 
   const nodes: EntityNodeViewModel[] = useMemo(

@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from '@emotion/react';
+import { ThemeProvider, css } from '@emotion/react';
 import { Story } from '@storybook/react';
 import { Writable } from '@kbn/utility-types';
-import { css } from '@emotion/react';
 import type {
   EdgeViewModel,
   LabelNodeViewModel,

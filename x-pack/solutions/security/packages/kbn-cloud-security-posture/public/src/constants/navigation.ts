@@ -9,20 +9,20 @@ import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-co
 import { i18n } from '@kbn/i18n';
 
 export const NAV_ITEMS_NAMES = {
-  DASHBOARD: i18n.translate('xpack.csp.navigation.dashboardNavItemLabel', {
+  DASHBOARD: i18n.translate('securitySolutionPackages.csp.navigation.dashboardNavItemLabel', {
     defaultMessage: 'Cloud Security Posture',
   }),
   VULNERABILITY_DASHBOARD: i18n.translate(
-    'xpack.csp.navigation.vulnerabilityDashboardNavItemLabel',
+    'securitySolutionPackages.csp.navigation.vulnerabilityDashboardNavItemLabel',
     { defaultMessage: 'Cloud Native Vulnerability Management' }
   ),
-  FINDINGS: i18n.translate('xpack.csp.navigation.findingsNavItemLabel', {
+  FINDINGS: i18n.translate('securitySolutionPackages.csp.navigation.findingsNavItemLabel', {
     defaultMessage: 'Findings',
   }),
-  BENCHMARKS: i18n.translate('xpack.csp.navigation.myBenchmarksNavItemLabel', {
+  BENCHMARKS: i18n.translate('securitySolutionPackages.csp.navigation.findingsNavItemLabel', {
     defaultMessage: 'Benchmarks',
   }),
-  RULES: i18n.translate('xpack.csp.navigation.rulesNavItemLabel', {
+  RULES: i18n.translate('securitySolutionPackages.csp.navigation.rulesNavItemLabel', {
     defaultMessage: 'Rules',
   }),
 };

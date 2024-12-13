@@ -73,6 +73,7 @@ describe('GraphLargeStackedEdgeCases story', () => {
 
         // Same label can appear more than once in the graph, so we skip them if already scanned
         if (labelElements.has(id!)) {
+          // eslint-disable-next-line no-continue
           continue;
         }
         labelElements.add(id!);

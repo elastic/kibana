@@ -20,6 +20,7 @@ type FilterValue = string | number | NegatedValue;
 
 export type NavFilter = Record<string, FilterValue>;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const encodeRison = (v: any): string | undefined => {
   try {
     return encode(v);
@@ -40,6 +41,7 @@ const decodeRison = <T extends unknown>(query: string): T | undefined => {
 
 const QUERY_PARAM_KEY = 'cspq';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const encodeQuery = (query: any): LocationDescriptorObject['search'] => {
   const risonQuery = encodeRison(query);
   if (!risonQuery) return;
@@ -56,6 +58,7 @@ export const encodeQueryUrl = (
   servicesStart: DataPublicPluginStart,
   filters: Filter[],
   groupBy?: string[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any => {
   return encodeQuery({
     query: servicesStart.query.queryString.getDefaultQuery(),

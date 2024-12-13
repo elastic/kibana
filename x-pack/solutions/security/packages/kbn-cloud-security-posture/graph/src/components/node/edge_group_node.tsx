@@ -10,6 +10,7 @@ import { Handle, NodeResizeControl, Position } from '@xyflow/react';
 import { HandleStyleOverride } from './styles';
 import type { NodeProps } from '../types';
 
+// eslint-disable-next-line react/display-name
 export const EdgeGroupNode: React.FC<NodeProps> = memo((props: NodeProps) => {
   // Handles order horizontally is: in > inside > out > outside
   return (

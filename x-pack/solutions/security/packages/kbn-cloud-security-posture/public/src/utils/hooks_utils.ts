@@ -7,12 +7,12 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
+  buildMutedRulesFilter,
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   CDR_VULNERABILITIES_INDEX_PATTERN,
   CDR_3RD_PARTY_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import { buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
 import type { UseCspOptions } from '../types';
 
 const MISCONFIGURATIONS_SOURCE_FIELDS = ['result.*', 'rule.*', 'resource.*'];

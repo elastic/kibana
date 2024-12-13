@@ -9,9 +9,12 @@ import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { i18n } from '@kbn/i18n';
 import type { CspBenchmarkRulesStates } from '../schema/rules/latest';
 
-export const defaultErrorMessage = i18n.translate('xpack.csp.common.utils.helpers.unknownError', {
-  defaultMessage: 'Unknown Error',
-});
+export const defaultErrorMessage = i18n.translate(
+  'sharedPlatformPackages.csp.common.utils.helpers.unknownError',
+  {
+    defaultMessage: 'Unknown Error',
+  }
+);
 
 export const extractErrorMessage = (e: unknown, fallbackMessage?: string): string => {
   if (e instanceof Error) return e.message;

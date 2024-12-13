@@ -24,6 +24,7 @@ import { NodeExpandButton } from './node_expand_button';
 const NODE_WIDTH = 87;
 const NODE_HEIGHT = 96;
 
+// eslint-disable-next-line react/display-name
 export const HexagonNode: React.FC<NodeProps> = memo((props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
     props.data as EntityNodeViewModel;

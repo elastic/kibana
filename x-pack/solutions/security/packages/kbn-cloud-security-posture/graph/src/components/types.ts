@@ -13,8 +13,7 @@ import type {
   EdgeDataModel,
   NodeShape,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
-import type { Node, NodeProps as xyNodeProps } from '@xyflow/react';
-import type { Edge, EdgeProps as xyEdgeProps } from '@xyflow/react';
+import type { Node, NodeProps as xyNodeProps, Edge, EdgeProps as xyEdgeProps } from '@xyflow/react';
 
 export interface Size {
   width: number;

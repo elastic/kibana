@@ -37,6 +37,7 @@ export const useMisconfigurationFindings = (options: UseCspOptions) => {
         rawResponse: { hits, aggregations },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           params: buildMisconfigurationsFindingsQuery(options, rulesStates!),
         })
       );

@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import type { HoverShapeProps, ShapeProps } from './types';
 
+// eslint-disable-next-line react/display-name
 export const DiamondHoverShape: React.FC<HoverShapeProps> = memo(({ stroke }) => (
   <path
     opacity="0.5"
@@ -17,6 +18,7 @@ export const DiamondHoverShape: React.FC<HoverShapeProps> = memo(({ stroke }) =>
   />
 ));
 
+// eslint-disable-next-line react/display-name
 export const DiamondShape: React.FC<ShapeProps> = memo(({ stroke, fill }) => (
   <path
     d="M34.1967 3.01041C37.1256 0.0814755 41.8744 0.0814755 44.8033 3.01041L75.4896 33.6967C78.4185 36.6256 78.4185 41.3744 75.4896 44.3033L44.8033 74.9896C41.8744 77.9185 37.1256 77.9185 34.1967 74.9896L3.51041 44.3033C0.581475 41.3744 0.581475 36.6256 3.51041 33.6967L34.1967 3.01041Z"
