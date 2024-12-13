@@ -6,7 +6,7 @@
  */
 
 import { useBarCharts } from './use_bar_charts';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { IWaterfallContext } from './context/waterfall_context';
 import { CANVAS_MAX_ITEMS } from './constants';
 

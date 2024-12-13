@@ -11,27 +11,29 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { DashboardApi } from '../../../dashboard_api/types';
 import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
-import { buildMockDashboard } from '../../../mocks';
+import { DashboardApi } from '../../../dashboard_api/types';
 import { coreServices, visualizationsService } from '../../../services/kibana_services';
 import { DashboardEmptyScreen } from './dashboard_empty_screen';
+import { ViewMode } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
 
 visualizationsService.getAliases = jest.fn().mockReturnValue([{ name: 'lens' }]);
 
 describe('DashboardEmptyScreen', () => {
   function mountComponent(viewMode: ViewMode) {
-    const dashboardApi = buildMockDashboard({ overrides: { viewMode } }) as DashboardApi;
+    const mockDashboardApi = {
+      viewMode: new BehaviorSubject<ViewMode>(viewMode),
+    } as unknown as DashboardApi;
     return mountWithIntl(
-      <DashboardContext.Provider value={dashboardApi}>
+      <DashboardContext.Provider value={mockDashboardApi}>
         <DashboardEmptyScreen />
       </DashboardContext.Provider>
     );
   }
 
   test('renders correctly with view mode', () => {
-    const component = mountComponent(ViewMode.VIEW);
+    const component = mountComponent('view');
     expect(component.render()).toMatchSnapshot();
 
     const emptyReadWrite = findTestSubject(component, 'dashboardEmptyReadWrite');
@@ -43,7 +45,7 @@ describe('DashboardEmptyScreen', () => {
   });
 
   test('renders correctly with edit mode', () => {
-    const component = mountComponent(ViewMode.EDIT);
+    const component = mountComponent('edit');
     expect(component.render()).toMatchSnapshot();
 
     const emptyReadWrite = findTestSubject(component, 'dashboardEmptyReadWrite');
@@ -57,7 +59,7 @@ describe('DashboardEmptyScreen', () => {
   test('renders correctly with readonly mode', () => {
     (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
 
-    const component = mountComponent(ViewMode.VIEW);
+    const component = mountComponent('view');
     expect(component.render()).toMatchSnapshot();
 
     const emptyReadWrite = findTestSubject(component, 'dashboardEmptyReadWrite');
@@ -72,7 +74,7 @@ describe('DashboardEmptyScreen', () => {
   test('renders correctly with readonly and edit mode', () => {
     (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
 
-    const component = mountComponent(ViewMode.EDIT);
+    const component = mountComponent('edit');
     expect(component.render()).toMatchSnapshot();
 
     const emptyReadWrite = findTestSubject(component, 'dashboardEmptyReadWrite');

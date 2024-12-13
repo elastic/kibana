@@ -291,6 +291,8 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    *               Can be useful when we grant access to a resource but want to identify a user if possible.
    *
    * Defaults to `true` if an auth mechanism is registered.
+   *
+   * @deprecated Use `security.authc.enabled` instead
    */
   authRequired?: boolean | 'optional';
 

@@ -24,8 +24,10 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
       access: 'public',
       path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
 
-      options: {
-        tags: ['access:elasticAssistant'],
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
       },
     })
     .addVersion(

@@ -72,12 +72,11 @@ export function InvestigationDetails({ user }: Props) {
         ],
       }}
     >
-      <EuiFlexGroup direction="row" responsive>
-        <EuiFlexItem grow={8}>
+      <EuiFlexGroup direction="row">
+        <EuiFlexItem grow={4}>
           <InvestigationItems />
         </EuiFlexItem>
-
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem>
           <InvestigationNotes user={user} />
         </EuiFlexItem>
       </EuiFlexGroup>

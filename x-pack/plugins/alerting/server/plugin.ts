@@ -116,6 +116,7 @@ import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/da
 import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
 import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
+import { registerDeprecations } from './deprecations';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -409,6 +410,8 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
       docLinks: core.docLinks,
     });
+
+    registerDeprecations({ core });
 
     return {
       registerConnectorAdapter: <

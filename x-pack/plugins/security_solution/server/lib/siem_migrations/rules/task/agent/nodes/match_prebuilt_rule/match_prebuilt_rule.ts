@@ -5,59 +5,84 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { SiemMigrationRuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
+import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { ChatModel } from '../../../util/actions_client_chat';
-import { filterPrebuiltRules, type PrebuiltRulesMapByName } from '../../../util/prebuilt_rules';
 import type { GraphNode } from '../../types';
 import { MATCH_PREBUILT_RULE_PROMPT } from './prompts';
 
 interface GetMatchPrebuiltRuleNodeParams {
   model: ChatModel;
-  prebuiltRulesMap: PrebuiltRulesMapByName;
+  logger: Logger;
+  ruleMigrationsRetriever: RuleMigrationsRetriever;
 }
 
 interface GetMatchedRuleResponse {
   match: string;
 }
 
-export const getMatchPrebuiltRuleNode =
-  ({ model, prebuiltRulesMap }: GetMatchPrebuiltRuleNodeParams): GraphNode =>
-  async (state) => {
-    const mitreAttackIds = state.original_rule.annotations?.mitre_attack;
-    if (!mitreAttackIds?.length) {
-      return {};
-    }
-
-    const filteredPrebuiltRulesMap = filterPrebuiltRules(prebuiltRulesMap, mitreAttackIds);
-    if (filteredPrebuiltRulesMap.size === 0) {
-      return {};
-    }
+export const getMatchPrebuiltRuleNode = ({
+  model,
+  ruleMigrationsRetriever,
+  logger,
+}: GetMatchPrebuiltRuleNodeParams): GraphNode => {
+  return async (state) => {
+    const query = state.semantic_query;
+    const techniqueIds = state.original_rule.annotations?.mitre_attack || [];
+    const prebuiltRules = await ruleMigrationsRetriever.prebuiltRules.getRules(
+      query,
+      techniqueIds.join(',')
+    );
 
     const outputParser = new JsonOutputParser();
-    const matchPrebuiltRule = MATCH_PREBUILT_RULE_PROMPT.pipe(model).pipe(outputParser);
+    const mostRelevantRule = MATCH_PREBUILT_RULE_PROMPT.pipe(model).pipe(outputParser);
 
-    const elasticSecurityRules = [...filteredPrebuiltRulesMap.keys()].join('\n');
+    const elasticSecurityRules = prebuiltRules.map((rule) => {
+      return {
+        name: rule.name,
+        description: rule.description,
+      };
+    });
 
-    const response = (await matchPrebuiltRule.invoke({
-      elasticSecurityRules,
-      ruleTitle: state.original_rule.title,
+    const splunkRule = {
+      title: state.original_rule.title,
+      description: state.original_rule.description,
+    };
+
+    /*
+     * Takes the most relevant rule from the array of rule(s) returned by the semantic query, returns either the most relevant or none.
+     */
+    const response = (await mostRelevantRule.invoke({
+      rules: JSON.stringify(elasticSecurityRules, null, 2),
+      splunk_rule: JSON.stringify(splunkRule, null, 2),
     })) as GetMatchedRuleResponse;
 
     if (response.match) {
-      const result = filteredPrebuiltRulesMap.get(response.match);
-      if (result != null) {
+      const matchedRule = prebuiltRules.find((r) => r.name === response.match);
+      if (matchedRule) {
         return {
           elastic_rule: {
-            title: result.rule.name,
-            description: result.rule.description,
-            prebuilt_rule_id: result.rule.rule_id,
-            id: result.installedRuleId,
+            title: matchedRule.name,
+            description: matchedRule.description,
+            id: matchedRule.installedRuleId,
+            prebuilt_rule_id: matchedRule.rule_id,
           },
           translation_result: SiemMigrationRuleTranslationResult.FULL,
         };
       }
     }
-
+    const lookupTypes = ['inputlookup', 'outputlookup'];
+    if (
+      state.original_rule?.query &&
+      lookupTypes.some((type) => state.original_rule.query.includes(type))
+    ) {
+      logger.debug(
+        `Rule: ${state.original_rule?.title} did not match any prebuilt rule, but contains inputlookup, dropping`
+      );
+      return { translation_result: SiemMigrationRuleTranslationResult.UNTRANSLATABLE };
+    }
     return {};
   };
+};
