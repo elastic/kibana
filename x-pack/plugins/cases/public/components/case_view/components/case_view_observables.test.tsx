@@ -8,17 +8,11 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 
-import type { CaseUI } from '../../../../common';
 import type { AppMockRenderer } from '../../../common/mock';
 
 import { createAppMockRenderer } from '../../../common/mock';
-import { alertCommentWithIndices, basicCase } from '../../../containers/mock';
+import { basicCase } from '../../../containers/mock';
 import { CaseViewObservables } from './case_view_observables';
-
-const caseData: CaseUI = {
-  ...basicCase,
-  comments: [...basicCase.comments, alertCommentWithIndices],
-};
 
 describe('Case View Page observables tab', () => {
   let appMockRender: AppMockRenderer;
@@ -29,13 +23,13 @@ describe('Case View Page observables tab', () => {
   });
 
   it('should render the utility bar for the observables table', async () => {
-    appMockRender.render(<CaseViewObservables isLoading={false} caseData={caseData} />);
+    appMockRender.render(<CaseViewObservables isLoading={false} caseData={basicCase} />);
 
     expect((await screen.findAllByTestId('cases-observables-add')).length).toBe(2);
   });
 
   it('should render the observable table', async () => {
-    appMockRender.render(<CaseViewObservables isLoading={false} caseData={caseData} />);
+    appMockRender.render(<CaseViewObservables isLoading={false} caseData={basicCase} />);
 
     expect(await screen.findByTestId('cases-observables-table')).toBeInTheDocument();
   });
