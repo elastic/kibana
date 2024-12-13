@@ -57,7 +57,7 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
     },
     icon: getIngestionMethodIconType(INGESTION_METHOD_IDS.CRAWLER),
     title: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.crawler.title', {
-      defaultMessage: 'Web crawler',
+      defaultMessage: 'Web Crawler',
     }),
   },
   [INGESTION_METHOD_IDS.CONNECTOR]: {
