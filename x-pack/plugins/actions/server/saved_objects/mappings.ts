@@ -40,9 +40,6 @@ export const actionMappings: SavedObjectsTypeMappingDefinition = {
 export const actionTaskParamsMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
-    apiKeyId: {
-      type: 'keyword',
-    },
     // NO NEED TO BE INDEXED
     // actionId: {
     //   type: 'keyword',
