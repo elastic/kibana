@@ -109,7 +109,7 @@ describe('SecurityWorkflowInsightsService', () => {
   let logger: Logger;
   let esClient: ElasticsearchClient;
   let mockEndpointAppContextService: jest.Mocked<EndpointAppContextService>;
-  let isInitializedSpy: jest.SpyInstance<Promise<[void, void]>, [], any>;
+  let isInitializedSpy: jest.SpyInstance<Promise<[void, void]>, [], boolean>;
 
   beforeEach(() => {
     logger = loggerMock.create();
