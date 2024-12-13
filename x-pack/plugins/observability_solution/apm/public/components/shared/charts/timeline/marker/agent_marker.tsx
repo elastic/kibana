@@ -7,20 +7,20 @@
 
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { asDuration } from '../../../../../../common/utils/formatters';
 import { useTheme } from '../../../../../hooks/use_theme';
 import { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 import { Legend } from '../legend';
 
-const NameContainer = euiStyled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
-  padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
+const NameContainer = styled.div`
+  border-bottom: 1px solid ${({ theme }) => theme.euiTheme.colors.mediumShade};
+  padding-bottom: ${({ theme }) => theme.euiTheme.size.s};
 `;
 
-const TimeContainer = euiStyled.div`
-  color: ${({ theme }) => theme.eui.euiColorMediumShade};
-  padding-top: ${({ theme }) => theme.eui.euiSizeS};
+const TimeContainer = styled.div`
+  color: ${({ theme }) => theme.euiTheme.colors.mediumShade};
+  padding-top: ${({ theme }) => theme.euiTheme.size.s};
 `;
 
 interface Props {

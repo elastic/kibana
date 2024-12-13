@@ -8,7 +8,7 @@
 import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useRef, useEffect, useState } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useTheme } from '../../../../../../hooks/use_theme';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
 import { TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
@@ -37,68 +37,68 @@ interface IBarStyleProps {
   color: string;
 }
 
-const Container = euiStyled.div<IContainerStyleProps>`
+const Container = styled.div<IContainerStyleProps>`
   position: relative;
   display: block;
   user-select: none;
-  padding-top: ${({ theme }) => theme.eui.euiSizeS};
-  padding-bottom: ${({ theme }) => theme.eui.euiSizeM};
+  padding-top: ${({ theme }) => theme.euiTheme.size.s};
+  padding-bottom: ${({ theme }) => theme.euiTheme.size.m};
   margin-right: ${(props) => props.timelineMargins.right}px;
   margin-left: ${(props) =>
     props.hasToggle
       ? props.timelineMargins.left - 30 // fix margin if there is a toggle
-      : props.timelineMargins.left}px ;
+      : props.timelineMargins.left}px;
   background-color: ${({ isSelected, theme }) =>
-    isSelected ? theme.eui.euiColorLightestShade : 'initial'};
+    isSelected ? theme.euiTheme.colors.lightestShade : 'initial'};
   cursor: pointer;
 
   &:hover {
-    background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
+    background-color: ${({ theme }) => theme.euiTheme.colors.lightestShade};
   }
 `;
 
-const ItemBar = euiStyled.div<IBarStyleProps>`
+const ItemBar = styled.div<IBarStyleProps>`
   box-sizing: border-box;
   position: relative;
-  height: ${({ theme }) => theme.eui.euiSize};
+  height: ${({ theme }) => theme.euiTheme.size.base};
   min-width: 2px;
   background-color: ${(props) => props.color};
 `;
 
-const ItemText = euiStyled.span`
+const ItemText = styled.span`
   position: absolute;
   right: 0;
   display: flex;
   align-items: center;
-  height: ${({ theme }) => theme.eui.euiSizeL};
+  height: ${({ theme }) => theme.euiTheme.size.l};
   max-width: 100%;
 
   /* add margin to all direct descendants */
   & > * {
-    margin-right: ${({ theme }) => theme.eui.euiSizeS};
+    margin-right: ${({ theme }) => theme.euiTheme.size.s};
     white-space: nowrap;
   }
 `;
 
-const CriticalPathItemBar = euiStyled.div`
+const CriticalPathItemBar = styled.div`
   box-sizing: border-box;
   position: relative;
-  height: ${({ theme }) => theme.eui.euiSizeS};
-  top : ${({ theme }) => theme.eui.euiSizeS};
+  height: ${({ theme }) => theme.euiTheme.size.s};
+  top: ${({ theme }) => theme.euiTheme.size.s};
   min-width: 2px;
   background-color: transparent;
   display: flex;
   flex-direction: row;
 `;
 
-const CriticalPathItemSegment = euiStyled.div<{
+const CriticalPathItemSegment = styled.div<{
   left: number;
   width: number;
   color: string;
 }>`
   box-sizing: border-box;
   position: absolute;
-  height: ${({ theme }) => theme.eui.euiSizeS};
+  height: ${({ theme }) => theme.euiTheme.size.s};
   left: ${(props) => props.left * 100}%;
   width: ${(props) => props.width * 100}%;
   min-width: 2px;

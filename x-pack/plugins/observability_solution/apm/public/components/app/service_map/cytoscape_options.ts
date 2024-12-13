@@ -8,6 +8,7 @@
 import cytoscape from 'cytoscape';
 import { CSSProperties } from 'react';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
 import { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
 import {
@@ -26,21 +27,21 @@ function getServiceAnomalyStats(el: cytoscape.NodeSingular) {
 }
 
 function getBorderColorFn(
-  theme: EuiTheme
+  euiTheme: EuiThemeComputed
 ): cytoscape.Css.MapperFunction<cytoscape.NodeSingular, string> {
   return (el: cytoscape.NodeSingular) => {
     const hasAnomalyDetectionJob = el.data('serviceAnomalyStats') !== undefined;
     const anomalyStats = getServiceAnomalyStats(el);
     if (hasAnomalyDetectionJob) {
       return getServiceHealthStatusColor(
-        theme,
+        euiTheme,
         anomalyStats?.healthStatus ?? ServiceHealthStatus.unknown
       );
     }
     if (el.hasClass('primary') || el.selected()) {
-      return theme.eui.euiColorPrimary;
+      return euiTheme.colors.primary;
     }
-    return theme.eui.euiColorMediumShade;
+    return euiTheme.colors.mediumShade;
   };
 }
 

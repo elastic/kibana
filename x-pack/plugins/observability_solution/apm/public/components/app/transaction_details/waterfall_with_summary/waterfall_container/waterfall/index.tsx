@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 import { useTheme } from '../../../../../../hooks/use_theme';
 import {
@@ -24,7 +24,7 @@ import { AccordionWaterfall } from './accordion_waterfall';
 import { WaterfallFlyout } from './waterfall_flyout';
 import { IWaterfall, IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 
-const Container = euiStyled.div`
+const Container = styled.div`
   transition: 0.1s padding ease;
   position: relative;
 `;
@@ -48,8 +48,8 @@ const toggleFlyout = ({
   });
 };
 
-const WaterfallItemsContainer = euiStyled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
+const WaterfallItemsContainer = styled.div`
+  border-bottom: 1px solid ${({ theme }) => theme.euiTheme.colors.mediumShade};
 `;
 
 interface Props {

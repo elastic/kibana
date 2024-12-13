@@ -6,9 +6,9 @@
  */
 
 import { EuiFlyout } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 
-export const ResponsiveFlyout = euiStyled(EuiFlyout)`
+export const ResponsiveFlyout = styled(EuiFlyout)`
   width: 100%;
 
   @media (min-width: 800px) {

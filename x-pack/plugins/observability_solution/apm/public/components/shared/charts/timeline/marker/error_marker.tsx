@@ -7,7 +7,7 @@
 
 import { EuiPopover, EuiText } from '@elastic/eui';
 import React, { useState } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { TRACE_ID, TRANSACTION_ID } from '../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../common/utils/formatters';
 import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
@@ -20,21 +20,21 @@ interface Props {
   mark: ErrorMark;
 }
 
-const Popover = euiStyled.div`
+const Popover = styled.div`
   max-width: 280px;
 `;
 
-const TimeLegend = euiStyled(Legend)`
-  margin-bottom: ${({ theme }) => theme.eui.euiSize};
+const TimeLegend = styled(Legend)`
+  margin-bottom: ${({ theme }) => theme.euiTheme.size.base};
 `;
 
-const ErrorLink = euiStyled(ErrorDetailLink)`
+const ErrorLink = styled(ErrorDetailLink)`
   display: block;
-  margin: ${({ theme }) => `${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS} 0`};
+  margin: ${({ theme }) => `${theme.euiTheme.size.s} 0 ${theme.euiTheme.size.s} 0`};
   overflow-wrap: break-word;
 `;
 
-const Button = euiStyled(Legend)`
+const Button = styled(Legend)`
   height: 20px;
   display: flex;
   align-items: flex-end;

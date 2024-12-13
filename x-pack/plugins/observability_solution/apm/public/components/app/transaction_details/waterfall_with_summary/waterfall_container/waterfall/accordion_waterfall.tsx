@@ -14,7 +14,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { transparentize } from 'polished';
 import React, { useEffect, useRef } from 'react';
 import { WindowScroller, AutoSizer } from 'react-virtualized';
@@ -53,7 +53,7 @@ interface WaterfallNodeProps extends WaterfallProps {
 
 const ACCORDION_HEIGHT = 48;
 
-const StyledAccordion = euiStyled(EuiAccordion).withConfig({
+const StyledAccordion = styled(EuiAccordion).withConfig({
   shouldForwardProp: (prop) => !['marginLeftLevel', 'hasError'].includes(prop),
 })<
   EuiAccordionProps & {
@@ -61,7 +61,6 @@ const StyledAccordion = euiStyled(EuiAccordion).withConfig({
     hasError: boolean;
   }
 >`
-
   border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
 
   ${(props) => {

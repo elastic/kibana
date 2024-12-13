@@ -8,11 +8,11 @@
 import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { EventOutcome } from '../../../../../../../typings/es_schemas/raw/fields/event_outcome';
 import { useTheme } from '../../../../../../hooks/use_theme';
 
-const ResetLineHeight = euiStyled.span`
+const ResetLineHeight = styled.span`
   line-height: initial;
 `;
 
@@ -30,7 +30,11 @@ export function FailureBadge({ outcome }: { outcome?: EventOutcome }) {
           defaultMessage: 'event.outcome = failure',
         })}
       >
-        <EuiBadge color={theme.eui.euiColorDanger}>failure</EuiBadge>
+        <EuiBadge color={theme.eui.euiColorDanger}>
+          {i18n.translate('xpack.apm.failure_badge.label', {
+            defaultMessage: 'failure',
+          })}
+        </EuiBadge>
       </EuiToolTip>
     </ResetLineHeight>
   );
