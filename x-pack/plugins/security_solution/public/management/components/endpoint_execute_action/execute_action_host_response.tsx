@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import type {
   ActionDetails,
@@ -12,8 +11,6 @@ import type {
   ResponseActionExecuteOutputContent,
   ResponseActionsExecuteParameters,
 } from '../../../../common/endpoint/types';
-import { EXECUTE_FILE_LINK_TITLE } from '../endpoint_response_actions_list/translations';
-import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
 import { ExecuteActionHostResponseOutput } from './execute_action_host_response_output';
 
 export interface ExecuteActionHostResponseProps {
@@ -44,16 +41,16 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
 
     return (
       <>
-        <EuiFlexItem>
-          <ResponseActionFileDownloadLink
-            action={action}
-            buttonTitle={EXECUTE_FILE_LINK_TITLE}
-            canAccessFileDownloadLink={canAccessFileDownloadLink}
-            data-test-subj={`${dataTestSubj}-getExecuteLink`}
-            textSize={textSize}
-          />
-          <EuiSpacer size="xxl" />
-        </EuiFlexItem>
+        {/* <EuiFlexItem>*/}
+        {/*  <ResponseActionFileDownloadLink*/}
+        {/*    action={action}*/}
+        {/*    buttonTitle={EXECUTE_FILE_LINK_TITLE}*/}
+        {/*    canAccessFileDownloadLink={canAccessFileDownloadLink}*/}
+        {/*    data-test-subj={`${dataTestSubj}-getExecuteLink`}*/}
+        {/*    textSize={textSize}*/}
+        {/*  />*/}
+        {/*  <EuiSpacer size="xxl" />*/}
+        {/* </EuiFlexItem>*/}
         {outputContent && (
           <ExecuteActionHostResponseOutput
             outputContent={outputContent}
