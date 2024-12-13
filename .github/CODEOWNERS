@@ -490,7 +490,6 @@ packages/kbn-securitysolution-rules @elastic/security-detection-engine
 packages/kbn-securitysolution-t-grid @elastic/security-detection-engine
 packages/kbn-securitysolution-utils @elastic/security-detection-engine
 packages/kbn-server-http-tools @elastic/kibana-core
-packages/kbn-server-route-repository-client @elastic/obs-knowledge-team
 packages/kbn-server-route-repository-utils @elastic/obs-knowledge-team
 packages/kbn-set-map @elastic/kibana-operations
 packages/kbn-shared-svg @elastic/obs-ux-infra_services-team
@@ -624,6 +623,7 @@ src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-es
 src/platform/packages/shared/kbn-io-ts-utils @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
 src/platform/packages/shared/kbn-server-route-repository @elastic/obs-knowledge-team
+src/platform/packages/shared/kbn-server-route-repository-client @elastic/obs-knowledge-team
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/platform/plugins/shared/esql @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
