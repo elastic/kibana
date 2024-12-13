@@ -53,7 +53,6 @@ export const enhancedEsSearchStrategyProvider = (
       request.params?.keep_alive ?? getDefaultAsyncGetParams(searchConfig, options).keep_alive;
 
     const { body, headers } = await client.asyncSearch.status(
-      // @ts-expect-error keep_alive was recently added and the types haven't been updated yet
       { id: id!, keep_alive: keepAlive },
       { ...options.transport, signal: options.abortSignal, meta: true }
     );

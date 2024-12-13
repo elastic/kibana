@@ -119,6 +119,7 @@ interface BaseQueryApiKeyResult {
 /**
  * Interface representing a REST API key that is managed by Kibana.
  */
+// @ts-expect-error `type` can only be "rest" or "cross_cluster"
 export interface ManagedApiKey extends BaseApiKey {
   type: 'managed';
 }
