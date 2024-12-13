@@ -6,7 +6,11 @@
  */
 import * as t from 'io-ts';
 import moment from 'moment';
-import { SERVICE_NAME, DATA_STREAM_TYPE } from '@kbn/observability-shared-plugin/common';
+import {
+  SERVICE_NAME,
+  DATA_STREAM_TYPE,
+  AGENT_NAME,
+} from '@kbn/observability-shared-plugin/common';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { createEntitiesESClient } from '../../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
@@ -52,7 +56,7 @@ const serviceEntitiesSummaryRoute = createApmServerRoute({
       type: 'built_in_services_from_ecs_data',
       filters: [`${SERVICE_NAME}: "${serviceName}"`],
       limit: 1,
-      metadata_fields: [DATA_STREAM_TYPE],
+      metadata_fields: [DATA_STREAM_TYPE, AGENT_NAME],
     });
 
     console.log(
