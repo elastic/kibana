@@ -26,7 +26,7 @@ class TelemetryConfigurationDTO {
     num_docs_to_sample: 10,
   };
   private readonly DEFAULT_INDICES_METADATA_CONFIG = {
-    indices_threshold: 15000,
+    indices_threshold: 10000,
     datastreams_threshold: 1000,
 
     max_prefixes: 10, // @deprecated
