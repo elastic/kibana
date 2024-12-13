@@ -6,34 +6,11 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
 import { NameReadOnly } from './name';
-import { FieldFinalReadOnly } from '../../field_final_readonly';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
-import { mockCustomQueryRule } from '../../storybook/mocks';
-import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: NameReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/name',
 };
 
-interface TemplateProps {
-  finalDiffableRule: DiffableRule;
-}
-
-const Template: Story<TemplateProps> = (args) => {
-  return (
-    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule} fieldName="name">
-      <FieldFinalReadOnly />
-    </ThreeWayDiffStorybookProviders>
-  );
-};
-
-export const Default = Template.bind({});
-
-Default.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    name: 'Forwarded Google Workspace Security Alert',
-  }),
-};
+export const Default = () => <NameReadOnly name="Forwarded Google Workspace Security Alert" />;

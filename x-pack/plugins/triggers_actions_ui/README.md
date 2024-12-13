@@ -1212,7 +1212,7 @@ Before starting the UI implementation, the [server side registration](https://gi
 
 Action type UI is expected to be defined as `ActionTypeModel` object.
 
-The framework uses the [Form lib](https://github.com/elastic/kibana/blob/main/src/plugins/es_ui_shared/static/forms/docs/welcome.mdx). Please refer to the documentation of the library to learn more.
+The framework uses the [Form lib](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/es_ui_shared/static/forms/docs/welcome.mdx). Please refer to the documentation of the library to learn more.
 
 Below is a list of steps that should be done to build and register a new action type with the name `Example Action Type`:
 

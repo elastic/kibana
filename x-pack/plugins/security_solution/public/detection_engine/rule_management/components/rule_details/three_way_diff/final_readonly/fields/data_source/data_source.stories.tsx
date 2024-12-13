@@ -6,58 +6,35 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
-import { FieldFinalReadOnly } from '../../field_final_readonly';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 import {
   dataSourceWithDataView,
   dataSourceWithIndexPatterns,
   mockDataView,
-  mockCustomQueryRule,
 } from '../../storybook/mocks';
+import { DataSourceReadOnly } from './data_source';
 
 export default {
-  component: FieldFinalReadOnly,
+  component: DataSourceReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/data_source',
 };
 
-interface TemplateProps {
-  finalDiffableRule: DiffableRule;
-  kibanaServicesOverrides?: Record<string, unknown>;
-}
+export const DataSourceWithIndexPatterns = () => (
+  <DataSourceReadOnly dataSource={dataSourceWithIndexPatterns} />
+);
 
-const Template: Story<TemplateProps> = (args) => {
-  return (
-    <ThreeWayDiffStorybookProviders
-      kibanaServicesOverrides={args.kibanaServicesOverrides}
-      finalDiffableRule={args.finalDiffableRule}
-      fieldName="data_source"
-    >
-      <FieldFinalReadOnly />
-    </ThreeWayDiffStorybookProviders>
-  );
-};
-
-export const DataSourceWithIndexPatterns = Template.bind({});
-
-DataSourceWithIndexPatterns.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    data_source: dataSourceWithIndexPatterns,
-  }),
-};
-
-export const DataSourceWithDataView = Template.bind({});
-
-DataSourceWithDataView.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    data_source: dataSourceWithDataView,
-  }),
-  kibanaServicesOverrides: {
-    data: {
-      dataViews: {
-        get: async () => mockDataView(),
+export const DataSourceWithDataView = () => (
+  <ThreeWayDiffStorybookProviders
+    kibanaServicesOverrides={{
+      data: {
+        dataViews: {
+          get: async () => mockDataView(),
+        },
       },
-    },
-  },
-};
+    }}
+  >
+    <DataSourceReadOnly dataSource={dataSourceWithDataView} />
+  </ThreeWayDiffStorybookProviders>
+);
+
+export const NoValue = () => <DataSourceReadOnly />;
