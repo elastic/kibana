@@ -66,6 +66,7 @@ import {
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 import { arrayMapsAreEqual } from '@kbn/core-saved-objects-utils-server';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
+import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('SavedObjectsRepository Security Extension', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -676,7 +677,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     test(`returns result when partially authorized`, async () => {
       setupAuthorizeFunc(mockSecurityExt.authorizeOpenPointInTime, 'partially_authorized');
 
-      client.openPointInTime.mockResponseOnce({ id });
+      client.openPointInTime.mockResponseOnce({ id } as OpenPointInTimeResponse);
       const result = await repository.openPointInTimeForType(type);
 
       expect(mockSecurityExt.authorizeOpenPointInTime).toHaveBeenCalledTimes(1);
@@ -687,7 +688,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     test(`returns result when fully authorized`, async () => {
       setupAuthorizeFunc(mockSecurityExt.authorizeOpenPointInTime, 'fully_authorized');
 
-      client.openPointInTime.mockResponseOnce({ id });
+      client.openPointInTime.mockResponseOnce({ id } as OpenPointInTimeResponse);
       const result = await repository.openPointInTimeForType(type);
 
       expect(mockSecurityExt.authorizeOpenPointInTime).toHaveBeenCalledTimes(1);
@@ -702,7 +703,7 @@ describe('SavedObjectsRepository Security Extension', () => {
 
     test(`calls authorizeOpenPointInTime with correct parameters`, async () => {
       setupAuthorizeFunc(mockSecurityExt.authorizeOpenPointInTime, 'fully_authorized');
-      client.openPointInTime.mockResponseOnce({ id });
+      client.openPointInTime.mockResponseOnce({ id } as OpenPointInTimeResponse);
       const namespaces = [namespace, 'x', 'y', 'z'];
       await repository.openPointInTimeForType(type, { namespaces });
       expect(mockSecurityExt.authorizeOpenPointInTime).toHaveBeenCalledTimes(1);

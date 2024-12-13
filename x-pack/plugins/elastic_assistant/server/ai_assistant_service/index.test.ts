@@ -79,6 +79,7 @@ const GetDataStreamResponse: IndicesGetDataStreamResponse = {
       template: 'ignored',
       next_generation_managed_by: 'Data stream lifecycle',
       prefer_ilm: false,
+      rollover_on_write: false,
     },
   ],
 };

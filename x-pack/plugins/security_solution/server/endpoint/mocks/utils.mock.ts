@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { OpenPointInTimeResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidV4 } from 'uuid';
 import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
 
@@ -45,14 +45,14 @@ export const applyEsClientSearchMock = <TDocument = unknown>({
       const pitResponse = { id: `mock:pit:${index}:${uuidV4()}` };
       openedPitIds.add(pitResponse.id);
 
-      return pitResponse;
+      return pitResponse as OpenPointInTimeResponse;
     }
 
     if (priorOpenPointInTimeImplementation) {
       return priorOpenPointInTimeImplementation(...args);
     }
 
-    return { id: 'mock' };
+    return { id: 'mock' } as OpenPointInTimeResponse;
   });
 
   esClientMock.closePointInTime.mockImplementation(async (...args) => {
