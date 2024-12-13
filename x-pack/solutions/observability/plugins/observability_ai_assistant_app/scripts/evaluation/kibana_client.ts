@@ -381,7 +381,7 @@ export class KibanaClient {
             pathname: '/internal/observability_ai_assistant/chat',
           }),
           params,
-          { responseType: 'stream', timeout: NaN }
+          { responseType: 'stream', timeout: NaN, headers: { 'x-elastic-internal-origin': true } }
         );
       }).pipe(
         switchMap((response) => streamIntoObservable(response.data)),
@@ -465,7 +465,11 @@ export class KibanaClient {
                 title: currentTitle,
                 scopes,
               },
-              { responseType: 'stream', timeout: NaN }
+              {
+                responseType: 'stream',
+                timeout: NaN,
+                headers: { 'x-elastic-internal-origin': true },
+              }
             )
           );
         }).pipe(
