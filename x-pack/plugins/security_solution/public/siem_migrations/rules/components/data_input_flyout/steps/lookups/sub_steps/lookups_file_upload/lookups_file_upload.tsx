@@ -27,16 +27,15 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
   ({ createResources, apiError, isLoading }) => {
     const [lookupResources, setLookupResources] = useState<RuleMigrationResourceData[]>([]);
 
-    const onFileLoaded = useCallback((name: string, content: string) => {
-      setLookupResources((current) => [...current, { type: 'list', name, content }]);
-    }, []);
-
     const createLookups = useCallback(() => {
       createResources(lookupResources);
     }, [createResources, lookupResources]);
 
     const [isParsing, setIsParsing] = useState<boolean>(false);
-    const [fileError, setError] = useState<string>();
+    const [fileErrors, setErrors] = useState<string[]>([]);
+    const addError = useCallback((error: string) => {
+      setErrors((current) => [...current, error]);
+    }, []);
 
     const parseFile = useCallback(
       async (files: FileList | null) => {
@@ -44,72 +43,79 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
           return;
         }
 
-        setError(undefined);
+        setErrors([]);
+        setLookupResources([]);
 
-        for (const file of files) {
-          const reader = new FileReader();
+        const lookups = await Promise.all(
+          Array.from(files).map((file) => {
+            return new Promise<RuleMigrationResourceData>((resolve) => {
+              const reader = new FileReader();
 
-          reader.onloadstart = () => setIsParsing(true);
-          reader.onloadend = () => setIsParsing(false);
+              reader.onloadstart = () => setIsParsing(true);
+              reader.onloadend = () => setIsParsing(false);
 
-          reader.onload = function (e) {
-            // We can safely cast to string since we call `readAsText` to load the file.
-            const fileContent = e.target?.result as string | undefined;
+              reader.onload = function (e) {
+                // We can safely cast to string since we call `readAsText` to load the file.
+                const content = e.target?.result as string | undefined;
 
-            if (fileContent == null) {
-              setError(FILE_UPLOAD_ERROR.CAN_NOT_READ);
-              return;
-            }
+                if (content == null) {
+                  addError(FILE_UPLOAD_ERROR.CAN_NOT_READ);
+                  return;
+                }
 
-            if (fileContent === '' && e.loaded > 100000) {
-              // V8-based browsers can't handle large files and return an empty string
-              // instead of an error; see https://stackoverflow.com/a/61316641
-              setError(FILE_UPLOAD_ERROR.TOO_LARGE_TO_PARSE);
-              return;
-            }
+                if (content === '' && e.loaded > 100000) {
+                  // V8-based browsers can't handle large files and return an empty string
+                  // instead of an error; see https://stackoverflow.com/a/61316641
+                  addError(FILE_UPLOAD_ERROR.TOO_LARGE_TO_PARSE);
+                  return;
+                }
 
-            try {
-              onFileLoaded(file.name, fileContent);
-            } catch (err) {
-              setError(err.message);
-            }
-          };
+                const name = file.name.replace(/\.[^/.]+$/, '').trim();
+                resolve({ type: 'list', name, content });
+              };
 
-          const handleReaderError = function () {
-            const message = reader.error?.message;
-            if (message) {
-              setError(FILE_UPLOAD_ERROR.CAN_NOT_READ_WITH_REASON(message));
-            } else {
-              setError(FILE_UPLOAD_ERROR.CAN_NOT_READ);
-            }
-          };
+              const handleReaderError = function () {
+                const message = reader.error?.message;
+                if (message) {
+                  addError(FILE_UPLOAD_ERROR.CAN_NOT_READ_WITH_REASON(message));
+                } else {
+                  addError(FILE_UPLOAD_ERROR.CAN_NOT_READ);
+                }
+              };
 
-          reader.onerror = handleReaderError;
-          reader.onabort = handleReaderError;
+              reader.onerror = handleReaderError;
+              reader.onabort = handleReaderError;
 
-          reader.readAsText(file);
-        }
+              reader.readAsText(file);
+            });
+          })
+        ).catch((e) => {
+          addError(e.message);
+          return [];
+        });
+        // Set the loaded lookups to the state
+        setLookupResources((current) => [...current, ...lookups]);
       },
-      [onFileLoaded]
+      [addError]
     );
 
-    const error = useMemo(() => {
+    const errors = useMemo(() => {
       if (apiError) {
-        return apiError;
+        return [apiError];
       }
-      return fileError;
-    }, [apiError, fileError]);
+      return fileErrors;
+    }, [apiError, fileErrors]);
 
     return (
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiFormRow
-            helpText={
+            helpText={errors.map((error) => (
               <EuiText color="danger" size="xs">
                 {error}
               </EuiText>
-            }
-            isInvalid={error != null}
+            ))}
+            isInvalid={errors.length > 0}
             fullWidth
           >
             <EuiFilePicker
@@ -138,7 +144,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
             <EuiFlexItem grow={false}>
               <EuiButton onClick={createLookups} isLoading={isLoading} color="success">
-                {'upload IT!'}
+                {i18n.LOOKUPS_DATA_INPUT_FILE_UPLOAD_BUTTON}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -19,3 +19,12 @@ export const MISSING_LOOKUPS_DESCRIPTION = i18n.translate(
       'For your lookups, go to your admin Splunk account and the Search and Reporting app Lookups page. Download the following lookups individually and upload below.',
   }
 );
+
+export const COPY_LOOKUP_NAME_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.lookups.copyLookupNameTooltip',
+  { defaultMessage: 'Copy lookup name' }
+);
+export const CLEAR_EMPTY_LOOKUP_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.lookups.clearEmptyLookupTooltip',
+  { defaultMessage: 'Mark the lookup as empty' }
+);

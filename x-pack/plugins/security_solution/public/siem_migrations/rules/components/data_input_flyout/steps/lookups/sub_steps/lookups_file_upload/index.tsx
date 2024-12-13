@@ -7,69 +7,36 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
-import { ResourceIdentifier } from '../../../../../../../../../common/siem_migrations/rules/resources';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
 import type {
   RuleMigrationResourceData,
   RuleMigrationTaskStats,
 } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { OnResourcesCreated } from '../../../../types';
-import { LookupsFileUpload } from './lookups_file_upload';
+import type { AddUploadedLookups } from '../../lookups_data_input';
 import * as i18n from './translations';
+import { LookupsFileUpload } from './lookups_file_upload';
 
 export interface RulesFileUploadStepProps {
   status: EuiStepStatus;
   migrationStats: RuleMigrationTaskStats;
   missingLookups: string[];
-  addUploadedLookups: (lookups: string[]) => void;
-  onLookupsCreated: OnResourcesCreated;
+  addUploadedLookups: AddUploadedLookups;
 }
 export const useLookupsFileUploadStep = ({
   status,
   migrationStats,
-  missingLookups,
   addUploadedLookups,
-  onLookupsCreated,
 }: RulesFileUploadStepProps): EuiStepProps => {
-  const { upsertResources, isLoading, error } = useUpsertResources(onLookupsCreated);
+  const { upsertResources, isLoading, error } = useUpsertResources(addUploadedLookups);
 
   const upsertMigrationResources = useCallback(
     (lookupsFromFile: RuleMigrationResourceData[]) => {
-      const lookupsIndexed: Record<string, RuleMigrationResourceData> = Object.fromEntries(
-        lookupsFromFile.map((lookup) => [lookup.name, lookup])
-      );
-      const resourceIdentifier = new ResourceIdentifier('splunk');
-      const lookupsToUpsert: RuleMigrationResourceData[] = [];
-      let missingLookupsIt: string[] = missingLookups;
-
-      while (missingLookupsIt.length > 0) {
-        const lookups: RuleMigrationResourceData[] = [];
-        missingLookupsIt.forEach((lookupName) => {
-          const lookup = lookupsIndexed[lookupName];
-          if (lookup) {
-            lookups.push(lookup);
-          } else {
-            // Macro missing from file
-          }
-        });
-        lookupsToUpsert.push(...lookups);
-
-        missingLookupsIt = resourceIdentifier
-          .fromResources(lookups)
-          .reduce<string[]>((acc, resource) => {
-            if (resource.type === 'list') {
-              acc.push(resource.name);
-            }
-            return acc;
-          }, []);
+      if (lookupsFromFile.length === 0) {
+        return; // No lookups provided
       }
-
-      if (lookupsToUpsert.length === 0) {
-        return; // No missing lookups provided
-      }
-      upsertResources(migrationStats.id, lookupsToUpsert);
+      upsertResources(migrationStats.id, lookupsFromFile);
     },
-    [upsertResources, migrationStats, missingLookups]
+    [upsertResources, migrationStats]
   );
 
   const uploadStepStatus = useMemo(() => {

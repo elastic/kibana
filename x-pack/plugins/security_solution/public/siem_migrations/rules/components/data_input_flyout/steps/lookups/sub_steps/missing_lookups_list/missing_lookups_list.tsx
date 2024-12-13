@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { css } from '@emotion/css';
 import {
   EuiButtonIcon,
   EuiCopy,
@@ -15,8 +16,11 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { EMPTY_RESOURCE_PLACEHOLDER } from '../../../../../../../../../common/siem_migrations/constants';
+import type { UploadedLookups } from '../../lookups_data_input';
 import * as i18n from './translations';
 
 const scrollPanelCss = css`
@@ -26,14 +30,17 @@ const scrollPanelCss = css`
 
 interface MissingLookupsListProps {
   missingLookups: string[];
-  uploadedLookups: Record<string, true>;
+  uploadedLookups: UploadedLookups;
+  clearLookup: (lookupsName: string) => void;
+  isLoading: boolean;
   onCopied: () => void;
 }
 export const MissingLookupsList = React.memo<MissingLookupsListProps>(
-  ({ missingLookups, uploadedLookups, onCopied }) => {
+  ({ missingLookups, uploadedLookups, clearLookup, isLoading, onCopied }) => {
+    const { euiTheme } = useEuiTheme();
     return (
       <>
-        <EuiPanel hasShadow={false} hasBorder className={scrollPanelCss}>
+        <EuiPanel hasShadow={false} hasBorder className={scrollPanelCss} disabled={isLoading}>
           <EuiFlexGroup direction="column" gutterSize="s">
             {missingLookups.map((lookupName) => {
               return (
@@ -46,20 +53,40 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
                   >
                     <EuiFlexItem grow={false}>
                       {uploadedLookups[lookupName] ? (
-                        <EuiIcon type="checkInCircleFilled" color="success" />
+                        <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
                       ) : (
                         <EuiIcon type="dot" />
                       )}
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiText size="s">{lookupName}</EuiText>
+                      <EuiText
+                        size="s"
+                        style={
+                          uploadedLookups[lookupName] === EMPTY_RESOURCE_PLACEHOLDER
+                            ? { textDecoration: 'line-through' }
+                            : {}
+                        }
+                      >
+                        {lookupName}
+                      </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiCopy textToCopy={lookupName}>
                         {(copy) => (
-                          <CopyButton lookupName={lookupName} onCopied={onCopied} copy={copy} />
+                          <CopyLookupNameButton
+                            lookupName={lookupName}
+                            onCopied={onCopied}
+                            copy={copy}
+                          />
                         )}
                       </EuiCopy>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <ClearLookupButton
+                        lookupName={lookupName}
+                        clearLookup={clearLookup}
+                        isDisabled={!!uploadedLookups[lookupName]}
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
@@ -77,24 +104,56 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
 );
 MissingLookupsList.displayName = 'MissingLookupsList';
 
-interface CopyButtonProps {
+interface CopyLookupNameButtonProps {
   lookupName: string;
   onCopied: () => void;
   copy: () => void;
 }
-const CopyButton = React.memo<CopyButtonProps>(({ lookupName, onCopied, copy }) => {
-  const onClick = useCallback(() => {
-    copy();
-    onCopied();
-  }, [copy, onCopied]);
-  return (
-    <EuiButtonIcon
-      onClick={onClick}
-      iconType="copyClipboard"
-      color="text"
-      aria-label={lookupName}
-      data-test-subj="lookupNameCopy"
-    />
-  );
-});
-CopyButton.displayName = 'CopyButton';
+const CopyLookupNameButton = React.memo<CopyLookupNameButtonProps>(
+  ({ lookupName, onCopied, copy }) => {
+    const onClick = useCallback(() => {
+      copy();
+      onCopied();
+    }, [copy, onCopied]);
+    return (
+      <EuiToolTip content={i18n.COPY_LOOKUP_NAME_TOOLTIP}>
+        <EuiButtonIcon
+          onClick={onClick}
+          iconType="copyClipboard"
+          color="text"
+          aria-label={`${i18n.COPY_LOOKUP_NAME_TOOLTIP} ${lookupName}`}
+          data-test-subj="lookupNameCopy"
+        />
+      </EuiToolTip>
+    );
+  }
+);
+CopyLookupNameButton.displayName = 'CopyLookupNameButton';
+
+interface ClearLookupButtonProps {
+  lookupName: string;
+  clearLookup: (lookupName: string) => void;
+  isDisabled: boolean;
+}
+const ClearLookupButton = React.memo<ClearLookupButtonProps>(
+  ({ lookupName, clearLookup, isDisabled }) => {
+    const button = useMemo(
+      () => (
+        <EuiButtonIcon
+          onClick={() => clearLookup(lookupName)}
+          iconType="cross"
+          color="text"
+          aria-label={`${i18n.CLEAR_EMPTY_LOOKUP_TOOLTIP} ${lookupName}`}
+          data-test-subj="lookupNameClear"
+          isDisabled={isDisabled}
+        />
+      ),
+      [clearLookup, isDisabled, lookupName]
+    );
+    if (isDisabled) {
+      return button;
+    }
+    return <EuiToolTip content={i18n.CLEAR_EMPTY_LOOKUP_TOOLTIP}>{button}</EuiToolTip>;
+  }
+);
+ClearLookupButton.displayName = 'ClearLookupButton';

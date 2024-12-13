@@ -14,8 +14,12 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
-import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EMPTY_RESOURCE_PLACEHOLDER } from '../../../../../../../common/siem_migrations/constants';
+import type {
+  RuleMigrationResourceData,
+  RuleMigrationTaskStats,
+} from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { OnResourcesCreated } from '../../types';
 import { getStatus } from '../common/get_status';
 import * as i18n from './translations';
@@ -23,6 +27,9 @@ import { DataInputStep } from '../constants';
 import { SubSteps } from '../common/sub_step';
 import { useMissingLookupsListStep } from './sub_steps/missing_lookups_list';
 import { useLookupsFileUploadStep } from './sub_steps/lookups_file_upload';
+
+export type UploadedLookups = Record<string, string>;
+export type AddUploadedLookups = (lookups: RuleMigrationResourceData[]) => void;
 
 interface LookupsDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
@@ -89,13 +96,23 @@ type SubStep = 1 | 2 | typeof END;
 export const LookupsDataInputSubSteps = React.memo<LookupsDataInputSubStepsProps>(
   ({ migrationStats, missingLookups, onLookupsCreated }) => {
     const [subStep, setSubStep] = useState<SubStep>(1);
-    const [uploadedLookups, setUploadedLookups] = useState<Record<string, true>>({});
-    const addUploadedLookups = useCallback((lookupNames: string[]) => {
+    const [uploadedLookups, setUploadedLookups] = useState<UploadedLookups>({});
+
+    const addUploadedLookups = useCallback<AddUploadedLookups>((lookups) => {
       setUploadedLookups((prevUploadedLookups) => ({
         ...prevUploadedLookups,
-        ...Object.fromEntries(lookupNames.map((lookupName) => [lookupName, true])),
+        ...Object.fromEntries(
+          lookups.map((lookup) => [lookup.name, lookup.content ?? EMPTY_RESOURCE_PLACEHOLDER])
+        ),
       }));
     }, []);
+
+    useEffect(() => {
+      if (missingLookups.every((lookupName) => uploadedLookups[lookupName])) {
+        setSubStep(END);
+        onLookupsCreated();
+      }
+    }, [uploadedLookups, missingLookups, onLookupsCreated]);
 
     // Copy query step
     const onCopied = useCallback(() => {
@@ -103,23 +120,19 @@ export const LookupsDataInputSubSteps = React.memo<LookupsDataInputSubStepsProps
     }, []);
     const copyStep = useMissingLookupsListStep({
       status: getStatus(1, subStep),
+      migrationStats,
       missingLookups,
       uploadedLookups,
+      addUploadedLookups,
       onCopied,
     });
 
     // Upload macros step
-    const onLookupsCreatedStep = useCallback<OnResourcesCreated>(() => {
-      onLookupsCreated();
-      setSubStep(END);
-    }, [onLookupsCreated]);
-
     const uploadStep = useLookupsFileUploadStep({
       status: getStatus(2, subStep),
       migrationStats,
       missingLookups,
       addUploadedLookups,
-      onLookupsCreated: onLookupsCreatedStep,
     });
 
     const steps = useMemo<EuiStepProps[]>(() => [copyStep, uploadStep], [copyStep, uploadStep]);
