@@ -343,21 +343,6 @@ describe('CreateIntegration', () => {
       });
     });
 
-    // describe('when step is 3 and showCelCreateFlyout=true', () => {
-    //   beforeEach(() => {
-    //     mockInitialState.mockReturnValueOnce({
-    //       ...defaultInitialState,
-    //       step: 3,
-    //       showCelCreateFlyout: true,
-    //     });
-    //   });
-
-    // it('should render cel creation flyout', () => {
-    //   const result = renderIntegrationAssistant();
-    //   expect(result.queryByTestId('celCreateFlyoutMock')).toBeInTheDocument();
-    // });
-    // });
-
     describe('when data stream step is done', () => {
       beforeEach(() => {
         mockIsDataStreamStepReadyToComplete.mockReturnValue(true);
@@ -437,6 +422,21 @@ describe('CreateIntegration', () => {
       it('should enable the next button', () => {
         expect(result.getByTestId('buttonsFooter-nextButton')).toBeEnabled();
       });
+    });
+  });
+
+  describe('when step is 3 and showCelCreateFlyout=true', () => {
+    beforeEach(() => {
+      mockInitialState.mockReturnValueOnce({
+        ...defaultInitialState,
+        step: 3,
+        showCelCreateFlyout: true,
+      });
+    });
+
+    it('should render cel creation flyout', () => {
+      const result = renderIntegrationAssistant();
+      expect(result.queryByTestId('celCreateFlyoutMock')).toBeInTheDocument();
     });
   });
 
