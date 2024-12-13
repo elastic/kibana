@@ -53,7 +53,11 @@ export const useUnifiedSearch = () => {
 
   const {
     data: {
-      query: { filterManager: filterManagerService, queryString: queryStringService },
+      query: {
+        filterManager: filterManagerService,
+        queryString: queryStringService,
+        timefilter: timeFilterService,
+      },
     },
     telemetry,
   } = services;
@@ -68,29 +72,33 @@ export const useUnifiedSearch = () => {
   const onFiltersChange = useCallback(
     (filters: Filter[]) => {
       setSearch({ type: 'SET_FILTERS', filters });
+      updateSearchSessionId();
     },
-    [setSearch]
+    [setSearch, updateSearchSessionId]
   );
 
   const onPanelFiltersChange = useCallback(
     (panelFilters: Filter[]) => {
       setSearch({ type: 'SET_PANEL_FILTERS', panelFilters });
+      updateSearchSessionId();
     },
-    [setSearch]
+    [setSearch, updateSearchSessionId]
   );
 
   const onLimitChange = useCallback(
     (limit: number) => {
       setSearch({ type: 'SET_LIMIT', limit });
+      updateSearchSessionId();
     },
-    [setSearch]
+    [setSearch, updateSearchSessionId]
   );
 
   const onDateRangeChange = useCallback(
     (dateRange: StringDateRange) => {
       setSearch({ type: 'SET_DATE_RANGE', dateRange });
+      updateSearchSessionId();
     },
-    [setSearch]
+    [setSearch, updateSearchSessionId]
   );
 
   const onQueryChange = useCallback(
@@ -99,19 +107,19 @@ export const useUnifiedSearch = () => {
         setError(null);
         validateQuery(query);
         setSearch({ type: 'SET_QUERY', query });
+        updateSearchSessionId();
       } catch (err) {
         setError(err);
       }
     },
-    [validateQuery, setSearch]
+    [validateQuery, setSearch, updateSearchSessionId]
   );
 
   const onSubmit = useCallback(
     ({ dateRange }: { dateRange: TimeRange }) => {
       onDateRangeChange(dateRange);
-      updateSearchSessionId();
     },
-    [onDateRangeChange, updateSearchSessionId]
+    [onDateRangeChange]
   );
 
   const getDateRangeAsTimestamp = useCallback(() => {
@@ -169,6 +177,16 @@ export const useUnifiedSearch = () => {
     );
 
     subscription.add(
+      timeFilterService.timefilter
+        .getTimeUpdate$()
+        .pipe(
+          map(() => timeFilterService.timefilter.getTime()),
+          tap((dateRange) => onDateRangeChange(dateRange))
+        )
+        .subscribe()
+    );
+
+    subscription.add(
       queryStringService
         .getUpdates$()
         .pipe(
@@ -181,7 +199,14 @@ export const useUnifiedSearch = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [filterManagerService, queryStringService, onQueryChange, onFiltersChange]);
+  }, [
+    filterManagerService,
+    queryStringService,
+    onQueryChange,
+    onFiltersChange,
+    timeFilterService.timefilter,
+    onDateRangeChange,
+  ]);
 
   // Track telemetry event on query/filter/date changes
   useEffect(() => {

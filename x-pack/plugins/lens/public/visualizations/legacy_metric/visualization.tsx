@@ -7,8 +7,13 @@
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { Ast } from '@kbn/interpreter';
-import { PaletteOutput, PaletteRegistry, CUSTOM_PALETTE, shiftPalette } from '@kbn/coloring';
-import { ThemeServiceStart } from '@kbn/core/public';
+import {
+  PaletteOutput,
+  PaletteRegistry,
+  CUSTOM_PALETTE,
+  shiftPalette,
+  getOverridePaletteStops,
+} from '@kbn/coloring';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
@@ -65,7 +70,7 @@ const toExpression = (
   const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
   const operation = datasource && datasource.getOperationForColumnId(state.accessor);
 
-  const stops = state.palette?.params?.stops || [];
+  const stops = getOverridePaletteStops(paletteService, state.palette) ?? [];
   const isCustomPalette = state.palette?.params?.name === CUSTOM_PALETTE;
 
   const canColor = operation?.dataType === 'number';
@@ -150,10 +155,8 @@ const toExpression = (
 
 export const getLegacyMetricVisualization = ({
   paletteService,
-  theme,
 }: {
   paletteService: PaletteRegistry;
-  theme: ThemeServiceStart;
 }): Visualization<LegacyMetricState> => ({
   id: 'lnsLegacyMetric',
 
@@ -215,7 +218,8 @@ export const getLegacyMetricVisualization = ({
 
   getConfiguration(props) {
     const hasColoring = props.state.palette != null;
-    const stops = props.state.palette?.params?.stops || [];
+    const stops = getOverridePaletteStops(paletteService, props.state.palette);
+
     return {
       groups: [
         {
@@ -236,7 +240,7 @@ export const getLegacyMetricVisualization = ({
                 {
                   columnId: props.state.accessor,
                   triggerIconType: hasColoring ? 'colorBy' : undefined,
-                  palette: hasColoring ? stops.map(({ color }) => color) : undefined,
+                  palette: hasColoring ? stops?.map(({ color }) => color) : undefined,
                 },
               ]
             : [],
@@ -314,7 +318,7 @@ export const getLegacyMetricVisualization = ({
     }
 
     const hasColoring = state.palette != null;
-    const stops = state.palette?.params?.stops || [];
+    const stops = getOverridePaletteStops(paletteService, state.palette);
 
     return {
       layers: [
@@ -324,7 +328,7 @@ export const getLegacyMetricVisualization = ({
           chartType: 'metric',
           ...this.getDescription(state),
           dimensions,
-          palette: hasColoring ? stops.map(({ color }) => color) : undefined,
+          palette: hasColoring ? stops?.map(({ color }) => color) : undefined,
         },
       ],
     };
