@@ -12,7 +12,7 @@ import { NewTimelineButton } from '../components/new_timeline';
 import { TimelineTypeEnum } from '../../../common/api/timeline';
 import { HeaderPage } from '../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { useKibana } from '../../common/lib/kibana';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { StatefulOpenTimeline } from '../components/open_timeline';
 import * as i18n from './translations';
@@ -25,8 +25,9 @@ export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 export const TimelinesPage = React.memo(() => {
   const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
   const { indicesExist } = useSourcererDataView();
-  const capabilitiesCanUserCRUD: boolean =
-    !!useKibana().services?.application?.capabilities?.securitySolutionTimeline?.crud;
+  const {
+    timelinePrivileges: { crud: canWriteTimeline, read: canReadTimeline },
+  } = useUserPrivileges();
 
   const [isImportDataModalOpen, setImportDataModal] = useState<boolean>(false);
   const openImportModal = useCallback(() => {
@@ -41,8 +42,8 @@ export const TimelinesPage = React.memo(() => {
       {indicesExist ? (
         <SecuritySolutionPageWrapper>
           <HeaderPage title={i18n.PAGE_TITLE}>
-            {capabilitiesCanUserCRUD && (
-              <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              {canWriteTimeline && (
                 <EuiFlexItem>
                   <EuiButton
                     iconType="indexOpen"
@@ -52,17 +53,19 @@ export const TimelinesPage = React.memo(() => {
                     {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
                   </EuiButton>
                 </EuiFlexItem>
+              )}
+              {canReadTimeline && (
                 <EuiFlexItem data-test-subj="timelines-page-new">
                   <NewTimelineButton type={timelineType} />
                 </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
+              )}
+            </EuiFlexGroup>
           </HeaderPage>
 
           <StatefulOpenTimeline
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             isModal={false}
-            importDataModalToggle={isImportDataModalOpen && capabilitiesCanUserCRUD}
+            importDataModalToggle={isImportDataModalOpen && canWriteTimeline}
             setImportDataModalToggle={setImportDataModal}
             title={i18n.ALL_TIMELINES_PANEL_TITLE}
             data-test-subj="stateful-open-timeline"

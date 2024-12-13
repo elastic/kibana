@@ -805,4 +805,44 @@ describe('StatefulOpenTimeline', () => {
       expect(queryByTestId('create-rule-from-timeline')).not.toBeInTheDocument();
     });
   });
+
+  describe('privileges', () => {
+    test('installs prepackaged timelines when the user has sufficient privileges', async () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        timelinePrivileges: { crud: true },
+      });
+      const wrapper = mount(
+        <TestProviders>
+          <StatefulOpenTimeline
+            isModal={false}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(mockInstallPrepackagedTimelines).toHaveBeenCalled();
+      });
+    });
+
+    test('does not install prepackaged timelines when the user has insufficient privileges', async () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        timelinePrivileges: { crud: false },
+      });
+      const wrapper = mount(
+        <TestProviders>
+          <StatefulOpenTimeline
+            isModal={false}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(mockInstallPrepackagedTimelines).not.toHaveBeenCalled();
+      });
+    });
+  });
 });
