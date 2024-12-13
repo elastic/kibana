@@ -25,20 +25,6 @@ const AnalyzeButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating 
 });
 AnalyzeButtonText.displayName = 'AnalyzeButtonText';
 
-// Generation button for Step 5
-const AnalyzeCelButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating }) => {
-  if (!isGenerating) {
-    return <>{i18n.ANALYZE_CEL}</>;
-  }
-  return (
-    <>
-      <EuiLoadingSpinner size="s" data-test-subj="generatingLoader" />
-      {i18n.LOADING}
-    </>
-  );
-});
-AnalyzeCelButtonText.displayName = 'AnalyzeCelButtonText';
-
 interface FooterProps {
   isGenerating?: State['isGenerating'];
   isAnalyzeStep?: boolean;

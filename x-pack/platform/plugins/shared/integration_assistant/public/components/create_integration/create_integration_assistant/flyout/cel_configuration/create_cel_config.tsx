@@ -12,11 +12,9 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiImage,
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import icon from './imgs/openapi.svg';
 import { useActions, type State } from '../../state';
 import * as i18n from './translations';
 import { CelInputStep, isCelInputStepReadyToComplete } from './steps/cel_input_step';
@@ -71,7 +69,6 @@ export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
       <EuiFlyout onClose={() => setShowCelCreateFlyout(false)}>
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiImage size={32} margin="s" src={icon} alt="" />
             <EuiTitle size="m">
               <h2>{i18n.OPEN_API_SPEC_TITLE}</h2>
             </EuiTitle>

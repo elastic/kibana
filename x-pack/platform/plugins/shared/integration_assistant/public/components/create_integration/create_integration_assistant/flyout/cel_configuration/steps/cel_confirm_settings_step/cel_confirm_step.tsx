@@ -17,13 +17,6 @@ import { EndpointSelection } from './endpoint_selection';
 import type { IntegrationSettings } from '../../../../types';
 import { AuthSelection } from './auth_selection';
 
-export const authOptions = [
-  { label: 'Basic' },
-  { label: 'OAuth2' },
-  { label: 'Digest' },
-  { label: 'Header' },
-];
-
 interface CelConfirmStepProps {
   integrationSettings: State['integrationSettings'];
   connector: State['connector'];

@@ -426,6 +426,15 @@ export const mockState: State = {
   result,
   showCelCreateFlyout: false,
   isFlyoutGenerating: false,
+  celInputResult: {
+    url: 'https://sample.com',
+    program: 'line1\nline2',
+    authType: 'basic',
+    stateSettings: { setting1: 100, setting2: '' },
+    redactVars: ['setting2'],
+    configFields: { setting1: {}, setting2: {} },
+    needsAuthConfigBlock: false,
+  },
 };
 
 export const mockActions: Actions = {

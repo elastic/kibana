@@ -32,12 +32,6 @@ export const SAVE_AND_CONTINUE = i18n.translate(
     defaultMessage: 'Save & Continue',
   }
 );
-// export const ANALYZE_API = i18n.translate('xpack.integrationAssistant.bottomBar.analyzeApi', {
-//   defaultMessage: 'Analyze API',
-// });
-// export const ANALYZE_CEL = i18n.translate('xpack.integrationAssistant.bottomBar.analyzeCel', {
-//   defaultMessage: 'Generate CEL input configuration',
-// });
 export const CLOSE = i18n.translate('xpack.integrationAssistant.celFlyout.footer.close', {
   defaultMessage: 'Close',
 });
