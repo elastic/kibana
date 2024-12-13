@@ -26,7 +26,6 @@ export const SeveritySelector: React.FC<Props> = ({
 }) => {
   const caseSeverities = Object.keys(severities) as CaseSeverity[];
   const options: Array<EuiSuperSelectOption<CaseSeverity>> = caseSeverities.map((severity) => {
-    const severityData = severities[severity];
     return {
       value: severity,
       inputDisplay: (

@@ -25,7 +25,6 @@ import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 import type { ActionConnector } from '../../../common/types/domain';
-import { CaseSeverity } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui/types';
 import type { CasesColumnSelection } from './types';
 import { getEmptyCellValue } from '../empty_value';
@@ -37,7 +36,7 @@ import { useCasesColumnsConfiguration } from './use_cases_columns_configuration'
 import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
-import { severities, SeverityHealth } from '../severity/config';
+import { SeverityHealth } from '../severity/config';
 import { AssigneesColumn } from './assignees_column';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
@@ -296,7 +295,6 @@ export const useCasesColumns = ({
         sortable: true,
         render: (severity: CaseUI['severity']) => {
           if (severity != null) {
-            const severityData = severities[severity ?? CaseSeverity.LOW];
             return (
               <SeverityHealth
                 data-test-subj={`case-table-column-severity-${severity}`}

@@ -12,7 +12,7 @@ import { CaseSeverity } from '../../../common/types/domain';
 import { CRITICAL, HIGH, LOW, MEDIUM } from './translations';
 
 interface Props {
-  severity: CaseSeverity[];
+  severity: CaseSeverity;
 }
 
 export const severities = {

@@ -22,7 +22,6 @@ const options = mapToMultiSelectOption(Object.keys(severities) as CaseSeverity[]
 
 export const SeverityFilter: React.FC<Props> = ({ selectedOptionKeys, onChange }) => {
   const renderOption = (option: MultiSelectFilterOption<CaseSeverity>) => {
-    const severityData = severities[option.label];
     return (
       <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
         <EuiFlexItem grow={false}>
