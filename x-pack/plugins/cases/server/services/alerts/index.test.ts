@@ -16,6 +16,9 @@ describe('updateAlertsStatus', () => {
   const alertsClient = alertsClientMock.create();
   let alertService: AlertService;
 
+  jest.useFakeTimers();
+  jest.setSystemTime(new Date('2022-02-21T17:35:00Z'));
+
   beforeEach(async () => {
     alertService = new AlertService(esClient, logger, alertsClient);
     jest.clearAllMocks();
@@ -41,7 +44,8 @@ describe('updateAlertsStatus', () => {
               "script": Object {
                 "lang": "painless",
                 "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                        ctx._source['kibana.alert.workflow_status'] = 'closed'
+                        ctx._source['kibana.alert.workflow_status'] = 'closed';
+                        ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
                       }
                       if (ctx._source.signal != null && ctx._source.signal.status != null) {
                         ctx._source.signal.status = 'closed'
@@ -80,7 +84,8 @@ describe('updateAlertsStatus', () => {
               "script": Object {
                 "lang": "painless",
                 "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                        ctx._source['kibana.alert.workflow_status'] = 'closed'
+                        ctx._source['kibana.alert.workflow_status'] = 'closed';
+                        ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
                       }
                       if (ctx._source.signal != null && ctx._source.signal.status != null) {
                         ctx._source.signal.status = 'closed'
@@ -115,7 +120,8 @@ describe('updateAlertsStatus', () => {
               "script": Object {
                 "lang": "painless",
                 "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                        ctx._source['kibana.alert.workflow_status'] = 'acknowledged'
+                        ctx._source['kibana.alert.workflow_status'] = 'acknowledged';
+                        ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
                       }
                       if (ctx._source.signal != null && ctx._source.signal.status != null) {
                         ctx._source.signal.status = 'acknowledged'
@@ -154,7 +160,8 @@ describe('updateAlertsStatus', () => {
               "script": Object {
                 "lang": "painless",
                 "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                        ctx._source['kibana.alert.workflow_status'] = 'closed'
+                        ctx._source['kibana.alert.workflow_status'] = 'closed';
+                        ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
                       }
                       if (ctx._source.signal != null && ctx._source.signal.status != null) {
                         ctx._source.signal.status = 'closed'
@@ -183,7 +190,8 @@ describe('updateAlertsStatus', () => {
               "script": Object {
                 "lang": "painless",
                 "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                        ctx._source['kibana.alert.workflow_status'] = 'open'
+                        ctx._source['kibana.alert.workflow_status'] = 'open';
+                        ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
                       }
                       if (ctx._source.signal != null && ctx._source.signal.status != null) {
                         ctx._source.signal.status = 'open'
@@ -222,7 +230,8 @@ describe('updateAlertsStatus', () => {
               "script": Object {
                 "lang": "painless",
                 "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                        ctx._source['kibana.alert.workflow_status'] = 'closed'
+                        ctx._source['kibana.alert.workflow_status'] = 'closed';
+                        ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
                       }
                       if (ctx._source.signal != null && ctx._source.signal.status != null) {
                         ctx._source.signal.status = 'closed'
@@ -251,7 +260,8 @@ describe('updateAlertsStatus', () => {
               "script": Object {
                 "lang": "painless",
                 "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                        ctx._source['kibana.alert.workflow_status'] = 'open'
+                        ctx._source['kibana.alert.workflow_status'] = 'open';
+                        ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
                       }
                       if (ctx._source.signal != null && ctx._source.signal.status != null) {
                         ctx._source.signal.status = 'open'
