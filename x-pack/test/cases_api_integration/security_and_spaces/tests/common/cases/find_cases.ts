@@ -563,7 +563,6 @@ export default ({ getService }: FtrProviderContext): void => {
       const signalID = '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78';
       const signalID2 = '1023bcfea939643c5e51fd8df53797e0ea693cee547db579ab56d96402365c1e';
 
-     
       afterEach(async () => {
         await deleteAllCaseItems(es);
       });
