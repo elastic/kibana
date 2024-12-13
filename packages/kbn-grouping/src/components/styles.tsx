@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonEmpty, EuiContextMenu, type EuiThemeComputed } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiContextMenu,
+  type EuiThemeComputed,
+  type EuiThemeFontSize,
+} from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { css } from '@emotion/react';
 
-export const countCss = (euiTheme: EuiThemeComputed<{}>) => css`
-  font-size: ${euiTheme.font.size.xs};
-  font-weight: ${euiTheme.fontWeight.semiBold};
+export const countCss = (euiTheme: EuiThemeComputed<{}>, xsFontSize: EuiThemeFontSize<{}>) => css`
+  font-size: ${xsFontSize};
+  font-weight: ${euiTheme.font.weight.semiBold};
   border-right: ${euiTheme.border.thin};
   margin-right: 16px;
   padding-right: 16px;
@@ -90,7 +95,7 @@ export const StyledContextMenu = euiStyled(EuiContextMenu)`
     text-overflow: ellipsis;
   }
   .euiContextMenuItem {
-    border-bottom: ${(props) => props.theme.euiTheme.border.thin};
+    border-bottom: ${(props) => props.theme.border.thin};
   }
   .euiContextMenuItem:last-child {
     border: none;

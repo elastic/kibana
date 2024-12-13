@@ -61,13 +61,13 @@ export const LinkIcon = React.memo<LinkIconProps>(
               ? css`
                   margin-right: ${euiTheme.size.xs};
                 `
-              : ss`
-              flex-direction: row-reverse;
-        
-              .euiIcon {
-                margin-left: ${euiTheme.size.xs};
-              }
-            `
+              : css`
+                  flex-direction: row-reverse;
+
+                  .euiIcon {
+                    margin-left: ${euiTheme.size.xs};
+                  }
+                `
           }
           data-test-subj="link-icon"
           size={iconSize}
