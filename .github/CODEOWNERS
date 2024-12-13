@@ -53,7 +53,7 @@ test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
 x-pack/plugins/asset_inventory @elastic/kibana-cloud-security-posture
 x-pack/test/security_api_integration/plugins/audit_log @elastic/kibana-security
-packages/kbn-avc-banner @elastic/security-defend-workflows
+src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
 packages/kbn-axe-config @elastic/kibana-qa
 packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-babel-register @elastic/kibana-operations
@@ -687,7 +687,7 @@ packages/kbn-openapi-generator @elastic/security-detection-rule-management
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
-x-pack/plugins/osquery @elastic/security-defend-workflows
+x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 examples/partial_results_example @elastic/kibana-data-discovery
 x-pack/plugins/painless_lab @elastic/kibana-management
 packages/kbn-panel-loader @elastic/kibana-presentation
