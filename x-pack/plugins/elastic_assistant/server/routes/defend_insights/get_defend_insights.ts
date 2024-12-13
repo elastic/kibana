@@ -26,8 +26,10 @@ export const getDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestHa
     .get({
       access: 'internal',
       path: DEFEND_INSIGHTS,
-      options: {
-        tags: ['access:elasticAssistant'],
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
       },
     })
     .addVersion(
