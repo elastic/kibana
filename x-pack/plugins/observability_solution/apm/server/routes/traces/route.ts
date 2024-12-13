@@ -35,7 +35,7 @@ const tracesRoute = createApmServerRoute({
   params: t.type({
     query: t.intersection([environmentRt, kueryRt, rangeRt, probabilityRt]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<TopTracesPrimaryStatsResponse> => {
     const {
       config,
@@ -83,7 +83,7 @@ const tracesByIdRoute = createApmServerRoute({
       t.partial({ maxTraceItems: toNumberRt }),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -127,7 +127,7 @@ const rootTransactionByTraceIdRoute = createApmServerRoute({
     }),
     query: rangeRt,
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -154,7 +154,7 @@ const transactionByIdRoute = createApmServerRoute({
     }),
     query: rangeRt,
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -190,7 +190,7 @@ const transactionByNameRoute = createApmServerRoute({
       }),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -227,9 +227,7 @@ const findTracesRoute = createApmServerRoute({
       }),
     ]),
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -264,9 +262,7 @@ const aggregatedCriticalPathRoute = createApmServerRoute({
       rangeRt,
     ]),
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ criticalPath: CriticalPathResponse | null }> => {
     const {
       params: {
@@ -297,7 +293,7 @@ const transactionFromTraceByIdRoute = createApmServerRoute({
     }),
     query: rangeRt,
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<Transaction | undefined> => {
     const { params } = resources;
     const {
@@ -328,7 +324,7 @@ const spanFromTraceByIdRoute = createApmServerRoute({
       t.union([t.partial({ parentTransactionId: t.string }), t.undefined]),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
