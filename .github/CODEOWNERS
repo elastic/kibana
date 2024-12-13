@@ -608,15 +608,13 @@ src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-esql
+src/platform/packages/shared/kbn-io-ts-utils @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-management/cards_navigation @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/components/field_input @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/components/field_row @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/field_definition @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/types @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/utilities @elastic/kibana-management
-src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
-src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
-src/platform/packages/shared/kbn-io-ts-utils @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
 src/platform/packages/shared/kbn-server-route-repository @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-server-route-repository-client @elastic/obs-knowledge-team
@@ -625,6 +623,7 @@ src/platform/packages/shared/kbn-sse-utils @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-sse-utils-client @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-sse-utils-server @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
+src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/platform/plugins/shared/console @elastic/kibana-management
 src/platform/plugins/shared/dev_tools @elastic/kibana-management
@@ -874,14 +873,12 @@ x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
+x-pack/platform/plugins/shared/integration_assistant @elastic/security-scalability
 x-pack/platform/plugins/shared/license_management @elastic/kibana-management
 x-pack/platform/plugins/shared/ml @elastic/ml-ui
 x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant @elastic/obs-ai-assistant
-x-pack/platform/plugins/shared/searchprofiler @elastic/kibana-management
-x-pack/platform/plugins/shared/integration_assistant @elastic/security-scalability
-x-pack/platform/plugins/shared/ml @elastic/ml-ui
-x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant @elastic/obs-ai-assistant
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
+x-pack/platform/plugins/shared/searchprofiler @elastic/kibana-management
 x-pack/plugins/actions @elastic/response-ops
 x-pack/plugins/alerting @elastic/response-ops
 x-pack/plugins/asset_inventory @elastic/kibana-cloud-security-posture
@@ -942,9 +939,6 @@ x-pack/plugins/observability_solution/observability_shared @elastic/observabilit
 x-pack/plugins/observability_solution/profiling @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/profiling_data_access @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/slo @elastic/obs-ux-management-team
-x-pack/plugins/osquery @elastic/security-defend-workflows
-x-pack/plugins/painless_lab @elastic/kibana-management
-x-pack/plugins/remote_clusters @elastic/kibana-management
 x-pack/plugins/reporting @elastic/appex-sharedux
 x-pack/plugins/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 x-pack/plugins/saved_objects_tagging @elastic/appex-sharedux
