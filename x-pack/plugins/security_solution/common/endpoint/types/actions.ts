@@ -97,7 +97,8 @@ export interface ResponseActionScanOutputContent {
 }
 
 export interface ResponseActionRunScriptOutputContent {
-  output: string;
+  stdout: string;
+  stderr: string;
   code: string;
 }
 
@@ -231,12 +232,10 @@ interface ActionsRunScriptParametersBase {
 }
 
 // Enforce at least one of the script parameters is required
-// export type ResponseActionRunScriptParameters = AtLeastOne<
-//   ActionsRunScriptParametersBase,
-//   'Raw' | 'HostPath' | 'CloudFile'
-// >;
-
-export type ResponseActionRunScriptParameters = ActionsRunScriptParametersBase;
+export type ResponseActionRunScriptParameters = AtLeastOne<
+  ActionsRunScriptParametersBase,
+  'Raw' | 'HostPath' | 'CloudFile'
+>;
 
 export type EndpointActionDataParameterTypes =
   | undefined
