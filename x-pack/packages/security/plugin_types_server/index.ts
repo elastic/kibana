@@ -50,6 +50,7 @@ export type {
   CheckUserProfilesPrivileges,
   AuthorizationMode,
   AuthorizationServiceSetup,
+  EsSecurityConfig,
 } from './src/authorization';
 export type { SecurityPluginSetup, SecurityPluginStart } from './src/plugin';
 export type {

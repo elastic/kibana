@@ -5236,7 +5236,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-stream-adapter@link:packages/kbn-data-stream-adapter":
+"@kbn/data-stream-adapter@link:x-pack/solutions/security/packages/data-stream-adapter":
   version "0.0.0"
   uid ""
 
@@ -5912,7 +5912,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/index-adapter@link:packages/kbn-index-adapter":
+"@kbn/index-adapter@link:x-pack/solutions/security/packages/index-adapter":
   version "0.0.0"
   uid ""
 
