@@ -675,7 +675,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
 
 export const getControlSuggestionLabel = (controlType: EsqlControlType): string => {
   switch (controlType) {
-    case EsqlControlType.FIELDS:
+    case EsqlControlType.TIME_LITERAL:
       return i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.intervalLabel', {
         defaultMessage: 'Interval',
       });

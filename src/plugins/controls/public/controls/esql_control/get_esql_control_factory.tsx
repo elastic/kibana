@@ -65,7 +65,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
               queryString: initialState.esqlQuery,
               controlType: initialState.variableType,
               dashboardApi: controlGroupApi.parentApi,
-              panelId: uuid,
+              controlId: uuid,
               initialState: state,
             });
           },

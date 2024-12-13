@@ -230,6 +230,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     }
   }, [code, query.esql]);
 
+  // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
     if (supportsVariables) {
       esqlService.enable();

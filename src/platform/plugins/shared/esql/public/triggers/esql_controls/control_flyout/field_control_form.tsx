@@ -9,7 +9,6 @@
 
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { v4 as uuidv4 } from 'uuid';
 import {
   EuiComboBox,
   EuiFormRow,
@@ -18,10 +17,8 @@ import {
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { getQueryForFields } from '@kbn/esql-validation-autocomplete/src/autocomplete/helper';
 import { buildQueryUntilPreviousCommand } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
 import { parse } from '@kbn/esql-ast';
@@ -37,7 +34,7 @@ import {
   VariableName,
   ControlLabel,
 } from './shared_form_components';
-import { getRecurrentVariableName, updateQueryStringWithVariable } from './helpers';
+import { getRecurrentVariableName } from './helpers';
 import { EsqlControlFlyoutType } from '../types';
 
 interface FieldControlFormProps {
@@ -46,14 +43,8 @@ interface FieldControlFormProps {
   dashboardApi: DashboardApi;
   queryString: string;
   closeFlyout: () => void;
-  addToESQLVariablesService: (
-    varName: string,
-    variableValue: string,
-    variableType: EsqlControlType,
-    query: string
-  ) => void;
-  panelId?: string;
-  cursorPosition?: monaco.Position;
+  onCreateControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
+  onEditControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
   initialState?: ESQLControlState;
 }
 
@@ -62,15 +53,11 @@ export function FieldControlForm({
   initialState,
   dashboardApi,
   queryString,
-  panelId,
-  cursorPosition,
+  onCreateControl,
+  onEditControl,
   search,
   closeFlyout,
-  addToESQLVariablesService,
 }: FieldControlFormProps) {
-  const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
-  const dashboardPanels = useStateFromPublishingSubject(dashboardApi.children$);
-
   const suggestedVariableName = useMemo(() => {
     const existingVariables = esqlVariablesService.getVariablesByType(controlType);
 
@@ -198,29 +185,12 @@ export function FieldControlForm({
       grow,
     };
 
-    if (panelId && cursorPosition && availableOptions.length && !isControlInEditMode) {
-      // create a new control
-      controlGroupApi?.addNewPanel({
-        panelType: 'esqlControl',
-        initialState: {
-          ...state,
-          id: uuidv4(),
-        },
-      });
-
-      const query = updateQueryStringWithVariable(queryString, variableName, cursorPosition);
-
-      addToESQLVariablesService(variableName, availableOptions[0], controlType, query);
-      const embeddable = dashboardPanels[panelId!];
-      // open the edit flyout to continue editing
-      await (embeddable as { onEdit: () => Promise<void> }).onEdit();
-    } else if (isControlInEditMode && panelId && availableOptions.length) {
-      // edit an existing control, variable needs to be updated
-      controlGroupApi?.replacePanel(panelId, {
-        panelType: 'esqlControl',
-        initialState: state,
-      });
-      addToESQLVariablesService(variableName, availableOptions[0], controlType, '');
+    if (availableOptions.length) {
+      if (!isControlInEditMode) {
+        await onCreateControl(state, variableName, availableOptions[0]);
+      } else {
+        onEditControl(state, variableName, availableOptions[0]);
+      }
     }
     closeFlyout();
   }, [
@@ -231,13 +201,10 @@ export function FieldControlForm({
     controlType,
     queryString,
     grow,
-    panelId,
-    cursorPosition,
     isControlInEditMode,
     closeFlyout,
-    controlGroupApi,
-    addToESQLVariablesService,
-    dashboardPanels,
+    onCreateControl,
+    onEditControl,
   ]);
 
   return (

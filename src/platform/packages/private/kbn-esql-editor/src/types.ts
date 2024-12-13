@@ -70,16 +70,17 @@ export interface ESQLEditorProps {
   /** adds a documentation icon in the footer which opens the inline docs as a flyout **/
   displayDocumentationAsFlyout?: boolean;
 
-  /** very important for controls creation from the editor **/
-  dashboardApi?: PresentationContainer;
-
-  panelId?: string;
-
   /** The component by default focuses on the editor when it is mounted, this flag disabled it**/
   disableAutoFocus?: boolean;
-
-  /** The editor supports the creation of controls**/
+  /** The editor supports the creation of controls,
+   * This flag should be set to true to display the "Create control" suggestion
+   **/
   supportsVariables?: boolean;
+  /** very important for controls creation from the editor, controls creation api **/
+  dashboardApi?: PresentationContainer;
+  /** very important for controls creation from the editor.
+   * Pass the embedable id if the editor is part of an embeddable **/
+  panelId?: string;
 }
 
 export interface ESQLEditorDeps {

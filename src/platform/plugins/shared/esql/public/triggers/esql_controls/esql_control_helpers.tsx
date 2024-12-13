@@ -29,6 +29,7 @@ interface Context {
   search: ISearchGeneric;
   controlType: EsqlControlType;
   dashboardApi: DashboardApi;
+  controlId?: string;
   panelId?: string;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
@@ -45,6 +46,7 @@ export async function executeAction({
   search,
   controlType,
   dashboardApi,
+  controlId,
   panelId,
   cursorPosition,
   initialState,
@@ -73,6 +75,7 @@ export async function executeAction({
               }}
               dashboardApi={dashboardApi}
               panelId={panelId}
+              controlId={controlId}
               cursorPosition={cursorPosition}
               initialState={initialState}
             />

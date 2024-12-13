@@ -12,11 +12,14 @@ import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { monaco } from '@kbn/monaco';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import { v4 as uuidv4 } from 'uuid';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { esqlVariablesService } from '../../../../common';
 import type { ESQLControlState } from '../types';
 import { IntervalControlForm } from './interval_control_form';
 import { ValueControlForm } from './value_control_form';
 import { FieldControlForm } from './field_control_form';
+import { updateQueryStringWithVariable } from './helpers';
 
 interface ESQLControlsFlyoutProps {
   search: ISearchGeneric;
@@ -24,6 +27,7 @@ interface ESQLControlsFlyoutProps {
   queryString: string;
   dashboardApi: DashboardApi;
   panelId?: string;
+  controlId?: string;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
   closeFlyout: () => void;
@@ -35,10 +39,14 @@ export function ESQLControlsFlyout({
   queryString,
   dashboardApi,
   panelId,
+  controlId,
   cursorPosition,
   initialState,
   closeFlyout,
 }: ESQLControlsFlyoutProps) {
+  const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
+  const dashboardPanels = useStateFromPublishingSubject(dashboardApi.children$);
+
   const addToESQLVariablesService = useCallback(
     (varName: string, variableValue: string, variableType: EsqlControlType, query: string) => {
       if (esqlVariablesService.variableExists(varName)) {
@@ -54,6 +62,52 @@ export function ESQLControlsFlyout({
     []
   );
 
+  const onCreateControl = useCallback(
+    async (state: ESQLControlState, variableName: string, variableValue: string) => {
+      // create a new control
+      controlGroupApi?.addNewPanel({
+        panelType: 'esqlControl',
+        initialState: {
+          ...state,
+          id: uuidv4(),
+        },
+      });
+
+      if (cursorPosition) {
+        const query = updateQueryStringWithVariable(queryString, variableName, cursorPosition);
+        addToESQLVariablesService(variableName, variableValue, controlType, query);
+      }
+      if (panelId) {
+        // open the edit flyout to continue editing
+        const embeddable = dashboardPanels[panelId];
+        await (embeddable as { onEdit: () => Promise<void> }).onEdit();
+      }
+    },
+    [
+      addToESQLVariablesService,
+      controlGroupApi,
+      controlType,
+      cursorPosition,
+      dashboardPanels,
+      panelId,
+      queryString,
+    ]
+  );
+
+  const onEditControl = useCallback(
+    (state: ESQLControlState, variableName: string, variableValue: string) => {
+      // edit an existing control
+      if (controlId) {
+        controlGroupApi?.replacePanel(controlId, {
+          panelType: 'esqlControl',
+          initialState: state,
+        });
+      }
+      addToESQLVariablesService(variableName, variableValue, controlType, '');
+    },
+    [addToESQLVariablesService, controlGroupApi, controlId, controlType]
+  );
+
   if (controlType === EsqlControlType.TIME_LITERAL) {
     return (
       <IntervalControlForm
@@ -61,10 +115,9 @@ export function ESQLControlsFlyout({
         controlType={controlType}
         closeFlyout={closeFlyout}
         dashboardApi={dashboardApi}
-        panelId={panelId}
-        cursorPosition={cursorPosition}
         initialState={initialState}
-        addToESQLVariablesService={addToESQLVariablesService}
+        onCreateControl={onCreateControl}
+        onEditControl={onEditControl}
       />
     );
   } else if (controlType === EsqlControlType.VALUES) {
@@ -74,10 +127,9 @@ export function ESQLControlsFlyout({
         controlType={controlType}
         closeFlyout={closeFlyout}
         dashboardApi={dashboardApi}
-        panelId={panelId}
-        cursorPosition={cursorPosition}
         initialState={initialState}
-        addToESQLVariablesService={addToESQLVariablesService}
+        onCreateControl={onCreateControl}
+        onEditControl={onEditControl}
         search={search}
       />
     );
@@ -87,11 +139,10 @@ export function ESQLControlsFlyout({
         controlType={controlType}
         queryString={queryString}
         dashboardApi={dashboardApi}
-        panelId={panelId}
-        cursorPosition={cursorPosition}
+        onCreateControl={onCreateControl}
+        onEditControl={onEditControl}
         initialState={initialState}
         closeFlyout={closeFlyout}
-        addToESQLVariablesService={addToESQLVariablesService}
         search={search}
       />
     );

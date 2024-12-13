@@ -155,26 +155,8 @@ export const mapVariableToColumn = (
   variables: ESQLControlVariable[],
   columns: DatatableColumn[]
 ) => {
-  const queryHasTransformationalCommands = hasTransformationalCommand(esql);
   const { root } = parse(esql);
-  let usedVariablesInQuery = Walker.params(root).map((param) => param);
-
-  if (queryHasTransformationalCommands) {
-    const transformationalCommands = root.commands.filter(({ name }) =>
-      ['stats', 'keep'].includes(name)
-    );
-
-    const lastCommand = transformationalCommands.length
-      ? transformationalCommands[transformationalCommands.length - 1]
-      : null;
-
-    if (lastCommand) {
-      const params = Walker.params(lastCommand).map((param) => param);
-      if (params.length) {
-        usedVariablesInQuery = params;
-      }
-    }
-  }
+  const usedVariablesInQuery = Walker.params(root).map((param) => param);
 
   const uniqueVariablesInQyery = new Set<string>();
   usedVariablesInQuery.forEach((variable) => {

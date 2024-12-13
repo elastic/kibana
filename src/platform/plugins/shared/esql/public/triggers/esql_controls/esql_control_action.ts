@@ -23,6 +23,7 @@ interface Context {
   controlType: EsqlControlType;
   dashboardApi: DashboardApi;
   panelId?: string;
+  controlId?: string;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
 }
@@ -55,6 +56,7 @@ export class CreateESQLControlAction implements Action<Context> {
     queryString,
     controlType,
     dashboardApi,
+    controlId,
     panelId,
     cursorPosition,
     initialState,
@@ -66,6 +68,7 @@ export class CreateESQLControlAction implements Action<Context> {
       search: this.search,
       controlType,
       dashboardApi,
+      controlId,
       panelId,
       cursorPosition,
       initialState,
