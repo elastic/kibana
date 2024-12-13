@@ -37,7 +37,7 @@ export const AssistantNavLink: FC = () => {
   useEffect(() => {
     const s = chrome.getChromeStyle$().subscribe(setChromeStyle);
     return () => s.unsubscribe();
-  }, [chrome.getChromeStyle$]);
+  }, [chrome]);
 
   useEffect(() => {
     const registerPortalNode = () => {
