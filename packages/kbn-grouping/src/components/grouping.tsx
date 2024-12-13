@@ -14,7 +14,6 @@ import {
   EuiSpacer,
   EuiTablePagination,
   useEuiTheme,
-  useEuiFontSize,
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
@@ -81,7 +80,6 @@ const GroupingComponent = <T,>({
   groupsUnit = GROUPS_UNIT,
 }: GroupingProps<T>) => {
   const { euiTheme } = useEuiTheme();
-  const xsFontSize = useEuiFontSize('xs').fontSize;
 
   const [trigger, setTrigger] = useState<Record<string, { state: 'open' | 'closed' | undefined }>>(
     {}
@@ -203,13 +201,13 @@ const GroupingComponent = <T,>({
             {groupCount > 0 && unitCount > 0 ? (
               <EuiFlexGroup gutterSize="none">
                 <EuiFlexItem grow={false}>
-                  <span css={countCss(euiTheme, xsFontSize)} data-test-subj="unit-count">
+                  <span css={countCss(euiTheme)} data-test-subj="unit-count">
                     {unitCountText}
                   </span>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <span
-                    css={countCss(euiTheme, xsFontSize)}
+                    css={countCss(euiTheme)}
                     data-test-subj="group-count"
                     style={{ borderRight: 'none' }}
                   >
