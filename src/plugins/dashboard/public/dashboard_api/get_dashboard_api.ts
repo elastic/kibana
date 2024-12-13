@@ -172,7 +172,7 @@ export function getDashboardApi({
       unifiedSearchManager.internalApi.panelsReload$
     ).pipe(debounceTime(0)),
     getSerializedState: async () => {
-      const { controlGroupReferences, dashboardState, panelReferences } = await getState();
+      const { controlGroupReferences, dashboardState, panelReferences } = getState();
       return getDashboardContentManagementService().getDashboardState({
         controlGroupReferences,
         currentState: dashboardState,
