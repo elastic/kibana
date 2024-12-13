@@ -80,7 +80,7 @@ export interface SecurityPluginSetup extends SecurityPluginSetupWithoutDeprecate
   /**
    * @deprecated Use `authz` methods from the `SecurityServiceStart` contract instead.
    */
-  authz: Omit<AuthorizationServiceSetup, 'getCurrentUser' | 'getSecurityConfig'>;
+  authz: AuthorizationServiceSetup;
 }
 
 export interface PluginSetupDependencies {
