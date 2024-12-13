@@ -139,6 +139,7 @@ export const useRowHeight = ({
     (newRowHeightLines: number) => {
       updateStoredRowHeight(newRowHeightLines, configRowHeight, storage, consumer, key);
       onUpdateRowHeight?.(newRowHeightLines);
+      setLineCountInput(newRowHeightLines);
     },
     [configRowHeight, consumer, key, onUpdateRowHeight, storage]
   );

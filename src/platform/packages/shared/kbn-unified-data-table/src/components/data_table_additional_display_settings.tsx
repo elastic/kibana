@@ -31,9 +31,7 @@ export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   sampleSize: number;
   onChangeSampleSize?: (sampleSize: number) => void;
   lineCountInput: number;
-  setLineCountInput: (value: number) => void;
   headerLineCountInput: number;
-  setHeaderLineCountInput: (value: number) => void;
 }
 
 const defaultOnChangeSampleSize = () => {};
@@ -53,9 +51,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   sampleSize,
   onChangeSampleSize,
   lineCountInput,
-  setLineCountInput,
   headerLineCountInput,
-  setHeaderLineCountInput,
 }) => {
   const [activeSampleSize, setActiveSampleSize] = useState<number | ''>(sampleSize);
   const minRangeSampleSize = Math.max(
@@ -114,7 +110,6 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
         data-test-subj="unifiedDataTableHeaderRowHeightSettings"
         maxRowHeight={5}
         lineCountInput={headerLineCountInput}
-        setLineCountInput={setHeaderLineCountInput}
       />
     );
   }
@@ -131,7 +126,6 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
         onChangeRowHeightLines={onChangeRowHeightLines}
         data-test-subj="unifiedDataTableRowHeightSettings"
         lineCountInput={lineCountInput}
-        setLineCountInput={setLineCountInput}
       />
     );
   }

@@ -815,7 +815,6 @@ export const UnifiedDataTable = ({
     lineCountInput: headerLineCountInput,
     onChangeRowHeight: onChangeHeaderRowHeight,
     onChangeRowHeightLines: onChangeHeaderRowHeightLines,
-    setLineCountInput: setHeaderLineCountInput,
   } = useRowHeight({
     storage,
     consumer,
@@ -825,21 +824,15 @@ export const UnifiedDataTable = ({
     onUpdateRowHeight: onUpdateHeaderRowHeight,
   });
 
-  const {
-    rowHeight,
-    rowHeightLines,
-    lineCountInput,
-    onChangeRowHeight,
-    onChangeRowHeightLines,
-    setLineCountInput,
-  } = useRowHeight({
-    storage,
-    consumer,
-    key: 'dataGridRowHeight',
-    configRowHeight: configRowHeight ?? ROWS_HEIGHT_OPTIONS.default,
-    rowHeightState,
-    onUpdateRowHeight,
-  });
+  const { rowHeight, rowHeightLines, lineCountInput, onChangeRowHeight, onChangeRowHeightLines } =
+    useRowHeight({
+      storage,
+      consumer,
+      key: 'dataGridRowHeight',
+      configRowHeight: configRowHeight ?? ROWS_HEIGHT_OPTIONS.default,
+      rowHeightState,
+      onUpdateRowHeight,
+    });
 
   const euiGridColumns = useMemo(
     () =>
@@ -1041,9 +1034,7 @@ export const UnifiedDataTable = ({
             sampleSize={sampleSizeState}
             onChangeSampleSize={onUpdateSampleSize}
             lineCountInput={lineCountInput}
-            setLineCountInput={setLineCountInput}
             headerLineCountInput={headerLineCountInput}
-            setHeaderLineCountInput={setHeaderLineCountInput}
           />
         </>
       ),
@@ -1064,9 +1055,7 @@ export const UnifiedDataTable = ({
     sampleSizeState,
     onUpdateDataGridDensity,
     lineCountInput,
-    setLineCountInput,
     headerLineCountInput,
-    setHeaderLineCountInput,
   ]);
 
   const toolbarVisibility = useMemo(
