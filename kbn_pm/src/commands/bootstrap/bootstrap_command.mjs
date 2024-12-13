@@ -58,6 +58,7 @@ export const command = {
                           settings for local development. Disable this process either pass this flag or set
                           the KBN_BOOTSTRAP_NO_VSCODE=true environment variable.
     --quiet              Prevent logging more than basic success/error messages
+    --verbose            Activate verbose logging where possible
   `,
   reportTimings: {
     group: 'scripts/kbn bootstrap',
@@ -66,6 +67,7 @@ export const command = {
   async run({ args, log, time }) {
     const offline = args.getBooleanValue('offline') ?? false;
     const validate = args.getBooleanValue('validate') ?? true;
+    const verbose = args.getBooleanValue('verbose') ?? false;
     const quiet = args.getBooleanValue('quiet') ?? false;
     const disableNXCache = !(args.getBooleanValue('cache') ?? true);
 
@@ -123,6 +125,7 @@ export const command = {
     await time('pre-build webpack bundles for packages', async () => {
       await buildPackages(['@kbn/monaco', '@kbn/ui-shared-deps-src', '@kbn/ui-shared-deps-npm'], {
         log,
+        verbose,
         disableNXCache,
         quiet,
       });

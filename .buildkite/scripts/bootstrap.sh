@@ -6,6 +6,18 @@ source .buildkite/scripts/common/util.sh
 
 echo "--- yarn install and bootstrap"
 
+# if CI is not set, only run local bootstrap and exit
+if [[ -z "${CI:-}" ]]; then
+  # if bootstrap is happy, we're done
+  if yarn kbn bootstrap; then
+    exit 0
+  else
+    echo "Local bootstrap failed, retrying with force reinstall"
+    yarn kbn bootstrap --force-install
+    exit 1
+  fi
+fi
+
 BOOTSTRAP_PARAMS=()
 if [[ "${BOOTSTRAP_ALWAYS_FORCE_INSTALL:-}" ]]; then
   BOOTSTRAP_PARAMS+=(--force-install)

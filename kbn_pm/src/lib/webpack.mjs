@@ -14,7 +14,7 @@ import path from 'path';
 /**
  * Builds a set of packages with NX, relying on an existing build target
  * @param {string[]} packages
- * @param {{quiet: boolean, disableNXCache: boolean, log: any}} options
+ * @param {{quiet: boolean, disableNXCache: boolean, verbose: boolean, log: any}} options
  * @returns {Promise<unknown>}
  */
 export async function buildPackages(packages, options) {
@@ -25,11 +25,11 @@ export async function buildPackages(packages, options) {
   const BUILD_TARGET = 'build';
   const projectFilterFlags = packages.map((packageName) => `--projects="${packageName}"`);
 
-  const flags = [
-    `--target=${BUILD_TARGET}`,
-    ...projectFilterFlags,
-    '--verbose', // NX is quite quiet by default, verbose doesn't hurt
-  ];
+  const flags = [`--target=${BUILD_TARGET}`, ...projectFilterFlags];
+
+  if (options.verbose) {
+    flags.push('--verbose');
+  }
 
   if (options.disableNXCache) {
     flags.push('--skipNxCache');
