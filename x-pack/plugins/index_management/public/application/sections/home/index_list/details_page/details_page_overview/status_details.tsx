@@ -73,7 +73,7 @@ export const StatusDetails: FunctionComponent<{
           <EuiText
             color={status === 'close' ? 'danger' : 'success'}
             css={css`
-              font-size: ${euiTheme.size.l};
+              font-size: ${euiTheme.font.scale.l};
             `}
           >
             {status === 'close'

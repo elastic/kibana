@@ -40,7 +40,7 @@ export const DataStreamDetails: FunctionComponent<{ dataStreamName: string }> = 
       <EuiFlexItem grow={false}>
         <EuiText
           css={css`
-            font-size: ${euiTheme.size.l};
+            font-size: ${euiTheme.font.scale.l};
           `}
         >
           {dataStream?.generation}

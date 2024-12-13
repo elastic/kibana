@@ -44,7 +44,7 @@ export const StorageDetails: FunctionComponent<{
             <EuiFlexItem grow={false}>
               <EuiText
                 css={css`
-                  font-size: ${euiTheme.size.l};
+                  font-size: ${euiTheme.font.scale.l};
                 `}
               >
                 {primarySize}
@@ -64,7 +64,7 @@ export const StorageDetails: FunctionComponent<{
             <EuiFlexItem grow={false}>
               <EuiText
                 css={css`
-                  font-size: ${euiTheme.size.l};
+                  font-size: ${euiTheme.font.scale.l};
                 `}
               >
                 {size}

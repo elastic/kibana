@@ -49,9 +49,8 @@ export const OverviewCard: FunctionComponent<Props> = ({
             justifyContent="spaceBetween"
             wrap={true}
             alignItems="center"
-            // euiButtonHeightSmall
             css={css`
-              min-height: ${euiTheme.size.s};
+              min-height: ${euiTheme.size.xl};
             `}
           >
             <EuiFlexItem grow={false}>{contentLeft}</EuiFlexItem>

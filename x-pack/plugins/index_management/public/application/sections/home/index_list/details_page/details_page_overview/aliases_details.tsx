@@ -59,7 +59,7 @@ export const AliasesDetails: FunctionComponent<{ aliases: Index['aliases'] }> = 
               <EuiFlexItem grow={false}>
                 <EuiText
                   css={css`
-                    font-size: ${euiTheme.size.l};
+                    font-size: ${euiTheme.font.scale.l};
                   `}
                 >
                   {aliases.length}
