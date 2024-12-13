@@ -36,10 +36,7 @@
       "lens",
       "observabilityAIAssistant"
     ],
-    "requiredBundles": [
-      "kibanaReact",
-      "triggersActionsUi"
-    ],
+    "requiredBundles": [],
     "extraPublicDirs": [
       "common"
     ]

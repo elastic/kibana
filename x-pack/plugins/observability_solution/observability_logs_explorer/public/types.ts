@@ -27,14 +27,10 @@ import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { SLOPublicStart } from '@kbn/slo-plugin/public';
 import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
-import {
-  ObservabilityLogsExplorerLocators,
-  ObservabilityLogsExplorerLocationState,
-} from '../common/locators';
+import type { ObservabilityLogsExplorerLocationState } from '@kbn/deeplinks-observability/locators';
 
-export interface ObservabilityLogsExplorerPluginSetup {
-  locators: ObservabilityLogsExplorerLocators;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ObservabilityLogsExplorerPluginSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityLogsExplorerPluginStart {}

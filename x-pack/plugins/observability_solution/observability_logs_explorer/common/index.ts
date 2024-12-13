@@ -6,11 +6,6 @@
  */
 
 export {
-  type ObservabilityLogsExplorerLocators,
-  SingleDatasetLocatorDefinition,
-  AllDatasetsLocatorDefinition,
-} from './locators';
-export {
   OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY,
   logsExplorerUrlSchemaV1,
   logsExplorerUrlSchemaV2,

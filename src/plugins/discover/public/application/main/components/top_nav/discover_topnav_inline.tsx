@@ -11,8 +11,6 @@ import React from 'react';
 import { EuiHeader, EuiHeaderSection, EuiHeaderSectionItem } from '@elastic/eui';
 import { TopNavMenuBadges, TopNavMenuItems } from '@kbn/navigation-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { LogsExplorerTabs } from '../../../../components/logs_explorer_tabs';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDiscoverTopNav } from './use_discover_topnav';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 
@@ -24,7 +22,6 @@ export const DiscoverTopNavInline = ({
   hideNavMenuItems?: boolean;
 }) => {
   const { customizationContext } = stateContainer;
-  const services = useDiscoverServices();
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
 
   if (
@@ -39,13 +36,6 @@ export const DiscoverTopNavInline = ({
       css={{ boxShadow: 'none', backgroundColor: euiThemeVars.euiPageBackgroundColor }}
       data-test-subj="discoverTopNavInline"
     >
-      {customizationContext.inlineTopNav.showLogsExplorerTabs && (
-        <EuiHeaderSection>
-          <EuiHeaderSectionItem>
-            <LogsExplorerTabs services={services} selectedTab="discover" />
-          </EuiHeaderSectionItem>
-        </EuiHeaderSection>
-      )}
       {!hideNavMenuItems && (
         <EuiHeaderSection side="right" data-test-subj="topNavMenuItems">
           <EuiHeaderSectionItem>

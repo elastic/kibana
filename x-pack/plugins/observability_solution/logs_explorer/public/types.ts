@@ -13,13 +13,12 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
-import type { LogsExplorerLocators } from '../common/locators';
 import type { LogsExplorerProps } from './components/logs_explorer';
 import type { CreateLogsExplorerController } from './controller';
 
-export interface LogsExplorerPluginSetup {
-  locators: LogsExplorerLocators;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface LogsExplorerPluginSetup {}
+
 export interface LogsExplorerPluginStart {
   LogsExplorer: ComponentType<LogsExplorerProps>;
   createLogsExplorerController: CreateLogsExplorerController;
