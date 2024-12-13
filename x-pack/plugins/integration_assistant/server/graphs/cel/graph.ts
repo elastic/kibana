@@ -13,6 +13,7 @@ import { handleGetStateDetails } from './retrieve_state_details';
 import { handleGetStateVariables } from './retrieve_state_vars';
 import { handleSummarizeQuery } from './summarize_query';
 import { CelInputBaseNodeParams, CelInputGraphParams } from './types';
+import { PackageInfo } from '@kbn/config';
 
 const graphState: StateGraphArgs<CelInputState>['channels'] = {
   lastExecutedChain: {
@@ -58,6 +59,19 @@ const graphState: StateGraphArgs<CelInputState>['channels'] = {
   redactVars: {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
+  },
+  packageInfo: {
+    value: (x: PackageInfo, y?: PackageInfo) => y ?? x,
+    default: () => ({
+      version: '',
+      branch: '',
+      buildNum: 0,
+      buildSha: '',
+      buildShaShort: '',
+      dist: false,
+      buildDate: new Date(),
+      buildFlavor: 'traditional',
+    }),
   },
 };
 
