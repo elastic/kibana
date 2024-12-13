@@ -111,8 +111,8 @@ export function getDashboardApi({
     viewModeManager,
     unifiedSearchManager,
   });
-  async function getState() {
-    const { panels, references: panelReferences } = await panelsManager.internalApi.getState();
+  function getState() {
+    const { panels, references: panelReferences } = panelsManager.internalApi.getState();
     const dashboardState: DashboardState = {
       ...settingsManager.internalApi.getState(),
       ...unifiedSearchManager.internalApi.getState(),
@@ -124,7 +124,7 @@ export function getDashboardApi({
     let controlGroupReferences: Reference[] | undefined;
     if (controlGroupApi) {
       const { rawState: controlGroupSerializedState, references: extractedReferences } =
-        await controlGroupApi.serializeState();
+        controlGroupApi.serializeState();
       controlGroupReferences = extractedReferences;
       dashboardState.controlGroupInput = controlGroupSerializedState;
     }
@@ -177,7 +177,7 @@ export function getDashboardApi({
         isManaged,
         lastSavedId: savedObjectId$.value,
         viewMode: viewModeManager.api.viewMode.value,
-        ...(await getState()),
+        ...getState(),
       });
 
       if (saveResult) {
@@ -200,7 +200,7 @@ export function getDashboardApi({
     },
     runQuickSave: async () => {
       if (isManaged) return;
-      const { controlGroupReferences, dashboardState, panelReferences } = await getState();
+      const { controlGroupReferences, dashboardState, panelReferences } = getState();
       const saveResult = await getDashboardContentManagementService().saveDashboardState({
         controlGroupReferences,
         currentState: dashboardState,

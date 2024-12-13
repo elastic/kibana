@@ -66,6 +66,7 @@ const NodeContainerSmall = ({ children, ...props }: NodeProps & { color: string 
 );
 const ValueInner = ({ children, ...props }: NodeProps) => {
   const { euiTheme } = useEuiTheme();
+
   return (
     <div
       css={css`
