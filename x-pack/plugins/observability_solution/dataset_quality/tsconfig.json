@@ -23,7 +23,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/field-types",
     "@kbn/io-ts-utils",
-    "@kbn/observability-plugin",
     "@kbn/es-types",
     "@kbn/deeplinks-observability",
     "@kbn/router-utils",
