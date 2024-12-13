@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const UNKNOWN_MIGRATION_RULE_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.unknownMigrationRuleTitle',
+  {
+    defaultMessage: 'Unknown migration rule',
+  }
+);
+
 export const OVERVIEW_TAB_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationDetails.overviewTabLabel',
   {
