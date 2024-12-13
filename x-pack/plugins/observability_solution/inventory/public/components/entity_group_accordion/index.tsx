@@ -18,11 +18,12 @@ const ENTITIES_COUNT_BADGE = i18n.translate(
 
 export interface Props {
   groupValue: string;
+  groupLabel: string;
   groupCount: number;
   isLoading?: boolean;
 }
 
-export function EntityGroupAccordion({ groupValue, groupCount, isLoading }: Props) {
+export function EntityGroupAccordion({ groupValue, groupLabel, groupCount, isLoading }: Props) {
   const { euiTheme } = useEuiTheme();
   const [open, setOpen] = useState(false);
 
@@ -44,7 +45,7 @@ export function EntityGroupAccordion({ groupValue, groupCount, isLoading }: Prop
           id={`inventory-group-entity.type-${groupValue}`}
           buttonContent={
             <EuiTitle size="xs">
-              <h4 data-test-subj={`inventoryGroupTitle_entity.type_${groupValue}`}>{groupValue}</h4>
+              <h4 data-test-subj={`inventoryGroupTitle_entity.type_${groupValue}`}>{groupLabel}</h4>
             </EuiTitle>
           }
           buttonElement="div"

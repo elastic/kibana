@@ -34,6 +34,7 @@ export function InventoryPage() {
           query: {
             includeEntityTypes: entityTypesOn.length ? JSON.stringify(entityTypesOn) : undefined,
             excludeEntityTypes: entityTypesOff.length ? JSON.stringify(entityTypesOff) : undefined,
+            kuery,
           },
         },
         signal,
@@ -64,8 +65,9 @@ export function InventoryPage() {
       {value?.entityTypes.map((entityType) => {
         return (
           <EntityGroupAccordion
-            key={`entity.type-${entityType}`}
-            groupValue={entityType}
+            key={`entity.type-${entityType.id}`}
+            groupValue={entityType.id}
+            groupLabel={entityType.display_name}
             // groupCount is a placeholder for the actual number of entities because the API does not return it
             groupCount={50}
             isLoading={loading}
