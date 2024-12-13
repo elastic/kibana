@@ -1,25 +1,22 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
       "jest",
-      "node",
-      "react"
+      "node"
     ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core-http-server",
-    "@kbn/core",
-    "@kbn/zod",
+    "@kbn/server-route-repository-utils",
+    "@kbn/core-lifecycle-browser",
     "@kbn/core-http-browser",
-    "@kbn/sse-utils",
+    "@kbn/sse-utils-client",
   ]
 }

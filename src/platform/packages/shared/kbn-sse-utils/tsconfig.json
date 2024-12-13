@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -8,13 +8,12 @@
     ]
   },
   "include": [
-    "**/*.ts"
-  ],
-  "kbn_references": [
-    "@kbn/core",
-    "@kbn/datemath"
+    "**/*.ts",
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
   ]
 }
