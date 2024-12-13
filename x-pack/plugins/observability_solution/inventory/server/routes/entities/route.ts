@@ -22,6 +22,7 @@ export const getEntityTypesRoute = createInventoryServerRoute({
     query: t.partial({
       includeEntityTypes: jsonRt.pipe(t.array(t.string)),
       excludeEntityTypes: jsonRt.pipe(t.array(t.string)),
+      kuery: t.string,
     }),
   }),
   security: {
@@ -33,23 +34,28 @@ export const getEntityTypesRoute = createInventoryServerRoute({
     const entityManagerStart = await plugins.entityManager.start();
 
     const entityManagerClient = await entityManagerStart.getScopedClient({ request });
+    const { includeEntityTypes, excludeEntityTypes, kuery } = params?.query ?? {};
 
     const rawEntityTypes = await entityManagerClient.v2.readTypeDefinitions();
-    const { includeEntityTypes, excludeEntityTypes } = params?.query ?? {};
+    const entityTypes = includeEntityTypes?.length
+      ? rawEntityTypes.filter((entityType) => includeEntityTypes.includes(entityType.id))
+      : rawEntityTypes.filter((entityType) => !excludeEntityTypes?.includes(entityType.id));
 
-    if (includeEntityTypes?.length) {
-      const entityTypes = rawEntityTypes
-        .filter((entityType) => includeEntityTypes.includes(entityType.id))
-        .map((entityType) => entityType.id);
+    const entityCount = await entityManagerClient.v2.countEntities({
+      start: moment().subtract(15, 'm').toISOString(),
+      end: moment().toISOString(),
+      types: entityTypes.map((entityType) => entityType.id),
+      filters: kuery ? [kuery] : undefined,
+    });
 
-      return { entityTypes };
-    }
+    const entityTypesWithCount = entityTypes
+      .map((entityType) => ({
+        ...entityType,
+        count: entityCount.types[entityType.id],
+      }))
+      .filter((entityType) => entityType.count > 0);
 
-    const entityTypes = rawEntityTypes
-      .filter((entityType) => !excludeEntityTypes?.includes(entityType.id))
-      .map((entityType) => entityType.id);
-
-    return { entityTypes };
+    return { entityTypes: entityTypesWithCount, totalEntities: entityCount.total };
   },
 });
 
@@ -78,7 +84,7 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
     const { sortDirection, sortField, kuery, entityType } = params.query;
 
     const entityManagerClient = await entityManagerStart.getScopedClient({ request });
-    const [alertsClient, rawEntities] = await Promise.all([
+    const [alertsClient, { entities: rawEntities }] = await Promise.all([
       createAlertsClient({ plugins, request }),
       entityManagerClient.v2.searchEntities({
         start: moment().subtract(15, 'm').toISOString(),

@@ -52,10 +52,10 @@ export function InventoryPage() {
     <>
       <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
-          {
-            // totalEntities is a placeholder for the actual number of entities because the API does not return it
-          }
-          <EntitiesSummary totalEntities={100} totalGroups={value?.entityTypes.length} />
+          <EntitiesSummary
+            totalEntities={value?.totalEntities}
+            totalGroups={value?.entityTypes.length}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <GroupBySelector />
@@ -68,8 +68,7 @@ export function InventoryPage() {
             key={`entity.type-${entityType.id}`}
             groupValue={entityType.id}
             groupLabel={entityType.display_name}
-            // groupCount is a placeholder for the actual number of entities because the API does not return it
-            groupCount={50}
+            groupCount={entityType.count}
             isLoading={loading}
           />
         );
