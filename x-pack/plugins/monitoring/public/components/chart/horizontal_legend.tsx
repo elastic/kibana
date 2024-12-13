@@ -5,40 +5,76 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { MouseEvent } from 'react';
+import { EuiFlexItem, EuiFlexGroup, EuiIcon, UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { includes, isFunction } from 'lodash';
-import { EuiFlexItem, EuiFlexGroup, EuiIcon } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import './horizontal_legend.scss';
 
-export class HorizontalLegend extends React.Component {
-  constructor() {
-    super();
+const legendItemStyles = (isDisabled: boolean) => (theme: UseEuiTheme) =>
+  css`
+  font-size: ${theme.euiTheme.font.scale.xs}
+  cursor: pointer;
+  color: var(--euiTextColor);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  ${isDisabled ? 'opacity: 0.5;' : ''}
+`;
+
+const legendHorizontalStyles = (theme: UseEuiTheme) => css`
+  margin-top: var(--euiSizeXS);
+`;
+
+const legendLabelStyles = css`
+  overflow: hidden;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
+
+const legendValueStyles = (theme: UseEuiTheme) => css`
+  overflow: hidden;
+  white-space: nowrap;
+  margin-left: var(--euiSizeXS);
+`;
+
+interface Row {
+  id: string;
+  label: string;
+  legend?: boolean;
+  color?: string;
+  tickFormatter?: (arg: number) => number;
+}
+
+interface Props {
+  series: Row[];
+  seriesValues: { [key: string]: number };
+  seriesFilter: string[];
+  onToggle: (event: MouseEvent<HTMLButtonElement>, id: string) => void;
+  legendFormatter?: (value: number) => number;
+  tickFormatter?: (value: number) => number;
+}
+
+export class HorizontalLegend extends React.Component<Props> {
+  constructor(props: Props) {
+    super(props);
     this.formatter = this.formatter.bind(this);
     this.createSeries = this.createSeries.bind(this);
   }
 
-  /**
-   * @param {Number} value Final value to display
-   */
-  displayValue(value) {
-    return <span className="monRhythmChart__legendValue">{value}</span>;
+  displayValue(value: number) {
+    return <span css={legendValueStyles}>{value}</span>;
   }
 
-  /**
-   * @param {Number} value True if value is falsy and/or not a number
-   */
-  validValue(value) {
+  validValue(value: number) {
     return value !== null && value !== undefined && (typeof value === 'string' || !isNaN(value));
   }
 
-  /**
-   * @param {Number} value The value to format and show in the horizontallegend.
-   * A null means no data for the time bucket and will be formatted as 'N/A'
-   * @param {Object} row Props passed form a parent by row index
-   */
-  formatter(value, row) {
+  formatter(value: number, row: Row) {
     if (!this.validValue(value)) {
       return (
         <FormattedMessage
@@ -48,7 +84,7 @@ export class HorizontalLegend extends React.Component {
       );
     }
 
-    if (row && row.tickFormatter) {
+    if (row?.tickFormatter) {
       return this.displayValue(row.tickFormatter(value));
     }
 
@@ -60,12 +96,7 @@ export class HorizontalLegend extends React.Component {
     return this.displayValue(value);
   }
 
-  createSeries(row, rowIdx) {
-    const classes = ['monRhythmChart__legendItem'];
-
-    if (!includes(this.props.seriesFilter, row.id)) {
-      classes.push('monRhythmChart__legendItem-isDisabled');
-    }
+  createSeries(row: Row, rowIdx: number) {
     if (!row.label || row.legend === false) {
       return <div key={rowIdx} style={{ display: 'none' }} />;
     }
@@ -73,12 +104,11 @@ export class HorizontalLegend extends React.Component {
     return (
       <EuiFlexItem grow={false} key={rowIdx}>
         <button
-          className={classes.join(' ')}
+          css={legendItemStyles(!includes(this.props.seriesFilter, row.id))}
           onClick={(event) => this.props.onToggle(event, row.id)}
         >
-          <span className="monRhythmChart__legendLabel">
+          <span css={legendLabelStyles}>
             <EuiIcon
-              className="monRhythmChart__legendIndicator"
               aria-label={i18n.translate(
                 'xpack.monitoring.chart.horizontalLegend.toggleButtonAriaLabel',
                 { defaultMessage: 'toggle button' }
@@ -87,7 +117,7 @@ export class HorizontalLegend extends React.Component {
               type="dot"
               color={row.color}
             />
-            {' ' + row.label + ' '}
+            {` ${row.label} `}
           </span>
           {this.formatter(this.props.seriesValues[row.id], row)}
         </button>
@@ -99,8 +129,8 @@ export class HorizontalLegend extends React.Component {
     const rows = this.props.series.map(this.createSeries);
 
     return (
-      <div className="monRhythmChart__legendHorizontal">
-        <EuiFlexGroup wrap={true} gutterSize="s" className="monRhythmChart__legendSeries">
+      <div css={legendHorizontalStyles}>
+        <EuiFlexGroup wrap={true} gutterSize="s">
           {rows}
         </EuiFlexGroup>
       </div>

@@ -7,6 +7,7 @@
 
 import React, { Component } from 'react';
 import moment from 'moment';
+import { css } from '@emotion/react';
 import { partialRight } from 'lodash';
 import {
   EuiPage,
@@ -18,13 +19,19 @@ import {
   EuiFlexItem,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { formatMetric } from '../../../lib/format_number';
 import { ClusterStatus } from '../cluster_status';
 import { Sparkline } from '../../sparkline';
 import { EuiMonitoringSSPTable } from '../../table';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+
+const tableCellNumberStyle = (theme) => css`
+  font-size: ${theme.euiTheme.font.scale.l};
+`;
 
 export class PipelineListing extends Component {
   tooltipXValueFormatter(xValue, dateFormat) {
@@ -76,7 +83,7 @@ export class PipelineListing extends Component {
                   options={{ xaxis: throughput.timeRange }}
                 />
               </EuiFlexItem>
-              <EuiFlexItem className="monTableCell__number" data-test-subj="eventsEmittedRate">
+              <EuiFlexItem css={tableCellNumberStyle} data-test-subj="eventsEmittedRate">
                 {formatMetric(value, '0.[0]a', throughput.metric.units)}
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -108,7 +115,7 @@ export class PipelineListing extends Component {
                   options={{ xaxis: nodesCount.timeRange }}
                 />
               </EuiFlexItem>
-              <EuiFlexItem className="monTableCell__number" data-test-subj="nodeCount">
+              <EuiFlexItem css={tableCellNumberStyle} data-test-subj="nodeCount">
                 {formatMetric(value, '0a')}
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -128,8 +135,7 @@ export class PipelineListing extends Component {
   }
 
   render() {
-    const { data, sorting, pagination, onTableChange, upgradeMessage, className, ...props } =
-      this.props;
+    const { data, sorting, pagination, onTableChange, upgradeMessage, ...props } = this.props;
 
     const sortingOptions = sorting || { field: 'id', direction: 'asc' };
     if (sortingOptions.field === 'name') {
@@ -152,7 +158,6 @@ export class PipelineListing extends Component {
           <EuiSpacer size="m" />
           <EuiPanel>
             <EuiMonitoringSSPTable
-              className={className || 'logstashNodesTable'}
               rows={data}
               columns={columns}
               sorting={sortingOptions}

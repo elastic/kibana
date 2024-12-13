@@ -6,14 +6,29 @@
  */
 
 import React, { Fragment } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiStat, UseEuiTheme } from '@elastic/eui';
 import { capitalize } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
+import { css } from '@emotion/react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import { StatusIcon, StatusIconProps } from '../status_icon';
 import { AlertsStatus } from '../../alerts/status';
 import type { AlertsByName } from '../../alerts/types';
-import './summary_status.scss';
+
+const summaryStatusNoWrapStyle = (theme: UseEuiTheme) => css`
+  margin-left: ${theme.euiTheme.size.m}
+  margin-right: ${theme.euiTheme.size.m}
+`;
+
+const summaryStatusNoWrapStatStyle = css`
+  p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+`;
 
 interface Metrics {
   label: string;
@@ -46,7 +61,7 @@ const wrapChild = ({ label, value, ...props }: Metrics, index: number) => (
   >
     <EuiStat
       title={value}
-      className="monSummaryStatusNoWrap__stat"
+      css={summaryStatusNoWrapStatStyle}
       titleSize="xxxs"
       textAlign="left"
       description={label ? `${label}` : ''}
@@ -102,7 +117,7 @@ export const DefaultStatusIndicator = ({
       }
       titleSize="xxxs"
       textAlign="left"
-      className="monSummaryStatusNoWrap__stat"
+      css={summaryStatusNoWrapStatStyle}
       description={i18n.translate('xpack.monitoring.summaryStatus.statusDescription', {
         defaultMessage: 'Status',
       })}
@@ -120,7 +135,7 @@ export function SummaryStatus({
   ...props
 }: SummaryProps) {
   return (
-    <div {...props} className="monSummaryStatusNoWrap">
+    <div {...props} css={summaryStatusNoWrapStyle}>
       <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem
           className="eui-textTruncate"
@@ -136,7 +151,7 @@ export function SummaryStatus({
               title={<AlertsStatus showOnlyCount={true} alerts={alerts} />}
               titleSize="xxxs"
               textAlign="left"
-              className="monSummaryStatusNoWrap__stat"
+              css={summaryStatusNoWrapStatStyle}
               description={i18n.translate('xpack.monitoring.summaryStatus.alertsDescription', {
                 defaultMessage: 'Alerts',
               })}

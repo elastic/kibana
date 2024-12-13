@@ -6,9 +6,9 @@
  */
 
 import React, { Fragment } from 'react';
-import { Legacy } from '../../../legacy_shims';
 import moment from 'moment';
 import numeral from '@elastic/numeral';
+import { css } from '@emotion/react';
 import { capitalize, partial } from 'lodash';
 import {
   EuiHealth,
@@ -21,15 +21,30 @@ import {
   EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { EuiMonitoringTable } from '../../table';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+
+import { Legacy } from '../../../legacy_shims';
+import { EuiMonitoringTable } from '../../table';
 import { AlertsStatus } from '../../../alerts/status';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
-import './listing.scss';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+
+const clusterCellExpired = (theme) => css`
+  color: ${theme.euiTheme.colors.textParagraph};
+`;
+
+const clusterCellLicense = (theme) => css`
+  // euiFontSize
+  font-size: ${theme.euiTheme.font.scale.m};
+`;
+
+const clusterCellExpiration = (theme) => css`
+  color: ${theme.euiTheme.colors.darkShade};
+`;
 
 const IsClusterSupported = ({ isSupported, children }) => {
   return isSupported ? children : '-';
@@ -64,7 +79,7 @@ const STANDALONE_CLUSTER_STORAGE_KEY = 'viewedStandaloneCluster';
 
 const getColumns = (
   showLicenseExpiration,
-  changeCluster,
+  _changeCluster,
   handleClickIncompatibleLicense,
   handleClickInvalidLicense
 ) => {
@@ -195,7 +210,7 @@ const getColumns = (
         if (!licenseType) {
           return (
             <div>
-              <div className="monTableCell__clusterCellLicense">N/A</div>
+              <div css={clusterCellLicense}>N/A</div>
             </div>
           );
         }
@@ -204,7 +219,7 @@ const getColumns = (
           const licenseExpiry = () => {
             if (license.expiry_date_in_millis < moment().valueOf()) {
               // license is expired
-              return <span className="monTableCell__clusterCellExpired">Expired</span>;
+              return <span css={clusterCellExpired}>Expired</span>;
             }
 
             // license is fine
@@ -213,8 +228,8 @@ const getColumns = (
 
           return (
             <div>
-              <div className="monTableCell__clusterCellLicense">{capitalize(licenseType)}</div>
-              <div className="monTableCell__clusterCellExpiration">
+              <div css={clusterCellLicense}>{capitalize(licenseType)}</div>
+              <div css={clusterCellExpiration}>
                 {showLicenseExpiration ? licenseExpiry() : null}
               </div>
             </div>
@@ -419,7 +434,6 @@ export const Listing = ({ angular, clusters, sorting, pagination, onTableChange 
             <StandaloneClusterCallout changeCluster={_changeCluster} storage={storage} />
           ) : null}
           <EuiMonitoringTable
-            className="clusterTable"
             rows={clusters}
             columns={getColumns(
               showLicenseExpiration,

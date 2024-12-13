@@ -5,11 +5,46 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
-import React from 'react';
 import PropTypes from 'prop-types';
+import React from 'react';
+import { css } from '@emotion/react';
+import { isEqual } from 'lodash';
+import { transparentize } from 'polished';
+
 import { SparklineFlotChart } from './sparkline_flot_chart';
-import './sparkline.scss';
+
+// TODO: Replace with EUI tooltip
+const sparklineTooltipStyle = (theme) => css`
+  font-weight: normal;
+  background: ${transparentize(0.3, theme.euiTheme.colors.darkestShade)};
+  font-size: ${theme.euiTheme.font.scale.xs};
+  padding: ${theme.euiTheme.size.xs};
+  border-radius: ${theme.euiTheme.border.radius.medium};
+  pointer-events: none;
+`;
+
+const tooltipXValueStyle = (theme) => css`
+  color: ${transparentize(0.3, theme.euiTheme.colors.ghost)};
+`;
+
+const tooltipYValueStyle = (theme) => css`
+  color: ${theme.euiTheme.colors.ghost};
+`;
+
+const tooltipContainerStyle = (theme) => css`
+  position: fixed;
+  z-index: ${theme.euiTheme.levels.menu};
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+`;
+
+const tooltipCaretStyle = (theme) => css`
+  font-size: ${theme.euiTheme.font.scale.l};
+  color: ${transparentize(0.3, theme.euiTheme.colors.darkestShade)};
+  display: none;
+`;
 
 export class Sparkline extends React.Component {
   constructor(props) {
@@ -97,17 +132,21 @@ export class Sparkline extends React.Component {
     }
 
     return (
-      <div className="monSparklineTooltip__container" style={styles.tooltipContainer}>
-        <i className="fa fa-caret-left monSparklineTooltip__caret" style={styles.leftCaret} />
-        <div className="monSparklineTooltip" style={styles.tooltip}>
-          <div className="monSparklineTooltip__yValue">
+      <div
+        className="monSparklineTooltip__container"
+        css={tooltipContainerStyle}
+        style={styles.tooltipContainer}
+      >
+        <i className="fa fa-caret-left" css={tooltipCaretStyle} style={styles.leftCaret} />
+        <div css={sparklineTooltipStyle} style={styles.tooltip}>
+          <div css={tooltipYValueStyle}>
             {this.props.tooltip.yValueFormatter(this.state.tooltip.yValue)}
           </div>
-          <div className="monSparklineTooltip__xValue">
+          <div css={tooltipXValueStyle}>
             {this.props.tooltip.xValueFormatter(this.state.tooltip.xValue)}
           </div>
         </div>
-        <i className="fa fa-caret-right monSparklineTooltip__caret" style={styles.rightCaret} />
+        <i className="fa fa-caret-right" css={tooltipCaretStyle} style={styles.rightCaret} />
       </div>
     );
   }
@@ -124,7 +163,7 @@ export class Sparkline extends React.Component {
   render() {
     return (
       <div>
-        <div className="monSparkline" ref={this.handleSparklineRef} />
+        <div css={{ height: '2em' }} ref={this.handleSparklineRef} />
         {this.renderTooltip()}
       </div>
     );
