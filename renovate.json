@@ -1268,11 +1268,56 @@
       "enabled": true
     },
     {
+      "groupName": "json-stringify-pretty-compact",
+      "matchDepNames": [
+        "json-stringify-pretty-compact"
+      ],
+      "reviewers": [
+        "team:kibana-visualizations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Feature:Vega",
+        "Team:Visualizations",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "kibana-visualization color related modules",
+      "matchDepNames": [
+        "chroma-js",
+        "color",
+        "tinycolor2",
+        "tinygradient",
+        "@types/chroma-js",
+        "@types/color"
+      ],
+      "reviewers": [
+        "team:kibana-visualizations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Feature:Vega",
+        "Team:Visualizations",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "vega related modules",
       "matchDepNames": [
         "vega",
+        "vega-interpreter",
         "vega-lite",
         "vega-schema-url-parser",
+        "vega-spec-injector",
         "vega-tooltip"
       ],
       "reviewers": [
@@ -1283,7 +1328,44 @@
       ],
       "labels": [
         "Feature:Vega",
-        "Team:Visualizations"
+        "Team:Visualizations",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "d3 modules",
+      "matchDepNames": [
+        "@types/d3",
+        "@types/d3-array",
+        "@types/d3-brush",
+        "@types/d3-interpolate",
+        "@types/d3-scale",
+        "@types/d3-selection",
+        "@types/d3-shape",
+        "@types/d3-time",
+        "@types/d3-transition",
+        "d3",
+        "d3-array",
+        "d3-brush",
+        "d3-interpolate",
+        "d3-scale",
+        "d3-selection",
+        "d3-shape",
+        "d3-time",
+        "d3-transition"
+      ],
+      "reviewers": [
+        "team:kibana-visualizations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Feature:Vega",
+        "Team:Visualizations",
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -2638,6 +2720,25 @@
         "release_note:skip"
       ],
       "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "react-is",
+      "matchDepNames": [
+        "react-is",
+        "@types/react-is"
+      ],
+      "reviewers": [
+        "team:visualizations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open",
+        "Team:Visualizations"
+      ],
       "enabled": true
     },
     {
