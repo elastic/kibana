@@ -203,7 +203,12 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
 
   return (
     <>
-      <EuiFlexGroup style={{ float: 'right' }} alignItems="center" justifyContent="flexEnd">
+      <EuiFlexGroup
+        style={{ float: 'right' }}
+        alignItems="center"
+        justifyContent="flexEnd"
+        gutterSize="s"
+      >
         {showModelBoundsCheckbox && showControls && (
           <EuiFlexItem grow={false}>
             <EuiFormRow hasEmptyLabelSpace>

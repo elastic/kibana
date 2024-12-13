@@ -513,42 +513,37 @@ const FieldPanel: FC<FieldPanelProps> = ({
 
   return (
     <EuiPanel paddingSize="s" hasBorder hasShadow={false} data-test-subj={dataTestSubj}>
-      <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize={'s'}>
+      <EuiFlexGroup alignItems={'flexStart'} justifyContent={'spaceBetween'} gutterSize={'s'}>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                data-test-subj="aiopsChangePointDetectionExpandConfigButton"
-                iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-                onClick={setIsExpanded.bind(null, (prevState) => !prevState)}
-                aria-label={i18n.translate('xpack.aiops.changePointDetection.expandConfigLabel', {
-                  defaultMessage: 'Expand configuration',
-                })}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <FieldsControls fieldConfig={fieldConfig} onChange={onChange}>
-                <EuiFlexItem
-                  css={{ visibility: progress === null ? 'hidden' : 'visible' }}
-                  grow={true}
-                >
-                  <EuiProgress
-                    label={
-                      <FormattedMessage
-                        id="xpack.aiops.changePointDetection.progressBarLabel"
-                        defaultMessage="Fetching change points"
-                      />
-                    }
-                    value={progress ?? 0}
-                    max={100}
-                    valueText
-                    size="m"
+          <EuiButtonIcon
+            data-test-subj="aiopsChangePointDetectionExpandConfigButton"
+            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            onClick={setIsExpanded.bind(null, (prevState) => !prevState)}
+            aria-label={i18n.translate('xpack.aiops.changePointDetection.expandConfigLabel', {
+              defaultMessage: 'Expand configuration',
+            })}
+            size="s"
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <FieldsControls fieldConfig={fieldConfig} onChange={onChange} data-test-subj="blablabla">
+            <EuiFlexItem {...(progress === null && { css: { display: 'none' } })} grow={true}>
+              <EuiProgress
+                label={
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.progressBarLabel"
+                    defaultMessage="Fetching change points"
                   />
-                  <EuiSpacer size="s" />
-                </EuiFlexItem>
-              </FieldsControls>
+                }
+                value={progress ?? 0}
+                max={100}
+                valueText
+                size="m"
+              />
+              <EuiSpacer size="s" />
             </EuiFlexItem>
-          </EuiFlexGroup>
+          </FieldsControls>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
@@ -682,7 +677,7 @@ export const FieldsControls: FC<PropsWithChildren<FieldsControlsProps>> = ({
       }
       theme={theme}
     >
-      <EuiFlexGroup alignItems={'center'} responsive={true} wrap={true} gutterSize={'m'}>
+      <EuiFlexGroup alignItems={'center'} responsive={true} wrap={true} gutterSize={'s'}>
         <EuiFlexItem grow={false} css={{ width: '200px' }}>
           <FunctionPicker value={fieldConfig.fn} onChange={(v) => onChangeFn('fn', v)} />
         </EuiFlexItem>
