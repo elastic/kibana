@@ -11,12 +11,13 @@ import {
   EuiForm,
   EuiFieldText,
   EuiFormRow,
-  EuiButton,
-  EuiText,
+  EuiButtonIcon,
   EuiFlexGroup,
-  EuiSpacer,
   EuiFlexItem,
   EuiToolTip,
+  EuiButton,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { decompressFromEncodedURIComponent } from 'lz-string';
@@ -120,7 +121,7 @@ export const ProfileQueryEditor = memo(() => {
       {/* Form */}
       <EuiFlexItem grow={false}>
         <EuiForm>
-          <EuiFlexGroup direction="row" gutterSize="s">
+          <EuiFlexGroup direction="row" gutterSize="s" alignItems="flexEnd">
             <EuiFlexItem>
               <EuiFormRow
                 label={i18n.translate('xpack.searchProfiler.formIndexLabel', {
@@ -139,12 +140,28 @@ export const ProfileQueryEditor = memo(() => {
                 />
               </EuiFormRow>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate('xpack.searchProfiler.sendRequestButtonTooltipContent', {
+                  defaultMessage: 'Click to send request',
+                })}
+              >
+                <EuiButtonIcon
+                  iconType={'playFilled'}
+                  data-test-subj="profileButton"
+                  disabled={!licenseEnabled}
+                  onClick={() => handleProfileClick()}
+                  size="m"
+                  display="base"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiForm>
       </EuiFlexItem>
 
       {/* Editor */}
-      <EuiFlexItem grow={10}>
+      <EuiFlexItem>
         <Editor
           onEditorReady={onEditorReady}
           setEditorValue={setEditorValue}
@@ -152,7 +169,6 @@ export const ProfileQueryEditor = memo(() => {
           licenseEnabled={licenseEnabled}
         />
       </EuiFlexItem>
-
       {/* Button */}
       <EuiFlexItem grow={false}>
         <EuiFlexGroup
