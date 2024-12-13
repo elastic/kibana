@@ -14,7 +14,6 @@ import {
   EuiIcon,
   EuiPageTemplate,
   EuiPanel,
-  EuiText,
   EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -199,16 +198,16 @@ export const ElasticsearchOverview = () => {
           links={[
             ...(selectedLanguage.basicConfig
               ? [
-                {
-                  href: selectedLanguage.basicConfig,
-                  label: i18n.translate(
-                    'xpack.serverlessSearch.configureClient.basicConfigLabel',
-                    {
-                      defaultMessage: 'Basic configuration',
-                    }
-                  ),
-                },
-              ]
+                  {
+                    href: selectedLanguage.basicConfig,
+                    label: i18n.translate(
+                      'xpack.serverlessSearch.configureClient.basicConfigLabel',
+                      {
+                        defaultMessage: 'Basic configuration',
+                      }
+                    ),
+                  },
+                ]
               : []),
           ]}
           title={i18n.translate('xpack.serverlessSearch.configureClient.title', {
