@@ -103,9 +103,18 @@ describe('toastAPIErrors', () => {
   it('converts API errors into flash messages', () => {
     toastAPIErrors(mockHttpError);
 
-    expect(flashErrorToast).toHaveBeenNthCalledWith(1, 'Could not find X');
-    expect(flashErrorToast).toHaveBeenNthCalledWith(2, 'Could not find Y');
-    expect(flashErrorToast).toHaveBeenNthCalledWith(3, 'Something else bad happened');
+    expect(flashErrorToast).toHaveBeenNthCalledWith(1, 'Could not find X', {
+      'aria-live': 'assertive',
+      role: 'alert',
+    });
+    expect(flashErrorToast).toHaveBeenNthCalledWith(2, 'Could not find Y', {
+      'aria-live': 'assertive',
+      role: 'alert',
+    });
+    expect(flashErrorToast).toHaveBeenNthCalledWith(3, 'Something else bad happened', {
+      'aria-live': 'assertive',
+      role: 'alert',
+    });
   });
 
   it('falls back to the basic message for http responses without an errors array', () => {
