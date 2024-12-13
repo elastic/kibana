@@ -55,7 +55,7 @@ export const extractRuleEqlQuery = (
   filters: RuleFilterArray | undefined
 ): RuleEqlQuery => {
   return {
-    query: query.trim(),,
+    query: query.trim(),
     language,
     filters: filters ?? [],
   };
