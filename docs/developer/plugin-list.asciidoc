@@ -592,7 +592,7 @@ security and spaces filtering.
 activities.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/exploratory_view/README.md[exploratoryView]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/exploratory_view/README.md[exploratoryView]
 |A shared component for visualizing observability data types via lens embeddable. For further details.
 
 
@@ -657,7 +657,7 @@ the infrastructure monitoring use-case within Kibana.
 |The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/integration_assistant/README.md[integrationAssistant]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/integration_assistant/README.md[integrationAssistant]
 |Team owner: Security Integrations Scalability
 
 
@@ -665,11 +665,11 @@ the infrastructure monitoring use-case within Kibana.
 |Home of the Inventory plugin, which renders the... inventory.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/investigate/README.md[investigate]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/investigate/README.md[investigate]
 |undefined
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/investigate_app/README.md[investigateApp]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/investigate_app/README.md[investigateApp]
 |undefined
 
 
@@ -743,7 +743,7 @@ Elastic.
 |The Notifications plugin provides a set of services to help Solutions and plugins send notifications to users.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability/README.md[observability]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability/README.md[observability]
 |This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
 
 
@@ -882,7 +882,7 @@ This plugin is only enabled when the application is built for serverless project
 |
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/serverless_observability/README.mdx[serverlessObservability]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/serverless_observability/README.mdx[serverlessObservability]
 |This plugin contains configuration and code used to create a Serverless Observability project.  It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
 
 
@@ -925,7 +925,7 @@ routes, etc.
 |Home of the Streams app plugin, which allows users to manage Streams via the UI.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/synthetics/README.md[synthetics]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/synthetics/README.md[synthetics]
 |The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening
 in their infrastructure.
 
@@ -938,11 +938,11 @@ in their infrastructure.
 |Gathers all usage collection, retrieving them from both: OSS and X-Pack plugins.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/threat_intelligence/README.md[threatIntelligence]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/threat_intelligence/README.md[threatIntelligence]
 |Elastic Threat Intelligence makes it easy to analyze and investigate potential security threats by aggregating data from multiple sources in one place. You’ll be able to view data from all activated threat intelligence feeds and take action.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/timelines/README.md[timelines]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/timelines/README.md[timelines]
 |Timelines is a plugin that provides a grid component with accompanying server side apis to help users identify events of interest and perform root cause analysis within Kibana.
 
 
@@ -964,7 +964,7 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 |Upgrade Assistant helps users prepare their Stack for being upgraded to the next version of the Elastic stack.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/uptime/README.md[uptime]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/uptime/README.md[uptime]
 |The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening
 in their infrastructure.
 
@@ -973,7 +973,7 @@ in their infrastructure.
 |NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/ux/readme.md[ux]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/ux/readme.md[ux]
 |https://docs.elastic.dev/kibana-dev-docs/welcome
 
 

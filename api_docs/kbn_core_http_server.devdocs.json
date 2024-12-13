@@ -4175,15 +4175,15 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability_solution/observability/server/lib/annotations/register_annotation_apis.ts"
+                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability_solution/observability/server/lib/annotations/register_annotation_apis.ts"
+                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability_solution/observability/server/lib/annotations/register_annotation_apis.ts"
+                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
               {
                 "plugin": "triggersActionsUi",
@@ -5026,14 +5026,6 @@
                 "path": "x-pack/plugins/observability_solution/profiling/server/routes/topn.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
-              },
-              {
-                "plugin": "uptime",
-                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/uptime_server.ts"
-              },
-              {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/lib/request_interceptors/on_post_auth_interceptor.test.ts"
               },
@@ -5052,6 +5044,14 @@
               {
                 "plugin": "apmDataAccess",
                 "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.test.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/server.ts"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "console",
@@ -6877,7 +6877,7 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability_solution/observability/server/lib/annotations/register_annotation_apis.ts"
+                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
               {
                 "plugin": "triggersActionsUi",
@@ -7585,11 +7585,11 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/server.ts"
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/uptime_server.ts"
+                "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "console",
@@ -8867,7 +8867,7 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability_solution/observability/server/lib/annotations/register_annotation_apis.ts"
+                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
               {
                 "plugin": "logsShared",
@@ -9135,11 +9135,11 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/server.ts"
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/uptime_server.ts"
+                "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "ftrApis",
@@ -9835,7 +9835,7 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability_solution/observability/server/lib/annotations/register_annotation_apis.ts"
+                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -10039,11 +10039,11 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/server.ts"
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/uptime_server.ts"
+                "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "ftrApis",
@@ -15942,10 +15942,6 @@
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmark_rules/get_states/get_states.ts"
               },
               {
-                "plugin": "dataUsage",
-                "path": "x-pack/plugins/data_usage/server/routes/internal/data_streams.ts"
-              },
-              {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/get_index_mappings.ts"
               },
@@ -16615,6 +16611,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/resources/missing.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/get_prebuilt_rules.ts"
               },
               {
@@ -16690,20 +16690,8 @@
                 "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
-              },
-              {
-                "plugin": "uptime",
-                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/uptime_server.ts"
-              },
-              {
                 "plugin": "dataUsage",
-                "path": "x-pack/plugins/data_usage/server/routes/internal/data_streams.test.ts"
-              },
-              {
-                "plugin": "dataUsage",
-                "path": "x-pack/plugins/data_usage/server/routes/internal/data_streams.test.ts"
+                "path": "x-pack/platform/plugins/private/data_usage/server/routes/internal/data_streams.ts"
               },
               {
                 "plugin": "dataVisualizer",
@@ -16732,6 +16720,22 @@
               {
                 "plugin": "transform",
                 "path": "x-pack/platform/plugins/private/transform/server/routes/api/transforms_stats_single/register_route.ts"
+              },
+              {
+                "plugin": "dataUsage",
+                "path": "x-pack/platform/plugins/private/data_usage/server/routes/internal/data_streams.test.ts"
+              },
+              {
+                "plugin": "dataUsage",
+                "path": "x-pack/platform/plugins/private/data_usage/server/routes/internal/data_streams.test.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/server.ts"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -17161,20 +17165,20 @@
                 "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
-              },
-              {
-                "plugin": "uptime",
-                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/uptime_server.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_update_rules/route.ts"
               },
               {
                 "plugin": "transform",
                 "path": "x-pack/platform/plugins/private/transform/server/routes/api/transforms_create/register_route.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/server.ts"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -17442,10 +17446,6 @@
               {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/graph/route.ts"
-              },
-              {
-                "plugin": "dataUsage",
-                "path": "x-pack/plugins/data_usage/server/routes/internal/usage_metrics.ts"
               },
               {
                 "plugin": "ecsDataQualityDashboard",
@@ -18224,24 +18224,16 @@
                 "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
-              },
-              {
-                "plugin": "dataUsage",
-                "path": "x-pack/plugins/data_usage/server/routes/internal/usage_metrics.test.ts"
-              },
-              {
-                "plugin": "dataUsage",
-                "path": "x-pack/plugins/data_usage/server/routes/internal/usage_metrics.test.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_create_rules/route.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_delete_rules/route.ts"
+              },
+              {
+                "plugin": "dataUsage",
+                "path": "x-pack/platform/plugins/private/data_usage/server/routes/internal/usage_metrics.ts"
               },
               {
                 "plugin": "dataVisualizer",
@@ -18298,6 +18290,18 @@
               {
                 "plugin": "aiops",
                 "path": "x-pack/platform/plugins/shared/aiops/server/routes/categorization_field_validation/define_route.ts"
+              },
+              {
+                "plugin": "dataUsage",
+                "path": "x-pack/platform/plugins/private/data_usage/server/routes/internal/usage_metrics.test.ts"
+              },
+              {
+                "plugin": "dataUsage",
+                "path": "x-pack/platform/plugins/private/data_usage/server/routes/internal/usage_metrics.test.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/server.ts"
               },
               {
                 "plugin": "dataViewFieldEditor",
@@ -18798,12 +18802,12 @@
                 "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_delete_rules/route.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/server.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
