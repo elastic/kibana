@@ -507,7 +507,6 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
             persistence: {
               [TaskPersistence.Recurring]: 10,
               [TaskPersistence.NonRecurring]: 10,
-              [TaskPersistence.Ephemeral]: 10,
             },
             result_frequency_percent_as_number: {},
           },

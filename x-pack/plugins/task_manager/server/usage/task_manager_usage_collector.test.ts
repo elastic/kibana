@@ -26,43 +26,6 @@ describe('registerTaskManagerUsageCollector', () => {
   let collector: Collector<unknown>;
   const logger = loggingSystemMock.createLogger();
 
-  it('should report telemetry on the ephemeral queue', async () => {
-    const monitoringStats$ = new Subject<MonitoredHealth>();
-    const monitoringUtilization$ = new Subject<MonitoredUtilization>();
-    const usageCollectionMock = createUsageCollectionSetupMock();
-    const fetchContext = createCollectorFetchContextMock();
-    usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
-      collector = new Collector(logger, config);
-      return createUsageCollectionSetupMock().makeUsageCollector(config);
-    });
-
-    registerTaskManagerUsageCollector(
-      usageCollectionMock,
-      monitoringStats$,
-      monitoringUtilization$,
-      true,
-      10,
-      []
-    );
-
-    const mockHealth = getMockMonitoredHealth();
-    monitoringStats$.next(mockHealth);
-    const mockUtilization = getMockMonitoredUtilization();
-    monitoringUtilization$.next(mockUtilization);
-    await sleep(1001);
-
-    expect(usageCollectionMock.makeUsageCollector).toBeCalled();
-    const telemetry: TaskManagerUsage = (await collector.fetch(fetchContext)) as TaskManagerUsage;
-    expect(telemetry.ephemeral_tasks_enabled).toBe(true);
-    expect(telemetry.ephemeral_request_capacity).toBe(10);
-    expect(telemetry.ephemeral_stats).toMatchObject({
-      status: mockHealth.stats.ephemeral?.status,
-      load: mockHealth.stats.ephemeral?.value.load,
-      executions_per_cycle: mockHealth.stats.ephemeral?.value.executionsPerCycle,
-      queued_tasks: mockHealth.stats.ephemeral?.value.queuedTasks,
-    });
-  });
-
   it('should report telemetry on the excluded task types', async () => {
     const monitoringStats$ = new Subject<MonitoredHealth>();
     const monitoringUtilization$ = new Subject<MonitoredUtilization>();
@@ -77,8 +40,6 @@ describe('registerTaskManagerUsageCollector', () => {
       usageCollectionMock,
       monitoringStats$,
       monitoringUtilization$,
-      true,
-      10,
       ['actions:*']
     );
 
@@ -107,8 +68,6 @@ describe('registerTaskManagerUsageCollector', () => {
       usageCollectionMock,
       monitoringStats$,
       monitoringUtilization$,
-      true,
-      10,
       ['actions:*']
     );
 
@@ -146,8 +105,6 @@ describe('registerTaskManagerUsageCollector', () => {
       usageCollectionMock,
       monitoringStats$,
       monitoringUtilization$,
-      true,
-      10,
       ['actions:*']
     );
 
@@ -216,30 +173,6 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
           },
         },
       },
-      ephemeral: {
-        status: HealthStatus.OK,
-        timestamp: new Date().toISOString(),
-        value: {
-          load: {
-            p50: 4,
-            p90: 6,
-            p95: 6,
-            p99: 6,
-          },
-          executionsPerCycle: {
-            p50: 4,
-            p90: 6,
-            p95: 6,
-            p99: 6,
-          },
-          queuedTasks: {
-            p50: 4,
-            p90: 6,
-            p95: 6,
-            p99: 6,
-          },
-        },
-      },
       runtime: {
         timestamp: new Date().toISOString(),
         status: HealthStatus.OK,
@@ -263,7 +196,6 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
             persistence: {
               [TaskPersistence.Recurring]: 10,
               [TaskPersistence.NonRecurring]: 10,
-              [TaskPersistence.Ephemeral]: 10,
             },
             result_frequency_percent_as_number: {},
           },

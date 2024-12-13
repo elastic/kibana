@@ -19,10 +19,6 @@ describe('config validation', () => {
           "active_nodes_lookback": "30s",
           "interval": 10000,
         },
-        "ephemeral_tasks": Object {
-          "enabled": false,
-          "request_capacity": 10,
-        },
         "event_loop_delay": Object {
           "monitor": true,
           "warn_threshold": 5000,
@@ -82,10 +78,6 @@ describe('config validation', () => {
           "active_nodes_lookback": "30s",
           "interval": 10000,
         },
-        "ephemeral_tasks": Object {
-          "enabled": false,
-          "request_capacity": 10,
-        },
         "event_loop_delay": Object {
           "monitor": true,
           "warn_threshold": 5000,
@@ -142,10 +134,6 @@ describe('config validation', () => {
         "discovery": Object {
           "active_nodes_lookback": "30s",
           "interval": 10000,
-        },
-        "ephemeral_tasks": Object {
-          "enabled": false,
-          "request_capacity": 10,
         },
         "event_loop_delay": Object {
           "monitor": true,
@@ -295,5 +283,16 @@ describe('config validation', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"[discovery.active_nodes_lookback]: active node lookback duration cannot exceed five minutes"`
     );
+  });
+
+  test('should not throw if ephemeral_tasks is defined', () => {
+    const config: Record<string, unknown> = {
+      ephemeral_tasks: {
+        enabled: true,
+        request_capacity: 20,
+      },
+    };
+
+    expect(() => configSchema.validate(config)).not.toThrow();
   });
 });

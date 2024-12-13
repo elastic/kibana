@@ -17,7 +17,6 @@ export const plugin = async (initContext: PluginInitializerContext) => {
 export type {
   TaskInstance,
   ConcreteTaskInstance,
-  EphemeralTask,
   TaskRunCreatorFunction,
   RunContext,
   IntervalSchedule,
@@ -32,7 +31,6 @@ export {
   isUnrecoverableError,
   throwUnrecoverableError,
   throwRetryableError,
-  isEphemeralTaskRejectedDueToCapacityError,
   createTaskRunError,
   TaskErrorSource,
 } from './task_running';
@@ -57,14 +55,6 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   schema: configSchema,
   deprecations: ({ deprecate }) => {
     return [
-      deprecate('ephemeral_tasks.enabled', 'a future version', {
-        level: 'warning',
-        message: `Configuring "xpack.task_manager.ephemeral_tasks.enabled" is deprecated and will be removed in a future version. Remove this setting to increase task execution resiliency.`,
-      }),
-      deprecate('ephemeral_tasks.request_capacity', 'a future version', {
-        level: 'warning',
-        message: `Configuring "xpack.task_manager.ephemeral_tasks.request_capacity" is deprecated and will be removed in a future version. Remove this setting to increase task execution resiliency.`,
-      }),
       deprecate('max_workers', 'a future version', {
         level: 'warning',
         message: `Configuring "xpack.task_manager.max_workers" is deprecated and will be removed in a future version. Remove this setting and use "xpack.task_manager.capacity" instead.`,

@@ -84,10 +84,6 @@ describe('TaskPollingLifecycle', () => {
         },
         custom: {},
       },
-      ephemeral_tasks: {
-        enabled: true,
-        request_capacity: 10,
-      },
       unsafe: {
         exclude_task_types: [],
         authenticate_background_task_utilization: true,

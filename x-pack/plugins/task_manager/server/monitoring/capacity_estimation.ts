@@ -104,9 +104,9 @@ export function estimateCapacity(
 
   /**
    * On average, how much of this kibana's capacity has been historically used to execute
-   * non-recurring and ephemeral tasks
+   * non-recurring tasks
    */
-  const averageCapacityUsedByNonRecurringAndEphemeralTasksPerKibana = percentageOf(
+  const averageCapacityUsedByNonRecurringTasksPerKibana = percentageOf(
     capacityPerMinutePerKibana,
     percentageOf(averageLoadPercentage, 100 - percentageOfExecutionsUsedByRecurringTasks)
   );
@@ -116,14 +116,14 @@ export function estimateCapacity(
    * for recurring tasks
    */
   const averageCapacityAvailableForRecurringTasksPerKibana =
-    capacityPerMinutePerKibana - averageCapacityUsedByNonRecurringAndEphemeralTasksPerKibana;
+    capacityPerMinutePerKibana - averageCapacityUsedByNonRecurringTasksPerKibana;
 
   /**
-   * At times a cluster might experience spikes of NonRecurring/Ephemeral tasks which swamp Task Manager
-   * causing it to spend all its capacity on NonRecurring/Ephemeral tasks, which makes it much harder
+   * At times a cluster might experience spikes of NonRecurring tasks which swamp Task Manager
+   * causing it to spend all its capacity on NonRecurring tasks, which makes it much harder
    * to estimate the required capacity.
    * This is easy to identify as load will usually max out or all the workers are busy executing non-recurring
-   * or ephemeral tasks, and none are running recurring tasks.
+   * tasks, and none are running recurring tasks.
    */
   const hasTooLittleCapacityToEstimateRequiredNonRecurringCapacity =
     averageLoadPercentage === 100 || averageCapacityAvailableForRecurringTasksPerKibana === 0;
@@ -165,24 +165,24 @@ export function estimateCapacity(
     averageRecurringRequiredPerMinute / minRequiredKibanaInstances;
 
   /**
-   * assuming the historical capacity needed for ephemeral and non-recurring tasks, plus
+   * assuming the historical capacity needed for non-recurring tasks, plus
    * the amount we know each kibana would need for recurring tasks, how much capacity would
    * each kibana need if following the minRequiredKibanaInstances?
    */
   const averageRequiredThroughputPerMinutePerKibana =
-    averageCapacityUsedByNonRecurringAndEphemeralTasksPerKibana *
+    averageCapacityUsedByNonRecurringTasksPerKibana *
       (assumedKibanaInstances / minRequiredKibanaInstances) +
     averageRecurringRequiredPerMinute / minRequiredKibanaInstances;
 
   const assumedAverageRecurringRequiredThroughputPerMinutePerKibana =
     averageRecurringRequiredPerMinute / assumedKibanaInstances;
   /**
-   * assuming the historical capacity needed for ephemeral and non-recurring tasks, plus
+   * assuming the historical capacity needed for non-recurring tasks, plus
    * the amount we know each kibana would need for recurring tasks, how much capacity would
    * each kibana need if the assumed current number were correct?
    */
   const assumedRequiredThroughputPerMinutePerKibana =
-    averageCapacityUsedByNonRecurringAndEphemeralTasksPerKibana +
+    averageCapacityUsedByNonRecurringTasksPerKibana +
     averageRecurringRequiredPerMinute / assumedKibanaInstances;
 
   const { status, reason } = getHealthStatus(logger, {
@@ -281,11 +281,7 @@ function getAverageDuration(
   durations: Partial<TaskPersistenceTypes<AveragedStat>>
 ): Result<number, number> {
   const result = stats.mean(
-    [
-      durations.ephemeral?.p50 ?? 0,
-      durations.non_recurring?.p50 ?? 0,
-      durations.recurring?.p50 ?? 0,
-    ].filter((val) => val > 0)
+    [durations.non_recurring?.p50 ?? 0, durations.recurring?.p50 ?? 0].filter((val) => val > 0)
   );
   if (isNaN(result)) {
     return asErr(result);

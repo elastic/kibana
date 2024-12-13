@@ -41,10 +41,6 @@ const config: TaskManagerConfig = {
   },
   kibanas_per_partition: 2,
   allow_reading_invalid_state: false,
-  ephemeral_tasks: {
-    enabled: true,
-    request_capacity: 10,
-  },
   event_loop_delay: {
     monitor: true,
     warn_threshold: 5000,

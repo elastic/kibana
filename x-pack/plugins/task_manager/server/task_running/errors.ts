@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { TaskErrorSource } from '../../common';
-import { EphemeralTask } from '../task';
 
 export { TaskErrorSource };
 
@@ -21,19 +20,6 @@ export interface DecoratedError extends Error {
   [code]?: string;
   [retry]?: Date | boolean;
   [source]?: TaskErrorSource;
-}
-
-export class EphemeralTaskRejectedDueToCapacityError extends Error {
-  private _task: EphemeralTask;
-
-  constructor(message: string, task: EphemeralTask) {
-    super(message);
-    this._task = task;
-  }
-
-  public get task() {
-    return this._task;
-  }
 }
 
 function isTaskManagerError(error: unknown): error is DecoratedError {
@@ -86,10 +72,4 @@ export function getErrorSource(error: Error | DecoratedError): TaskErrorSource |
 
 export function isUserError(error: Error | DecoratedError) {
   return getErrorSource(error) === TaskErrorSource.USER;
-}
-
-export function isEphemeralTaskRejectedDueToCapacityError(
-  error: Error | EphemeralTaskRejectedDueToCapacityError
-) {
-  return Boolean(error && error instanceof EphemeralTaskRejectedDueToCapacityError);
 }

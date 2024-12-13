@@ -79,7 +79,6 @@ export interface TaskRunner {
   id: string;
   taskExecutionId: string;
   stage: string;
-  isEphemeral?: boolean;
   toString: () => string;
   isSameTask: (executionId: string) => boolean;
   isAdHocTaskAndOutOfAttempts: boolean;
