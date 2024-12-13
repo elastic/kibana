@@ -180,7 +180,7 @@ export class DiscoverPlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
-        ebtManager.enableContext();
+        ebtManager.onDiscoverAppMounted();
 
         const services = buildServices({
           core: coreStart,
@@ -229,7 +229,7 @@ export class DiscoverPlugin
         });
 
         return () => {
-          ebtManager.disableAndResetContext();
+          ebtManager.onDiscoverAppUnmounted();
           unlistenParentHistory();
           unmount();
           appUnMounted();
