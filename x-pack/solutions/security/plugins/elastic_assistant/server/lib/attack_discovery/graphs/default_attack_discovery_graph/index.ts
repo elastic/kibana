@@ -41,7 +41,7 @@ export type DefaultAttackDiscoveryGraph = ReturnType<typeof getDefaultAttackDisc
  * Attack discovery graph.
  *
  * Refer to the following diagram for this graph:
- * x-pack/plugins/elastic_assistant/docs/img/default_attack_discovery_graph.png
+ * x-pack/solutions/security/plugins/elastic_assistant/docs/img/default_attack_discovery_graph.png
  */
 export const getDefaultAttackDiscoveryGraph = ({
   alertsIndexPattern,

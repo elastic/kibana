@@ -27,4 +27,4 @@ The graphs will be generated in the `docs/img` directory of the plugin.
 
 ### Testing
 
-To run the tests for this plugin, run `node scripts/jest --watch x-pack/plugins/elastic_assistant/jest.config.js --coverage` from the Kibana root directory.
+To run the tests for this plugin, run `node scripts/jest --watch x-pack/solutions/security/plugins/elastic_assistant/jest.config.js --coverage` from the Kibana root directory.
