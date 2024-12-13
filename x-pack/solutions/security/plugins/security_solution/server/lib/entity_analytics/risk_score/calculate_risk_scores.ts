@@ -14,6 +14,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   ALERT_RISK_SCORE,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { getRiskEngineEntityTypes } from '../../../../common/entity_analytics/risk_engine/utils';
 import type { EntityType } from '../../../../common/search_strategy';
@@ -220,7 +221,9 @@ export const calculateRiskScores = async ({
   runtimeMappings,
   weights,
   alertSampleSizePerShard = 10_000,
+  excludeAlertStatuses = [],
   experimentalFeatures,
+  excludeAlertTags = [],
 }: {
   assetCriticalityService: AssetCriticalityService;
   esClient: ElasticsearchClient;
@@ -230,13 +233,19 @@ export const calculateRiskScores = async ({
   withSecuritySpan('calculateRiskScores', async () => {
     const now = new Date().toISOString();
     const scriptedMetricPainless = await getPainlessScripts();
-    const filter = [
-      filterFromRange(range),
-      { bool: { must_not: { term: { [ALERT_WORKFLOW_STATUS]: 'closed' } } } },
-      { exists: { field: ALERT_RISK_SCORE } },
-    ];
+    const filter = [filterFromRange(range), { exists: { field: ALERT_RISK_SCORE } }];
+    if (excludeAlertStatuses.length > 0) {
+      filter.push({
+        bool: { must_not: { terms: { [ALERT_WORKFLOW_STATUS]: excludeAlertStatuses } } },
+      });
+    }
     if (!isEmpty(userFilter)) {
       filter.push(userFilter as QueryDslQueryContainer);
+    }
+    if (excludeAlertTags.length > 0) {
+      filter.push({
+        bool: { must_not: { terms: { [ALERT_WORKFLOW_TAGS]: excludeAlertTags } } },
+      });
     }
     const identifierTypes: EntityType[] = identifierType
       ? [identifierType]
