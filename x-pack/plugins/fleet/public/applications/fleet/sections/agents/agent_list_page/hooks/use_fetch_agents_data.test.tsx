@@ -7,6 +7,7 @@
 
 /* eslint-disable ban/ban */
 /* eslint-disable jest/no-focused-tests */
+/* eslint-disable no-console */
 
 import { act, waitFor } from '@testing-library/react';
 
@@ -162,26 +163,40 @@ describe.only('Attempt to reproduce test flakiness', () => {
       });
 
       it('sync querystring kuery with current search', async () => {
+        console.time('initial render');
         const renderer = createFleetTestRendererMock();
         const { result } = renderer.renderHook(() => useFetchAgentsData());
+        console.timeEnd('initial render');
 
+        console.time('empty search');
         await waitFor(() => expect(renderer.history.location.search).toEqual(''));
+        console.timeEnd('empty search');
 
         // Set search
+        console.time('set search to active: true');
         await act(async () => {
           result.current.setSearch('active:true');
         });
+        console.timeEnd('set search to active: true');
 
+        console.time('check query params');
         await waitFor(() =>
           expect(renderer.history.location.search).toEqual('?kuery=active%3Atrue')
         );
+        console.timeEnd('check query params');
 
         // Clear search
+        console.time('clear search');
         await act(async () => {
           result.current.setSearch('');
         });
+        console.timeEnd('clear search');
 
+        console.time('reset query params');
         await waitFor(() => expect(renderer.history.location.search).toEqual(''));
+        console.timeEnd('reset query params');
+
+        console.log('--------------------------------------');
       });
     });
   }
