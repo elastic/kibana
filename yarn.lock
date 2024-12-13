@@ -7213,7 +7213,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/server-route-repository-utils@link:packages/kbn-server-route-repository-utils":
+"@kbn/server-route-repository-utils@link:src/platform/packages/shared/kbn-server-route-repository-utils":
   version "0.0.0"
   uid ""
 

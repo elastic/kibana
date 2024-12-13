@@ -862,7 +862,7 @@
     "@kbn/server-http-tools": "link:packages/kbn-server-http-tools",
     "@kbn/server-route-repository": "link:src/platform/packages/shared/kbn-server-route-repository",
     "@kbn/server-route-repository-client": "link:src/platform/packages/shared/kbn-server-route-repository-client",
-    "@kbn/server-route-repository-utils": "link:packages/kbn-server-route-repository-utils",
+    "@kbn/server-route-repository-utils": "link:src/platform/packages/shared/kbn-server-route-repository-utils",
     "@kbn/serverless": "link:x-pack/plugins/serverless",
     "@kbn/serverless-common-settings": "link:packages/serverless/settings/common",
     "@kbn/serverless-observability": "link:x-pack/solutions/observability/plugins/serverless_observability",
