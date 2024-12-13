@@ -97,8 +97,8 @@ export default function ({ getService }: FtrProviderContext) {
                   },
                   {
                     feature: {
-                      dashboard: ['read'],
-                      discover: ['all'],
+                      dashboard_v2: ['read'],
+                      discover_v2: ['all'],
                       ml: ['all'],
                     },
                     spaces: ['marketing', 'sales'],
@@ -122,8 +122,8 @@ export default function ({ getService }: FtrProviderContext) {
                   },
                   {
                     feature: {
-                      dashboard: ['read'],
-                      discover: ['all'],
+                      dashboard_v2: ['read'],
+                      discover_v2: ['all'],
                       ml: ['all'],
                     },
                     spaces: ['marketing', 'sales'],
@@ -326,7 +326,7 @@ export default function ({ getService }: FtrProviderContext) {
                 kibana: [
                   {
                     feature: {
-                      dashboard: ['read'],
+                      dashboard_v2: ['read'],
                       dev_tools: ['all'],
                     },
                     spaces: ['*'],
@@ -341,7 +341,7 @@ export default function ({ getService }: FtrProviderContext) {
                 kibana: [
                   {
                     feature: {
-                      dashboard: ['read'],
+                      dashboard_v2: ['read'],
                       dev_tools: ['all'],
                     },
                     spaces: ['*'],
