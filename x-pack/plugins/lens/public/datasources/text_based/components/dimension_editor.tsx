@@ -157,7 +157,12 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                         columns: props.state.layers[props.layerId].columns.map((col) =>
                           col.columnId !== props.columnId
                             ? col
-                            : { ...col, fieldName: choice.field, meta: column?.meta }
+                            : {
+                                ...col,
+                                fieldName: choice.field,
+                                meta: column?.meta,
+                                variable: column?.variable,
+                              }
                         ),
                       },
                     },
