@@ -16,7 +16,6 @@ import {
   EuiSplitPanel,
 } from '@elastic/eui';
 
-// eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { css } from '@emotion/react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
