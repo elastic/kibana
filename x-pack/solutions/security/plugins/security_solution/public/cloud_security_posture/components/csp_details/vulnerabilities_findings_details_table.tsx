@@ -14,11 +14,11 @@ import {
   type VulnSeverity,
 } from '@kbn/cloud-security-posture-common';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
-import { useVulnerabilitiesFindings } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_findings';
 import type {
-  CspVulnerabilityFinding,
-  Vulnerability,
-} from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
+  VulnerabilitiesFindingDetailFields,
+  VulnerabilitiesPackage,
+} from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_findings';
+import { useVulnerabilitiesFindings } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_findings';
 import {
   getVulnerabilityStats,
   CVSScoreBadge,
@@ -34,22 +34,6 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
-
-// type VulnerabilitiesFindingDetailFields = Pick<
-//   CspVulnerabilityFinding,
-//   'vulnerability' | 'resource'
-// >;
-
-interface VulnerabilitiesPackage extends Vulnerability {
-  package: {
-    name: string;
-    version: string;
-  };
-}
-
-type VulnerabilitiesFindingDetailFields = Pick<Vulnerability, 'id' | 'severity' | 'score'> &
-  Pick<VulnerabilitiesPackage, 'package'> &
-  Pick<CspVulnerabilityFinding, 'vulnerability' | 'resource'>;
 
 export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: string }) => {
   useEffect(() => {

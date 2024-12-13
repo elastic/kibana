@@ -28,14 +28,14 @@ type LatestFindingsResponse = IKibanaSearchResponse<
   SearchResponse<CspVulnerabilityFinding, FindingsAggs>
 >;
 
-interface VulnerabilitiesPackage extends Vulnerability {
+export interface VulnerabilitiesPackage extends Vulnerability {
   package: {
     name: string;
     version: string;
   };
 }
 
-type VulnerabilitiesFindingDetailFields = Pick<Vulnerability, 'id' | 'severity' | 'score'> &
+export type VulnerabilitiesFindingDetailFields = Pick<Vulnerability, 'id' | 'severity' | 'score'> &
   Pick<VulnerabilitiesPackage, 'package'> &
   Pick<CspVulnerabilityFinding, 'vulnerability' | 'resource'>;
 

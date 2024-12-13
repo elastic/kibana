@@ -76,7 +76,9 @@ export const AlertsDetailsTable = memo(
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
 
-    const [sortField, setSortField] = useState<'ruleName' | 'severity' | 'status'>('ruleName');
+    const [sortField, setSortField] = useState<
+      'id' | 'ruleName' | 'severity' | 'status' | 'index' | 'ruleUuid'
+    >('ruleName');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
     const formatName = (name: string) => {
@@ -90,8 +92,6 @@ export const AlertsDetailsTable = memo(
         direction: sortDirection,
       },
     };
-
-    const obj: { [key: string]: string } = {};
 
     const alertsPagination = (alerts: ContextualFlyoutAlertsField[]) => {
       let pageOfItems;
@@ -112,7 +112,16 @@ export const AlertsDetailsTable = memo(
     const { to, from } = useGlobalTime();
     const { signalIndexName } = useSignalIndex();
     const { data, setQuery } = useQueryAlerts({
-      query: buildEntityAlertsQuery(field, to, from, value, 500, ''),
+      query: buildEntityAlertsQuery(
+        field,
+        to,
+        from,
+        value,
+        500,
+        '',
+        formatName(sortField),
+        sortDirection
+      ),
       queryName: ALERTS_QUERY_NAMES.BY_RULE_BY_STATUS,
       indexName: signalIndexName,
     });
@@ -191,13 +200,12 @@ export const AlertsDetailsTable = memo(
           setPageIndex(index);
           setPageSize(size);
         }
+
         if (sort) {
           const { field: fieldSort, direction } = sort;
           setSortField(fieldSort);
           setSortDirection(direction);
-          // obj[formatName(fieldSort)] = direction;
-          // console.log(fieldSort)
-          // console.log(direction)
+
           setQuery(
             buildEntityAlertsQuery(
               field,
@@ -206,39 +214,14 @@ export const AlertsDetailsTable = memo(
               value,
               500,
               '',
-              formatName(sortField),
-              sortDirection
+              formatName(fieldSort),
+              direction
             )
           );
         }
       },
-      [field, from, setQuery, sortDirection, sortField, to, value]
+      [field, from, setQuery, to, value]
     );
-
-    // const onTableChange = ({ page, sort }: Criteria<ContextualFlyoutAlertsField>) => {
-    //   if (page) {
-    //     const { index, size } = page;
-    //     setPageIndex(index);
-    //     setPageSize(size);
-    //   }
-    //   if (sort) {
-    //     const { field: fieldSort, direction } = sort;
-    //     setSortField(fieldSort);
-    //     setSortDirection(direction);
-    //     setQuery(
-    //       buildEntityAlertsQuery(
-    //         field,
-    //         to,
-    //         from,
-    //         value,
-    //         500,
-    //         '',
-    //         formatName(sortField),
-    //         sortDirection
-    //       )
-    //     );
-    //   }
-    // };
 
     const { openPreviewPanel } = useExpandableFlyoutApi();
 
