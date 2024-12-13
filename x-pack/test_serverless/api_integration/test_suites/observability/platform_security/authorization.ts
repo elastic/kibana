@@ -32,7 +32,9 @@ export default function ({ getService }: FtrProviderContext) {
         // specific to the observability solution.
         const compositeFeatureIds = [
           'apm',
+          'dashboard',
           'dashboard_v2',
+          'discover',
           'discover_v2',
           'fleetv2',
           'infrastructure',

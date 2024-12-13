@@ -160,7 +160,8 @@
           "discover_v2": ["all"],
           "dashboard_v2": ["all"],
           "maps_v2": ["all"],
-          "visualize_v2": ["all"]
+          "visualize_v2": ["all"],
+          "savedQueryManagement": ["all"]
         },
         "spaces": ["*"],
         "base": []

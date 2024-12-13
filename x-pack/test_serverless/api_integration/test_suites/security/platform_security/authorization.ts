@@ -30,7 +30,14 @@ export default function ({ getService }: FtrProviderContext) {
 
         // The following features are composed of other features in a way that is
         // specific to the security solution.
-        const compositeFeatureIds = ['dashboard_v2', 'discover_v2', 'reporting', 'siem'];
+        const compositeFeatureIds = [
+          'dashboard',
+          'dashboard_v2',
+          'discover',
+          'discover_v2',
+          'reporting',
+          'siem',
+        ];
 
         const features = Object.fromEntries(
           Object.entries(body.features).filter(([key]) => compositeFeatureIds.includes(key))

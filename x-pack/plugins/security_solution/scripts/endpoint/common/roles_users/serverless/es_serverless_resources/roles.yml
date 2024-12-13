@@ -76,6 +76,7 @@ viewer:
         - feature_graph.all
         - feature_maps_v2.all
         - feature_visualize_v2.all
+        - feature_savedQueryManagement.all
       resources: "*"
   run_as: []
 
@@ -156,6 +157,7 @@ editor:
         - feature_graph.all
         - feature_maps_v2.all
         - feature_visualize_v2.all
+        - feature_savedQueryManagement.all
       resources: "*"
   run_as: []
 
@@ -207,6 +209,7 @@ t1_analyst:
         - feature_graph.all
         - feature_maps_v2.all
         - feature_visualize_v2.all
+        - feature_savedQueryManagement.all
       resources: "*"
 
 t2_analyst:
@@ -263,6 +266,7 @@ t2_analyst:
         - feature_graph.all
         - feature_maps_v2.all
         - feature_visualize_v2.all
+        - feature_savedQueryManagement.all
       resources: "*"
 
 t3_analyst:
@@ -333,6 +337,7 @@ t3_analyst:
         - feature_graph.all
         - feature_maps_v2.all
         - feature_visualize_v2.all
+        - feature_savedQueryManagement.all
       resources: "*"
 
 threat_intelligence_analyst:
@@ -391,6 +396,7 @@ threat_intelligence_analyst:
         - feature_graph.all
         - feature_maps_v2.all
         - feature_visualize_v2.all
+        - feature_savedQueryManagement.all
       resources: "*"
 
 rule_author:
@@ -460,6 +466,7 @@ rule_author:
         - feature_graph.all
         - feature_maps_v2.all
         - feature_visualize_v2.all
+        - feature_savedQueryManagement.all
       resources: "*"
 
 soc_manager:
@@ -535,6 +542,7 @@ soc_manager:
         - feature_graph.all
         - feature_maps_v2.all
         - feature_visualize_v2.all
+        - feature_savedQueryManagement.all
       resources: "*"
 
 detections_admin:
@@ -595,6 +603,7 @@ detections_admin:
         - feature_graph.all
         - feature_maps_v2.all
         - feature_visualize_v2.all
+        - feature_savedQueryManagement.all
       resources: "*"
 
 platform_engineer:
@@ -658,6 +667,7 @@ platform_engineer:
         - feature_graph.all
         - feature_maps_v2.all
         - feature_visualize_v2.all
+        - feature_savedQueryManagement.all
       resources: "*"
 
 endpoint_operations_analyst:
@@ -731,6 +741,7 @@ endpoint_operations_analyst:
         - feature_graph.all
         - feature_maps_v2.all
         - feature_visualize_v2.all
+        - feature_savedQueryManagement.all
       resources: "*"
 
 endpoint_policy_manager:
@@ -799,4 +810,5 @@ endpoint_policy_manager:
         - feature_graph.all
         - feature_maps_v2.all
         - feature_visualize_v2.all
+        - feature_savedQueryManagement.all
       resources: "*"
