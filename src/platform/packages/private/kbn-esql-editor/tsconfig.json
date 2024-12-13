@@ -35,7 +35,6 @@
     "@kbn/shared-ux-table-persist",
     "@kbn/ui-actions-plugin",
     "@kbn/presentation-containers",
-    "@kbn/esql",
   ],
   "exclude": [
     "target/**/*",
