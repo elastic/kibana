@@ -1309,14 +1309,14 @@ module.exports = {
       overrides: [
         {
           files: [
-            'x-pack/solutions/security/packages/features/**/*.{js,mjs,ts,tsx}',
-            'x-pack/solutions/security/packages/navigation/**/*.{js,mjs,ts,tsx}',
+            'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
+            'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
-            'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
-            'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
-            'x-pack/x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
+            'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
+            'x-pack/solutions/security/packages/features/**/*.{js,mjs,ts,tsx}',
+            'x-pack/solutions/security/packages/navigation/**/*.{js,mjs,ts,tsx}',
             'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
           ],
           rules: {
