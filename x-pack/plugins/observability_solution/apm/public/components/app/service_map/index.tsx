@@ -186,7 +186,9 @@ export function ServiceMap({
   }
 
   if (status === FETCH_STATUS.SUCCESS) {
-    onPageReady();
+    onPageReady({
+      meta: { rangeFrom: start, rangeTo: end },
+    });
   }
 
   return (

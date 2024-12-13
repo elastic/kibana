@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-
 import {
   EuiFlexGroup,
   EuiPanel,
@@ -28,10 +27,12 @@ import {
   summaryPanelQualityTooltipText,
 } from '../../../../common/translations';
 import { mapPercentagesToQualityCounts } from '../../quality_indicator';
+import { useDatasetQualityFilters } from '../../../hooks/use_dataset_quality_filters';
 import { VerticalRule } from '../../common/vertical_rule';
 
 export function DatasetsQualityIndicators() {
   const { onPageReady } = usePerformanceContext();
+  const { timeRange } = useDatasetQualityFilters();
   const {
     datasetsQuality,
     isDatasetsQualityLoading,
@@ -45,10 +46,16 @@ export function DatasetsQualityIndicators() {
 
   if (!isDatasetsQualityLoading && (numberOfDatasets || numberOfDocuments)) {
     onPageReady({
-      key1: 'datasets',
-      value1: numberOfDatasets,
-      key2: 'documents',
-      value2: numberOfDocuments,
+      customMetrics: {
+        key1: 'datasets',
+        value1: numberOfDatasets,
+        key2: 'documents',
+        value2: numberOfDocuments,
+      },
+      meta: {
+        rangeFrom: timeRange.from,
+        rangeTo: timeRange.to,
+      },
     });
   }
 
