@@ -44,7 +44,7 @@ describe('Elasticsearch version compatible with Kibana', () => {
     return { startKibana };
   };
 
-  it('successfully starts Kibana 7.17.x against Elasticsearch 8.0.0', async () => {
+  it('successfully starts Kibana 8.18 against Elasticsearch 9.0.0', async () => {
     const { startKibana } = await start({ esVersion: '9.0.0' });
     const startWithCleanup = async () => {
       kibanaServer = await startKibana();
