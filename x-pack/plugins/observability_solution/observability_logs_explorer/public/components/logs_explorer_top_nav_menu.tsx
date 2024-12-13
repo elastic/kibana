@@ -11,12 +11,12 @@ import {
   EuiHeaderLinks,
   EuiHeaderSection,
   EuiHeaderSectionItem,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { filter, take } from 'rxjs';
@@ -43,15 +43,18 @@ export const LogsExplorerTopNavMenu = () => {
 };
 
 const ProjectTopNav = () => {
+  const { euiTheme } = useEuiTheme();
+  const { services } = useKibanaContextForPlugin();
+
   return (
     <EuiHeader
       data-test-subj="logsExplorerHeaderMenu"
-      css={{ boxShadow: 'none', backgroundColor: euiThemeVars.euiPageBackgroundColor }}
+      css={{ boxShadow: 'none', backgroundColor: euiTheme.colors.backgroundBasePlain }}
     >
       <EuiHeaderSection
         side="right"
         css={css`
-          gap: ${euiThemeVars.euiSizeM};
+          gap: ${euiTheme.size.m};
         `}
       >
         <EuiHeaderSectionItem>
@@ -77,6 +80,7 @@ const ProjectTopNav = () => {
 };
 
 const ClassicTopNav = () => {
+  const { euiTheme } = useEuiTheme();
   const {
     services: {
       appParams: { setHeaderActionMenu },
@@ -102,7 +106,7 @@ const ClassicTopNav = () => {
           <EuiHeaderSection
             data-test-subj="logsExplorerHeaderMenu"
             css={css`
-              margin-left: ${euiThemeVars.euiSizeM};
+              margin-left: ${euiTheme.size.m};
             `}
           >
             <EuiHeaderSectionItem>
@@ -119,7 +123,7 @@ const ClassicTopNav = () => {
         chrome.setBreadcrumbsAppendExtension(previousAppendExtension);
       }
     };
-  }, [chrome, i18nStart, previousAppendExtension, theme]);
+  }, [chrome, i18nStart, previousAppendExtension, theme, euiTheme]);
 
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>
@@ -143,9 +147,9 @@ const ClassicTopNav = () => {
 };
 
 const VerticalRule = styled.span`
-  width: 1px;
+  width: ${(props) => props.theme.euiTheme.border.width.thin};
   height: 20px;
-  background-color: ${euiThemeVars.euiColorLightShade};
+  background-color: ${(props) => props.theme.euiTheme.colors.borderBaseSubdued};
 `;
 
 const ConditionalVerticalRule = ({ Component }: { Component: JSX.Element | null }) =>
