@@ -20,6 +20,7 @@ import {
   ExecuteConnectorRequestParamsV1,
 } from '../../../../common/routes/connector/apis/execute';
 import { transformExecuteConnectorResponseV1 } from './transforms';
+import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 
 export const executeConnectorRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
@@ -28,6 +29,7 @@ export const executeConnectorRoute = (
   router.post(
     {
       path: `${BASE_ACTION_API_PATH}/connector/{id}/_execute`,
+      security: DEFAULT_ACTION_ROUTE_SECURITY,
       options: {
         access: 'public',
         summary: `Run a connector`,

@@ -17,6 +17,7 @@ import {
   createConnectorRequestBodySchemaV1,
 } from '../../../../common/routes/connector/apis/create';
 import { transformCreateConnectorBodyV1 } from './transforms';
+import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 
 export const createConnectorRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
@@ -25,6 +26,7 @@ export const createConnectorRoute = (
   router.post(
     {
       path: `${BASE_ACTION_API_PATH}/connector/{id?}`,
+      security: DEFAULT_ACTION_ROUTE_SECURITY,
       options: {
         access: 'public',
         summary: 'Create a connector',
