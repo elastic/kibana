@@ -40,6 +40,10 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
+
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml', false));
+
+    return;
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
     if (await doAnyChangesMatch([/^packages\/kbn-handlebars/])) {
