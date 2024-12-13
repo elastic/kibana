@@ -230,9 +230,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/common/utils/detection_rules.test.ts",
     "fileName": "detection_rules.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -498,9 +498,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/common/utils/helpers.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/common/utils/helpers.test.ts",
     "fileName": "helpers.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -894,9 +894,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/common/utils/subscription.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/common/utils/subscription.test.ts",
     "fileName": "subscription.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -994,9 +994,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/application/csp_router.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/application/csp_router.test.tsx",
     "fileName": "csp_router.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -1289,9 +1289,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/common/hooks/use_benchmark_dynamic_values.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/common/hooks/use_benchmark_dynamic_values.test.ts",
     "fileName": "use_benchmark_dynamic_values.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -1368,9 +1368,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/common/hooks/use_navigate_findings.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/common/hooks/use_navigate_findings.test.ts",
     "fileName": "use_navigate_findings.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -1468,9 +1468,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/common/hooks/use_url_query.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/common/hooks/use_url_query.test.ts",
     "fileName": "use_url_query.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -1547,9 +1547,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/common/navigation/security_solution_links.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/common/navigation/security_solution_links.test.ts",
     "fileName": "security_solution_links.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -1605,9 +1605,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/common/utils/get_abbreviated_number.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/common/utils/get_abbreviated_number.test.ts",
     "fileName": "get_abbreviated_number.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -1705,9 +1705,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/common/utils/get_vulnerabiltity_colors.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/common/utils/get_vulnerabiltity_colors.test.ts",
     "fileName": "get_vulnerabiltity_colors.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -1975,9 +1975,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/components/accounts_evaluated_widget.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/components/accounts_evaluated_widget.test.tsx",
     "fileName": "accounts_evaluated_widget.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -2075,9 +2075,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/components/chart_panel.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/components/chart_panel.test.tsx",
     "fileName": "chart_panel.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -2175,9 +2175,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/components/cloud_posture_page.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/components/cloud_posture_page.test.tsx",
     "fileName": "cloud_posture_page.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -2380,9 +2380,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/components/cloud_security_data_table/cloud_security_data_table.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/components/cloud_security_data_table/cloud_security_data_table.test.tsx",
     "fileName": "cloud_security_data_table.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -2522,9 +2522,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/components/cloud_security_data_table/fields_selector/fields_selector_table.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/components/cloud_security_data_table/fields_selector/fields_selector_table.test.tsx",
     "fileName": "fields_selector_table.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -2836,9 +2836,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/components/cloud_security_grouping/utils/first_non_null_value.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/components/cloud_security_grouping/utils/first_non_null_value.test.ts",
     "fileName": "first_non_null_value.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -2999,9 +2999,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/components/detection_rule_counter.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/components/detection_rule_counter.test.tsx",
     "fileName": "detection_rule_counter.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -3120,9 +3120,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/components/fleet_extensions/policy_template_form.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/components/fleet_extensions/policy_template_form.test.tsx",
     "fileName": "policy_template_form.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT",
       "HAS SKIP"
@@ -4747,9 +4747,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/components/fleet_extensions/setup_technology_selector/use_setup_technology.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/components/fleet_extensions/setup_technology_selector/use_setup_technology.test.ts",
     "fileName": "use_setup_technology.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -5061,9 +5061,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/components/fleet_extensions/utils.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/components/fleet_extensions/utils.test.ts",
     "fileName": "utils.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -5784,9 +5784,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/components/no_findings_states/no_findings_states.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/components/no_findings_states/no_findings_states.test.tsx",
     "fileName": "no_findings_states.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -5968,9 +5968,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/pages/benchmarks/benchmarks_table.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/pages/benchmarks/benchmarks_table.test.tsx",
     "fileName": "benchmarks_table.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -6110,9 +6110,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/pages/benchmarks/benchmarks.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/pages/benchmarks/benchmarks.test.tsx",
     "fileName": "benchmarks.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -6231,9 +6231,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_charts/risks_table.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_charts/risks_table.test.ts",
     "fileName": "risks_table.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -6310,9 +6310,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx",
     "fileName": "compliance_dashboard.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -6832,9 +6832,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/dashboard_sections/benchmarks_section.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/pages/compliance_dashboard/dashboard_sections/benchmarks_section.test.tsx",
     "fileName": "benchmarks_section.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -6934,9 +6934,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/dashboard_sections/summary_section.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/pages/compliance_dashboard/dashboard_sections/summary_section.test.tsx",
     "fileName": "summary_section.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -7034,9 +7034,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/pages/configurations/configurations.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/pages/configurations/configurations.test.tsx",
     "fileName": "configurations.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -7285,9 +7285,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/pages/configurations/findings_flyout/findings_flyout.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/pages/configurations/findings_flyout/findings_flyout.test.tsx",
     "fileName": "findings_flyout.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -7666,9 +7666,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/pages/configurations/utils/get_filters.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/pages/configurations/utils/get_filters.test.ts",
     "fileName": "get_filters.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -7724,9 +7724,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/pages/rules/rules_container.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/pages/rules/rules_container.test.tsx",
     "fileName": "rules_container.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -7782,9 +7782,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/pages/rules/rules.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/pages/rules/rules.test.tsx",
     "fileName": "rules.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -7861,9 +7861,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/pages/rules/use_change_csp_rule_state.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/pages/rules/use_change_csp_rule_state.test.tsx",
     "fileName": "use_change_csp_rule_state.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -8024,9 +8024,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_flyout.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_flyout.test.tsx",
     "fileName": "vulnerability_finding_flyout.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT",
       "HAS SKIP"
@@ -8280,9 +8280,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilties.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilties.test.tsx",
     "fileName": "vulnerabilties.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -8422,9 +8422,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/pages/vulnerability_dashboard/vulnerability_dashboard.test.tsx",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/public/pages/vulnerability_dashboard/vulnerability_dashboard.test.tsx",
     "fileName": "vulnerability_dashboard.test.tsx",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -8585,9 +8585,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/server/create_indices/create_indices.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/server/create_indices/create_indices.test.ts",
     "fileName": "create_indices.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -8727,9 +8727,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/server/create_transforms/create_transforms.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/server/create_transforms/create_transforms.test.ts",
     "fileName": "create_transforms.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -8934,9 +8934,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/server/lib/mapping_field_util.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/server/lib/mapping_field_util.test.ts",
     "fileName": "mapping_field_util.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -9076,9 +9076,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/server/plugin.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/server/plugin.test.ts",
     "fileName": "plugin.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -9220,9 +9220,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/server/routes/benchmark_rules/find/find.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/benchmark_rules/find/find.test.ts",
     "fileName": "find.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -9362,9 +9362,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/server/routes/benchmarks/benchmarks.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/benchmarks/benchmarks.test.ts",
     "fileName": "benchmarks.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -9827,9 +9827,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/compliance_dashboard.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/compliance_dashboard/compliance_dashboard.test.ts",
     "fileName": "compliance_dashboard.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -9906,9 +9906,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/get_benchmarks.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/compliance_dashboard/get_benchmarks.test.ts",
     "fileName": "get_benchmarks.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -9964,9 +9964,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/get_clusters.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/compliance_dashboard/get_clusters.test.ts",
     "fileName": "get_clusters.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -10022,9 +10022,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/get_grouped_findings_evaluation.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/compliance_dashboard/get_grouped_findings_evaluation.test.ts",
     "fileName": "get_grouped_findings_evaluation.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -10080,9 +10080,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/get_stats.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/compliance_dashboard/get_stats.test.ts",
     "fileName": "get_stats.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -10289,9 +10289,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/get_trends.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/compliance_dashboard/get_trends.test.ts",
     "fileName": "get_trends.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -10347,9 +10347,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/server/routes/status/status.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/status/status.test.ts",
     "fileName": "status.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],
@@ -10785,9 +10785,9 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/server/tasks/task_state.test.ts",
+    "filePath": "x-pack/solutions/security/plugins/cloud_security_posture/server/tasks/task_state.test.ts",
     "fileName": "task_state.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
+    "directory": "x-pack/solutions/security/plugins/cloud_security_posture",
     "tags": [
       "UT"
     ],

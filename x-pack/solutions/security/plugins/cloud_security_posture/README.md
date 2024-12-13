@@ -15,12 +15,12 @@ For general guidelines, read [Kibana Testing Guide](https://www.elastic.co/guide
 ### Tests
 
 1. Unit Tests (Jest) - located in sibling files to the source code
-1. [API Integration Tests](../../test/api_integration/apis/cloud_security_posture/config.ts)
-1. [Telemetry Integration Tests](../../test/cloud_security_posture_api/config.ts)
-1. [End-to-End Tests](../../test/cloud_security_posture_functional/config.ts)
-1. [Serverless API Integration tests](../../test_serverless/api_integration/test_suites/security/config.ts)
-1. [Serverless End-to-End Tests](../../test_serverless/functional/test_suites/security/config.ts)
-1. [Cypress End-to-End Tests](../../test/security_solution_cypress/cypress/e2e/cloud_security_posture)
+1. [API Integration Tests](../../../../test/api_integration/apis/cloud_security_posture/config.ts)
+1. [Telemetry Integration Tests](../../../../test/cloud_security_posture_api/config.ts)
+1. [End-to-End Tests](../../../../test/cloud_security_posture_functional/config.ts)
+1. [Serverless API Integration tests](../../../../test_serverless/api_integration/test_suites/security/config.ts)
+1. [Serverless End-to-End Tests](../../../../test_serverless/functional/test_suites/security/config.ts)
+1. [Cypress End-to-End Tests](../../../../test/security_solution_cypress/cypress/e2e/cloud_security_posture)
 
 
 ### Tools
@@ -28,13 +28,13 @@ For general guidelines, read [Kibana Testing Guide](https://www.elastic.co/guide
 Run **TypeScript**:
 
 ```bash
-node scripts/type_check.js --project=x-pack/plugins/cloud_security_posture/tsconfig.json
+node scripts/type_check.js --project=x-pack/solutions/security/plugins/cloud_security_posture/tsconfig.json
 ```
 
 Run **ESLint**:
 
 ```bash
-yarn lint:es x-pack/plugins/cloud_security_posture
+yarn lint:es x-pack/solutions/security/plugins/cloud_security_posture
 ```
 
 Run **i18n check**:
@@ -51,12 +51,12 @@ node scripts/i18n_check.js
 Run [**Unit Tests**](https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing):
 
 ```bash
-yarn test:jest --config x-pack/plugins/cloud_security_posture/jest.config.js
+yarn test:jest --config x-pack/solutions/security/plugins/cloud_security_posture/jest.config.js
 ```
 
 > **Note**
 >
-> for a coverage report, add the `--coverage` flag, and run `open target/kibana-coverage/jest/x-pack/plugins/cloud_security_posture/index.html`
+> for a coverage report, add the `--coverage` flag, and run `open target/kibana-coverage/jest/x-pack/solutions/security/plugins/cloud_security_posture/index.html`
 
 Run [**Integration Tests**](https://docs.elastic.dev/kibana-dev-docs/tutorials/testing-plugins#):
 

@@ -8,12 +8,12 @@
 /** @type {import('@jest/types').Config.InitialOptions} */
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/cloud_security_posture'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/cloud_security_posture',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/security/plugins/cloud_security_posture'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/cloud_security_posture',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/cloud_security_posture/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/solutions/security/plugins/cloud_security_posture/{common,public,server}/**/*.{ts,tsx}',
   ],
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   transformIgnorePatterns: [
