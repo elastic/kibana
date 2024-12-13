@@ -593,7 +593,7 @@
     "@kbn/investigate-app-plugin": "link:x-pack/solutions/observability/plugins/investigate_app",
     "@kbn/investigate-plugin": "link:x-pack/solutions/observability/plugins/investigate",
     "@kbn/investigation-shared": "link:x-pack/solutions/observability/packages/kbn-investigation-shared",
-    "@kbn/io-ts-utils": "link:packages/kbn-io-ts-utils",
+    "@kbn/io-ts-utils": "link:src/platform/packages/shared/kbn-io-ts-utils",
     "@kbn/ipynb": "link:packages/kbn-ipynb",
     "@kbn/item-buffer": "link:packages/kbn-item-buffer",
     "@kbn/json-schemas": "link:x-pack/platform/packages/private/ml/json_schemas",
