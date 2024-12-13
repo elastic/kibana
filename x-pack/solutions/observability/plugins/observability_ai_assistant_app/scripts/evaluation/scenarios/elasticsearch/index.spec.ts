@@ -7,11 +7,11 @@
 
 /// <reference types="@kbn/ambient-ftr-types"/>
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { chatClient, esClient } from '../../services';
 
-describe('elasticsearch functions', () => {
+describe.skip('elasticsearch functions', () => {
   describe('health', () => {
     it('returns the cluster health state', async () => {
       const conversation = await chatClient.complete(

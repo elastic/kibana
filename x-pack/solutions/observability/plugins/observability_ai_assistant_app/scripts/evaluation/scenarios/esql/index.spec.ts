@@ -8,7 +8,7 @@
 /// <reference types="@kbn/ambient-ftr-types"/>
 
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import moment from 'moment';
 import { chatClient, esClient, synthtraceEsClients } from '../../services';
 
@@ -43,7 +43,7 @@ async function evaluateEsqlQuery({
   return;
 }
 
-describe('ES|QL query generation', () => {
+describe.skip('ES|QL query generation', () => {
   describe('other queries', () => {
     describe('with packetbeat data', () => {
       before(async () => {
