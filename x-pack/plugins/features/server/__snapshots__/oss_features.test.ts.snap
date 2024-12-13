@@ -1101,20 +1101,36 @@ Array [
           "search_sessions",
         ],
       },
-      "replacedBy": Array [
-        Object {
-          "feature": "dashboard_v2",
-          "privileges": Array [
-            "all",
-          ],
-        },
-        Object {
-          "feature": "savedQueryManagement",
-          "privileges": Array [
-            "all",
-          ],
-        },
-      ],
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "dashboard_v2",
+            "privileges": Array [
+              "all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "all",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "dashboard_v2",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "dashboard",
@@ -1158,20 +1174,36 @@ Array [
       "catalogue": Array [
         "dashboard",
       ],
-      "replacedBy": Array [
-        Object {
-          "feature": "dashboard_v2",
-          "privileges": Array [
-            "read",
-          ],
-        },
-        Object {
-          "feature": "savedQueryManagement",
-          "privileges": Array [
-            "read",
-          ],
-        },
-      ],
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "dashboard_v2",
+            "privileges": Array [
+              "read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "read",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "dashboard_v2",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [],
         "read": Array [
@@ -1398,20 +1430,36 @@ Array [
           "search_sessions",
         ],
       },
-      "replacedBy": Array [
-        Object {
-          "feature": "discover_v2",
-          "privileges": Array [
-            "all",
-          ],
-        },
-        Object {
-          "feature": "savedQueryManagement",
-          "privileges": Array [
-            "all",
-          ],
-        },
-      ],
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "discover_v2",
+            "privileges": Array [
+              "all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "all",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "discover_v2",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "search",
@@ -1445,20 +1493,36 @@ Array [
       "catalogue": Array [
         "discover",
       ],
-      "replacedBy": Array [
-        Object {
-          "feature": "discover_v2",
-          "privileges": Array [
-            "read",
-          ],
-        },
-        Object {
-          "feature": "savedQueryManagement",
-          "privileges": Array [
-            "read",
-          ],
-        },
-      ],
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "discover_v2",
+            "privileges": Array [
+              "read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "read",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "discover_v2",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [],
         "read": Array [
@@ -1861,20 +1925,36 @@ Array [
         "visualize",
       ],
       "management": Object {},
-      "replacedBy": Array [
-        Object {
-          "feature": "visualize_v2",
-          "privileges": Array [
-            "all",
-          ],
-        },
-        Object {
-          "feature": "savedQueryManagement",
-          "privileges": Array [
-            "all",
-          ],
-        },
-      ],
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "visualize_v2",
+            "privileges": Array [
+              "all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "all",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "visualize_v2",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "visualization",
@@ -1911,20 +1991,36 @@ Array [
       "catalogue": Array [
         "visualize",
       ],
-      "replacedBy": Array [
-        Object {
-          "feature": "visualize_v2",
-          "privileges": Array [
-            "read",
-          ],
-        },
-        Object {
-          "feature": "savedQueryManagement",
-          "privileges": Array [
-            "read",
-          ],
-        },
-      ],
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "visualize_v2",
+            "privileges": Array [
+              "read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "read",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "visualize_v2",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [],
         "read": Array [
@@ -2126,20 +2222,36 @@ Array [
           "search_sessions",
         ],
       },
-      "replacedBy": Array [
-        Object {
-          "feature": "dashboard_v2",
-          "privileges": Array [
-            "all",
-          ],
-        },
-        Object {
-          "feature": "savedQueryManagement",
-          "privileges": Array [
-            "all",
-          ],
-        },
-      ],
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "dashboard_v2",
+            "privileges": Array [
+              "all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "all",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "dashboard_v2",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "dashboard",
@@ -2183,20 +2295,36 @@ Array [
       "catalogue": Array [
         "dashboard",
       ],
-      "replacedBy": Array [
-        Object {
-          "feature": "dashboard_v2",
-          "privileges": Array [
-            "read",
-          ],
-        },
-        Object {
-          "feature": "savedQueryManagement",
-          "privileges": Array [
-            "read",
-          ],
-        },
-      ],
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "dashboard_v2",
+            "privileges": Array [
+              "read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "read",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "dashboard_v2",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [],
         "read": Array [
@@ -2423,20 +2551,36 @@ Array [
           "search_sessions",
         ],
       },
-      "replacedBy": Array [
-        Object {
-          "feature": "discover_v2",
-          "privileges": Array [
-            "all",
-          ],
-        },
-        Object {
-          "feature": "savedQueryManagement",
-          "privileges": Array [
-            "all",
-          ],
-        },
-      ],
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "discover_v2",
+            "privileges": Array [
+              "all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "all",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "discover_v2",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "search",
@@ -2470,20 +2614,36 @@ Array [
       "catalogue": Array [
         "discover",
       ],
-      "replacedBy": Array [
-        Object {
-          "feature": "discover_v2",
-          "privileges": Array [
-            "read",
-          ],
-        },
-        Object {
-          "feature": "savedQueryManagement",
-          "privileges": Array [
-            "read",
-          ],
-        },
-      ],
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "discover_v2",
+            "privileges": Array [
+              "read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "read",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "discover_v2",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [],
         "read": Array [
@@ -2886,20 +3046,36 @@ Array [
         "visualize",
       ],
       "management": Object {},
-      "replacedBy": Array [
-        Object {
-          "feature": "visualize_v2",
-          "privileges": Array [
-            "all",
-          ],
-        },
-        Object {
-          "feature": "savedQueryManagement",
-          "privileges": Array [
-            "all",
-          ],
-        },
-      ],
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "visualize_v2",
+            "privileges": Array [
+              "all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "all",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "visualize_v2",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "visualization",
@@ -2936,20 +3112,36 @@ Array [
       "catalogue": Array [
         "visualize",
       ],
-      "replacedBy": Array [
-        Object {
-          "feature": "visualize_v2",
-          "privileges": Array [
-            "read",
-          ],
-        },
-        Object {
-          "feature": "savedQueryManagement",
-          "privileges": Array [
-            "read",
-          ],
-        },
-      ],
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "visualize_v2",
+            "privileges": Array [
+              "read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "read",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "visualize_v2",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [],
         "read": Array [
