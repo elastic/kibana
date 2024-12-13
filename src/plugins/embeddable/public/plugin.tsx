@@ -50,7 +50,10 @@ import {
 } from '../common/lib';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
 import { setKibanaServices } from './kibana_services';
-import { registerReactEmbeddableFactory } from './react_embeddable_system';
+import {
+  reactEmbeddableRegistryHasKey,
+  registerReactEmbeddableFactory,
+} from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
 
 export interface EmbeddableSetupDependencies {
@@ -110,6 +113,11 @@ export interface EmbeddableSetup {
 }
 
 export interface EmbeddableStart extends PersistableStateService<EmbeddableStateWithType> {
+  /**
+   * Checks if a {@link ReactEmbeddableFactory} has been registered using {@link registerReactEmbeddableFactory}
+   */
+  reactEmbeddableRegistryHasKey: (type: string) => boolean;
+
   /**
    * @deprecated use {@link registerReactEmbeddableFactory} instead.
    */
@@ -181,6 +189,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       );
 
     const embeddableStart: EmbeddableStart = {
+      reactEmbeddableRegistryHasKey,
+
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,
       getStateTransfer: (storage?: Storage) =>

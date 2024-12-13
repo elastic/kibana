@@ -9,6 +9,7 @@
 
 import {
   registerReactEmbeddableFactory,
+  reactEmbeddableRegistryHasKey,
   getReactEmbeddableFactory,
 } from './react_embeddable_registry';
 import { ReactEmbeddableFactory } from './types';
@@ -31,5 +32,10 @@ describe('react embeddable registry', () => {
     const returnedFactory = getTestEmbeddableFactory();
     registerReactEmbeddableFactory('test', getTestEmbeddableFactory);
     expect(getReactEmbeddableFactory('test')).toEqual(returnedFactory);
+  });
+
+  it('can check if a factory is registered', () => {
+    expect(reactEmbeddableRegistryHasKey('test')).toBe(true);
+    expect(reactEmbeddableRegistryHasKey('notRegistered')).toBe(false);
   });
 });
