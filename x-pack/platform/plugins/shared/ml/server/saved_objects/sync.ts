@@ -145,10 +145,10 @@ export function syncSavedObjectsFactory(
                   job,
                   addToAllSpaces || modelId.startsWith('.')
                 );
-                // if (modelId.startsWith('.')) {
-                //   // if the model id starts with a dot, it is an internal model and should be in all spaces
-                //   await mlSavedObjectService.updateTrainedModelsSpaces([modelId], ['*'], []);
-                // }
+                if (modelId.startsWith('.')) {
+                  // if the model id starts with a dot, it is an internal model and should be in all spaces
+                  await mlSavedObjectService.updateTrainedModelsSpaces([modelId], ['*'], []);
+                }
                 results.savedObjectsCreated[type]![modelId] = {
                   success: true,
                 };

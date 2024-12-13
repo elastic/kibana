@@ -464,8 +464,8 @@ export function savedObjectsRoutes(
           ],
         },
       },
-      summary: 'Check whether user can delete a job or trained model',
-      description: `Check the user's ability to delete jobs or trained models. Returns whether they are able to fully delete the job or trained model and whether they are able to remove it from the current space. Note, this is only for enabling UI controls. A user calling endpoints directly will still be able to delete or remove the job or trained model from a space.`,
+      summary: 'Check whether user can sync a job or trained model to the * space',
+      description: `Check the user's ability to sync jobs or trained models to the * space. Returns whether they are able to sync the job or trained model to the * space.`,
     })
     .addVersion(
       {
