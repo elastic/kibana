@@ -8,6 +8,7 @@ import moment from 'moment';
 import semver from 'semver';
 import { v4 as uuidv4 } from 'uuid';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import {
   ConfigKey,
   HTTPFields,
@@ -22,10 +23,7 @@ import rawExpect from 'expect';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
-import {
-  INSTALLED_VERSION,
-  PrivateLocationTestService,
-} from '../../../services/synthetics_private_location';
+import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 import { addMonitorAPIHelper, keyToOmitList, omitMonitorKeys } from './create_monitor';
 import { SyntheticsMonitorTestService } from '../../../services/synthetics_monitor';
 
@@ -35,6 +33,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const supertestAPI = getService('supertestWithoutAuth');
     const supertestWithAuth = getService('supertest');
     const samlAuth = getService('samlAuth');
+    const retry = getService('retry');
 
     let testFleetPolicyID: string;
     let editorUser: RoleCredentials;
@@ -315,100 +314,70 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(packagePolicy).eql(undefined);
     });
 
-    // it('handles spaces', async () => {
-    //   const username = 'admin';
-    //   const password = `${username}-password`;
-    //   const roleName = 'uptime-role';
-    //   const SPACE_ID = `test-space-${uuidv4()}`;
-    //   const SPACE_NAME = `test-space-name ${uuidv4()}`;
-    //   let monitorId = '';
-    //   const monitor = {
-    //     ...httpMonitorJson,
-    //     name: `Test monitor ${uuidv4()}`,
-    //     [ConfigKey.NAMESPACE]: 'default',
-    //     locations: [
-    //       {
-    //         id: testFleetPolicyID,
-    //         agentPolicyId: testFleetPolicyID,
-    //         label: 'Test private location 0',
-    //         isServiceManaged: false,
-    //         geo: {
-    //           lat: 0,
-    //           lon: 0,
-    //         },
-    //       },
-    //     ],
-    //   };
+    it('handles spaces', async () => {
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
+      const spaceScopedPrivateLocation = await testPrivateLocations.addTestPrivateLocation(
+        SPACE_ID
+      );
+      let monitorId = '';
+      const monitor = {
+        ...httpMonitorJson,
+        name: `Test monitor ${uuidv4()}`,
+        [ConfigKey.NAMESPACE]: 'default',
+        locations: [spaceScopedPrivateLocation],
+      };
 
-    //   try {
-    //     await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-    //     await security.role.create(roleName, {
-    //       kibana: [
-    //         {
-    //           feature: {
-    //             uptime: ['all'],
-    //             actions: ['all'],
-    //           },
-    //           spaces: ['*'],
-    //         },
-    //       ],
-    //     });
-    //     await security.user.create(username, {
-    //       password,
-    //       roles: [roleName],
-    //       full_name: 'a kibana user',
-    //     });
-    //     const apiResponse = await supertestWithoutAuth
-    //       .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-    //       .auth(username, password)
-    //       .set('kbn-xsrf', 'true')
-    //       .send(monitor)
-    //       .expect(200);
+      await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+      const apiResponse = await supertestAPI
+        .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .set('kbn-xsrf', 'true')
+        .send(monitor);
 
-    //     const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
-    //     expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+      const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
+      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
 
-    //     expect(omit(apiResponse.body, keyToOmitList)).eql(
-    //       omitMonitorKeys({
-    //         ...monitor,
-    //         [ConfigKey.NAMESPACE]: formatKibanaNamespace(SPACE_ID),
-    //         url: apiResponse.body.url,
-    //       })
-    //     );
-    //     monitorId = apiResponse.body.id;
+      expect(omit(apiResponse.body, keyToOmitList)).eql(
+        omitMonitorKeys({
+          ...monitor,
+          [ConfigKey.NAMESPACE]: formatKibanaNamespace(SPACE_ID),
+          url: apiResponse.body.url,
+        })
+      );
+      monitorId = apiResponse.body.id;
 
-    //     const policyResponse = await supertestWithAuth.get(
-    //       '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
-    //     );
+      const policyResponse = await supertestWithAuth.get(
+        '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+      );
 
-    //     const packagePolicy = policyResponse.body.items.find(
-    //       (pkgPolicy: PackagePolicy) =>
-    //         pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-${SPACE_ID}`
-    //     );
+      const packagePolicy = policyResponse.body.items.find(
+        (pkgPolicy: PackagePolicy) =>
+          pkgPolicy.id === monitorId + '-' + spaceScopedPrivateLocation.id + `-${SPACE_ID}`
+      );
 
-    //     expect(packagePolicy.policy_id).eql(testFleetPolicyID);
-    //     expect(packagePolicy.name).eql(`${monitor.name}-Test private location 0-${SPACE_ID}`);
-    //     comparePolicies(
-    //       packagePolicy,
-    //       getTestSyntheticsPolicy({
-    //         name: monitor.name,
-    //         id: monitorId,
-    //         location: { id: testFleetPolicyID },
-    //         namespace: formatKibanaNamespace(SPACE_ID),
-    //         spaceId: SPACE_ID,
-    //       })
-    //     );
-    //     await supertestWithoutAuth
-    //       .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-    //       .auth(username, password)
-    //       .set('kbn-xsrf', 'true')
-    //       .send({ ids: [monitorId] })
-    //       .expect(200);
-    //   } finally {
-    //     await security.user.delete(username);
-    //     await security.role.delete(roleName);
-    //   }
-    // });
+      expect(packagePolicy.policy_id).eql(spaceScopedPrivateLocation.id);
+      expect(packagePolicy.name).eql(
+        `${monitor.name}-${spaceScopedPrivateLocation.label}-${SPACE_ID}`
+      );
+      comparePolicies(
+        packagePolicy,
+        getTestSyntheticsPolicy({
+          name: monitor.name,
+          id: monitorId,
+          location: { id: spaceScopedPrivateLocation.id, name: spaceScopedPrivateLocation.label },
+          namespace: formatKibanaNamespace(SPACE_ID),
+          spaceId: SPACE_ID,
+        })
+      );
+      await supertestAPI
+        .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ ids: [monitorId] })
+        .expect(200);
+    });
 
     it('handles is_tls_enabled true', async () => {
       let monitorId = '';
@@ -508,19 +477,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('handles auto upgrading policies', async () => {
+      // force a lower version
+      const lowerVersion = '1.1.1';
+      await testPrivateLocations.installSyntheticsPackage({ version: lowerVersion });
       let monitorId = '';
+      const privateLocation = await testPrivateLocations.addTestPrivateLocation();
 
       const monitor = {
         ...httpMonitorJson,
         name: `Test monitor ${uuidv4()}`,
         [ConfigKey.NAMESPACE]: 'default',
-        locations: [
-          {
-            id: testFleetPolicyID,
-            label: privateLocations[0].label,
-            isServiceManaged: false,
-          },
-        ],
+        locations: [privateLocation],
       };
 
       try {
@@ -538,20 +505,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const packagePolicy = policyResponse.body.items.find(
           (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
+            pkgPolicy.id === monitorId + '-' + privateLocation.id + `-default`
         );
 
-        expect(packagePolicy.package.version).eql(INSTALLED_VERSION);
-
+        expect(packagePolicy.package.version).eql(lowerVersion);
         await supertestWithAuth.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-        const policyResponseAfterUpgrade = await supertestWithAuth.get(
-          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
-        );
-        const packagePolicyAfterUpgrade = policyResponseAfterUpgrade.body.items.find(
-          (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
-        );
-        expect(semver.gte(packagePolicyAfterUpgrade.package.version, INSTALLED_VERSION)).eql(true);
+        await retry.tryForTime(60 * 1000, async () => {
+          const policyResponseAfterUpgrade = await supertestWithAuth.get(
+            '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+          );
+          const packagePolicyAfterUpgrade = policyResponseAfterUpgrade.body.items.find(
+            (pkgPolicy: PackagePolicy) =>
+              pkgPolicy.id === monitorId + '-' + privateLocation.id + `-default`
+          );
+          expect(semver.gt(packagePolicyAfterUpgrade.package.version, lowerVersion)).eql(true);
+        });
       } finally {
         await deleteMonitor(monitorId);
       }
