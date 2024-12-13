@@ -39,10 +39,25 @@
     },
     {
       "groupName": "webpack",
-      "matchDepNames": ["webpack", "@types/webpack", "webpack-cli", "webpack-dev-server", "webpack-merge"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "backport:all-open", "release_note:skip", "ci:build-webpack-bundle-analyzer"],
+      "matchDepNames": [
+        "webpack",
+        "@types/webpack",
+        "webpack-cli",
+        "webpack-dev-server",
+        "webpack-merge"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "backport:all-open",
+        "release_note:skip",
+        "ci:build-webpack-bundle-analyzer"
+      ],
       "minimumReleaseAge": "60 days",
       "enabled": true
     },
@@ -1077,7 +1092,7 @@
       "enabled": true
     },
     {
-      "groupName": "@storybook",
+      "groupName": "storybook",
       "reviewers": [
         "team:kibana-operations"
       ],
@@ -1087,38 +1102,13 @@
       "matchDepPatterns": [
         "^@storybook"
       ],
-      "excludeDepNames": [
-        "@storybook/testing-react"
-      ],
       "labels": [
         "Team:Operations",
         "release_note:skip",
         "ci:build-storybooks",
-        "backport:skip"
+        "backport:prev-minor"
       ],
       "minimumReleaseAge": "7 days",
-      "allowedVersions": "<7.0",
-      "enabled": true
-    },
-    {
-      "groupName": "@storybook/testing-react",
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "matchDepNames": [
-        "@storybook/testing-react"
-      ],
-      "labels": [
-        "Team:Operations",
-        "release_note:skip",
-        "ci:build-storybooks",
-        "backport:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "allowedVersions": "<2.0",
       "enabled": true
     },
     {
