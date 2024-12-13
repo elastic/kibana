@@ -16,12 +16,18 @@ import { useFieldUpgradeContext } from './field_upgrade_context';
 
 export function FieldUpgrade(): JSX.Element {
   const { euiTheme } = useEuiTheme();
-  const { fieldName, fieldUpgradeState, hasConflict } = useFieldUpgradeContext();
+  const { fieldName, fieldUpgradeState, hasConflict, isCustomized } = useFieldUpgradeContext();
 
   return (
     <>
       <SplitAccordion
-        header={<FieldUpgradeHeader fieldName={fieldName} fieldUpgradeState={fieldUpgradeState} />}
+        header={
+          <FieldUpgradeHeader
+            fieldName={fieldName}
+            fieldUpgradeState={fieldUpgradeState}
+            isCustomized={isCustomized}
+          />
+        }
         initialIsOpen={hasConflict}
         data-test-subj="ruleUpgradePerFieldDiff"
       >

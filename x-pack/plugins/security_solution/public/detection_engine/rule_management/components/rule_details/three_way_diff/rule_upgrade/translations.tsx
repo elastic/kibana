@@ -110,6 +110,7 @@ export const RULE_IS_READY_FOR_UPGRADE_DESCRIPTION = i18n.translate(
 export const FIELD_MODIFIED_BADGE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeFlyout.fieldModifiedBadgeDescription',
   {
-    defaultMessage: 'The field value was edited and differs from the stock value',
+    defaultMessage:
+      "The field value was edited after rule's installation and differs from the value upon installation",
   }
 );

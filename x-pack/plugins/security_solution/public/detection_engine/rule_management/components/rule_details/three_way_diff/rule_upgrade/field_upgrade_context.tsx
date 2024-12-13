@@ -7,10 +7,12 @@
 
 import React, { createContext, useContext, useMemo } from 'react';
 import { useBoolean } from '@kbn/react-hooks';
-import type {
-  DiffableRule,
-  FieldsDiff,
-  ThreeWayDiff,
+import { assertUnreachable } from '../../../../../../../common/utility_types';
+import {
+  ThreeWayDiffOutcome,
+  type DiffableRule,
+  type FieldsDiff,
+  type ThreeWayDiff,
 } from '../../../../../../../common/api/detection_engine';
 import { invariant } from '../../../../../../../common/utils/invariant';
 import { convertRuleToDiffable } from '../../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
@@ -34,9 +36,13 @@ interface FieldUpgradeContextType {
    */
   fieldUpgradeState: FieldUpgradeStateEnum;
   /**
-   * Whether rule has an unresolved conflict. This state is derived from `fieldUpgradeState`.
+   * Whether the field has an unresolved conflict. This state is derived from `fieldUpgradeState`.
    */
   hasConflict: boolean;
+  /**
+   * Whether the field was changed after prebuilt rule installation, i.e. customized
+   */
+  isCustomized: boolean;
   /**
    * Field's three way diff
    */
@@ -98,6 +104,7 @@ export function FieldUpgradeContextProvider({
       hasConflict:
         fieldUpgradeState === FieldUpgradeStateEnum.SolvableConflict ||
         fieldUpgradeState === FieldUpgradeStateEnum.NonSolvableConflict,
+      isCustomized: calcIsCustomized(fieldDiff),
       fieldDiff,
       finalDiffableRule: calcFinalDiffableRule(ruleUpgradeState),
       rightSideMode: editing ? FieldFinalSideMode.Edit : FieldFinalSideMode.Readonly,
@@ -131,6 +138,24 @@ export function useFieldUpgradeContext() {
   );
 
   return context;
+}
+
+function calcIsCustomized(fieldDiff: ThreeWayDiff<unknown>): boolean {
+  switch (fieldDiff.diff_outcome) {
+    case ThreeWayDiffOutcome.StockValueNoUpdate:
+    case ThreeWayDiffOutcome.StockValueCanUpdate:
+    case ThreeWayDiffOutcome.MissingBaseCanUpdate:
+    case ThreeWayDiffOutcome.MissingBaseNoUpdate:
+      return false;
+
+    case ThreeWayDiffOutcome.CustomizedValueCanUpdate:
+    case ThreeWayDiffOutcome.CustomizedValueSameUpdate:
+    case ThreeWayDiffOutcome.CustomizedValueNoUpdate:
+      return true;
+
+    default:
+      return assertUnreachable(fieldDiff.diff_outcome);
+  }
 }
 
 function calcFinalDiffableRule(ruleUpgradeState: RuleUpgradeState): DiffableRule {
