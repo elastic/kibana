@@ -6081,7 +6081,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/langchain@link:x-pack/packages/kbn-langchain":
+"@kbn/langchain@link:x-pack/platform/packages/shared/kbn-langchain":
   version "0.0.0"
   uid ""
 
