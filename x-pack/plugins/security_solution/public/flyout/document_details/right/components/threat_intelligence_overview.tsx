@@ -6,9 +6,8 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
@@ -19,9 +18,9 @@ import {
   INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
   INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID,
 } from './test_ids';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
 const TITLE = (
   <FormattedMessage
@@ -42,24 +41,12 @@ const TOOLTIP = (
  * and the SummaryPanel component for data rendering.
  */
 export const ThreatIntelligenceOverview: FC = () => {
-  const { eventId, indexName, scopeId, dataFormattedForFieldBrowser, isPreviewMode } =
-    useDocumentDetailsContext();
-  const { openLeftPanel } = useExpandableFlyoutApi();
+  const { dataFormattedForFieldBrowser, isPreviewMode } = useDocumentDetailsContext();
 
-  const goToThreatIntelligenceTab = useCallback(() => {
-    openLeftPanel({
-      id: DocumentDetailsLeftPanelKey,
-      path: {
-        tab: LeftPanelInsightsTab,
-        subTab: THREAT_INTELLIGENCE_TAB_ID,
-      },
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
-  }, [eventId, openLeftPanel, indexName, scopeId]);
+  const { navigateToLeftPanel: goToThreatIntelligenceTab, isEnabled } = useNavigateToLeftPanel({
+    tab: LeftPanelInsightsTab,
+    subTab: THREAT_INTELLIGENCE_TAB_ID,
+  });
 
   const { loading, threatMatchesCount, threatEnrichmentsCount } = useFetchThreatIntelligence({
     dataFormattedForFieldBrowser,
@@ -67,13 +54,13 @@ export const ThreatIntelligenceOverview: FC = () => {
 
   const link = useMemo(
     () =>
-      !isPreviewMode
+      isEnabled
         ? {
             callback: goToThreatIntelligenceTab,
             tooltip: TOOLTIP,
           }
         : undefined,
-    [isPreviewMode, goToThreatIntelligenceTab]
+    [goToThreatIntelligenceTab, isEnabled]
   );
 
   const threatMatchCountText = useMemo(
