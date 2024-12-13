@@ -16,7 +16,6 @@ import { ActionsRequestHandlerContext } from '../../../types';
 import { BASE_ACTION_API_PATH } from '../../../../common';
 import { ILicenseState } from '../../../lib';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
-import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 
 export const listTypesRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
@@ -25,7 +24,12 @@ export const listTypesRoute = (
   router.get(
     {
       path: `${BASE_ACTION_API_PATH}/connector_types`,
-      security: DEFAULT_ACTION_ROUTE_SECURITY,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This API does not require any Kibana feature privileges.',
+        },
+      },
       options: {
         access: 'public',
         summary: `Get connector types`,
