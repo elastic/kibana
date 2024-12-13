@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiSpacer,
   EuiFlexItem,
@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useStartServices } from '../../hooks';
 import type { PackagePolicy, RegistryPolicyTemplate } from '../../types';
+import type { ConfigurationLink } from '../../../common/types';
 
 export const NextSteps = ({
   packagePolicy,
@@ -40,6 +41,34 @@ export const NextSteps = ({
     return [];
   }, [policyTemplates]);
 
+  const parseKbnLink = (url: string) => {
+    // matching strings with format kbn:/app/appId/path/optionalsubpath
+    const matches = url.match(/kbn:\/app\/(\w*)\/(\w*\/*)*/);
+    if (matches && matches.length > 0) {
+      const appId = matches[1];
+      const path = matches[2];
+      return { appId, path };
+    }
+    return undefined;
+  };
+
+  const isExternal = (url: string) => url.startsWith('http') || url.startsWith('https');
+  const onClickLink = useCallback(
+    (url?: string) => {
+      if (!url) return undefined;
+
+      if (isExternal(url)) {
+        application.navigateToUrl(`${url}`);
+      } else if (url.startsWith('kbn:/')) {
+        const { appId, path } = parseKbnLink(url);
+        application.navigateToApp(appId, {
+          path,
+        });
+      }
+    },
+    [application]
+  );
+
   const nextStepsCards = configurationLinks
     .filter((link) => link?.type === 'next_step')
     .map((link, index) => {
@@ -49,23 +78,14 @@ export const NextSteps = ({
             data-test-subj={`agentlessStepConfirmData.connectorCard.${link?.title}`}
             title={`${link?.title}`}
             description={`${link?.content}`}
-            onClick={() => {
-              if (link?.url.startsWith('http') || link?.url.startsWith('https')) {
-                application.navigateToUrl(`${link?.url}`);
-              }
-              //  else {
-              //   application.navigateToApp(link?.app, {
-              //     path: link?.url,
-              //   });
-              // }
-            }}
+            onClick={() => onClickLink(link?.url)}
           />
         </EuiFlexItem>
       );
     });
 
   const connectorCards = packagePolicy.inputs
-    .filter((input) => !!input?.vars?.connector_id || !!input?.vars?.connector_name)
+    .filter((input) => !!input?.vars?.connector_id.value || !!input?.vars?.connector_name.value)
     .map((input, index) => {
       return (
         <EuiFlexItem key={index}>
@@ -89,14 +109,14 @@ export const NextSteps = ({
     });
 
   const actionButtons = configurationLinks
-    .filter((link) => link?.type === 'action')
+    .filter((link) => !!link && link?.type === 'action')
     .map((link, index) => {
       return (
         <EuiFlexItem key={index} grow={false}>
           <EuiButton
             data-test-subj={`agentlessStepConfirmData.connectorCard.${link?.title}`}
             iconType="link"
-            href={link?.url}
+            onClick={() => onClickLink(link?.url)}
           >
             {link?.title}
           </EuiButton>
