@@ -8,16 +8,42 @@
 import React, { PureComponent, useContext } from 'react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { upperFirst } from 'lodash';
-import { Legacy } from '../../legacy_shims';
 import { EuiBasicTable, EuiTitle, EuiSpacer, EuiText, EuiCallOut, EuiLink } from '@elastic/eui';
-import { formatDateTimeLocal } from '../../../common/formatting';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Reason } from './reason';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
+import { Reason, type IReason } from './reason';
+import { formatDateTimeLocal } from '../../../common/formatting';
+import { Legacy } from '../../legacy_shims';
 import { ExternalConfigContext } from '../../application/contexts/external_config_context';
+import { MonitoringStartServices } from '../../types';
 
-const getFormattedDateTimeLocal = (timestamp) => {
+interface LogsProps {
+  logs: {
+    logs?: Array<{
+      timestamp: string;
+      component: string;
+      level: string;
+      type: string;
+      node: string;
+      message: string;
+    }>;
+    enabled: boolean;
+    limit: number;
+    reason?: IReason;
+  };
+  nodeId?: string;
+  indexUuid?: string;
+  clusterUuid?: string;
+}
+
+interface LogsContentProps extends LogsProps {
+  sharePlugin: SharePluginStart;
+  logsIndices: string;
+}
+
+const getFormattedDateTimeLocal = (timestamp: number | Date) => {
   const timezone = Legacy.shims.uiSettings?.get('dateFormat:tz');
   return formatDateTimeLocal(timestamp, timezone);
 };
@@ -51,7 +77,7 @@ const columns = [
     field: 'timestamp',
     name: columnTimestampTitle,
     width: '12%',
-    render: (timestamp) => getFormattedDateTimeLocal(timestamp),
+    render: (timestamp: number | Date) => getFormattedDateTimeLocal(timestamp),
   },
   {
     field: 'level',
@@ -62,7 +88,7 @@ const columns = [
     field: 'type',
     name: columnTypeTitle,
     width: '10%',
-    render: (type) => upperFirst(type),
+    render: (type: string) => upperFirst(type),
   },
   {
     field: 'message',
@@ -81,7 +107,7 @@ const clusterColumns = [
     field: 'timestamp',
     name: columnTimestampTitle,
     width: '12%',
-    render: (timestamp) => getFormattedDateTimeLocal(timestamp),
+    render: (timestamp: number | Date) => getFormattedDateTimeLocal(timestamp),
   },
   {
     field: 'level',
@@ -92,7 +118,7 @@ const clusterColumns = [
     field: 'type',
     name: columnTypeTitle,
     width: '10%',
-    render: (type) => upperFirst(type),
+    render: (type: string) => upperFirst(type),
   },
   {
     field: 'message',
@@ -111,7 +137,13 @@ const clusterColumns = [
   },
 ];
 
-function getDiscoverLink(clusterUuid, nodeId, indexUuid, sharePlugin, logsIndices) {
+function getDiscoverLink(
+  clusterUuid?: string,
+  nodeId?: string,
+  indexUuid?: string,
+  sharePlugin?: SharePluginStart,
+  logsIndices?: string
+) {
   const params = [];
   if (clusterUuid) {
     params.push(`elasticsearch.cluster.uuid:${clusterUuid}`);
@@ -124,13 +156,9 @@ function getDiscoverLink(clusterUuid, nodeId, indexUuid, sharePlugin, logsIndice
   }
 
   const filter = params.join(' and ');
-  const discoverLocator = sharePlugin.url.locators.get('DISCOVER_APP_LOCATOR');
+  const discoverLocator = sharePlugin?.url.locators.get('DISCOVER_APP_LOCATOR');
 
-  if (!discoverLocator) {
-    return;
-  }
-
-  const base = discoverLocator.getRedirectUrl({
+  const base = discoverLocator?.getRedirectUrl({
     dataViewSpec: {
       id: logsIndices,
       title: logsIndices,
@@ -144,14 +172,15 @@ function getDiscoverLink(clusterUuid, nodeId, indexUuid, sharePlugin, logsIndice
   return base;
 }
 
-export const Logs = (props) => {
+export const Logs = (props: LogsProps) => {
   const {
     services: { share },
-  } = useKibana();
+  } = useKibana<MonitoringStartServices>();
   const externalConfig = useContext(ExternalConfigContext);
   return <LogsContent sharePlugin={share} logsIndices={externalConfig.logsIndices} {...props} />;
 };
-export class LogsContent extends PureComponent {
+
+export class LogsContent extends PureComponent<LogsContentProps> {
   renderLogs() {
     const {
       logs: { enabled, logs },

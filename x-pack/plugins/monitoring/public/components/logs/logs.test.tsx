@@ -29,7 +29,7 @@ const sharePlugin = {
       },
     },
   },
-};
+} as unknown as ReturnType<typeof sharePluginMock.createStartContract>;
 
 const logs = {
   enabled: true,
