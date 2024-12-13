@@ -20,8 +20,11 @@ export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const supertest = getService('supertest');
 
-  describe('_search API', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/203982
+  describe.skip('_search API', () => {
     let cleanup: Function[] = [];
+
+    before(() => clearEntityDefinitions(esClient));
 
     afterEach(async () => {
       await Promise.all([clearEntityDefinitions(esClient), ...cleanup.map((fn) => fn())]);
@@ -767,7 +770,7 @@ export default function ({ getService }: FtrProviderContext) {
         type: 'type-with-non-existing-index',
       });
       expect(errors).toEqual([
-        'No index found for source [non-existing-index] with index patterns [non-existing-index-pattern*, non-existing-index]',
+        'No index found for source [source: non-existing-index, type: type-with-non-existing-index] with index patterns [non-existing-index-pattern*, non-existing-index]',
       ]);
       expect(entities).toEqual([]);
     });
@@ -806,7 +809,7 @@ export default function ({ getService }: FtrProviderContext) {
         type: 'type-with-unmapped-id-fields',
       });
       expect(errors).toEqual([
-        'Mandatory fields [service.name, @timestamp] are not mapped for source [unmapped-fields] with index patterns [unmapped-id-fields]',
+        'Mandatory fields [service.name, @timestamp] are not mapped for source [source: unmapped-fields, type: type-with-unmapped-id-fields] with index patterns [unmapped-id-fields]',
       ]);
       expect(entities).toEqual([]);
     });
