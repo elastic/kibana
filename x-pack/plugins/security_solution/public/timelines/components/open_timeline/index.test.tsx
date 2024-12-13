@@ -811,7 +811,7 @@ describe('StatefulOpenTimeline', () => {
       (useUserPrivileges as jest.Mock).mockReturnValue({
         timelinePrivileges: { crud: true },
       });
-      const wrapper = mount(
+      mount(
         <TestProviders>
           <StatefulOpenTimeline
             isModal={false}
@@ -830,7 +830,7 @@ describe('StatefulOpenTimeline', () => {
       (useUserPrivileges as jest.Mock).mockReturnValue({
         timelinePrivileges: { crud: false },
       });
-      const wrapper = mount(
+      mount(
         <TestProviders>
           <StatefulOpenTimeline
             isModal={false}
