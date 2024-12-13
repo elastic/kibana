@@ -5,12 +5,57 @@
  * 2.0.
  */
 
-import { get, sortBy } from 'lodash';
 import React from 'react';
-import { Shard } from './shard';
-import { calculateClass } from '../lib/calculate_class';
+import { get, sortBy } from 'lodash';
+import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
+
+import { Shard } from './shard';
 import { getSafeForExternalLink } from '../../../../lib/get_safe_for_external_link';
+
+const assignedChildrenStyle = (theme) => css`
+  padding-top: ${theme.euiTheme.size.l};
+`;
+
+const childTitleStyle = (theme) => css`
+  padding: ${theme.euiTheme.size.xs} ${theme.euiTheme.size.s};
+  text-align: center;
+  font-size: ${theme.euiTheme.font.scale.xs};
+  color: ${theme.euiTheme.colors.ghost};
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
+
+const shardStyle = (theme) => css`
+  align-self: center;
+  padding: ${theme.euiTheme.size.xs} ${theme.euiTheme.size.s};
+  font-size: ${theme.euiTheme.font.scale.xs};
+  position: relative;
+  display: inline-block;
+`;
+
+const childStyle = (data, shardStats) => (theme) =>
+  css`
+    float: left;
+    align-self: center;
+    background-color: ${theme.euiTheme.colors.lightestShade};
+    margin: ${theme.euiTheme.size.s};
+    border: 1px solid ${theme.euiTheme.colors.mediumShade};
+    border-radius: ${theme.euiTheme.size.xs};
+    padding: calc(${theme.euiTheme.size.xs} / 2) 0;
+
+    ${data.type === 'index' &&
+    `border-left: ${theme.euiTheme.size.xs} solid ${theme.euiTheme.colors.success};`}
+
+    ${shardStats?.status === 'red' &&
+    `border-left: ${theme.euiTheme.size.xs} solid ${theme.euiTheme.colors.danger};`}
+
+    ${shardStats?.status === 'yellow' &&
+    `border-left: ${theme.euiTheme.size.xs} solid ${theme.euiTheme.colors.warning};`}
+
+    ${data.type === 'shard' && shardStyle(theme)}
+  `;
 
 const generateQueryAndLink = (data) => {
   let type = 'indices';
@@ -46,21 +91,7 @@ export class Assigned extends React.Component {
 
   createChild = (data) => {
     const key = data.id;
-    const initialClasses = ['monChild'];
-    if (data.type === 'index') {
-      initialClasses.push('monChild--index');
-    }
     const shardStats = get(this.props.shardStats.indices, key);
-    if (shardStats) {
-      switch (shardStats.status) {
-        case 'red':
-          initialClasses.push('monChild--danger');
-          break;
-        case 'yellow':
-          initialClasses.push('monChild--warning');
-          break;
-      }
-    }
 
     // TODO: redesign for shard allocation
     const name = <EuiLink href={generateQueryAndLink(data)}>{data.name}</EuiLink>;
@@ -71,13 +102,13 @@ export class Assigned extends React.Component {
     return (
       <EuiFlexItem
         grow={false}
-        className={calculateClass(data, initialClasses.join(' '))}
+        css={childStyle(data, shardStats)}
         key={key}
         data-test-subj={`clusterView-Assigned-${key}`}
-        data-status={shardStats && shardStats.status}
+        data-status={shardStats?.status}
       >
         <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem grow={false} className="monChild__title eui-textNoWrap">
+          <EuiFlexItem css={childTitleStyle} grow={false} className="eui-textNoWrap">
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem grow={false}>{name}</EuiFlexItem>
               <EuiFlexItem grow={false}>{master}</EuiFlexItem>
@@ -93,9 +124,10 @@ export class Assigned extends React.Component {
 
   render() {
     const data = sortBy(this.props.data, sortByName).map(this.createChild);
+
     return (
-      <td className="monAssigned">
-        <EuiFlexGroup wrap className="monAssigned__children">
+      <td>
+        <EuiFlexGroup wrap css={assignedChildrenStyle}>
           {data}
         </EuiFlexGroup>
       </td>

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React, { Fragment } from 'react';
+import { css } from '@emotion/react';
+import { get } from 'lodash';
 import {
   EuiBadge,
   EuiBadgeGroup,
@@ -21,10 +24,10 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { get } from 'lodash';
-import React, { Fragment } from 'react';
+
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { SetupModeFeature } from '../../../../common/enums';
 import { AlertsStatus } from '../../../alerts/status';
@@ -36,6 +39,15 @@ import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { EuiMonitoringSSPTable } from '../../table';
 import { ClusterStatus } from '../cluster_status';
 import { MetricCell, OfflineCell } from './cells';
+
+const tableCellNameStyle = (theme) => css`
+  font-size: ${theme.euiTheme.font.scale.m};
+`;
+
+const tableCellTransportAddressStyle = (theme) => css`
+  font-size: ${theme.euiTheme.font.scale.s};
+  color: ${theme.euiTheme.colors.darkShade};
+`;
 
 const getNodeTooltip = (node) => {
   const { nodeTypeLabel, nodeTypeClass } = node;
@@ -97,7 +109,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
         };
 
         setupModeStatus = (
-          <div className="monTableCell__setupModeStatus">
+          <div>
             <SetupModeBadge
               setupMode={setupMode}
               status={status}
@@ -114,13 +126,13 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
 
       return (
         <div>
-          <div className="monTableCell__name">
+          <div css={tableCellNameStyle}>
             <EuiText size="m">
               {getNodeTooltip(node)}
               <span data-test-subj="name">{nameLink}</span>
             </EuiText>
           </div>
-          <div className="monTableCell__transportAddress">{extractIp(node.transport_address)}</div>
+          <div css={tableCellTransportAddressStyle}>{extractIp(node.transport_address)}</div>
           {setupModeStatus}
         </div>
       );
@@ -502,7 +514,6 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
         {setupModeCallout}
         <EuiPanel>
           <EuiMonitoringSSPTable
-            className="elasticsearchNodesTable"
             rows={nodes}
             columns={columns}
             sorting={sorting}

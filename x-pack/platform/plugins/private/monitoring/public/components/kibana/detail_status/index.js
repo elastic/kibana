@@ -5,16 +5,27 @@
  * 2.0.
  */
 
+import React from 'react';
+import { capitalize } from 'lodash';
+import { css } from '@emotion/react';
 import { EuiBadge, EuiStat, EuiToolTip } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { capitalize } from 'lodash';
-import React from 'react';
+
 import { ExternalConfigContext } from '../../../application/contexts/external_config_context';
 import { formatMetric } from '../../../lib/format_number';
 import { DefaultStatusIndicator, SummaryStatus } from '../../summary_status';
 import { formatLastSeenTimestamp } from '../format_last_seen_timestamp';
 import { KibanaStatusIcon } from '../status_icon';
+
+const summaryStatusNoWrapStatStyle = css`
+  p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+`;
 
 export function DetailStatus({ stats }) {
   const {
@@ -77,12 +88,12 @@ export function DetailStatus({ stats }) {
 
     return (
       <EuiStat
+        css={summaryStatusNoWrapStatStyle}
         data-test-subj="status"
         description={description}
+        textAlign="left"
         title={title}
         titleSize="xxxs"
-        textAlign="left"
-        className="monSummaryStatusNoWrap__stat"
       />
     );
   };
