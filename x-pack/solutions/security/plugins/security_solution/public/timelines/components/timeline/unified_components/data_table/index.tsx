@@ -250,10 +250,9 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       (newSampleSize: number) => {
         if (newSampleSize !== sampleSize) {
           dispatch(timelineActions.updateSampleSize({ id: timelineId, sampleSize: newSampleSize }));
-          refetch();
         }
       },
-      [dispatch, sampleSize, timelineId, refetch]
+      [dispatch, sampleSize, timelineId]
     );
 
     const onUpdateRowHeight = useCallback(

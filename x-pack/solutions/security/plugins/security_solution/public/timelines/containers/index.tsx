@@ -222,6 +222,11 @@ export const useTimelineEventsHandler = ({
     loadBatchHandler(0);
   }, [loadBatchHandler]);
 
+  useEffect(() => {
+    // when batch size changes, refetch DataGrid
+    setActiveBatch(0);
+  }, [limit]);
+
   const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
     id,
     inspect: {

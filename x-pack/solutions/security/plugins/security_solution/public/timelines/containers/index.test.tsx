@@ -658,5 +658,52 @@ describe('useTimelineEventsHandler', () => {
       });
       //////////////////////
     });
+
+    test('should request 0th batch (refetch)  when batchSize is changed', async () => {
+      const { result, rerender } = renderHook((args) => useTimelineEvents(args), {
+        initialProps: { ...props, limit: 5 },
+      });
+
+      //////////////////////
+      // Batch 2
+      await loadNextBatch(result);
+
+      //////////////////////
+      // Batch 3
+      await loadNextBatch(result);
+
+      mockSearch.mockClear();
+
+      // change the batch size
+      rerender({ ...props, limit: 10 });
+
+      await waitFor(() => {
+        expect(result.current[0]).toBe(DataLoadingState.loaded);
+        expect(mockSearch).toHaveBeenCalledWith(
+          expect.objectContaining({ pagination: { activePage: 0, querySize: 10 } })
+        );
+      });
+    });
+
+    test('should return correct list of events ( 0th batch ) when batchSize is changed', async () => {
+      const { result, rerender } = renderHook((args) => useTimelineEvents(args), {
+        initialProps: { ...props, limit: 5 },
+      });
+
+      //////////////////////
+      // Batch 2
+      await loadNextBatch(result);
+
+      //////////////////////
+      // Batch 3
+      await loadNextBatch(result);
+
+      // change the batch size
+      rerender({ ...props, limit: 10 });
+
+      await waitFor(() => {
+        expect(result.current[1].events.length).toBe(10);
+      });
+    });
   });
 });
