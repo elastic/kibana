@@ -27,6 +27,7 @@ export const KibanaSettingsApplication = ({
   i18n,
   notifications,
   settings,
+  userProfile,
   theme,
   history,
   sectionRegistry,
@@ -36,6 +37,7 @@ export const KibanaSettingsApplication = ({
   <SettingsApplicationKibanaProvider
     {...{
       settings,
+      userProfile,
       theme,
       i18n,
       notifications,

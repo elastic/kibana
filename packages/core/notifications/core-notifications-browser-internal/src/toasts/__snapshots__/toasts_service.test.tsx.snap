@@ -31,6 +31,16 @@ Array [
           },
         }
       }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
+        }
+      }
     >
       <GlobalToastList
         dismissToast={[Function]}

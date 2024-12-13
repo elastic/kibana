@@ -11,7 +11,7 @@ import {
   type ValidFeatureId,
 } from '@kbn/rule-data-utils';
 
-export const apmAlertingConsumers: ValidFeatureId[] = [
+export const APM_ALERTING_CONSUMERS: ValidFeatureId[] = [
   AlertConsumers.LOGS,
   AlertConsumers.APM,
   AlertConsumers.SLO,
@@ -20,4 +20,4 @@ export const apmAlertingConsumers: ValidFeatureId[] = [
   AlertConsumers.ALERTS,
 ];
 
-export const apmAlertingRuleTypeIds: string[] = [...OBSERVABILITY_RULE_TYPE_IDS];
+export const APM_ALERTING_RULE_TYPE_IDS: string[] = [...OBSERVABILITY_RULE_TYPE_IDS];

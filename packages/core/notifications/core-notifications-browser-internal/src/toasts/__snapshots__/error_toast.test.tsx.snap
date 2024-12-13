@@ -29,6 +29,16 @@ exports[`renders matching snapshot 1`] = `
       },
     }
   }
+  userProfile={
+    Object {
+      "bulkGet": [MockFunction],
+      "getCurrent": [MockFunction],
+      "getUserProfile$": [MockFunction],
+      "partialUpdate": [MockFunction],
+      "suggest": [MockFunction],
+      "update": [MockFunction],
+    }
+  }
 >
   <p
     data-test-subj="errorToastMessage"

@@ -53,6 +53,7 @@ export const createMockClients = () => {
       getSpaceId: jest.fn(),
       getCurrentUser: jest.fn(),
       inference: jest.fn(),
+      llmTasks: jest.fn(),
     },
     savedObjectsClient: core.savedObjects.client,
 
@@ -145,6 +146,7 @@ const createElasticAssistantRequestContextMock = (
     getServerBasePath: jest.fn(),
     getSpaceId: jest.fn().mockReturnValue('default'),
     inference: { getClient: jest.fn() },
+    llmTasks: { retrieveDocumentationAvailable: jest.fn(), retrieveDocumentation: jest.fn() },
     core: clients.core,
     telemetry: clients.elasticAssistant.telemetry,
   };

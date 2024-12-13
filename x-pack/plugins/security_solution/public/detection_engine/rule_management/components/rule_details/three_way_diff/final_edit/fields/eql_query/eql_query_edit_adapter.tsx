@@ -8,7 +8,7 @@
 import React from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import { EqlQueryEdit } from '../../../../../../../rule_creation/components/eql_query_edit';
-import type { RuleFieldEditComponentProps } from '../rule_field_edit_component_props';
+import type { RuleFieldEditComponentProps } from '../../../field_final_side';
 import { useDiffableRuleDataView } from '../hooks/use_diffable_rule_data_view';
 
 export function EqlQueryEditAdapter({
@@ -29,7 +29,6 @@ export function EqlQueryEditAdapter({
       dataView={dataView ?? DEFAULT_DATA_VIEW_BASE}
       loading={isLoading}
       disabled={isLoading}
-      skipEqlValidation
     />
   );
 }
