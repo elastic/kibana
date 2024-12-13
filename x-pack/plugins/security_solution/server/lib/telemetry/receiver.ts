@@ -1397,7 +1397,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   public async *getIndicesStats(indices: string[]) {
     const es = this.esClient();
 
-    this.logger.l('Fetching indices stats', { indices } as LogMeta);
+    this.logger.l('Fetching indices stats');
 
     const groupedIndices = chunkStringsByMaxLength(indices);
 
@@ -1498,7 +1498,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     } as LogMeta);
 
     for (const group of groupedIlms) {
-      this.logger.l('Fetching ilm policies', { ilms: group } as LogMeta);
+      this.logger.l('Fetching ilm policies');
       const request: IlmGetLifecycleRequest = {
         name: group.join(','),
         filter_path: [
