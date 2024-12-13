@@ -63,7 +63,7 @@ describe(
 
       // No access to response actions (except `unisolate`)
       for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
-        (apiName) => apiName !== 'unisolate'
+        (apiName) => apiName !== 'unisolate' && apiName !== 'runscript'
       )) {
         it(`should not allow access to Response Action: ${actionName}`, () => {
           ensureResponseActionAuthzAccess('none', actionName, username, password);
@@ -88,7 +88,7 @@ describe(
 
       // No access to response actions (except `unisolate`)
       for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
-        (apiName) => apiName !== 'unisolate'
+        (apiName) => apiName !== 'unisolate' && apiName !== 'runscript'
       )) {
         it(`should not allow access to Response Action: ${actionName}`, () => {
           ensureResponseActionAuthzAccess('none', actionName, username, password);

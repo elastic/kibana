@@ -17,14 +17,14 @@ import type { TableColumn } from './constants';
 interface ActionNameProps {
   disableActions?: boolean;
   migrationRule: RuleMigration;
-  openMigrationRulePreview: (migrationRule: RuleMigration) => void;
+  openMigrationRuleDetails: (migrationRule: RuleMigration) => void;
   installMigrationRule: (migrationRule: RuleMigration, enable?: boolean) => void;
 }
 
 const ActionName = ({
   disableActions,
   migrationRule,
-  openMigrationRulePreview,
+  openMigrationRuleDetails,
   installMigrationRule,
 }: ActionNameProps) => {
   const { navigateToApp } = useKibana().services.application;
@@ -72,7 +72,7 @@ const ActionName = ({
     <EuiLink
       disabled={disableActions}
       onClick={() => {
-        openMigrationRulePreview(migrationRule);
+        openMigrationRuleDetails(migrationRule);
       }}
       data-test-subj="editRule"
     >
@@ -83,13 +83,13 @@ const ActionName = ({
 
 interface CreateActionsColumnProps {
   disableActions?: boolean;
-  openMigrationRulePreview: (migrationRule: RuleMigration) => void;
+  openMigrationRuleDetails: (migrationRule: RuleMigration) => void;
   installMigrationRule: (migrationRule: RuleMigration, enable?: boolean) => void;
 }
 
 export const createActionsColumn = ({
   disableActions,
-  openMigrationRulePreview,
+  openMigrationRuleDetails,
   installMigrationRule,
 }: CreateActionsColumnProps): TableColumn => {
   return {
@@ -100,7 +100,7 @@ export const createActionsColumn = ({
         <ActionName
           disableActions={disableActions}
           migrationRule={migrationRule}
-          openMigrationRulePreview={openMigrationRulePreview}
+          openMigrationRuleDetails={openMigrationRuleDetails}
           installMigrationRule={installMigrationRule}
         />
       );

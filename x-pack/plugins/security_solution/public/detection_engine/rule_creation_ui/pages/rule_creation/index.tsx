@@ -56,6 +56,8 @@ import {
 } from '../../../../detections/pages/detection_engine/rules/helpers';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { RuleStep } from '../../../../detections/pages/detection_engine/rules/types';
+import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
+import { useConfirmValidationErrorsModal } from '../../../../common/hooks/use_confirm_validation_errors_modal';
 import { formatRule } from './helpers';
 import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
 import * as i18n from './translations';
@@ -77,11 +79,11 @@ import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { RulePreview } from '../../components/rule_preview';
 import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
+import { VALIDATION_WARNING_CODE_FIELD_NAME_MAP } from '../../../rule_creation/constants/validation_warning_codes';
+import { extractValidationMessages } from '../../../rule_creation/logic/extract_validation_messages';
 import { NextStep } from '../../components/next_step';
-import { useRuleForms, useRuleFormsErrors, useRuleIndexPattern } from '../form';
+import { useRuleForms, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
-import { SaveWithErrorsModal } from '../../components/save_with_errors_confirmation';
-import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -178,6 +180,9 @@ const CreateRulePageComponent: React.FC = () => {
     actionsStepDefault,
   });
 
+  const { modal: confirmSavingWithWarningModal, confirmValidationErrors } =
+    useConfirmValidationErrorsModal();
+
   const isThreatMatchRuleValue = useMemo(
     () => isThreatMatchRule(defineStepData.ruleType),
     [defineStepData.ruleType]
@@ -202,12 +207,6 @@ const CreateRulePageComponent: React.FC = () => {
   const [prevRuleType, setPrevRuleType] = useState<string>();
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
-
-  const [isSaveWithErrorsModalVisible, setIsSaveWithErrorsModalVisible] = useState(false);
-  const [enableRuleAfterConfirmation, setEnableRuleAfterConfirmation] = useState(false);
-  const [nonBlockingRuleErrors, setNonBlockingRuleErrors] = useState<string[]>([]);
-
-  const { getRuleFormsErrors } = useRuleFormsErrors();
 
   const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
 
@@ -315,73 +314,73 @@ const CreateRulePageComponent: React.FC = () => {
       switch (step) {
         case RuleStep.defineRule: {
           const valid = await defineStepForm.validate();
-          const { blockingErrors, nonBlockingErrors } = getRuleFormsErrors({ defineStepForm });
-          return { valid, blockingErrors, nonBlockingErrors };
+
+          return {
+            valid,
+            warnings: defineStepForm.getValidationWarnings(),
+          };
         }
+
         case RuleStep.aboutRule: {
           const valid = await aboutStepForm.validate();
-          const { blockingErrors, nonBlockingErrors } = getRuleFormsErrors({ aboutStepForm });
-          return { valid, blockingErrors, nonBlockingErrors };
+
+          return {
+            valid,
+            warnings: aboutStepForm.getValidationWarnings(),
+          };
         }
         case RuleStep.scheduleRule: {
           const valid = await scheduleStepForm.validate();
-          const { blockingErrors, nonBlockingErrors } = getRuleFormsErrors({ scheduleStepForm });
-          return { valid, blockingErrors, nonBlockingErrors };
+
+          return {
+            valid,
+            warnings: scheduleStepForm.getValidationWarnings(),
+          };
         }
         case RuleStep.ruleActions: {
           const valid = await actionsStepForm.validate();
-          const { blockingErrors, nonBlockingErrors } = getRuleFormsErrors({ actionsStepForm });
-          return { valid, blockingErrors, nonBlockingErrors };
+
+          return {
+            valid,
+            warnings: actionsStepForm.getValidationWarnings(),
+          };
         }
       }
     },
-    [aboutStepForm, actionsStepForm, defineStepForm, getRuleFormsErrors, scheduleStepForm]
+    [aboutStepForm, actionsStepForm, defineStepForm, scheduleStepForm]
   );
 
-  const validateEachStep = useCallback(async () => {
-    const {
-      valid: defineStepFormValid,
-      blockingErrors: defineStepBlockingErrors,
-      nonBlockingErrors: defineStepNonBlockingErrors,
-    } = await validateStep(RuleStep.defineRule);
-    const {
-      valid: aboutStepFormValid,
-      blockingErrors: aboutStepBlockingErrors,
-      nonBlockingErrors: aboutStepNonBlockingErrors,
-    } = await validateStep(RuleStep.aboutRule);
-    const {
-      valid: scheduleStepFormValid,
-      blockingErrors: scheduleStepBlockingErrors,
-      nonBlockingErrors: scheduleStepNonBlockingErrors,
-    } = await validateStep(RuleStep.scheduleRule);
-    const {
-      valid: actionsStepFormValid,
-      blockingErrors: actionsStepBlockingErrors,
-      nonBlockingErrors: actionsStepNonBlockingErrors,
-    } = await validateStep(RuleStep.ruleActions);
+  const validateAllSteps = useCallback(async () => {
+    const { valid: defineStepFormValid, warnings: defineStepWarnings } = await validateStep(
+      RuleStep.defineRule
+    );
+    const { valid: aboutStepFormValid, warnings: aboutStepWarnings } = await validateStep(
+      RuleStep.aboutRule
+    );
+    const { valid: scheduleStepFormValid, warnings: scheduleStepWarnings } = await validateStep(
+      RuleStep.scheduleRule
+    );
+    const { valid: actionsStepFormValid, warnings: actionsStepWarnings } = await validateStep(
+      RuleStep.ruleActions
+    );
     const valid =
       defineStepFormValid && aboutStepFormValid && scheduleStepFormValid && actionsStepFormValid;
 
-    const blockingErrors = [
-      ...defineStepBlockingErrors,
-      ...aboutStepBlockingErrors,
-      ...scheduleStepBlockingErrors,
-      ...actionsStepBlockingErrors,
-    ];
-    const nonBlockingErrors = [
-      ...defineStepNonBlockingErrors,
-      ...aboutStepNonBlockingErrors,
-      ...scheduleStepNonBlockingErrors,
-      ...actionsStepNonBlockingErrors,
+    const warnings = [
+      ...defineStepWarnings,
+      ...aboutStepWarnings,
+      ...scheduleStepWarnings,
+      ...actionsStepWarnings,
     ];
 
-    return { valid, blockingErrors, nonBlockingErrors };
+    return { valid, warnings };
   }, [validateStep]);
 
   const editStep = useCallback(
     async (step: RuleStep) => {
-      const { valid, blockingErrors } = await validateStep(activeStep);
-      if (valid || !blockingErrors.length) {
+      const { valid } = await validateStep(activeStep);
+
+      if (valid) {
         goToStep(step);
       }
     },
@@ -440,34 +439,21 @@ const CreateRulePageComponent: React.FC = () => {
     ]
   );
 
-  const showSaveWithErrorsModal = useCallback(() => setIsSaveWithErrorsModalVisible(true), []);
-  const closeSaveWithErrorsModal = useCallback(() => setIsSaveWithErrorsModalVisible(false), []);
-  const onConfirmSaveWithErrors = useCallback(async () => {
-    closeSaveWithErrorsModal();
-    await createRuleFromFormData(enableRuleAfterConfirmation);
-  }, [closeSaveWithErrorsModal, createRuleFromFormData, enableRuleAfterConfirmation]);
-
   const submitRule = useCallback(
     async (enabled: boolean) => {
-      const { valid, blockingErrors, nonBlockingErrors } = await validateEachStep();
-      if (valid) {
-        // There are no validation errors, thus proceed to rule creation
-        await createRuleFromFormData(enabled);
+      const { valid, warnings } = await validateAllSteps();
+      const warningMessages = extractValidationMessages(
+        warnings,
+        VALIDATION_WARNING_CODE_FIELD_NAME_MAP
+      );
+
+      if (!valid || !(await confirmValidationErrors(warningMessages))) {
         return;
       }
 
-      if (blockingErrors.length > 0) {
-        // There are blocking validation errors, thus do not allow user to create a rule
-        return;
-      }
-      if (nonBlockingErrors.length > 0) {
-        // There are non-blocking validation errors, thus confirm that user understand that this can cause rule failures
-        setEnableRuleAfterConfirmation(enabled);
-        setNonBlockingRuleErrors(nonBlockingErrors);
-        showSaveWithErrorsModal();
-      }
+      await createRuleFromFormData(enabled);
     },
-    [createRuleFromFormData, showSaveWithErrorsModal, validateEachStep]
+    [createRuleFromFormData, validateAllSteps, confirmValidationErrors]
   );
 
   const defineRuleButtonType =
@@ -846,13 +832,7 @@ const CreateRulePageComponent: React.FC = () => {
 
   return (
     <>
-      {isSaveWithErrorsModalVisible && (
-        <SaveWithErrorsModal
-          errors={nonBlockingRuleErrors}
-          onCancel={closeSaveWithErrorsModal}
-          onConfirm={onConfirmSaveWithErrors}
-        />
-      )}
+      {confirmSavingWithWarningModal}
       <SecuritySolutionPageWrapper>
         <EuiResizableContainer>
           {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {

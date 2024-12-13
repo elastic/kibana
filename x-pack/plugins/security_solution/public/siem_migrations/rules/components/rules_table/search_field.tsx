@@ -7,18 +7,8 @@
 
 import type { ChangeEvent } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { EuiFieldSearch, EuiFlexItem } from '@elastic/eui';
 import * as i18n from './translations';
-
-const SearchBarWrapper = styled(EuiFlexItem)`
-  min-width: 200px;
-  & .euiPopover {
-    // This is needed to "cancel" styles passed down from EuiTourStep that
-    // interfere with EuiFieldSearch and don't allow it to take the full width
-    display: block;
-  }
-`;
 
 interface SearchFieldProps {
   initialValue?: string;
@@ -39,7 +29,7 @@ export const SearchField: React.FC<SearchFieldProps> = React.memo(
     }, [initialValue]);
 
     return (
-      <SearchBarWrapper grow>
+      <EuiFlexItem grow>
         <EuiFieldSearch
           aria-label={i18n.SEARCH_MIGRATION_RULES}
           fullWidth
@@ -50,7 +40,7 @@ export const SearchField: React.FC<SearchFieldProps> = React.memo(
           onSearch={onSearch}
           data-test-subj="ruleSearchField"
         />
-      </SearchBarWrapper>
+      </EuiFlexItem>
     );
   }
 );

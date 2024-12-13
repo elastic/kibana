@@ -85,6 +85,13 @@ export const setKibanaPrivilegeSpace = (spaceId: string) => {
   cy.getByTestSubj('comboBoxOptionsList spaceSelectorComboBox-optionsList')
     .find(`button#spaceOption_${spaceId}`)
     .click();
+
+  // Wait for the selection to be added to the list of selected spaces
+  cy.getByTestSubj('spaceSelectorComboBox').find(`#spaceOption_${spaceId}`);
+
+  // This `click()` just ensures that the combox in the UI is "closed" after the
+  // selection and mouse focus is moved away from that field.
+  getKibanaFeaturePrivilegesFlyout().click();
 };
 
 /**

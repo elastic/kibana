@@ -6,11 +6,8 @@
  */
 
 import stringify from 'json-stable-stringify';
-import { Version } from '../versions_picker/constants';
-import type {
-  DiffableAllFields,
-  ThreeWayDiff,
-} from '../../../../../../../common/api/detection_engine';
+import { Version } from './versions_picker/constants';
+import type { ThreeWayDiff } from '../../../../../../../common/api/detection_engine';
 
 /**
  * Picks the field value for a given version either from a three-way diff object or from a user-set resolved value.
@@ -20,11 +17,11 @@ import type {
  * @param resolvedValue - A value field will be upgraded to.
  * @returns - The field value for the specified version
  */
-export function pickFieldValueForVersion<FieldName extends keyof DiffableAllFields>(
+export function pickFieldValueForVersion(
   version: Version,
-  fieldThreeWayDiff: ThreeWayDiff<DiffableAllFields[FieldName]>,
-  resolvedValue: DiffableAllFields[FieldName]
-): DiffableAllFields[FieldName] | undefined {
+  fieldThreeWayDiff: ThreeWayDiff<unknown>,
+  resolvedValue: unknown
+): unknown {
   if (version === Version.Final) {
     return resolvedValue;
   }

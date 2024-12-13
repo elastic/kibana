@@ -22,7 +22,6 @@ describe('useColumns', () => {
     dataViews: dataViewsMock,
     setAppState: () => {},
     columns: ['Time', 'message'],
-    useNewFieldsApi: false,
   };
 
   test('should return valid result', () => {
@@ -37,12 +36,11 @@ describe('useColumns', () => {
     expect(result.current.onSetColumns).toBeInstanceOf(Function);
   });
 
-  test('should skip _source column when useNewFieldsApi is set to true', () => {
+  test('should skip _source column', () => {
     const { result } = renderHook(() => {
       return useColumns({
         ...defaultProps,
         columns: ['Time', '_source'],
-        useNewFieldsApi: true,
       });
     });
 

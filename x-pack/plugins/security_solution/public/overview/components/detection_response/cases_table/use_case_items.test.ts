@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 
 import { mockCasesResult, parsedCasesItems } from './mock_data';
 import { useCaseItems } from './use_case_items';
@@ -32,6 +32,7 @@ const mockKibana = {
     },
   },
 };
+
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => mockKibana,
 }));
@@ -51,7 +52,7 @@ jest.mock('../../../../common/containers/use_global_time', () => {
 });
 
 const renderUseCaseItems = (overrides: Partial<UseCaseItemsProps> = {}) =>
-  renderHook<UseCaseItems, ReturnType<UseCaseItems>>(() =>
+  renderHook<ReturnType<UseCaseItems>, UseCaseItems>(() =>
     useCaseItems({ skip: false, ...overrides })
   );
 
@@ -63,59 +64,55 @@ describe('useCaseItems', () => {
   });
 
   it('should return default values', async () => {
-    const { result, waitForNextUpdate } = renderUseCaseItems();
+    const { result } = renderUseCaseItems();
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        items: [],
+        isLoading: false,
+        updatedAt: dateNow,
+      });
 
-    expect(result.current).toEqual({
-      items: [],
-      isLoading: false,
-      updatedAt: dateNow,
-    });
-
-    expect(mockCasesApi).toBeCalledWith({
-      from: '2020-07-07T08:20:18.966Z',
-      to: '2020-07-08T08:20:18.966Z',
-      owner: 'securitySolution',
-      sortField: 'createdAt',
-      sortOrder: 'desc',
-      page: 1,
-      perPage: 4,
+      expect(mockCasesApi).toBeCalledWith({
+        from: '2020-07-07T08:20:18.966Z',
+        to: '2020-07-08T08:20:18.966Z',
+        owner: 'securitySolution',
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+        page: 1,
+        perPage: 4,
+      });
     });
   });
 
   it('should return parsed items', async () => {
     mockCasesApi.mockReturnValue(mockCasesResult);
-    const { result, waitForNextUpdate } = renderUseCaseItems();
+    const { result } = renderUseCaseItems();
 
-    await waitForNextUpdate();
-
-    expect(result.current).toEqual({
-      items: parsedCasesItems,
-      isLoading: false,
-      updatedAt: dateNow,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        items: parsedCasesItems,
+        isLoading: false,
+        updatedAt: dateNow,
+      })
+    );
   });
 
   test('it should call setQuery when fetching', async () => {
     mockCasesApi.mockReturnValue(mockCasesResult);
-    const { waitForNextUpdate } = renderUseCaseItems();
+    renderUseCaseItems();
 
-    await waitForNextUpdate();
-
-    expect(mockSetQuery).toHaveBeenCalled();
+    await waitFor(() => expect(mockSetQuery).toHaveBeenCalled());
   });
 
   test('it should call deleteQuery when unmounting', async () => {
-    const { waitForNextUpdate, unmount } = renderUseCaseItems();
+    const { unmount } = renderUseCaseItems();
 
-    await waitForNextUpdate();
+    unmount();
 
-    act(() => {
-      unmount();
+    await waitFor(() => {
+      expect(mockDeleteQuery).toHaveBeenCalled();
     });
-
-    expect(mockDeleteQuery).toHaveBeenCalled();
   });
 
   it('should return new updatedAt', async () => {
@@ -124,15 +121,15 @@ describe('useCaseItems', () => {
     mockDateNow.mockReturnValueOnce(dateNow);
     mockCasesApi.mockReturnValue(mockCasesResult);
 
-    const { result, waitForNextUpdate } = renderUseCaseItems();
+    const { result } = renderUseCaseItems();
 
-    await waitForNextUpdate();
-
-    expect(mockDateNow).toHaveBeenCalled();
-    expect(result.current).toEqual({
-      items: parsedCasesItems,
-      isLoading: false,
-      updatedAt: newDateNow,
+    await waitFor(() => {
+      expect(mockDateNow).toHaveBeenCalled();
+      expect(result.current).toEqual({
+        items: parsedCasesItems,
+        isLoading: false,
+        updatedAt: newDateNow,
+      });
     });
   });
 

@@ -212,12 +212,20 @@ export const GENERATION_ERROR_TRANSLATION: Record<
       defaultMessage: 'Max attempts exceeded. Please try again.',
     }
   ),
-  [GenerationErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT]: i18n.translate(
-    'xpack.integrationAssistant.errors.unsupportedLogSamples',
-    {
-      defaultMessage: 'Unsupported log format in the samples.',
+  [GenerationErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT]: (attributes) => {
+    if (attributes.logFormat !== undefined && attributes.logFormat?.length !== 0) {
+      return i18n.translate('xpack.integrationAssistant.errors.uparseableCSV.withReason', {
+        values: {
+          format: attributes.logFormat,
+        },
+        defaultMessage: `Unsupported log format in the samples (format: {format}).`,
+      });
+    } else {
+      return i18n.translate('xpack.integrationAssistant.errors.unsupportedLogSamples', {
+        defaultMessage: `Unsupported log format in the samples.`,
+      });
     }
-  ),
+  },
   [GenerationErrorCode.CEF_ERROR]: i18n.translate('xpack.integrationAssistant.errors.cefError', {
     // This is a default error message if the linking does not work.
     defaultMessage:

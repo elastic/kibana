@@ -9,6 +9,7 @@
 
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import {
   EmbeddableApiContext,
   HasEditCapabilities,
@@ -47,6 +48,7 @@ export type SearchEmbeddableState = Pick<
   rows: DataTableRecord[];
   columnsMeta: DataTableColumnsMeta | undefined;
   totalHitCount: number | undefined;
+  inspectorAdapters: Record<string, unknown>;
 };
 
 export type SearchEmbeddableStateManager = {
@@ -55,7 +57,7 @@ export type SearchEmbeddableStateManager = {
 
 export type SearchEmbeddableSerializedAttributes = Omit<
   SearchEmbeddableState,
-  'rows' | 'columnsMeta' | 'totalHitCount' | 'searchSource'
+  'rows' | 'columnsMeta' | 'totalHitCount' | 'searchSource' | 'inspectorAdapters'
 > &
   Pick<SerializableSavedSearch, 'serializedSearchSource'>;
 
@@ -66,9 +68,13 @@ export interface NonPersistedDisplayOptions {
   enableFilters?: boolean;
 }
 
+export type EditableSavedSearchAttributes = Partial<
+  Pick<SavedSearchAttributes, (typeof EDITABLE_SAVED_SEARCH_KEYS)[number]>
+>;
+
 export type SearchEmbeddableSerializedState = SerializedTitles &
   SerializedTimeRange &
-  Partial<Pick<SavedSearchAttributes, (typeof EDITABLE_SAVED_SEARCH_KEYS)[number]>> & {
+  EditableSavedSearchAttributes & {
     // by value
     attributes?: SavedSearchAttributes & { references: SavedSearch['references'] };
     // by reference
@@ -79,6 +85,7 @@ export type SearchEmbeddableSerializedState = SerializedTitles &
 export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes &
   SerializedTitles &
   SerializedTimeRange & {
+    rawSavedObjectAttributes?: EditableSavedSearchAttributes;
     savedObjectTitle?: string;
     savedObjectId?: string;
     savedObjectDescription?: string;
@@ -98,6 +105,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<
   PublishesWritableUnifiedSearch &
   HasInPlaceLibraryTransforms &
   HasTimeRange &
+  HasInspectorAdapters &
   Partial<HasEditCapabilities & PublishesSavedObjectId>;
 
 export interface PublishesSavedSearch {

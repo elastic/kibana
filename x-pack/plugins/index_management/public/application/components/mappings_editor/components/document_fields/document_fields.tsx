@@ -27,6 +27,7 @@ interface Props {
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
   semanticTextInfo?: SemanticTextInfo;
+  pendingFieldsRef?: React.RefObject<HTMLDivElement>;
 }
 export const DocumentFields = React.memo(
   ({
@@ -35,6 +36,7 @@ export const DocumentFields = React.memo(
     onCancelAddingNewFields,
     isAddingFields,
     semanticTextInfo,
+    pendingFieldsRef,
   }: Props) => {
     const { fields, documentFields } = useMappingsState();
     const dispatch = useDispatch();
@@ -58,6 +60,7 @@ export const DocumentFields = React.memo(
           onCancelAddingNewFields={onCancelAddingNewFields}
           isAddingFields={isAddingFields}
           semanticTextInfo={semanticTextInfo}
+          pendingFieldsRef={pendingFieldsRef}
         />
       );
 
@@ -81,8 +84,9 @@ export const DocumentFields = React.memo(
     useEffect(() => {
       if (!isEditing) {
         removeContentFromGlobalFlyout('mappingsEditField');
+        if (pendingFieldsRef?.current) pendingFieldsRef.current.focus();
       }
-    }, [isEditing, removeContentFromGlobalFlyout]);
+    }, [isEditing, removeContentFromGlobalFlyout, pendingFieldsRef]);
 
     useEffect(() => {
       return () => {

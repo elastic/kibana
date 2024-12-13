@@ -212,6 +212,7 @@ describe('SecurityWorkflowInsightsService', () => {
       expect(esClient.index).toHaveBeenCalledWith({
         index: DATA_STREAM_NAME,
         body: insight,
+        refresh: 'wait_for',
       });
     });
   });
@@ -225,16 +226,18 @@ describe('SecurityWorkflowInsightsService', () => {
       await securityWorkflowInsightsService.start({ esClient });
       const insightId = 'some-insight-id';
       const insight = getDefaultInsight();
-      await securityWorkflowInsightsService.update(insightId, insight);
+      const indexName = 'backing-index-name';
+      await securityWorkflowInsightsService.update(insightId, insight, indexName);
 
       // ensure it waits for initialization first
       expect(isInitializedSpy).toHaveBeenCalledTimes(1);
       // updates the doc
       expect(esClient.update).toHaveBeenCalledTimes(1);
       expect(esClient.update).toHaveBeenCalledWith({
-        index: DATA_STREAM_NAME,
+        index: indexName,
         id: insightId,
         body: { doc: insight },
+        refresh: 'wait_for',
       });
     });
   });
