@@ -69,12 +69,7 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
           if (startDate && endDate) {
             const decodedStartDate = decodeURIComponent(startDate);
             const decodedEndDate = decodeURIComponent(endDate);
-            const meteringStats = await fetchMeteringStats(
-              client,
-              decodedIndexName,
-              request.headers.authorization
-            );
-
+            const meteringStats = await fetchMeteringStats(client, decodedIndexName);
             if (!meteringStats.indices) {
               logger.warn(`No metering stats indices found under pattern: ${decodedIndexName}`);
               return response.ok({
