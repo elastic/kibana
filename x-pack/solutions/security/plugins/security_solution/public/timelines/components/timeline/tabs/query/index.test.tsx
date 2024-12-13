@@ -1205,29 +1205,7 @@ describe('query tab with unified timeline', () => {
       it(
         'should allow pinning when event has notes but notes are not attached in current timeline',
         async () => {
-          const mockStateWithNotesNotLinkedWithTimeline: typeof mockGlobalState = {
-            ...mockState,
-            timeline: {
-              ...mockState.timeline,
-              timelineById: {
-                [TimelineId.test]: {
-                  ...mockState.timeline.timelineById[TimelineId.test],
-                  savedObjectId: 'not-timeline-1', // unmatch timelineId to mocked notes data
-                  eventIdToNoteIds: {},
-                },
-              },
-            },
-          };
-
-          render(
-            <TestProviders
-              store={createMockStore({
-                ...structuredClone(mockStateWithNotesNotLinkedWithTimeline),
-              })}
-            >
-              <TestComponent />
-            </TestProviders>
-          );
+          renderTestComponents();
           expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
           expect(screen.getAllByTestId('pin')).toHaveLength(1);
