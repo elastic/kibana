@@ -1076,7 +1076,7 @@
           },
           "<string | undefined>; forceRefresh: () => void; getSettings: () => ",
           "DashboardStateFromSettingsFlyout",
-          "; getDashboardPanelFromId: (id: string) => Promise<",
+          "; getDashboardPanelFromId: (id: string) => ",
           {
             "pluginId": "dashboard",
             "scope": "common",
@@ -1092,7 +1092,7 @@
             "section": "def-common.SavedObjectEmbeddableInput",
             "text": "SavedObjectEmbeddableInput"
           },
-          ">>; hasOverlays$: ",
+          ">; hasOverlays$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",

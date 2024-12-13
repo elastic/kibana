@@ -1486,19 +1486,19 @@
         "references": [
           {
             "plugin": "aiAssistantManagementSelection",
-            "path": "src/plugins/ai_assistant_management/selection/public/management_section/mount_section.tsx"
+            "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/management_section/mount_section.tsx"
           },
           {
             "plugin": "aiAssistantManagementSelection",
-            "path": "src/plugins/ai_assistant_management/selection/public/management_section/mount_section.tsx"
+            "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/management_section/mount_section.tsx"
           },
           {
             "plugin": "observabilityAiAssistantManagement",
-            "path": "x-pack/plugins/observability_solution/observability_ai_assistant_management/public/app.tsx"
+            "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_management/public/app.tsx"
           },
           {
             "plugin": "observabilityAiAssistantManagement",
-            "path": "x-pack/plugins/observability_solution/observability_ai_assistant_management/public/app.tsx"
+            "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_management/public/app.tsx"
           }
         ],
         "children": [

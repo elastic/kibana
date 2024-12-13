@@ -47,7 +47,7 @@
           "EuiDataGridSetCellProps",
           ") => void) => void"
         ],
-        "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+        "path": "x-pack/solutions/security/packages/data_table/components/data_table/helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -67,7 +67,7 @@
                 "text": "EcsSecurityExtension"
               }
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -88,7 +88,7 @@
                 "text": "EuiTheme"
               }
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -105,7 +105,7 @@
               "EuiDataGridSetCellProps",
               ") => void"
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -126,7 +126,7 @@
           "DataTableProps",
           ">"
         ],
-        "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx",
+        "path": "x-pack/solutions/security/packages/data_table/components/data_table/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -175,7 +175,7 @@
             "text": "TableState"
           }
         ],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/reducer.ts",
+        "path": "x-pack/solutions/security/packages/data_table/store/data_table/reducer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -235,7 +235,7 @@
           "ColumnHeaderOptions",
           "[]"
         ],
-        "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx",
+        "path": "x-pack/solutions/security/packages/data_table/components/data_table/column_headers/helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -250,7 +250,7 @@
               "ColumnHeaderOptions",
               "[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/column_headers/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -271,7 +271,7 @@
                 "text": "BrowserFields"
               }
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/column_headers/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -286,7 +286,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/column_headers/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -323,7 +323,7 @@
           },
           "[]>"
         ],
-        "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+        "path": "x-pack/solutions/security/packages/data_table/components/data_table/helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -344,7 +344,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -359,7 +359,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -374,7 +374,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -389,7 +389,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -410,7 +410,7 @@
         "signature": [
           "(rowIndex: number, itemsPerPage: number) => number"
         ],
-        "path": "x-pack/packages/security-solution/data_table/components/data_table/pagination.ts",
+        "path": "x-pack/solutions/security/packages/data_table/components/data_table/pagination.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -424,7 +424,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/pagination.ts",
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/pagination.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -439,7 +439,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/pagination.ts",
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/pagination.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -492,7 +492,7 @@
           },
           ", { clearCache: () => void; }> & { clearCache: () => void; }"
         ],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/selectors.ts",
+        "path": "x-pack/solutions/security/packages/data_table/store/data_table/selectors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -517,7 +517,7 @@
           },
           ") => boolean"
         ],
-        "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+        "path": "x-pack/solutions/security/packages/data_table/components/data_table/helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -537,7 +537,7 @@
                 "text": "EcsSecurityExtension"
               }
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -566,7 +566,7 @@
           " extends ",
           "DataTableModelSettings"
         ],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+        "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -612,7 +612,7 @@
               },
               " | undefined; type?: string | undefined; })[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -628,7 +628,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -644,7 +644,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -665,7 +665,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -681,7 +681,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -694,7 +694,7 @@
             "description": [
               "Uniquely identifies the data table"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -708,7 +708,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -719,7 +719,7 @@
             "tags": [],
             "label": "isLoading",
             "description": [],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -732,7 +732,7 @@
             "description": [
               "If selectAll checkbox in header is checked"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -745,7 +745,7 @@
             "description": [
               "The number of items to show in a single page of results"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -761,7 +761,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -777,7 +777,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -801,7 +801,7 @@
               },
               "[]; }"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -815,7 +815,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -830,7 +830,7 @@
               "SessionViewConfig",
               " | null"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -846,7 +846,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -859,7 +859,7 @@
             "description": [
               "Total number of fetched events/alerts"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -873,7 +873,7 @@
             "signature": [
               "\"gridView\" | \"eventRenderedView\""
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -887,7 +887,7 @@
             "signature": [
               "{ showOnlyThreatIndicatorAlerts: boolean; showBuildingBlockAlerts: boolean; }"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -903,7 +903,7 @@
         "description": [
           "The state of all timelines is stored here"
         ],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
+        "path": "x-pack/solutions/security/packages/data_table/store/data_table/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -923,7 +923,7 @@
                 "text": "TableState"
               }
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -937,7 +937,7 @@
         "tags": [],
         "label": "SortColumnTable",
         "description": [],
-        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+        "path": "x-pack/solutions/security/packages/data_table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -948,7 +948,7 @@
             "tags": [],
             "label": "columnId",
             "description": [],
-            "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+            "path": "x-pack/solutions/security/packages/data_table/common/types/data_table/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -959,7 +959,7 @@
             "tags": [],
             "label": "columnType",
             "description": [],
-            "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+            "path": "x-pack/solutions/security/packages/data_table/common/types/data_table/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -973,7 +973,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+            "path": "x-pack/solutions/security/packages/data_table/common/types/data_table/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -994,7 +994,7 @@
                 "text": "Direction"
               }
             ],
-            "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+            "path": "x-pack/solutions/security/packages/data_table/common/types/data_table/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1010,7 +1010,7 @@
         "description": [
           "A map of id to data table"
         ],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
+        "path": "x-pack/solutions/security/packages/data_table/store/data_table/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1031,7 +1031,7 @@
                 "text": "DataTableModel"
               }
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1047,7 +1047,7 @@
         "description": [
           "The state of all data tables is stored here"
         ],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
+        "path": "x-pack/solutions/security/packages/data_table/store/data_table/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1067,7 +1067,7 @@
                 "text": "TableById"
               }
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1083,7 +1083,7 @@
         "tags": [],
         "label": "Direction",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1095,7 +1095,7 @@
         "tags": [],
         "label": "TableEntityType",
         "description": [],
-        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+        "path": "x-pack/solutions/security/packages/data_table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1107,7 +1107,7 @@
         "tags": [],
         "label": "TableId",
         "description": [],
-        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+        "path": "x-pack/solutions/security/packages/data_table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1119,7 +1119,7 @@
         "tags": [],
         "label": "TimelineTabs",
         "description": [],
-        "path": "x-pack/packages/security-solution/data_table/common/types/detail_panel.ts",
+        "path": "x-pack/solutions/security/packages/data_table/common/types/detail_panel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1136,7 +1136,7 @@
         "signature": [
           "\"not-filtered\" | \"text-filter\""
         ],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+        "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1152,7 +1152,7 @@
           "ColumnHeaderOptions",
           "[]"
         ],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+        "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1167,7 +1167,7 @@
         "signature": [
           "\"open\""
         ],
-        "path": "x-pack/packages/security-solution/data_table/common/types/index.ts",
+        "path": "x-pack/solutions/security/packages/data_table/common/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1189,7 +1189,7 @@
             "text": "Direction"
           }
         ],
-        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+        "path": "x-pack/solutions/security/packages/data_table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1300,7 +1300,7 @@
           "SessionViewConfig",
           " | null; readonly totalCount: number; }"
         ],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+        "path": "x-pack/solutions/security/packages/data_table/store/data_table/model.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1402,7 +1402,7 @@
           },
           ".alertsRiskInputs"
         ],
-        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+        "path": "x-pack/solutions/security/packages/data_table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1417,7 +1417,7 @@
         "signature": [
           "\"gridView\" | \"eventRenderedView\""
         ],
-        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+        "path": "x-pack/solutions/security/packages/data_table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1431,7 +1431,7 @@
         "tags": [],
         "label": "tableDefaults",
         "description": [],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+        "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1446,7 +1446,7 @@
               "ColumnHeaderOptions",
               "[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1460,7 +1460,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1474,7 +1474,7 @@
             "signature": [
               "never[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1488,7 +1488,7 @@
             "signature": [
               "never[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1502,7 +1502,7 @@
             "signature": [
               "never[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1516,7 +1516,7 @@
             "signature": [
               "false"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1530,7 +1530,7 @@
             "signature": [
               "false"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1541,7 +1541,7 @@
             "tags": [],
             "label": "itemsPerPage",
             "description": [],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1555,7 +1555,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1569,7 +1569,7 @@
             "signature": [
               "never[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1580,7 +1580,7 @@
             "tags": [],
             "label": "selectedEventIds",
             "description": [],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -1595,7 +1595,7 @@
             "signature": [
               "false"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1609,7 +1609,7 @@
             "signature": [
               "{ columnId: string; columnType: string; esTypes: string[]; sortDirection: \"desc\"; }[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1623,7 +1623,7 @@
             "signature": [
               "false"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1634,7 +1634,7 @@
             "tags": [],
             "label": "graphEventId",
             "description": [],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1648,7 +1648,7 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1663,7 +1663,7 @@
               "ColumnHeaderOptions",
               "[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1677,7 +1677,7 @@
             "signature": [
               "never[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1688,7 +1688,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1699,7 +1699,7 @@
             "tags": [],
             "label": "totalCount",
             "description": [],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1713,7 +1713,7 @@
             "signature": [
               "\"gridView\""
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1724,7 +1724,7 @@
             "tags": [],
             "label": "additionalFilters",
             "description": [],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1738,7 +1738,7 @@
                 "signature": [
                   "false"
                 ],
-                "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+                "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1752,7 +1752,7 @@
                 "signature": [
                   "false"
                 ],
-                "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+                "path": "x-pack/solutions/security/packages/data_table/store/data_table/defaults.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1875,7 +1875,7 @@
           },
           "; }"
         ],
-        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+        "path": "x-pack/solutions/security/packages/data_table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
