@@ -18,15 +18,15 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine';
-import type { RuleMigration } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleResponse } from '../../../../../../../common/api/detection_engine';
+import type { RuleMigration } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { TranslationTabHeader } from './header';
 import { MigrationRuleQuery } from './migration_rule_query';
 import * as i18n from './translations';
 import {
   convertTranslationResultIntoColor,
   convertTranslationResultIntoText,
-} from '../../../utils/helpers';
+} from '../../../../utils/helpers';
 import { TranslationCallOut } from './callout';
 
 interface TranslationTabProps {
