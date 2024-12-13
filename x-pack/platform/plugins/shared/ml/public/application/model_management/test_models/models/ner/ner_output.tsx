@@ -44,12 +44,12 @@ const ENTITY_TYPES: Record<EntityTypeName, EntityType> = {
   PER: {
     label: 'Person',
     icon: 'user',
-    color: 'euiColorVis5',
+    color: 'euiColorVis9',
   },
   LOC: {
     label: 'Location',
     icon: 'visMapCoordinate',
-    color: 'euiColorVis1',
+    color: 'euiColorVis2',
   },
   ORG: {
     label: 'Organization',
@@ -59,14 +59,14 @@ const ENTITY_TYPES: Record<EntityTypeName, EntityType> = {
   MISC: {
     label: 'Miscellaneous',
     icon: 'questionInCircle',
-    color: 'euiColorVis7',
+    color: 'euiColorVis8',
   },
 };
 
 const UNKNOWN_ENTITY_TYPE: EntityType = {
   label: '',
   icon: 'questionInCircle',
-  color: 'euiColorVis5',
+  color: 'euiColorVis9',
 };
 
 export const getNerOutputComponent = (inferrer: NerInference) => <NerOutput inferrer={inferrer} />;
