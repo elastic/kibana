@@ -10,12 +10,6 @@ You must have `gh` CLI tool installed. You can install it by running:
 brew install gh
 ```
 
-You must also configure your "default" kibana repo in `gh`, so that it can find PRs.:
-
-```sh
-gh repo set-default elastic/kibana
-```
-
 You must have `elastic/kibana` remote configured under the name `upstream`.
 
 You must have a remote named `origin` pointing to your fork of the Kibana repo.
