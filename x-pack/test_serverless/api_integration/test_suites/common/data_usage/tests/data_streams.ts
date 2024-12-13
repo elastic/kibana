@@ -54,7 +54,6 @@ export default function ({ getService }: FtrProviderContext) {
       const res = await supertestAdminWithCookieCredentials
         .get(DATA_USAGE_DATA_STREAMS_API_ROUTE)
         .set('elastic-api-version', '1');
-      const dataStreams: DataStreamsResponseBodySchemaBody = res.body;
       expect(res.statusCode).to.be(404);
     });
   });
