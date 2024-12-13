@@ -13,8 +13,8 @@ import {
   getLensApiMock,
   makeEmbeddableServices,
   getLensRuntimeStateMock,
-  getVisualizationContextHelperMock,
   createUnifiedSearchApi,
+  getLensInternalApiMock,
 } from '../mocks';
 import { createEmptyLensState } from '../helper';
 const DATAVIEW_ID = 'myDataView';
@@ -40,11 +40,17 @@ function setupActionsApi(
 ) {
   const services = makeEmbeddableServices(undefined, undefined, {
     visOverrides: { id: 'lnsXY' },
-    dataOverrides: { id: 'form_based' },
+    dataOverrides: { id: 'formBased' },
   });
   const uuid = faker.string.uuid();
   const runtimeState = getLensRuntimeStateMock(stateOverrides);
   const apiMock = getLensApiMock();
+  // create the internal API and customize internal state
+  const internalApi = getLensInternalApiMock();
+  internalApi.updateAttributes(runtimeState.attributes);
+  if (contextOverrides) {
+    internalApi.updateVisualizationContext(contextOverrides);
+  }
 
   const { api } = initializeActionApi(
     uuid,
@@ -53,7 +59,7 @@ function setupActionsApi(
     createUnifiedSearchApi(),
     pick(apiMock, ['timeRange$']),
     pick(apiMock, ['panelTitle']),
-    getVisualizationContextHelperMock(stateOverrides?.attributes, contextOverrides),
+    internalApi,
     {
       ...services,
       data: {
