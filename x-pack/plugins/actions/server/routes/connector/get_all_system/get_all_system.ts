@@ -12,6 +12,7 @@ import { INTERNAL_BASE_ACTION_API_PATH } from '../../../../common';
 import { ILicenseState } from '../../../lib';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { transformGetAllConnectorsResponseV1 } from '../get_all/transforms';
+import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 
 export const getAllConnectorsIncludingSystemRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
@@ -20,6 +21,7 @@ export const getAllConnectorsIncludingSystemRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ACTION_API_PATH}/connectors`,
+      security: DEFAULT_ACTION_ROUTE_SECURITY,
       validate: {},
       options: {
         access: 'internal',
