@@ -257,6 +257,7 @@ export interface ESQLUnknownItem extends ESQLAstBaseItem {
 }
 
 export interface ESQLTimeInterval extends ESQLAstBaseItem {
+  /** @todo For consistency with other literals, this should be `literal`, not `timeInterval`. */
   type: 'timeInterval';
   unit: string;
   quantity: number;
@@ -363,7 +364,10 @@ export interface ESQLNullLiteral extends ESQLAstBaseItem {
 // @internal
 export interface ESQLStringLiteral extends ESQLAstBaseItem {
   type: 'literal';
+
+  /** This really should be `string`, not `keyword`. */
   literalType: 'keyword';
+
   value: string;
 }
 
