@@ -9,7 +9,10 @@ import { defaultConfig } from '@kbn/storybook';
 
 module.exports = {
   ...defaultConfig,
-  stories: ['../**/*.stories.tsx', '../../ai-assistant/**/*.stories.tsx'],
+  stories: [
+    '../**/*.stories.tsx',
+    '../../../platform/packages/shared/ai-assistant/**/*.stories.tsx',
+  ],
   reactOptions: {
     strictMode: true,
   },
