@@ -31,6 +31,7 @@ describe('alert function', () => {
     ruleIds.push(responseApmRule.data.id);
 
     logger.info('Creating dataview');
+    // TODO: consider spaceId when checking for existingDataView
     const dataViewId = customThresholdAIAssistantLogCount.dataViewParams.options.id;
     const existingDataView = await kibanaClient.callKibana(
       'post',
@@ -61,13 +62,11 @@ describe('alert function', () => {
     ruleIds.push(responseLogsRule.data.id);
 
     logger.debug('Cleaning APM indices');
-
     await synthtraceEsClients.apmSynthtraceEsClient.clean();
 
     const myServiceInstance = apm.service('my-service', 'production', 'go').instance('my-instance');
 
     logger.debug('Indexing synthtrace data');
-
     await synthtraceEsClients.apmSynthtraceEsClient.index(
       timerange(moment().subtract(15, 'minutes'), moment())
         .interval('1m')
@@ -92,7 +91,6 @@ describe('alert function', () => {
     );
 
     logger.debug('Triggering a rule run');
-
     await Promise.all(
       ruleIds.map((ruleId) =>
         kibanaClient.callKibana<void>('post', {
