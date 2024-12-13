@@ -7,10 +7,13 @@
 
 import { ECS_RESERVED } from './constants';
 
+import { ecsTestState } from '../../../__jest__/fixtures/ecs_mapping';
+import { EcsMappingState } from '../../types';
 import {
   extractECSMapping,
   findDuplicateFields,
   findInvalidEcsFields,
+  handleValidateMappings,
   removeReservedFields,
 } from './validate';
 
@@ -285,4 +288,70 @@ describe('removeReservedFields', () => {
     expect(ecsMapping).toEqual(ecsMappingCopy);
     expect(ecsMapping).not.toEqual(result);
   });
+});
+
+describe('handleValidateMappings', () => {
+  it('should return empty missing fields if none found', () => {
+    const state: EcsMappingState = ecsTestState;
+    state.currentMapping = {
+      test: {
+        test: {
+          event: { target: 'event.action', confidence: 0.95, type: 'string' },
+        },
+      },
+    };
+    state.combinedSamples = JSON.stringify({
+      test: {
+        test: {
+          event: 'cert.create',
+        },
+      },
+    });
+    const { missingKeys } = handleValidateMappings({ state });
+
+    expect(missingKeys).toEqual([]);
+  });
+
+  it('should return missing fields list if any', () => {
+    const state: EcsMappingState = ecsTestState;
+    state.currentMapping = {
+      test: {
+        test: {
+          event: { target: 'event.action', confidence: 0.95, type: 'string' },
+        },
+      },
+    };
+    state.combinedSamples = JSON.stringify({
+      test: {
+        test: {
+          event: 'cert.create',
+          version: '1',
+        },
+      },
+    });
+    const { missingKeys } = handleValidateMappings({ state });
+
+    expect(missingKeys).toEqual(['test.test.version']);
+  });
+
+  // it('should return missing timestamp field not in mapping', () => {
+  //   const state: EcsMappingState = ecsTestState;
+  //   state.currentMapping = {
+  //     test: {
+  //       test: {
+  //         event: { target: 'event.action', confidence: 0.95, type: 'string' },
+  //       },
+  //     },
+  //   };
+  //   state.combinedSamples = JSON.stringify({
+  //     test: {
+  //       test: {
+  //         event: '2024-02-24T06:56:50.648137154Z',
+  //       },
+  //     },
+  //   });
+  //   const { missingKeys } = handleValidateMappings({ state });
+
+  //   expect(missingKeys).toEqual(['@timestamp']);
+  // });
 });
