@@ -39,6 +39,7 @@ exports[`Table prevents hidden saved objects from being deleted 1`] = `
               id="savedObjectsManagement.objectsTable.table.deleteDisabledTooltip"
             />
           }
+          data-test-subj="deleteSOToolTip"
           delay="regular"
           display="inlineBlock"
           position="top"
@@ -267,6 +268,7 @@ exports[`Table should render normally 1`] = `
     toolsRight={
       Array [
         <EuiToolTip
+          data-test-subj="deleteSOToolTip"
           delay="regular"
           display="inlineBlock"
           position="top"
