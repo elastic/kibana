@@ -124,12 +124,12 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
               />
             </EuiText>
           </EuiCallOut>
-          {canSyncToAllSpaces === false && (
+          {canSyncToAllSpaces === false ? (
             <>
               <EuiSpacer size="s" />
               <SyncToAllSpacesWarning />
             </>
-          )}
+          ) : null}
           <EuiSpacer />
           <SyncList syncItems={syncResp} />
         </EuiFlyoutBody>

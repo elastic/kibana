@@ -452,7 +452,7 @@ export function savedObjectsRoutes(
     );
 
   router.versioned
-    .post({
+    .get({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/can_sync_to_all_spaces/{mlSavedObjectType?}`,
       access: 'internal',
       security: {

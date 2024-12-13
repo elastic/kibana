@@ -96,7 +96,7 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/can_sync_to_all_spaces${
         mlSavedObjectType !== undefined ? `/${mlSavedObjectType}` : ''
       }`,
-      method: 'POST',
+      method: 'GET',
       version: '1',
     });
   },
