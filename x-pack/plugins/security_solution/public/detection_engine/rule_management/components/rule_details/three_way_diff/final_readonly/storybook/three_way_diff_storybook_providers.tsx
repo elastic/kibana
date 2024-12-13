@@ -13,15 +13,8 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import type { CoreStart } from '@kbn/core/public';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import type { UpgradeableDiffableFields } from '../../../../../model/prebuilt_rule_upgrade/fields';
 import { ReactQueryClientProvider } from '../../../../../../../common/containers/query_client/query_client_provider';
 import { UpsellingProvider } from '../../../../../../../common/components/upselling_provider';
-import { FieldUpgradeContextProvider } from '../../rule_upgrade/field_upgrade_context';
-import type {
-  DiffableRule,
-  RuleResponse,
-} from '../../../../../../../../common/api/detection_engine';
-import { mockCustomQueryRule } from './mocks';
 
 function createKibanaServicesMock(overrides?: Partial<CoreStart>) {
   const baseMock = {
@@ -76,55 +69,26 @@ function createMockStore() {
   return store;
 }
 
-const setRuleFieldResolvedValueMock = () => {};
-
 interface StorybookProvidersProps {
   children: React.ReactNode;
   kibanaServicesOverrides?: Record<string, unknown>;
-  finalDiffableRule?: DiffableRule;
-  fieldName: string;
 }
 
 export function ThreeWayDiffStorybookProviders({
   children,
   kibanaServicesOverrides,
-  finalDiffableRule = mockCustomQueryRule(),
-  fieldName,
 }: StorybookProvidersProps) {
   const kibanaServicesMock = createKibanaServicesMock(kibanaServicesOverrides);
   const KibanaReactContext = createKibanaReactContext(kibanaServicesMock);
 
   const store = createMockStore();
 
-  const ruleUpgradeStateMock = {
-    id: 'test-id',
-    rule_id: 'test-id',
-    current_rule: {} as RuleResponse,
-    target_rule: {} as RuleResponse,
-    diff: {
-      fields: {},
-      num_fields_with_updates: 0,
-      num_fields_with_conflicts: 0,
-      num_fields_with_non_solvable_conflicts: 0,
-    },
-    revision: 1,
-    finalRule: finalDiffableRule,
-    hasUnresolvedConflicts: false,
-    fieldsUpgradeState: {},
-  };
-
   return (
     <KibanaReactContext.Provider>
       <ReactQueryClientProvider>
         <ReduxStoreProvider store={store}>
           <UpsellingProvider upsellingService={kibanaServicesMock.upsellingService}>
-            <FieldUpgradeContextProvider
-              ruleUpgradeState={ruleUpgradeStateMock}
-              fieldName={fieldName as UpgradeableDiffableFields}
-              setRuleFieldResolvedValue={setRuleFieldResolvedValueMock}
-            >
-              {children}
-            </FieldUpgradeContextProvider>
+            {children}
           </UpsellingProvider>
         </ReduxStoreProvider>
       </ReactQueryClientProvider>

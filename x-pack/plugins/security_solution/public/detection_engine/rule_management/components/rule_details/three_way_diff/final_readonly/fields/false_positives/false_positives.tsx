@@ -10,22 +10,23 @@ import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
 import type { RuleFalsePositiveArray } from '../../../../../../../../../common/api/detection_engine';
 import { FalsePositives } from '../../../../rule_about_section';
+import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 
 interface FalsePositivesReadOnlyProps {
   falsePositives: RuleFalsePositiveArray;
 }
 
 export function FalsePositivesReadOnly({ falsePositives }: FalsePositivesReadOnlyProps) {
-  if (falsePositives.length === 0) {
-    return null;
-  }
-
   return (
     <EuiDescriptionList
       listItems={[
         {
           title: ruleDetailsI18n.FALSE_POSITIVES_FIELD_LABEL,
-          description: <FalsePositives falsePositives={falsePositives} />,
+          description: falsePositives.length ? (
+            <FalsePositives falsePositives={falsePositives} />
+          ) : (
+            <EmptyFieldValuePlaceholder />
+          ),
         },
       ]}
     />

@@ -6,38 +6,16 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
-import { FieldFinalReadOnly } from '../../field_final_readonly';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreatMappingReadOnly } from './threat_mapping';
-import { mockThreatMatchRule } from '../../storybook/mocks';
-import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: ThreatMappingReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/threat_mapping',
 };
 
-interface TemplateProps {
-  finalDiffableRule: DiffableRule;
-}
-
-const Template: Story<TemplateProps> = (args) => {
-  return (
-    <ThreeWayDiffStorybookProviders
-      finalDiffableRule={args.finalDiffableRule}
-      fieldName="threat_mapping"
-    >
-      <FieldFinalReadOnly />
-    </ThreeWayDiffStorybookProviders>
-  );
-};
-
-export const Default = Template.bind({});
-
-Default.args = {
-  finalDiffableRule: mockThreatMatchRule({
-    threat_mapping: [
+export const Default = () => (
+  <ThreatMappingReadOnly
+    threatMapping={[
       {
         entries: [
           {
@@ -47,6 +25,6 @@ Default.args = {
           },
         ],
       },
-    ],
-  }),
-};
+    ]}
+  />
+);

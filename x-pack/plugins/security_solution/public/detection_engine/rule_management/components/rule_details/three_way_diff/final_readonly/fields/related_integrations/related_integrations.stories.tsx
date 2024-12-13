@@ -7,12 +7,8 @@
 
 import React from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import type { Story } from '@storybook/react';
-import { RelatedIntegrationsReadOnly } from './related_integrations';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
-import { FieldFinalReadOnly } from '../../field_final_readonly';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
-import { mockCustomQueryRule } from '../../storybook/mocks';
+import { RelatedIntegrationsReadOnly } from './related_integrations';
 
 export default {
   component: RelatedIntegrationsReadOnly,
@@ -39,27 +35,14 @@ function MockRelatedIntegrationsData({ children }: { children: React.ReactNode }
   return <>{children}</>;
 }
 
-interface TemplateProps {
-  finalDiffableRule: DiffableRule;
-}
+export const Default = () => (
+  <ThreeWayDiffStorybookProviders>
+    <MockRelatedIntegrationsData>
+      <RelatedIntegrationsReadOnly
+        relatedIntegrations={[{ package: 'endpoint', version: '^8.2.0' }]}
+      />
+    </MockRelatedIntegrationsData>
+  </ThreeWayDiffStorybookProviders>
+);
 
-const Template: Story<TemplateProps> = (args) => {
-  return (
-    <ThreeWayDiffStorybookProviders
-      finalDiffableRule={args.finalDiffableRule}
-      fieldName="related_integrations"
-    >
-      <MockRelatedIntegrationsData>
-        <FieldFinalReadOnly />
-      </MockRelatedIntegrationsData>
-    </ThreeWayDiffStorybookProviders>
-  );
-};
-
-export const Default = Template.bind({});
-
-Default.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    related_integrations: [{ package: 'endpoint', version: '^8.2.0' }],
-  }),
-};
+export const EmptyArrayValue = () => <RelatedIntegrationsReadOnly relatedIntegrations={[]} />;

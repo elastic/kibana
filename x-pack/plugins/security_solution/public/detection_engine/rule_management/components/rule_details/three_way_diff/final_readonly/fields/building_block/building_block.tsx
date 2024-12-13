@@ -16,16 +16,12 @@ interface BuildingBlockReadOnlyProps {
 }
 
 export function BuildingBlockReadOnly({ buildingBlock }: BuildingBlockReadOnlyProps) {
-  if (!buildingBlock || !buildingBlock.type) {
-    return null;
-  }
-
   return (
     <EuiDescriptionList
       listItems={[
         {
           title: ruleDetailsI18n.BUILDING_BLOCK_FIELD_LABEL,
-          description: <BuildingBlock />,
+          description: <BuildingBlock type={buildingBlock?.type} />,
         },
       ]}
     />

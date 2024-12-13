@@ -6,11 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
 import { AlertSuppressionReadOnly } from './alert_suppression';
-import { FieldFinalReadOnly } from '../../field_final_readonly';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
-import { mockCustomQueryRule } from '../../storybook/mocks';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
@@ -19,29 +15,28 @@ export default {
     'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/alert_suppression',
 };
 
-interface TemplateProps {
-  finalDiffableRule: DiffableRule;
-}
+export const OtherRuleTypes = () => (
+  <ThreeWayDiffStorybookProviders>
+    <AlertSuppressionReadOnly
+      ruleType="query"
+      alertSuppression={{
+        group_by: ['host.name'],
+        duration: { value: 5, unit: 'm' },
+        missing_fields_strategy: 'suppress',
+      }}
+    />
+  </ThreeWayDiffStorybookProviders>
+);
 
-const Template: Story<TemplateProps> = (args) => {
-  return (
-    <ThreeWayDiffStorybookProviders
-      finalDiffableRule={args.finalDiffableRule}
-      fieldName="alert_suppression"
-    >
-      <FieldFinalReadOnly />
-    </ThreeWayDiffStorybookProviders>
-  );
-};
+export const Threshold = () => (
+  <ThreeWayDiffStorybookProviders>
+    <AlertSuppressionReadOnly
+      ruleType="threshold"
+      alertSuppression={{
+        duration: { value: 5, unit: 'm' },
+      }}
+    />
+  </ThreeWayDiffStorybookProviders>
+);
 
-export const Default = Template.bind({});
-
-Default.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    alert_suppression: {
-      group_by: ['host.name'],
-      duration: { value: 5, unit: 'm' },
-      missing_fields_strategy: 'suppress',
-    },
-  }),
-};
+export const EmptyValue = () => <AlertSuppressionReadOnly ruleType="query" />;

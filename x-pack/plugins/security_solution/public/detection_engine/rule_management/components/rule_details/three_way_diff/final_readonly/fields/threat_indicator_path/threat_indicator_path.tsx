@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
 import { ThreatIndicatorPath } from '../../../../rule_about_section';
+import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 
 export interface ThreatIndicatorPathReadOnlyProps {
   threatIndicatorPath?: string;
@@ -17,16 +18,16 @@ export interface ThreatIndicatorPathReadOnlyProps {
 export const ThreatIndicatorPathReadOnly = ({
   threatIndicatorPath,
 }: ThreatIndicatorPathReadOnlyProps) => {
-  if (!threatIndicatorPath) {
-    return null;
-  }
-
   return (
     <EuiDescriptionList
       listItems={[
         {
           title: ruleDetailsI18n.THREAT_INDEX_FIELD_LABEL,
-          description: <ThreatIndicatorPath threatIndicatorPath={threatIndicatorPath} />,
+          description: threatIndicatorPath ? (
+            <ThreatIndicatorPath threatIndicatorPath={threatIndicatorPath} />
+          ) : (
+            <EmptyFieldValuePlaceholder />
+          ),
         },
       ]}
     />
