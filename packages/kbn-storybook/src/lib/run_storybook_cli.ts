@@ -44,8 +44,12 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
         port: 9001,
         loglevel: getLogLevelFromFlags(flags),
       };
+
       if (flags.site) {
         config.outputDir = join(constants.ASSET_DIR, name);
+        process.env.NODE_ENV = 'production';
+      } else {
+        process.env.NODE_ENV = 'development';
       }
 
       try {

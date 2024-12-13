@@ -15,6 +15,7 @@ import webpack from 'webpack';
 import { resolve } from 'path';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
+import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import { REPO_ROOT } from './constants';
 import { default as WebpackConfig } from '../webpack.config';
 
@@ -112,16 +113,24 @@ export const defaultConfig: StorybookConfig = {
       config.presets = [];
     }
 
-    config.presets.push(require.resolve('@kbn/babel-preset/common_preset'), [
-      require.resolve('@emotion/babel-preset-css-prop'),
+    config.presets.push(
+      require.resolve('@kbn/babel-preset/common_preset'),
+      [
+        require.resolve('@emotion/babel-preset-css-prop'),
+        {
+          // There's an issue where emotion classnames may be duplicated,
+          // (e.g. `[hash]-[filename]--[local]_[filename]--[local]`)
+          // https://github.com/emotion-js/emotion/issues/2417
+          autoLabel: 'always',
+          labelFormat: '[filename]--[local]',
+        },
+      ],
       {
-        // There's an issue where emotion classnames may be duplicated,
-        // (e.g. `[hash]-[filename]--[local]_[filename]--[local]`)
-        // https://github.com/emotion-js/emotion/issues/2417
-        autoLabel: 'always',
-        labelFormat: '[filename]--[local]',
-      },
-    ]);
+        plugins: [
+          process.env.NODE_ENV !== 'production' && require.resolve('react-refresh/babel'),
+        ].filter(Boolean),
+      }
+    );
 
     return config;
   },
@@ -130,6 +139,8 @@ export const defaultConfig: StorybookConfig = {
       config.parallelism = 4;
       config.cache = true;
     }
+
+    config.target = 'web';
 
     // This will go over every component which is imported and check its import statements.
     // For every import which starts with ./ it will do a check to see if a file with the same name
@@ -172,6 +183,14 @@ export const defaultConfig: StorybookConfig = {
         }
       })
     );
+
+    if (process.env.NODE_ENV !== 'production') {
+      config.plugins?.push(
+        new ReactRefreshWebpackPlugin({
+          overlay: false,
+        })
+      );
+    }
 
     config.resolve = {
       ...config.resolve,
