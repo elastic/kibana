@@ -17,7 +17,7 @@ import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 import { useKibana } from '../../common/lib/kibana';
 
-const { initSortDefault, useTimelineEvents, useTimelineEventsHandler } = useTimelineEventsModule;
+const { initSortDefault, useTimelineEvents } = useTimelineEventsModule;
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -659,7 +659,7 @@ describe('useTimelineEventsHandler', () => {
       //////////////////////
     });
 
-    test('should request 0th batch (refetch)  when batchSize is changed', async () => {
+    test('should request 0th batch (refetch) when batchSize is changed', async () => {
       const { result, rerender } = renderHook((args) => useTimelineEvents(args), {
         initialProps: { ...props, limit: 5 },
       });
@@ -702,6 +702,11 @@ describe('useTimelineEventsHandler', () => {
       rerender({ ...props, limit: 10 });
 
       await waitFor(() => {
+        expect(result.current[0]).toBe(DataLoadingState.loading);
+      });
+
+      await waitFor(() => {
+        expect(result.current[0]).toBe(DataLoadingState.loaded);
         expect(result.current[1].events.length).toBe(10);
       });
     });
