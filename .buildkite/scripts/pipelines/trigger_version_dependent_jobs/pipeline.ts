@@ -107,7 +107,9 @@ export function getESForward9Dot0PipelineTriggers(): BuildkiteTriggerStep[] {
       'Update ES forward compatibility 9.0 pipeline to remove 8.x and add version 8.18'
     );
   }
-  const targetESVersions = versions.versions.filter((v) => v.branch.startsWith('9.'));
+  const targetESVersions = versions.versions.filter(
+    (v) => v.branch.startsWith('9.') || (v.branch.includes('main') && v.version.startsWith('9.0.0'))
+  );
 
   return targetESVersions.map(({ version }) => {
     return {
