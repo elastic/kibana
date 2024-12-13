@@ -8,10 +8,16 @@
  */
 
 import path from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
 import { Config } from '../config';
 
-export const loadConfig = async (configPath: string, log: ToolingLog): Promise<Config> => {
+/**
+ * Dynamically loads server configuration file in the "kbn-scout" framework. It reads
+ * and validates the configuration file, ensuring the presence of essential servers
+ * information required to initialize the testing environment.
+ * @param configPath Path to the configuration file to be loaded.
+ * @returns Config instance that is used to start local servers
+ */
+export const loadConfig = async (configPath: string): Promise<Config> => {
   try {
     const absolutePath = path.resolve(configPath);
     const configModule = await import(absolutePath);
