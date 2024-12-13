@@ -98,7 +98,7 @@ const buildIngestPipeline = ({
       ? description.pipeline(processors)
       : description.pipeline;
 
-  return [...(debugMode ? [debugDeepCopyContextStep()] : []), ...extraSteps, ...processors];
+  return [...(debugMode ? [debugDeepCopyContextStep()] : []), ...processors, ...extraSteps];
 };
 
 // developing the pipeline is a bit tricky, so we have a debug mode
