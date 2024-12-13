@@ -16,7 +16,7 @@ Maintained by the Security Solution team
 To (interactively) run unit tests with code coverage, run the following command:
 
 ```sh
-cd $KIBANA_HOME && node scripts/jest --watch x-pack/packages/kbn-elastic-assistant-common --coverage
+cd $KIBANA_HOME && node scripts/jest --watch x-pack/platform/packages/shared/kbn-elastic-assistant-common --coverage
 ```
 
 ## OpenAPI Codegen
@@ -25,7 +25,7 @@ Implemented using the new OpenAPI codegen and bundle packages:
 * Includes OpenAPI codegen script and CI action as detailed in: https://github.com/elastic/kibana/pull/166269
 * Includes OpenAPI docs bundling script as detailed in: https://github.com/elastic/kibana/pull/171526
 
-To run codegen/bundling locally, cd to `x-pack/packages/kbn-elastic-assistant-common/` and run any of the following commands:
+To run codegen/bundling locally, cd to `x-pack/platform/packages/shared/kbn-elastic-assistant-common/` and run any of the following commands:
 
 ```bash
 yarn openapi:generate
