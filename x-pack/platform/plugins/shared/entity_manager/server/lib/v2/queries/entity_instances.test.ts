@@ -28,7 +28,7 @@ describe('getEntityInstancesQuery', () => {
 
     expect(query).toEqual(
       'FROM logs-*, metrics-* | ' +
-        'STATS host.name = VALUES(host.name::keyword), entity.last_seen_timestamp = MAX(custom_timestamp_field), service.id = MAX(service.id::keyword) BY service.name::keyword | ' +
+        'STATS host.name = TOP(host.name::keyword, 10, "ASC"), entity.last_seen_timestamp = MAX(custom_timestamp_field), service.id = MAX(service.id::keyword) BY service.name::keyword | ' +
         'RENAME `service.name::keyword` AS service.name | ' +
         'EVAL entity.type = "service", entity.id = service.name, entity.display_name = COALESCE(service.id, entity.id) | ' +
         'SORT entity.id DESC | ' +
