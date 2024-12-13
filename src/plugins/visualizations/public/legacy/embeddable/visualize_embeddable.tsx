@@ -41,6 +41,7 @@ import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { isFallbackDataView } from '../../visualize_app/utils';
 import { VisualizationMissedSavedObjectError } from '../../components/visualization_missed_saved_object_error';
 import VisualizationError from '../../components/visualization_error';
@@ -48,11 +49,20 @@ import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { SerializedVis, Vis } from '../../vis';
 import { getApplication, getExecutionContext, getExpressions, getUiActions } from '../../services';
 import { VIS_EVENT_TO_TRIGGER } from '../../embeddable/events';
-import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { getSavedVisualization } from '../../utils/saved_visualize_utils';
 import { VisSavedObject } from '../../types';
 import { toExpressionAst } from '../../embeddable/to_ast';
 import { AttributeService } from './attribute_service';
+import { VisualizationsStartDeps } from '../../plugin';
+
+export interface VisualizeEmbeddableDeps {
+  start: StartServicesGetter<
+    Pick<
+      VisualizationsStartDeps,
+      'inspector' | 'embeddable' | 'data' | 'savedObjectsTaggingOss' | 'spaces'
+    >
+  >;
+}
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
@@ -60,7 +70,7 @@ export interface VisualizeEmbeddableConfiguration {
   editPath: string;
   editUrl: string;
   capabilities: { visualizeSave: boolean; dashboardSave: boolean; visualizeOpen: boolean };
-  deps: VisualizeEmbeddableFactoryDeps;
+  deps: VisualizeEmbeddableDeps;
 }
 
 export interface VisualizeInput extends EmbeddableInput {
@@ -120,7 +130,7 @@ export class VisualizeEmbeddable
   private warningDomNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
   private abortController?: AbortController;
-  private readonly deps: VisualizeEmbeddableFactoryDeps;
+  private readonly deps: VisualizeEmbeddableDeps;
   private readonly inspectorAdapters?: Adapters;
   private attributeService?: AttributeService<
     VisualizeSavedObjectAttributes,

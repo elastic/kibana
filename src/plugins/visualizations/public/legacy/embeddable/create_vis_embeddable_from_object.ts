@@ -16,10 +16,10 @@ import type {
   VisualizeByValueInput,
   VisualizeByReferenceInput,
   VisualizeSavedObjectAttributes,
+  VisualizeEmbeddableDeps,
 } from './visualize_embeddable';
 import { getHttp, getTimeFilter, getCapabilities } from '../../services';
 import { urlFor } from '../../utils/saved_visualize_utils';
-import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
 import { AttributeService } from './attribute_service';
 
@@ -28,7 +28,7 @@ import { AttributeService } from './attribute_service';
  * used within the visualize editor.
  */
 export const createVisEmbeddableFromObject =
-  (deps: VisualizeEmbeddableFactoryDeps) =>
+  (deps: VisualizeEmbeddableDeps) =>
   async (
     vis: Vis,
     input: Partial<VisualizeInput> & { id: string },
