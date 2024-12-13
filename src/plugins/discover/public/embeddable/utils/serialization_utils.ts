@@ -43,6 +43,7 @@ export const deserializeState = async ({
     const { get } = discoverServices.savedSearch;
     const so = await get(savedObjectId, true);
 
+    const rawSavedObjectAttributes = pick(so, EDITABLE_SAVED_SEARCH_KEYS);
     const savedObjectOverride = pick(serializedState.rawState, EDITABLE_SAVED_SEARCH_KEYS);
     return {
       // ignore the time range from the saved object - only global time range + panel time range matter
@@ -53,6 +54,9 @@ export const deserializeState = async ({
       // Overwrite SO state with dashboard state for title, description, columns, sort, etc.
       ...panelState,
       ...savedObjectOverride,
+
+      // back up the original saved object attributes for comparison
+      rawSavedObjectAttributes,
     };
   } else {
     // by value
@@ -72,14 +76,13 @@ export const deserializeState = async ({
   }
 };
 
-export const serializeState = async ({
+export const serializeState = ({
   uuid,
   initialState,
   savedSearch,
   serializeTitles,
   serializeTimeRange,
   savedObjectId,
-  discoverServices,
 }: {
   uuid: string;
   initialState: SearchEmbeddableRuntimeState;
@@ -87,19 +90,17 @@ export const serializeState = async ({
   serializeTitles: () => SerializedTitles;
   serializeTimeRange: () => SerializedTimeRange;
   savedObjectId?: string;
-  discoverServices: DiscoverServices;
-}): Promise<SerializedPanelState<SearchEmbeddableSerializedState>> => {
+}): SerializedPanelState<SearchEmbeddableSerializedState> => {
   const searchSource = savedSearch.searchSource;
   const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
   const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
   if (savedObjectId) {
-    const { get } = discoverServices.savedSearch;
-    const so = await get(savedObjectId);
+    const editableAttributesBackup = initialState.rawSavedObjectAttributes ?? {};
 
     // only save the current state that is **different** than the saved object state
     const overwriteState = EDITABLE_SAVED_SEARCH_KEYS.reduce((prev, key) => {
-      if (deepEqual(savedSearchAttributes[key], so[key])) {
+      if (deepEqual(savedSearchAttributes[key], editableAttributesBackup[key])) {
         return prev;
       }
       return { ...prev, [key]: savedSearchAttributes[key] };

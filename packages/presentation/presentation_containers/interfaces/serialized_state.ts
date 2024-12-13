@@ -8,7 +8,6 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { MaybePromise } from '@kbn/utility-types';
 
 /**
  * A package containing the serialized Embeddable state, with references extracted. When saving Embeddables using any
@@ -24,7 +23,7 @@ export interface HasSerializableState<State extends object = object> {
    * Serializes all state into a format that can be saved into
    * some external store. The opposite of `deserialize` in the {@link ReactEmbeddableFactory}
    */
-  serializeState: () => MaybePromise<SerializedPanelState<State>>;
+  serializeState: () => SerializedPanelState<State>;
 }
 
 export const apiHasSerializableState = (api: unknown | null): api is HasSerializableState => {

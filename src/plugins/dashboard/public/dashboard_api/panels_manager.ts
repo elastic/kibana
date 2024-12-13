@@ -13,11 +13,7 @@ import { v4 } from 'uuid';
 import { asyncForEach } from '@kbn/std';
 import type { Reference } from '@kbn/content-management-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
-import {
-  PanelPackage,
-  SerializedPanelState,
-  apiHasSerializableState,
-} from '@kbn/presentation-containers';
+import { PanelPackage, apiHasSerializableState } from '@kbn/presentation-containers';
 import {
   DefaultEmbeddableApi,
   EmbeddablePackageState,
@@ -32,7 +28,6 @@ import {
   getPanelTitle,
   stateHasTitles,
 } from '@kbn/presentation-publishing';
-import { cloneDeep } from 'lodash';
 import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { i18n } from '@kbn/i18n';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
@@ -156,13 +151,11 @@ export function initializePanelsManager(
     });
   }
 
-  async function getDashboardPanelFromId(panelId: string) {
+  function getDashboardPanelFromId(panelId: string) {
     const panel = panels$.value[panelId];
     const child = children$.value[panelId];
     if (!child || !panel) throw new PanelNotFoundError();
-    const serialized = apiHasSerializableState(child)
-      ? await child.serializeState()
-      : { rawState: {} };
+    const serialized = apiHasSerializableState(child) ? child.serializeState() : { rawState: {} };
     return {
       type: panel.type,
       explicitInput: { ...panel.explicitInput, ...serialized.rawState },
@@ -181,7 +174,7 @@ export function initializePanelsManager(
     return titles;
   }
 
-  async function duplicateReactEmbeddableInput(
+  function duplicateReactEmbeddableInput(
     childApi: unknown,
     panelToClone: DashboardPanelState,
     panelTitles: string[]
@@ -198,7 +191,7 @@ export function initializePanelsManager(
      * use in-place library transforms
      */
     if (apiHasLibraryTransforms(childApi)) {
-      const byValueSerializedState = await childApi.getByValueState();
+      const byValueSerializedState = childApi.getByValueState();
       if (panelToClone.references) {
         pushReferences(prefixReferencesFromPanel(id, panelToClone.references));
       }
@@ -284,9 +277,9 @@ export function initializePanelsManager(
       canRemovePanels: () => trackPanel.expandedPanelId.value === undefined,
       children$,
       duplicatePanel: async (idToDuplicate: string) => {
-        const panelToClone = await getDashboardPanelFromId(idToDuplicate);
+        const panelToClone = getDashboardPanelFromId(idToDuplicate);
 
-        const duplicatedPanelState = await duplicateReactEmbeddableInput(
+        const duplicatedPanelState = duplicateReactEmbeddableInput(
           children$.value[idToDuplicate],
           panelToClone,
           await getPanelTitles()
@@ -414,36 +407,23 @@ export function initializePanelsManager(
         }
         if (resetChangedPanelCount) children$.next(currentChildren);
       },
-      getState: async (): Promise<{
+      getState: (): {
         panels: DashboardState['panels'];
         references: Reference[];
-      }> => {
+      } => {
         const references: Reference[] = [];
-        const panels = cloneDeep(panels$.value);
 
-        const serializePromises: Array<
-          Promise<{ uuid: string; serialized: SerializedPanelState<object> }>
-        > = [];
-        for (const uuid of Object.keys(panels)) {
-          const api = children$.value[uuid];
+        const panels = Object.keys(panels$.value).reduce((acc, id) => {
+          const childApi = children$.value[id];
+          const serializeResult = apiHasSerializableState(childApi)
+            ? childApi.serializeState()
+            : { rawState: {} };
+          acc[id] = { ...panels$.value[id], explicitInput: { ...serializeResult.rawState, id } };
 
-          if (apiHasSerializableState(api)) {
-            serializePromises.push(
-              (async () => {
-                const serialized = await api.serializeState();
-                return { uuid, serialized };
-              })()
-            );
-          }
-        }
+          references.push(...prefixReferencesFromPanel(id, serializeResult.references ?? []));
 
-        const serializeResults = await Promise.all(serializePromises);
-        for (const result of serializeResults) {
-          panels[result.uuid].explicitInput = { ...result.serialized.rawState, id: result.uuid };
-          references.push(
-            ...prefixReferencesFromPanel(result.uuid, result.serialized.references ?? [])
-          );
-        }
+          return acc;
+        }, {} as DashboardPanelMap);
 
         return { panels, references };
       },

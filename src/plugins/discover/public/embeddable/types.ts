@@ -68,9 +68,13 @@ export interface NonPersistedDisplayOptions {
   enableFilters?: boolean;
 }
 
+export type EditableSavedSearchAttributes = Partial<
+  Pick<SavedSearchAttributes, (typeof EDITABLE_SAVED_SEARCH_KEYS)[number]>
+>;
+
 export type SearchEmbeddableSerializedState = SerializedTitles &
   SerializedTimeRange &
-  Partial<Pick<SavedSearchAttributes, (typeof EDITABLE_SAVED_SEARCH_KEYS)[number]>> & {
+  EditableSavedSearchAttributes & {
     // by value
     attributes?: SavedSearchAttributes & { references: SavedSearch['references'] };
     // by reference
@@ -81,6 +85,7 @@ export type SearchEmbeddableSerializedState = SerializedTitles &
 export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes &
   SerializedTitles &
   SerializedTimeRange & {
+    rawSavedObjectAttributes?: EditableSavedSearchAttributes;
     savedObjectTitle?: string;
     savedObjectId?: string;
     savedObjectDescription?: string;

@@ -11,7 +11,7 @@ import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import {
@@ -21,7 +21,6 @@ import {
 } from './book_state';
 import { ADD_SAVED_BOOK_ACTION_ID, SAVED_BOOK_ID } from './constants';
 import { openSavedBookEditor } from './saved_book_editor';
-import { saveBookAttributes } from './saved_book_library';
 import { BookRuntimeState } from './types';
 
 export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart, core: CoreStart) => {
@@ -36,19 +35,17 @@ export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart, c
       if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
       const newPanelStateManager = stateManagerFromAttributes(defaultBookAttributes);
 
-      const { addToLibrary } = await openSavedBookEditor(newPanelStateManager, true, core, {
-        parentApi: embeddable,
+      const { savedBookId } = await openSavedBookEditor({
+        attributesManager: newPanelStateManager,
+        parent: embeddable,
+        isCreate: true,
+        core,
       });
 
-      const initialState: BookRuntimeState = await (async () => {
-        const bookAttributes = serializeBookAttributes(newPanelStateManager);
-        // if we're adding this to the library, we only need to return the by reference state.
-        if (addToLibrary) {
-          const savedBookId = await saveBookAttributes(undefined, bookAttributes);
-          return { savedBookId, ...bookAttributes };
-        }
-        return bookAttributes;
-      })();
+      const bookAttributes = serializeBookAttributes(newPanelStateManager);
+      const initialState: BookRuntimeState = savedBookId
+        ? { savedBookId, ...bookAttributes }
+        : { ...bookAttributes };
 
       embeddable.addNewPanel<BookRuntimeState>({
         panelType: SAVED_BOOK_ID,

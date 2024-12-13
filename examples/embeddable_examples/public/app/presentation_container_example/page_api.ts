@@ -9,7 +9,6 @@
 
 import { BehaviorSubject, Subject, combineLatest, map, merge } from 'rxjs';
 import { v4 as generateId } from 'uuid';
-import { asyncForEach } from '@kbn/std';
 import { TimeRange } from '@kbn/es-query';
 import {
   PanelPackage,
@@ -146,14 +145,14 @@ export function getPageApi() {
       },
       onSave: async () => {
         const panelsState: LastSavedState['panelsState'] = [];
-        await asyncForEach(panels$.value, async ({ id, type }) => {
+        panels$.value.forEach(({ id, type }) => {
           try {
             const childApi = children$.value[id];
             if (apiHasSerializableState(childApi)) {
               panelsState.push({
                 id,
                 type,
-                panelState: await childApi.serializeState(),
+                panelState: childApi.serializeState(),
               });
             }
           } catch (error) {
