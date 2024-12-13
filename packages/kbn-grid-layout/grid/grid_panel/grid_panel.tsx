@@ -7,24 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useEffect, useMemo } from 'react';
+import React, { forwardRef, useEffect, useMemo, useState } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
-import { EuiPanel, euiFullHeight, useEuiOverflowScroll } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+
 import { GridLayoutStateManager, PanelInteractionEvent } from '../types';
 import { getKeysInOrder } from '../utils/resolve_grid_row';
-import { DragHandle } from './drag_handle';
+import { DragHandle, DragHandleApi } from './drag_handle';
 import { ResizeHandle } from './resize_handle';
 
 export interface GridPanelProps {
   panelId: string;
   rowIndex: number;
-  renderPanelContents: (panelId: string) => React.ReactNode;
+  renderPanelContents: (
+    panelId: string,
+    setDragHandles?: (refs: Array<HTMLElement | null>) => void
+  ) => React.ReactNode;
   interactionStart: (
     type: PanelInteractionEvent['type'] | 'drop',
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    e: MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => void;
   gridLayoutStateManager: GridLayoutStateManager;
 }
@@ -34,6 +37,37 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
     { panelId, rowIndex, renderPanelContents, interactionStart, gridLayoutStateManager },
     panelRef
   ) => {
+    const [dragHandleApi, setDragHandleApi] = useState<DragHandleApi | null>(null);
+
+    useEffect(() => {
+      const onDropEventHandler = (dropEvent: MouseEvent) => interactionStart('drop', dropEvent);
+      /**
+       * Subscription to add a singular "drop" event handler whenever an interaction starts -
+       * this is handled in a subscription so that it is not lost when the component gets remounted
+       * (which happens when a panel gets dragged from one grid row to another)
+       */
+      const dropEventSubscription = gridLayoutStateManager.interactionEvent$.subscribe((event) => {
+        if (!event || event.id !== panelId) return;
+
+        /**
+         * By adding the "drop" event listener to the document rather than the drag/resize event handler,
+         * we prevent the element from getting "stuck" in an interaction; however, we only attach this event
+         * listener **when the drag/resize event starts**, and it only executes once (i.e. it removes itself
+         * once it executes, so we don't have to manually remove it outside of the unmount condition)
+         */
+        document.addEventListener('mouseup', onDropEventHandler, {
+          once: true,
+          passive: true,
+        });
+      });
+
+      return () => {
+        dropEventSubscription.unsubscribe();
+        document.removeEventListener('mouseup', onDropEventHandler); // removes the event listener on row change
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
       const initialPanel = gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels[panelId];
@@ -88,24 +122,22 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
                 // undo any "lock to grid" styles **except** for the top left corner, which stays locked
                 ref.style.gridColumnStart = `${panel.column + 1}`;
                 ref.style.gridRowStart = `${panel.row + 1}`;
-                ref.style.gridColumnEnd = ``;
-                ref.style.gridRowEnd = ``;
+                ref.style.gridColumnEnd = `auto`;
+                ref.style.gridRowEnd = `auto`;
               } else {
                 // if the current panel is being dragged, render it with a fixed position + size
-                ref.style.position = `fixed`;
+                ref.style.position = 'fixed';
+
                 ref.style.left = `${draggingPosition.left}px`;
                 ref.style.top = `${draggingPosition.top}px`;
                 ref.style.width = `${draggingPosition.right - draggingPosition.left}px`;
                 ref.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
 
                 // undo any "lock to grid" styles
-                ref.style.gridColumnStart = ``;
-                ref.style.gridRowStart = ``;
-                ref.style.gridColumnEnd = ``;
-                ref.style.gridRowEnd = ``;
+                ref.style.gridArea = `auto`; // shortcut to set all grid styles to `auto`
               }
             } else {
-              ref.style.zIndex = '0';
+              ref.style.zIndex = `auto`;
 
               // if the panel is not being dragged and/or resized, undo any fixed position styles
               ref.style.position = '';
@@ -175,32 +207,27 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
      * Memoize panel contents to prevent unnecessary re-renders
      */
     const panelContents = useMemo(() => {
-      return renderPanelContents(panelId);
-    }, [panelId, renderPanelContents]);
+      if (!dragHandleApi) return <></>; // delays the rendering of the panel until after dragHandleApi is defined
+      return renderPanelContents(panelId, dragHandleApi.setDragHandles);
+    }, [panelId, renderPanelContents, dragHandleApi]);
 
     return (
       <div ref={panelRef} css={initialStyles} className="kbnGridPanel">
-        <EuiPanel
-          hasShadow={false}
-          hasBorder={true}
+        <div
           css={css`
             padding: 0;
-            position: relative;
             height: 100%;
+            position: relative;
           `}
         >
-          <DragHandle interactionStart={interactionStart} />
-          <div
-            css={css`
-              ${euiFullHeight()}
-              ${useEuiOverflowScroll('y', false)}
-              ${useEuiOverflowScroll('x', false)}
-            `}
-          >
-            {panelContents}
-          </div>
+          <DragHandle
+            ref={setDragHandleApi}
+            gridLayoutStateManager={gridLayoutStateManager}
+            interactionStart={interactionStart}
+          />
+          {panelContents}
           <ResizeHandle interactionStart={interactionStart} />
-        </EuiPanel>
+        </div>
       </div>
     );
   }

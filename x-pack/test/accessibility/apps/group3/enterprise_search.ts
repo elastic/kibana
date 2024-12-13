@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Overview', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/overview');
+        await common.navigateToApp('elasticsearch/overview');
       });
 
       it('loads a landing page with product cards', async function () {
@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Content', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/content/search_indices');
+        await common.navigateToApp('elasticsearch/content/search_indices');
       });
 
       it('loads the indices page', async function () {
@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Elasticsearch', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/elasticsearch');
+        await common.navigateToApp('elasticsearch/elasticsearch');
       });
 
       it('loads a setup guide', async function () {
@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Playground', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/applications');
+        await common.navigateToApp('elasticsearch/applications');
       });
 
       it('loads playground', async function () {
@@ -129,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Search Applications', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/applications/search_applications');
+        await common.navigateToApp('elasticsearch/applications/search_applications');
       });
 
       it('loads search applications list', async function () {
@@ -142,7 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     describe('Behavioral Analytics', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/analytics');
+        await common.navigateToApp('elasticsearch/analytics');
       });
 
       it('loads Behavioral Analytics page', async function () {
@@ -155,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     describe('Vector Search', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/vector_search');
+        await common.navigateToApp('elasticsearch/vector_search');
       });
 
       it('loads Vector Search page', async function () {
@@ -168,7 +168,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     describe('AI Search', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/ai_search');
+        await common.navigateToApp('elasticsearch/ai_search');
       });
 
       it('loads AI Search page', async function () {

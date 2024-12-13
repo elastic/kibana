@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import { AuditLogger, AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
@@ -19,6 +19,7 @@ export interface AIAssistantDataClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   kibanaVersion: string;
   spaceId: string;
+  auditLogger?: AuditLogger;
   logger: Logger;
   indexPatternsResourceName: string;
   currentUser: AuthenticatedUser | null;

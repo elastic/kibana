@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { fetchMonitorManagementList } from '../state';
 import { useMonitorName } from './use_monitor_name';
 
@@ -54,7 +54,7 @@ describe('useMonitorName', () => {
   });
 
   it('returns expected initial and after load state', async () => {
-    const { result, waitForValueToChange } = renderHook(() => useMonitorName({}));
+    const { result } = renderHook(() => useMonitorName({}));
 
     expect(result.current).toStrictEqual({
       loading: true,
@@ -62,7 +62,7 @@ describe('useMonitorName', () => {
       nameAlreadyExists: false,
     });
 
-    await waitForValueToChange(() => result.current.values);
+    await waitFor(() => result.current.values);
 
     expect(result.current).toStrictEqual({
       loading: false,
@@ -78,11 +78,9 @@ describe('useMonitorName', () => {
   });
 
   it('returns correct "nameAlreadyExists" when name matches', async () => {
-    const { result, waitForValueToChange } = renderHook(() =>
-      useMonitorName({ search: 'Test monitor name 2' })
-    );
+    const { result } = renderHook(() => useMonitorName({ search: 'Test monitor name 2' }));
 
-    await waitForValueToChange(() => result.current.values); // Wait until data has been loaded
+    await waitFor(() => result.current.values); // Wait until data has been loaded
     expect(result.current).toStrictEqual({
       loading: false,
       nameAlreadyExists: true,
@@ -97,11 +95,9 @@ describe('useMonitorName', () => {
   });
 
   it('returns expected results after data while editing monitor', async () => {
-    const { result, waitForValueToChange } = renderHook(() =>
-      useMonitorName({ search: 'Test monitor name' })
-    );
+    const { result } = renderHook(() => useMonitorName({ search: 'Test monitor name' }));
 
-    await waitForValueToChange(() => result.current.values); // Wait until data has been loaded
+    await waitFor(() => result.current.values); // Wait until data has been loaded
     expect(result.current).toStrictEqual({
       loading: false,
       nameAlreadyExists: false, // Should be `false` for the currently editing monitor,
