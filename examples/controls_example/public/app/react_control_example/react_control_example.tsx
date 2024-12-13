@@ -315,10 +315,7 @@ export const ReactControlExample = ({
                   <EuiCodeBlock language="json">
                     {JSON.stringify(controlGroupApi?.serializeState(), null, 2)}
                   </EuiCodeBlock>,
-                  {
-                    theme: core.theme,
-                    i18n: core.i18n,
-                  }
+                  core
                 )
               );
             }}
@@ -374,10 +371,10 @@ export const ReactControlExample = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
-                onClick={async () => {
+                onClick={() => {
                   if (controlGroupApi) {
                     saveNotification$.next();
-                    setControlGroupSerializedState(await controlGroupApi.serializeState());
+                    setControlGroupSerializedState(controlGroupApi.serializeState());
                   }
                 }}
               >

@@ -58,6 +58,54 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-graph",
+        "id": "def-public.GraphInvestigation",
+        "type": "Function",
+        "tags": [],
+        "label": "GraphInvestigation",
+        "description": [
+          "\nGraph investigation view allows the user to expand nodes and view related entities."
+        ],
+        "signature": [
+          "React.FunctionComponent<GraphInvestigationProps>"
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph_investigation/graph_investigation.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.GraphInvestigation.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.GraphInvestigation.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-graph",
         "id": "def-public.GraphPopover",
         "type": "Function",
         "tags": [],
@@ -89,6 +137,46 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-graph",
+        "id": "def-public.useFetchGraphData",
+        "type": "Function",
+        "tags": [],
+        "label": "useFetchGraphData",
+        "description": [
+          "\nHook to fetch event's graph visualization data.\n"
+        ],
+        "signature": [
+          "({ req, options, }: ",
+          "UseFetchGraphDataParams",
+          ") => ",
+          "UseFetchGraphDataResult"
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/hooks/use_fetch_graph_data.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.useFetchGraphData.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  req,\n  options,\n}",
+            "description": [],
+            "signature": [
+              "UseFetchGraphDataParams"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/hooks/use_fetch_graph_data.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The result of the hook."
+        ],
         "initialIsOpen": false
       },
       {

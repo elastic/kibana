@@ -23,20 +23,15 @@ type InvalidAggregationRequest = unknown;
 // Union keys are not included in keyof, but extends iterates over the types in a union.
 type ValidAggregationKeysOf<T extends Record<string, any>> = T extends T ? keyof T : never;
 
-type KeyOfSource<T> = Record<
-  keyof T,
-  (T extends Record<string, { terms: { missing_bucket: true } }> ? null : never) | string | number
->;
+type KeyOfSource<T> = {
+  [key in keyof T]:
+    | (T[key] extends Record<string, { terms: { missing_bucket: true } }> ? null : never)
+    | string
+    | number;
+};
 
-type KeysOfSources<T extends any[]> = T extends [any]
-  ? KeyOfSource<T[0]>
-  : T extends [any, any]
-  ? KeyOfSource<T[0]> & KeyOfSource<T[1]>
-  : T extends [any, any, any]
-  ? KeyOfSource<T[0]> & KeyOfSource<T[1]> & KeyOfSource<T[2]>
-  : T extends [any, any, any, any]
-  ? KeyOfSource<T[0]> & KeyOfSource<T[1]> & KeyOfSource<T[2]> & KeyOfSource<T[3]>
-  : Record<string, null | string | number>;
+// convert to intersection to be able to get all the keys
+type KeysOfSources<T extends any[]> = UnionToIntersection<KeyOfSource<ValuesType<Pick<T, number>>>>;
 
 type CompositeKeysOf<TAggregationContainer extends AggregationsAggregationContainer> =
   TAggregationContainer extends {
