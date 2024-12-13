@@ -19,7 +19,6 @@ import {
   CoreStatus,
 } from '@kbn/core/server';
 import type { CloudStart } from '@kbn/cloud-plugin/server';
-import { omit } from 'lodash';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
