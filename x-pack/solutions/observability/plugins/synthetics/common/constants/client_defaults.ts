@@ -112,3 +112,18 @@ export const getTimeSpanFilter = () => ({
     },
   },
 });
+
+export const getQueryFilters = (query: string) => ({
+  query_string: {
+    query: `${query}`,
+    fields: [
+      'monitor.name.text',
+      'tags',
+      'observer.geo.name',
+      'observer.name',
+      'urls',
+      'hosts',
+      'monitor.project.id',
+    ],
+  },
+});
