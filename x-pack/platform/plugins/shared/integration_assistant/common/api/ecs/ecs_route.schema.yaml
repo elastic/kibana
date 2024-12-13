@@ -3,7 +3,7 @@ info:
   title: Integration Assistatnt ECS Mapping API endpoint
   version: "1"
 paths:
-  /api/integration_assistant/ecs:
+  /internal/automatic_import/ecs:
     post:
       summary: Builds ECS Mapping based on the input samples
       operationId: EcsMapping

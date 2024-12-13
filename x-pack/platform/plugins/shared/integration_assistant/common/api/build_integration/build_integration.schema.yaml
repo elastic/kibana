@@ -3,7 +3,7 @@ info:
   title: Integration Assistatnt Build Integrarion API endpoint
   version: "1"
 paths:
-  /api/integration_assistant/build:
+  /internal/automatic_import/build:
     post:
       summary: Builds Integration with the given input samples
       operationId: BuildIntegration
