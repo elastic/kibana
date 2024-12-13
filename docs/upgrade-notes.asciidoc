@@ -1456,33 +1456,6 @@ Enable X-Pack Security.
 NOTE: For the complete Elastic Security solution release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 
 [discrete]
-[[breaking-161806]]
-.[Elastic Defend] Converted filterQuery to KQL.(8.11)
-[%collapsible]
-====
-*Details* +
-Converts `filterQuery` to a KQL query string. For more information, refer to ({kibana-pull}161806[#161806]).
-====
-
-
-
-[float]
-=== Deprecation notices
-
-The following functionality is deprecated and will be removed at a future date. Deprecated functionality 
-does not have an immediate impact on your application, but we strongly recommend you make the necessary 
-updates to avoid use of deprecated features.
-
-Use the **Kibana Upgrade Assistant** to prepare for your upgrade to the next version of the Elastic Stack. 
-The assistant identifies deprecated settings in your configuration and guides you through the process of 
-resolving issues if any deprecated features are enabled. 
-To access the assistant, go to **Stack Management** > **Upgrade Assistant**.
-
-
-[float]
-==== Kibana APIs
-
-[discrete]
 [[breaking-201810]]
 .Remove original user and host risk scoring and all associated UIs (9.0.0)
 [%collapsible]
@@ -1519,6 +1492,35 @@ Upgrade to use the Risk Engine in all spaces which use the legacy risk scoring m
 - In the main menu, go to Security > Manage > Entity Risk Score.
 - If the original user and host risk score modules are enabled, you'll see a button to "Start update". Click the button, and follow the instructions.
 ====
+
+[discrete]
+[[breaking-161806]]
+.[Elastic Defend] Converted filterQuery to KQL.(8.11)
+[%collapsible]
+====
+*Details* +
+Converts `filterQuery` to a KQL query string. For more information, refer to ({kibana-pull}161806[#161806]).
+====
+
+
+
+[float]
+=== Deprecation notices
+
+The following functionality is deprecated and will be removed at a future date. Deprecated functionality 
+does not have an immediate impact on your application, but we strongly recommend you make the necessary 
+updates to avoid use of deprecated features.
+
+Use the **Kibana Upgrade Assistant** to prepare for your upgrade to the next version of the Elastic Stack. 
+The assistant identifies deprecated settings in your configuration and guides you through the process of 
+resolving issues if any deprecated features are enabled. 
+To access the assistant, go to **Stack Management** > **Upgrade Assistant**.
+
+
+[float]
+==== Kibana APIs
+
+
 
 [discrete]
 [[kibana-152236]]
