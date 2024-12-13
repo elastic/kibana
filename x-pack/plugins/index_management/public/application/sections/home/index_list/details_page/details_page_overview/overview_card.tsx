@@ -7,8 +7,14 @@
 
 import React, { FunctionComponent, ReactNode } from 'react';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSplitPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiSplitPanel,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 
 interface Props {
   title: string;
@@ -29,6 +35,7 @@ export const OverviewCard: FunctionComponent<Props> = ({
   footer: { left: footerLeft, right: footerRight } = {},
   'data-test-subj': dataTestSubj,
 }) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexItem>
       <EuiSplitPanel.Outer grow hasBorder={true} data-test-subj={dataTestSubj}>
@@ -42,8 +49,9 @@ export const OverviewCard: FunctionComponent<Props> = ({
             justifyContent="spaceBetween"
             wrap={true}
             alignItems="center"
+            // euiButtonHeightSmall
             css={css`
-              min-height: ${euiThemeVars.euiButtonHeightSmall};
+              min-height: ${euiTheme.size.s};
             `}
           >
             <EuiFlexItem grow={false}>{contentLeft}</EuiFlexItem>
