@@ -7,7 +7,7 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { KibanaFeatureConfig, KibanaFeatureScope } from '@kbn/features-plugin/common';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
@@ -24,7 +24,7 @@ export const EDR_SUB_ACTIONS_EXECUTE_PRIVILEGE = `api:actions:execute-edr-sub-ac
  */
 const FEATURE_ORDER = 3000;
 
-export const ACTIONS_FEATURE = {
+export const ACTIONS_FEATURE: KibanaFeatureConfig = {
   id: 'actions',
   name: i18n.translate('xpack.actions.featureRegistry.actionsFeatureName', {
     defaultMessage: 'Actions and Connectors',

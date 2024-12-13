@@ -10,6 +10,7 @@
 import type { ComponentType, ReactNode } from 'react';
 import type { RuleActionParam, ActionVariable } from '@kbn/alerting-types';
 import { IconType, RecursivePartial } from '@elastic/eui';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { SubFeatureType } from '@kbn/actions-types';
 import { TypeRegistry } from '../type_registry';
 import { RuleFormParamsErrors } from './rule_types';
