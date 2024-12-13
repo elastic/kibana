@@ -13,7 +13,8 @@
 // - from the non-stale search results, return as many as we can run based on available
 //   capacity and the cost of each task type to run
 
-import apm, { Logger } from 'elastic-apm-node';
+import apm from 'elastic-apm-node';
+import { Logger } from '@kbn/core/server';
 import { Subject } from 'rxjs';
 import { createWrappedLogger } from '../lib/wrapped_logger';
 
@@ -52,6 +53,7 @@ import { isOk, asOk } from '../lib/result_type';
 import { selectTasksByCapacity } from './lib/task_selector_by_capacity';
 import { TaskPartitioner } from '../lib/task_partitioner';
 import { getRetryAt } from '../lib/get_retry_at';
+import { parseIntervalAsSecond } from '../lib/intervals';
 
 interface OwnershipClaimingOpts {
   claimOwnershipUntil: Date;
@@ -169,19 +171,34 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const now = new Date();
   const taskUpdates: PartialConcreteTaskInstance[] = [];
   for (const task of tasksToRun) {
-    taskUpdates.push({
-      id: task.id,
-      version: task.version,
-      scheduledAt:
-        task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()
-          ? task.retryAt
-          : task.runAt,
-      status: TaskStatus.Running,
-      startedAt: now,
-      attempts: task.attempts + 1,
-      retryAt: getRetryAt(task, definitions.get(task.taskType)) ?? null,
-      ownerId: taskStore.taskManagerId,
-    });
+    // special check for invalid schedule interval
+    let intervalValidated = true;
+    if (task.schedule && task.schedule.interval) {
+      try {
+        parseIntervalAsSecond(task.schedule.interval);
+      } catch (err) {
+        intervalValidated = false;
+        logger.warn(
+          `Task ${task.id} has an invalid schedule interval: ${task.schedule.interval}. This task will not be run.`
+        );
+      }
+    }
+
+    if (intervalValidated) {
+      taskUpdates.push({
+        id: task.id,
+        version: task.version,
+        scheduledAt:
+          task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()
+            ? task.retryAt
+            : task.runAt,
+        status: TaskStatus.Running,
+        startedAt: now,
+        attempts: task.attempts + 1,
+        retryAt: getRetryAt(task, definitions.get(task.taskType)) ?? null,
+        ownerId: taskStore.taskManagerId,
+      });
+    }
   }
 
   // perform the task object updates, deal with errors
