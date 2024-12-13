@@ -6,10 +6,8 @@
  */
 
 import React, { useCallback } from 'react';
-import { type AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiCallOut } from '@elastic/eui';
-import { useQueryClient } from '@tanstack/react-query';
-import { LOAD_CONNECTORS_QUERY_KEY } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
+import type { AIConnector } from './types';
 import * as i18n from './translations';
 import { MissingPrivilegesDescription } from './missing_privileges';
 import { ConnectorSetup } from './connector_setup';
@@ -22,8 +20,7 @@ interface ConnectorCardsProps {
   canCreateConnectors?: boolean;
   connectors?: AIConnector[]; // make connectors optional to handle loading state
   selectedConnectorId?: string;
-  onConnectorSelected?: (connector: AIConnector) => void;
-  onConnectorIdSelected?: (connectorId: string) => void;
+  onConnectorSelected: (connector: AIConnector) => void;
 }
 
 export const ConnectorCards = React.memo<ConnectorCardsProps>(
@@ -33,29 +30,23 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
     canCreateConnectors,
     selectedConnectorId,
     onConnectorSelected,
-    onConnectorIdSelected,
   }) => {
-    const queryClient = useQueryClient();
     const { spaceId } = useOnboardingContext();
     const [, setStoredAssistantConnectorId] = useStoredAssistantConnectorId(spaceId);
 
     const onConnectorSaveWithQuery = useCallback(
       (newConnector: AIConnector) => {
-        // refetch the connector selector items indirectly with the queryKey
-        queryClient.invalidateQueries({ queryKey: LOAD_CONNECTORS_QUERY_KEY });
-        // save the connectorId selected in LocalStorage
         setStoredAssistantConnectorId(newConnector.id);
         onConnectorSaved();
       },
-      [onConnectorSaved, queryClient, setStoredAssistantConnectorId]
+      [onConnectorSaved, setStoredAssistantConnectorId]
     );
 
     const onConnectorSelectedHandler = useCallback(
       (connector: AIConnector) => {
-        onConnectorSelected?.(connector);
-        onConnectorIdSelected?.(connector.id);
+        onConnectorSelected(connector);
       },
-      [onConnectorIdSelected, onConnectorSelected]
+      [onConnectorSelected]
     );
 
     if (!connectors) {
@@ -80,9 +71,9 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
             <EuiFlexItem>
               <ConnectorActivePanel
                 selectedConnectorId={selectedConnectorId}
-                onConnectorSaved={onConnectorSaved}
                 connectors={connectors}
                 onConnectorSelected={onConnectorSelectedHandler}
+                onRefetchConnectors={onConnectorSaved}
               />
             </EuiFlexItem>
           )}

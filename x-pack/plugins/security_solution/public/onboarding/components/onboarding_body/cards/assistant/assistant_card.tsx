@@ -14,7 +14,7 @@ import { useDataStreamApis } from '@kbn/elastic-assistant/impl/assistant/use_dat
 import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
 import { getGenAiConfig } from '@kbn/elastic-assistant/impl/connectorland/helpers';
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
-import type { AIConnector } from '@kbn/security-solution-connectors/src/connector_selector';
+import { CenteredLoadingSpinner } from '../../../../../common/components/centered_loading_spinner';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import * as i18n from './translations';
@@ -26,6 +26,7 @@ import { CardCallOut } from '../common/card_callout';
 import { CardSubduedText } from '../common/card_subdued_text';
 import type { AssistantCardMetadata } from './types';
 import { MissingPrivilegesCallOut } from '../common/connectors/missing_privileges';
+import type { AIConnector } from '../common/connectors/types';
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
 export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
@@ -36,6 +37,8 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   isCardAvailable,
 }) => {
   const { spaceId } = useOnboardingContext();
+  const { connectors, canExecuteConnectors, canCreateConnectors } = checkCompleteMetadata ?? {};
+
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
     [isCardComplete]
@@ -49,10 +52,6 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   const expandIntegrationsCard = useCallback(() => {
     setExpandedCardId(OnboardingCardId.integrations, { scroll: true });
   }, [setExpandedCardId]);
-
-  const connectors = checkCompleteMetadata?.connectors;
-  const canExecuteConnectors = checkCompleteMetadata?.canExecuteConnectors;
-  const canCreateConnectors = checkCompleteMetadata?.canCreateConnectors;
 
   const [storedAssistantConnectorId, setStoredAssistantConnectorId] =
     useStoredAssistantConnectorId(spaceId);
@@ -117,7 +116,6 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
       const config = getGenAiConfig(connector);
       const apiProvider = config?.apiProvider;
       const model = config?.defaultModel;
-      // setIsOpen(false);
 
       if (currentConversation != null) {
         const conversation = await setApiConfig({
@@ -143,6 +141,14 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
     },
     [currentConversation, onSelectConnectorId, setApiConfig, onConversationChange]
   );
+
+  if (!checkCompleteMetadata) {
+    return (
+      <OnboardingCardContentPanel>
+        <CenteredLoadingSpinner />
+      </OnboardingCardContentPanel>
+    );
+  }
 
   return (
     <OnboardingCardContentPanel>

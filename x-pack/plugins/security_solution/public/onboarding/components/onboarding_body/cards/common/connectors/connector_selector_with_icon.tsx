@@ -13,12 +13,17 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useMemo, useEffect, useState } from 'react';
-import { css } from '@emotion/css';
-import { type AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
+import React, { useMemo, useEffect, useState, useCallback } from 'react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
+import {
+  getActionTypeTitle,
+  getGenAiConfig,
+} from '@kbn/elastic-assistant/impl/connectorland/helpers';
+import type { AIConnector } from './types';
 import { useFilteredActionTypes } from './hooks/use_load_action_types';
+import * as i18n from './translations';
+import { useConnectorSelectorWithIconStyles } from './connector_selector_with_icon.styles';
 
 interface Props {
   isDisabled?: boolean;
@@ -26,32 +31,11 @@ interface Props {
   connectors: AIConnector[];
   onConnectorSaved?: () => void;
   onConnectorSelected: (connector: AIConnector) => void;
+  onRefetchConnectors: () => void;
 }
 
-const inputContainerClassName = css`
-  height: 32px;
-
-  .euiSuperSelectControl {
-    border: none;
-    box-shadow: none;
-    background: none;
-    padding-left: 0;
-  }
-
-  .euiFormControlLayoutIcons {
-    right: 14px;
-    top: 2px;
-  }
-`;
-
-const inputDisplayClassName = css`
-  margin-right: 8px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
-
 /**
- * A compact wrapper of the ConnectorSelector component used in the Settings modal.
+ * A compact wrapper of the ConnectorSelector with a Selected Icon
  */
 export const ConnectorSelectorWithIcon = React.memo<Props>(
   ({
@@ -60,9 +44,11 @@ export const ConnectorSelectorWithIcon = React.memo<Props>(
     connectors,
     onConnectorSaved,
     onConnectorSelected,
+    onRefetchConnectors,
   }) => {
     const { actionTypeRegistry, http, assistantAvailability, toasts } = useAssistantContext();
     const { euiTheme } = useEuiTheme();
+    const { inputContainerClassName, inputDisplayClassName } = useConnectorSelectorWithIconStyles();
 
     const actionTypes = useFilteredActionTypes(http, toasts);
     const [isOpen, setIsOpen] = useState(false);
@@ -79,6 +65,53 @@ export const ConnectorSelectorWithIcon = React.memo<Props>(
     }, [connectors, onConnectorSelected]);
 
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
+
+    const connectorOptions = useMemo(
+      () =>
+        (connectors ?? []).map((connector) => {
+          const connectorTypeTitle =
+            getGenAiConfig(connector)?.apiProvider ??
+            getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
+          const connectorDetails = connector.isPreconfigured
+            ? i18n.PRECONFIGURED_CONNECTOR
+            : connectorTypeTitle;
+
+          return {
+            value: connector.id,
+            'data-test-subj': connector.id,
+            inputDisplay: (
+              <EuiText className={inputDisplayClassName} size="s" color={euiTheme.colors.primary}>
+                {connector.name}
+              </EuiText>
+            ),
+            dropdownDisplay: (
+              <React.Fragment key={connector.id}>
+                <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
+                  <EuiFlexItem grow={false} data-test-subj={`connector-${connector.name}`}>
+                    <strong>{connector.name}</strong>
+                    {connectorDetails && (
+                      <EuiText size="xs" color="subdued">
+                        <p>{connectorDetails}</p>
+                      </EuiText>
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </React.Fragment>
+            ),
+          };
+        }),
+      [actionTypeRegistry, connectors, euiTheme.colors.primary, inputDisplayClassName]
+    );
+
+    const onConnectorSelectionChange = useCallback(
+      (connectorId: string) => {
+        const connector = (connectors ?? []).find((c) => c.id === connectorId);
+        if (connector) {
+          onConnectorSelected(connector);
+        }
+      },
+      [connectors, onConnectorSelected]
+    );
 
     if (!actionTypes) {
       return <EuiLoadingSpinner />;
@@ -105,20 +138,16 @@ export const ConnectorSelectorWithIcon = React.memo<Props>(
 
         <EuiFlexItem grow={false}>
           <ConnectorSelector
-            http={http}
-            displayFancy={(displayText) => (
-              <EuiText className={inputDisplayClassName} size="s" color={euiTheme.colors.primary}>
-                {displayText}
-              </EuiText>
-            )}
             isOpen={isOpen}
             isDisabled={localIsDisabled}
             selectedConnectorId={selectedConnectorId}
             setIsOpen={setIsOpen}
-            onConnectorSelectionChange={onConnectorSelected}
+            onConnectorSelectionChange={onConnectorSelectionChange}
             actionTypeRegistry={actionTypeRegistry}
             actionTypes={actionTypes}
             onConnectorSaved={onConnectorSaved}
+            connectorOptions={connectorOptions}
+            onRefetchConnectors={onRefetchConnectors}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

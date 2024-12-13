@@ -16,6 +16,7 @@ import { ConnectorCards } from '../../common/connectors/connector_cards';
 import { CardSubduedText } from '../../common/card_subdued_text';
 import type { AIConnectorCardMetadata } from './types';
 import { MissingPrivilegesCallOut } from '../../common/connectors/missing_privileges';
+import type { AIConnector } from '../../common/connectors/types';
 
 export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> = ({
   checkCompleteMetadata,
@@ -23,13 +24,13 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
   setComplete,
 }) => {
   const { siemMigrations } = useKibana().services;
-  const [storedConnectorId, setStoredConnectorId] = useDefinedLocalStorage<string | null>(
+  const [storedConnectorId, setStoredConnectorId] = useDefinedLocalStorage<string>(
     siemMigrations.rules.connectorIdStorage.key,
-    null
+    ''
   );
-  const setSelectedConnectorId = useCallback(
-    (connectorId: string) => {
-      setStoredConnectorId(connectorId);
+  const setSelectedConnector = useCallback(
+    (connector: AIConnector) => {
+      setStoredConnectorId(connector.id);
       setComplete(true);
     },
     [setComplete, setStoredConnectorId]
@@ -52,7 +53,7 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
               connectors={connectors}
               onConnectorSaved={checkComplete}
               selectedConnectorId={storedConnectorId}
-              onConnectorIdSelected={setSelectedConnectorId}
+              onConnectorSelected={setSelectedConnector}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

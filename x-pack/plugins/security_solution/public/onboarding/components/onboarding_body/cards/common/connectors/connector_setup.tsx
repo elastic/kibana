@@ -42,13 +42,14 @@ interface ConnectorSetupProps {
 }
 export const ConnectorSetup = React.memo<ConnectorSetupProps>(({ onConnectorSaved, onClose }) => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
+
   const panelCss = usePanelCss();
   const {
     http,
     triggersActionsUi: { actionTypeRegistry },
     notifications: { toasts },
   } = useKibana().services;
-  const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
 
   const onModalClose = useCallback(() => {
     setSelectedActionType(null);

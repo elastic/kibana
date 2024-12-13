@@ -27,6 +27,13 @@ export const PRIVILEGES_MISSING_TITLE = i18n.translate(
   }
 );
 
+export const PRECONFIGURED_CONNECTOR = i18n.translate(
+  'xpack.securitySolution.onboarding.assistantCard.preconfiguredTitle',
+  {
+    defaultMessage: 'Preconfigured',
+  }
+);
+
 export const PRIVILEGES_REQUIRED_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.assistantCard.requiredPrivileges',
   {
