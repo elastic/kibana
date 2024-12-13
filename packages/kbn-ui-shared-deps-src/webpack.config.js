@@ -109,7 +109,8 @@ module.exports = {
     extensions: ['.js', '.ts', '.tsx'],
     alias: {
       '@elastic/eui$': '@elastic/eui/optimize/es',
-      '@elastic/eui/lib/components/provider/nested$': '@elastic/eui/optimize/es/components/provider/nested',
+      '@elastic/eui/lib/components/provider/nested$':
+        '@elastic/eui/optimize/es/components/provider/nested',
       '@elastic/eui/lib/services/theme/warning$': '@elastic/eui/optimize/es/services/theme/warning',
       moment: MOMENT_SRC,
       // NOTE: Used to include react profiling on bundles
