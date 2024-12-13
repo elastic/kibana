@@ -3163,7 +3163,14 @@
             "label": "indexMode",
             "description": [],
             "signature": [
-              "\"standard\" | \"time_series\" | \"logsdb\""
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.IndexMode",
+                "text": "IndexMode"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/templates.ts",
             "deprecated": false,
