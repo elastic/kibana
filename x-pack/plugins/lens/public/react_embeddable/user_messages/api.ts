@@ -28,7 +28,6 @@ import {
 import {
   LensPublicCallbacks,
   LensEmbeddableStartServices,
-  VisualizationContext,
   VisualizationContextHelper,
   LensApi,
   LensInternalApi,
@@ -100,7 +99,6 @@ function getWarningMessages(
 export function buildUserMessagesHelpers(
   api: LensApi,
   internalApi: LensInternalApi,
-  getVisualizationContext: () => VisualizationContext,
   { coreStart, data, visualizationMap, datasourceMap }: LensEmbeddableStartServices,
   onBeforeBadgesRender: LensPublicCallbacks['onBeforeBadgesRender'],
   spaces?: SpacesApi,
@@ -141,7 +139,7 @@ export function buildUserMessagesHelpers(
       dataViewObject,
       mergedSearchContext,
       activeData,
-    } = getUpdatedState(getVisualizationContext, visualizationMap, datasourceMap);
+    } = getUpdatedState(internalApi.getVisualizationContext, visualizationMap, datasourceMap);
     const userMessages: UserMessage[] = [];
 
     userMessages.push(
@@ -278,7 +276,7 @@ export function buildUserMessagesHelpers(
     updateWarnings: () => {
       addUserMessages(
         getWarningMessages(
-          getUpdatedState(getVisualizationContext, visualizationMap, datasourceMap),
+          getUpdatedState(internalApi.getVisualizationContext, visualizationMap, datasourceMap),
           api.adapters$.getValue(),
           data
         )
