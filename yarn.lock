@@ -3845,7 +3845,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ai-assistant-common@link:x-pack/packages/kbn-ai-assistant-common":
+"@kbn/ai-assistant-common@link:x-pack/platform/packages/shared/ai-assistant/common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ai-assistant-icon@link:x-pack/platform/packages/shared/ai-assistant/icon":
   version "0.0.0"
   uid ""
 

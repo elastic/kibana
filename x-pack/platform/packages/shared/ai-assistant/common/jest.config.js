@@ -10,10 +10,10 @@ module.exports = {
     '<rootDir>/target/kibana-coverage/jest/x-pack/packages/kbn_ai_assistant_common_src',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/packages/kbn-ai-assistant-common/src/**/*.{ts,tsx}',
-    '!<rootDir>/x-pack/packages/kbn-ai-assistant-common/src/*.test.{ts,tsx}',
+    '<rootDir>/x-pack/platform/packages/shared/ai-assistant/common/src/**/*.{ts,tsx}',
+    '!<rootDir>/x-pack/platform/packages/shared/ai-assistant/common/src/*.test.{ts,tsx}',
   ],
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/packages/kbn-ai-assistant-common'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/ai-assistant/common'],
 };
