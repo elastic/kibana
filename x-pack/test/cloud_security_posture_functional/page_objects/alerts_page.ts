@@ -10,7 +10,7 @@ import { FtrService } from '../../functional/ftr_provider_context';
 
 const ALERT_TABLE_ROW_CSS_SELECTOR = '[data-test-subj="alertsTable"] .euiDataGridRow';
 const VISUALIZATIONS_SECTION_HEADER_TEST_ID = 'securitySolutionFlyoutVisualizationsHeader';
-const GRAPH_PREVIEW_TEST_ID = 'securitySolutionFlyoutGraphPreview';
+const GRAPH_PREVIEW_CONTENT_TEST_ID = 'securitySolutionFlyoutGraphPreviewContent';
 const GRAPH_PREVIEW_LOADING_TEST_ID = 'securitySolutionFlyoutGraphPreviewLoading';
 
 export class AlertsPageObject extends FtrService {
@@ -89,12 +89,12 @@ export class AlertsPageObject extends FtrService {
     },
 
     assertGraphPreviewVisible: async () => {
-      return await this.testSubjects.existOrFail(GRAPH_PREVIEW_TEST_ID);
+      return await this.testSubjects.existOrFail(GRAPH_PREVIEW_CONTENT_TEST_ID);
     },
 
     assertGraphNodesNumber: async (expected: number) => {
       await this.flyout.waitGraphIsLoaded();
-      const graph = await this.testSubjects.find(GRAPH_PREVIEW_TEST_ID);
+      const graph = await this.testSubjects.find(GRAPH_PREVIEW_CONTENT_TEST_ID);
       await graph.scrollIntoView();
       const nodes = await graph.findAllByCssSelector('.react-flow__nodes .react-flow__node');
       expect(nodes.length).to.be(expected);
