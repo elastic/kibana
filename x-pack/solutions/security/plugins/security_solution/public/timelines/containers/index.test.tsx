@@ -12,7 +12,6 @@ import * as useTimelineEventsModule from '.';
 import { SecurityPageName } from '../../../common/constants';
 import { TimelineId } from '../../../common/types/timeline';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { mockTimelineData } from '../../common/mock';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 import { useKibana } from '../../common/lib/kibana';
@@ -33,8 +32,6 @@ jest.mock('react-redux', () => {
 jest.mock('../../notes/hooks/use_fetch_notes');
 const onLoadMock = jest.fn();
 const useFetchNotesMock = useFetchNotes as jest.Mock;
-
-const mockEvents = structuredClone(mockTimelineData);
 
 jest.mock('../../common/lib/apm/use_track_http_request');
 jest.mock('../../common/hooks/use_experimental_features');
@@ -157,12 +154,12 @@ describe('useTimelineEventsHandler', () => {
   });
 
   test('should make events search request correctly', async () => {
-    const { result, rerender } = renderHook<
-      [DataLoadingState, TimelineArgs],
-      UseTimelineEventsProps
-    >((args) => useTimelineEvents(args), {
-      initialProps: props,
-    });
+    const { result } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
+      (args) => useTimelineEvents(args),
+      {
+        initialProps: props,
+      }
+    );
     await waitFor(() => {
       expect(mockSearch).toHaveBeenCalledTimes(1);
       expect(mockSearch).toHaveBeenNthCalledWith(
