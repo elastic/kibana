@@ -86,7 +86,7 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
         .attr('y', 0)
         .attr('height', ANNOTATION_CONTAINER_HEIGHT)
         .attr('width', endingXPos - startingXPos)
-        .style('stroke', euiTheme.colors.borderBasePlain)
+        .style('stroke', euiTheme.border.color)
         .style('fill', 'none')
         .style('stroke-width', 1);
 

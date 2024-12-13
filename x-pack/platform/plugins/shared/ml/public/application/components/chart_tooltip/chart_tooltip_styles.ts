@@ -38,7 +38,7 @@ export const useChartTooltipStyles = () => {
       fontWeight: euiTheme.font.weight.bold,
       padding: `${euiTheme.size.xs} ${mathWithUnits(euiTheme.size.xs, (x) => x * 2)}`,
       marginBottom: euiTheme.size.xs,
-      borderBottom: `1px solid ${transparentize(euiTheme.colors.borderBasePlain, 0.8)}`,
+      borderBottom: `1px solid ${transparentize(euiTheme.border.color, 0.8)}`,
     }),
     mlChartTooltipItem: css({
       display: 'flex',
