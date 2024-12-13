@@ -158,7 +158,7 @@ export type DashboardApi = CanExpandPanels &
       attributes: DashboardAttributes;
       references: SavedObjectReference[];
     }>;
-    getDashboardPanelFromId: (id: string) => Promise<DashboardPanelState>;
+    getDashboardPanelFromId: (id: string) => DashboardPanelState;
     hasOverlays$: PublishingSubject<boolean>;
     hasUnsavedChanges$: PublishingSubject<boolean>;
     highlightPanel: (panelRef: HTMLDivElement) => void;

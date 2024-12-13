@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const SIEM_TRANSLATION_RESULT_FULL_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationResult.full',
   {
-    defaultMessage: 'Fully translated',
+    defaultMessage: 'Translated',
   }
 );
 
