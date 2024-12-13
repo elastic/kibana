@@ -8,6 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { v4 as uuidV4 } from 'uuid';
+import { ResourceIdentifier } from '../../../../../common/siem_migrations/rules/resources';
 import { SIEM_RULE_MIGRATION_CREATE_PATH } from '../../../../../common/siem_migrations/constants';
 import {
   CreateRuleMigrationRequestBody,
@@ -43,6 +44,11 @@ export const registerSiemRuleMigrationsCreateRoute = (
           const originalRules = req.body;
           const migrationId = req.params.migration_id ?? uuidV4();
           try {
+            const [firstOriginalRule] = originalRules;
+            if (!firstOriginalRule) {
+              return res.noContent();
+            }
+
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
@@ -52,6 +58,16 @@ export const registerSiemRuleMigrationsCreateRoute = (
             }));
 
             await ruleMigrationsClient.data.rules.create(ruleMigrations);
+
+            // Create identified resource documents without content to keep track of them
+            const resourceIdentifier = new ResourceIdentifier(firstOriginalRule.vendor);
+            const resources = resourceIdentifier
+              .fromOriginalRules(originalRules)
+              .map((resource) => ({ ...resource, migration_id: migrationId }));
+
+            if (resources.length > 0) {
+              await ruleMigrationsClient.data.resources.create(resources);
+            }
 
             return res.ok({ body: { migration_id: migrationId } });
           } catch (err) {
