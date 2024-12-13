@@ -6,6 +6,7 @@ source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
 
+echo '--- Jest: Unit tests with NX'
 node_modules/.bin/nx-cloud record --\
  node_modules/.bin/nx affected \
  -t jest \
