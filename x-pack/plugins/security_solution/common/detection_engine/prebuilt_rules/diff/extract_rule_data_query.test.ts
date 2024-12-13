@@ -28,22 +28,12 @@ describe('extract rule data queries', () => {
 
   describe('extractRuleEqlQuery', () => {
     it('extracts a trimmed version of the query field', () => {
-      const extractedEqlQuery = extractRuleEqlQuery({
-        query: '\n\nquery where true\n\n',
-        language: 'eql',
-        filters: [],
-        eventCategoryOverride: undefined,
-        timestampField: undefined,
-        tiebreakerField: undefined,
-      });
+      const extractedEqlQuery = extractRuleEqlQuery('\n\nquery where true\n\n', 'eql', []);
 
       expect(extractedEqlQuery).toEqual({
         query: 'query where true',
         language: 'eql',
         filters: [],
-        event_category_override: undefined,
-        timestamp_field: undefined,
-        tiebreaker_field: undefined,
       });
     });
   });
