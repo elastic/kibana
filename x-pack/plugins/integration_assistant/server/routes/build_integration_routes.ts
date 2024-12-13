@@ -14,6 +14,11 @@ import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 import { handleCustomErrors } from './routes_util';
 import { GenerationErrorCode } from '../../common/constants';
+import {
+  ACTIONS_AND_CONNECTORS_ALL_ROLE,
+  FLEET_ALL_ROLE,
+  INTEGRATIONS_ALL_ROLE,
+} from '../constants';
 export function registerIntegrationBuilderRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
 ) {
@@ -27,7 +32,11 @@ export function registerIntegrationBuilderRoutes(
         version: '1',
         security: {
           authz: {
-            requiredPrivileges: [`fleet-all`, `fleetv2-all`, `actions-all`],
+            requiredPrivileges: [
+              FLEET_ALL_ROLE,
+              INTEGRATIONS_ALL_ROLE,
+              ACTIONS_AND_CONNECTORS_ALL_ROLE,
+            ],
           },
         },
         validate: {
