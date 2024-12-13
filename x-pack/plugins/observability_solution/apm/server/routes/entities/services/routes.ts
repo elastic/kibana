@@ -16,8 +16,9 @@ const serviceEntitiesSummaryRoute = createApmServerRoute({
     path: t.type({ serviceName: t.string }),
     query: environmentRt,
   }),
-  options: { tags: ['access:apm'] },
-  async handler({ context, params, request, plugins }) {
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  async handler(resources) {
+    const { context, params, request, plugins } = resources;
     const [_coreContext, entityManagerStart] = await Promise.all([
       context.core,
       plugins.entityManager.start(),
@@ -45,7 +46,7 @@ const serviceLogRateTimeseriesRoute = createApmServerRoute({
     }),
     query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   async handler(resources) {
     const { context, params, plugins } = resources;
     const [coreContext, logsDataAccessStart] = await Promise.all([
@@ -79,7 +80,7 @@ const serviceLogErrorRateTimeseriesRoute = createApmServerRoute({
     }),
     query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   async handler(resources) {
     const { context, params, plugins } = resources;
     const [coreContext, logsDataAccessStart] = await Promise.all([
