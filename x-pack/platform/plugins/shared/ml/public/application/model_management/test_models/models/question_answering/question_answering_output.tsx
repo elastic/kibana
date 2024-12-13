@@ -62,7 +62,7 @@ const ResultBadge: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const euiFontSizeXS = useEuiFontSize('xs').fontSize;
   return (
     <EuiBadge
-      color={euiTheme.colors.vis.euiColorVis5}
+      color={euiTheme.colors.vis.euiColorVis9}
       style={{
         marginRight: ICON_PADDING,
         marginTop: `-${ICON_PADDING}`,
