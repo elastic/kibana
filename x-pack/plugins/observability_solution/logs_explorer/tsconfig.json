@@ -37,7 +37,6 @@
     "@kbn/router-utils",
     "@kbn/share-plugin",
     "@kbn/shared-ux-utility",
-    "@kbn/ui-theme",
     "@kbn/unified-data-table",
     "@kbn/unified-field-list",
     "@kbn/unified-search-plugin",

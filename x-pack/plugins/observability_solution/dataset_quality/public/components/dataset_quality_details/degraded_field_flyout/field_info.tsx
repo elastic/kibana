@@ -16,6 +16,7 @@ import {
   EuiTitle,
   EuiToolTip,
   formatNumber,
+  useEuiTheme,
 } from '@elastic/eui';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 
@@ -33,6 +34,8 @@ import { SparkPlot } from '../../common/spark_plot';
 import { DegradedField } from '../../../../common/api_types';
 
 export const DegradedFieldInfo = ({ fieldList }: { fieldList?: DegradedField }) => {
+  const { euiTheme } = useEuiTheme();
+
   const {
     fieldFormats,
     degradedFieldValues,
@@ -164,7 +167,7 @@ export const DegradedFieldInfo = ({ fieldList }: { fieldList?: DegradedField }) 
                 <EuiBadgeGroup gutterSize="s">
                   {degradedFieldValues?.values.map((value, idx) => (
                     <EuiBadge color="hollow" key={idx}>
-                      <EuiTextColor color="#765B96">
+                      <EuiTextColor color={euiTheme.colors.vis.euiColorVis3}>
                         <strong>{value}</strong>
                       </EuiTextColor>
                     </EuiBadge>

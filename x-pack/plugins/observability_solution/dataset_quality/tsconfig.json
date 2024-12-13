@@ -29,7 +29,6 @@
     "@kbn/router-utils",
     "@kbn/xstate-utils",
     "@kbn/shared-ux-utility",
-    "@kbn/ui-theme",
     "@kbn/data-service",
     "@kbn/observability-shared-plugin",
     "@kbn/data-plugin",

@@ -7,22 +7,9 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSkeletonTitle, EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { PrivilegesWarningIconWrapper } from '../../../common';
 import { notAvailableLabel } from '../../../../../common/translations';
-
-const verticalRule = css`
-  width: 1px;
-  height: 65px;
-  background-color: ${euiThemeVars.euiColorLightShade};
-`;
-
-const verticalRuleHidden = css`
-  width: 1px;
-  height: 65px;
-  visibility: hidden;
-`;
+import { VerticalRule } from '../../../common/vertical_rule';
 
 export function Panel({
   title,
@@ -38,14 +25,14 @@ export function Panel({
       return panelChildren.map((panelChild, index) => (
         <React.Fragment key={index}>
           {panelChild}
-          {index < panelChildren.length - 1 && <span css={verticalRule} />}
+          {index < panelChildren.length - 1 && <VerticalRule />}
         </React.Fragment>
       ));
     }
     return (
       <>
         {panelChildren}
-        <span css={verticalRuleHidden} />
+        <VerticalRule style={{ visibility: 'hidden' }} />
       </>
     );
   };

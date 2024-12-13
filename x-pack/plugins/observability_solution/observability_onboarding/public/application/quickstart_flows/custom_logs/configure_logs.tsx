@@ -284,7 +284,7 @@ export function ConfigureLogsContent() {
           id="advancedSettingsAccordion"
           css={{
             '.euiAccordion__buttonContent': {
-              color: euiTheme.colors.primaryText,
+              color: euiTheme.colors.textPrimary,
               fontSize: xsFontSize,
             },
             '.euiAccordion__arrow svg': {

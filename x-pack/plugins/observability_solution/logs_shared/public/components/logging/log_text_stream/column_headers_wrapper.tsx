@@ -5,26 +5,33 @@
  * 2.0.
  */
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { transparentize } from 'polished';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+import React from 'react';
 import { ASSUMED_SCROLLBAR_WIDTH } from './vertical_scroll_panel';
 
-export const LogColumnHeadersWrapper = euiStyled.div.attrs((props) => ({
-  role: props.role ?? 'row',
-}))`
-    align-items: stretch;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    overflow: hidden;
-    padding-right: ${ASSUMED_SCROLLBAR_WIDTH}px;
-    border-bottom: ${(props) => props.theme.eui.euiBorderThin};
-    box-shadow: 0 2px 2px -1px ${(props) =>
-      transparentize(0.3, props.theme.eui.euiColorLightShade)};
-    position: relative;
-    z-index: 1;
-  `;
+export const LogColumnHeadersWrapper = ({ role = 'row', ...props }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      role={role}
+      css={css`
+        align-items: stretch;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        overflow: hidden;
+        padding-right: ${ASSUMED_SCROLLBAR_WIDTH}px;
+        border-bottom: ${euiTheme.border.thin};
+        box-shadow: 0 2px 2px -1px ${euiTheme.colors.borderBaseSubdued};
+        position: relative;
+        z-index: 1;
+      `}
+      {...props}
+    />
+  );
+};
 
 // eslint-disable-next-line import/no-default-export
 export default LogColumnHeadersWrapper;

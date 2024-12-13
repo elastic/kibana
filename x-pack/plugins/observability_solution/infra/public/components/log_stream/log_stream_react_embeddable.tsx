@@ -111,8 +111,8 @@ const SAVED_SEARCH_DOCS_URL =
   'https://www.elastic.co/guide/en/kibana/current/save-open-search.html';
 
 const DeprecationCallout = () => {
-  const [isDismissed, setDismissed] = useLocalStorage(DISMISSAL_STORAGE_KEY, false);
   const { euiTheme } = useEuiTheme();
+  const [isDismissed, setDismissed] = useLocalStorage(DISMISSAL_STORAGE_KEY, false);
 
   if (isDismissed) {
     return null;
