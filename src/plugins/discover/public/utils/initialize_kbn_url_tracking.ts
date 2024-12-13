@@ -35,7 +35,7 @@ export function initializeKbnUrlTracking({
 }) {
   /**
    * Store the setting of enabling / disabling url
-   * it's should be disabled for ad-hoc data views to omit error messages
+   * it's should be disabled for ad-hoc data views (but enabled for ES|QL) to omit error messages
    * - When you've added an ad hoc data view in Discover
    * - Continued your work in different parts of Kibana
    * - You've closed the Kibana tab
