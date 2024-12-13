@@ -249,7 +249,7 @@ export function FieldControlForm({
           isInvalid={!selectedFields.length}
           error={
             !selectedFields.length
-              ? i18n.translate('esql.flyout.values.error', {
+              ? i18n.translate('esql.flyout.fieldvalues.error', {
                   defaultMessage: 'At least one field is required',
                 })
               : undefined
