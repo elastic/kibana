@@ -29,7 +29,11 @@ export class TaskMetricsService implements ITaskMetricsService {
   public async end(trace: Trace, error?: Error): Promise<void> {
     const event = this.createTaskMetric(trace, error);
 
-    this.logger.l(`Task ${event.name} complete. Task run took ${event.time_executed_in_ms}ms`);
+    this.logger.l('Task completed', {
+      task_name: event.name,
+      time_executed_in_ms: event.time_executed_in_ms,
+      error_message: event.error_message,
+    });
 
     if (telemetryConfiguration.use_async_sender) {
       this.sender.sendAsync(TelemetryChannel.TASK_METRICS, [event]);
