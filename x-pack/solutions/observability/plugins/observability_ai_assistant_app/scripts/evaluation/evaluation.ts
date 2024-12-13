@@ -37,6 +37,9 @@ function runEvaluations() {
             kibana: argv.kibana,
           });
 
+          log.info(`Elasticsearch URL: ${serviceUrls.esUrl}`);
+          log.info(`Kibana URL: ${serviceUrls.kibanaUrl}`);
+
           const kibanaClient = new KibanaClient(log, serviceUrls.kibanaUrl, argv.spaceId);
           const esClient = new Client({
             node: serviceUrls.esUrl,
