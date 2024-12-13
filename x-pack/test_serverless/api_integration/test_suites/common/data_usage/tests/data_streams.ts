@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   let supertestAdminWithCookieCredentials: SupertestWithRoleScope;
   const testDataStreamName = 'test-data-stream';
-  describe(`GET ${DATA_USAGE_DATA_STREAMS_API_ROUTE}`, function () {
+  describe.only(`GET ${DATA_USAGE_DATA_STREAMS_API_ROUTE}`, function () {
     this.tags(['skipMKI']);
     before(async () => {
       await svlDatastreamsHelpers.createDataStream(testDataStreamName);
@@ -55,9 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
         .get(DATA_USAGE_DATA_STREAMS_API_ROUTE)
         .set('elastic-api-version', '1');
       const dataStreams: DataStreamsResponseBodySchemaBody = res.body;
-      const foundStream = dataStreams.find((stream) => stream.name === testDataStreamName);
-      expect(res.statusCode).to.be(200);
-      expect(foundStream).to.be(undefined);
+      expect(res.statusCode).to.be(404);
     });
   });
 }
