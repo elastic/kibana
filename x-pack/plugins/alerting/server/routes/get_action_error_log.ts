@@ -11,6 +11,7 @@ import { ILicenseState } from '../lib';
 import { GetActionErrorLogByIdParams } from '../rules_client';
 import { RewriteRequestCase, verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from './constants';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -59,6 +60,7 @@ export const getActionErrorLogRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_action_error_log`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       validate: {
         params: paramSchema,
         query: querySchema,

@@ -14,6 +14,7 @@ import {
   EnableRuleRequestParamsV1,
   enableRuleRequestParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/enable';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 export const enableRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
@@ -21,6 +22,7 @@ export const enableRuleRoute = (
   router.post(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id}/_enable`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'public',
         summary: 'Enable a rule',

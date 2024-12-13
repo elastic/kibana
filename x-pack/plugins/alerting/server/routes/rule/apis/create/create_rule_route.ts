@@ -19,6 +19,7 @@ import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes
 import { Rule } from '../../../../application/rule/types';
 import { RuleTypeDisabledError } from '../../../../lib';
 import { BASE_ALERTING_API_PATH } from '../../../../types';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 import {
   countUsageOfPredefinedIds,
   handleDisabledApiKeysError,
@@ -32,6 +33,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
   router.post(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id?}`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'public',
         summary: `Create a rule`,

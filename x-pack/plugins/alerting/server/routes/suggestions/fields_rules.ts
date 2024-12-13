@@ -21,6 +21,7 @@ import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { verifyAccessAndContext } from '../lib';
 import { ILicenseState } from '../../lib';
 import { AlertingRequestHandlerContext } from '../../types';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 
 export function registerFieldsRoute(
   router: IRouter<AlertingRequestHandlerContext>,
@@ -30,6 +31,7 @@ export function registerFieldsRoute(
   router.post(
     {
       path: '/internal/rules/saved_objects/fields',
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
         body: schema.nullable(

@@ -14,6 +14,7 @@ import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { transformBulkUntrackAlertsByQueryBodyV1 } from './transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const bulkUntrackAlertsByQueryRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -22,6 +23,7 @@ export const bulkUntrackAlertsByQueryRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/alerts/_bulk_untrack_by_query`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
         body: bulkUntrackByQueryBodySchemaV1,

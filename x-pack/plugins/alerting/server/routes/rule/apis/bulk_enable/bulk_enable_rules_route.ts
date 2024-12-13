@@ -16,6 +16,7 @@ import {
 } from '../../../../../common/routes/rule/apis/bulk_enable';
 import { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { transformBulkEnableResponseV1 } from './transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const bulkEnableRulesRoute = ({
   router,
@@ -27,6 +28,7 @@ export const bulkEnableRulesRoute = ({
   router.patch(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_enable`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
         body: bulkEnableBodySchemaV1,

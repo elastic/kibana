@@ -15,6 +15,7 @@ import { ILicenseState, RuleMutedError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_ALERTING_SNOOZE_RULE } from '../../../../types';
 import { transformSnoozeBodyV1 } from './transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export type SnoozeRuleRequestParamsV1 = TypeOf<typeof snoozeParamsSchema>;
 
@@ -25,6 +26,7 @@ export const snoozeRuleRoute = (
   router.post(
     {
       path: INTERNAL_ALERTING_SNOOZE_RULE,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
         params: snoozeParamsSchema,

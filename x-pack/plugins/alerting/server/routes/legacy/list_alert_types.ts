@@ -11,6 +11,7 @@ import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 
 export const listAlertTypesRoute = (
   router: AlertingRouter,
@@ -23,6 +24,7 @@ export const listAlertTypesRoute = (
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/list_alert_types`,
       validate: {},
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: isServerless ? 'internal' : 'public',
         summary: 'Get the alert types',
