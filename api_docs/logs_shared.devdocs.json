@@ -3164,6 +3164,46 @@
             "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientStartDeps.embeddable",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableStart",
+                "text": "EmbeddableStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientStartDeps.savedSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "savedSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedSearch",
+                "scope": "public",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-public.SavedSearchPublicPluginStart",
+                "text": "SavedSearchPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

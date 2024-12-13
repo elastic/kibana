@@ -6,8 +6,7 @@
  */
 import React from 'react';
 import * as ReactQuery from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks/dom';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { useProviders } from './get_providers';

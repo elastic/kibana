@@ -130,7 +130,7 @@ export default function bulkUntrackByQueryTests({ getService }: FtrProviderConte
                   },
                 },
               ],
-              feature_ids: ['alertsFixture'],
+              rule_type_ids: ['test.always-firing-alert-as-data'],
             });
 
           switch (scenario.id) {

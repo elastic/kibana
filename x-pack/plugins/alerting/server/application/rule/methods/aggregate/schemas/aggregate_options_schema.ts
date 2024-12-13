@@ -16,7 +16,8 @@ export const aggregateOptionsSchema = schema.object({
       id: schema.string(),
     })
   ),
-  filterConsumers: schema.maybe(schema.arrayOf(schema.string())),
+  ruleTypeIds: schema.maybe(schema.arrayOf(schema.string())),
+  consumers: schema.maybe(schema.arrayOf(schema.string())),
   // filter type is `string | KueryNode`, but `KueryNode` has no schema to import yet
   filter: schema.maybe(
     schema.oneOf([schema.string(), schema.recordOf(schema.string(), schema.any())])

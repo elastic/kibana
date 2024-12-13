@@ -92,12 +92,12 @@ export const useAccordionState = ({ navNode }: { navNode: ChromeProjectNavigatio
   const getAccordionProps = useCallback(
     (
       path: string,
-      _accordionProps?: Partial<EuiAccordionProps>
+      accordionProps?: Partial<EuiAccordionProps>
     ): Partial<EuiAccordionProps> | undefined => {
       const isCollapsed = accordionStateById[path]?.isCollapsed;
       const isCollapsible = accordionStateById[path]?.isCollapsible;
 
-      if (isCollapsed === undefined) return _accordionProps; // No state set yet
+      if (isCollapsed === undefined) return accordionProps; // No state set yet
 
       let forceState: EuiAccordionProps['forceState'] = isCollapsed ? 'closed' : 'open';
       if (!isCollapsible) forceState = 'open'; // Allways open if the accordion is not collapsible
@@ -109,9 +109,8 @@ export const useAccordionState = ({ navNode }: { navNode: ChromeProjectNavigatio
 
       const updated: Partial<EuiAccordionProps & { isCollapsible?: boolean }> = {
         buttonProps: { 'data-test-subj': 'accordionToggleBtn' },
-        ..._accordionProps,
+        ...accordionProps,
         arrowProps,
-        isCollapsible,
         forceState,
         onToggle: isCollapsible
           ? () => {

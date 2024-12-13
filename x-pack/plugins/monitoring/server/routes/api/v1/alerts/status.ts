@@ -36,7 +36,7 @@ export function alertStatusRoute(npRoute: RouteDependencies) {
       try {
         const { clusterUuid } = request.params;
         const { alertTypeIds, filters } = request.body;
-        const rulesClient = (await context.alerting)?.getRulesClient();
+        const rulesClient = await (await context.alerting)?.getRulesClient();
         if (!rulesClient) {
           return response.ok({ body: undefined });
         }

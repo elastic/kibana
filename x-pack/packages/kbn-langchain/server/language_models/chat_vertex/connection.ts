@@ -82,6 +82,7 @@ export class ActionsClientChatConnection<Auth> extends ChatConnection<Auth> {
               tools: data?.tools,
               temperature: this.temperature,
               ...systemInstruction,
+              signal: options?.signal,
             },
           },
         };

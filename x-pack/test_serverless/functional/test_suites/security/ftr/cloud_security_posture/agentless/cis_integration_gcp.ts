@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import * as http from 'http';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { setupMockServer } from '../agentless_api/mock_agentless_api';
+import { setupMockServer } from './mock_agentless_api';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'svlCommonPage', 'cisAddIntegration', 'header']);
 

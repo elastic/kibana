@@ -129,7 +129,6 @@ describe('useDetailViewRedirect', () => {
     expect(url).toBe('service-overview-url');
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       serviceName: 'service-1',
-      environment: 'prod',
     });
   });
 

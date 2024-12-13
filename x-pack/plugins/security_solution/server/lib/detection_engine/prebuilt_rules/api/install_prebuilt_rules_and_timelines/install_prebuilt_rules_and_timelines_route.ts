@@ -53,7 +53,7 @@ export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPl
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const rulesClient = (await context.alerting).getRulesClient();
+          const rulesClient = await (await context.alerting).getRulesClient();
 
           const validated = await createPrepackagedRules(
             await context.securitySolution,

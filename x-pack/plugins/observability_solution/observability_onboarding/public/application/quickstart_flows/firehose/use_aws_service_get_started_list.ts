@@ -14,7 +14,7 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { AWSIndexName } from '../../../../common/aws_firehose';
 import { ObservabilityOnboardingContextValue } from '../../../plugin';
 
-interface AWSServiceGetStartedConfig {
+export interface AWSServiceGetStartedConfig {
   id: string;
   indexNameList: AWSIndexName[];
   title: string;

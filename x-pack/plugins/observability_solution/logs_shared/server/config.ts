@@ -26,4 +26,5 @@ export const configSchema = schema.object({
 
 export const config: PluginConfigDescriptor<LogsSharedConfig> = {
   schema: configSchema,
+  deprecations: ({ unused }) => [unused('savedObjects.logView.enabled', { level: 'warning' })],
 };

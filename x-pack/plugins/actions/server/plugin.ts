@@ -48,10 +48,7 @@ import { resolveCustomHosts } from './lib/custom_host_settings';
 import { events } from './lib/event_based_telemetry';
 import { ActionsClient } from './actions_client/actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
-import {
-  createEphemeralExecutionEnqueuerFunction,
-  createBulkExecutionEnqueuerFunction,
-} from './create_execute_function';
+import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
 import { registerActionsUsageCollector } from './usage';
 import {
   ActionExecutor,
@@ -480,14 +477,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         request,
         authorization: instantiateAuthorization(request),
         actionExecutor: actionExecutor!,
-        ephemeralExecutionEnqueuer: createEphemeralExecutionEnqueuerFunction({
-          taskManager: plugins.taskManager,
-          actionTypeRegistry: actionTypeRegistry!,
-          isESOCanEncrypt: isESOCanEncrypt!,
-          inMemoryConnectors: this.inMemoryConnectors,
-          configurationUtilities: actionsConfigUtils,
-          logger,
-        }),
         bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
@@ -753,14 +742,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             request,
             authorization: instantiateAuthorization(request),
             actionExecutor: actionExecutor!,
-            ephemeralExecutionEnqueuer: createEphemeralExecutionEnqueuerFunction({
-              taskManager,
-              actionTypeRegistry: actionTypeRegistry!,
-              isESOCanEncrypt: isESOCanEncrypt!,
-              inMemoryConnectors,
-              configurationUtilities: actionsConfigUtils,
-              logger,
-            }),
             bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,

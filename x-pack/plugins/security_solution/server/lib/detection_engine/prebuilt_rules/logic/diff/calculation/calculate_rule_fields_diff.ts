@@ -273,7 +273,6 @@ const threatMatchFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableThreatMat
   threat_index: scalarArrayDiffAlgorithm,
   threat_mapping: simpleDiffAlgorithm,
   threat_indicator_path: singleLineStringDiffAlgorithm,
-  threat_language: simpleDiffAlgorithm,
   alert_suppression: simpleDiffAlgorithm,
 };
 

@@ -77,6 +77,7 @@ export const Grid: Story<EntityGridStoriesArgs> = (args) => {
           onChangePage={setPageIndex}
           onChangeSort={setSort}
           pageIndex={pageIndex}
+          onFilterByType={() => {}}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -99,6 +100,7 @@ export const EmptyGrid: Story<EntityGridStoriesArgs> = (args) => {
       onChangePage={setPageIndex}
       onChangeSort={setSort}
       pageIndex={pageIndex}
+      onFilterByType={() => {}}
     />
   );
 };

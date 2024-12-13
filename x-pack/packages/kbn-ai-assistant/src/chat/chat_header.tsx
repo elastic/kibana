@@ -104,7 +104,9 @@ export function ChatHeader({
             size={breakpoint === 'xs' ? 'xs' : 's'}
             value={newTitle}
             className={css`
-              color: ${!!title ? theme.euiTheme.colors.text : theme.euiTheme.colors.subduedText};
+              color: ${!!title
+                ? theme.euiTheme.colors.textParagraph
+                : theme.euiTheme.colors.textSubdued};
             `}
             inputAriaLabel={i18n.translate('xpack.aiAssistant.chatHeader.editConversationInput', {
               defaultMessage: 'Edit conversation',

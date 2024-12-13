@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { CasesStatus } from '@kbn/cases-plugin/common';
+import type { CasesMetricsResponse } from '@kbn/cases-plugin/common';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useState, useEffect, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { APP_ID } from '../../../../../common/constants';
@@ -34,15 +35,18 @@ export const useCasesByStatus = ({ skip = false }) => {
   const uniqueQueryId = useMemo(() => `useCaseItems-${uuidv4()}`, []);
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [isLoading, setIsLoading] = useState(true);
-  const [casesCounts, setCasesCounts] = useState<CasesStatus | null>(null);
+  const [casesCounts, setCasesCounts] = useState<CasesMetricsResponse['status'] | null | undefined>(
+    null
+  );
 
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
     const fetchCases = async () => {
       try {
-        const casesResponse = await cases.api.cases.getCasesStatus(
+        const casesResponse = await cases.api.cases.getCasesMetrics(
           {
+            features: [CaseMetricsFeature.STATUS],
             from,
             to,
             owner: APP_ID,
@@ -51,7 +55,7 @@ export const useCasesByStatus = ({ skip = false }) => {
         );
 
         if (isSubscribed) {
-          setCasesCounts(casesResponse);
+          setCasesCounts(casesResponse.status);
         }
       } catch (error) {
         if (isSubscribed) {
@@ -88,14 +92,12 @@ export const useCasesByStatus = ({ skip = false }) => {
   }, [cases.api.cases, from, skip, to, setQuery, deleteQuery, uniqueQueryId]);
 
   return {
-    closed: casesCounts?.countClosedCases ?? 0,
-    inProgress: casesCounts?.countInProgressCases ?? 0,
+    closed: casesCounts?.closed ?? 0,
+    inProgress: casesCounts?.inProgress ?? 0,
     isLoading,
-    open: casesCounts?.countOpenCases ?? 0,
+    open: casesCounts?.open ?? 0,
     totalCounts:
-      (casesCounts?.countClosedCases ?? 0) +
-      (casesCounts?.countInProgressCases ?? 0) +
-      (casesCounts?.countOpenCases ?? 0),
+      (casesCounts?.closed ?? 0) + (casesCounts?.inProgress ?? 0) + (casesCounts?.open ?? 0),
     updatedAt,
   };
 };

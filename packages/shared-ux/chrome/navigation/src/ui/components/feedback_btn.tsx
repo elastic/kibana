@@ -50,7 +50,7 @@ export const FeedbackBtn: FC<Props> = ({ solutionId }) => {
       onDismiss={onDismiss}
       data-test-subj="sideNavfeedbackCallout"
     >
-      <EuiText size="s" color="dimgrey">
+      <EuiText size="s">
         {i18n.translate('sharedUXPackages.chrome.sideNavigation.feedbackCallout.title', {
           defaultMessage: `How's the navigation working for you? Missing anything?`,
         })}

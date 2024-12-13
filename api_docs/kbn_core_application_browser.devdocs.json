@@ -1194,12 +1194,16 @@
                 "path": "packages/core/application/core-application-browser-internal/src/ui/app_container.tsx"
               },
               {
+                "plugin": "@kbn/core-application-browser-mocks",
+                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts"
+              },
+              {
                 "plugin": "management",
                 "path": "src/plugins/management/public/application.tsx"
               },
               {
-                "plugin": "@kbn/core-application-browser-mocks",
-                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts"
+                "plugin": "assetInventory",
+                "path": "x-pack/plugins/asset_inventory/public/application.tsx"
               },
               {
                 "plugin": "fleet",

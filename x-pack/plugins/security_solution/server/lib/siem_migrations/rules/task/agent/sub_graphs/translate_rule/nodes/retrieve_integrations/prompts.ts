@@ -6,43 +6,44 @@
  */
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-
-export const CREATE_SEMANTIC_QUERY_PROMPT = ChatPromptTemplate.fromMessages([
+export const MATCH_INTEGRATION_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
-    `You are a helpful assistant that helps in translating provided titles, descriptions and data sources into a single summary of keywords specifically crafted to be used as a semantic search query, which are usually short and includes keywords that are valid for the usecase.
-    The data provided are collected from SIEM detection rules, and it is trying to match the description of a list of data sources, so provide good keywords that match this usecase.
-    Try to also detect what sort of vendor, solution or technology is required and add these as keywords as well.
-    Some examples would be to identify if its cloud, which vendor, network, host, endpoint, etc.`,
+    `You are an expert assistant in Cybersecurity, your task is to help migrating a SIEM detection rule, from Splunk Security to Elastic Security.
+You will be provided with a Splunk Detection Rule name by the user, your goal is to try to find the most relevant Elastic Integration from the integration list below if any, and return either the most relevant. If none seems relevant you should always return empty.
+Here are some context for you to reference for your task, read it carefully as you will get questions about it later:
+
+<context>
+<elastic_integrations>
+{integrations}
+</elastic_integrations>
+</context>
+`,
   ],
   [
     'human',
-    `<query>
-Title: {title}
-Description: {description}
-Query: {query}
-</query>
-
-Go through the relevant title, description and data sources from the above query and create a collection of keywords specifically crafted to be used as a semantic search query.
+    `See the below description of the relevant splunk rule and try to match it with any of the Elastic Integrations from before, do not guess or reply with anything else, only reply with the most relevant Elastic Integration if any.
+<splunk_rule>
+{splunk_rule}
+</splunk_rule>
 
 <guidelines>
-- The query should be short and concise.
-- Include keywords that are relevant to the use case.
-- Add related keywords you detected from the above query, like one or more vendor, product, cloud provider, OS platform etc.
-- Always reply with a JSON object with the key "query" and the value as the semantic search query inside three backticks as shown in the below example.
+- Always reply with a JSON object with the key "match" and the value being the most relevant matched integration title. Do not reply with anything else.
+- Only reply with exact matches, if you are unsure or do not find a very confident match, always reply with an empty string value in the match key, do not guess or reply with anything else.
+- If there is one elastic integration in the list that covers the relevant usecase, set the title of the matching integration as a value of the match key. Do not reply with anything else.
+- If there are multiple elastic integrations in the list that cover the same usecase, answer with the most specific of them, for example if the rule is related to "Sysmon" then the Sysmon integration is more specific than Windows.
 </guidelines>
 
-<example>
-U: <query>
-Title: Processes created by netsh
-Description: This search looks for processes launching netsh.exe to execute various commands via the netsh command-line utility. Netsh.exe is a command-line scripting utility that allows you to, either locally or remotely, display or modify the network configuration of a computer that is currently running. Netsh can be used as a persistence proxy technique to execute a helper .dll when netsh.exe is executed. In this search, we are looking for processes spawned by netsh.exe that are executing commands via the command line. Deprecated because we have another detection of the same type.
-Data Sources:
-</query>
-A: Please find the query keywords JSON object below:
+<example_response>
+U: <splunk_rule_name>
+Linux Auditd Add User Account Type
+</splunk_rule_name>
+A: Please find the match JSON object below:
 \`\`\`json
-{{"query": "windows host endpoint netsh.exe process creation command-line utility network configuration persistence proxy dll execution sysmon event id 1"}}
+{{"match": "auditd_manager"}}
 \`\`\`
-</example>`,
+</example_response>
+`,
   ],
-  ['ai', 'Please find the query keywords JSON object below:'],
+  ['ai', 'Please find the match JSON object below:'],
 ]);

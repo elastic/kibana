@@ -37,7 +37,8 @@
       "lens",
       "maps",
       "uiActions",
-      "logsDataAccess"
+      "logsDataAccess",
+      "savedSearch",
     ],
     "optionalPlugins": [
       "actions",

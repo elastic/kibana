@@ -7,7 +7,6 @@
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { isLensApi } from '@kbn/lens-plugin/public';
 import type { Serializable } from '@kbn/utility-types';
-import { APP_UI_ID } from '../../../common/constants';
 
 // All cell actions are disabled for these fields in Security
 const FIELDS_WITHOUT_CELL_ACTIONS = [
@@ -16,10 +15,6 @@ const FIELDS_WITHOUT_CELL_ACTIONS = [
   'signal.reason',
   'kibana.alert.reason',
 ];
-
-export const isInSecurityApp = (currentAppId?: string): boolean => {
-  return !!currentAppId && currentAppId === APP_UI_ID;
-};
 
 // @TODO: this is a temporary fix. It needs a better refactor on the consumer side here to
 // adapt to the new Embeddable architecture

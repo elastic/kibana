@@ -30,6 +30,7 @@ export function AlertsBadge({ entity }: { entity: InventoryEntity }) {
       status: 'active',
     })}`
   );
+
   return (
     <EuiToolTip
       position="bottom"

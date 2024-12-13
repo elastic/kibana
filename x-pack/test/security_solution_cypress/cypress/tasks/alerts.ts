@@ -81,6 +81,7 @@ import { FIELDS_BROWSER_BTN } from '../screens/rule_details';
 import { openFilterGroupContextMenu } from './common/filter_group';
 import { visitWithTimeRange } from './navigation';
 import { GET_DATA_GRID_HEADER_ACTION_BUTTON } from '../screens/common/data_grid';
+import { getDataTestSubjectSelector } from '../helpers/common';
 
 export const addExceptionFromFirstAlert = () => {
   expandFirstAlertActions();
@@ -195,9 +196,19 @@ export const closePageFilterPopover = (filterIndex: number) => {
   cy.get(OPTION_LIST_VALUES(filterIndex)).should('not.have.class', 'euiFilterButton-isSelected');
 };
 
+export const hasSelection = (filterIndex: number) => {
+  return cy.get(OPTION_LIST_VALUES(filterIndex)).then(($el) => {
+    return $el.find(getDataTestSubjectSelector('optionsListSelections')).length > 0;
+  });
+};
+
 export const clearAllSelections = (filterIndex: number) => {
-  cy.get(OPTION_LIST_VALUES(filterIndex)).realHover();
-  cy.get(OPTION_LIST_CLEAR_BTN).eq(filterIndex).click();
+  hasSelection(filterIndex).then(($el) => {
+    if ($el) {
+      cy.get(OPTION_LIST_VALUES(filterIndex)).realHover();
+      cy.get(OPTION_LIST_CLEAR_BTN).eq(filterIndex).click();
+    }
+  });
 };
 
 export const selectPageFilterValue = (filterIndex: number, ...values: string[]) => {

@@ -16,6 +16,7 @@ import { registerAssistantFunctions } from './assistant_functions';
 import { registerDeprecations } from './deprecations';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { createApmTelemetry } from './lib/apm_telemetry';
+import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
 import {
   APM_RULE_TYPE_ALERT_CONTEXT,
   apmRuleTypeAlertFieldMap,
@@ -114,6 +115,13 @@ export class APMPlugin
       };
     }) as APMRouteHandlerResources['plugins'];
 
+    const apmIndicesPromise = (async () => {
+      const coreStart = await getCoreStart();
+      const soClient = await getInternalSavedObjectsClient(coreStart);
+      const { getApmIndices } = plugins.apmDataAccess;
+      return getApmIndices(soClient);
+    })();
+
     // This if else block will go away in favour of removing Home Tutorial Integration
     // Ideally we will directly register a custom integration and pass the configs
     // for cloud, onPrem and Serverless so that the actual component can take
@@ -121,8 +129,7 @@ export class APMPlugin
     if (currentConfig.serverlessOnboarding && plugins.customIntegrations) {
       plugins.customIntegrations?.registerCustomIntegration(apmTutorialCustomIntegration);
     } else {
-      plugins.apmDataAccess
-        .getApmIndices()
+      apmIndicesPromise
         .then((apmIndices) => {
           plugins.home?.tutorials.registerTutorial(
             tutorialProvider({

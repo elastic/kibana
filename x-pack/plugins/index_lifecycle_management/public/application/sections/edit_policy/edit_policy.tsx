@@ -33,7 +33,6 @@ import {
   useKibana,
   useFormIsModified,
 } from '../../../shared_imports';
-import { toasts } from '../../services/notification';
 import { getPoliciesListPath, getPolicyViewPath } from '../../services/navigation';
 import { UseField } from './form';
 import { savePolicy } from './save_policy';
@@ -137,25 +136,21 @@ export const EditPolicy: React.FunctionComponent = () => {
     const { data: policy, isValid } = await form.submit();
 
     if (!isValid) {
-      toasts.addDanger(
-        i18n.translate('xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage', {
-          defaultMessage: 'Please fix the errors on this page.',
-        })
-      );
-    } else {
-      const name = getPolicyName();
-      setHasSubmittedForm(true);
-      const success = await savePolicy(
-        {
-          ...policy,
-          name,
-        },
-        isNewPolicy || isClonedPolicy
-      );
+      return;
+    }
 
-      if (success) {
-        backToPolicyList(name);
-      }
+    const name = getPolicyName();
+    setHasSubmittedForm(true);
+    const success = await savePolicy(
+      {
+        ...policy,
+        name,
+      },
+      isNewPolicy || isClonedPolicy
+    );
+
+    if (success) {
+      backToPolicyList(name);
     }
   };
 

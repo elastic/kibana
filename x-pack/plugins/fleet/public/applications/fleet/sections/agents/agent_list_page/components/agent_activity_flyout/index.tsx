@@ -34,8 +34,6 @@ import { getKuery } from '../../utils/get_kuery';
 
 import { AGENT_STATUSES } from '../../../services/agent_status';
 
-import type { AgentPolicy } from '../../../../../types';
-
 import { FlyoutBody } from './flyout_body';
 
 const FlyoutFooterWPadding = styled(EuiFlyoutFooter)`
@@ -48,15 +46,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
   refreshAgentActivity: boolean;
   setSearch: (search: string) => void;
   setSelectedStatus: (status: string[]) => void;
-  agentPolicies: AgentPolicy[];
-}> = ({
-  onClose,
-  onAbortSuccess,
-  refreshAgentActivity,
-  setSearch,
-  setSelectedStatus,
-  agentPolicies,
-}) => {
+}> = ({ onClose, onAbortSuccess, refreshAgentActivity, setSearch, setSelectedStatus }) => {
   const { notifications } = useStartServices();
   const { data: agentPoliciesData } = useGetAgentPolicies({
     perPage: SO_SEARCH_LIMIT,
@@ -167,7 +157,6 @@ export const AgentActivityFlyout: React.FunctionComponent<{
           onClickShowMore={onClickShowMore}
           dateFilter={dateFilter}
           onChangeDateFilter={onChangeDateFilter}
-          agentPolicies={agentPolicies}
         />
         <FlyoutFooterWPadding>
           <EuiFlexGroup justifyContent="flexStart">

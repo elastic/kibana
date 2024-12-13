@@ -915,12 +915,16 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         <PolicyTemplateInfo postureType={input.policy_template} />
         <EuiSpacer size="l" />
         {/* Defines the single enabled input of the active policy template */}
-        <PolicyTemplateInputSelector
-          input={input}
-          setInput={setEnabledPolicyInput}
-          disabled={isEditPage}
-        />
-        <EuiSpacer size="l" />
+        {input.type === 'cloudbeat/vuln_mgmt_aws' ? null : (
+          <>
+            <PolicyTemplateInputSelector
+              input={input}
+              setInput={setEnabledPolicyInput}
+              disabled={isEditPage}
+            />
+            <EuiSpacer size="l" />
+          </>
+        )}
 
         {/* AWS account type selection box */}
         {input.type === 'cloudbeat/cis_aws' && (
@@ -954,8 +958,11 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           />
         )}
 
-        {/* Defines the name/description */}
-        <EuiSpacer size="l" />
+        {input.type === 'cloudbeat/vuln_mgmt_aws' ? null : (
+          <>
+            <EuiSpacer size="l" />
+          </>
+        )}
         <IntegrationSettings
           fields={integrationFields}
           onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}

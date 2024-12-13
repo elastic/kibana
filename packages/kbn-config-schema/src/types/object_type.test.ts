@@ -517,6 +517,41 @@ describe('nested unknowns', () => {
       },
     });
   });
+
+  describe(`stripUnknownKeys: true in validate`, () => {
+    test('should strip unknown keys', () => {
+      const type = schema.object({
+        myObj: schema.object({
+          foo: schema.string({ defaultValue: 'test' }),
+          nested: schema.object({
+            a: schema.number(),
+          }),
+        }),
+      });
+
+      expect(
+        type.validate(
+          {
+            myObj: {
+              bar: 'baz',
+              nested: {
+                a: 1,
+                b: 2,
+              },
+            },
+          },
+          void 0,
+          void 0,
+          { stripUnknownKeys: true }
+        )
+      ).toStrictEqual({
+        myObj: {
+          foo: 'test',
+          nested: { a: 1 },
+        },
+      });
+    });
+  });
 });
 
 test('handles optional properties', () => {

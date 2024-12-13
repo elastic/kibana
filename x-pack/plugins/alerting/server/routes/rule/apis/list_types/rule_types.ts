@@ -14,6 +14,7 @@ import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 import { transformRuleTypesResponseV1 } from './transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const ruleTypesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -22,6 +23,7 @@ export const ruleTypesRoute = (
   router.get(
     {
       path: `${BASE_ALERTING_API_PATH}/rule_types`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'public',
         summary: `Get the rule types`,
@@ -42,7 +44,7 @@ export const ruleTypesRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const rulesClient = await (await context.alerting).getRulesClient();
         const ruleTypes = await rulesClient.listRuleTypes();
 
         const responseBody: TypesRulesResponseBodyV1 = transformRuleTypesResponseV1(ruleTypes);

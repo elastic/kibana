@@ -65,7 +65,7 @@ export const DynamicFields = () => {
                       onClick={() => removeItem(item.id)}
                       iconType="minusInCircle"
                       aria-label="Remove item"
-                      style={{ marginTop: '28px' }}
+                      css={{ marginTop: '28px' }}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -155,7 +155,7 @@ export const DynamicFieldsValidation = () => {
                           onClick={() => removeItem(item.id)}
                           iconType="minusInCircle"
                           aria-label="Remove item"
-                          style={{ marginTop: '28px' }}
+                          css={{ marginTop: '28px' }}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -218,7 +218,7 @@ export const DynamicFieldsReorder = () => {
                             return (
                               <EuiFlexGroup key={item.id}>
                                 <EuiFlexItem grow={false}>
-                                  <div {...provided.dragHandleProps} style={{ marginTop: '30px' }}>
+                                  <div {...provided.dragHandleProps} css={{ marginTop: '30px' }}>
                                     <EuiIcon type="grab" />
                                   </div>
                                 </EuiFlexItem>
@@ -245,7 +245,7 @@ export const DynamicFieldsReorder = () => {
                                     onClick={() => removeItem(item.id)}
                                     iconType="minusInCircle"
                                     aria-label="Remove item"
-                                    style={{ marginTop: '28px' }}
+                                    css={{ marginTop: '28px' }}
                                   />
                                 </EuiFlexItem>
                               </EuiFlexGroup>

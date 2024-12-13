@@ -7,11 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { DocLinksServiceSetup } from '@kbn/core/server';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import type { AlertingRouter } from '../../types';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -20,6 +22,7 @@ const paramSchema = schema.object({
 export const getAlertRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
+  docLinks: DocLinksServiceSetup,
   usageCounter?: UsageCounter,
   isServerless?: boolean
 ) => {
@@ -29,12 +32,20 @@ export const getAlertRoute = (
       validate: {
         params: paramSchema,
       },
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: isServerless ? 'internal' : 'public',
         summary: 'Get an alert',
         tags: ['oas-tag:alerting'],
-        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
-        deprecated: true,
+        deprecated: {
+          documentationUrl: docLinks.links.alerting.legacyRuleApiDeprecations,
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiMethod: 'GET',
+            newApiPath: '/api/alerting/rule/{id}',
+          },
+        },
       },
     },
     router.handleLegacyErrors(async function (context, req, res) {
@@ -43,7 +54,8 @@ export const getAlertRoute = (
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
       trackLegacyRouteUsage('get', usageCounter);
-      const rulesClient = (await context.alerting).getRulesClient();
+      const alertingContext = await context.alerting;
+      const rulesClient = await alertingContext.getRulesClient();
       const { id } = req.params;
       const { systemActions, ...rule } = await rulesClient.get({ id, excludeFromPublicApi: true });
       return res.ok({

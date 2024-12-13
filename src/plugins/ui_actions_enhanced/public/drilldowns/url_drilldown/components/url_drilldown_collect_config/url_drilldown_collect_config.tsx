@@ -137,7 +137,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps>
         data-test-subj="urlDrilldownAdditionalOptions"
       >
         <EuiSpacer size={'s'} />
-        <EuiPanel color="subdued" borderRadius="none" hasShadow={false} style={{ border: 'none' }}>
+        <EuiPanel color="subdued" borderRadius="none" hasShadow={false} css={{ border: 'none' }}>
           <UrlDrilldownOptionsComponent
             options={{ ...DEFAULT_URL_DRILLDOWN_OPTIONS, ...config }}
             onOptionChange={(change) => {

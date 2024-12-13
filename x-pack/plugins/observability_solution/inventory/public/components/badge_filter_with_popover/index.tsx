@@ -18,19 +18,18 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import React, { useState } from 'react';
-import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
+import type { EntityTypeCheckOptions } from '../../../common/rt_types';
 
 interface Props {
   field: string;
   value: string;
+  onFilter: (value: string, checked: EntityTypeCheckOptions) => void;
 }
 
-export function BadgeFilterWithPopover({ field, value }: Props) {
+export function BadgeFilterWithPopover({ field, value, onFilter }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const theme = useEuiTheme();
-  const { addFilter } = useUnifiedSearchContext();
 
   return (
     <EuiPopover
@@ -82,7 +81,7 @@ export function BadgeFilterWithPopover({ field, value }: Props) {
             data-test-subj="inventoryBadgeFilterWithPopoverFilterForButton"
             iconType="plusInCircle"
             onClick={() => {
-              addFilter({ fieldName: ENTITY_TYPE, operation: '+', value });
+              onFilter(value, 'on');
             }}
           >
             {i18n.translate('xpack.inventory.badgeFilterWithPopover.filterForButtonEmptyLabel', {
@@ -92,10 +91,10 @@ export function BadgeFilterWithPopover({ field, value }: Props) {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButtonEmpty
-            data-test-subj="inventoryBadgeFilterWithPopoverFilterForButton"
+            data-test-subj="inventoryBadgeFilterWithPopoverFilterOutButton"
             iconType="minusInCircle"
             onClick={() => {
-              addFilter({ fieldName: ENTITY_TYPE, operation: '-', value });
+              onFilter(value, 'off');
             }}
           >
             {i18n.translate('xpack.inventory.badgeFilterWithPopover.filterForButtonEmptyLabel', {

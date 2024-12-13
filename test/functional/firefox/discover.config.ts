@@ -18,7 +18,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...baseConfig.getAll(),
 
     testFiles: [
-      require.resolve('../apps/discover/classic'),
       require.resolve('../apps/discover/esql'),
       require.resolve('../apps/discover/group1'),
       require.resolve('../apps/discover/group2_data_grid1'),

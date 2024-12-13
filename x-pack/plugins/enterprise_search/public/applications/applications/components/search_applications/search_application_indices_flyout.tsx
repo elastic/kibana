@@ -26,7 +26,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
-import { Status } from '../../../../../common/types/api';
 
 import { EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
 
@@ -34,8 +33,6 @@ import { SEARCH_INDEX_PATH } from '../../../enterprise_search_content/routes';
 import { healthColorsMap } from '../../../shared/constants/health_colors';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
-
-import { SearchApplicationError } from '../search_application/search_application_error';
 
 import { SearchApplicationIndicesFlyoutLogic } from './search_application_indices_flyout_logic';
 
@@ -45,15 +42,11 @@ export const SearchApplicationIndicesFlyout: React.FC = () => {
     searchApplicationName,
     isSearchApplicationLoading,
     isFlyoutVisible,
-    fetchSearchApplicationApiStatus,
-    fetchSearchApplicationApiError,
   } = useValues(SearchApplicationIndicesFlyoutLogic);
   const { closeFlyout } = useActions(SearchApplicationIndicesFlyoutLogic);
 
   if (!searchApplicationData) return null;
   const { indices } = searchApplicationData;
-  const searchApplicationFetchError =
-    fetchSearchApplicationApiStatus === Status.ERROR ? true : false;
 
   const columns: Array<EuiBasicTableColumn<EnterpriseSearchApplicationIndex>> = [
     {
@@ -139,11 +132,7 @@ export const SearchApplicationIndicesFlyout: React.FC = () => {
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
-          {searchApplicationFetchError ? (
-            <SearchApplicationError error={fetchSearchApplicationApiError} />
-          ) : (
-            <EuiBasicTable items={indices} columns={columns} loading={isSearchApplicationLoading} />
-          )}
+          <EuiBasicTable items={indices} columns={columns} loading={isSearchApplicationLoading} />
         </EuiFlyoutBody>
       </EuiFlyout>
     );

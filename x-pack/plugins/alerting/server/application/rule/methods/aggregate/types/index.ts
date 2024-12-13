@@ -9,17 +9,9 @@ import { TypeOf } from '@kbn/config-schema';
 import { KueryNode } from '@kbn/es-query';
 import { aggregateOptionsSchema } from '../schemas';
 
-type AggregateOptionsSchemaTypes = TypeOf<typeof aggregateOptionsSchema>;
 export type AggregateOptions = TypeOf<typeof aggregateOptionsSchema> & {
-  search?: AggregateOptionsSchemaTypes['search'];
-  defaultSearchOperator?: AggregateOptionsSchemaTypes['defaultSearchOperator'];
-  searchFields?: AggregateOptionsSchemaTypes['searchFields'];
-  hasReference?: AggregateOptionsSchemaTypes['hasReference'];
   // Adding filter as in schema it's defined as any instead of KueryNode
   filter?: string | KueryNode;
-  page?: AggregateOptionsSchemaTypes['page'];
-  perPage?: AggregateOptionsSchemaTypes['perPage'];
-  filterConsumers?: string[];
 };
 
 export interface AggregateParams<AggregationResult> {

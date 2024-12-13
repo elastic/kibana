@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, CoreStart } from '@kbn/core/server';
+import { Logger, CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   FleetStartContract,
   PostPackagePolicyCreateCallback,
@@ -22,6 +22,7 @@ import {
   SOURCE_MAP_API_KEY_PATH,
 } from './get_package_policy_decorators';
 import { createInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
+import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
 
 export async function registerFleetPolicyCallbacks({
@@ -148,7 +149,7 @@ function onPackagePolicyCreateOrUpdate({
   coreStart,
 }: {
   fleetPluginStart: FleetStartContract;
-  getApmIndices: () => Promise<APMIndices>;
+  getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMIndices>;
   coreStart: CoreStart;
 }): PutPackagePolicyUpdateCallback & PostPackagePolicyCreateCallback {
   return async (packagePolicy) => {
@@ -157,7 +158,8 @@ function onPackagePolicyCreateOrUpdate({
     }
 
     const { asInternalUser } = coreStart.elasticsearch.client;
-    const apmIndices = await getApmIndices();
+    const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
+    const apmIndices = await getApmIndices(savedObjectsClient);
 
     const internalESClient = await createInternalESClient({
       debug: false,

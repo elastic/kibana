@@ -50,7 +50,7 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
         }
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
-          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesClient = await ctx.alerting.getRulesClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           checkDefaultRuleExceptionListReferences({ exceptionLists: request.body.exceptions_list });

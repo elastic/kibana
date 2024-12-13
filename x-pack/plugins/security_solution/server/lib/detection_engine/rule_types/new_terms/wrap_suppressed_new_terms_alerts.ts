@@ -58,7 +58,7 @@ export const wrapSuppressedNewTermsAlerts = ({
 
     const suppressionTerms = getSuppressionTerms({
       alertSuppression: completeRule?.ruleParams?.alertSuppression,
-      fields: event.fields,
+      input: event.fields,
     });
 
     const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);

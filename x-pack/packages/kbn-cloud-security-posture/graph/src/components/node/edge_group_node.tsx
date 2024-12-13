@@ -16,7 +16,7 @@ export const EdgeGroupNode: React.FC<NodeProps> = memo((props: NodeProps) => {
     <>
       <NodeResizeControl
         position="right"
-        style={{ borderColor: 'transparent', background: 'transparent' }}
+        css={{ borderColor: 'transparent', background: 'transparent' }}
       >
         <Handle
           type="target"

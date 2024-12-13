@@ -16,6 +16,7 @@ import {
   GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
+  RUN_SCRIPT_ROUTE,
   SCAN_ROUTE,
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
@@ -80,7 +81,7 @@ export const fillUpNewEsqlRule = (name = 'Test', description = 'Test', query: st
   cy.getByTestSubj('create-new-rule').click();
   cy.getByTestSubj('stepDefineRule').within(() => {
     cy.getByTestSubj('esqlRuleType').click();
-    cy.getByTestSubj('detectionEngineStepDefineRuleEsqlQueryBar').within(() => {
+    cy.getByTestSubj('ruleEsqlQueryBar').within(() => {
       cy.getByTestSubj('globalQueryBar').click();
       cy.getByTestSubj('kibanaCodeEditor').type(query);
     });
@@ -272,6 +273,11 @@ export const ensureResponseActionAuthzAccess = (
     case 'scan':
       url = SCAN_ROUTE;
       Object.assign(apiPayload, { parameters: { path: 'scan/two' } });
+      break;
+
+    case 'runscript':
+      url = RUN_SCRIPT_ROUTE;
+      Object.assign(apiPayload, { parameters: { Raw: 'ls' } });
       break;
 
     default:

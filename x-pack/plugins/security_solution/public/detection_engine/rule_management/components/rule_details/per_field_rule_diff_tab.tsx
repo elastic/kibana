@@ -16,9 +16,10 @@ import * as i18n from './translations';
 
 interface PerFieldRuleDiffTabProps {
   ruleDiff: PartialRuleDiff;
+  header?: React.ReactNode;
 }
 
-export const PerFieldRuleDiffTab = ({ ruleDiff }: PerFieldRuleDiffTabProps) => {
+export const PerFieldRuleDiffTab = ({ ruleDiff, header }: PerFieldRuleDiffTabProps) => {
   const fieldsToRender = useMemo(() => {
     const fields: FieldsGroupDiff[] = [];
     // Filter out diff outcomes that we don't support displaying in the per-field diff flyout
@@ -44,6 +45,7 @@ export const PerFieldRuleDiffTab = ({ ruleDiff }: PerFieldRuleDiffTabProps) => {
   return (
     <>
       <RuleDiffHeaderBar />
+      {header}
       {aboutFields.length !== 0 && (
         <RuleDiffSection
           title={i18n.ABOUT_SECTION_LABEL}

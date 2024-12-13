@@ -79,7 +79,7 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
         type: formState.type,
         fields: formState.customOptions
           ? {
-              ...formState.customOptions,
+              customOptions: formState.customOptions,
             }
           : {
               ...formState.fields,

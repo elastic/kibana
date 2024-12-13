@@ -18,7 +18,8 @@
         "closed",
         "hidden",
         "none"
-      ]
+      ],
+      "allow_partial_search_results": "__flag__"
     },
     "methods": [
       "POST"

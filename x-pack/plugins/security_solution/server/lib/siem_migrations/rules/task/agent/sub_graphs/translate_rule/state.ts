@@ -14,6 +14,7 @@ import type {
   RuleMigration,
 } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { Integration } from '../../../../types';
+import type { TranslateRuleValidationErrors } from './types';
 
 export const translateRuleState = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
@@ -21,17 +22,29 @@ export const translateRuleState = Annotation.Root({
     default: () => [],
   }),
   original_rule: Annotation<OriginalRule>(),
-  integrations: Annotation<Integration[]>({
+  integration: Annotation<Integration>({
     reducer: (current, value) => value ?? current,
-    default: () => [],
+    default: () => ({} as Integration),
+  }),
+  translation_finalized: Annotation<boolean>({
+    reducer: (current, value) => value ?? current,
+    default: () => false,
   }),
   inline_query: Annotation<string>({
+    reducer: (current, value) => value ?? current,
+    default: () => '',
+  }),
+  semantic_query: Annotation<string>({
     reducer: (current, value) => value ?? current,
     default: () => '',
   }),
   elastic_rule: Annotation<ElasticRule>({
     reducer: (state, action) => ({ ...state, ...action }),
     default: () => ({} as ElasticRule),
+  }),
+  validation_errors: Annotation<TranslateRuleValidationErrors>({
+    reducer: (current, value) => value ?? current,
+    default: () => ({ iterations: 0 } as TranslateRuleValidationErrors),
   }),
   translation_result: Annotation<SiemMigrationRuleTranslationResult>({
     reducer: (current, value) => value ?? current,

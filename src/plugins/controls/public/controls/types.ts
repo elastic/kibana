@@ -9,7 +9,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { SerializedPanelState } from '@kbn/presentation-containers';
+import { HasSerializableState } from '@kbn/presentation-containers';
 import { PanelCompatibleComponent } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
   HasParentApi,
@@ -39,16 +39,12 @@ export type DefaultControlApi = PublishesDataLoading &
   CanClearSelections &
   HasType &
   HasUniqueId &
+  HasSerializableState<DefaultControlState> &
   HasParentApi<ControlGroupApi> & {
     setDataLoading: (loading: boolean) => void;
     setBlockingError: (error: Error | undefined) => void;
     grow: PublishingSubject<boolean | undefined>;
     width: PublishingSubject<ControlWidth | undefined>;
-
-    // Can not use HasSerializableState interface
-    // HasSerializableState types serializeState as function returning 'MaybePromise'
-    // Controls serializeState is sync
-    serializeState: () => SerializedPanelState<DefaultControlState>;
   };
 
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<
@@ -59,7 +55,7 @@ export type ControlApiRegistration<ControlApi extends DefaultControlApi = Defaul
 export type ControlApiInitialization<ControlApi extends DefaultControlApi = DefaultControlApi> =
   Omit<
     ControlApiRegistration<ControlApi>,
-    'serializeState' | 'getTypeDisplayName' | 'clearSelections'
+    'serializeState' | 'getTypeDisplayName' | keyof CanClearSelections
   >;
 
 export interface ControlFactory<

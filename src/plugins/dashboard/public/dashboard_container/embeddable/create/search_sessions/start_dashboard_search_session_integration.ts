@@ -12,7 +12,6 @@ import { skip } from 'rxjs';
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 
 import { dataService } from '../../../../services/kibana_services';
-import { DashboardContainer } from '../../dashboard_container';
 import type { DashboardApi, DashboardCreationOptions } from '../../../..';
 import { newSession$ } from './new_session';
 import { getDashboardCapabilities } from '../../../../utils/get_dashboard_capabilities';
@@ -21,8 +20,9 @@ import { getDashboardCapabilities } from '../../../../utils/get_dashboard_capabi
  * Enables dashboard search sessions.
  */
 export function startDashboardSearchSessionIntegration(
-  this: DashboardContainer,
-  searchSessionSettings: DashboardCreationOptions['searchSessionSettings']
+  dashboardApi: DashboardApi,
+  searchSessionSettings: DashboardCreationOptions['searchSessionSettings'],
+  setSearchSessionId: (searchSessionId: string) => void
 ) {
   if (!searchSessionSettings) return;
 
@@ -33,26 +33,23 @@ export function startDashboardSearchSessionIntegration(
     createSessionRestorationDataProvider,
   } = searchSessionSettings;
 
-  dataService.search.session.enableStorage(
-    createSessionRestorationDataProvider(this as DashboardApi),
-    {
-      isDisabled: () =>
-        getDashboardCapabilities().storeSearchSession
-          ? { disabled: false }
-          : {
-              disabled: true,
-              reasonText: noSearchSessionStorageCapabilityMessage,
-            },
-    }
-  );
+  dataService.search.session.enableStorage(createSessionRestorationDataProvider(dashboardApi), {
+    isDisabled: () =>
+      getDashboardCapabilities().storeSearchSession
+        ? { disabled: false }
+        : {
+            disabled: true,
+            reasonText: noSearchSessionStorageCapabilityMessage,
+          },
+  });
 
   // force refresh when the session id in the URL changes. This will also fire off the "handle search session change" below.
   const searchSessionIdChangeSubscription = sessionIdUrlChangeObservable
     ?.pipe(skip(1))
-    .subscribe(() => this.forceRefresh());
+    .subscribe(() => dashboardApi.forceRefresh());
 
-  newSession$(this).subscribe(() => {
-    const currentSearchSessionId = this.getState().explicitInput.searchSessionId;
+  const newSessionSubscription = newSession$(dashboardApi).subscribe(() => {
+    const currentSearchSessionId = dashboardApi.searchSessionId$.value;
 
     const updatedSearchSessionId: string | undefined = (() => {
       let searchSessionIdFromURL = getSearchSessionIdFromURL();
@@ -72,10 +69,12 @@ export function startDashboardSearchSessionIntegration(
     })();
 
     if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
-      this.searchSessionId = updatedSearchSessionId;
-      this.searchSessionId$.next(updatedSearchSessionId);
+      setSearchSessionId(updatedSearchSessionId);
     }
   });
 
-  this.integrationSubscriptions.add(searchSessionIdChangeSubscription);
+  return () => {
+    searchSessionIdChangeSubscription?.unsubscribe();
+    newSessionSubscription.unsubscribe();
+  };
 }

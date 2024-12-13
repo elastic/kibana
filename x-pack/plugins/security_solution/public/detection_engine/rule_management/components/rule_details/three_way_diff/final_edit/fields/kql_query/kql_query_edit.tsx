@@ -12,13 +12,13 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import type { DataViewBase } from '@kbn/es-query';
 import { schema } from '../../../../../../../rule_creation_ui/components/step_define_rule/schema';
 import { HiddenField, UseField } from '../../../../../../../../shared_imports';
-import { QueryBarDefineRule } from '../../../../../../../rule_creation_ui/components/query_bar';
+import { QueryBarField } from '../../../../../../../rule_creation_ui/components/query_bar_field';
 import * as stepDefineRuleI18n from '../../../../../../../rule_creation_ui/components/step_define_rule/translations';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import type { SetRuleQuery } from '../../../../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { useRuleFromTimeline } from '../../../../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { useGetSavedQuery } from '../../../../../../../../detections/pages/detection_engine/rules/use_get_saved_query';
-import type { RuleFieldEditComponentProps } from '../rule_field_edit_component_props';
+import type { RuleFieldEditComponentProps } from '../../../field_final_side';
 import { useDiffableRuleDataView } from '../hooks/use_diffable_rule_data_view';
 
 export function KqlQueryEdit({
@@ -58,7 +58,7 @@ export function KqlQueryEdit({
             <ImportTimelineQueryButton handleOpenTimelineSearch={toggleIsTimelineSearchOpen} />
           ),
         }}
-        component={QueryBarDefineRule}
+        component={QueryBarField}
         componentProps={{
           indexPattern: dataView ?? DEFAULT_DATA_VIEW,
           isLoading,
