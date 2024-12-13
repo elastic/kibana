@@ -180,7 +180,7 @@ export const defaultConfig: StorybookConfig = {
         fs: false,
       },
     };
-    config.watch = false;
+
     config.watchOptions = {
       ...config.watchOptions,
       ignored: IGNORE_GLOBS,
