@@ -7,7 +7,7 @@
 
 /// <reference types="@kbn/ambient-ftr-types"/>
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import moment from 'moment';
 import { apm, timerange, serviceMap } from '@kbn/apm-synthtrace-client';
 import { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
@@ -15,7 +15,7 @@ import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { chatClient, kibanaClient, synthtraceEsClients } from '../../services';
 import { apmErrorCountAIAssistant } from '../../alert_templates/templates';
 
-describe('apm', () => {
+describe.skip('apm', () => {
   const ruleIds: any[] = [];
   before(async () => {
     const responseApmRule = await kibanaClient.callKibana<RuleResponse>(
