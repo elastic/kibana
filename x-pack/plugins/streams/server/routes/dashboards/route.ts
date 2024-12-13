@@ -6,11 +6,19 @@
  */
 
 import { z } from '@kbn/zod';
-import { Asset, Dashboard, ReadDashboard } from '../../../common/assets';
+import { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
+import { internal } from '@hapi/boom';
+import { Asset, DashboardAsset } from '../../../common/assets';
 import { createServerRoute } from '../create_server_route';
 
+export interface SanitizedDashboardAsset {
+  id: string;
+  label: string;
+  tags: string[];
+}
+
 export interface ListDashboardsResponse {
-  dashboards: ReadDashboard[];
+  dashboards: SanitizedDashboardAsset[];
 }
 
 export interface LinkDashboardResponse {
@@ -22,12 +30,24 @@ export interface UnlinkDashboardResponse {
 }
 
 export interface SuggestDashboardResponse {
-  suggestions: Array<{
-    dashboard: ReadDashboard;
-  }>;
+  suggestions: SanitizedDashboardAsset[];
 }
 
-export const listDashboardsRoute = createServerRoute({
+export type BulkUpdateAssetsResponse =
+  | {
+      acknowledged: boolean;
+    }
+  | { errors: ErrorCause[] };
+
+function sanitizeDashboardAsset(asset: DashboardAsset): SanitizedDashboardAsset {
+  return {
+    id: asset.assetId,
+    label: asset.label,
+    tags: asset.tags,
+  };
+}
+
+const listDashboardsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{id}/dashboards',
   options: {
     access: 'internal',
@@ -44,8 +64,8 @@ export const listDashboardsRoute = createServerRoute({
       path: { id: streamId },
     } = params;
 
-    function isDashboard(asset: Asset): asset is Dashboard {
-      return asset.type === 'dashboard';
+    function isDashboard(asset: Asset): asset is DashboardAsset {
+      return asset.assetType === 'dashboard';
     }
 
     return {
@@ -56,16 +76,12 @@ export const listDashboardsRoute = createServerRoute({
         })
       )
         .filter(isDashboard)
-        .map((asset) => ({
-          id: asset.assetId,
-          label: asset.label,
-          tags: asset.tags,
-        })),
+        .map(sanitizeDashboardAsset),
     };
   },
 });
 
-export const linkDashboardRoute = createServerRoute({
+const linkDashboardRoute = createServerRoute({
   endpoint: 'PUT /api/streams/{id}/dashboards/{dashboardId}',
   options: {
     access: 'internal',
@@ -96,7 +112,7 @@ export const linkDashboardRoute = createServerRoute({
   },
 });
 
-export const unlinkDashboardRoute = createServerRoute({
+const unlinkDashboardRoute = createServerRoute({
   endpoint: 'DELETE /api/streams/{id}/dashboards/{dashboardId}',
   options: {
     access: 'internal',
@@ -127,7 +143,7 @@ export const unlinkDashboardRoute = createServerRoute({
   },
 });
 
-export const suggestDashboardsRoute = createServerRoute({
+const suggestDashboardsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{id}/dashboards/_suggestions',
   options: {
     access: 'internal',
@@ -147,30 +163,93 @@ export const suggestDashboardsRoute = createServerRoute({
     const assetsClient = await assets.getClientWithRequest({ request });
 
     const {
-      path: { id: streamId },
       query: { query },
       body: { tags },
     } = params;
 
     const suggestions = (
       await assetsClient.getSuggestions({
-        entityId: streamId,
-        entityType: 'stream',
-        assetType: 'dashboard',
+        assetTypes: ['dashboard'],
         query,
         tags,
       })
-    ).map(({ asset: dashboard }) => ({
-      dashboard: {
-        id: dashboard.assetId,
-        label: dashboard.label,
-        tags: dashboard.tags,
-      },
-    }));
+    ).assets.map((asset) => {
+      return sanitizeDashboardAsset(asset as DashboardAsset);
+    });
 
     return {
       suggestions,
     };
+  },
+});
+
+const dashboardSchema = z.object({
+  id: z.string(),
+});
+
+const bulkDashboardsRoute = createServerRoute({
+  endpoint: `POST /api/streams/{id}/dashboards/_bulk`,
+  options: {
+    access: 'internal',
+  },
+  params: z.object({
+    path: z.object({
+      id: z.string(),
+    }),
+    body: z.object({
+      operations: z.array(
+        z.union([
+          z.object({
+            create: dashboardSchema,
+          }),
+          z.object({
+            delete: dashboardSchema,
+          }),
+        ])
+      ),
+    }),
+  }),
+  handler: async ({ params, request, assets, logger }): Promise<BulkUpdateAssetsResponse> => {
+    const assetsClient = await assets.getClientWithRequest({ request });
+
+    const {
+      path: { id: streamId },
+      body: { operations },
+    } = params;
+
+    const result = await assetsClient.bulk(
+      {
+        entityId: streamId,
+        entityType: 'stream',
+      },
+      operations.map((operation) => {
+        if ('create' in operation) {
+          return {
+            create: {
+              asset: {
+                assetType: 'dashboard',
+                assetId: operation.create.id,
+              },
+            },
+          };
+        }
+        return {
+          delete: {
+            asset: {
+              assetType: 'dashboard',
+              assetId: operation.delete.id,
+            },
+          },
+        };
+      })
+    );
+
+    if (result.errors) {
+      logger.error(`Error indexing ${result.errors.length} items`);
+      throw internal(`Could not index all items`, { errors: result.errors });
+    }
+
+    return { acknowledged: true };
   },
 });
 
@@ -179,4 +258,5 @@ export const dashboardRoutes = {
   ...linkDashboardRoute,
   ...unlinkDashboardRoute,
   ...suggestDashboardsRoute,
+  ...bulkDashboardsRoute,
 };

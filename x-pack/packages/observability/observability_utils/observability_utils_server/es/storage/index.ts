@@ -26,6 +26,7 @@ export type StorageSettings = IndexStorageSettings;
 
 export interface IStorageAdapter<TStorageSettings extends StorageSettings = never> {
   getSearchIndexPattern(): string;
+  getWriteTarget(): string;
 }
 
 export type StorageSettingsOf<TStorageAdapter extends IStorageAdapter<StorageSettings>> =

@@ -7,7 +7,7 @@
 
 import { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/observability-utils-server/es/storage';
-import { Observable, defer, from, lastValueFrom, share } from 'rxjs';
+import { Observable, defer, from, lastValueFrom, shareReplay } from 'rxjs';
 import { StreamsPluginStartDependencies } from '../../../types';
 import { AssetClient } from './asset_client';
 import { assetStorageSettings } from './storage_settings';
@@ -18,7 +18,7 @@ export class AssetService {
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
     private readonly logger: Logger
   ) {
-    this.adapter$ = defer(() => from(this.prepareIndex())).pipe(share());
+    this.adapter$ = defer(() => from(this.prepareIndex())).pipe(shareReplay(1));
   }
 
   async prepareIndex(): Promise<StorageIndexAdapter<typeof assetStorageSettings>> {

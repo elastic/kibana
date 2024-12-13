@@ -23,9 +23,9 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ReadDashboard } from '@kbn/streams-plugin/common/assets';
 import { debounce } from 'lodash';
 import React, { useMemo, useState, useEffect } from 'react';
+import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { DashboardsTable } from './dashboard_table';
@@ -37,8 +37,8 @@ export function AddDashboardFlyout({
   onClose,
 }: {
   entityId: string;
-  onAddDashboards: (dashboard: ReadDashboard[]) => Promise<void>;
-  linkedDashboards: ReadDashboard[];
+  onAddDashboards: (dashboard: SanitizedDashboardAsset[]) => Promise<void>;
+  linkedDashboards: SanitizedDashboardAsset[];
   onClose: () => void;
 }) {
   const {
@@ -53,7 +53,7 @@ export function AddDashboardFlyout({
   const [query, setQuery] = useState('');
 
   const [submittedQuery, setSubmittedQuery] = useState(query);
-  const [selectedDashboards, setSelectedDashboards] = useState<ReadDashboard[]>([]);
+  const [selectedDashboards, setSelectedDashboards] = useState<SanitizedDashboardAsset[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -81,13 +81,11 @@ export function AddDashboardFlyout({
         })
         .then(({ suggestions }) => {
           return {
-            dashboards: suggestions
-              .map((suggestion) => suggestion.dashboard)
-              .filter((dashboard) => {
-                return !linkedDashboards.find(
-                  (linkedDashboard) => linkedDashboard.id === dashboard.id
-                );
-              }),
+            dashboards: suggestions.filter((dashboard) => {
+              return !linkedDashboards.find(
+                (linkedDashboard) => linkedDashboard.id === dashboard.id
+              );
+            }),
           };
         });
     },
@@ -206,7 +204,7 @@ export function AddDashboardFlyout({
           <DashboardsTable
             dashboards={allDashboards}
             loading={dashboardSuggestionsFetch.loading}
-            selecedDashboards={selectedDashboards}
+            selectedDashboards={selectedDashboards}
             setSelectedDashboards={setSelectedDashboards}
           />
         </EuiFlexGroup>

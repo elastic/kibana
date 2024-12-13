@@ -6,23 +6,23 @@
  */
 import { EuiBasicTable, EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ReadDashboard } from '@kbn/streams-plugin/common/assets';
 import React, { useMemo } from 'react';
+import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import { useKibana } from '../../hooks/use_kibana';
 import { tagListToReferenceList } from './to_reference_list';
 
 export function DashboardsTable({
   dashboards,
   compact = false,
-  selecedDashboards: selectedDashboards,
+  selectedDashboards,
   setSelectedDashboards,
   loading,
 }: {
   loading: boolean;
-  dashboards: ReadDashboard[] | undefined;
+  dashboards: SanitizedDashboardAsset[] | undefined;
   compact?: boolean;
-  selecedDashboards: ReadDashboard[];
-  setSelectedDashboards: (dashboards: ReadDashboard[]) => void;
+  selectedDashboards: SanitizedDashboardAsset[];
+  setSelectedDashboards: (dashboards: SanitizedDashboardAsset[]) => void;
 }) {
   const {
     dependencies: {
@@ -31,7 +31,7 @@ export function DashboardsTable({
       },
     },
   } = useKibana();
-  const columns = useMemo((): Array<EuiBasicTableColumn<ReadDashboard>> => {
+  const columns = useMemo((): Array<EuiBasicTableColumn<SanitizedDashboardAsset>> => {
     return [
       {
         field: 'label',
@@ -56,7 +56,7 @@ export function DashboardsTable({
                 );
               },
             },
-          ] satisfies Array<EuiBasicTableColumn<ReadDashboard>>)
+          ] satisfies Array<EuiBasicTableColumn<SanitizedDashboardAsset>>)
         : []),
     ];
   }, [compact, savedObjectsTaggingUi]);
@@ -74,7 +74,7 @@ export function DashboardsTable({
         items={items}
         loading={loading}
         selection={{
-          onSelectionChange: (newSelection: ReadDashboard[]) => {
+          onSelectionChange: (newSelection: SanitizedDashboardAsset[]) => {
             setSelectedDashboards(newSelection);
           },
           selected: selectedDashboards,

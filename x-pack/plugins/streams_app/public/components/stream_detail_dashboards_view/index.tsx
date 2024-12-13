@@ -4,103 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiFlexGroup, EuiSearchBar, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StreamDefinition } from '@kbn/streams-plugin/common';
-import React, { useMemo, useState, useCallback } from 'react';
-import { ReadDashboard } from '@kbn/streams-plugin/common/assets';
-import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
-import { useKibana } from '../../hooks/use_kibana';
-import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
+import React, { useMemo, useState } from 'react';
+import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import { AddDashboardFlyout } from './add_dashboard_flyout';
 import { DashboardsTable } from './dashboard_table';
-
-const useDashboardCrud = (id?: string) => {
-  const { signal } = useAbortController();
-  const {
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-  } = useKibana();
-
-  const dashboardsFetch = useStreamsAppFetch(() => {
-    if (!id) {
-      return Promise.resolve(undefined);
-    }
-    return streamsRepositoryClient.fetch('GET /api/streams/{id}/dashboards', {
-      signal,
-      params: {
-        path: {
-          id,
-        },
-      },
-    });
-  }, [id, signal, streamsRepositoryClient]);
-
-  const addDashboards = useCallback(
-    async (dashboards: ReadDashboard[]) => {
-      if (!id) {
-        return;
-      }
-      await Promise.all(
-        dashboards.map((dashboard) => {
-          return streamsRepositoryClient.fetch('PUT /api/streams/{id}/dashboards/{dashboardId}', {
-            signal,
-            params: {
-              path: {
-                id,
-                dashboardId: dashboard.id,
-              },
-            },
-          });
-        })
-      );
-      await dashboardsFetch.refresh();
-    },
-    [dashboardsFetch, id, signal, streamsRepositoryClient]
-  );
-
-  const removeDashboards = useCallback(
-    async (dashboards: ReadDashboard[]) => {
-      if (!id) {
-        return;
-      }
-      await Promise.all(
-        dashboards.map((dashboard) => {
-          return streamsRepositoryClient.fetch(
-            'DELETE /api/streams/{id}/dashboards/{dashboardId}',
-            {
-              signal,
-              params: {
-                path: {
-                  id,
-                  dashboardId: dashboard.id,
-                },
-              },
-            }
-          );
-        })
-      );
-      await dashboardsFetch.refresh();
-    },
-    [dashboardsFetch, id, signal, streamsRepositoryClient]
-  );
-
-  return {
-    dashboardsFetch,
-    addDashboards,
-    removeDashboards,
-  };
-};
+import { useDashboardsApi } from '../../hooks/use_dashboards_api';
 
 export function StreamDetailDashboardsView({ definition }: { definition?: StreamDefinition }) {
   const [query, setQuery] = useState('');
 
   const [isAddDashboardFlyoutOpen, setIsAddDashboardFlyoutOpen] = useState(false);
 
-  const { dashboardsFetch, addDashboards, removeDashboards } = useDashboardCrud(definition?.id);
+  const { dashboardsFetch, addDashboards, removeDashboards } = useDashboardsApi(definition?.id);
 
   const [isUnlinkLoading, setIsUnlinkLoading] = useState(false);
   const linkedDashboards = useMemo(() => {
@@ -113,7 +31,7 @@ export function StreamDetailDashboardsView({ definition }: { definition?: Stream
     });
   }, [linkedDashboards, query]);
 
-  const [selectedDashboards, setSelectedDashboards] = useState<ReadDashboard[]>([]);
+  const [selectedDashboards, setSelectedDashboards] = useState<SanitizedDashboardAsset[]>([]);
 
   return (
     <EuiFlexGroup direction="column">
@@ -166,7 +84,7 @@ export function StreamDetailDashboardsView({ definition }: { definition?: Stream
         <DashboardsTable
           dashboards={filteredDashboards}
           loading={dashboardsFetch.loading}
-          selecedDashboards={selectedDashboards}
+          selectedDashboards={selectedDashboards}
           setSelectedDashboards={setSelectedDashboards}
         />
         {definition && isAddDashboardFlyoutOpen ? (

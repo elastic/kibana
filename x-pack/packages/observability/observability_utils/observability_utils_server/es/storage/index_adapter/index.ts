@@ -99,6 +99,10 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings>
     return getAliasName(this.storage.name);
   }
 
+  getWriteTarget(): string {
+    return getAliasName(this.storage.name);
+  }
+
   private async createIndexTemplate(create: boolean = true): Promise<void> {
     this.logger.debug(`Creating index template (create = ${create})`);
 

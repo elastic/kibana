@@ -4,59 +4,88 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import pLimit from 'p-limit';
-import { StorageClient } from '@kbn/observability-utils-server/es/storage';
-import { termQuery } from '@kbn/observability-utils-server/es/queries/term_query';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RulesClient } from '@kbn/alerting-plugin/server';
 import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { termQuery } from '@kbn/observability-utils-server/es/queries/term_query';
+import { StorageClient, StorageDocumentOf } from '@kbn/observability-utils-server/es/storage';
 import { keyBy } from 'lodash';
 import objectHash from 'object-hash';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { AssetStorageSettings } from './storage_settings';
+import pLimit from 'p-limit';
 import {
   ASSET_TYPES,
   Asset,
+  AssetLink,
   AssetType,
-  AssetTypeToAssetMap,
-  Dashboard,
-  Slo,
+  DashboardAsset,
+  SloAsset,
+  RuleAsset,
 } from '../../../../common/assets';
 import { ASSET_ENTITY_ID, ASSET_ENTITY_TYPE, ASSET_TYPE } from './fields';
+import { AssetStorageSettings } from './storage_settings';
 
 function sloSavedObjectToAsset(
   sloId: string,
   savedObject: SavedObject<{ name: string; tags: string[] }>
-): Slo {
+): SloAsset {
   return {
     assetId: sloId,
     label: savedObject.attributes.name,
     tags: savedObject.attributes.tags.concat(
       savedObject.references.filter((ref) => ref.type === 'tag').map((ref) => ref.id)
     ),
-    type: 'slo',
+    assetType: 'slo',
   };
 }
 
 function dashboardSavedObjectToAsset(
   dashboardId: string,
   savedObject: SavedObject<{ title: string }>
-): Dashboard {
+): DashboardAsset {
   return {
     assetId: dashboardId,
     label: savedObject.attributes.title,
     tags: savedObject.references.filter((ref) => ref.type === 'tag').map((ref) => ref.id),
-    type: 'dashboard',
+    assetType: 'dashboard',
   };
 }
 
-function ruleToAsset(ruleId: string, rule: SanitizedRule): Asset {
+function ruleToAsset(ruleId: string, rule: SanitizedRule): RuleAsset {
   return {
-    type: 'rule',
+    assetType: 'rule',
     assetId: ruleId,
     label: rule.name,
     tags: rule.tags,
   };
 }
+
+function getAssetDocument({
+  assetId,
+  entityId,
+  entityType,
+  assetType,
+}: AssetLink & { entityId: string; entityType: string }): StorageDocumentOf<AssetStorageSettings> {
+  const doc = {
+    'asset.id': assetId,
+    'asset.type': assetType,
+    'entity.id': entityId,
+    'entity.type': entityType,
+  };
+
+  return {
+    _id: objectHash(doc),
+    ...doc,
+  };
+}
+
+interface AssetBulkCreateOperation {
+  create: { asset: AssetLink };
+}
+interface AssetBulkDeleteOperation {
+  delete: { asset: AssetLink };
+}
+
+export type AssetBulkOperation = AssetBulkCreateOperation | AssetBulkDeleteOperation;
 
 export class AssetClient {
   constructor(
@@ -67,29 +96,17 @@ export class AssetClient {
     }
   ) {}
 
-  async linkAsset({
-    entityId,
-    entityType,
-    assetId,
-    assetType,
-  }: {
-    entityId: string;
-    entityType: string;
-    assetId: string;
-    assetType: AssetType;
-  }) {
-    const assetDoc = {
-      'asset.id': assetId,
-      'asset.type': assetType,
-      'entity.id': entityId,
-      'entity.type': entityType,
-    };
-
-    const id = objectHash(assetDoc);
+  async linkAsset(
+    properties: {
+      entityId: string;
+      entityType: string;
+    } & AssetLink
+  ) {
+    const { _id: id, ...document } = getAssetDocument(properties);
 
     await this.clients.storageClient.index({
       id,
-      document: assetDoc,
+      document,
     });
   }
 
@@ -149,23 +166,13 @@ export class AssetClient {
     ]);
   }
 
-  async unlinkAsset({
-    entityId,
-    entityType,
-    assetId,
-    assetType,
-  }: {
-    entityId: string;
-    entityType: string;
-    assetId: string;
-    assetType: string;
-  }) {
-    const id = objectHash({
-      'asset.id': assetId,
-      'asset.type': assetType,
-      'entity.id': entityId,
-      'entity.type': entityType,
-    });
+  async unlinkAsset(
+    properties: {
+      entityId: string;
+      entityType: string;
+    } & AssetLink
+  ) {
+    const { _id: id } = getAssetDocument(properties);
 
     await this.clients.storageClient.delete(id);
   }
@@ -194,6 +201,36 @@ export class AssetClient {
     });
 
     return assetsResponse.hits.hits.map((hit) => hit._source['asset.id']);
+  }
+
+  async bulk(
+    { entityId, entityType }: { entityId: string; entityType: string },
+    operations: AssetBulkOperation[]
+  ) {
+    return await this.clients.storageClient.bulk(
+      operations.map((operation) => {
+        const { _id, ...document } = getAssetDocument({
+          ...Object.values(operation)[0].asset,
+          entityId,
+          entityType,
+        });
+
+        if ('create' in operation) {
+          return {
+            create: {
+              document,
+              _id,
+            },
+          };
+        }
+
+        return {
+          delete: {
+            _id,
+          },
+        };
+      })
+    );
   }
 
   async getAssets({
@@ -287,47 +324,85 @@ export class AssetClient {
     return [...dashboards, ...rules, ...slos];
   }
 
-  async getSuggestions<T extends keyof AssetTypeToAssetMap>({
-    entityId,
-    entityType,
+  async getSuggestions({
     query,
-    assetType,
+    assetTypes,
     tags,
   }: {
-    entityId: string;
-    entityType: string;
     query: string;
+    assetTypes?: AssetType[];
     tags?: string[];
-    assetType: T;
-  }): Promise<Array<{ asset: AssetTypeToAssetMap[T] }>> {
-    if (assetType === 'dashboard') {
-      const dashboardSavedObjects = await this.clients.soClient.find<{ title: string }>({
-        type: 'dashboard',
-        search: query,
-        hasReferenceOperator: 'OR',
-        hasReference: tags?.map((tag) => ({ type: 'tag', id: tag })),
-      });
+  }): Promise<{ hasMore: boolean; assets: Asset[] }> {
+    const perPage = 101;
 
-      return dashboardSavedObjects.saved_objects.map((dashboardSavedObject) => {
-        return {
-          asset: dashboardSavedObjectToAsset(dashboardSavedObject.id, dashboardSavedObject),
-        };
-      }) as Array<{ asset: AssetTypeToAssetMap[T] }>;
-    }
-    if (assetType === 'rule') {
-      return [];
-    }
-    if (assetType === 'slo') {
-      const sloSavedObjects = await this.clients.soClient.find<{ name: string; tags: string[] }>({
-        type: 'slo',
-        search: query,
-      });
+    const searchAll = !assetTypes;
 
-      return sloSavedObjects.saved_objects.map((sloSavedObject) => {
-        return { asset: sloSavedObjectToAsset(sloSavedObject.id, sloSavedObject) };
-      }) as Array<{ asset: AssetTypeToAssetMap[T] }>;
-    }
+    const searchDashboardsOrSlos =
+      searchAll || assetTypes.includes('dashboard') || assetTypes.includes('slo');
 
-    throw new Error(`Unsupported asset type: ${assetType}`);
+    const searchRules = searchAll || assetTypes.includes('rule');
+
+    const [suggestionsFromSlosAndDashboards, suggestionsFromRules] = await Promise.all([
+      searchDashboardsOrSlos
+        ? this.clients.soClient
+            .find({
+              type: ['dashboard' as const, 'slo' as const].filter(
+                (type) => searchAll || assetTypes.includes(type)
+              ),
+              search: query,
+              perPage,
+              ...(tags
+                ? {
+                    hasReferenceOperator: 'OR',
+                    hasReference: tags.map((tag) => ({ type: 'tag', id: tag })),
+                  }
+                : {}),
+            })
+            .then((results) => {
+              return results.saved_objects.map((savedObject) => {
+                if (savedObject.type === 'slo') {
+                  const sloSavedObject = savedObject as SavedObject<{
+                    id: string;
+                    name: string;
+                    tags: string[];
+                  }>;
+                  return sloSavedObjectToAsset(sloSavedObject.attributes.id, sloSavedObject);
+                }
+
+                const dashboardSavedObject = savedObject as SavedObject<{
+                  title: string;
+                }>;
+
+                return dashboardSavedObjectToAsset(dashboardSavedObject.id, dashboardSavedObject);
+              });
+            })
+        : Promise.resolve([]),
+      searchRules
+        ? this.clients.rulesClient
+            .find({
+              options: {
+                perPage,
+                ...(tags
+                  ? {
+                      hasReferenceOperator: 'OR',
+                      hasReference: tags.map((tag) => ({ type: 'tag', id: tag })),
+                    }
+                  : {}),
+              },
+            })
+            .then((results) => {
+              return results.data.map((rule) => {
+                return ruleToAsset(rule.id, rule);
+              });
+            })
+        : Promise.resolve([]),
+    ]);
+
+    return {
+      assets: [...suggestionsFromRules, ...suggestionsFromSlosAndDashboards],
+      hasMore:
+        Math.max(suggestionsFromSlosAndDashboards.length, suggestionsFromRules.length) >
+        perPage - 1,
+    };
   }
 }

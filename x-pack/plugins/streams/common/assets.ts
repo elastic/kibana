@@ -15,40 +15,26 @@ export const ASSET_TYPES = {
 
 export type AssetType = ValuesType<typeof ASSET_TYPES>;
 
-export interface AssetLink {
-  type: AssetType;
+export interface AssetLink<TAssetType extends AssetType = AssetType> {
+  assetType: TAssetType;
   assetId: string;
 }
 
-export interface DashboardLink extends AssetLink {
-  type: typeof ASSET_TYPES.Dashboard;
-}
+export type DashboardLink = AssetLink<'dashboard'>;
+export type SloLink = AssetLink<'slo'>;
+export type RuleLink = AssetLink<'rule'>;
 
-export interface SloLink extends AssetLink {
-  type: typeof ASSET_TYPES.Slo;
-}
-
-export interface Asset extends AssetLink {
+export interface Asset<TAssetType extends AssetType = AssetType> extends AssetLink<TAssetType> {
   label: string;
   tags: string[];
 }
 
-export interface Dashboard extends Asset {
-  type: typeof ASSET_TYPES.Dashboard;
-}
-
-export interface ReadDashboard {
-  id: string;
-  label: string;
-  tags: string[];
-}
-
-export interface Slo extends Asset {
-  type: typeof ASSET_TYPES.Slo;
-}
+export type DashboardAsset = Asset<'dashboard'>;
+export type SloAsset = Asset<'slo'>;
+export type RuleAsset = Asset<'rule'>;
 
 export interface AssetTypeToAssetMap {
-  [ASSET_TYPES.Dashboard]: Dashboard;
-  [ASSET_TYPES.Slo]: Slo;
-  [ASSET_TYPES.Rule]: Asset;
+  [ASSET_TYPES.Dashboard]: DashboardAsset;
+  [ASSET_TYPES.Slo]: SloAsset;
+  [ASSET_TYPES.Rule]: RuleAsset;
 }
