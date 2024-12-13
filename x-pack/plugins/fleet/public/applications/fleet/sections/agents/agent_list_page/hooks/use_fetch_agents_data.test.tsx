@@ -104,12 +104,38 @@ jest.mock('../../../../hooks', () => ({
   }),
 }));
 
+function blocked(fn: any) {
+  let start = process.hrtime();
+  const interval = 50;
+  const threshold = 1000;
+
+  return setInterval(function () {
+    const delta = process.hrtime(start);
+    const nanosec = delta[0] * 1e9 + delta[1];
+    const ms = nanosec / 1e6;
+    const n = ms - interval;
+
+    if (n > threshold) {
+      fn(Math.round(n));
+    }
+    start = process.hrtime();
+  }, interval);
+}
+
 describe.only('Attempt to reproduce test flakiness', () => {
   for (let i = 0; i < 1000; i++) {
     describe(`useFetchAgentsData - ${i + 1}`, () => {
+      let interval: any;
+      beforeAll(() => {
+        interval = blocked((ms: number) => {
+          process.stdout.write(`\nevent loop delay ${ms}\n`);
+        });
+      });
+      afterAll(() => {
+        clearInterval(interval);
+      });
       const startServices = useStartServices();
       const mockErrorToast = startServices.notifications.toasts.addError as jest.Mock;
-
       beforeAll(() => {
         mockedExperimentalFeaturesService.get.mockReturnValue({
           displayAgentMetrics: true,
@@ -125,7 +151,6 @@ describe.only('Attempt to reproduce test flakiness', () => {
         const renderer = createFleetTestRendererMock();
         const { result } = renderer.renderHook(() => useFetchAgentsData());
         await waitFor(() => new Promise((resolve) => resolve(null)));
-
         expect(result?.current.selectedStatus).toEqual([
           'healthy',
           'unhealthy',
