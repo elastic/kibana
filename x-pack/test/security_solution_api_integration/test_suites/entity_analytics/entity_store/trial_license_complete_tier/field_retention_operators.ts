@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import {
   FieldRetentionOperator,
   fieldOperatorToIngestProcessor,
-} from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/field_retention_definition';
+} from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/field_retention';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { applyIngestProcessorToDoc } from '../utils/ingest';
 export default ({ getService }: FtrProviderContext) => {
