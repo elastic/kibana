@@ -5,38 +5,16 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import React from 'react';
 
-export interface AssistantAvatarProps {
-  size?: keyof typeof sizeMap;
-  // Required for EuiAvatar `iconType` prop
-  // eslint-disable-next-line react/no-unused-prop-types
-  children?: ReactNode;
-  className?: string;
-}
-
-export const sizeMap = {
-  xl: 64,
-  l: 48,
-  m: 32,
-  s: 24,
-  xs: 16,
-  xxs: 12,
-};
-
-/**
- * Default Elastic AI Assistant logo
- *
- * @deprecated This component will soon be replaced by `AssistantIcon` from `@kbn/ai-assistant-icon`.
- */
-export const AssistantAvatar = ({ className, size = 's' }: AssistantAvatarProps) => (
+const AssistantLogo = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
-    className={className}
     xmlns="http://www.w3.org/2000/svg"
-    width={sizeMap[size]}
-    height={sizeMap[size]}
+    height="100%"
+    width="100%"
     viewBox="0 0 64 64"
     fill="none"
+    {...props}
   >
     <path fill="#F04E98" d="M36 28h24v36H36V28Z" />
     <path fill="#00BFB3" d="M4 46c0-9.941 8.059-18 18-18h6v36h-6c-9.941 0-18-8.059-18-18Z" />
@@ -47,3 +25,6 @@ export const AssistantAvatar = ({ className, size = 's' }: AssistantAvatarProps)
     <path fill="#FA744E" d="M6 23C6 10.85 15.85 1 28 1v22H6Z" />
   </svg>
 );
+
+// eslint-disable-next-line import/no-default-export
+export { AssistantLogo as default };

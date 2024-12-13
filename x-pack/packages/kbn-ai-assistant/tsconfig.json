@@ -12,6 +12,8 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    ".storybook/**/*.ts",
+    ".storybook/**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
@@ -36,5 +38,6 @@
     "@kbn/ml-plugin",
     "@kbn/share-plugin",
     "@kbn/ai-assistant-common",
+    "@kbn/storybook",
   ]
 }
