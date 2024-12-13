@@ -10,6 +10,7 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
   createTestServers,
+  request,
   type TestUtils,
   type TestElasticsearchUtils,
   type TestKibanaUtils,
@@ -41,4 +42,45 @@ export class EsqlServiceTestbed {
 
     return client;
   }
+
+  public async setupLookupIndices() {
+    const client = this.esClient();
+
+    await client.indices.create({
+      index: 'lookup_index1',
+      body: {
+        settings: {
+          'index.mode': 'lookup',
+        },
+        mappings: {
+          properties: {
+            field1: { type: 'keyword' },
+          },
+        },
+      },
+    });
+
+    // Lookup index with aliases
+    await client.indices.create({
+      index: 'lookup_index2',
+      body: {
+        settings: {
+          'index.mode': 'lookup',
+        },
+        aliases: {
+          lookup_index2_alias1: {},
+          lookup_index2_alias2: {},
+        },
+        mappings: {
+          properties: {
+            field2: { type: 'keyword' },
+          },
+        },
+      },
+    });
+  }
+
+  public readonly GET = (path: string) => {
+    return request.get(this.kibana!.root, path).set('x-elastic-internal-origin', 'esql-test');
+  };
 }

@@ -14,13 +14,32 @@ describe('EsqlService', () => {
 
   beforeAll(async () => {
     await testbed.start();
+    await testbed.setupLookupIndices();
   });
 
   afterAll(async () => {
     await testbed.stop();
   });
 
-  it('can initialize the Event Stream', async () => {
-    console.log('hello world');
+  it('can load ES|QL Autocomplete/Validation indices for JOIN command', async () => {
+    const url = '/internal/esql/autocomplete/join/indices';
+    const result = await testbed.GET(url).send().expect(200);
+
+    const item1 = result.body.indices.find((item: any) => item.name === 'lookup_index1');
+    const item2 = result.body.indices.find((item: any) => item.name === 'lookup_index2');
+
+    expect(item1).toMatchObject({
+      name: 'lookup_index1',
+      mode: 'lookup',
+      aliases: [],
+    });
+
+    item2.aliases.sort();
+
+    expect(item2).toMatchObject({
+      name: 'lookup_index2',
+      mode: 'lookup',
+      aliases: ['lookup_index2_alias1', 'lookup_index2_alias2'],
+    });
   });
 });
