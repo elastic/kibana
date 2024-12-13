@@ -164,7 +164,7 @@ export default function ({ getService }: FtrProviderContext) {
               'settings_read',
             ],
             fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
-            actions: ['all', 'read', 'minimal_all', 'minimal_read'],
+            actions: ['all', 'read', 'minimal_all', 'minimal_read', 'execute_edr'],
             stackAlerts: ['all', 'read', 'minimal_all', 'minimal_read'],
             ml: ['all', 'read', 'minimal_all', 'minimal_read'],
             siem: [

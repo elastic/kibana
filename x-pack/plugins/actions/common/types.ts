@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SUB_FEATURE_TYPE } from '@kbn/actions-types';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
@@ -16,9 +17,6 @@ export {
   GenerativeAIForSecurityConnectorFeatureId,
 } from './connector_feature_config';
 
-enum SUB_FEATURE_TYPE {
-  edr,
-}
 export type SubFeatureType = keyof typeof SUB_FEATURE_TYPE;
 
 export interface ActionType {

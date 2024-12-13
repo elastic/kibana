@@ -83,7 +83,7 @@ export const ACTIONS_FEATURE: KibanaFeatureConfig = {
           privileges: [
             {
               api: [EDR_EXECUTE_PRIVILEGE_API_TAG],
-              id: 'executeEdrConnectors',
+              id: 'execute_edr',
               name: i18n.translate('xpack.actions.featureRegistry.edrSubFeaturePrivilege', {
                 defaultMessage: 'Execute',
               }),

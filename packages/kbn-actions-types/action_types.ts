@@ -9,7 +9,7 @@
 
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
-enum SUB_FEATURE_TYPE {
+export enum SUB_FEATURE_TYPE {
   edr,
 }
 export type SubFeatureType = keyof typeof SUB_FEATURE_TYPE;
