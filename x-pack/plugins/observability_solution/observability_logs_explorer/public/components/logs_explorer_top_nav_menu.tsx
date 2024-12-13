@@ -44,7 +44,6 @@ export const LogsExplorerTopNavMenu = () => {
 
 const ProjectTopNav = () => {
   const { euiTheme } = useEuiTheme();
-  const { services } = useKibanaContextForPlugin();
 
   return (
     <EuiHeader
