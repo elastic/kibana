@@ -7,6 +7,7 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getTotalAlertsCountAggregations } from './get_telemetry_from_alerts';
+import { DiagnosticResult, errors } from '@elastic/elasticsearch';
 
 const elasticsearch = elasticsearchServiceMock.createStart();
 const esClient = elasticsearch.client.asInternalUser;
@@ -116,8 +117,49 @@ describe('kibana index telemetry', () => {
     });
   });
 
-  test('should return empty results and log warning if query throws error', async () => {
+  it('should return empty results and log warning if query throws error', async () => {
     esClient.search.mockRejectedValueOnce(new Error('test'));
+
+    const telemetry = await getTotalAlertsCountAggregations({
+      esClient,
+      logger,
+    });
+
+    expect(esClient.search).toHaveBeenCalledTimes(1);
+    expect(logger.debug).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+
+    expect(telemetry).toEqual({
+      hasErrors: true,
+      errorMessage: 'test',
+      count_alerts_total: 0,
+      count_alerts_by_rule_type: {},
+    });
+  });
+
+  it('should return empty results and log debug log if query throws search_phase_execution_exception error', async () => {
+    esClient.search.mockRejectedValueOnce(
+      new errors.ResponseError({
+        warnings: [],
+        meta: {} as any,
+        body: {
+          error: {
+            root_cause: [],
+            type: 'search_phase_execution_exception',
+            reason: 'no_shard_available_action_exception',
+            phase: 'fetch',
+            grouped: true,
+            failed_shards: [],
+            caused_by: {
+              type: 'no_shard_available_action_exception',
+              reason: 'This is the nested reason',
+            },
+          },
+        },
+        statusCode: 503,
+        headers: {},
+      })
+    );
 
     const telemetry = await getTotalAlertsCountAggregations({
       esClient,

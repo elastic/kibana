@@ -377,14 +377,20 @@ export async function getTotalCountAggregations({
     };
   } catch (err) {
     const errorMessage = err && err.message ? err.message : err.toString();
+    const errorStr = JSON.stringify(err);
+    const logMessage = `Error executing alerting telemetry task: getTotalCountAggregations - ${err}`;
+    const logOptions = {
+      tags: ['alerting', 'telemetry-failed'],
+      error: { stack_trace: err.stack },
+    };
 
-    logger.warn(
-      `Error executing alerting telemetry task: getTotalCountAggregations - ${JSON.stringify(err)}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
-      }
-    );
+    // If error string contains "no_shard_available_action_exception", debug log it
+    if (errorStr.includes('no_shard_available_action_exception')) {
+      logger.debug(logMessage, logOptions);
+    } else {
+      logger.warn(logMessage, logOptions);
+    }
+
     return {
       hasErrors: true,
       errorMessage,
@@ -492,13 +498,20 @@ export async function getTotalCountInUse({
     };
   } catch (err) {
     const errorMessage = err && err.message ? err.message : err.toString();
-    logger.warn(
-      `Error executing alerting telemetry task: getTotalCountInUse - ${JSON.stringify(err)}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
-      }
-    );
+    const errorStr = JSON.stringify(err);
+    const logMessage = `Error executing alerting telemetry task: getTotalCountInUse - ${err}`;
+    const logOptions = {
+      tags: ['alerting', 'telemetry-failed'],
+      error: { stack_trace: err.stack },
+    };
+
+    // If error string contains "no_shard_available_action_exception", debug log it
+    if (errorStr.includes('no_shard_available_action_exception')) {
+      logger.debug(logMessage, logOptions);
+    } else {
+      logger.warn(logMessage, logOptions);
+    }
+
     return {
       hasErrors: true,
       errorMessage,
@@ -549,13 +562,20 @@ export async function getMWTelemetry({
     };
   } catch (err) {
     const errorMessage = err?.message ? err.message : err.toString();
-    logger.warn(
-      `Error executing alerting telemetry task: getTotalMWCount - ${JSON.stringify(err)}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err?.stack },
-      }
-    );
+    const errorStr = JSON.stringify(err);
+    const logMessage = `Error executing alerting telemetry task: getTotalMWCount - ${err}`;
+    const logOptions = {
+      tags: ['alerting', 'telemetry-failed'],
+      error: { stack_trace: err.stack },
+    };
+
+    // If error string contains "no_shard_available_action_exception", debug log it
+    if (errorStr.includes('no_shard_available_action_exception')) {
+      logger.debug(logMessage, logOptions);
+    } else {
+      logger.warn(logMessage, logOptions);
+    }
+
     return {
       hasErrors: true,
       errorMessage,

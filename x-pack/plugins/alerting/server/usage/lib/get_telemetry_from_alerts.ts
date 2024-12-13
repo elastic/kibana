@@ -69,20 +69,24 @@ export async function getTotalAlertsCountAggregations({
     return {
       hasErrors: false,
       count_alerts_total: totalAlertsCount ?? 0,
-      count_alerts_by_rule_type: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
+      count_alerts_by_rule_type: parseSimpleRuleTypeBucket(aggregations?.by_rule_type_id?.buckets),
     };
   } catch (err) {
     const errorMessage = err && err.message ? err.message : err.toString();
+    const errorStr = JSON.stringify(err);
+    const logMessage = `Error executing alerting telemetry task: getTotalAlertsCountAggregations - ${err}`;
+    console.log(logMessage);
+    const logOptions = {
+      tags: ['alerting', 'telemetry-failed'],
+      error: { stack_trace: err.stack },
+    };
 
-    logger.warn(
-      `Error executing alerting telemetry task: getTotalAlertsCountAggregations - ${JSON.stringify(
-        err
-      )}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
-      }
-    );
+    // If error string contains "no_shard_available_action_exception", debug log it
+    if (errorStr.includes('no_shard_available_action_exception')) {
+      logger.debug(logMessage, logOptions);
+    } else {
+      logger.warn(logMessage, logOptions);
+    }
 
     return {
       hasErrors: true,
