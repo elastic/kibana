@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-require('../../../../../src/setup_node_env');
-require('./osquery_formatter');
+import '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
+
+declare module '@emotion/react' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  export interface Theme extends UseEuiTheme {}
+}
