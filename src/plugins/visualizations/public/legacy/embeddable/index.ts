@@ -12,7 +12,3 @@ export { VISUALIZE_EMBEDDABLE_TYPE, COMMON_VISUALIZATION_GROUPING } from './cons
 export { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
 
 export type { VisualizeEmbeddable, VisualizeInput } from './visualize_embeddable';
-export {
-  type HasVisualizeConfig,
-  apiHasVisualizeConfig,
-} from '../../embeddable/interfaces/has_visualize_config';
