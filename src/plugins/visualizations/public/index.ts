@@ -19,7 +19,8 @@ export function plugin(initializerContext: PluginInitializerContext) {
 /** @public static code */
 export { TypesService } from './vis_types/types_service';
 export { VIS_EVENT_TO_TRIGGER } from './embeddable';
-export { apiHasVisualizeConfig, COMMON_VISUALIZATION_GROUPING } from './legacy/embeddable';
+export { apiHasVisualizeConfig } from './embeddable/interfaces/has_visualize_config';
+export { COMMON_VISUALIZATION_GROUPING } from './legacy/embeddable/constants';
 export { VisualizationContainer } from './components';
 export { getVisSchemas } from './vis_schemas';
 
@@ -41,7 +42,8 @@ export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbedda
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 export type { SchemaConfig } from '../common/types';
 export { updateOldState } from './legacy/vis_update_state';
-export type { VisualizeInput, VisualizeEmbeddable, HasVisualizeConfig } from './legacy/embeddable';
+export type { VisualizeInput, VisualizeEmbeddable } from './legacy/embeddable';
+export type { HasVisualizeConfig } from './embeddable/interfaces/has_visualize_config';
 export type { PersistedState } from './persisted_state';
 export type {
   ISavedVis,

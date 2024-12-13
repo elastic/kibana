@@ -27,6 +27,8 @@ export const SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH =
   `${SIEM_RULE_MIGRATION_PATH}/prebuilt_rules` as const;
 
 export const SIEM_RULE_MIGRATION_RESOURCES_PATH = `${SIEM_RULE_MIGRATION_PATH}/resources` as const;
+export const SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH =
+  `${SIEM_RULE_MIGRATION_RESOURCES_PATH}/missing` as const;
 
 export enum SiemMigrationTaskStatus {
   READY = 'ready',
