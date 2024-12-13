@@ -58,15 +58,14 @@ export function ServiceOverview() {
   );
 
   const hasSignal =
-    serviceEntitySummary?.['data_stream.type'] &&
-    serviceEntitySummary?.['data_stream.type']?.length > 0;
+    serviceEntitySummary?.dataStreamTypes && serviceEntitySummary?.dataStreamTypes?.length > 0;
 
-  const hasLogsOnlySignal = hasSignal && isLogsOnlySignal(serviceEntitySummary['data_stream.type']);
+  const hasLogsOnlySignal = hasSignal && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
 
-  const hasLogsSignal = hasSignal && isLogsSignal(serviceEntitySummary['data_stream.type']);
+  const hasLogsSignal = hasSignal && isLogsSignal(serviceEntitySummary.dataStreamTypes);
 
   // Shows APM overview when entity has APM signal or when Entity centric is not enabled
-  const hasApmSignal = hasSignal && isApmSignal(serviceEntitySummary['data_stream.type']);
+  const hasApmSignal = hasSignal && isApmSignal(serviceEntitySummary.dataStreamTypes);
 
   // Shows APM overview when entity has APM signal or when Entity centric is not enabled or when entity has no signal
   const showApmOverview = isEntityCentricExperienceEnabled === false || hasApmSignal || !hasSignal;

@@ -94,9 +94,9 @@ export function ApmMainTemplate({
     [application?.capabilities.savedObjectsManagement.edit]
   );
 
-  const hasLogsData = serviceEntitySummary?.['data_stream.type']
-    ? serviceEntitySummary?.['data_stream.type']?.length > 0 &&
-      isLogsSignal(serviceEntitySummary['data_stream.type'])
+  const hasLogsData = serviceEntitySummary?.dataStreamTypes
+    ? serviceEntitySummary?.dataStreamTypes?.length > 0 &&
+      isLogsSignal(serviceEntitySummary.dataStreamTypes)
     : false;
 
   const shouldBypassNoDataScreen =

@@ -56,8 +56,8 @@ export function ServiceDashboards() {
     '/mobile-services/{serviceName}/dashboards'
   );
   const { serviceEntitySummary, serviceEntitySummaryStatus } = useApmServiceContext();
-  const checkForEntities = serviceEntitySummary?.['data_stream.type']
-    ? isLogsOnlySignal(serviceEntitySummary['data_stream.type'])
+  const checkForEntities = serviceEntitySummary?.dataStreamTypes
+    ? isLogsOnlySignal(serviceEntitySummary.dataStreamTypes)
     : false;
   const [dashboard, setDashboard] = useState<DashboardApi | undefined>();
   const [serviceDashboards, setServiceDashboards] = useState<MergedServiceDashboard[]>([]);

@@ -82,8 +82,7 @@ export function ServiceMapServiceDetail() {
   const { serviceEntitySummary } = useApmServiceContext();
 
   const hasLogsOnlySignal =
-    serviceEntitySummary?.['data_stream.type'] &&
-    isLogsOnlySignal(serviceEntitySummary['data_stream.type']);
+    serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
 
   if (hasLogsOnlySignal) {
     return <ServiceTabEmptyState id="serviceMap" />;
