@@ -22,7 +22,7 @@ export const runKbnArchiverScript = (
     hostname: HOSTNAME,
     configport: PORT,
   } = Cypress.env();
-  const script = `node ../../../scripts/kbn_archiver.js --space ${space} --kibana-url http://${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD}@${HOSTNAME}:${PORT} ${method} ./cypress/fixtures/saved_objects/${fileName}.ndjson`;
+  const script = `node ../../../../../scripts/kbn_archiver.js --space ${space} --kibana-url http://${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD}@${HOSTNAME}:${PORT} ${method} ./cypress/fixtures/saved_objects/${fileName}.ndjson`;
 
   cy.exec(script, { env: { NODE_TLS_REJECT_UNAUTHORIZED: 1 } });
 };
