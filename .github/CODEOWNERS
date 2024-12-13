@@ -301,7 +301,6 @@ packages/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 packages/kbn-cases-components @elastic/response-ops
 packages/kbn-cbor @elastic/kibana-operations
-packages/kbn-cell-actions @elastic/security-threat-hunting-explore
 packages/kbn-chart-icons @elastic/kibana-visualizations
 packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
@@ -611,6 +610,7 @@ src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
 src/platform/packages/shared/deeplinks/ml @elastic/ml-ui
 src/platform/packages/shared/deeplinks/observability @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
+src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting-explore
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql

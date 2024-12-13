@@ -4089,7 +4089,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cell-actions@link:packages/kbn-cell-actions":
+"@kbn/cell-actions@link:src/platform/packages/shared/kbn-cell-actions":
   version "0.0.0"
   uid ""
 
