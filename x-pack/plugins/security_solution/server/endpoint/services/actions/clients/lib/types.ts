@@ -23,6 +23,8 @@ import type {
   UploadedFileInfo,
   ResponseActionScanOutputContent,
   ResponseActionScanParameters,
+  ResponseActionRunScriptOutputContent,
+  ResponseActionRunScriptParameters,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -35,6 +37,7 @@ import type {
   ScanActionRequestBody,
   KillProcessRequestBody,
   SuspendProcessRequestBody,
+  RunScriptActionRequestBody,
 } from '../../../../../../common/api/endpoint';
 
 type OmitUnsupportedAttributes<T extends BaseActionRequestBody> = Omit<
@@ -155,4 +158,16 @@ export interface ResponseActionsClient {
     actionRequest: OmitUnsupportedAttributes<ScanActionRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>>;
+
+  /**
+   * Run a script
+   * @param actionRequest
+   * @param options
+   */
+  runscript: (
+    actionRequest: OmitUnsupportedAttributes<RunScriptActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ) => Promise<
+    ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
+  >;
 }
