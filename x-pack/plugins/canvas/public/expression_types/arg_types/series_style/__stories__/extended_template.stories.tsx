@@ -6,8 +6,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { array, radios, boolean } from '@storybook/addon-knobs';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { ExtendedTemplate } from '../extended_template';
 import { ExpressionAstExpression } from '../../../../../types';
@@ -23,62 +22,67 @@ const defaultExpression: ExpressionAstExpression = {
   ],
 };
 
-const defaultValues = {
-  argValue: defaultExpression,
+interface InteractiveProps {
+  lines?: boolean;
+  bars?: boolean;
+  points?: boolean;
+  seriesLabels: string[];
+  typeInstance: 'defaultStyle' | 'custom';
+}
+
+const Interactive = ({
+  lines = true,
+  bars = true,
+  points = true,
+  seriesLabels = ['label1', 'label2'],
+  typeInstance = 'custom',
+}: InteractiveProps) => {
+  const [argValue, setArgValue] = useState<ExpressionAstExpression>(defaultExpression);
+
+  const include = [];
+  if (lines) include.push('lines');
+  if (bars) include.push('bars');
+  if (points) include.push('points');
+
+  return (
+    <ExtendedTemplate
+      argValue={argValue}
+      onValueChange={(newValue) => {
+        action('onValueChange')(newValue);
+        setArgValue(newValue);
+      }}
+      resolved={{ labels: seriesLabels }}
+      typeInstance={{
+        name: typeInstance,
+        options: { include },
+      }}
+    />
+  );
 };
 
-class Interactive extends React.Component<{}, { argValue: ExpressionAstExpression }> {
-  public state = defaultValues;
-
-  public render() {
-    const include = [];
-    if (boolean('Lines', true)) {
-      include.push('lines');
-    }
-    if (boolean('Bars', true)) {
-      include.push('bars');
-    }
-    if (boolean('Points', true)) {
-      include.push('points');
-    }
-    return (
-      <ExtendedTemplate
-        argValue={this.state.argValue}
-        onValueChange={(argValue) => {
-          action('onValueChange')(argValue);
-          this.setState({ argValue });
-        }}
-        resolved={{ labels: array('Series Labels', ['label1', 'label2']) }}
-        typeInstance={{
-          name: radios('Type Instance', { default: 'defaultStyle', custom: 'custom' }, 'custom'),
-          options: {
-            include,
-          },
-        }}
-      />
-    );
-  }
-}
+Interactive.args = {
+  lines: true,
+  bars: true,
+  points: true,
+  seriesLabels: ['label1', 'label2'],
+  typeInstance: 'custom',
+};
 
 export default {
   title: 'arguments/SeriesStyle',
-
+  component: Interactive,
   decorators: [
     (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
   ],
-};
-
-export const Extended = {
-  render: () => <Interactive />,
-  name: 'extended',
-};
-
-export default {
-  title: 'arguments/SeriesStyle/components',
-
-  decorators: [
-    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
-  ],
+  argTypes: {
+    typeInstance: {
+      control: 'radio',
+      options: ['defaultStyle', 'custom'],
+    },
+    seriesLabels: {
+      control: 'array',
+    },
+  },
 };
 
 export const ExtendedDefaults = {
