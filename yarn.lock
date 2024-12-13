@@ -12097,11 +12097,6 @@
   resolved "https://registry.yarnpkg.com/@types/picomatch/-/picomatch-2.3.0.tgz#75db5e75a713c5a83d5b76780c3da84a82806003"
   integrity sha512-O397rnSS9iQI4OirieAtsDqvCj4+3eY1J+EPdNTKuHuRWIfUoGyzX294o8C4KJYaLqgSrd2o60c5EqCU8Zv02g==
 
-"@types/pidusage@^2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@types/pidusage/-/pidusage-2.0.2.tgz#3f8c4b19ba7ea438a733d093661e92b60e5f88ee"
-  integrity sha512-lHgpGZjXDfjggZDLkgp4zQTYkvXq4S7RxjBjrDcPe1MBU72hESWxubutx8+AM4QkJdRxAhrQyxSA6pzHKJKlsQ==
-
 "@types/pixelmatch@^5.2.4":
   version "5.2.4"
   resolved "https://registry.yarnpkg.com/@types/pixelmatch/-/pixelmatch-5.2.4.tgz#ca145cc5ede1388c71c68edf2d1f5190e5ddd0f6"
@@ -26283,13 +26278,6 @@ picomatch@^4.0.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-4.0.2.tgz#77c742931e8f3b8820946c76cd0c1f13730d1dab"
   integrity sha512-M7BAV6Rlcy5u+m6oPhAPFgJTzAioX/6B0DxyvDlo9l8+T3nLKbrczg2WLUyzd45L8RqfUMyGPzekbMvX2Ldkwg==
-
-pidusage@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/pidusage/-/pidusage-3.0.2.tgz#6faa5402b2530b3af2cf93d13bcf202889724a53"
-  integrity sha512-g0VU+y08pKw5M8EZ2rIGiEBaB8wrQMjYGFfW2QVIfyT8V+fq8YFLkvlz4bz5ljvFDJYNFCWT3PWqcRr2FKO81w==
-  dependencies:
-    safe-buffer "^5.2.1"
 
 pify@^2.0.0, pify@^2.2.0:
   version "2.3.0"
