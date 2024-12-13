@@ -25,7 +25,7 @@ export interface DashboardSavedObjectUserContent extends UserContentCommonSchema
   managed?: boolean;
   attributes: {
     title: string;
-    description?: string;
+    description: string;
     timeRestore: boolean;
   };
 }
