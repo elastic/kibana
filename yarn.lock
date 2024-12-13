@@ -4126,7 +4126,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-data-migration-plugin@link:x-pack/plugins/cloud_integrations/cloud_data_migration":
+"@kbn/cloud-data-migration-plugin@link:x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration":
   version "0.0.0"
   uid ""
 
@@ -4202,7 +4202,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/console-plugin@link:src/plugins/console":
+"@kbn/console-plugin@link:src/platform/plugins/shared/console":
   version "0.0.0"
   uid ""
 
@@ -5166,7 +5166,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cross-cluster-replication-plugin@link:x-pack/plugins/cross_cluster_replication":
+"@kbn/cross-cluster-replication-plugin@link:x-pack/platform/plugins/private/cross_cluster_replication":
   version "0.0.0"
   uid ""
 
@@ -5274,7 +5274,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-devtools@link:packages/deeplinks/devtools":
+"@kbn/deeplinks-devtools@link:src/platform/packages/shared/deeplinks/devtools":
   version "0.0.0"
   uid ""
 
@@ -5282,7 +5282,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-management@link:packages/deeplinks/management":
+"@kbn/deeplinks-management@link:src/platform/packages/shared/deeplinks/management":
   version "0.0.0"
   uid ""
 
@@ -5310,11 +5310,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/default-nav-devtools@link:packages/default-nav/devtools":
+"@kbn/default-nav-devtools@link:src/platform/packages/private/default-nav/devtools":
   version "0.0.0"
   uid ""
 
-"@kbn/default-nav-management@link:packages/default-nav/management":
+"@kbn/default-nav-management@link:src/platform/packages/private/default-nav/management":
   version "0.0.0"
   uid ""
 
@@ -5338,7 +5338,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dev-tools-plugin@link:src/plugins/dev_tools":
+"@kbn/dev-tools-plugin@link:src/platform/plugins/shared/dev_tools":
   version "0.0.0"
   uid ""
 
@@ -5486,7 +5486,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es-ui-shared-plugin@link:src/plugins/es_ui_shared":
+"@kbn/es-ui-shared-plugin@link:src/platform/plugins/shared/es_ui_shared":
   version "0.0.0"
   uid ""
 
@@ -5818,7 +5818,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/grokdebugger-plugin@link:x-pack/plugins/grokdebugger":
+"@kbn/grokdebugger-plugin@link:x-pack/platform/plugins/private/grokdebugger":
   version "0.0.0"
   uid ""
 
@@ -5902,11 +5902,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/index-lifecycle-management-common-shared@link:x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared":
+"@kbn/index-lifecycle-management-common-shared@link:x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared":
   version "0.0.0"
   uid ""
 
-"@kbn/index-lifecycle-management-plugin@link:x-pack/plugins/index_lifecycle_management":
+"@kbn/index-lifecycle-management-plugin@link:x-pack/platform/plugins/private/index_lifecycle_management":
   version "0.0.0"
   uid ""
 
@@ -5914,7 +5914,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/index-management-shared-types@link:x-pack/packages/index-management/index_management_shared_types":
+"@kbn/index-management-shared-types@link:x-pack/platform/packages/shared/index-management/index_management_shared_types":
   version "0.0.0"
   uid ""
 
@@ -6090,11 +6090,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/license-api-guard-plugin@link:x-pack/plugins/license_api_guard":
+"@kbn/license-api-guard-plugin@link:x-pack/platform/plugins/private/license_api_guard":
   version "0.0.0"
   uid ""
 
-"@kbn/license-management-plugin@link:x-pack/plugins/license_management":
+"@kbn/license-management-plugin@link:x-pack/platform/plugins/shared/license_management":
   version "0.0.0"
   uid ""
 
@@ -6166,35 +6166,35 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-cards-navigation@link:packages/kbn-management/cards_navigation":
+"@kbn/management-cards-navigation@link:src/platform/packages/shared/kbn-management/cards_navigation":
   version "0.0.0"
   uid ""
 
-"@kbn/management-plugin@link:src/plugins/management":
+"@kbn/management-plugin@link:src/platform/plugins/shared/management":
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-application@link:packages/kbn-management/settings/application":
+"@kbn/management-settings-application@link:src/platform/packages/private/kbn-management/settings/application":
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-components-field-category@link:packages/kbn-management/settings/components/field_category":
+"@kbn/management-settings-components-field-category@link:src/platform/packages/private/kbn-management/settings/components/field_category":
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-components-field-input@link:packages/kbn-management/settings/components/field_input":
+"@kbn/management-settings-components-field-input@link:src/platform/packages/shared/kbn-management/settings/components/field_input":
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-components-field-row@link:packages/kbn-management/settings/components/field_row":
+"@kbn/management-settings-components-field-row@link:src/platform/packages/shared/kbn-management/settings/components/field_row":
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-components-form@link:packages/kbn-management/settings/components/form":
+"@kbn/management-settings-components-form@link:src/platform/packages/private/kbn-management/settings/components/form":
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-field-definition@link:packages/kbn-management/settings/field_definition":
+"@kbn/management-settings-field-definition@link:src/platform/packages/shared/kbn-management/settings/field_definition":
   version "0.0.0"
   uid ""
 
@@ -6206,11 +6206,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-types@link:packages/kbn-management/settings/types":
+"@kbn/management-settings-types@link:src/platform/packages/shared/kbn-management/settings/types":
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-utilities@link:packages/kbn-management/settings/utilities":
+"@kbn/management-settings-utilities@link:src/platform/packages/shared/kbn-management/settings/utilities":
   version "0.0.0"
   uid ""
 
@@ -6550,7 +6550,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/painless-lab-plugin@link:x-pack/plugins/painless_lab":
+"@kbn/painless-lab-plugin@link:x-pack/platform/plugins/private/painless_lab":
   version "0.0.0"
   uid ""
 
@@ -6678,7 +6678,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/remote-clusters-plugin@link:x-pack/plugins/remote_clusters":
+"@kbn/remote-clusters-plugin@link:x-pack/platform/plugins/private/remote_clusters":
   version "0.0.0"
   uid ""
 
@@ -6794,11 +6794,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rollup-plugin@link:x-pack/plugins/rollup":
+"@kbn/rollup-plugin@link:x-pack/platform/plugins/private/rollup":
   version "0.0.0"
   uid ""
 
-"@kbn/rollup@link:x-pack/packages/rollup":
+"@kbn/rollup@link:x-pack/platform/packages/private/rollup":
   version "0.0.0"
   uid ""
 
@@ -6826,7 +6826,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/runtime-fields-plugin@link:x-pack/plugins/runtime_fields":
+"@kbn/runtime-fields-plugin@link:x-pack/platform/plugins/private/runtime_fields":
   version "0.0.0"
   uid ""
 
@@ -6990,7 +6990,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/searchprofiler-plugin@link:x-pack/plugins/searchprofiler":
+"@kbn/searchprofiler-plugin@link:x-pack/platform/plugins/shared/searchprofiler":
   version "0.0.0"
   uid ""
 
@@ -7454,7 +7454,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/snapshot-restore-plugin@link:x-pack/plugins/snapshot_restore":
+"@kbn/snapshot-restore-plugin@link:x-pack/platform/plugins/private/snapshot_restore":
   version "0.0.0"
   uid ""
 
@@ -7774,7 +7774,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/unsaved-changes-prompt@link:packages/kbn-unsaved-changes-prompt":
+"@kbn/unsaved-changes-prompt@link:src/platform/packages/shared/kbn-unsaved-changes-prompt":
   version "0.0.0"
   uid ""
 
@@ -7906,7 +7906,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/watcher-plugin@link:x-pack/plugins/watcher":
+"@kbn/watcher-plugin@link:x-pack/platform/plugins/private/watcher":
   version "0.0.0"
   uid ""
 
