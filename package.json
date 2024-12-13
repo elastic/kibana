@@ -841,7 +841,7 @@
     "@kbn/security-ui-components": "link:x-pack/packages/security/ui_components",
     "@kbn/securitysolution-autocomplete": "link:packages/kbn-securitysolution-autocomplete",
     "@kbn/securitysolution-data-table": "link:x-pack/solutions/security/packages/data_table",
-    "@kbn/securitysolution-ecs": "link:packages/kbn-securitysolution-ecs",
+    "@kbn/securitysolution-ecs": "link:src/platform/packages/shared/kbn-securitysolution-ecs",
     "@kbn/securitysolution-endpoint-exceptions-common": "link:packages/kbn-securitysolution-endpoint-exceptions-common",
     "@kbn/securitysolution-es-utils": "link:packages/kbn-securitysolution-es-utils",
     "@kbn/securitysolution-exception-list-components": "link:packages/kbn-securitysolution-exception-list-components",

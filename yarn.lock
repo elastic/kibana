@@ -7133,7 +7133,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-ecs@link:packages/kbn-securitysolution-ecs":
+"@kbn/securitysolution-ecs@link:src/platform/packages/shared/kbn-securitysolution-ecs":
   version "0.0.0"
   uid ""
 
