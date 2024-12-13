@@ -25,6 +25,7 @@ import { registerRoutes } from './routes';
 import { config as deprecationConfig, DeprecationConfigType } from './deprecation_config';
 import { registerApiDeprecationsInfo, registerConfigDeprecationsInfo } from './deprecations';
 
+/** @internal */
 export interface InternalDeprecationsServiceStart {
   /**
    * Creates a {@link DeprecationsClient} with provided SO client and ES client.
