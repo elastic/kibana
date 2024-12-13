@@ -5,5 +5,5 @@
     "@elastic/obs-knowledge-team"
   ],
   "group": "platform",
-  "visibility": "private"
+  "visibility": "shared"
 }

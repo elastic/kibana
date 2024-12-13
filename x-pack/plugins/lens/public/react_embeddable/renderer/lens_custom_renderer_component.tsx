@@ -59,6 +59,7 @@ export function LensRenderer({
   filters,
   timeRange,
   disabledActions,
+  searchSessionId,
   hidePanelTitles,
   lastReloadRequestTime,
   ...props
@@ -73,6 +74,7 @@ export function LensRenderer({
   }, []);
   const disabledActionIds$ = useObservableVariable(disabledActions);
   const viewMode$ = useObservableVariable(viewMode);
+  const searchSessionId$ = useObservableVariable(searchSessionId);
   const hidePanelTitles$ = useObservableVariable(hidePanelTitles);
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
@@ -142,6 +144,7 @@ export function LensRenderer({
         ...props,
         // forward the unified search context
         ...searchApi,
+        searchSessionId$,
         disabledActionIds: disabledActionIds$,
         setDisabledActionIds: (ids: string[] | undefined) => disabledActionIds$.next(ids),
         viewMode: viewMode$,
