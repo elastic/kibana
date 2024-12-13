@@ -136,13 +136,14 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient }) => 
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeModal}>
+        <EuiButtonEmpty data-test-subj="appearanceModalDiscardButton" onClick={closeModal}>
           {i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceModalDiscardBtnLabel', {
             defaultMessage: 'Discard',
           })}
         </EuiButtonEmpty>
 
         <EuiButton
+          data-test-subj="appearanceModalSaveButton"
           onClick={async () => {
             await onChange({ colorMode }, true);
             closeModal();
