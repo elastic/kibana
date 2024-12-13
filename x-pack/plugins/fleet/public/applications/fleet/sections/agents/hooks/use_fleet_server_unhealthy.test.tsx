@@ -51,42 +51,6 @@ describe('useFleetServerUnhealthy', () => {
     expect(result.current.isUnhealthy).toBeFalsy();
   });
 
-  describe('never fail test', () => {
-    const timings: number[] = [];
-    afterAll(() => {
-      process.stdout.write(`TEST never_fail_test took`);
-      timings.forEach((timing, index) => {
-        process.stdout.write(`\n ${index} => ${timings[index]}ms`);
-      });
-    });
-    for (let i = 0; i < 5000; i++) {
-      describe('test', () => {
-        beforeEach(() => {
-          timings[i] = Date.now();
-        });
-
-        afterEach(() => {
-          timings[i] = Date.now() - timings[i];
-        });
-
-        it('Test that should never fail ' + i, async () => {
-          jest.mocked(sendGetEnrollmentSettings).mockResolvedValue({
-            error: null,
-            data: {
-              fleet_server: {
-                has_active: false,
-                policies: [],
-              },
-            },
-          });
-          const { result } = testRenderer.renderHook(() => useFleetServerUnhealthy());
-          await testRenderer.waitFor(() => expect(result.current.isLoading).toBeFalsy());
-          expect(result.current.isUnhealthy).toBeTruthy();
-        });
-      });
-    }
-  });
-
   it('should return isUnHealthy:true with only one offline fleet server', async () => {
     jest.mocked(sendGetEnrollmentSettings).mockResolvedValue({
       error: null,
