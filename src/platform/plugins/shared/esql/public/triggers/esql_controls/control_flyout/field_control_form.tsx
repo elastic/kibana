@@ -159,6 +159,32 @@ export function FieldControlForm({
     setGrow(e.target.checked);
   }, []);
 
+  const onCreateOption = useCallback(
+    (searchValue: string, flattenedOptions: EuiComboBoxOptionOption[] = []) => {
+      if (!searchValue) {
+        return;
+      }
+
+      const normalizedSearchValue = searchValue.trim().toLowerCase();
+
+      const newOption = {
+        value: searchValue,
+        label: searchValue,
+      };
+
+      if (
+        flattenedOptions.findIndex(
+          (option) => option.label.trim().toLowerCase() === normalizedSearchValue
+        ) === -1
+      ) {
+        setAvailableFieldsOptions([...availableFieldsOptions, newOption]);
+      }
+
+      setSelectedFields((prevSelected) => [...prevSelected, newOption]);
+    },
+    [availableFieldsOptions]
+  );
+
   const onCreateIntervalControl = useCallback(async () => {
     const availableOptions = selectedFields.map((field) => field.label);
     const state = {
@@ -272,6 +298,7 @@ export function FieldControlForm({
             options={availableFieldsOptions}
             selectedOptions={selectedFields}
             onChange={onFieldsChange}
+            onCreateOption={onCreateOption}
             fullWidth
           />
         </EuiFormRow>
