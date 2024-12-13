@@ -7,7 +7,7 @@
 
 /// <reference types="@kbn/ambient-ftr-types"/>
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
@@ -31,12 +31,26 @@ describe('alert function', () => {
     ruleIds.push(responseApmRule.data.id);
 
     logger.info('Creating dataview');
-
-    await kibanaClient.callKibana(
+    const dataViewId = customThresholdAIAssistantLogCount.dataViewParams.options.id;
+    const existingDataView = await kibanaClient.callKibana(
       'post',
-      { pathname: '/api/content_management/rpc/create' },
-      customThresholdAIAssistantLogCount.dataViewParams
+      { pathname: '/api/content_management/rpc/get' },
+      {
+        contentTypeId: customThresholdAIAssistantLogCount.dataViewParams.contentTypeId,
+        id: dataViewId,
+        version: 1,
+      }
     );
+
+    if (!existingDataView) {
+      await kibanaClient.callKibana(
+        'post',
+        { pathname: '/api/content_management/rpc/create' },
+        customThresholdAIAssistantLogCount.dataViewParams
+      );
+    } else {
+      logger.info('Data view already exists, skipping creation');
+    }
 
     logger.info('Creating logs rule');
     const responseLogsRule = await kibanaClient.callKibana<RuleResponse>(
