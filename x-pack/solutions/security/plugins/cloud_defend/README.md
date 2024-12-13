@@ -41,9 +41,9 @@ responses:
 ## pre commit checks
 
 ```
-node scripts/type_check.js --project x-pack/plugins/cloud_defend/tsconfig.json
-node scripts/eslint.js x-pack/plugins/cloud_defend
-yarn test:jest x-pack/plugins/cloud_defend
+node scripts/type_check.js --project x-pack/solutions/security/plugins/cloud_defend/tsconfig.json
+node scripts/eslint.js x-pack/solutions/security/plugins/cloud_defend
+yarn test:jest x-pack/solutions/security/plugins/cloud_defend
 ```
 
 See the [kibana contributing guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) for instructions setting up your development environment.

@@ -885,7 +885,6 @@ x-pack/plugins/banners @elastic/appex-sharedux
 x-pack/plugins/canvas @elastic/kibana-presentation
 x-pack/plugins/cases @elastic/response-ops
 x-pack/plugins/cloud @elastic/kibana-core
-x-pack/plugins/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/plugins/cloud_integrations/cloud_chat @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_experiments @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_full_story @elastic/kibana-core
@@ -997,6 +996,7 @@ x-pack/solutions/security/packages/side_nav @elastic/security-threat-hunting-exp
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-explore
 x-pack/solutions/security/plugins/asset_inventory @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/plugins/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 x-pack/solutions/security/plugins/elastic_assistant @elastic/security-generative-ai
 x-pack/solutions/security/plugins/threat_intelligence @elastic/security-threat-hunting-investigations

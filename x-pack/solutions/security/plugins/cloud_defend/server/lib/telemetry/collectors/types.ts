@@ -6,7 +6,7 @@
  */
 // for some reason we can't reference common/index.ts because
 // the `node scripts/check_telemetry.js --fix` command fails with the error
-// ERROR Error: Error extracting collector in x-pack/plugins/cloud_defend/server/lib/telemetry/collectors/register.ts
+// ERROR Error: Error extracting collector in x-pack/solutions/security/plugins/cloud_defend/server/lib/telemetry/collectors/register.ts
 //      Error: Unable to find identifier in source Selector
 //          at createFailError (dev_cli_errors.ts:27:24)
 //          at parseUsageCollection (ts_parser.ts:226:32)
