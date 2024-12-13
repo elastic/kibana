@@ -376,7 +376,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
   }
 
-  public start() { }
+  public start() {}
 
-  public stop() { }
+  public stop() {}
 }
