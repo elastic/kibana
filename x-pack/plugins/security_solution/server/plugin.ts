@@ -281,6 +281,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         all: allRiskScoreIndexPattern,
         latest: latestRiskScoreIndexPattern,
       },
+      legacySignalsIndex: config.signalsIndex,
     });
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
@@ -530,6 +531,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       kibanaVersion: pluginContext.env.packageInfo.version,
       logger: this.logger,
       isFeatureEnabled: config.experimentalFeatures.defendInsights,
+      endpointContext: this.endpointContext.service,
     });
 
     return {
