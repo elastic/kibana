@@ -557,7 +557,7 @@ Plugin server-side only. Plugin has three main functions:
 |This plugin implements (server) APIs used to render the content of the Data Quality dashboard.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/elastic_assistant/README.md[elasticAssistant]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/elastic_assistant/README.md[elasticAssistant]
 |This plugin implements (only) server APIs for the Elastic AI Assistant.
 
 

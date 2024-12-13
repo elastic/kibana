@@ -5417,15 +5417,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/elastic-assistant-common@link:x-pack/packages/kbn-elastic-assistant-common":
+"@kbn/elastic-assistant-common@link:x-pack/platform/packages/shared/kbn-elastic-assistant-common":
   version "0.0.0"
   uid ""
 
-"@kbn/elastic-assistant-plugin@link:x-pack/plugins/elastic_assistant":
+"@kbn/elastic-assistant-plugin@link:x-pack/solutions/security/plugins/elastic_assistant":
   version "0.0.0"
   uid ""
 
-"@kbn/elastic-assistant@link:x-pack/packages/kbn-elastic-assistant":
+"@kbn/elastic-assistant@link:x-pack/platform/packages/shared/kbn-elastic-assistant":
   version "0.0.0"
   uid ""
 
@@ -6081,7 +6081,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/langchain@link:x-pack/packages/kbn-langchain":
+"@kbn/langchain@link:x-pack/platform/packages/shared/kbn-langchain":
   version "0.0.0"
   uid ""
 
