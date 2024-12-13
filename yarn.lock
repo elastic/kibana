@@ -7729,7 +7729,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/typed-react-router-config@link:packages/kbn-typed-react-router-config":
+"@kbn/typed-react-router-config@link:src/platform/packages/shared/kbn-typed-react-router-config":
   version "0.0.0"
   uid ""
 
