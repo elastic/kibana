@@ -15,8 +15,6 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { auditLoggerMock } from '@kbn/core-security-server-mocks';
 
-const mockMigrateEcsMappings = jest.fn().mockResolvedValue(false);
-const mockIsEcsMappingsMigrationRequired = jest.fn().mockResolvedValue(false);
 const mockIsEcsDataMigrationRequired = jest.fn().mockResolvedValue(false);
 const mockMigrateEcsData = jest.fn().mockResolvedValue({
   updated: 100,
