@@ -8,9 +8,21 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
+import { UI_SETTINGS } from '../../../constants';
 import { GetConfigFn } from '../../../types';
 import type { SearchRequest } from './types';
-import { getEsPreference } from '../../utils';
+
+const defaultSessionId = `${Date.now()}`;
+
+export function getEsPreference(
+  getConfigFn: GetConfigFn,
+  sessionId = defaultSessionId
+): SearchRequest['preference'] {
+  const setPreference = getConfigFn<string>(UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE);
+  if (setPreference === 'sessionId') return `${sessionId}`;
+  const customPreference = getConfigFn<string>(UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE);
+  return setPreference === 'custom' ? customPreference : undefined;
+}
 
 /** @public */
 // TODO: Could provide this on runtime contract with dependencies

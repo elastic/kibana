@@ -9,8 +9,7 @@
 
 import moment from 'moment-timezone';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { AggTypesDependencies, GetConfigFn, UI_SETTINGS } from '..';
+import { AggTypesDependencies } from '..';
 
 // TODO - investigate if this check is still needed
 // There are no documented work flows where response or rawResponse is not returned
@@ -50,15 +49,3 @@ export const getUserTimeZone = (
 
   return userTimeZone ?? defaultTimeZone;
 };
-
-const defaultSessionId = `${Date.now()}`;
-
-export function getEsPreference(
-  getConfigFn: GetConfigFn,
-  sessionId = defaultSessionId
-): SearchRequest['preference'] {
-  const setPreference = getConfigFn<string>(UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE);
-  if (setPreference === 'sessionId') return `${sessionId}`;
-  const customPreference = getConfigFn<string>(UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE);
-  return setPreference === 'custom' ? customPreference : undefined;
-}
