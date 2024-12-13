@@ -14,8 +14,7 @@ import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 
-// Failing: See https://github.com/elastic/kibana/issues/203930
-describe.skip('Endpoints RBAC', { tags: ['@ess'] }, () => {
+describe('Endpoints RBAC', { tags: ['@ess'] }, () => {
   type Privilege = 'all' | 'read' | 'none';
   const PRIVILEGES: Privilege[] = ['none', 'read', 'all'];
 

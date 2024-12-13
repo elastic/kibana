@@ -22,8 +22,7 @@ import {
 } from '../../../tasks/isolate';
 import { login } from '../../../tasks/login';
 
-// Failing: See https://github.com/elastic/kibana/issues/203904
-describe.skip('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     login();
   });

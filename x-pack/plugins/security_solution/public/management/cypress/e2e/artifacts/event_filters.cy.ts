@@ -18,9 +18,7 @@ import { login } from '../../tasks/login';
 import type { ReturnTypeFromChainable } from '../../types';
 
 // Skipped in Serverless MKI due to interactions with internal indices
-// Failing: See https://github.com/elastic/kibana/issues/194135
-// Failing: See https://github.com/elastic/kibana/issues/194135
-describe.skip('Event Filters', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+describe('Event Filters', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
 
   const CONDITION_VALUE = 'valuesAutocompleteMatch';
