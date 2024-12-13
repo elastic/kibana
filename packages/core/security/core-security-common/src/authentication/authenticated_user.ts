@@ -74,6 +74,11 @@ export interface AuthenticatedUser extends User {
   profile_uid?: string;
 
   /**
+   * Indicates whether user is an operator.
+   */
+  operator?: boolean;
+
+  /**
    * Metadata of the API key that was used to authenticate the user.
    */
   api_key?: ApiKey;

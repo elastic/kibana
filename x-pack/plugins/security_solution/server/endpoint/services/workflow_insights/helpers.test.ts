@@ -8,27 +8,33 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
+import type { HostMetadata } from '../../../../common/endpoint/types';
 import type { SearchParams } from '../../../../common/endpoint/types/workflow_insights';
 
-import { buildEsQueryParams, createDatastream, createPipeline } from './helpers';
 import {
-  DATA_STREAM_PREFIX,
+  ActionType,
+  Category,
+  SourceType,
+} from '../../../../common/endpoint/types/workflow_insights';
+import type { EndpointMetadataService } from '../metadata';
+import {
+  buildEsQueryParams,
+  createDatastream,
+  createPipeline,
+  groupEndpointIdsByOS,
+} from './helpers';
+import {
   COMPONENT_TEMPLATE_NAME,
+  DATA_STREAM_PREFIX,
   INDEX_TEMPLATE_NAME,
   INGEST_PIPELINE_NAME,
   TOTAL_FIELDS_LIMIT,
 } from './constants';
 import { securityWorkflowInsightsFieldMap } from './field_map_configurations';
-import {
-  ActionType,
-  Category,
-  SourceType,
-  TargetType,
-} from '../../../../common/endpoint/types/workflow_insights';
+import { createMockEndpointAppContext } from '../../mocks';
 
 jest.mock('@kbn/data-stream-adapter', () => ({
   DataStreamSpacesAdapter: jest.fn().mockImplementation(() => ({
@@ -89,62 +95,102 @@ describe('helpers', () => {
   });
 
   describe('buildEsQueryParams', () => {
-    it('should build es query correct', () => {
+    it('should build query with valid keys', () => {
       const searchParams: SearchParams = {
-        size: 50,
-        from: 50,
         ids: ['id1', 'id2'],
         categories: [Category.Endpoint],
-        types: [DefendInsightType.Enum.incompatible_antivirus],
+        types: ['incompatible_antivirus'],
         sourceTypes: [SourceType.LlmConnector],
-        sourceIds: ['source-id1', 'source-id2'],
-        targetTypes: [TargetType.Endpoint],
-        targetIds: ['target-id1', 'target-id2'],
-        actionTypes: [ActionType.Refreshed, ActionType.Remediated],
+        sourceIds: ['source1'],
+        targetIds: ['target1'],
+        actionTypes: [ActionType.Refreshed],
       };
       const result = buildEsQueryParams(searchParams);
       expect(result).toEqual([
-        {
-          terms: {
-            _id: ['id1', 'id2'],
-          },
-        },
-        {
-          terms: {
-            categories: ['endpoint'],
-          },
-        },
-        {
-          terms: {
-            types: ['incompatible_antivirus'],
-          },
-        },
-        {
-          terms: {
-            'source.type': ['llm-connector'],
-          },
-        },
-        {
-          terms: {
-            'source.id': ['source-id1', 'source-id2'],
-          },
-        },
-        {
-          terms: {
-            'target.type': ['endpoint'],
-          },
-        },
-        {
-          terms: {
-            'target.id': ['target-id1', 'target-id2'],
-          },
-        },
-        {
-          terms: {
-            'action.type': ['refreshed', 'remediated'],
-          },
-        },
+        { terms: { _id: ['id1', 'id2'] } },
+        { terms: { categories: ['endpoint'] } },
+        { terms: { types: ['incompatible_antivirus'] } },
+        { nested: { path: 'source', query: { terms: { 'source.type': ['llm-connector'] } } } },
+        { nested: { path: 'source', query: { terms: { 'source.id': ['source1'] } } } },
+        { nested: { path: 'target', query: { terms: { 'target.ids': ['target1'] } } } },
+        { nested: { path: 'action', query: { terms: { 'action.type': ['refreshed'] } } } },
       ]);
+    });
+
+    it('should ignore invalid keys', () => {
+      const searchParams = {
+        invalidKey: 'invalidValue',
+        ids: ['id1'],
+      } as unknown as SearchParams;
+      const result = buildEsQueryParams(searchParams);
+      expect(result).toEqual([{ terms: { _id: ['id1'] } }]);
+    });
+
+    it('should handle empty searchParams', () => {
+      const searchParams: SearchParams = {};
+      const result = buildEsQueryParams(searchParams);
+      expect(result).toEqual([]);
+    });
+
+    it('should handle nested query for actionTypes', () => {
+      const searchParams: SearchParams = {
+        actionTypes: [ActionType.Refreshed],
+      };
+      const result = buildEsQueryParams(searchParams);
+      expect(result).toEqual([
+        { nested: { path: 'action', query: { terms: { 'action.type': ['refreshed'] } } } },
+      ]);
+    });
+
+    it('should handle nested query for targetIds', () => {
+      const searchParams: SearchParams = {
+        targetIds: ['target1'],
+      };
+      const result = buildEsQueryParams(searchParams);
+      expect(result).toEqual([
+        { nested: { path: 'target', query: { terms: { 'target.ids': ['target1'] } } } },
+      ]);
+    });
+  });
+
+  describe('groupEndpointIdsByOS', () => {
+    let endpointMetadataService: jest.Mocked<EndpointMetadataService>;
+
+    beforeEach(() => {
+      const mockEndpointAppContextService = createMockEndpointAppContext().service;
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn().mockReturnValue({
+        getMetadataForEndpoints: jest.fn(),
+      });
+      endpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService() as jest.Mocked<EndpointMetadataService>;
+    });
+
+    it('should correctly group endpoint IDs by OS type', async () => {
+      const endpointIds = ['endpoint1', 'endpoint2', 'endpoint3'];
+      const metadata = [
+        {
+          host: { os: { name: 'Windows' } },
+          agent: { id: 'agent1' },
+        },
+        {
+          host: { os: { name: 'Linux' } },
+          agent: { id: 'agent2' },
+        },
+        {
+          host: { os: { name: 'MacOS' } },
+          agent: { id: 'agent3' },
+        },
+      ] as HostMetadata[];
+
+      endpointMetadataService.getMetadataForEndpoints.mockResolvedValue(metadata);
+
+      const result = await groupEndpointIdsByOS(endpointIds, endpointMetadataService);
+
+      expect(result).toEqual({
+        windows: ['agent1'],
+        linux: ['agent2'],
+        macos: ['agent3'],
+      });
     });
   });
 });

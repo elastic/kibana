@@ -62,12 +62,13 @@ describe('export_csv', () => {
       field: 'agent.id',
       direction: 'asc',
     };
+    const columns = [{ field: 'agent.id' }];
 
     act(() => {
-      result.result.current.generateReportingJobCSV(agents, sortOptions);
+      result.result.current.generateReportingJobCSV(agents, columns, sortOptions);
     });
 
-    expect(mockGetDecoratedJobParams.mock.calls[0][0].columns.length).toEqual(6);
+    expect(mockGetDecoratedJobParams.mock.calls[0][0].columns.length).toEqual(1);
     expect(mockGetDecoratedJobParams.mock.calls[0][0].searchSource).toEqual(
       expect.objectContaining({
         filter: expect.objectContaining({
@@ -127,12 +128,13 @@ describe('export_csv', () => {
 
   it('should generate reporting job for export csv with agents query', () => {
     const agents = 'policy_id:1 AND status:online';
+    const columns = [{ field: 'agent.id' }];
 
     act(() => {
-      result.result.current.generateReportingJobCSV(agents, undefined);
+      result.result.current.generateReportingJobCSV(agents, columns, undefined);
     });
 
-    expect(mockGetDecoratedJobParams.mock.calls[0][0].columns.length).toEqual(6);
+    expect(mockGetDecoratedJobParams.mock.calls[0][0].columns.length).toEqual(1);
     expect(mockGetDecoratedJobParams.mock.calls[0][0].searchSource).toEqual(
       expect.objectContaining({
         filter: expect.objectContaining({

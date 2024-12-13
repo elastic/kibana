@@ -17,6 +17,7 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
+import { RuleResponse } from '../../api/detection_engine/model/rule_schema/rule_schemas.gen';
 
 /**
  * The original rule vendor identifier.
@@ -102,9 +103,9 @@ export const ElasticRule = z.object({
    */
   prebuilt_rule_id: NonEmptyString.optional(),
   /**
-   * The Elastic integration IDs related to the rule.
+   * The Elastic integration ID found to be most relevant to the splunk rule.
    */
-  integration_ids: z.array(z.string()).optional(),
+  integration_id: z.string().optional(),
   /**
    * The Elastic rule id installed as a result.
    */
@@ -116,6 +117,21 @@ export const ElasticRule = z.object({
  */
 export type ElasticRulePartial = z.infer<typeof ElasticRulePartial>;
 export const ElasticRulePartial = ElasticRule.partial();
+
+/**
+ * The prebuilt rule version.
+ */
+export type PrebuiltRuleVersion = z.infer<typeof PrebuiltRuleVersion>;
+export const PrebuiltRuleVersion = z.object({
+  /**
+   * The latest available version of prebuilt rule.
+   */
+  target: RuleResponse,
+  /**
+   * The currently installed version of prebuilt rule.
+   */
+  current: RuleResponse.optional(),
+});
 
 /**
  * The rule translation result.
@@ -288,6 +304,29 @@ export const RuleMigrationTranslationStats = z.object({
 });
 
 /**
+ * The rule migration data object for rule update operation
+ */
+export type UpdateRuleMigrationData = z.infer<typeof UpdateRuleMigrationData>;
+export const UpdateRuleMigrationData = z.object({
+  /**
+   * The rule migration id
+   */
+  id: NonEmptyString,
+  /**
+   * The migrated elastic rule attributes to update.
+   */
+  elastic_rule: ElasticRulePartial.optional(),
+  /**
+   * The rule translation result.
+   */
+  translation_result: RuleMigrationTranslationResult.optional(),
+  /**
+   * The comments for the migration including a summary from the LLM in markdown.
+   */
+  comments: RuleMigrationComments.optional(),
+});
+
+/**
  * The type of the rule migration resource.
  */
 export type RuleMigrationResourceType = z.infer<typeof RuleMigrationResourceType>;
@@ -308,7 +347,7 @@ export const RuleMigrationResourceData = z.object({
   /**
    * The resource content value.
    */
-  content: z.string(),
+  content: z.string().optional(),
   /**
    * The resource arbitrary metadata.
    */

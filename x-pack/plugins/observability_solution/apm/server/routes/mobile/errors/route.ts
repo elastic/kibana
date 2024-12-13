@@ -39,7 +39,7 @@ const mobileMobileHttpRatesRoute = createApmServerRoute({
     }),
     query: t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<MobileHttpErrorsTimeseries> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -76,7 +76,7 @@ const mobileErrorsDetailedStatisticsRoute = createApmServerRoute({
     ]),
     body: t.type({ groupIds: jsonRt.pipe(t.array(t.string)) }),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<MobileErrorGroupPeriodsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -117,7 +117,7 @@ const mobileErrorTermsByFieldRoute = createApmServerRoute({
       }),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -158,7 +158,7 @@ const mobileErrorsMainStatisticsRoute = createApmServerRoute({
       rangeRt,
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ errorGroups: MobileErrorGroupMainStatisticsResponse }> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);

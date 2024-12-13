@@ -2,19 +2,22 @@
 
 exports[`CallOuts should render normally 1`] = `
 <Fragment>
+  <EuiSpacer
+    size="m"
+  />
   <EuiCallOut
     color="danger"
     iconType="cross"
     title={
       <Memo(MemoizedFormattedMessage)
-        defaultMessage="Deprecation languages in use"
-        id="indexPatternManagement.editIndexPattern.scripted.deprecationLangHeader"
+        defaultMessage="Deprecated languages in use"
+        id="indexPatternManagement.editIndexPattern.scripted.deprecatedLangHeader"
       />
     }
   >
     <p>
       <MemoizedFormattedMessage
-        defaultMessage="The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to {link} to avoid any problems."
+        defaultMessage="The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert your scripted fields to {link} to avoid any problems."
         id="indexPatternManagement.editIndexPattern.scripted.deprecationLangLabel.deprecationLangDetail"
         values={
           Object {
@@ -32,9 +35,6 @@ exports[`CallOuts should render normally 1`] = `
       />
     </p>
   </EuiCallOut>
-  <EuiSpacer
-    size="m"
-  />
 </Fragment>
 `;
 

@@ -22,12 +22,15 @@ import {
 import { getUserDisplayName } from '@kbn/user-profile-components';
 
 import { Item } from '../types';
+import { useServices } from '../services';
 
 export interface ActivityViewProps {
   item: Pick<Partial<Item>, 'createdBy' | 'createdAt' | 'updatedBy' | 'updatedAt' | 'managed'>;
+  entityNamePlural?: string;
 }
 
-export const ActivityView = ({ item }: ActivityViewProps) => {
+export const ActivityView = ({ item, entityNamePlural }: ActivityViewProps) => {
+  const isKibanaVersioningEnabled = useServices()?.isKibanaVersioningEnabled ?? false;
   const showLastUpdated = Boolean(item.updatedAt && item.updatedAt !== item.createdAt);
 
   const UnknownUserLabel = (
@@ -62,7 +65,10 @@ export const ActivityView = ({ item }: ActivityViewProps) => {
             ) : (
               <>
                 {UnknownUserLabel}
-                <NoCreatorTip />
+                <NoCreatorTip
+                  includeVersionTip={isKibanaVersioningEnabled}
+                  entityNamePlural={entityNamePlural}
+                />
               </>
             )
           }
@@ -85,7 +91,10 @@ export const ActivityView = ({ item }: ActivityViewProps) => {
               ) : (
                 <>
                   {UnknownUserLabel}
-                  <NoUpdaterTip />
+                  <NoUpdaterTip
+                    includeVersionTip={isKibanaVersioningEnabled}
+                    entityNamePlural={entityNamePlural}
+                  />
                 </>
               )
             }
