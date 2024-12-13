@@ -10,7 +10,6 @@ import type { EuiCommentProps } from '@elastic/eui';
 import { EuiAvatar, EuiCommentList, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import moment from 'moment';
 import { AssistantAvatar } from '@kbn/elastic-assistant';
-import { useTimeZone } from '../../../../../../common/lib/kibana';
 import {
   RuleMigrationStatusEnum,
   type RuleMigration,
@@ -22,11 +21,10 @@ interface SummaryTabProps {
 }
 
 export const SummaryTab: React.FC<SummaryTabProps> = React.memo(({ ruleMigration }) => {
-  const timezone = useTimeZone();
   const timestamp = useMemo(
     // Date formats https://momentjs.com/docs/#/displaying/format/
-    () => moment.tz(ruleMigration['@timestamp'], timezone).format('ll'),
-    [ruleMigration, timezone]
+    () => moment(ruleMigration['@timestamp']).format('ll'),
+    [ruleMigration]
   );
   const comments: EuiCommentProps[] | undefined = useMemo(() => {
     return ruleMigration.comments?.map((comment) => {
