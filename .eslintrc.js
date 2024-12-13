@@ -1786,7 +1786,7 @@ module.exports = {
         'plugin:@typescript-eslint/recommended',
       ],
       plugins: ['react', '@typescript-eslint'],
-      files: ['x-pack/plugins/osquery/**/*.{js,mjs,ts,tsx}'],
+      files: ['x-pack/platform/plugins/shared/osquery/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'padding-line-between-statements': [
           'error',
@@ -1812,7 +1812,7 @@ module.exports = {
     },
     {
       // typescript and javascript for front end react performance
-      files: ['x-pack/plugins/osquery/public/**/!(*.test).{js,mjs,ts,tsx}'],
+      files: ['x-pack/platform/plugins/shared/osquery/public/**/!(*.test).{js,mjs,ts,tsx}'],
       plugins: ['react', 'react-perf'],
       rules: {
         'react-perf/jsx-no-new-object-as-prop': 'error',
@@ -2007,7 +2007,7 @@ module.exports = {
         'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)
 
         // @kbn/osquery-plugin could be categorised as Security, but @kbn/infra-plugin (observability) depends on it!
-        'x-pack/plugins/osquery/**',
+        'x-pack/platform/plugins/shared/osquery/**',
 
         // For now, we keep the exception to let tests depend on anythying.
         // Ideally, we need to classify the solution specific ones to reduce CI times

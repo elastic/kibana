@@ -4017,7 +4017,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/avc-banner@link:packages/kbn-avc-banner":
+"@kbn/avc-banner@link:src/platform/packages/shared/kbn-avc-banner":
   version "0.0.0"
   uid ""
 
@@ -6561,7 +6561,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/osquery-plugin@link:x-pack/plugins/osquery":
+"@kbn/osquery-plugin@link:x-pack/platform/plugins/shared/osquery":
   version "0.0.0"
   uid ""
 

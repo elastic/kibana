@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-require('../../../../../src/setup_node_env');
-require('./osquery_formatter');
+require('../../../../../../../src/setup_node_env');
+require('./ecs_formatter');
