@@ -20,10 +20,6 @@ export const Minimal = {
   name: 'minimal',
 };
 
-export default {
-  title: 'components/WorkpadHeader/ShareMenu',
-};
-
 export const WithReporting = {
   render: () => (
     <ShareMenu

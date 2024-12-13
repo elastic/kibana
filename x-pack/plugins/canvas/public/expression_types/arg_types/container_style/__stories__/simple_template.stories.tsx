@@ -56,14 +56,6 @@ export const Simple = {
   name: 'simple',
 };
 
-export default {
-  title: 'arguments/ContainerStyle/components',
-
-  decorators: [
-    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
-  ],
-};
-
 export const _SimpleTemplate = {
   render: () => (
     <SimpleTemplate

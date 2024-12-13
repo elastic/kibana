@@ -67,14 +67,6 @@ export const Extended = {
   name: 'extended',
 };
 
-export default {
-  title: 'arguments/ContainerStyle/components',
-
-  decorators: [
-    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
-  ],
-};
-
 export const _AppearanceForm = {
   render: () => (
     <AppearanceForm onChange={action('onChange')} padding="4" opacity="1" overflow="visible" />

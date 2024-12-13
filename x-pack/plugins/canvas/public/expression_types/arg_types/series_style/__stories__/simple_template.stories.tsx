@@ -62,14 +62,6 @@ export const Simple = {
   name: 'simple',
 };
 
-export default {
-  title: 'arguments/SeriesStyle/components',
-
-  decorators: [
-    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
-  ],
-};
-
 export const SimpleNoLabels = {
   render: () => (
     <SimpleTemplate
