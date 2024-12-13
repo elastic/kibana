@@ -49,7 +49,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('/api/observability_ai_assistant/chat/complete', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/203408
+  describe.skip('/api/observability_ai_assistant/chat/complete', function () {
     // TODO: https://github.com/elastic/kibana/issues/192751
     this.tags(['skipMKI']);
 

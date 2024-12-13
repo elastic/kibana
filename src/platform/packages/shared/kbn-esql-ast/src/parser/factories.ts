@@ -526,11 +526,21 @@ export function createColumn(ctx: ParserRuleContext): ESQLColumn {
   if (ctx instanceof QualifiedNamePatternContext) {
     const list = ctx.identifierPattern_list();
 
-    for (const identifier of list) {
-      const name = parseIdentifier(identifier.getText());
-      const node = Builder.identifier({ name }, createParserFields(identifier));
+    for (const identifierPattern of list) {
+      const ID_PATTERN = identifierPattern.ID_PATTERN();
 
-      args.push(node);
+      if (ID_PATTERN) {
+        const name = parseIdentifier(ID_PATTERN.getText());
+        const node = Builder.identifier({ name }, createParserFields(identifierPattern));
+
+        args.push(node);
+      } else {
+        const parameter = createParam(identifierPattern.parameter());
+
+        if (parameter) {
+          args.push(parameter);
+        }
+      }
     }
   } else if (ctx instanceof QualifiedNameContext) {
     const list = ctx.identifierOrParameter_list();

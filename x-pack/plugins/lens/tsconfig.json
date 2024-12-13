@@ -114,6 +114,7 @@
     "@kbn/es-types",
     "@kbn/esql-datagrid",
     "@kbn/transpose-utils",
+    "@kbn/palettes",
     "@kbn/core-application-browser",
     "@kbn/core-chrome-browser",
     "@kbn/core-capabilities-common",

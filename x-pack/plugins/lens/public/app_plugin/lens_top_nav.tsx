@@ -17,6 +17,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import moment from 'moment';
+import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { LENS_APP_LOCATOR } from '../../common/locator/locator';
 import { LENS_APP_NAME } from '../../common/constants';
 import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
@@ -641,6 +643,26 @@ export const LensTopNavMenu = ({
                 title: i18n.translate('xpack.lens.app.shareModal.title', {
                   defaultMessage: 'Share this Lens visualization',
                 }),
+                config: {
+                  link: {
+                    draftModeCallOut: (
+                      <EuiCallOut
+                        color="warning"
+                        title={
+                          <FormattedMessage
+                            id="xpack.lens.app.shareModal.draftModeCallout.title"
+                            defaultMessage="Unsaved changes"
+                          />
+                        }
+                      >
+                        <FormattedMessage
+                          id="xpack.lens.app.shareModal.draftModeCallout.link.warning"
+                          defaultMessage="The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first."
+                        />
+                      </EuiCallOut>
+                    ),
+                  },
+                },
               },
               sharingData,
               // only want to know about changes when savedObjectURL.href
