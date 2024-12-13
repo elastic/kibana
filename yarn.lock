@@ -7525,7 +7525,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/sse-utils@link:packages/kbn-sse-utils":
+"@kbn/sse-utils@link:src/platform/packages/shared/kbn-sse-utils":
   version "0.0.0"
   uid ""
 
