@@ -6,7 +6,11 @@
  */
 
 import os from 'os';
-import type { PaginationConfiguration, TelemetrySenderChannelConfiguration } from './types';
+import type {
+  IndicesMetadataConfiguration,
+  PaginationConfiguration,
+  TelemetrySenderChannelConfiguration,
+} from './types';
 
 class TelemetryConfigurationDTO {
   private readonly DEFAULT_TELEMETRY_MAX_BUFFER_SIZE = 100;
@@ -21,6 +25,15 @@ class TelemetryConfigurationDTO {
     max_page_size_bytes: Math.min(os.totalmem() * 0.02, 80 * 1024 * 1024),
     num_docs_to_sample: 10,
   };
+  private readonly DEFAULT_INDICES_METADATA_CONFIG = {
+    indices_threshold: 10000,
+    datastreams_threshold: 1000,
+
+    max_prefixes: 10, // @deprecated
+    max_group_size: 100, // @deprecated
+    min_group_size: 5, // @deprecated
+  };
+
   private _telemetry_max_buffer_size = this.DEFAULT_TELEMETRY_MAX_BUFFER_SIZE;
   private _max_security_list_telemetry_batch = this.DEFAULT_MAX_SECURITY_LIST_TELEMETRY_BATCH;
   private _max_endpoint_telemetry_batch = this.DEFAULT_MAX_ENDPOINT_TELEMETRY_BATCH;
@@ -31,6 +44,8 @@ class TelemetryConfigurationDTO {
     [key: string]: TelemetrySenderChannelConfiguration;
   } = this.DEFAULT_SENDER_CHANNELS;
   private _pagination_config: PaginationConfiguration = this.DEFAULT_PAGINATION_CONFIG;
+  private _indices_metadata_config: IndicesMetadataConfiguration =
+    this.DEFAULT_INDICES_METADATA_CONFIG;
 
   public get telemetry_max_buffer_size(): number {
     return this._telemetry_max_buffer_size;
@@ -96,6 +111,14 @@ class TelemetryConfigurationDTO {
     return this._pagination_config;
   }
 
+  public set indices_metadata_config(paginationConfiguration: IndicesMetadataConfiguration) {
+    this._indices_metadata_config = paginationConfiguration;
+  }
+
+  public get indices_metadata_config(): IndicesMetadataConfiguration {
+    return this._indices_metadata_config;
+  }
+
   public resetAllToDefault() {
     this._telemetry_max_buffer_size = this.DEFAULT_TELEMETRY_MAX_BUFFER_SIZE;
     this._max_security_list_telemetry_batch = this.DEFAULT_MAX_SECURITY_LIST_TELEMETRY_BATCH;
@@ -104,6 +127,7 @@ class TelemetryConfigurationDTO {
     this._max_detection_alerts_batch = this.DEFAULT_MAX_DETECTION_ALERTS_BATCH;
     this._sender_channels = this.DEFAULT_SENDER_CHANNELS;
     this._pagination_config = this.DEFAULT_PAGINATION_CONFIG;
+    this._indices_metadata_config = this.DEFAULT_INDICES_METADATA_CONFIG;
   }
 }
 

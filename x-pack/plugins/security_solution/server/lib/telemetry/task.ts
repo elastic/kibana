@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import type { Logger } from '@kbn/core/server';
+import type { Logger, LogMeta } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -15,8 +15,9 @@ import type {
 import type { ITelemetryReceiver } from './receiver';
 import type { ITelemetryEventsSender } from './sender';
 import type { ITaskMetricsService } from './task_metrics.types';
-import { tlog } from './helpers';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
+import { newTelemetryLogger } from './helpers';
+import { type TelemetryLogger } from './telemetry_logger';
 
 export interface SecurityTelemetryTaskConfig {
   type: string;
@@ -49,7 +50,7 @@ export type LastExecutionTimestampCalculator = (
 
 export class SecurityTelemetryTask {
   private readonly config: SecurityTelemetryTaskConfig;
-  private readonly logger: Logger;
+  private readonly logger: TelemetryLogger;
   private readonly sender: ITelemetryEventsSender;
   private readonly receiver: ITelemetryReceiver;
   private readonly taskMetricsService: ITaskMetricsService;
@@ -62,7 +63,7 @@ export class SecurityTelemetryTask {
     taskMetricsService: ITaskMetricsService
   ) {
     this.config = config;
-    this.logger = logger;
+    this.logger = newTelemetryLogger(logger.get('task'));
     this.sender = sender;
     this.receiver = receiver;
     this.taskMetricsService = taskMetricsService;
@@ -122,7 +123,7 @@ export class SecurityTelemetryTask {
 
   public start = async (taskManager: TaskManagerStartContract) => {
     const taskId = this.getTaskId();
-    tlog(this.logger, `[task ${taskId}]: attempting to schedule`);
+    this.logger.debug('Attempting to schedule task', { taskId } as LogMeta);
     try {
       await taskManager.ensureScheduled({
         id: taskId,
@@ -135,30 +136,32 @@ export class SecurityTelemetryTask {
         params: { version: this.config.version },
       });
     } catch (e) {
-      this.logger.error(`[task ${taskId}]: error scheduling task, received ${e.message}`);
+      this.logger.error('Error scheduling task', {
+        error: e.message,
+      } as LogMeta);
     }
   };
 
   public runTask = async (taskId: string, executionPeriod: TaskExecutionPeriod) => {
-    tlog(this.logger, `[task ${taskId}]: attempting to run`);
+    this.logger.debug('Attempting to run', { taskId } as LogMeta);
     if (taskId !== this.getTaskId()) {
-      tlog(this.logger, `[task ${taskId}]: outdated task`);
+      this.logger.info('outdated task', { taskId } as LogMeta);
       return 0;
     }
 
     const isOptedIn = await this.sender.isTelemetryOptedIn();
     if (!isOptedIn) {
-      tlog(this.logger, `[task ${taskId}]: telemetry is not opted-in`);
+      this.logger.info('Telemetry is not opted-in', { taskId } as LogMeta);
       return 0;
     }
 
     const isTelemetryServicesReachable = await this.sender.isTelemetryServicesReachable();
     if (!isTelemetryServicesReachable) {
-      tlog(this.logger, `[task ${taskId}]: cannot reach telemetry services`);
+      this.logger.info('Cannot reach telemetry services', { taskId } as LogMeta);
       return 0;
     }
 
-    tlog(this.logger, `[task ${taskId}]: running task`);
+    this.logger.debug('Running task', { taskId } as LogMeta);
     return this.config.runTask(
       taskId,
       this.logger,
