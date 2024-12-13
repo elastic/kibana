@@ -219,6 +219,7 @@ export const LogRateAnalysisAttachmentsMenu = ({
                 })}
                 color="text"
                 display="base"
+                size="s"
                 isSelected={isActionMenuOpen}
                 iconType="boxesHorizontal"
                 onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
