@@ -828,7 +828,7 @@ describe('EPM template', () => {
     const objectFieldWithPropertyReversedMapping = {
       dynamic_templates: [
         {
-          'labels': {
+          labels: {
             path_match: 'labels.*',
             match_mapping_type: '*',
             mapping: {
