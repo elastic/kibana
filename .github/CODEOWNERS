@@ -938,8 +938,6 @@ x-pack/plugins/observability_solution/observability_onboarding/e2e @elastic/obs-
 x-pack/plugins/observability_solution/observability_shared @elastic/observability-ui
 x-pack/plugins/observability_solution/profiling @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/profiling_data_access @elastic/obs-ux-infra_services-team
-x-pack/plugins/painless_lab @elastic/kibana-management
-x-pack/plugins/remote_clusters @elastic/kibana-management
 x-pack/plugins/reporting @elastic/appex-sharedux
 x-pack/plugins/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 x-pack/plugins/saved_objects_tagging @elastic/appex-sharedux
