@@ -65,7 +65,7 @@ run(
       const fileOwners = getOwners(file.path);
 
       if (fileOwners) {
-        asyncForEach(fileOwners, async (fileOwner) => {
+        await asyncForEach(fileOwners, async (fileOwner) => {
           const loc = file.staged ? 'staged' : 'unstaged';
 
           owners[loc][fileOwner] = [
