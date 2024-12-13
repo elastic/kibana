@@ -5969,7 +5969,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/integration-assistant-plugin@link:x-pack/plugins/integration_assistant":
+"@kbn/integration-assistant-plugin@link:x-pack/platform/plugins/shared/integration_assistant":
   version "0.0.0"
   uid ""
 
