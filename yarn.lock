@@ -7217,7 +7217,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/server-route-repository@link:packages/kbn-server-route-repository":
+"@kbn/server-route-repository@link:src/platform/packages/shared/kbn-server-route-repository":
   version "0.0.0"
   uid ""
 
