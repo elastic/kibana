@@ -16,7 +16,7 @@ module.exports = {
     /packages[\/\\]kbn-ui-shared-deps-(npm|src)[\/\\]/,
     /src[\/\\]plugins[\/\\](kibana_react)[\/\\]/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]/,
-    /x-pack[\/\\]plugins[\/\\](observability_solution\/apm|beats_management|fleet|observability_solution\/infra|lists|observability_solution\/observability|observability_solution\/observability_shared|observability_solution\/exploratory_view|security_solution|timelines|observability_solution\/synthetics|observability_solution\/ux|observability_solution\/uptime)[\/\\]/,
+    /x-pack[\/\\]plugins[\/\\](observability_solution\/apm|beats_management|fleet|lists|observability_solution\/observability|observability_solution\/observability_shared|observability_solution\/exploratory_view|security_solution|timelines|observability_solution\/synthetics|observability_solution\/ux|observability_solution\/uptime)[\/\\]/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\](observability_solution\/apm|beats_management|fleet|observability_solution\/infra|lists|observability_solution\/observability|observability_solution\/observability_shared|observability_solution\/exploratory_view|security_solution|timelines|observability_solution\/synthetics|observability_solution\/ux|observability_solution\/uptime)[\/\\]/,
     /x-pack[\/\\]test[\/\\]plugin_functional[\/\\]plugins[\/\\]resolver_test[\/\\]/,
     /x-pack[\/\\]packages[\/\\]elastic_assistant[\/\\]/,
