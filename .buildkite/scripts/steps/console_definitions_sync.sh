@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-GIT_SCOPE="src/plugins/console/server/lib/spec_definitions"
+GIT_SCOPE="src/platform/plugins/shared/console/server/lib/spec_definitions"
 
 report_main_step () {
   echo "--- $1"

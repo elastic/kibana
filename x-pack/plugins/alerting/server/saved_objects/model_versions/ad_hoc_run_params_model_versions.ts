@@ -6,10 +6,7 @@
  */
 
 import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import {
-  rawAdHocRunParamsSchemaV1,
-  rawAdHocRunParamsSchemaV2,
-} from '../schemas/raw_ad_hoc_run_params';
+import { rawAdHocRunParamsSchemaV1 } from '../schemas/raw_ad_hoc_run_params';
 
 export const adHocRunParamsModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -17,13 +14,6 @@ export const adHocRunParamsModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: rawAdHocRunParamsSchemaV1.extends({}, { unknowns: 'ignore' }),
       create: rawAdHocRunParamsSchemaV1,
-    },
-  },
-  '2': {
-    changes: [],
-    schemas: {
-      forwardCompatibility: rawAdHocRunParamsSchemaV2.extends({}, { unknowns: 'ignore' }),
-      create: rawAdHocRunParamsSchemaV2,
     },
   },
 };
