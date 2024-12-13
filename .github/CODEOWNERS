@@ -496,7 +496,6 @@ packages/kbn-shared-ux-utility @elastic/appex-sharedux
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-sort-predicates @elastic/kibana-visualizations
-packages/kbn-sse-utils-server @elastic/obs-knowledge-team
 packages/kbn-std @elastic/kibana-core
 packages/kbn-stdio-dev-helpers @elastic/kibana-operations
 packages/kbn-storybook @elastic/kibana-operations
@@ -624,6 +623,7 @@ src/platform/packages/shared/kbn-server-route-repository-client @elastic/obs-kno
 src/platform/packages/shared/kbn-server-route-repository-utils @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-sse-utils @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-sse-utils-client @elastic/obs-knowledge-team
+src/platform/packages/shared/kbn-sse-utils-server @elastic/obs-knowledge-team
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/platform/plugins/shared/esql @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
