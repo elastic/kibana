@@ -31,7 +31,7 @@ export const getDataStreamsHandler = (
         core.elasticsearch.client.asSecondaryAuthUser
       );
 
-      if (!meteringStatsDataStreams) {
+      if (!meteringStatsDataStreams || !meteringStatsDataStreams.length) {
         return errorHandler(
           logger,
           response,
