@@ -52,6 +52,7 @@ export type SaveModalContainerProps = {
     | 'analytics'
     | 'i18n'
     | 'theme'
+    | 'userProfile'
     | 'stateTransfer'
     | 'savedObjectStore'
   >;
@@ -240,6 +241,7 @@ export type SaveVisualizationProps = Simplify<
       | 'analytics'
       | 'i18n'
       | 'theme'
+      | 'userProfile'
       | 'notifications'
       | 'stateTransfer'
       | 'attributeService'
