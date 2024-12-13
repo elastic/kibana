@@ -152,7 +152,6 @@ export function DocumentsTable({
                     setSampleSize(nSample);
                   }}
                   sort={[]}
-                  useNewFieldsApi={true}
                   showFullScreenButton={false}
                 />
               </CellActionsProvider>

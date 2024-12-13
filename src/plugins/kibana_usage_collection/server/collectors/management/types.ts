@@ -31,7 +31,6 @@ export interface UsageStats {
   'search:timeout': number;
   'visualization:visualize:legacyHeatmapChartsLibrary': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
-  'discover:searchFieldsFromSource': boolean;
   'discover:showFieldStatistics': boolean;
   'discover:showMultiFields': boolean;
   enableESQL: boolean;

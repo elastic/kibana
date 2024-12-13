@@ -11,7 +11,7 @@
 // There are four modules of jobs that are affected. However, because the API
 // that returns installed jobs does not include those jobs' modules, hardcoding
 // the IDs from those modules (as found in e.g.
-// x-pack/plugins/ml/server/models/data_recognizer/modules/security_windows/manifest.json)
+// x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security_windows/manifest.json)
 // allows us to make this determination from a single API call.
 //
 // Note: In 8.3 the V3 ML modules were released (#131166) and a large portion of the V1/V2

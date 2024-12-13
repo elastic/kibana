@@ -10,7 +10,11 @@ import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
 import { SavedObjectsBulkDeleteResponse, SavedObjectsUpdateResponse } from '@kbn/core/server';
 
 import { createFindResponse, createFindSO } from './mock_kibana_discovery_service';
-import { DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION, DEFAULT_DISCOVERY_INTERVAL_MS } from '../config';
+import {
+  DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+  DEFAULT_DISCOVERY_INTERVAL_MS,
+  DISCOVERY_INTERVAL_AFTER_BLOCK_EXCEPTION_MS,
+} from '../config';
 
 const currentNode = 'current-node-id';
 const now = '2024-08-10T10:00:00.000Z';
@@ -196,6 +200,49 @@ describe('KibanaDiscoveryService', () => {
       expect(logger.error).toHaveBeenCalledTimes(1);
       expect(logger.error).toHaveBeenCalledWith(
         "Kibana Discovery Service couldn't update this node's last_seen timestamp. id: current-node-id, last_seen: 2024-08-10T10:00:10.000Z, error:foo"
+      );
+    });
+
+    it('reschedules discovery job in case of cluster_block_exception', async () => {
+      savedObjectsRepository.update.mockResolvedValueOnce(
+        {} as SavedObjectsUpdateResponse<unknown>
+      );
+
+      const kibanaDiscoveryService = new KibanaDiscoveryService({
+        savedObjectsRepository,
+        logger,
+        currentNode,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: DEFAULT_DISCOVERY_INTERVAL_MS,
+        },
+      });
+      await kibanaDiscoveryService.start();
+
+      expect(kibanaDiscoveryService.isStarted()).toBe(true);
+      expect(setTimeout).toHaveBeenCalledTimes(1);
+      expect(setTimeout).toHaveBeenNthCalledWith(
+        1,
+        expect.any(Function),
+        DEFAULT_DISCOVERY_INTERVAL_MS
+      );
+
+      savedObjectsRepository.update.mockRejectedValueOnce(
+        new Error('failed due to cluster_block_exception, task_manager index')
+      );
+
+      await jest.advanceTimersByTimeAsync(15000);
+
+      expect(savedObjectsRepository.update).toHaveBeenCalledTimes(2);
+      expect(setTimeout).toHaveBeenCalledTimes(2);
+      expect(setTimeout).toHaveBeenNthCalledWith(
+        2,
+        expect.any(Function),
+        DISCOVERY_INTERVAL_AFTER_BLOCK_EXCEPTION_MS
+      );
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        "Kibana Discovery Service couldn't update this node's last_seen timestamp. id: current-node-id, last_seen: 2024-08-10T10:00:10.000Z, error:failed due to cluster_block_exception, task_manager index"
       );
     });
 
