@@ -13,7 +13,8 @@ import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 
-describe('Endpoints page', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/171639
+describe.skip('Endpoints page', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
 
   before(() => {

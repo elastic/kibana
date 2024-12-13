@@ -11,7 +11,7 @@ import { css } from '@emotion/css';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DataSourceType } from '../../../../../../../../../common/api/detection_engine/prebuilt_rules';
 import { UseMultiFields } from '../../../../../../../../shared_imports';
-import type { RuleFieldEditComponentProps } from '../rule_field_edit_component_props';
+import type { RuleFieldEditComponentProps } from '../../../field_final_side';
 import { IndexPatternField } from './index_pattern_edit';
 import { DataSourceInfoText } from './data_source_info_text';
 import { DataViewField } from './data_view_field';
