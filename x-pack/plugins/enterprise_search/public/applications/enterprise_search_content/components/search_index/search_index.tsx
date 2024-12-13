@@ -42,7 +42,6 @@ import { IndexError } from './index_error';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
-import { useIndicesNav } from './indices/indices_nav';
 import { SearchIndexOverview } from './overview';
 import { SearchIndexPipelines } from './pipelines/pipelines';
 
@@ -82,8 +81,6 @@ export const SearchIndex: React.FC = () => {
     updateSideNavDefinition,
   } = useValues(KibanaLogic);
 
-  const indicesItems = useIndicesNav();
-
   useEffect(() => {
     const subscription = guidedOnboarding?.guidedOnboardingApi
       ?.isGuideStepActive$('appSearch', 'add_data')
@@ -116,11 +113,6 @@ export const SearchIndex: React.FC = () => {
       });
     return () => subscription?.unsubscribe();
   }, [guidedOnboarding, index?.count]);
-
-  useEffect(() => {
-    // We update the new side nav definition with the selected indices items
-    updateSideNavDefinition({ indices: indicesItems });
-  }, [indicesItems, updateSideNavDefinition]);
 
   useEffect(() => {
     return () => {
