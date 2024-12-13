@@ -22,7 +22,7 @@ export function SetupReadOnly({ setup }: SetupReadOnlyProps) {
       listItems={[
         {
           title: ruleDetailsI18n.SETUP_GUIDE_SECTION_LABEL,
-          description: setup ? <Setup setup={setup} /> : <EmptyFieldValuePlaceholder />,
+          description: setup.trim() ? <Setup setup={setup} /> : <EmptyFieldValuePlaceholder />,
         },
       ]}
     />

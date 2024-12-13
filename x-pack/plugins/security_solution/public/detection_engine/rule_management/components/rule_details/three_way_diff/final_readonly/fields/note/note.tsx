@@ -22,7 +22,7 @@ export function NoteReadOnly({ note }: NoteReadOnlyProps) {
       listItems={[
         {
           title: i18n.NOTE_LABEL,
-          description: note ? <Note note={note} /> : <EmptyFieldValuePlaceholder />,
+          description: note.trim() ? <Note note={note} /> : <EmptyFieldValuePlaceholder />,
         },
       ]}
     />

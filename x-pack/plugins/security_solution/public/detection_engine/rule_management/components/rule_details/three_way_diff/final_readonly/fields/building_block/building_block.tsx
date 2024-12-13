@@ -21,7 +21,7 @@ export function BuildingBlockReadOnly({ buildingBlock }: BuildingBlockReadOnlyPr
       listItems={[
         {
           title: ruleDetailsI18n.BUILDING_BLOCK_FIELD_LABEL,
-          description: <BuildingBlock isBuildingBlockEnabled={Boolean(buildingBlock?.type)} />,
+          description: <BuildingBlock type={buildingBlock?.type} />,
         },
       ]}
     />

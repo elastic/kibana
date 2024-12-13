@@ -10,6 +10,6 @@ import { i18n } from '@kbn/i18n';
 export const EMPTY_FIELD_VALUE_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.emptyFieldValuePlaceholder',
   {
-    defaultMessage: 'Field value is empty',
+    defaultMessage: '<Field value is empty>',
   }
 );

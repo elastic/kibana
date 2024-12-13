@@ -22,12 +22,11 @@ export function TimestampOverrideReadOnly({ timestampOverride }: TimestampOverri
       listItems={[
         {
           title: ruleDetailsI18n.TIMESTAMP_OVERRIDE_FIELD_LABEL,
-          description:
-            timestampOverride && timestampOverride.field_name ? (
-              <TimestampOverride timestampOverride={timestampOverride.field_name} />
-            ) : (
-              <EmptyFieldValuePlaceholder />
-            ),
+          description: timestampOverride?.field_name ? (
+            <TimestampOverride timestampOverride={timestampOverride.field_name} />
+          ) : (
+            <EmptyFieldValuePlaceholder />
+          ),
         },
       ]}
     />

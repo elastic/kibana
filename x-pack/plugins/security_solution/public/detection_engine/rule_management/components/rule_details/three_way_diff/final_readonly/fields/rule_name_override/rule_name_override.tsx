@@ -22,12 +22,11 @@ export function RuleNameOverrideReadOnly({ ruleNameOverride }: RuleNameOverrideR
       listItems={[
         {
           title: ruleDetailsI18n.RULE_NAME_OVERRIDE_FIELD_LABEL,
-          description:
-            ruleNameOverride && ruleNameOverride.field_name ? (
-              <RuleNameOverride ruleNameOverride={ruleNameOverride.field_name} />
-            ) : (
-              <EmptyFieldValuePlaceholder />
-            ),
+          description: ruleNameOverride?.field_name ? (
+            <RuleNameOverride ruleNameOverride={ruleNameOverride.field_name} />
+          ) : (
+            <EmptyFieldValuePlaceholder />
+          ),
         },
       ]}
     />
