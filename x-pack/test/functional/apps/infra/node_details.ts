@@ -537,7 +537,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Logs Tab', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/203656
+      describe.skip('Logs Tab', () => {
         before(async () => {
           await pageObjects.assetDetails.clickLogsTab();
           await pageObjects.timePicker.setAbsoluteRange(

@@ -43,7 +43,10 @@ import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
 import { IMyStrategyResponse } from '../../common/types';
 
 interface SearchExamplesAppDeps
-  extends Pick<CoreStart, 'notifications' | 'http' | 'analytics' | 'i18n' | 'theme'> {
+  extends Pick<
+    CoreStart,
+    'notifications' | 'http' | 'analytics' | 'i18n' | 'theme' | 'userProfile'
+  > {
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -227,13 +230,8 @@ export const SearchExamplesApp = ({
               </EuiText>
             );
             notifications.toasts.addSuccess(
-              {
-                title: 'Query result',
-                text: toMountPoint(message, startServices),
-              },
-              {
-                toastLifeTimeMs: 300000,
-              }
+              { title: 'Query result', text: toMountPoint(message, startServices) },
+              { toastLifeTimeMs: 300000 }
             );
             if (res.warning) {
               notifications.toasts.addWarning({

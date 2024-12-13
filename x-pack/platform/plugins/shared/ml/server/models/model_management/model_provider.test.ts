@@ -126,6 +126,22 @@ describe('modelsProvider', () => {
           licenseUrl: 'https://huggingface.co/elastic/multilingual-e5-small_linux-x86_64',
           type: ['pytorch', 'text_embedding'],
         },
+        {
+          model_id: '.rerank-v1',
+          techPreview: true,
+          recommended: true,
+          supported: true,
+          hidden: true,
+          modelName: 'rerank',
+          version: 1,
+          config: {
+            input: {
+              field_names: ['input', 'query'],
+            },
+          },
+          description: 'Elastic Rerank v1',
+          type: ['pytorch', 'text_similarity'],
+        },
       ]);
     });
 
@@ -214,6 +230,22 @@ describe('modelsProvider', () => {
           type: ['pytorch', 'text_embedding'],
           license: 'MIT',
           licenseUrl: 'https://huggingface.co/elastic/multilingual-e5-small_linux-x86_64',
+        },
+        {
+          model_id: '.rerank-v1',
+          techPreview: true,
+          recommended: true,
+          supported: true,
+          hidden: true,
+          modelName: 'rerank',
+          version: 1,
+          config: {
+            input: {
+              field_names: ['input', 'query'],
+            },
+          },
+          description: 'Elastic Rerank v1',
+          type: ['pytorch', 'text_similarity'],
         },
       ]);
     });

@@ -538,7 +538,7 @@ export const getEndpointConsoleCommands = ({
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
-      exampleUsage: `runscript --Raw=\`\`\`Get-ChildItem .\`\`\` -CommandLine=""`,
+      exampleUsage: `runscript --Raw="Get-ChildItem ." --CommandLine=""`,
       helpUsage: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.helpUsage,
       exampleInstruction: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.about,
       validate: capabilitiesAndPrivilegesValidator(agentType),

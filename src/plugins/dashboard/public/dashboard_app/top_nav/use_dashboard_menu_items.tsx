@@ -43,11 +43,10 @@ export const useDashboardMenuItems = ({
 
   const dashboardApi = useDashboardApi();
 
-  const [dashboardTitle, hasOverlays, hasRunMigrations, hasUnsavedChanges, lastSavedId, viewMode] =
+  const [dashboardTitle, hasOverlays, hasUnsavedChanges, lastSavedId, viewMode] =
     useBatchedPublishingSubjects(
       dashboardApi.panelTitle,
       dashboardApi.hasOverlays$,
-      dashboardApi.hasRunMigrations$,
       dashboardApi.hasUnsavedChanges$,
       dashboardApi.savedObjectId,
       dashboardApi.viewMode
@@ -161,7 +160,7 @@ export const useDashboardMenuItems = ({
         emphasize: true,
         isLoading: isSaveInProgress,
         testId: 'dashboardQuickSaveMenuItem',
-        disableButton: disableTopNav || !(hasRunMigrations || hasUnsavedChanges),
+        disableButton: disableTopNav || !hasUnsavedChanges,
         run: () => quickSaveDashboard(),
       } as TopNavMenuData,
 
@@ -211,7 +210,6 @@ export const useDashboardMenuItems = ({
   }, [
     disableTopNav,
     isSaveInProgress,
-    hasRunMigrations,
     hasUnsavedChanges,
     lastSavedId,
     dashboardInteractiveSave,
