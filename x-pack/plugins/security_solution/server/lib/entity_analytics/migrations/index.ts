@@ -20,6 +20,22 @@ export interface EntityAnalyticsMigrationsParams {
   kibanaVersion: string;
 }
 
+/**
+ * ### How to add a new field to the risk score index and template mappings?
+
+ * - Update the mapping object [here](../risk_score/configurations.ts)
+ * - Pump the `mappingsVersion` version [here](../risk_engine/utils/saved_object_configuration.ts)
+ *
+ * ### How to add a new field to the asset criticality index?
+ * - Update the mapping object [here](../asset_criticality/constants.ts)
+ * - Pump the `ASSET_CRITICALITY_MAPPINGS_VERSIONS` version [here](../asset_criticality/constants.ts)
+ *
+ * ### How to update the risk score transform config?
+ * - Update the transform config [here](../risk_score/configurations.ts)
+ * - Pump the `version` [here](../risk_score/configurations.ts)
+ *
+ * note: If you change the `latest` property, the transform will reinstall after the engine task runs.
+ */
 export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMigrationsParams) => {
   const scopedLogger = params.logger.get('entityAnalytics.migration');
 
