@@ -25,18 +25,18 @@ export const getCypressBaseConfig = (
 ): Cypress.ConfigOptions =>
   merge(
     {
-      reporter: '../../../node_modules/cypress-multi-reporters',
+      reporter: '../../../../../node_modules/cypress-multi-reporters',
       reporterOptions: {
-        configFile: './cypress/reporter_config.json',
+        configFile: './reporter_config.json',
       },
 
       defaultCommandTimeout: 60000,
       execTimeout: 120000,
       pageLoadTimeout: 12000,
-      screenshotsFolder: '../../../target/kibana-osquery/cypress/screenshots',
+      screenshotsFolder: '../../../../../target/kibana-osquery/cypress/screenshots',
       trashAssetsBeforeRuns: false,
       video: true,
-      videosFolder: '../../../target/kibana-osquery/cypress/videos',
+      videosFolder: '../../../../../target/kibana-osquery/cypress/videos',
 
       retries: {
         runMode: 1,
@@ -53,7 +53,7 @@ export const getCypressBaseConfig = (
       },
 
       e2e: {
-        specPattern: './cypress/e2e/**/*.cy.ts',
+        specPattern: './e2e/**/*.cy.ts',
         experimentalRunAllSpecs: true,
         experimentalMemoryManagement: true,
         numTestsKeptInMemory: 3,
