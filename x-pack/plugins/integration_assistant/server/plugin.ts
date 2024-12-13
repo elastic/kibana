@@ -82,7 +82,7 @@ export class IntegrationAssistantPlugin
         app: [PLUGIN_ID],
         catalogue: [PLUGIN_ID],
         privilegesTooltip: i18n.translate(
-          'xpack.plugins.integration_assistant.serverPlugin.privilegesTooltip',
+          'xpack.integrationAssistant.serverPlugin.privilegesTooltip',
           {
             defaultMessage:
               'Fleet and Integrations all access is required for Integration Assistant',
