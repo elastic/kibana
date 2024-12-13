@@ -9,7 +9,6 @@
 
 import stripAnsi from 'strip-ansi';
 
-import type { CodeOwnership } from '@kbn/code-owners';
 import { FailedTestCase, TestReport, makeFailedTestCaseIter } from './test_report';
 
 export type TestFailure = FailedTestCase['$'] & {
@@ -19,7 +18,7 @@ export type TestFailure = FailedTestCase['$'] & {
   githubIssue?: string;
   failureCount?: number;
   commandLine?: string;
-  owners?: CodeOwnership;
+  owners?: any;
 };
 
 const getText = (node?: Array<string | { _: string }>) => {
