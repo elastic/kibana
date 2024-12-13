@@ -54,7 +54,7 @@ export class SearchInferenceEndpointsPlugin
       id: PLUGIN_ID,
       minimumLicense: 'enterprise',
       name: PLUGIN_NAME,
-      order: 0,
+      order: 2,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       app: ['kibana', PLUGIN_ID],
       scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],

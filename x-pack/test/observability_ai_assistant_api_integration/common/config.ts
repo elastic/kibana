@@ -11,7 +11,7 @@ import { ObservabilityAIAssistantFtrConfigName } from '../configs';
 import { getApmSynthtraceEsClient } from './create_synthtrace_client';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
 import { getScopedApiClient } from './observability_ai_assistant_api_client';
-import { editor, secondaryEditor, viewer } from './users/users';
+import { editor, secondaryEditor, unauthorizedUser, viewer } from './users/users';
 
 export interface ObservabilityAIAssistantFtrConfig {
   name: ObservabilityAIAssistantFtrConfigName;
@@ -32,6 +32,16 @@ export type ObservabilityAIAssistantAPIClient = Awaited<
 >;
 
 export type ObservabilityAIAssistantServices = Awaited<ReturnType<CreateTestConfig>>['services'];
+
+export class ForbiddenApiError extends Error {
+  status: number;
+
+  constructor(message: string = 'Forbidden') {
+    super(message);
+    this.name = 'ForbiddenApiError';
+    this.status = 403;
+  }
+}
 
 export function createObservabilityAIAssistantAPIConfig({
   config,
@@ -67,6 +77,7 @@ export function createObservabilityAIAssistantAPIConfig({
           viewer: getScopedApiClientForUsername(viewer.username),
           editor: getScopedApiClientForUsername(editor.username),
           secondaryEditor: getScopedApiClientForUsername(secondaryEditor.username),
+          unauthorizedUser: getScopedApiClientForUsername(unauthorizedUser.username),
         };
       },
     },

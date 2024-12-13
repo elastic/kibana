@@ -14,12 +14,9 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { SupertestReturnType } from '../../common/observability_ai_assistant_api_client';
-import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
-  const svlUserManager = getService('svlUserManager');
-  const svlCommonApi = getService('svlCommonApi');
 
   const conversationCreate: ConversationCreateRequest = {
     '@timestamp': new Date().toISOString(),
@@ -48,22 +45,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   describe('Conversations', () => {
-    let roleAuthc: RoleCredentials;
-    let internalReqHeader: InternalRequestHeader;
-    before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('editor');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
-    });
-    after(async () => {
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-    });
     describe('without conversations', () => {
       it('returns no conversations when listing', async () => {
         const response = await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'POST /internal/observability_ai_assistant/conversations',
-            internalReqHeader,
-            roleAuthc,
           })
           .expect(200);
 
@@ -72,10 +58,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns a 404 for updating conversations', async () => {
         await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
-            internalReqHeader,
-            roleAuthc,
             params: {
               path: {
                 conversationId: 'non-existing-conversation-id',
@@ -90,10 +74,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns a 404 for retrieving a conversation', async () => {
         await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
-            internalReqHeader,
-            roleAuthc,
             params: {
               path: {
                 conversationId: 'my-conversation-id',
@@ -108,12 +90,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let createResponse: Awaited<
         SupertestReturnType<'POST /internal/observability_ai_assistant/conversation'>
       >;
+
       before(async () => {
         createResponse = await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'POST /internal/observability_ai_assistant/conversation',
-            roleAuthc,
-            internalReqHeader,
             params: {
               body: {
                 conversation: conversationCreate,
@@ -125,10 +106,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
-            internalReqHeader,
-            roleAuthc,
             params: {
               path: {
                 conversationId: createResponse.body.conversation.id,
@@ -138,10 +117,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .expect(200);
 
         await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
-            internalReqHeader,
-            roleAuthc,
             params: {
               path: {
                 conversationId: createResponse.body.conversation.id,
@@ -150,6 +127,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           })
           .expect(404);
       });
+
       it('returns the conversation', function () {
         // delete user from response to avoid comparing it as it will be different in MKI
         delete createResponse.body.user;
@@ -170,10 +148,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns a 404 for updating a non-existing conversation', async () => {
         await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
-            roleAuthc,
-            internalReqHeader,
             params: {
               path: {
                 conversationId: 'non-existing-conversation-id',
@@ -188,10 +164,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns a 404 for retrieving a non-existing conversation', async () => {
         await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
-            roleAuthc,
-            internalReqHeader,
             params: {
               path: {
                 conversationId: 'non-existing-conversation-id',
@@ -203,10 +177,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the conversation that was created', async () => {
         const response = await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
-            internalReqHeader,
-            roleAuthc,
             params: {
               path: {
                 conversationId: createResponse.body.conversation.id,
@@ -222,10 +194,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the created conversation when listing', async () => {
         const response = await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'POST /internal/observability_ai_assistant/conversations',
-            roleAuthc,
-            internalReqHeader,
           })
           .expect(200);
         // delete user from response to avoid comparing it as it will be different in MKI
@@ -243,10 +213,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           updateResponse = await observabilityAIAssistantAPIClient
-            .slsUser({
+            .slsEditor({
               endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
-              internalReqHeader,
-              roleAuthc,
               params: {
                 path: {
                   conversationId: createResponse.body.conversation.id,
@@ -269,10 +237,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('returns the updated conversation after get', async () => {
           const updateAfterCreateResponse = await observabilityAIAssistantAPIClient
-            .slsUser({
+            .slsEditor({
               endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
-              internalReqHeader,
-              roleAuthc,
               params: {
                 path: {
                   conversationId: createResponse.body.conversation.id,

@@ -6,7 +6,7 @@
  */
 
 import type { FC, ChangeEvent } from 'react';
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -20,9 +20,9 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { EqlOptions } from '../../../../../common/search_strategy';
 import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_bar_field';
 import { useKibana } from '../../../../common/lib/kibana';
+import { EQL_ERROR_CODES } from '../../../../common/hooks/eql/api';
 import type { EqlQueryBarFooterProps } from './footer';
 import { EqlQueryBarFooter } from './footer';
-import { getValidationResults } from './validators';
 import * as i18n from './translations';
 
 const TextArea = styled(EuiTextArea)`
@@ -81,12 +81,10 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   onValidatingChange,
 }) => {
   const { addError } = useAppToasts();
-  const [errorMessages, setErrorMessages] = useState<string[]>([]);
-  const { isValidating, value: fieldValue, setValue: setFieldValue } = field;
-  const { isValid, message, messages, error } = getValidationResults(field);
-
   const { uiSettings } = useKibana().services;
   const filterManager = useRef<FilterManager>(new FilterManager(uiSettings));
+  const { isValidating, value: fieldValue, setValue: setFieldValue, isValid, errors } = field;
+  const errorMessages = useMemo(() => errors.map((x) => x.message), [errors]);
 
   // Bubbles up field validity to parent.
   // Using something like form `getErrors` does
@@ -98,14 +96,12 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   }, [isValid, onValidityChange]);
 
   useEffect(() => {
-    setErrorMessages(messages ?? []);
-  }, [messages]);
+    const requestError = errors.find((x) => x.code === EQL_ERROR_CODES.FAILED_REQUEST);
 
-  useEffect(() => {
-    if (error) {
-      addError(error, { title: i18n.EQL_VALIDATION_REQUEST_ERROR });
+    if (requestError) {
+      addError(requestError.message, { title: i18n.EQL_VALIDATION_REQUEST_ERROR });
     }
-  }, [error, addError]);
+  }, [errors, addError]);
 
   useEffect(() => {
     if (onValidatingChange) {
@@ -152,7 +148,6 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
       if (onValidatingChange) {
         onValidatingChange(true);
       }
-      setErrorMessages([]);
       setFieldValue({
         filters: fieldValue.filters,
         query: {
@@ -182,7 +177,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
       label={field.label}
       labelAppend={field.labelAppend}
       helpText={field.helpText}
-      error={message}
+      error={errorMessages[0]}
       isInvalid={!isValid && !isValidating}
       fullWidth
       data-test-subj={dataTestSubj}

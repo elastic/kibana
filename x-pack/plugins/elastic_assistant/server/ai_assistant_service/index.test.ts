@@ -79,6 +79,7 @@ const GetDataStreamResponse: IndicesGetDataStreamResponse = {
       template: 'ignored',
       next_generation_managed_by: 'Data stream lifecycle',
       prefer_ilm: false,
+      rollover_on_write: false,
     },
   ],
 };
@@ -122,6 +123,12 @@ describe('AI Assistant Service', () => {
       kibanaVersion: '8.8.0',
       ml,
       taskManager: taskManagerMock.createSetup(),
+      productDocManager: Promise.resolve({
+        getStatus: jest.fn(),
+        install: jest.fn(),
+        update: jest.fn(),
+        uninstall: jest.fn(),
+      }),
     };
   });
 

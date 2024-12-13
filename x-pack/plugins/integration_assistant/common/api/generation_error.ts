@@ -34,6 +34,7 @@ export function isGenerationErrorBody(obj: unknown | undefined): obj is Generati
 export interface GenerationErrorAttributes {
   errorCode: GenerationErrorCode;
   underlyingMessages?: string[] | undefined;
+  logFormat?: string | undefined;
   errorMessageWithLink?: ErrorMessageWithLink | undefined;
 }
 

@@ -94,16 +94,12 @@ const EncryptionKeySchema = schema.conditional(
   schema.string({ defaultValue: 'a'.repeat(32) })
 );
 
-const RolesSchema = schema.object({
-  enabled: offeringBasedSchema({
-    serverless: schema.boolean({ defaultValue: false }),
-    traditional: schema.boolean({ defaultValue: true }),
-  }), // true: use ES API for access control (deprecated in 7.x). false: use Kibana API for application features (8.0)
-  allow: offeringBasedSchema({
-    serverless: schema.arrayOf(schema.string(), { defaultValue: [] }),
-    traditional: schema.arrayOf(schema.string(), { defaultValue: ['reporting_user'] }),
-  }),
-});
+const RolesSchema = schema.maybe(
+  schema.object({
+    enabled: schema.boolean(),
+    allow: schema.arrayOf(schema.string()),
+  })
+); // unused as of 9.0
 
 // Browser side polling: job completion notifier, management table auto-refresh
 // NOTE: can not use schema.duration, a bug prevents it being passed to the browser correctly

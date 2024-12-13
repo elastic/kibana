@@ -147,6 +147,15 @@
         "details": "[[type: tweet, field: liked]]",
         "resolve_during_rolling_upgrade": false
       }
+    ],
+    "myindex": [
+      {
+        "level": "critical",
+        "message": "Old index with a compatibility version < 8.0",
+        "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
+        "details": "This index has version: 7.17.25",
+        "resolve_during_rolling_upgrade": false
+      }
     ]
   },
   "data_streams": {
