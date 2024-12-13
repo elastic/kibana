@@ -309,7 +309,7 @@ describe('AddDomainLogic', () => {
 
         expect(flashSuccessToast).toHaveBeenCalled();
         expect(navigateToUrl).toHaveBeenCalledWith(
-          '/app/management/data/index_management/indices/index-name/domain_management/test-domain'
+          '/search_indices/index-name/domain_management/test-domain'
         );
       });
     });
