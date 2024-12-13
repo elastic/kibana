@@ -11,30 +11,29 @@ export const dynamicNewestRetentionSteps = (description: EntityEngineInstallatio
   const staticFields = description.fields.map((field) => `"${field.destination}"`).join(',');
 
   const painless = /* java */ `
-    Set staticFields = new HashSet([${staticFields}]); 
-    Map mergeFields(Map latest, Map historical) {
+    Map mergeFields(Map latest, Map historical, Set staticFields) {
       for (entry in historical.entrySet()) {
-        String key = entry.getKey();
-            
+        String key = entry.getKey();          
         if (staticFields.contains(key)) {
-            continue;
+          continue;
         }
-            
+                
         def historicalValue = entry.getValue();
         if (latest.containsKey(key)) {
           def latestValue = latest.get(key);
           if (latestValue instanceof Map && historicalValue instanceof Map) {
-            latest.put(key, mergeFields(latestValue, historicalValue));
+            latest.put(key, mergeFields(latestValue, historicalValue, staticFields));
           }
-        else {
+        } else {
           latest.put(key, historicalValue);
         }
       }
       return latest;
     }
 
+    Set staticFields = new HashSet([${staticFields}]); 
     if (ctx.historical != null && ctx.historical instanceof Map) {
-        ctx = mergeFields(ctx, ctx.historical);
+      ctx = mergeFields(ctx, ctx.historical, staticFields);
     }
   `;
   return [
