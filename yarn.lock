@@ -5237,7 +5237,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-stream-adapter@link:packages/kbn-data-stream-adapter":
+"@kbn/data-stream-adapter@link:x-pack/solutions/security/packages/data-stream-adapter":
   version "0.0.0"
   uid ""
 
@@ -5601,7 +5601,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expandable-flyout@link:packages/kbn-expandable-flyout":
+"@kbn/expandable-flyout@link:x-pack/solutions/security/packages/expandable-flyout":
   version "0.0.0"
   uid ""
 
@@ -5913,7 +5913,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/index-adapter@link:packages/kbn-index-adapter":
+"@kbn/index-adapter@link:x-pack/solutions/security/packages/index-adapter":
   version "0.0.0"
   uid ""
 
@@ -7669,11 +7669,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/threat-intelligence-plugin@link:x-pack/plugins/threat_intelligence":
+"@kbn/threat-intelligence-plugin@link:x-pack/solutions/security/plugins/threat_intelligence":
   version "0.0.0"
   uid ""
 
-"@kbn/timelines-plugin@link:x-pack/plugins/timelines":
+"@kbn/timelines-plugin@link:x-pack/solutions/security/plugins/timelines":
   version "0.0.0"
   uid ""
 
