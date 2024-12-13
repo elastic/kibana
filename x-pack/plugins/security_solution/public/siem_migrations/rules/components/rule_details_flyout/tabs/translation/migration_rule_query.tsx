@@ -17,10 +17,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { VALIDATION_WARNING_CODES } from '../../../../../detection_engine/rule_creation/constants/validation_warning_codes';
-import { useFormWithWarnings } from '../../../../../common/hooks/use_form_with_warnings';
-import { EsqlQueryEdit } from '../../../../../detection_engine/rule_creation/components/esql_query_edit';
-import { Field, Form, getUseField } from '../../../../../shared_imports';
+import { VALIDATION_WARNING_CODES } from '../../../../../../detection_engine/rule_creation/constants/validation_warning_codes';
+import { useFormWithWarnings } from '../../../../../../common/hooks/use_form_with_warnings';
+import { EsqlQueryEdit } from '../../../../../../detection_engine/rule_creation/components/esql_query_edit';
+import { Field, Form, getUseField } from '../../../../../../shared_imports';
 import type { RuleTranslationSchema } from './types';
 import { schema } from './schema';
 import * as i18n from './translations';
