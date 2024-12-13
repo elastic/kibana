@@ -5,15 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import moment from 'moment';
-import {
-  SERVICE_NAME,
-  DATA_STREAM_TYPE,
-  AGENT_NAME,
-  SERVICE_ENVIRONMENT,
-} from '@kbn/observability-shared-plugin/common';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { createEntitiesESClient } from '../../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../../default_api_types';
 import { getServiceEntitySummary } from './get_service_entity_summary';
@@ -26,46 +18,22 @@ const serviceEntitiesSummaryRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   async handler({ context, params, request, plugins }) {
-    const [coreContext, entityManagerStart] = await Promise.all([
+    const [_coreContext, entityManagerStart] = await Promise.all([
       context.core,
       plugins.entityManager.start(),
     ]);
 
     const entityManagerClient = await entityManagerStart.getScopedClient({ request });
-    const entitiesESClient = await createEntitiesESClient({
-      request,
-      esClient: coreContext.elasticsearch.client.asCurrentUser,
-    });
-
     const { serviceName } = params.path;
     const { environment } = params.query;
 
     const serviceEntitySummary = await getServiceEntitySummary({
-      entitiesESClient,
+      entityManagerClient,
       serviceName,
       environment,
     });
 
-    console.log(
-      '### caue  handler  serviceEntitySummary:',
-      JSON.stringify(serviceEntitySummary, null, 2)
-    );
-
-    const eemAPIServiceEntity = await entityManagerClient.v2.searchEntities({
-      start: moment().subtract(15, 'm').toISOString(),
-      end: moment().toISOString(),
-      type: 'built_in_services_from_ecs_data',
-      filters: [`${SERVICE_NAME}: "${serviceName}"`],
-      limit: 1,
-      metadata_fields: [DATA_STREAM_TYPE, AGENT_NAME, SERVICE_ENVIRONMENT],
-    });
-
-    console.log(
-      '### caue  handler  eemAPIServiceEntity:',
-      JSON.stringify(eemAPIServiceEntity, null, 2)
-    );
-
-    return eemAPIServiceEntity.entities[0];
+    return serviceEntitySummary;
   },
 });
 

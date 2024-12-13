@@ -294,12 +294,10 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   ];
 
   const hasLogsSignal =
-    serviceEntitySummary?.['data_stream.type'] &&
-    isLogsSignal(serviceEntitySummary['data_stream.type']);
+    serviceEntitySummary?.dataStreamTypes && isLogsSignal(serviceEntitySummary.dataStreamTypes);
 
   const hasApmSignal =
-    serviceEntitySummary?.['data_stream.type'] &&
-    isApmSignal(serviceEntitySummary['data_stream.type']);
+    serviceEntitySummary?.dataStreamTypes && isApmSignal(serviceEntitySummary.dataStreamTypes);
 
   const isLogsOnlyView = hasLogsSignal && !hasApmSignal;
 
