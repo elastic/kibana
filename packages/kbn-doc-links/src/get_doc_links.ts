@@ -504,6 +504,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         riskScorePrerequisites: `${SECURITY_SOLUTION_DOCS}ers-requirements.html`,
         entityRiskScoring: `${SECURITY_SOLUTION_DOCS}entity-risk-scoring.html`,
         assetCriticality: `${SECURITY_SOLUTION_DOCS}asset-criticality.html`,
+        legacyRiskScoreModuleDeprecation: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-201810`,
       },
       detectionEngineOverview: `${SECURITY_SOLUTION_DOCS}detection-engine-overview.html`,
       aiAssistant: `${SECURITY_SOLUTION_DOCS}security-assistant.html`,

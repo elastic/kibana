@@ -6,10 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DeprecationsServiceSetup, IScopedClusterClient } from '@kbn/core/server';
+import type {
+  DeprecationsServiceSetup,
+  DocLinksServiceSetup,
+  IScopedClusterClient,
+} from '@kbn/core/server';
 
 interface Dependencies {
   deprecationsService: DeprecationsServiceSetup;
+  docLinks: DocLinksServiceSetup;
 }
 
 /*
@@ -38,7 +43,10 @@ const isModuleInAtLeastOneSpace = async ({
   return transforms.length > 0;
 };
 
-export const registerRiskScoreModulesDeprecation = ({ deprecationsService }: Dependencies) => {
+export const registerRiskScoreModulesDeprecation = ({
+  deprecationsService,
+  docLinks,
+}: Dependencies) => {
   deprecationsService.registerDeprecations({
     getDeprecations: async ({ esClient }) => {
       if (!(await isModuleInAtLeastOneSpace({ esClient }))) {
@@ -47,6 +55,8 @@ export const registerRiskScoreModulesDeprecation = ({ deprecationsService }: Dep
 
       return [
         {
+          documentationUrl:
+            docLinks.links.securitySolution.entityAnalytics.legacyRiskScoreModuleDeprecation,
           title: i18n.translate('xpack.securitySolution.deprecations.riskScoreModules.title', {
             defaultMessage: 'The original user and host risk score modules are deprecated.',
           }),

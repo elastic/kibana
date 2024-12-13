@@ -443,6 +443,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     registerRiskScoreModulesDeprecation({
       deprecationsService: core.deprecations,
+      docLinks: core.docLinks,
     });
 
     core
