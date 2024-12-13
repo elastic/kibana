@@ -6005,7 +6005,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/io-ts-utils@link:packages/kbn-io-ts-utils":
+"@kbn/io-ts-utils@link:src/platform/packages/shared/kbn-io-ts-utils":
   version "0.0.0"
   uid ""
 
@@ -7209,15 +7209,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/server-route-repository-client@link:packages/kbn-server-route-repository-client":
+"@kbn/server-route-repository-client@link:src/platform/packages/shared/kbn-server-route-repository-client":
   version "0.0.0"
   uid ""
 
-"@kbn/server-route-repository-utils@link:packages/kbn-server-route-repository-utils":
+"@kbn/server-route-repository-utils@link:src/platform/packages/shared/kbn-server-route-repository-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/server-route-repository@link:packages/kbn-server-route-repository":
+"@kbn/server-route-repository@link:src/platform/packages/shared/kbn-server-route-repository":
   version "0.0.0"
   uid ""
 
@@ -7517,15 +7517,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/sse-utils-client@link:packages/kbn-sse-utils-client":
+"@kbn/sse-utils-client@link:src/platform/packages/shared/kbn-sse-utils-client":
   version "0.0.0"
   uid ""
 
-"@kbn/sse-utils-server@link:packages/kbn-sse-utils-server":
+"@kbn/sse-utils-server@link:src/platform/packages/shared/kbn-sse-utils-server":
   version "0.0.0"
   uid ""
 
-"@kbn/sse-utils@link:packages/kbn-sse-utils":
+"@kbn/sse-utils@link:src/platform/packages/shared/kbn-sse-utils":
   version "0.0.0"
   uid ""
 
@@ -7729,7 +7729,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/typed-react-router-config@link:packages/kbn-typed-react-router-config":
+"@kbn/typed-react-router-config@link:src/platform/packages/shared/kbn-typed-react-router-config":
   version "0.0.0"
   uid ""
 
