@@ -29,6 +29,9 @@ export function generateLayer(
       // @timestamp can't ignore malformed dates as it's used for sorting in logsdb
       (property as MappingDateProperty).ignore_malformed = false;
     }
+    if (field.type === 'date' && field.format) {
+      (property as MappingDateProperty).format = field.format;
+    }
     properties[field.name] = property;
   });
   return {

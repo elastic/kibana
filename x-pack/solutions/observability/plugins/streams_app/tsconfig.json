@@ -36,5 +36,6 @@
     "@kbn/code-editor",
     "@kbn/ui-theme",
     "@kbn/navigation-plugin",
+    "@kbn/core-notifications-browser",
   ]
 }
