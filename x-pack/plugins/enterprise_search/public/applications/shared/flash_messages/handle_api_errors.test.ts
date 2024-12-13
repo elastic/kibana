@@ -126,7 +126,10 @@ describe('toastAPIErrors', () => {
       },
     } as any);
 
-    expect(flashErrorToast).toHaveBeenCalledWith('Not Found');
+    expect(flashErrorToast).toHaveBeenCalledWith('Not Found', {
+      'aria-live': 'assertive',
+      role: 'alert',
+    });
   });
 
   it('displays a generic error message and re-throws non-API errors', () => {
@@ -136,7 +139,10 @@ describe('toastAPIErrors', () => {
       toastAPIErrors(error as any);
     }).toThrowError(error);
 
-    expect(flashErrorToast).toHaveBeenCalledWith(expect.any(String));
+    expect(flashErrorToast).toHaveBeenCalledWith(expect.any(String), {
+      'aria-live': 'assertive',
+      role: 'alert',
+    });
   });
 });
 
