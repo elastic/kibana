@@ -8,17 +8,13 @@
  */
 
 import simpleGit from 'simple-git';
-import fs from 'fs';
-import path from 'path';
 
 import { run } from '@kbn/dev-cli-runner';
-import { getOwningTeamsForPath, getCodeOwnersEntries } from '@kbn/code-owners';
+import { getOwningTeamsForPath, getCodeOwnersEntries, CodeOwnersEntry } from '@kbn/code-owners';
 import { asyncForEach } from '@kbn/std';
 import { inspect } from 'util';
 
 const git = simpleGit();
-
-const CODEOWNERS_PATH = path.join('.github', 'CODEOWNERS');
 
 interface File {
   path: string;
@@ -37,18 +33,20 @@ run(
       _: [owner],
     } = flags;
 
-    if (!fs.existsSync(CODEOWNERS_PATH)) {
-      log.error('CODEOWNERS file not found!');
-      process.exit(1);
-    }
-
     const changedFiles = await getChangedFiles();
     const owners: { staged: Record<string, string[]>; unstaged: Record<string, string[]> } = {
       staged: {},
       unstaged: {},
     };
 
-    const codeOwnersEntries = getCodeOwnersEntries();
+    let codeOwnersEntries: CodeOwnersEntry[] = [];
+
+    try {
+      codeOwnersEntries = getCodeOwnersEntries();
+    } catch (e) {
+      log.error('CODEOWNERS cannot be read.');
+      process.exit(1);
+    }
 
     const getOwners = (file: string) => {
       const teams = getOwningTeamsForPath(file, codeOwnersEntries);
@@ -70,7 +68,7 @@ run(
 
           owners[loc][fileOwner] = [
             ...(owners[loc][fileOwner] || []),
-            file.path + (fileOwners.length > 1 ? ` (${fileOwners.length})` : ''),
+            file.path + (fileOwners.length > 1 ? ` (+${fileOwners.length - 1})` : ''),
           ];
 
           if (owner && fileOwner === owner) {
