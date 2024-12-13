@@ -657,7 +657,7 @@ the infrastructure monitoring use-case within Kibana.
 |The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/integration_assistant/README.md[integrationAssistant]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/integration_assistant/README.md[integrationAssistant]
 |Team owner: Security Integrations Scalability
 
 
@@ -771,7 +771,7 @@ Elastic.
 |A plugin that contains components and utilities shared by all Observability plugins.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/osquery/README.md[osquery]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/osquery/README.md[osquery]
 |This plugin adds extended support to Security Solution Fleet Osquery integration
 
 

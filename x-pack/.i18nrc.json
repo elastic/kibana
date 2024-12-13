@@ -65,7 +65,7 @@
     "xpack.logsShared": "plugins/observability_solution/logs_shared",
     "xpack.fleet": "plugins/fleet",
     "xpack.ingestPipelines": "plugins/ingest_pipelines",
-    "xpack.integrationAssistant": "plugins/integration_assistant",
+    "xpack.integrationAssistant": "platform/plugins/shared/integration_assistant",
     "xpack.inference": "platform/plugins/shared/inference",
     "xpack.inventory": "plugins/observability_solution/inventory",
     "xpack.investigate": "solutions/observability/plugins/investigate",
@@ -113,7 +113,7 @@
       "packages/observability/logs_overview/src/components"
     ],
     "xpack.osquery": [
-      "plugins/osquery"
+      "platform/plugins/shared/osquery"
     ],
     "xpack.painlessLab": "plugins/painless_lab",
     "xpack.profiling": [

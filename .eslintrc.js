@@ -1051,8 +1051,8 @@ module.exports = {
     {
       // front end and common typescript and javascript files only
       files: [
-        'x-pack/plugins/integration_assistant/public/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/integration_assistant/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/integration_assistant/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/integration_assistant/common/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
@@ -1136,7 +1136,7 @@ module.exports = {
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{ts,tsx}',
-        'x-pack/plugins/integration_assistant/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/integration_assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{ts,tsx}',
@@ -1151,7 +1151,7 @@ module.exports = {
       excludedFiles: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/plugins/integration_assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/platform/plugins/shared/integration_assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -1172,7 +1172,7 @@ module.exports = {
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{ts,tsx}',
-        'x-pack/plugins/integration_assistant/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/integration_assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{ts,tsx}',
@@ -1206,7 +1206,7 @@ module.exports = {
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/integration_assistant/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/integration_assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{js,mjs,ts,tsx}',
@@ -1786,7 +1786,7 @@ module.exports = {
         'plugin:@typescript-eslint/recommended',
       ],
       plugins: ['react', '@typescript-eslint'],
-      files: ['x-pack/plugins/osquery/**/*.{js,mjs,ts,tsx}'],
+      files: ['x-pack/platform/plugins/shared/osquery/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'padding-line-between-statements': [
           'error',
@@ -1812,7 +1812,7 @@ module.exports = {
     },
     {
       // typescript and javascript for front end react performance
-      files: ['x-pack/plugins/osquery/public/**/!(*.test).{js,mjs,ts,tsx}'],
+      files: ['x-pack/platform/plugins/shared/osquery/public/**/!(*.test).{js,mjs,ts,tsx}'],
       plugins: ['react', 'react-perf'],
       rules: {
         'react-perf/jsx-no-new-object-as-prop': 'error',
@@ -2007,7 +2007,7 @@ module.exports = {
         'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)
 
         // @kbn/osquery-plugin could be categorised as Security, but @kbn/infra-plugin (observability) depends on it!
-        'x-pack/plugins/osquery/**',
+        'x-pack/platform/plugins/shared/osquery/**',
 
         // For now, we keep the exception to let tests depend on anythying.
         // Ideally, we need to classify the solution specific ones to reduce CI times
