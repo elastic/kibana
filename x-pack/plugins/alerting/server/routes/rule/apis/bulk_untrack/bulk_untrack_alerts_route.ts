@@ -13,6 +13,7 @@ import { transformBulkUntrackAlertsBodyV1 } from './transforms';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const bulkUntrackAlertsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -21,6 +22,7 @@ export const bulkUntrackAlertsRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/alerts/_bulk_untrack`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
         body: bulkUntrackBodySchemaV1,
