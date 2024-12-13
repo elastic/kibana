@@ -8,16 +8,20 @@
  */
 
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
-import type { DashboardAttributes, DashboardUpdateIn, DashboardUpdateOut } from '../../../../server/content_management';
+import type {
+  DashboardAttributes,
+  DashboardUpdateIn,
+  DashboardUpdateOut,
+} from '../../../../server/content_management';
 import { findDashboardsByIds } from './find_dashboards';
 import { contentManagementService, savedObjectsTaggingService } from '../../kibana_services';
 
-export type UpdateDashboardMetaProps = {
-  id: DashboardUpdateIn['id'],
-  title: DashboardAttributes['title'],
-  description?: DashboardAttributes['description'],
-  tags: string[],
-};
+export interface UpdateDashboardMetaProps {
+  id: DashboardUpdateIn['id'];
+  title: DashboardAttributes['title'];
+  description?: DashboardAttributes['description'];
+  tags: string[];
+}
 
 export const updateDashboardMeta = async ({
   id,

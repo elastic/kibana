@@ -29,9 +29,7 @@ export interface DashboardContentManagementService {
   loadDashboardState: (props: { id?: string }) => Promise<LoadDashboardReturn>;
   saveDashboardState: (props: SaveDashboardProps) => Promise<SaveDashboardReturn>;
   checkForDuplicateDashboardTitle: (meta: DashboardDuplicateTitleCheckProps) => Promise<boolean>;
-  updateDashboardMeta: (
-    props: UpdateDashboardMetaProps
-  ) => Promise<void>;
+  updateDashboardMeta: (props: UpdateDashboardMetaProps) => Promise<void>;
 }
 
 /**
