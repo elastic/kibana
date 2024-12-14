@@ -17,17 +17,21 @@ export const getGuidePanelStepStyles = (euiTheme: EuiThemeComputed, stepStatus: 
     height: 24px;
     border-radius: 50%;
     border: 2px solid
-      ${stepStatus === 'inactive' ? euiTheme.colors.lightShade : euiTheme.colors.success};
+      ${stepStatus === 'inactive' ? euiTheme.colors.borderBasePlain : euiTheme.colors.success};
     font-weight: ${euiTheme.font.weight.medium};
     text-align: center;
     line-height: 1.4;
-    color: ${stepStatus === 'inactive' ? euiTheme.colors.subduedText : euiTheme.colors.text};
+    color: ${stepStatus === 'inactive'
+      ? euiTheme.colors.textSubdued
+      : euiTheme.colors.textParagraph};
   `,
   stepTitle: css`
     font-weight: ${euiTheme.font.weight.semiBold};
-    color: ${stepStatus === 'inactive' ? euiTheme.colors.subduedText : euiTheme.colors.text};
+    color: ${stepStatus === 'inactive'
+      ? euiTheme.colors.textSubdued
+      : euiTheme.colors.textParagraph};
     .euiAccordion-isOpen & {
-      color: ${euiTheme.colors.title};
+      color: ${euiTheme.colors.textHeading};
     }
   `,
   description: css`
