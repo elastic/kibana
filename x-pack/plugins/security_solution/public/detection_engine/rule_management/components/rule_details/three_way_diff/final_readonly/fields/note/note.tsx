@@ -10,22 +10,19 @@ import { EuiDescriptionList } from '@elastic/eui';
 import * as i18n from './translations';
 import type { InvestigationGuide } from '../../../../../../../../../common/api/detection_engine';
 import { MarkdownRenderer } from '../../../../../../../../common/components/markdown_editor';
+import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 
 interface NoteReadOnlyProps {
   note: InvestigationGuide;
 }
 
 export function NoteReadOnly({ note }: NoteReadOnlyProps) {
-  if (!note) {
-    return null;
-  }
-
   return (
     <EuiDescriptionList
       listItems={[
         {
           title: i18n.NOTE_LABEL,
-          description: <Note note={note} />,
+          description: note.trim() ? <Note note={note} /> : <EmptyFieldValuePlaceholder />,
         },
       ]}
     />
