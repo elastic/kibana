@@ -16,7 +16,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
-const mockOpenRightPanel = jest.fn();
+const mockOpenFlyout = jest.fn();
 
 jest.mock('@kbn/expandable-flyout');
 
@@ -28,7 +28,7 @@ describe('HostName', () => {
   beforeEach(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
-      openRightPanel: mockOpenRightPanel,
+      openFlyout: mockOpenFlyout,
     });
   });
 
@@ -81,7 +81,7 @@ describe('HostName', () => {
 
     wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenRightPanel).not.toHaveBeenCalled();
+      expect(mockOpenFlyout).not.toHaveBeenCalled();
     });
   });
 
@@ -103,7 +103,7 @@ describe('HostName', () => {
 
     wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenRightPanel).not.toHaveBeenCalled();
+      expect(mockOpenFlyout).not.toHaveBeenCalled();
     });
   });
 
@@ -125,7 +125,7 @@ describe('HostName', () => {
 
     wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenRightPanel).not.toHaveBeenCalled();
+      expect(mockOpenFlyout).not.toHaveBeenCalled();
     });
   });
 
@@ -146,13 +146,15 @@ describe('HostName', () => {
 
     wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenRightPanel).toHaveBeenCalledWith({
-        id: 'host-panel',
-        params: {
-          hostName: props.value,
-          contextID: props.contextId,
-          scopeId: TableId.alertsOnAlertsPage,
-          isDraggable: false,
+      expect(mockOpenFlyout).toHaveBeenCalledWith({
+        right: {
+          id: 'host-panel',
+          params: {
+            hostName: props.value,
+            contextID: props.contextId,
+            scopeId: TableId.alertsOnAlertsPage,
+            isDraggable: false,
+          },
         },
       });
     });
@@ -175,13 +177,15 @@ describe('HostName', () => {
 
     wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenRightPanel).toHaveBeenCalledWith({
-        id: 'host-panel',
-        params: {
-          hostName: props.value,
-          contextID: props.contextId,
-          scopeId: 'timeline-1',
-          isDraggable: false,
+      expect(mockOpenFlyout).toHaveBeenCalledWith({
+        right: {
+          id: 'host-panel',
+          params: {
+            hostName: props.value,
+            contextID: props.contextId,
+            scopeId: 'timeline-1',
+            isDraggable: false,
+          },
         },
       });
     });

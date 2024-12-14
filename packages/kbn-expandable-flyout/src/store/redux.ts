@@ -48,6 +48,8 @@ const panelsSelector = createSelector(stateSelector, (state) => state.panels);
 export const selectPanelsById = (id: string) =>
   createSelector(panelsSelector, (state) => state.byId[id] || {});
 export const selectNeedsSync = () => createSelector(panelsSelector, (state) => state.needsSync);
+export const selectHistoryById = (id: string) =>
+  createSelector(stateSelector, (state) => state.panels.byId[id].history || []);
 
 const uiSelector = createSelector(stateSelector, (state) => state.ui);
 export const selectPushVsOverlay = createSelector(uiSelector, (state) => state.pushVsOverlay);

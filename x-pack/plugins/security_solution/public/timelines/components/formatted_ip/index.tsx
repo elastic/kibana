@@ -195,6 +195,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
             id: NetworkPanelKey,
             params: {
               ip: address,
+              scopeId: eventContext.timelineID,
               flowTarget: fieldName.includes(FlowTargetSourceDest.destination)
                 ? FlowTargetSourceDest.destination
                 : FlowTargetSourceDest.source,

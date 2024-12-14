@@ -28,7 +28,7 @@ export interface PanelHeaderProps extends React.ComponentProps<typeof EuiFlyoutH
 }
 
 /**
- *
+ *  Header component for the network details flyout
  */
 export const PanelHeader: FC<PanelHeaderProps> = memo(
   ({ ip, flowTarget, ...flyoutHeaderProps }: PanelHeaderProps) => {
