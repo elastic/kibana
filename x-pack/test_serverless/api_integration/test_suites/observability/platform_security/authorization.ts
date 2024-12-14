@@ -4430,6 +4430,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:dashboard_v2/storeSearchSession",
                 "ui:dashboard_v2/generateScreenshot",
                 "ui:dashboard_v2/downloadCsv",
+                "ui:savedQueryManagement/showQueries",
                 "ui:savedQueryManagement/saveQuery",
               ],
               "download_csv_report": Array [
@@ -4600,6 +4601,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:dashboard_v2/createNew",
                 "ui:dashboard_v2/show",
                 "ui:dashboard_v2/showWriteControls",
+                "ui:savedQueryManagement/showQueries",
                 "ui:savedQueryManagement/saveQuery",
               ],
               "minimal_read": Array [
@@ -4702,6 +4704,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:visualize_v2/show",
                 "ui:visualize_v2/createShortUrl",
                 "ui:dashboard_v2/show",
+                "ui:savedQueryManagement/showQueries",
               ],
               "read": Array [
                 "login:",
@@ -4805,6 +4808,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:visualize_v2/createShortUrl",
                 "ui:dashboard_v2/show",
                 "ui:dashboard_v2/createShortUrl",
+                "ui:savedQueryManagement/showQueries",
               ],
               "store_search_session": Array [
                 "login:",
@@ -6607,6 +6611,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:discover_v2/createShortUrl",
                 "ui:discover_v2/storeSearchSession",
                 "ui:discover_v2/generateCsv",
+                "ui:savedQueryManagement/showQueries",
                 "ui:savedQueryManagement/saveQuery",
               ],
               "generate_report": Array [
@@ -7820,6 +7825,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "alerting:xpack.ml.anomaly_detection_alert/alerts/alert/update",
                 "ui:discover_v2/show",
                 "ui:discover_v2/save",
+                "ui:savedQueryManagement/showQueries",
                 "ui:savedQueryManagement/saveQuery",
               ],
               "minimal_read": Array [
@@ -8319,6 +8325,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "alerting:xpack.ml.anomaly_detection_alert/alerts/alert/getAuthorizedAlertsIndices",
                 "alerting:xpack.ml.anomaly_detection_alert/alerts/alert/getAlertSummary",
                 "ui:discover_v2/show",
+                "ui:savedQueryManagement/showQueries",
               ],
               "read": Array [
                 "login:",
@@ -8826,6 +8833,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "alerting:xpack.ml.anomaly_detection_alert/alerts/alert/getAlertSummary",
                 "ui:discover_v2/show",
                 "ui:discover_v2/createShortUrl",
+                "ui:savedQueryManagement/showQueries",
               ],
               "store_search_session": Array [
                 "login:",

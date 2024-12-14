@@ -220,7 +220,7 @@ export function useQueryBarMenuPanels({
   const { appName, usageCollection, uiSettings, http, storage, application } = kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
   const showSavedQueries =
-    showQueryInput && showFilterBar && application.capabilities.savedQueryManagement.showQueries;
+    showQueryInput && showFilterBar && application.capabilities.savedQueryManagement?.showQueries;
   const cancelPendingListingRequest = useRef<() => void>(() => {});
 
   const [hasSavedQueries, setHasSavedQueries] = useState(false);

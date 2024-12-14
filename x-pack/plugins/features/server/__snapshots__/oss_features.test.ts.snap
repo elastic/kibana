@@ -1864,6 +1864,7 @@ Array [
         "read": Array [],
       },
       "ui": Array [
+        "showQueries",
         "saveQuery",
       ],
     },
@@ -1880,7 +1881,9 @@ Array [
           "query",
         ],
       },
-      "ui": Array [],
+      "ui": Array [
+        "showQueries",
+      ],
     },
     "privilegeId": "read",
   },
@@ -2985,6 +2988,7 @@ Array [
         "read": Array [],
       },
       "ui": Array [
+        "showQueries",
         "saveQuery",
       ],
     },
@@ -3001,7 +3005,9 @@ Array [
           "query",
         ],
       },
-      "ui": Array [],
+      "ui": Array [
+        "showQueries",
+      ],
     },
     "privilegeId": "read",
   },

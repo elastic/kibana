@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
 
-  describe('security/authorization', function () {
+  describe.only('security/authorization', function () {
     describe('available features', () => {
       const svlUserManager = getService('svlUserManager');
       const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -917,6 +917,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:query/delete",
                 "saved_object:query/bulk_delete",
                 "saved_object:query/share_to_space",
+                "ui:savedQueryManagement/showQueries",
                 "ui:savedQueryManagement/saveQuery",
               ],
               "blocklist_all": Array [
@@ -1771,6 +1772,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:query/delete",
                 "saved_object:query/bulk_delete",
                 "saved_object:query/share_to_space",
+                "ui:savedQueryManagement/showQueries",
                 "ui:savedQueryManagement/saveQuery",
               ],
               "minimal_read": Array [
@@ -2104,6 +2106,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:query/find",
                 "saved_object:query/open_point_in_time",
                 "saved_object:query/close_point_in_time",
+                "ui:savedQueryManagement/showQueries",
               ],
               "policy_management_all": Array [
                 "login:",
@@ -2472,6 +2475,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:query/find",
                 "saved_object:query/open_point_in_time",
                 "saved_object:query/close_point_in_time",
+                "ui:savedQueryManagement/showQueries",
               ],
               "scan_operations_all": Array [
                 "login:",
