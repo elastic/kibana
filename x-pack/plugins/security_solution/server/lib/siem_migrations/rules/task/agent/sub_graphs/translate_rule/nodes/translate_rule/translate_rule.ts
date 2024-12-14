@@ -10,8 +10,7 @@ import type { InferenceClient } from '@kbn/inference-plugin/server';
 import { RuleTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import { getEsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base_caller';
 import type { GraphNode } from '../../types';
-import { SIEM_RULE_MIGRATION_CIM_ECS_MAP } from './cim_ecs_map';
-import { ESQL_TRANSLATION_PROMPT } from './prompts';
+import { ESQL_SYNTAX_TRANSLATION_PROMPT } from './prompts';
 
 interface GetTranslateRuleNodeParams {
   inferenceClient: InferenceClient;
@@ -26,34 +25,35 @@ export const getTranslateRuleNode = ({
 }: GetTranslateRuleNodeParams): GraphNode => {
   const esqlKnowledgeBaseCaller = getEsqlKnowledgeBase({ inferenceClient, connectorId, logger });
   return async (state) => {
-    const indexPatterns = state.integrations
-      .flatMap((integration) =>
-        integration.data_streams.map((dataStream) => dataStream.index_pattern)
-      )
-      .join(',');
-    const integrationIds = state.integrations.map((integration) => integration.id);
+    const indexPatterns =
+      state.integration?.data_streams?.map((dataStream) => dataStream.index_pattern).join(',') ||
+      'logs-*';
+    const integrationId = state.integration?.id || '';
 
-    const prompt = await ESQL_TRANSLATION_PROMPT.format({
+    const splunkRule = {
       title: state.original_rule.title,
       description: state.original_rule.description,
-      field_mapping: SIEM_RULE_MIGRATION_CIM_ECS_MAP,
       inline_query: state.inline_query,
+    };
+
+    const prompt = await ESQL_SYNTAX_TRANSLATION_PROMPT.format({
+      splunk_rule: JSON.stringify(splunkRule, null, 2),
       indexPatterns,
     });
     const response = await esqlKnowledgeBaseCaller(prompt);
 
     const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1] ?? '';
-    const summary = response.match(/## Migration Summary[\s\S]*$/)?.[0] ?? '';
+    const translationSummary = response.match(/## Translation Summary[\s\S]*$/)?.[0] ?? '';
 
     const translationResult = getTranslationResult(esqlQuery);
 
     return {
       response,
-      comments: [summary],
+      comments: [translationSummary],
       translation_result: translationResult,
       elastic_rule: {
         title: state.original_rule.title,
-        integration_ids: integrationIds,
+        integration_id: integrationId,
         description: state.original_rule.description,
         severity: 'low',
         query: esqlQuery,

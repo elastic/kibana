@@ -9,11 +9,14 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { RuleMigrationTranslationResult } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   convertTranslationResultIntoText,
   statusToColorMap,
 } from '../../utils/translation_results';
+import {
+  RuleMigrationStatusEnum,
+  type RuleMigration,
+} from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 
 const statusTextWrapperClassName = css`
@@ -22,35 +25,51 @@ const statusTextWrapperClassName = css`
 `;
 
 interface StatusBadgeProps {
-  value?: RuleMigrationTranslationResult;
-  installedRuleId?: string;
+  migrationRule: RuleMigration;
   'data-test-subj'?: string;
 }
 
 export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
-  ({ value, installedRuleId, 'data-test-subj': dataTestSubj = 'translation-result' }) => {
-    const translationResult = installedRuleId ? 'full' : value ?? 'untranslatable';
-    const displayValue = installedRuleId
-      ? i18n.RULE_STATUS_INSTALLED
-      : convertTranslationResultIntoText(translationResult);
+  ({ migrationRule, 'data-test-subj': dataTestSubj = 'translation-result' }) => {
+    // Installed
+    if (migrationRule.elastic_rule?.id) {
+      return (
+        <EuiToolTip content={i18n.RULE_STATUS_INSTALLED}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="check" color={statusToColorMap.full} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{i18n.RULE_STATUS_INSTALLED}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiToolTip>
+      );
+    }
+
+    // Failed
+    if (migrationRule.status === RuleMigrationStatusEnum.failed) {
+      return (
+        <EuiToolTip content={i18n.RULE_STATUS_FAILED}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="warningFilled" color="danger" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{i18n.RULE_STATUS_FAILED}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiToolTip>
+      );
+    }
+
+    const translationResult = migrationRule.translation_result ?? 'untranslatable';
+    const displayValue = convertTranslationResultIntoText(translationResult);
     const color = statusToColorMap[translationResult];
 
     return (
       <EuiToolTip content={displayValue}>
-        {installedRuleId ? (
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={'check'} color={statusToColorMap.full} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{displayValue}</EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          <EuiHealth color={color} data-test-subj={dataTestSubj}>
-            <div className={statusTextWrapperClassName}>
-              <span className="eui-textTruncate">{displayValue}</span>
-            </div>
-          </EuiHealth>
-        )}
+        <EuiHealth color={color} data-test-subj={dataTestSubj}>
+          <div className={statusTextWrapperClassName}>
+            <span className="eui-textTruncate">{displayValue}</span>
+          </div>
+        </EuiHealth>
       </EuiToolTip>
     );
   }
