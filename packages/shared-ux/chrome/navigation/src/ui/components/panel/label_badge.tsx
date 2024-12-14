@@ -25,14 +25,13 @@ export const LabelBadge = ({
   className?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
-
   return (
     <EuiBetaBadge
       label={text}
       size="s"
       css={css`
         margin-left: ${euiTheme.size.s};
-        color: ${euiTheme.colors.text};
+        color: ${euiTheme.colors.textParagraph};
         vertical-align: middle;
         margin-bottom: ${euiTheme.size.xxs};
       `}

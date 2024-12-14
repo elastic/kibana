@@ -52,8 +52,9 @@ export function useDatePicker({
     (newDateRange: TimeRange) => {
       setUrlState({ dateRange: newDateRange });
       setParsedDateRange(parseDateRange(newDateRange));
+      updateSearchSessionId();
     },
-    [setUrlState]
+    [setUrlState, updateSearchSessionId]
   );
 
   const onRefresh = useCallback(
@@ -62,12 +63,10 @@ export function useDatePicker({
       if (autoRefreshEnabled) {
         autoRefreshTick$.next(null);
       } else {
-        updateSearchSessionId();
+        setDateRange(newDateRange);
       }
-
-      setDateRange(newDateRange);
     },
-    [autoRefreshEnabled, autoRefreshTick$, setDateRange, updateSearchSessionId]
+    [autoRefreshEnabled, autoRefreshTick$, setDateRange]
   );
 
   const setAutoRefresh = useCallback(

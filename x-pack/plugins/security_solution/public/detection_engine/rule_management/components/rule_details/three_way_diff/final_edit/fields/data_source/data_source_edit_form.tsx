@@ -16,7 +16,7 @@ import {
   FIELD_TYPES,
 } from '../../../../../../../../shared_imports';
 import { DataSourceType } from '../../../../../../../../../common/api/detection_engine/prebuilt_rules';
-import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
+import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import { DataSourceEdit } from './data_source_edit';
 import { INDEX_HELPER_TEXT } from '../../../../../../../rule_creation_ui/components/step_define_rule/translations';
 import * as i18n from './translations';

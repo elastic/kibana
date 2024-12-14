@@ -10,10 +10,12 @@ import { INTERNAL_CASE_USERS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { userApiV1 } from '../../../../common/types/api';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const getCaseUsersRoute = createCasesRoute({
   method: 'get',
   path: INTERNAL_CASE_USERS_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     params: schema.object({
       case_id: schema.string(),

@@ -33,7 +33,8 @@ function renderInput(
   return { utils, mockOnChange };
 }
 
-test('it should allow to add a new host', async () => {
+// FLAKY: https://github.com/elastic/kibana/issues/202504
+test.skip('it should allow to add a new host', async () => {
   const { utils, mockOnChange } = renderInput();
 
   const addRowEl = await utils.findByText('Add row');

@@ -113,7 +113,7 @@ describe('Table', () => {
     expect(component.state().isSearchTextValid).toBe(true);
   });
 
-  it(`prevents hidden saved objects from being deleted`, () => {
+  it(`prevents hidden saved objects from being deleted`, async () => {
     const selectedSavedObjects = [
       { type: 'visualization', meta: { hiddenType: true } },
       { type: 'search', meta: { hiddenType: true } },
@@ -124,9 +124,33 @@ describe('Table', () => {
       selectedSavedObjects,
       capabilities: { savedObjectsManagement: { delete: false } } as any,
     };
-    const component = shallowWithI18nProvider(<Table {...customizedProps} />);
+    render(
+      <I18nProvider>
+        <Table {...customizedProps} />
+      </I18nProvider>
+    );
 
-    expect(component).toMatchSnapshot();
+    await waitFor(() => {
+      expect(screen.getByTestId('savedObjectsManagementDelete')).toBeDisabled();
+    });
+  });
+
+  it(`disables delete when no objects are selected `, async () => {
+    const selectedSavedObjects = [] as any;
+    const customizedProps = {
+      ...defaultProps,
+      selectedSavedObjects,
+      capabilities: { savedObjectsManagement: { delete: true } } as any,
+    };
+    render(
+      <I18nProvider>
+        <Table {...customizedProps} />
+      </I18nProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('savedObjectsManagementDelete')).toBeDisabled();
+    });
   });
 
   it(`allows for automatic refreshing after an action`, () => {

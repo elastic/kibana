@@ -28,7 +28,12 @@ import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import { catchAxiosErrorFormatAndThrow } from '../../common/endpoint/format_axios_error';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { renderSummaryTable } from './print_run';
-import { getOnBeforeHook, parseTestFileConfig, retrieveIntegrations } from './utils';
+import {
+  getOnBeforeHook,
+  parseTestFileConfig,
+  retrieveIntegrations,
+  setDefaultToolingLoggingLevel,
+} from './utils';
 import { prefixedOutputLogger } from '../endpoint/common/utils';
 
 import type { ProductType, Credentials, ProjectHandler } from './project_handler/project_handler';
@@ -363,9 +368,8 @@ ${JSON.stringify(argv, null, 2)}
         cypressConfigFile.env.grepTags = '@serverlessQA --@skipInServerless --@skipInServerlessMKI';
       }
 
-      if (cypressConfigFile.env?.TOOLING_LOG_LEVEL) {
-        createToolingLogger.defaultLogLevel = cypressConfigFile.env.TOOLING_LOG_LEVEL;
-      }
+      setDefaultToolingLoggingLevel(cypressConfigFile?.env?.TOOLING_LOG_LEVEL);
+
       // eslint-disable-next-line require-atomic-updates
       log = prefixedOutputLogger('cy.parallel(svl)', createToolingLogger());
 

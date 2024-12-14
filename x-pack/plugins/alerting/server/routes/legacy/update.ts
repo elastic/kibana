@@ -20,6 +20,7 @@ import {
   LEGACY_BASE_ALERT_API_PATH,
   validateNotifyWhenType,
 } from '../../../common';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -59,6 +60,7 @@ export const updateAlertRoute = (
         body: bodySchema,
         params: paramSchema,
       },
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: isServerless ? 'internal' : 'public',
         summary: 'Update an alert',

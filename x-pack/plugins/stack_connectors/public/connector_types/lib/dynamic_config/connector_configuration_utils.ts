@@ -49,7 +49,3 @@ export const ensureIntType = (value: string | number | boolean | null): number |
 export const ensureBooleanType = (value: string | number | boolean | null): boolean => {
   return Boolean(value);
 };
-
-export const hasUiRestrictions = (configEntry: Partial<ConnectorConfigEntry>) => {
-  return (configEntry.ui_restrictions ?? []).length > 0;
-};

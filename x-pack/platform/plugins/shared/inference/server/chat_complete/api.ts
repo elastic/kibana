@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { last } from 'lodash';
+import { last, omit } from 'lodash';
 import { defer, switchMap, throwError } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -51,14 +51,26 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
         const connectorType = connector.type;
         const inferenceAdapter = getInferenceAdapter(connectorType);
 
+        const messagesWithoutData = messages.map((message) => omit(message, 'data'));
+
         if (!inferenceAdapter) {
           return throwError(() =>
             createInferenceRequestError(`Adapter for type ${connectorType} not implemented`, 400)
           );
         }
 
-        logger.debug(() => `Sending request: ${JSON.stringify(last(messages))}`);
-        logger.trace(() => JSON.stringify({ messages, toolChoice, tools, system }));
+        logger.debug(
+          () => `Sending request, last message is: ${JSON.stringify(last(messagesWithoutData))}`
+        );
+
+        logger.trace(() =>
+          JSON.stringify({
+            messages: messagesWithoutData,
+            toolChoice,
+            tools,
+            system,
+          })
+        );
 
         return inferenceAdapter.chatComplete({
           system,

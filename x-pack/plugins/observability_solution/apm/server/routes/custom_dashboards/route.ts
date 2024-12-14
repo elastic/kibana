@@ -33,7 +33,11 @@ const serviceDashboardSaveRoute = createApmServerRoute({
       serviceEnvironmentFilterEnabled: t.boolean,
     }),
   }),
-  options: { tags: ['access:apm', 'access:apm_write'] },
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'apm_write'],
+    },
+  },
   handler: async (resources): Promise<SavedApmCustomDashboard> => {
     const { context, params } = resources;
     const { customDashboardId } = params.query;
@@ -62,9 +66,7 @@ const serviceDashboardsRoute = createApmServerRoute({
       }),
     ]),
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ serviceDashboards: SavedApmCustomDashboard[] }> => {
     const { context, params, request } = resources;
     const coreContext = await context.core;
@@ -116,7 +118,11 @@ const serviceDashboardDeleteRoute = createApmServerRoute({
       customDashboardId: t.string,
     }),
   }),
-  options: { tags: ['access:apm', 'access:apm_write'] },
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'apm_write'],
+    },
+  },
   handler: async (resources): Promise<void> => {
     const { context, params } = resources;
     const { customDashboardId } = params.query;

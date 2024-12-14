@@ -20,9 +20,9 @@ export class LegacyMetricVisualization {
       const { getLegacyMetricVisualization: getMetricVisualization } = await import(
         '../../async_services'
       );
-      const palettes = await charts.palettes.getPalettes();
+      const paletteService = await charts.palettes.getPalettes();
 
-      return getMetricVisualization({ paletteService: palettes, theme: core.theme });
+      return getMetricVisualization({ paletteService });
     });
   }
 }

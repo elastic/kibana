@@ -302,3 +302,64 @@ export const RISK_SCORE_MODULE_TURNED_OFF = i18n.translate(
     defaultMessage: 'Entity risk score has been turned off',
   }
 );
+
+export const RISK_SCORE_ENGINE_RUN_SUCCESS = i18n.translate(
+  'xpack.securitySolution.riskScore.engineRunSuccess',
+  {
+    defaultMessage: 'Entity risk score engine started successfully',
+  }
+);
+
+export const RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS = i18n.translate(
+  'xpack.securitySolution.riskScore.savedObject.configurationSuccess',
+  {
+    defaultMessage: 'Risk engine Saved Object configuration updated successfully',
+  }
+);
+
+export const INCLUDE_CLOSED_ALERTS_LABEL = i18n.translate(
+  'xpack.securitySolution.riskScore.includeClosedAlertsLabel',
+  {
+    defaultMessage: 'Include closed alerts for risk scoring',
+  }
+);
+
+export const RISK_ENGINE_INCLUDE_CLOSED_ALERTS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.riskScore.includeClosedAlertsDescription',
+  {
+    defaultMessage: `Enable this option to factor both open and closed alerts into the risk engine
+            calculations. Including closed alerts helps provide a more comprehensive risk assessment
+            based on past incidents, leading to more accurate scoring and insights.`,
+  }
+);
+
+export const RISK_ENGINE_NEXT_RUN_TIME = (timeInMinutes: string) =>
+  i18n.translate('xpack.securitySolution.riskScore.engineNextRunTime', {
+    defaultMessage: `Next engine run in {timeInMinutes}`,
+    values: { timeInMinutes },
+  });
+
+export const RUN_RISK_SCORE_ENGINE = i18n.translate('xpack.securitySolution.riskScore.runEngine', {
+  defaultMessage: 'Run Engine',
+});
+
+export const SAVE_CHANGES = i18n.translate(
+  'xpack.securitySolution.riskScore.engineSavedObjectsaveChanges',
+  {
+    defaultMessage: 'Save',
+  }
+);
+
+export const DISCARD_CHANGES = i18n.translate(
+  'xpack.securitySolution.riskScore.engineSavedObject.discardChanges',
+  {
+    defaultMessage: 'Discard',
+  }
+);
+
+export const RISK_SCORE_ENGINE_RUN_FAILURE = i18n.translate(
+  'xpack.securitySolution.riskScore.engineRunSuccess',
+  {
+    defaultMessage: 'Entity risk score engine failed to start',
+  }
+);

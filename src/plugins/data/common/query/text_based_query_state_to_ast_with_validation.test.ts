@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import { textBasedQueryStateToAstWithValidation } from './text_based_query_state_to_ast_with_validation';
 
 describe('textBasedQueryStateToAstWithValidation', () => {
@@ -25,13 +24,6 @@ describe('textBasedQueryStateToAstWithValidation', () => {
   });
 
   it('returns an object with the correct structure for an SQL query with existing dataview', async () => {
-    const dataView = createStubDataView({
-      spec: {
-        id: 'foo',
-        title: 'foo',
-        timeFieldName: '@timestamp',
-      },
-    });
     const actual = await textBasedQueryStateToAstWithValidation({
       filters: [],
       query: { esql: 'FROM foo' },
@@ -39,7 +31,7 @@ describe('textBasedQueryStateToAstWithValidation', () => {
         from: 'now',
         to: 'now+7d',
       },
-      dataView,
+      timeFieldName: '@timestamp',
     });
 
     expect(actual).toHaveProperty(
@@ -76,13 +68,6 @@ describe('textBasedQueryStateToAstWithValidation', () => {
   });
 
   it('returns an object with the correct structure for ES|QL', async () => {
-    const dataView = createStubDataView({
-      spec: {
-        id: 'foo',
-        title: 'foo',
-        timeFieldName: '@timestamp',
-      },
-    });
     const actual = await textBasedQueryStateToAstWithValidation({
       filters: [],
       query: { esql: 'from logs*' },
@@ -90,7 +75,7 @@ describe('textBasedQueryStateToAstWithValidation', () => {
         from: 'now',
         to: 'now+7d',
       },
-      dataView,
+      timeFieldName: '@timestamp',
       titleForInspector: 'Custom title',
       descriptionForInspector: 'Custom desc',
     });

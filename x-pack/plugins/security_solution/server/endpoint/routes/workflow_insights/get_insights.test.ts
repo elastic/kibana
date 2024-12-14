@@ -66,8 +66,8 @@ describe('Get Insights Route Handler', () => {
   describe('with valid privileges', () => {
     it('should fetch insights and return them', async () => {
       const mockInsights = [
-        { _source: { id: 1, name: 'Insight 1' } },
-        { _source: { id: 2, name: 'Insight 2' } },
+        { _id: 1, _source: { name: 'Insight 1' } },
+        { _id: 2, _source: { name: 'Insight 2' } },
       ];
       fetchMock.mockResolvedValue(mockInsights);
 

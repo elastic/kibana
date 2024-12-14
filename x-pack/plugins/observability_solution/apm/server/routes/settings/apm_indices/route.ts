@@ -15,7 +15,7 @@ import { getApmIndexSettings, ApmIndexSettingsResponse } from './get_apm_indices
 // get list of apm indices and values
 const apmIndexSettingsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/apm-index-settings',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -29,7 +29,7 @@ const apmIndexSettingsRoute = createApmServerRoute({
 // get apm indices configuration object
 const apmIndicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/apm-indices',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<APMIndices> => {
     return await resources.getApmIndices();
   },
@@ -42,8 +42,10 @@ type SaveApmIndicesBodySchema = {
 // save ui indices
 const saveApmIndicesRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/settings/apm-indices/save',
-  options: {
-    tags: ['access:apm', 'access:apm_settings_write'],
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'apm_settings_write'],
+    },
   },
   params: t.type({
     body: t.partial({

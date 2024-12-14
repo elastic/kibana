@@ -13,6 +13,7 @@ import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import type { AlertingRouter } from '../../types';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -31,6 +32,7 @@ export const getAlertRoute = (
       validate: {
         params: paramSchema,
       },
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: isServerless ? 'internal' : 'public',
         summary: 'Get an alert',

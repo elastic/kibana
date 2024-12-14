@@ -180,6 +180,9 @@ export function ServiceInventory() {
   const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
   const mainStatisticsFetch = useServicesMainStatisticsFetcher(debouncedSearchQuery);
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services');
 
   const displayHealthStatus = mainStatisticsData.items.some((item) => 'healthStatus' in item);
 
@@ -285,9 +288,11 @@ export function ServiceInventory() {
       mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
       comparisonFetch.status === FETCH_STATUS.SUCCESS
     ) {
-      onPageReady();
+      onPageReady({
+        meta: { rangeFrom, rangeTo },
+      });
     }
-  }, [mainStatisticsStatus, comparisonFetch.status, onPageReady]);
+  }, [mainStatisticsStatus, comparisonFetch.status, onPageReady, rangeFrom, rangeTo]);
 
   return (
     <>

@@ -16,6 +16,14 @@ export const mockAutoOpsResponse = {
       ],
     },
     {
+      name: 'metrics-system.core.total.pct-default',
+      error: null,
+      data: [
+        [1726858530000, 13756849],
+        [1726862130000, 14657904],
+      ],
+    },
+    {
       name: 'logs-nginx.access-default',
       error: null,
       data: [
@@ -31,6 +39,14 @@ export const mockAutoOpsResponse = {
       data: [
         [1726858530000, 12576413],
         [1726862130000, 13956423],
+      ],
+    },
+    {
+      name: 'metrics-system.core.total.pct-default',
+      error: null,
+      data: [
+        [1726858530000, 13756849],
+        [1726862130000, 14657904],
       ],
     },
     {

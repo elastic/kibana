@@ -6,34 +6,11 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
 import { TypeReadOnly } from './type';
-import { FieldReadOnly } from '../../field_readonly';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
-import { mockCustomQueryRule } from '../../storybook/mocks';
-import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: TypeReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/type',
 };
 
-interface TemplateProps {
-  finalDiffableRule: DiffableRule;
-}
-
-const Template: Story<TemplateProps> = (args) => {
-  return (
-    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
-      <FieldReadOnly fieldName="type" />
-    </ThreeWayDiffStorybookProviders>
-  );
-};
-
-export const Default = Template.bind({});
-
-Default.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    type: 'query',
-  }),
-};
+export const Default = () => <TypeReadOnly type="query" />;

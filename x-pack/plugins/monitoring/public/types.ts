@@ -15,7 +15,6 @@ export type { MLJobs } from '../server/lib/elasticsearch/get_ml_jobs';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { FleetStart } from '@kbn/fleet-plugin/public';
-import type { InfraClientStartExports } from '@kbn/infra-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { ReactNode } from 'react';
 
@@ -27,7 +26,6 @@ export interface MonitoringStartPluginDependencies {
   dataViews: DataViewsPublicPluginStart;
   dashboard?: DashboardStart;
   fleet?: FleetStart;
-  infra?: InfraClientStartExports;
   share: SharePluginStart;
 }
 

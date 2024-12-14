@@ -15,6 +15,7 @@ import {
   mockRegisterPrivilegesWithCluster,
 } from './service.test.mocks';
 
+import type { Client } from '@elastic/elasticsearch';
 import { Subject } from 'rxjs';
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -38,6 +39,9 @@ const mockCheckPrivilegesDynamicallyWithRequest = Symbol();
 const mockCheckSavedObjectsPrivilegesWithRequest = Symbol();
 const mockPrivilegesService = Symbol();
 const mockAuthorizationMode = Symbol();
+const mockEsSecurityResponse = {
+  security: { operator_privileges: { enabled: false, available: false } },
+};
 beforeEach(() => {
   mockCheckPrivilegesFactory.mockReturnValue({
     checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
@@ -59,6 +63,9 @@ afterEach(() => {
 
 it(`#setup returns exposed services`, () => {
   const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+  mockClusterClient.asInternalUser.xpack.usage.mockResolvedValue(
+    mockEsSecurityResponse as Awaited<ReturnType<Client['xpack']['usage']>>
+  );
   const mockGetSpacesService = jest
     .fn()
     .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() });
@@ -126,6 +133,9 @@ describe('#start', () => {
     statusSubject = new Subject<OnlineStatusRetryScheduler>();
 
     const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+    mockClusterClient.asInternalUser.xpack.usage.mockResolvedValue(
+      mockEsSecurityResponse as Awaited<ReturnType<Client['xpack']['usage']>>
+    );
     const mockCoreSetup = coreMock.createSetup();
 
     const authorizationService = new AuthorizationService();
@@ -194,6 +204,9 @@ describe('#start', () => {
 
 it('#stop unsubscribes from license and ES updates.', async () => {
   const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+  mockClusterClient.asInternalUser.xpack.usage.mockResolvedValue(
+    mockEsSecurityResponse as Awaited<ReturnType<Client['xpack']['usage']>>
+  );
   const statusSubject = new Subject<OnlineStatusRetryScheduler>();
   const mockCoreSetup = coreMock.createSetup();
 

@@ -7,8 +7,11 @@
 
 import type { MlJobUsageMetric } from './ml_jobs/types';
 import type { RuleAdoption } from './rules/types';
+// eslint-disable-next-line no-restricted-imports
+import type { LegacySiemSignals } from './legacy_siem_signals/types';
 
 export interface DetectionMetrics {
   ml_jobs: MlJobUsageMetric;
   detection_rules: RuleAdoption;
+  legacy_siem_signals: LegacySiemSignals;
 }

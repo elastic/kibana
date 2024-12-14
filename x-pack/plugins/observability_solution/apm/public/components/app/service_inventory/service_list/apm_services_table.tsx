@@ -115,6 +115,7 @@ export function getServiceColumns({
                   )}
                 >
                   <EuiBadge
+                    data-test-subj="serviceInventoryAlertsBadgeLink"
                     iconType="warning"
                     color="danger"
                     href={link('/services/{serviceName}/alerts', {

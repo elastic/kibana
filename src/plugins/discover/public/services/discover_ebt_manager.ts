@@ -11,7 +11,11 @@ import { BehaviorSubject } from 'rxjs';
 import { isEqual } from 'lodash';
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
 
+/**
+ * Field usage events i.e. when a field is selected in the data table, removed from the data table, or a filter is added
+ */
 const FIELD_USAGE_EVENT_TYPE = 'discover_field_usage';
 const FIELD_USAGE_EVENT_NAME = 'eventName';
 const FIELD_USAGE_FIELD_NAME = 'fieldName';
@@ -30,6 +34,19 @@ interface FieldUsageEventData {
   [FIELD_USAGE_FILTER_OPERATION]?: FilterOperation;
 }
 
+/**
+ * Contextual profile resolved event i.e. when a different contextual profile is resolved at root, data source, or document level
+ * Duplicated events for the same profile level will not be sent.
+ */
+const CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE = 'discover_profile_resolved';
+const CONTEXTUAL_PROFILE_LEVEL = 'contextLevel';
+const CONTEXTUAL_PROFILE_ID = 'profileId';
+
+interface ContextualProfileResolvedEventData {
+  [CONTEXTUAL_PROFILE_LEVEL]: ContextualProfileLevel;
+  [CONTEXTUAL_PROFILE_ID]: string;
+}
+
 export interface DiscoverEBTContextProps {
   discoverProfiles: string[]; // Discover Context Awareness Profiles
 }
@@ -39,8 +56,19 @@ export class DiscoverEBTManager {
   private isCustomContextEnabled: boolean = false;
   private customContext$: DiscoverEBTContext | undefined;
   private reportEvent: CoreSetup['analytics']['reportEvent'] | undefined;
+  private lastResolvedContextProfiles: {
+    [ContextualProfileLevel.rootLevel]: string | undefined;
+    [ContextualProfileLevel.dataSourceLevel]: string | undefined;
+    [ContextualProfileLevel.documentLevel]: string | undefined;
+  };
 
-  constructor() {}
+  constructor() {
+    this.lastResolvedContextProfiles = {
+      [ContextualProfileLevel.rootLevel]: undefined,
+      [ContextualProfileLevel.dataSourceLevel]: undefined,
+      [ContextualProfileLevel.documentLevel]: undefined,
+    };
+  }
 
   // https://docs.elastic.dev/telemetry/collection/event-based-telemetry
   public initialize({
@@ -104,17 +132,40 @@ export class DiscoverEBTManager {
           },
         },
       });
+      core.analytics.registerEventType({
+        eventType: CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE,
+        schema: {
+          [CONTEXTUAL_PROFILE_LEVEL]: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'The context level at which it was resolved i.e. rootLevel, dataSourceLevel, documentLevel',
+            },
+          },
+          [CONTEXTUAL_PROFILE_ID]: {
+            type: 'keyword',
+            _meta: {
+              description: 'The resolved name of the active profile',
+            },
+          },
+        },
+      });
       this.reportEvent = core.analytics.reportEvent;
     }
   }
 
-  public enableContext() {
+  public onDiscoverAppMounted() {
     this.isCustomContextEnabled = true;
   }
 
-  public disableAndResetContext() {
+  public onDiscoverAppUnmounted() {
     this.updateProfilesContextWith([]);
     this.isCustomContextEnabled = false;
+    this.lastResolvedContextProfiles = {
+      [ContextualProfileLevel.rootLevel]: undefined,
+      [ContextualProfileLevel.dataSourceLevel]: undefined,
+      [ContextualProfileLevel.documentLevel]: undefined,
+    };
   }
 
   public updateProfilesContextWith(discoverProfiles: DiscoverEBTContextProps['discoverProfiles']) {
@@ -215,5 +266,31 @@ export class DiscoverEBTManager {
       fieldsMetadata,
       filterOperation,
     });
+  }
+
+  public trackContextualProfileResolvedEvent({
+    contextLevel,
+    profileId,
+  }: {
+    contextLevel: ContextualProfileLevel;
+    profileId: string;
+  }) {
+    if (!this.reportEvent) {
+      return;
+    }
+
+    if (this.lastResolvedContextProfiles[contextLevel] === profileId) {
+      // avoid sending duplicate events to EBT
+      return;
+    }
+
+    this.lastResolvedContextProfiles[contextLevel] = profileId;
+
+    const eventData: ContextualProfileResolvedEventData = {
+      [CONTEXTUAL_PROFILE_LEVEL]: contextLevel,
+      [CONTEXTUAL_PROFILE_ID]: profileId,
+    };
+
+    this.reportEvent(CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE, eventData);
   }
 }

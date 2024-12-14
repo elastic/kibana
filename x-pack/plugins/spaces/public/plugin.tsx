@@ -59,14 +59,11 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   }
 
   public setup(core: CoreSetup<PluginsStart, SpacesPluginStart>, plugins: PluginsSetup) {
-    const hasOnlyDefaultSpace = this.config.maxSpaces === 1;
-    const onCloud = plugins.cloud !== undefined && plugins.cloud.isCloudEnabled;
+    if (this.config.allowSolutionVisibility === undefined) {
+      throw new Error('allowSolutionVisibility has not been set in the Spaces plugin config.');
+    }
 
-    // We only allow "solution" to be set on cloud environments, not on prem
-    // unless the forceSolutionVisibility flag is set
-    const allowSolutionVisibility =
-      (onCloud && !this.isServerless && this.config.allowSolutionVisibility) ||
-      Boolean(this.config.experimental?.forceSolutionVisibility);
+    const hasOnlyDefaultSpace = this.config.maxSpaces === 1;
 
     this.spacesManager = new SpacesManager(core.http);
     this.spacesApi = {
@@ -77,12 +74,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       getActiveSpace$: () => this.spacesManager.onActiveSpaceChange$,
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
       hasOnlyDefaultSpace,
-      isSolutionViewEnabled: allowSolutionVisibility,
-    };
-
-    this.config = {
-      ...this.config,
-      allowSolutionVisibility,
+      isSolutionViewEnabled: this.config.allowSolutionVisibility,
     };
 
     registerSpacesEventTypes(core);
@@ -167,7 +159,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
 
     registerAnalyticsContext(core.analytics, this.spacesManager.onActiveSpaceChange$);
 
-    return { hasOnlyDefaultSpace, isSolutionViewEnabled: allowSolutionVisibility };
+    return { hasOnlyDefaultSpace, isSolutionViewEnabled: this.config.allowSolutionVisibility };
   }
 
   public start(core: CoreStart) {

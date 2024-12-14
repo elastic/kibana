@@ -6,12 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
-import { FieldReadOnly } from '../../field_readonly';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreatIndicatorPathReadOnly } from './threat_indicator_path';
-import { mockThreatMatchRule } from '../../storybook/mocks';
-import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: ThreatIndicatorPathReadOnly,
@@ -19,22 +14,6 @@ export default {
     'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/threat_indicator_path',
 };
 
-interface TemplateProps {
-  finalDiffableRule: DiffableRule;
-}
+export const Default = () => <ThreatIndicatorPathReadOnly threatIndicatorPath="threat.indicator" />;
 
-const Template: Story<TemplateProps> = (args) => {
-  return (
-    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
-      <FieldReadOnly fieldName="threat_indicator_path" />
-    </ThreeWayDiffStorybookProviders>
-  );
-};
-
-export const Default = Template.bind({});
-
-Default.args = {
-  finalDiffableRule: mockThreatMatchRule({
-    threat_indicator_path: 'threat.indicator',
-  }),
-};
+export const NoValue = () => <ThreatIndicatorPathReadOnly />;

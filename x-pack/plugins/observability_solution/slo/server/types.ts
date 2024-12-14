@@ -21,14 +21,17 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { SloClient } from './client';
 
 export type { SLOConfig } from '../common/config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SLOServerSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SLOServerStart {}
+export interface SLOServerStart {
+  getSloClientWithRequest: (request: KibanaRequest) => SloClient;
+}
 
 export interface SLOPluginSetupDependencies {
   alerting: AlertingServerSetup;

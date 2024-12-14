@@ -14,6 +14,7 @@ import {
   deleteConnectorRequestParamsSchemaV1,
   DeleteConnectorRequestParamsV1,
 } from '../../../../common/routes/connector/apis/delete';
+import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 
 export const deleteConnectorRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
@@ -22,6 +23,7 @@ export const deleteConnectorRoute = (
   router.delete(
     {
       path: `${BASE_ACTION_API_PATH}/connector/{id}`,
+      security: DEFAULT_ACTION_ROUTE_SECURITY,
       options: {
         access: 'public',
         summary: `Delete a connector`,

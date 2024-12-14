@@ -27,7 +27,6 @@ import {
   getTimeOptions,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { DataView } from '@kbn/data-views-plugin/common';
 import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
@@ -38,7 +37,7 @@ import { rowToDocument, toEsQueryHits, transformDatatableToEsqlTable } from '../
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, setRuleParams, setRuleProperty, errors }) => {
-  const { expressions, http, fieldFormats, isServerless, dataViews } = useTriggerUiActionServices();
+  const { expressions, http, isServerless, dataViews } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
@@ -116,10 +115,7 @@ export const EsqlQueryExpression: React.FC<
       },
       undefined,
       // create a data view with the timefield to pass into the query
-      new DataView({
-        spec: { timeFieldName: timeField },
-        fieldFormats,
-      })
+      timeField
     );
     if (table) {
       const esqlTable = transformDatatableToEsqlTable(table);
@@ -154,7 +150,6 @@ export const EsqlQueryExpression: React.FC<
     currentRuleParams,
     esqlQuery,
     expressions,
-    fieldFormats,
     timeField,
     isServerless,
   ]);

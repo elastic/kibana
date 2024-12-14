@@ -71,6 +71,8 @@ import type {
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
   WithAllKeys,
+  ResponseActionRunScriptOutputContent,
+  ResponseActionRunScriptParameters,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
@@ -79,6 +81,7 @@ import type {
   KillProcessRequestBody,
   ResponseActionGetFileRequestBody,
   ResponseActionsRequestBody,
+  RunScriptActionRequestBody,
   ScanActionRequestBody,
   SuspendProcessRequestBody,
   UnisolationRouteRequestBody,
@@ -839,6 +842,15 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>> {
     throw new ResponseActionsNotSupportedError('scan');
+  }
+
+  public async runscript(
+    actionRequest: RunScriptActionRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<
+    ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
+  > {
+    throw new ResponseActionsNotSupportedError('runscript');
   }
 
   public async processPendingActions(_: ProcessPendingActionsMethodOptions): Promise<void> {

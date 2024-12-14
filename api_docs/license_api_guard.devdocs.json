@@ -17,7 +17,7 @@
         "tags": [],
         "label": "License",
         "description": [],
-        "path": "x-pack/plugins/license_api_guard/server/license.ts",
+        "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -31,7 +31,7 @@
             "signature": [
               "({ pluginName, logger }: SetupSettings) => void"
             ],
-            "path": "x-pack/plugins/license_api_guard/server/license.ts",
+            "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -45,7 +45,7 @@
                 "signature": [
                   "SetupSettings"
                 ],
-                "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -63,7 +63,7 @@
             "signature": [
               "({ pluginId, minimumLicenseType, licensing }: StartSettings) => void"
             ],
-            "path": "x-pack/plugins/license_api_guard/server/license.ts",
+            "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -77,7 +77,7 @@
                 "signature": [
                   "StartSettings"
                 ],
-                "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -145,7 +145,7 @@
               },
               "<any>>"
             ],
-            "path": "x-pack/plugins/license_api_guard/server/license.ts",
+            "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -168,7 +168,7 @@
                   },
                   ">"
                 ],
-                "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -183,7 +183,7 @@
             "tags": [],
             "label": "isEsSecurityEnabled",
             "description": [],
-            "path": "x-pack/plugins/license_api_guard/server/license.ts",
+            "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
             "deprecated": false,
             "trackAdoption": false
           }

@@ -28,10 +28,10 @@ import type { SubfieldChanges } from '../types';
  * @param newFieldValue - The new value of the field.
  * @returns - An array of subfield changes.
  */
-export const getSubfieldChanges = <FieldName extends keyof DiffableAllFields>(
-  fieldName: FieldName,
-  oldFieldValue?: DiffableAllFields[FieldName],
-  newFieldValue?: DiffableAllFields[FieldName]
+export const getSubfieldChanges = (
+  fieldName: keyof DiffableAllFields,
+  oldFieldValue: unknown,
+  newFieldValue: unknown
 ): SubfieldChanges => {
   switch (fieldName) {
     /*

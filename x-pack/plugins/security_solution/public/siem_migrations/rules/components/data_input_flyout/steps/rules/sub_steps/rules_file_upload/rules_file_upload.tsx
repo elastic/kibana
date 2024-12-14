@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFilePicker, EuiFormRow, EuiText } from '@elastic/eui';
+import { isPlainObject } from 'lodash';
 import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
-import { parseContent } from './parse_rules_file';
 import * as i18n from './translations';
+import { FILE_UPLOAD_ERROR } from '../../../../translations';
+import { useParseFileInput, type SplunkRow } from '../../../common/use_parse_file_input';
+import type { SPLUNK_RULES_COLUMNS } from '../../../../constants';
+
+type SplunkRulesResult = Partial<Record<(typeof SPLUNK_RULES_COLUMNS)[number], string>>;
 
 export interface RulesFileUploadProps {
   createMigration: CreateMigration;
@@ -20,64 +25,15 @@ export interface RulesFileUploadProps {
 }
 export const RulesFileUpload = React.memo<RulesFileUploadProps>(
   ({ createMigration, apiError, isLoading, isCreated }) => {
-    const [isParsing, setIsParsing] = useState<boolean>(false);
-    const [fileError, setFileError] = useState<string>();
-
-    const onChangeFile = useCallback(
-      (files: FileList | null) => {
-        if (!files) {
-          return;
-        }
-
-        setFileError(undefined);
-
-        const rulesFile = files[0];
-        const reader = new FileReader();
-
-        reader.onloadstart = () => setIsParsing(true);
-        reader.onloadend = () => setIsParsing(false);
-
-        reader.onload = function (e) {
-          // We can safely cast to string since we call `readAsText` to load the file.
-          const fileContent = e.target?.result as string | undefined;
-
-          if (fileContent == null) {
-            setFileError(i18n.RULES_DATA_INPUT_FILE_UPLOAD_ERROR.CAN_NOT_READ);
-            return;
-          }
-
-          if (fileContent === '' && e.loaded > 100000) {
-            // V8-based browsers can't handle large files and return an empty string
-            // instead of an error; see https://stackoverflow.com/a/61316641
-            setFileError(i18n.RULES_DATA_INPUT_FILE_UPLOAD_ERROR.TOO_LARGE_TO_PARSE);
-            return;
-          }
-
-          let data: OriginalRule[];
-          try {
-            data = parseContent(fileContent);
-            createMigration(data);
-          } catch (err) {
-            setFileError(err.message);
-          }
-        };
-
-        const handleReaderError = function () {
-          const message = reader.error?.message;
-          if (message) {
-            setFileError(i18n.RULES_DATA_INPUT_FILE_UPLOAD_ERROR.CAN_NOT_READ_WITH_REASON(message));
-          } else {
-            setFileError(i18n.RULES_DATA_INPUT_FILE_UPLOAD_ERROR.CAN_NOT_READ);
-          }
-        };
-
-        reader.onerror = handleReaderError;
-        reader.onabort = handleReaderError;
-
-        reader.readAsText(rulesFile);
+    const onFileParsed = useCallback(
+      (content: Array<SplunkRow<SplunkRulesResult>>) => {
+        const rules = content.map(formatRuleRow);
+        createMigration(rules);
       },
       [createMigration]
     );
+
+    const { parseFile, isParsing, error: fileError } = useParseFileInput(onFileParsed);
 
     const error = useMemo(() => {
       if (apiError) {
@@ -106,10 +62,10 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
               </EuiText>
             </>
           }
-          accept="application/json"
-          onChange={onChangeFile}
+          accept="application/json, application/x-ndjson"
+          onChange={parseFile}
           display="large"
-          aria-label="Upload logs sample file"
+          aria-label="Upload rules file"
           isLoading={isParsing || isLoading}
           disabled={isLoading || isCreated}
           data-test-subj="rulesFilePicker"
@@ -120,3 +76,27 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
   }
 );
 RulesFileUpload.displayName = 'RulesFileUpload';
+
+const formatRuleRow = (row: SplunkRow<SplunkRulesResult>): OriginalRule => {
+  if (!isPlainObject(row.result)) {
+    throw new Error(FILE_UPLOAD_ERROR.NOT_OBJECT);
+  }
+  const originalRule: Partial<OriginalRule> = {
+    id: row.result.id,
+    vendor: 'splunk',
+    title: row.result.title,
+    query: row.result.search,
+    query_language: 'spl',
+    description: row.result['action.escu.eli5']?.trim() || row.result.description,
+  };
+
+  if (row.result['action.correlationsearch.annotations']) {
+    try {
+      originalRule.annotations = JSON.parse(row.result['action.correlationsearch.annotations']);
+    } catch (error) {
+      delete originalRule.annotations;
+    }
+  }
+  // rule document format validation delegated to API
+  return originalRule as OriginalRule;
+};

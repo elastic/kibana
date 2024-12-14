@@ -1382,7 +1382,8 @@ describe('rules_list with show only capability', () => {
   });
 });
 
-describe('MaintenanceWindowsMock', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/203179
+describe.skip('MaintenanceWindowsMock', () => {
   beforeEach(() => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
 

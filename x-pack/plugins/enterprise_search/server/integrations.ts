@@ -23,7 +23,7 @@ export const registerEnterpriseSearchIntegrations = (
         defaultMessage: 'Add search to your website with the web crawler.',
       }),
       categories: ['search', 'web', 'elastic_stack', 'crawler'],
-      uiInternalPath: '/app/enterprise_search/content/crawlers/new_crawler',
+      uiInternalPath: '/app/elasticsearch/content/crawlers/new_crawler',
       icons: [
         {
           type: 'eui',
@@ -44,7 +44,7 @@ export const registerEnterpriseSearchIntegrations = (
       defaultMessage: "Add search to your application with Elasticsearch's robust APIs.",
     }),
     categories: ['search', 'custom', 'elastic_stack', 'sdk_search', 'language_client'],
-    uiInternalPath: '/app/enterprise_search/content/search_indices/new_index/api',
+    uiInternalPath: '/app/elasticsearch/content/search_indices/new_index/api',
     icons: [
       {
         type: 'eui',

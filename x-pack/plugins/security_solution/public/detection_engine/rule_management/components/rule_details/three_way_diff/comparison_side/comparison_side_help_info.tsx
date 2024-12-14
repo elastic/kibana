@@ -9,6 +9,10 @@ import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { TITLE } from './translations';
+import type { VersionsPickerOptionEnum } from './versions_picker/versions_picker';
+import { useFieldUpgradeContext } from '../rule_upgrade/field_upgrade_context';
+import { getOptionDetails } from './utils';
 
 /**
  * Theme doesn't expose width variables. Using provided size variables will require
@@ -19,8 +23,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
  */
 const POPOVER_WIDTH = 320;
 
-export function ComparisonSideHelpInfo(): JSX.Element {
+interface ComparisonSideHelpInfoProps {
+  options: VersionsPickerOptionEnum[];
+}
+
+export function ComparisonSideHelpInfo({ options }: ComparisonSideHelpInfoProps): JSX.Element {
   const [isPopoverOpen, togglePopover] = useToggle(false);
+
+  const { hasResolvedValueDifferentFromSuggested } = useFieldUpgradeContext();
+  const optionsWithDescriptions = options.map((option) =>
+    getOptionDetails(option, hasResolvedValueDifferentFromSuggested)
+  );
 
   const button = (
     <EuiButtonIcon
@@ -34,8 +47,25 @@ export function ComparisonSideHelpInfo(): JSX.Element {
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={togglePopover}>
       <EuiText style={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
-          id="xpack.securitySolution.detectionEngine.rules.upgradeRules.upgradeHelpText"
-          defaultMessage="Choose field values used in the upgraded rule. "
+          id="xpack.securitySolution.detectionEngine.rules.upgradeRules.comparisonSide.upgradeHelpText"
+          defaultMessage="The {title} lets you compare the values of a field across different versions of a rule: {versions} Differences are shown as JSON, with red lines showing what was removed, green lines showing additions, and bold text highlighting changes. Use {title} to review and understand changes across versions."
+          values={{
+            title: <strong>{TITLE}</strong>,
+            versions: (
+              <>
+                <br />
+                <ul>
+                  {optionsWithDescriptions.map(
+                    ({ title: displayName, description: explanation }) => (
+                      <li>
+                        <strong>{displayName}</strong> {'-'} {explanation}
+                      </li>
+                    )
+                  )}
+                </ul>
+              </>
+            ),
+          }}
         />
       </EuiText>
     </EuiPopover>

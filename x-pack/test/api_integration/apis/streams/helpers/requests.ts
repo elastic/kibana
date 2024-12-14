@@ -42,6 +42,18 @@ export async function putStream(supertest: Agent, name: string, body: JsonObject
   return response.body;
 }
 
+export async function getStream(supertest: Agent, name: string) {
+  const req = supertest.get(`/api/streams/${name}`).set('kbn-xsrf', 'xxx');
+  const response = await req.send().expect(200);
+  return response.body;
+}
+
+export async function listStreams(supertest: Agent) {
+  const req = supertest.get(`/api/streams`).set('kbn-xsrf', 'xxx');
+  const response = await req.send().expect(200);
+  return response.body;
+}
+
 export async function deleteStream(supertest: Agent, id: string) {
   const req = supertest.delete(`/api/streams/${id}`).set('kbn-xsrf', 'xxx');
   const response = await req.send().expect(200);

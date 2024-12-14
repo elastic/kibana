@@ -14,6 +14,7 @@ import {
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const getRuleTagsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -22,6 +23,7 @@ export const getRuleTagsRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_tags`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
         query: ruleTagsRequestQuerySchemaV1,

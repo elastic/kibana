@@ -6,12 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
-import { FieldReadOnly } from '../../field_readonly';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { SeverityMappingReadOnly } from './severity_mapping';
-import { mockCustomQueryRule } from '../../storybook/mocks';
-import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: SeverityMappingReadOnly,
@@ -19,23 +14,9 @@ export default {
     'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/severity_mapping',
 };
 
-interface TemplateProps {
-  finalDiffableRule: DiffableRule;
-}
-
-const Template: Story<TemplateProps> = (args) => {
-  return (
-    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
-      <FieldReadOnly fieldName="severity_mapping" />
-    </ThreeWayDiffStorybookProviders>
-  );
-};
-
-export const Default = Template.bind({});
-
-Default.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    severity_mapping: [
+export const Default = () => (
+  <SeverityMappingReadOnly
+    severityMapping={[
       {
         field: 'event.severity',
         operator: 'equals',
@@ -48,6 +29,8 @@ Default.args = {
         severity: 'high',
         value: 'VERY HIGH',
       },
-    ],
-  }),
-};
+    ]}
+  />
+);
+
+export const EmptyArrayValue = () => <SeverityMappingReadOnly severityMapping={[]} />;

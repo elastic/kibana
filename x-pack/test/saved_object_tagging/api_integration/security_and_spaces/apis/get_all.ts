@@ -86,7 +86,7 @@ export default function (ftrContext: FtrProviderContext) {
         USERS.DEFAULT_SPACE_VISUALIZE_READ_USER,
         USERS.DEFAULT_SPACE_MAPS_READ_USER,
       ],
-      unauthorized: [USERS.NOT_A_KIBANA_USER, USERS.DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER],
+      unauthorized: [USERS.NOT_A_KIBANA_USER],
     };
 
     const createUserTest = (

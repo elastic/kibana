@@ -23,7 +23,6 @@ import {
   AppStatus,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -38,6 +37,7 @@ import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public'
 import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import {
   ANALYTICS_PLUGIN,
@@ -54,7 +54,7 @@ import {
   SEMANTIC_SEARCH_PLUGIN,
 } from '../common/constants';
 import { registerLocators } from '../common/locators';
-import { ClientConfigType, InitialAppData, ProductAccess } from '../common/types';
+import { ClientConfigType, InitialAppData } from '../common/types';
 import { hasEnterpriseLicense } from '../common/utils/licensing';
 
 import { ENGINES_PATH } from './applications/app_search/routes';
@@ -82,6 +82,7 @@ interface PluginsSetup {
   licensing: LicensingPluginStart;
   security?: SecurityPluginSetup;
   share?: SharePluginSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface PluginsStart {
@@ -100,6 +101,7 @@ export interface PluginsStart {
   searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
   share?: SharePluginStart;
+  uiActions: UiActionsStart;
 }
 
 export interface ESConfig {
@@ -575,12 +577,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       // to the base set of classic side nav items to the search-navigation plugin.
       import('./applications/shared/layout/base_nav').then(({ buildBaseClassicNavItems }) => {
         plugins.searchNavigation?.setGetBaseClassicNavItems(() => {
-          const productAccess: ProductAccess = this.data?.access ?? {
-            hasAppSearchAccess: false,
-            hasWorkplaceSearchAccess: false,
-          };
-
-          return buildBaseClassicNavItems({ productAccess });
+          return buildBaseClassicNavItems();
         });
       });
 

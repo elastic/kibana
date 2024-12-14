@@ -10,10 +10,12 @@ import type { caseApiV1 } from '../../../../../common/types/api';
 import { CASE_ALERTS_URL } from '../../../../../common/constants';
 import { createCaseError } from '../../../../common/error';
 import { createCasesRoute } from '../../create_cases_route';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../../constants';
 
 export const getCasesByAlertIdRoute = createCasesRoute({
   method: 'get',
   path: CASE_ALERTS_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     params: schema.object({
       alert_id: schema.string({ minLength: 1 }),

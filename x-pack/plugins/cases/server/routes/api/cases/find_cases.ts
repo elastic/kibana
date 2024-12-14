@@ -9,10 +9,12 @@ import { CASES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { caseApiV1 } from '../../../../common/types/api';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const findCaseRoute = createCasesRoute({
   method: 'get',
   path: `${CASES_URL}/_find`,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   routerOptions: {
     access: 'public',
     summary: `Search cases`,

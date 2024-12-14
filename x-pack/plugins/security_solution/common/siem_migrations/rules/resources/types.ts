@@ -5,7 +5,19 @@
  * 2.0.
  */
 
-import type { RuleMigrationResourceType } from '../../model/rule_migration.gen';
+import type {
+  OriginalRule,
+  RuleMigrationResourceData,
+  RuleMigrationResourceType,
+} from '../../model/rule_migration.gen';
 
-export type RuleResourceCollection = Record<RuleMigrationResourceType, string[]>;
-export type QueryResourceIdentifier = (query: string) => RuleResourceCollection;
+export interface RuleResource {
+  type: RuleMigrationResourceType;
+  name: string;
+}
+export type ResourceIdentifier = (input: string) => RuleResource[];
+
+export interface ResourceIdentifiers {
+  fromOriginalRule: (originalRule: OriginalRule) => RuleResource[];
+  fromResource: (resource: RuleMigrationResourceData) => RuleResource[];
+}

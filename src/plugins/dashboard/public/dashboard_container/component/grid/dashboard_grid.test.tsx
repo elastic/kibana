@@ -10,7 +10,6 @@
 import React from 'react';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 
 import { DashboardGrid } from './dashboard_grid';
 import { buildMockDashboardApi } from '../../../mocks';
@@ -50,12 +49,12 @@ jest.mock('./dashboard_grid_item', () => {
 const PANELS = {
   '1': {
     gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-    type: CONTACT_CARD_EMBEDDABLE,
+    type: 'lens',
     explicitInput: { id: '1' },
   },
   '2': {
     gridData: { x: 6, y: 6, w: 6, h: 6, i: '2' },
-    type: CONTACT_CARD_EMBEDDABLE,
+    type: 'lens',
     explicitInput: { id: '2' },
   },
 };

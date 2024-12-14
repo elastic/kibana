@@ -11,10 +11,12 @@ import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { customFieldsApiV1 } from '../../../../common/types/api';
 import type { customFieldDomainV1 } from '../../../../common/types/domain';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const replaceCustomFieldRoute = createCasesRoute({
   method: 'put',
   path: INTERNAL_PUT_CUSTOM_FIELDS_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     params: schema.object({
       case_id: schema.string(),

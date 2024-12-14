@@ -6,36 +6,18 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
-import { FieldReadOnly } from '../../field_readonly';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
-import { mockEsqlRule } from '../../storybook/mocks';
-import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
+import { EsqlQueryReadOnly } from './esql_query';
 
 export default {
-  component: FieldReadOnly,
+  component: EsqlQueryReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/esql_query',
 };
 
-interface TemplateProps {
-  finalDiffableRule: DiffableRule;
-}
-
-const Template: Story<TemplateProps> = (args) => {
-  return (
-    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
-      <FieldReadOnly fieldName="esql_query" />
-    </ThreeWayDiffStorybookProviders>
-  );
-};
-
-export const Default = Template.bind({});
-
-Default.args = {
-  finalDiffableRule: mockEsqlRule({
-    esql_query: {
+export const Default = () => (
+  <EsqlQueryReadOnly
+    esqlQuery={{
       query: `SELECT user.name, source.ip FROM "logs-*" WHERE event.action = 'user_login' AND event.outcome = 'failure'`,
       language: 'esql',
-    },
-  }),
-};
+    }}
+  />
+);

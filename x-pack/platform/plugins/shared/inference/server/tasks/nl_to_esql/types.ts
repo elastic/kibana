@@ -29,5 +29,6 @@ export type NlToEsqlTaskParams<TToolOptions extends ToolOptions> = {
   connectorId: string;
   logger: Pick<Logger, 'debug'>;
   functionCalling?: FunctionCallingMode;
+  system?: string;
 } & TToolOptions &
   ({ input: string } | { messages: Message[] });

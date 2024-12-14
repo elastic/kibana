@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { PathWithOwners, CodeOwnership } from './src/file_code_owner';
+export type { CodeOwnersEntry } from './src/code_owners';
+export * as cli from './src/cli';
 export {
-  getPathsWithOwnersReversed,
-  getCodeOwnersForFile,
-  runGetOwnersForFileCli,
-} from './src/file_code_owner';
+  getCodeOwnersEntries,
+  findCodeOwnersEntryForPath,
+  getOwningTeamsForPath,
+} from './src/code_owners';

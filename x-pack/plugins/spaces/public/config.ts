@@ -9,7 +9,4 @@ export interface ConfigType {
   maxSpaces: number;
   allowFeatureVisibility: boolean;
   allowSolutionVisibility: boolean;
-  experimental: {
-    forceSolutionVisibility: boolean;
-  };
 }

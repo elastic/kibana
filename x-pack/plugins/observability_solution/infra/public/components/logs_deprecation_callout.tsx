@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
@@ -38,6 +38,7 @@ interface LogsDeprecationCalloutProps {
 }
 
 export const LogsDeprecationCallout = ({ page }: LogsDeprecationCalloutProps) => {
+  const { euiTheme } = useEuiTheme();
   const {
     services: {
       share,
@@ -46,8 +47,6 @@ export const LogsDeprecationCallout = ({ page }: LogsDeprecationCalloutProps) =>
       },
     },
   } = useKibanaContextForPlugin();
-
-  const { euiTheme } = useEuiTheme();
 
   const { dismissalStorageKey, message } = pageConfigurations[page];
 
@@ -68,7 +67,7 @@ export const LogsDeprecationCallout = ({ page }: LogsDeprecationCalloutProps) =>
       iconType="iInCircle"
       heading="h2"
       onDismiss={() => setDismissed(true)}
-      className={css`
+      css={css`
         margin-bottom: ${euiTheme.size.l};
       `}
     >

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { RuleFieldEditFormWrapper } from './fields/rule_field_edit_form_wrapper';
+import { RuleFieldEditFormWrapper } from '../field_final_side';
 import type { UpgradeableCommonFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 import {
   BuildingBlockEdit,

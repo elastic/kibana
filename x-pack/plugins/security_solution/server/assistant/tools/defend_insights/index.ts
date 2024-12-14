@@ -26,7 +26,6 @@ import { securityWorkflowInsightsService } from '../../../endpoint/services';
 import { getAnonymizedEvents } from './get_events';
 import { getDefendInsightsOutputParser } from './output_parsers';
 import { getDefendInsightsPrompt } from './prompts';
-import { buildWorkflowInsights } from './workflow_insights_builders';
 
 export const DEFEND_INSIGHTS_TOOL_DESCRIPTION = 'Call this for Elastic Defend insights.';
 
@@ -115,11 +114,7 @@ export const DEFEND_INSIGHTS_TOOL: AssistantTool = Object.freeze({
         });
         const insights: DefendInsight[] = result.records;
 
-        const workflowInsights = buildWorkflowInsights({
-          defendInsights: insights,
-          request,
-        });
-        workflowInsights.map(securityWorkflowInsightsService.create);
+        await securityWorkflowInsightsService.createFromDefendInsights(insights, request);
 
         return JSON.stringify({ eventsContextCount, insights }, null, 2);
       },

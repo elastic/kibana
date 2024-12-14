@@ -44,7 +44,6 @@ import {
   IContainer,
   PanelState,
 } from './i_container';
-import { reactEmbeddableRegistryHasKey } from '../../react_embeddable_system';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -548,17 +547,6 @@ export abstract class Container<
   }
 
   private async onPanelAdded(panel: PanelState) {
-    // do nothing if this panel's type is in the new Embeddable registry.
-    if (reactEmbeddableRegistryHasKey(panel.type)) {
-      this.updateOutput({
-        embeddableLoaded: {
-          ...this.output.embeddableLoaded,
-          [panel.explicitInput.id]: true,
-        },
-      } as Partial<TContainerOutput>);
-      return;
-    }
-
     this.updateOutput({
       embeddableLoaded: {
         ...this.output.embeddableLoaded,

@@ -11,17 +11,15 @@
         "label": "getMetricRenderer",
         "description": [],
         "signature": [
-          "(theme$: ",
-          "Observable",
-          "<",
+          "(core: ",
           {
-            "pluginId": "@kbn/core-theme-browser",
+            "pluginId": "@kbn/core-lifecycle-browser",
             "scope": "public",
-            "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-public.CoreTheme",
-            "text": "CoreTheme"
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-public.CoreStart",
+            "text": "CoreStart"
           },
-          ">) => () => ",
+          ") => () => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -48,19 +46,16 @@
             "id": "def-public.getMetricRenderer.$1",
             "type": "Object",
             "tags": [],
-            "label": "theme$",
+            "label": "core",
             "description": [],
             "signature": [
-              "Observable",
-              "<",
               {
-                "pluginId": "@kbn/core-theme-browser",
+                "pluginId": "@kbn/core-lifecycle-browser",
                 "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
-              ">"
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.CoreStart",
+                "text": "CoreStart"
+              }
             ],
             "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx",
             "deprecated": false,
@@ -84,10 +79,10 @@
             "pluginId": "@kbn/core-lifecycle-browser",
             "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreSetup",
-            "text": "CoreSetup"
+            "section": "def-public.CoreStart",
+            "text": "CoreStart"
           },
-          "<object, unknown>) => () => ",
+          ") => () => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -121,10 +116,9 @@
                 "pluginId": "@kbn/core-lifecycle-browser",
                 "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
-              "<object, unknown>"
+                "section": "def-public.CoreStart",
+                "text": "CoreStart"
+              }
             ],
             "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx",
             "deprecated": false,
