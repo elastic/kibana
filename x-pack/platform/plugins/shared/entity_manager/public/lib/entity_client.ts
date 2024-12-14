@@ -111,7 +111,7 @@ export class EntityClient {
       entity: Pick<EntityInstance['entity'], 'identity_fields'>;
     } & Required<EntityMetadata>
   ) {
-    const identityFieldsValue = this.getIdentityFieldsValue(entityInstance);
+    const identityFieldsValue = {};
 
     const nodes: KueryNode[] = Object.entries(identityFieldsValue).map(([identityField, value]) => {
       return nodeTypes.function.buildNode('is', identityField, `"${value}"`);
@@ -132,7 +132,7 @@ export class EntityClient {
     const { identity_fields: identityFields } = entityInstance.entity;
 
     if (!identityFields) {
-      throw new Error('Identity fields are missing');
+      return {};
     }
 
     return castArray(identityFields).reduce((acc, field) => {

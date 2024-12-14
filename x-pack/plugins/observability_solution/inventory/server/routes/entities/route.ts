@@ -5,16 +5,12 @@
  * 2.0.
  */
 import { jsonRt } from '@kbn/io-ts-utils';
-import { joinByKey } from '@kbn/observability-utils-common/array/join_by_key';
 import * as t from 'io-ts';
 import { orderBy } from 'lodash';
 import moment from 'moment';
 import { DATA_STREAM_TYPE } from '@kbn/dataset-quality-plugin/common/es_fields';
 import { InventoryEntity, entityColumnIdsRt } from '../../../common/entities';
-import { createAlertsClient } from '../../lib/create_alerts_client/create_alerts_client';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
-import { getIdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
-import { getLatestEntitiesAlerts } from './get_latest_entities_alerts';
 
 export const getEntityTypesRoute = createInventoryServerRoute({
   endpoint: 'GET /internal/inventory/entities/types',
@@ -78,57 +74,42 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
       requiredPrivileges: ['inventory'],
     },
   },
-  handler: async ({ params, plugins, request }): Promise<{ entities: InventoryEntity[] }> => {
+  handler: async ({
+    params,
+    plugins,
+    request,
+  }): Promise<{ entities: Array<Partial<InventoryEntity>> }> => {
     const entityManagerStart = await plugins.entityManager.start();
 
     const { sortDirection, sortField, kuery, entityType } = params.query;
 
     const entityManagerClient = await entityManagerStart.getScopedClient({ request });
-    const [alertsClient, { entities: rawEntities }] = await Promise.all([
-      createAlertsClient({ plugins, request }),
-      entityManagerClient.v2.searchEntities({
-        start: moment().subtract(15, 'm').toISOString(),
-        end: moment().toISOString(),
-        limit: 500,
-        type: entityType,
-        metadata_fields: [DATA_STREAM_TYPE],
-        filters: kuery ? [kuery] : [],
-      }),
-    ]);
-
-    const entities = rawEntities.map((entity) => ({
-      entityId: entity.id,
-      entityType: entity.type,
-      entityDefinitionId: entity.definition_id,
-      entityDisplayName: entity.display_name,
-      entityIdentityFields: entity.identity_fields,
-      entityLastSeenTimestamp: entity.last_seen_timestamp,
-      entityDefinitionVersion: entity.definition_version,
-      entitySchemaVersion: entity.schema_version,
-      ...entity,
-    }));
-
-    const identityFieldsPerEntityType = getIdentityFieldsPerEntityType(entities);
-
-    const alerts = await getLatestEntitiesAlerts({
-      identityFieldsPerEntityType,
-      alertsClient,
+    const { entities: rawEntities } = await entityManagerClient.v2.searchEntities({
+      start: moment().subtract(15, 'm').toISOString(),
+      end: moment().toISOString(),
+      limit: 500,
+      type: entityType,
+      metadata_fields: [DATA_STREAM_TYPE],
+      filters: kuery ? [kuery] : [],
     });
 
-    const joined = joinByKey(
-      [...entities, ...alerts] as InventoryEntity[],
-      [...identityFieldsPerEntityType.values()].flat()
-    ).filter((latestEntity) => latestEntity.entityId);
+    const entities = rawEntities.map((entity) => ({
+      entityId: entity['entity.id'],
+      entityType: entity['entity.type'],
+      entityDisplayName: entity['entity.display_name'],
+      entityLastSeenTimestamp: entity['entity.last_seen_timestamp'],
+      ...entity,
+    }));
 
     return {
       entities:
         sortField === 'alertsCount'
-          ? orderBy(
-              joined,
-              [(item: InventoryEntity) => item?.alertsCount === undefined, sortField],
+          ? (orderBy(
+              entities,
+              [(item: InventoryEntity) => (item?.alertsCount === undefined ? 1 : 0), sortField],
               ['asc', sortDirection] // push entities without alertsCount to the end
-            )
-          : joined,
+            ) as Array<Partial<InventoryEntity>>)
+          : (entities as Array<Partial<InventoryEntity>>),
     };
   },
 });
