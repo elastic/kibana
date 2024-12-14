@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
+import { ErrorBoundary } from 'react-error-boundary';
+import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup } from '@elastic/eui';
 import { FieldFinalReadOnly } from '../../final_readonly';
 import { FieldFinalEdit } from '../../final_edit';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
@@ -28,7 +29,9 @@ export function FieldFinalSideContent(): JSX.Element {
               {i18n.EDIT}
             </EuiButtonEmpty>
           </EuiFlexGroup>
-          <FieldFinalReadOnly />
+          <ErrorBoundary key="readonly" fallback={READONLY_ERROR_FALLBACK}>
+            <FieldFinalReadOnly />
+          </ErrorBoundary>
         </>
       );
     case FieldFinalSideMode.Edit:
@@ -39,10 +42,24 @@ export function FieldFinalSideContent(): JSX.Element {
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexGroup>
-          <FieldFinalEdit />
+          <ErrorBoundary key="edit" fallback={EDIT_ERROR_FALLBACK}>
+            <FieldFinalEdit />
+          </ErrorBoundary>
         </>
       );
     default:
       return assertUnreachable(rightSideMode);
   }
 }
+
+const READONLY_ERROR_FALLBACK = (
+  <EuiCallOut title={i18n.READONLY_MODE_ERROR_FALLBACK_TITLE} color="danger" iconType="error">
+    <p>{i18n.READONLY_MODE_ERROR_FALLBACK_DESCRIPTION}</p>
+  </EuiCallOut>
+);
+
+const EDIT_ERROR_FALLBACK = (
+  <EuiCallOut title={i18n.EDIT_MODE_ERROR_FALLBACK_TITLE} color="danger" iconType="error">
+    <p>{i18n.EDIT_MODE_ERROR_FALLBACK_DESCRIPTION}</p>
+  </EuiCallOut>
+);

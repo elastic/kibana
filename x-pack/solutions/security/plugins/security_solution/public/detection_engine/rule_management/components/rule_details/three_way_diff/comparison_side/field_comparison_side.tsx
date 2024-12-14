@@ -6,7 +6,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { ErrorBoundary } from 'react-error-boundary';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
 import { VersionsPicker, VersionsPickerOptionEnum } from './versions_picker/versions_picker';
@@ -77,7 +78,15 @@ export function FieldComparisonSide(): JSX.Element {
           </EuiFlexItem>
         </EuiFlexGroup>
       </FieldUpgradeSideHeader>
-      <SubfieldChanges fieldName={fieldName} subfieldChanges={subfieldChanges} />
+      <ErrorBoundary fallback={COMPARISON_SIDE_ERROR_FALLBACK}>
+        <SubfieldChanges fieldName={fieldName} subfieldChanges={subfieldChanges} />
+      </ErrorBoundary>
     </>
   );
 }
+
+const COMPARISON_SIDE_ERROR_FALLBACK = (
+  <EuiCallOut title={i18n.COMPARISON_SIDE_ERROR_FALLBACK_TITLE} color="danger" iconType="error">
+    <p>{i18n.COMPARISON_SIDE_ERROR_FALLBACK_DESCRIPTION}</p>
+  </EuiCallOut>
+);
