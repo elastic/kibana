@@ -14131,20 +14131,20 @@
                 "path": "x-pack/platform/plugins/shared/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/models/job_service/new_job_caps/rollup.ts"
-              },
-              {
-                "plugin": "@kbn/ml-data-view-utils",
-                "path": "x-pack/platform/packages/private/ml/data_view_utils/actions/data_view_handler.ts"
-              },
-              {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.ts"
               },
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/models/job_service/new_job_caps/rollup.ts"
+              },
+              {
+                "plugin": "@kbn/ml-data-view-utils",
+                "path": "x-pack/platform/packages/private/ml/data_view_utils/actions/data_view_handler.ts"
               },
               {
                 "plugin": "graph",
@@ -14175,22 +14175,6 @@
                 "path": "x-pack/solutions/security/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
-                "plugin": "exploratoryView",
-                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
                 "plugin": "stackAlerts",
                 "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/boundary_form.tsx"
               },
@@ -14209,6 +14193,22 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -26074,7 +26074,7 @@
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/read_pack_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
               },
               {
                 "plugin": "securitySolution",

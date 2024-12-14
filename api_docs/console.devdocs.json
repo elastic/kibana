@@ -51,7 +51,7 @@
           },
           ", object>"
         ],
-        "path": "src/plugins/console/public/plugin.ts",
+        "path": "src/platform/plugins/shared/console/public/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -65,7 +65,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/console/public/plugin.ts",
+            "path": "src/platform/plugins/shared/console/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -86,7 +86,7 @@
                   },
                   "<object>"
                 ],
-                "path": "src/plugins/console/public/plugin.ts",
+                "path": "src/platform/plugins/shared/console/public/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -127,7 +127,7 @@
                 "text": "ConsolePluginSetup"
               }
             ],
-            "path": "src/plugins/console/public/plugin.ts",
+            "path": "src/platform/plugins/shared/console/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -148,7 +148,7 @@
                   },
                   "<object, unknown>"
                 ],
-                "path": "src/plugins/console/public/plugin.ts",
+                "path": "src/platform/plugins/shared/console/public/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -169,7 +169,7 @@
                     "text": "AppSetupUIPluginDependencies"
                   }
                 ],
-                "path": "src/plugins/console/public/plugin.ts",
+                "path": "src/platform/plugins/shared/console/public/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -210,7 +210,7 @@
                 "text": "ConsolePluginStart"
               }
             ],
-            "path": "src/plugins/console/public/plugin.ts",
+            "path": "src/platform/plugins/shared/console/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -230,7 +230,7 @@
                     "text": "CoreStart"
                   }
                 ],
-                "path": "src/plugins/console/public/plugin.ts",
+                "path": "src/platform/plugins/shared/console/public/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -251,7 +251,7 @@
                     "text": "AppStartUIPluginDependencies"
                   }
                 ],
-                "path": "src/plugins/console/public/plugin.ts",
+                "path": "src/platform/plugins/shared/console/public/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -272,7 +272,7 @@
         "tags": [],
         "label": "AppSetupUIPluginDependencies",
         "description": [],
-        "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+        "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -293,7 +293,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+            "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -313,7 +313,7 @@
                 "text": "DevToolsSetup"
               }
             ],
-            "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+            "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -361,7 +361,7 @@
               },
               ") => void; }"
             ],
-            "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+            "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -382,7 +382,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+            "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -396,7 +396,7 @@
         "tags": [],
         "label": "AppStartUIPluginDependencies",
         "description": [],
-        "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+        "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -417,7 +417,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+            "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -457,7 +457,7 @@
               },
               ">): void; }"
             ],
-            "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+            "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -478,7 +478,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+            "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -509,7 +509,7 @@
             "text": "SerializableRecord"
           }
         ],
-        "path": "src/plugins/console/public/types/locator.ts",
+        "path": "src/platform/plugins/shared/console/public/types/locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -523,7 +523,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/console/public/types/locator.ts",
+            "path": "src/platform/plugins/shared/console/public/types/locator.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -537,7 +537,7 @@
         "tags": [],
         "label": "EmbeddedConsoleView",
         "description": [],
-        "path": "src/plugins/console/public/types/embeddable_console.ts",
+        "path": "src/platform/plugins/shared/console/public/types/embeddable_console.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -567,7 +567,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/console/public/types/embeddable_console.ts",
+            "path": "src/platform/plugins/shared/console/public/types/embeddable_console.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -581,7 +581,7 @@
             "signature": [
               "React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
             ],
-            "path": "src/plugins/console/public/types/embeddable_console.ts",
+            "path": "src/platform/plugins/shared/console/public/types/embeddable_console.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -595,7 +595,7 @@
         "tags": [],
         "label": "EmbeddedConsoleViewButtonProps",
         "description": [],
-        "path": "src/plugins/console/public/types/embeddable_console.ts",
+        "path": "src/platform/plugins/shared/console/public/types/embeddable_console.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -606,7 +606,7 @@
             "tags": [],
             "label": "activeView",
             "description": [],
-            "path": "src/plugins/console/public/types/embeddable_console.ts",
+            "path": "src/platform/plugins/shared/console/public/types/embeddable_console.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -620,7 +620,7 @@
             "signature": [
               "(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void"
             ],
-            "path": "src/plugins/console/public/types/embeddable_console.ts",
+            "path": "src/platform/plugins/shared/console/public/types/embeddable_console.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -657,7 +657,7 @@
       "description": [
         "\nConsole plugin's setup service object"
       ],
-      "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+      "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -688,7 +688,7 @@
             },
             "> | undefined"
           ],
-          "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+          "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -705,7 +705,7 @@
       "description": [
         "\nConsole plugin's start service object"
       ],
-      "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+      "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -721,7 +721,7 @@
           "signature": [
             "(() => boolean) | undefined"
           ],
-          "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+          "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -739,7 +739,7 @@
           "signature": [
             "((content?: string | undefined) => void) | undefined"
           ],
-          "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+          "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -753,7 +753,7 @@
               "signature": [
                 "string | undefined"
               ],
-              "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+              "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -773,7 +773,7 @@
           "signature": [
             "(() => void) | undefined"
           ],
-          "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+          "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -791,7 +791,7 @@
           "signature": [
             "React.FC<{}> | undefined"
           ],
-          "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+          "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -815,7 +815,7 @@
             },
             " | null) => void) | undefined"
           ],
-          "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+          "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -836,7 +836,7 @@
                 },
                 " | null"
               ],
-              "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+              "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -866,7 +866,7 @@
       "signature": [
         "void"
       ],
-      "path": "src/plugins/console/server/types.ts",
+      "path": "src/platform/plugins/shared/console/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

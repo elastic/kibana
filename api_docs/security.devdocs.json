@@ -6390,47 +6390,13 @@
           "label": "authz",
           "description": [],
           "signature": [
-            "{ mode: ",
             {
               "pluginId": "@kbn/security-plugin-types-server",
               "scope": "server",
               "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-              "section": "def-server.AuthorizationMode",
-              "text": "AuthorizationMode"
-            },
-            "; actions: ",
-            {
-              "pluginId": "@kbn/security-plugin-types-server",
-              "scope": "server",
-              "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-              "section": "def-server.Actions",
-              "text": "Actions"
-            },
-            "; checkPrivilegesWithRequest: ",
-            {
-              "pluginId": "@kbn/security-plugin-types-server",
-              "scope": "server",
-              "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-              "section": "def-server.CheckPrivilegesWithRequest",
-              "text": "CheckPrivilegesWithRequest"
-            },
-            "; checkPrivilegesDynamicallyWithRequest: ",
-            {
-              "pluginId": "@kbn/security-plugin-types-server",
-              "scope": "server",
-              "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-              "section": "def-server.CheckPrivilegesDynamicallyWithRequest",
-              "text": "CheckPrivilegesDynamicallyWithRequest"
-            },
-            "; checkSavedObjectsPrivilegesWithRequest: ",
-            {
-              "pluginId": "@kbn/security-plugin-types-server",
-              "scope": "server",
-              "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-              "section": "def-server.CheckSavedObjectsPrivilegesWithRequest",
-              "text": "CheckSavedObjectsPrivilegesWithRequest"
-            },
-            "; }"
+              "section": "def-server.AuthorizationServiceSetup",
+              "text": "AuthorizationServiceSetup"
+            }
           ],
           "path": "x-pack/plugins/security/server/plugin.ts",
           "deprecated": true,
@@ -6556,18 +6522,6 @@
               "path": "x-pack/plugins/cloud_security_posture/server/routes/setup_routes.ts"
             },
             {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/server/lib/helpers/get_random_sampler/index.ts"
-            },
-            {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/server/routes/agent_keys/get_agent_keys_privileges.ts"
-            },
-            {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/server/routes/fleet/is_superuser.ts"
-            },
-            {
               "plugin": "serverlessSearch",
               "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
             },
@@ -6582,6 +6536,18 @@
             {
               "plugin": "upgradeAssistant",
               "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/credential_store.ts"
+            },
+            {
+              "plugin": "apm",
+              "path": "x-pack/plugins/observability_solution/apm/server/lib/helpers/get_random_sampler/index.ts"
+            },
+            {
+              "plugin": "apm",
+              "path": "x-pack/plugins/observability_solution/apm/server/routes/agent_keys/get_agent_keys_privileges.ts"
+            },
+            {
+              "plugin": "apm",
+              "path": "x-pack/plugins/observability_solution/apm/server/routes/fleet/is_superuser.ts"
             },
             {
               "plugin": "entityManager",
@@ -6663,47 +6629,13 @@
             "\nAuthorization services to manage and access the permissions a particular user has."
           ],
           "signature": [
-            "{ mode: ",
             {
               "pluginId": "@kbn/security-plugin-types-server",
               "scope": "server",
               "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-              "section": "def-server.AuthorizationMode",
-              "text": "AuthorizationMode"
-            },
-            "; actions: ",
-            {
-              "pluginId": "@kbn/security-plugin-types-server",
-              "scope": "server",
-              "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-              "section": "def-server.Actions",
-              "text": "Actions"
-            },
-            "; checkPrivilegesWithRequest: ",
-            {
-              "pluginId": "@kbn/security-plugin-types-server",
-              "scope": "server",
-              "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-              "section": "def-server.CheckPrivilegesWithRequest",
-              "text": "CheckPrivilegesWithRequest"
-            },
-            "; checkPrivilegesDynamicallyWithRequest: ",
-            {
-              "pluginId": "@kbn/security-plugin-types-server",
-              "scope": "server",
-              "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-              "section": "def-server.CheckPrivilegesDynamicallyWithRequest",
-              "text": "CheckPrivilegesDynamicallyWithRequest"
-            },
-            "; checkSavedObjectsPrivilegesWithRequest: ",
-            {
-              "pluginId": "@kbn/security-plugin-types-server",
-              "scope": "server",
-              "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-              "section": "def-server.CheckSavedObjectsPrivilegesWithRequest",
-              "text": "CheckSavedObjectsPrivilegesWithRequest"
-            },
-            "; }"
+              "section": "def-server.AuthorizationServiceSetup",
+              "text": "AuthorizationServiceSetup"
+            }
           ],
           "path": "x-pack/packages/security/plugin_types_server/src/plugin.ts",
           "deprecated": false,

@@ -1650,7 +1650,9 @@
             "type": "Function",
             "tags": [],
             "label": "loadIfNeeded",
-            "description": [],
+            "description": [
+              "\nLoads an Elasticsearch archive if the specified data index is not present."
+            ],
             "signature": [
               "(name: string, performance?: ",
               {
@@ -1674,7 +1676,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "name",
-                "description": [],
+                "description": [
+                  "The name of the archive to load."
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1689,7 +1693,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "performance",
-                "description": [],
+                "description": [
+                  "An object of type LoadActionPerfOptions to measure and\nreport performance metrics during the load operation."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/es-archiver",
@@ -1706,7 +1712,9 @@
                 "isRequired": false
               }
             ],
-            "returnComment": []
+            "returnComment": [
+              "A Promise that resolves to an object containing index statistics."
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1960,7 +1968,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ScoutWorkerFixtures",
-        "description": [],
+        "description": [
+          "\nThe `ScoutWorkerFixtures` type defines the set of fixtures that are available"
+        ],
         "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
         "deprecated": false,
         "trackAdoption": false,

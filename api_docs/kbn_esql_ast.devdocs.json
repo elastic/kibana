@@ -4160,7 +4160,9 @@
             "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.ESQLTimeInterval.type",
             "type": "string",
-            "tags": [],
+            "tags": [
+              "todo"
+            ],
             "label": "type",
             "description": [],
             "signature": [

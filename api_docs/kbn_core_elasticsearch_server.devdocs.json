@@ -797,7 +797,7 @@
               },
               {
                 "plugin": "console",
-                "path": "src/plugins/console/server/plugin.ts"
+                "path": "src/platform/plugins/shared/console/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/core-elasticsearch-server-internal",
