@@ -153,6 +153,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchElasticsearchStartPage.clickCreateIndexButton();
         await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
 
+        await pageObjects.svlApiKeys.expectShownAPIKeyAvailable();
         const indexDetailsApiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
 
         expect(apiKeyUI).to.eql(indexDetailsApiKey);
