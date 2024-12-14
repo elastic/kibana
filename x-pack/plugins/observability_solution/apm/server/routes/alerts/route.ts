@@ -61,7 +61,7 @@ export type AlertParams = t.TypeOf<typeof alertParamsRt>;
 const transactionErrorRateChartPreview = createApmServerRoute({
   endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
   params: t.type({ query: alertParamsRt }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -84,7 +84,7 @@ const transactionErrorRateChartPreview = createApmServerRoute({
 const transactionErrorCountChartPreview = createApmServerRoute({
   endpoint: 'GET /internal/apm/rule_types/error_count/chart_preview',
   params: t.type({ query: alertParamsRt }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -107,7 +107,7 @@ const transactionErrorCountChartPreview = createApmServerRoute({
 const transactionDurationChartPreview = createApmServerRoute({
   endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
   params: t.type({ query: alertParamsRt }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
