@@ -6,6 +6,7 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
+import { isEqual } from 'lodash';
 import { useBoolean } from '@kbn/react-hooks';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import {
@@ -40,7 +41,13 @@ interface FieldUpgradeContextType {
    */
   hasConflict: boolean;
   /**
+   * Whether field value is different from Elastic's suggestion.
+   * It's true only if user has made changes to the suggested field value.
+   */
+  hasResolvedValueDifferentFromSuggested: boolean;
+  /**
    * Whether the field was changed after prebuilt rule installation, i.e. customized
+   * It's true only if user has made changes to the suggested field value.
    */
   isCustomized: boolean;
   /**
@@ -97,6 +104,8 @@ export function FieldUpgradeContextProvider({
 
   invariant(fieldDiff, `Field diff is not found for ${fieldName}.`);
 
+  const finalDiffableRule = calcFinalDiffableRule(ruleUpgradeState);
+
   const contextValue: FieldUpgradeContextType = useMemo(
     () => ({
       fieldName,
@@ -104,9 +113,17 @@ export function FieldUpgradeContextProvider({
       hasConflict:
         fieldUpgradeState === FieldUpgradeStateEnum.SolvableConflict ||
         fieldUpgradeState === FieldUpgradeStateEnum.NonSolvableConflict,
+      /*
+        Initially, we prefill the resolved value with the merged version.
+        If the current resolved value differs from the merged version, it indicates that the user has modified the suggestion.
+      */
+      hasResolvedValueDifferentFromSuggested: !isEqual(
+        fieldDiff.merged_version,
+        finalDiffableRule[fieldName]
+      ),
       isCustomized: calcIsCustomized(fieldDiff),
       fieldDiff,
-      finalDiffableRule: calcFinalDiffableRule(ruleUpgradeState),
+      finalDiffableRule,
       rightSideMode: editing ? FieldFinalSideMode.Edit : FieldFinalSideMode.Readonly,
       setRuleFieldResolvedValue,
       setReadOnlyMode,
@@ -116,7 +133,7 @@ export function FieldUpgradeContextProvider({
       fieldName,
       fieldUpgradeState,
       fieldDiff,
-      ruleUpgradeState,
+      finalDiffableRule,
       editing,
       setRuleFieldResolvedValue,
       setReadOnlyMode,

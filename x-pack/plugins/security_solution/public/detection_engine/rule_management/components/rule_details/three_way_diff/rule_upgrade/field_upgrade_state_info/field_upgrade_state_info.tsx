@@ -28,6 +28,13 @@ export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JS
           description: i18n.NO_UPDATE_DESCRIPTION,
         };
 
+      case FieldUpgradeStateEnum.SameUpdate:
+        return {
+          color: 'success',
+          title: i18n.SAME_UPDATE,
+          description: i18n.SAME_UPDATE_DESCRIPTION,
+        };
+
       case FieldUpgradeStateEnum.NoConflict:
         return {
           color: 'success',
