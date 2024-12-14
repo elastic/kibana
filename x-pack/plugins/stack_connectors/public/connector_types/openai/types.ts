@@ -18,6 +18,7 @@ export interface ActionParams {
 export interface Config {
   apiProvider: OpenAiProviderType;
   apiUrl: string;
+  defaultModel?: string;
 }
 
 export interface Secrets {
