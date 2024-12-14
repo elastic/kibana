@@ -56,9 +56,7 @@
     "@kbn/dashboard-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/react-hooks",
-    "@kbn/observability-utils-common",
     "@kbn/observability-utils-browser",
-    "@kbn/observability-utils-server",
     "@kbn/kibana-utils-plugin",
     "@kbn/dataset-quality-plugin"
   ]
