@@ -361,7 +361,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('is resilient to invalid sources', async () => {
+    it('is resilient to partially valid sources', async () => {
       await createEntityTypeDefinition(supertest, {
         type: { id: 'chumble', display_name: 'chumble' },
       });
@@ -414,6 +414,47 @@ export default function ({ getService }: FtrProviderContext) {
         },
         errors: [
           'Mandatory fields [service.name] are not mapped for source [source: invalid-source-with-chumbles, type: chumble] with index patterns [index-2-with-chumbles]',
+        ],
+      });
+    });
+
+    it('is resilient to no valid sources', async () => {
+      await createEntityTypeDefinition(supertest, {
+        type: { id: 'chumble', display_name: 'chumble' },
+      });
+      await Promise.all([
+        createEntitySourceDefinition(supertest, {
+          source: {
+            id: 'source1-with-chumbles',
+            type_id: 'chumble',
+            index_patterns: ['index-1-with-chumbles'],
+            identity_fields: ['service.name'],
+            metadata_fields: [],
+            filters: [],
+          },
+        }),
+        createEntitySourceDefinition(supertest, {
+          source: {
+            id: 'source2-with-chumbles',
+            type_id: 'chumble',
+            index_patterns: ['index-2-with-chumbles'],
+            identity_fields: ['service.name'],
+            metadata_fields: [],
+            filters: [],
+          },
+        }),
+      ]);
+
+      const result = await countEntities(supertest, {}, 200);
+
+      expect(result).toEqual({
+        total: 0,
+        types: {
+          chumble: 0,
+        },
+        errors: [
+          'No index found for source [source: source1-with-chumbles, type: chumble] with index patterns [index-1-with-chumbles]',
+          'No index found for source [source: source2-with-chumbles, type: chumble] with index patterns [index-2-with-chumbles]',
         ],
       });
     });
