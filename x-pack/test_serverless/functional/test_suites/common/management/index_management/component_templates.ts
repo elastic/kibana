@@ -115,6 +115,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
           kibana: [
             {
+              base: ['all'],
               feature: {
                 advancedSettings: ['read'],
               },
