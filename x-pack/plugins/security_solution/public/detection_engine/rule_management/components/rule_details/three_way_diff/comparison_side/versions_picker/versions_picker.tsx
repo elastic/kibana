@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
-import { isEqual } from 'lodash';
-import usePrevious from 'react-use/lib/usePrevious';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/css';
 import { EuiSelect } from '@elastic/eui';
 import { getOptionDetails } from '../utils';
 import * as i18n from './translations';
 
-export enum VersionsPickerOption {
+export enum VersionsPickerOptionEnum {
   MyChanges = 'MY_CHANGES',
   MyOriginalChanges = 'MY_ORIGINAL_CHANGES',
   UpdateFromElastic = 'UPDATE_FROM_ELASTIC',
@@ -21,10 +19,9 @@ export enum VersionsPickerOption {
 }
 
 interface VersionsPickerProps {
-  options: VersionsPickerOption[];
-  selectedOption: VersionsPickerOption;
-  onChange: (selectedOption: VersionsPickerOption) => void;
-  resolvedValue: unknown;
+  options: VersionsPickerOptionEnum[];
+  selectedOption: VersionsPickerOptionEnum;
+  onChange: (selectedOption: VersionsPickerOptionEnum) => void;
   hasResolvedValueDifferentFromSuggested: boolean;
 }
 
@@ -32,7 +29,6 @@ export function VersionsPicker({
   options,
   selectedOption,
   onChange,
-  resolvedValue,
   hasResolvedValueDifferentFromSuggested,
 }: VersionsPickerProps) {
   const euiSelectOptions = options.map((option) => {
@@ -50,27 +46,10 @@ export function VersionsPicker({
 
   const handleChange = useCallback(
     (changeEvent: React.ChangeEvent<HTMLSelectElement>) => {
-      onChange(changeEvent.target.value as VersionsPickerOption);
+      onChange(changeEvent.target.value as VersionsPickerOptionEnum);
     },
     [onChange]
   );
-
-  /* Change selected option to "My changes" if user has modified resolved value */
-  const prevResolvedValue = usePrevious(resolvedValue);
-  useEffect(() => {
-    if (
-      selectedOption !== VersionsPickerOption.MyChanges &&
-      !isEqual(prevResolvedValue, resolvedValue)
-    ) {
-      onChange(VersionsPickerOption.MyChanges);
-    }
-  }, [
-    hasResolvedValueDifferentFromSuggested,
-    onChange,
-    selectedOption,
-    prevResolvedValue,
-    resolvedValue,
-  ]);
 
   return (
     <EuiSelect

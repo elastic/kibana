@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { VersionsPicker, VersionsPickerOption } from './versions_picker';
+import { VersionsPicker, VersionsPickerOptionEnum } from './versions_picker';
 
 export default {
   component: VersionsPicker,
@@ -14,15 +14,14 @@ export default {
 };
 
 export const Default = () => {
-  const options = [VersionsPickerOption.UpdateFromElastic, VersionsPickerOption.MyChanges];
-  const [selectedOption, setSelectedOption] = useState<VersionsPickerOption>(options[0]);
+  const options = [VersionsPickerOptionEnum.MyChanges, VersionsPickerOptionEnum.UpdateFromElastic];
+  const [selectedOption, setSelectedOption] = useState<VersionsPickerOptionEnum>(options[0]);
 
   return (
     <VersionsPicker
       options={options}
       selectedOption={selectedOption}
       onChange={setSelectedOption}
-      resolvedValue={{}}
       hasResolvedValueDifferentFromSuggested={false}
     />
   );

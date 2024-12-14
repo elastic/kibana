@@ -12,7 +12,7 @@ import {
   type ThreeWayDiff,
   ThreeWayDiffConflict,
 } from '../../../../../../../common/api/detection_engine';
-import { VersionsPickerOption } from './versions_picker/versions_picker';
+import { VersionsPickerOptionEnum } from './versions_picker/versions_picker';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import * as i18n from './translations';
 
@@ -61,31 +61,31 @@ interface OptionDetails {
  * Returns the title and description for a given versions picker option.
  */
 export function getOptionDetails(
-  option: VersionsPickerOption,
+  option: VersionsPickerOptionEnum,
   hasResolvedValueDifferentFromSuggested: boolean
 ): OptionDetails {
   switch (option) {
-    case VersionsPickerOption.MyChanges:
+    case VersionsPickerOptionEnum.MyChanges:
       return hasResolvedValueDifferentFromSuggested
         ? {
             title: i18n.MY_CHANGES_TITLE,
-            description: i18n.MY_CHANGES_FINAL_UPDATE_ONLY_EXPLANATION,
+            description: i18n.MY_CHANGES_IN_RULE_UPGRADE_WORKFLOW_EXPLANATION,
           }
         : {
             title: i18n.MY_CHANGES_TITLE,
             description: i18n.MY_CHANGES_EXPLANATION,
           };
-    case VersionsPickerOption.MyOriginalChanges:
+    case VersionsPickerOptionEnum.MyOriginalChanges:
       return {
         title: i18n.MY_ORIGINAL_CHANGES_TITLE,
         description: i18n.MY_ORIGINAL_CHANGES_EXPLANATION,
       };
-    case VersionsPickerOption.UpdateFromElastic:
+    case VersionsPickerOptionEnum.UpdateFromElastic:
       return {
         title: i18n.UPDATE_FROM_ELASTIC_TITLE,
         description: i18n.UPDATE_FROM_ELASTIC_EXPLANATION,
       };
-    case VersionsPickerOption.Merged:
+    case VersionsPickerOptionEnum.Merged:
       return {
         title: i18n.MERGED_CHANGES_TITLE,
         description: i18n.MERGED_CHANGES_EXPLANATION,
@@ -99,17 +99,17 @@ export function getOptionDetails(
  * Returns the versions to be compared based on the selected versions picker option.
  */
 export function getVersionsForComparison(
-  selectedOption: VersionsPickerOption,
+  selectedOption: VersionsPickerOptionEnum,
   hasBaseVersion: boolean
 ): [Version, Version] {
   switch (selectedOption) {
-    case VersionsPickerOption.MyChanges:
+    case VersionsPickerOptionEnum.MyChanges:
       return hasBaseVersion ? [Version.Base, Version.Final] : [Version.Current, Version.Final];
-    case VersionsPickerOption.MyOriginalChanges:
+    case VersionsPickerOptionEnum.MyOriginalChanges:
       return [Version.Base, Version.Current];
-    case VersionsPickerOption.UpdateFromElastic:
+    case VersionsPickerOptionEnum.UpdateFromElastic:
       return hasBaseVersion ? [Version.Base, Version.Target] : [Version.Current, Version.Target];
-    case VersionsPickerOption.Merged:
+    case VersionsPickerOptionEnum.Merged:
       return [Version.Base, Version.Target];
     default:
       return assertUnreachable(selectedOption);
@@ -123,48 +123,53 @@ export const getComparisonOptionsForDiffOutcome = (
   diffOutcome: ThreeWayDiffOutcome,
   conflict: ThreeWayDiffConflict,
   hasResolvedValueDifferentFromSuggested: boolean
-): VersionsPickerOption[] => {
+): VersionsPickerOptionEnum[] => {
   switch (diffOutcome) {
     case ThreeWayDiffOutcome.StockValueCanUpdate: {
-      const options = [VersionsPickerOption.UpdateFromElastic];
+      const options = [];
 
       if (hasResolvedValueDifferentFromSuggested) {
-        options.push(VersionsPickerOption.MyChanges);
+        options.push(VersionsPickerOptionEnum.MyChanges);
       }
+      options.push(VersionsPickerOptionEnum.UpdateFromElastic);
 
       return options;
     }
     case ThreeWayDiffOutcome.CustomizedValueNoUpdate:
-      return [VersionsPickerOption.MyChanges];
+      return [VersionsPickerOptionEnum.MyChanges];
     case ThreeWayDiffOutcome.CustomizedValueSameUpdate:
-      return [VersionsPickerOption.MyChanges, VersionsPickerOption.UpdateFromElastic];
+      return [VersionsPickerOptionEnum.MyChanges, VersionsPickerOptionEnum.UpdateFromElastic];
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
       if (conflict === ThreeWayDiffConflict.SOLVABLE) {
         return [
           hasResolvedValueDifferentFromSuggested
-            ? VersionsPickerOption.MyChanges
-            : VersionsPickerOption.Merged,
-          VersionsPickerOption.UpdateFromElastic,
-          VersionsPickerOption.MyOriginalChanges,
+            ? VersionsPickerOptionEnum.MyChanges
+            : VersionsPickerOptionEnum.Merged,
+          VersionsPickerOptionEnum.UpdateFromElastic,
+          VersionsPickerOptionEnum.MyOriginalChanges,
         ];
       }
 
       if (conflict === ThreeWayDiffConflict.NON_SOLVABLE) {
-        const options = [VersionsPickerOption.MyChanges, VersionsPickerOption.UpdateFromElastic];
+        const options = [
+          VersionsPickerOptionEnum.MyChanges,
+          VersionsPickerOptionEnum.UpdateFromElastic,
+        ];
 
         if (hasResolvedValueDifferentFromSuggested) {
-          options.push(VersionsPickerOption.MyOriginalChanges);
+          options.push(VersionsPickerOptionEnum.MyOriginalChanges);
         }
 
         return options;
       }
     }
     case ThreeWayDiffOutcome.MissingBaseCanUpdate: {
-      const options = [VersionsPickerOption.UpdateFromElastic];
+      const options = [];
 
       if (hasResolvedValueDifferentFromSuggested) {
-        options.push(VersionsPickerOption.MyChanges);
+        options.push(VersionsPickerOptionEnum.MyChanges);
       }
+      options.push(VersionsPickerOptionEnum.UpdateFromElastic);
 
       return options;
     }

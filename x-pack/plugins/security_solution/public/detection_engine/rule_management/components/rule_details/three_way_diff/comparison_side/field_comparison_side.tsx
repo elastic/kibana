@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import type { VersionsPickerOption } from './versions_picker/versions_picker';
-import { VersionsPicker } from './versions_picker/versions_picker';
+import { isEqual } from 'lodash';
+import usePrevious from 'react-use/lib/usePrevious';
+import { VersionsPicker, VersionsPickerOptionEnum } from './versions_picker/versions_picker';
 import { FieldUpgradeSideHeader } from '../field_upgrade_side_header';
 import { useFieldUpgradeContext } from '../rule_upgrade/field_upgrade_context';
 import {
@@ -31,7 +32,7 @@ export function FieldComparisonSide(): JSX.Element {
     fieldDiff.conflict,
     hasResolvedValueDifferentFromSuggested
   );
-  const [selectedOption, setSelectedOption] = useState<VersionsPickerOption>(options[0]);
+  const [selectedOption, setSelectedOption] = useState<VersionsPickerOptionEnum>(options[0]);
 
   const [oldVersionType, newVersionType] = getVersionsForComparison(
     selectedOption,
@@ -42,6 +43,17 @@ export function FieldComparisonSide(): JSX.Element {
   const newFieldValue = pickFieldValueForVersion(newVersionType, fieldDiff, resolvedValue);
 
   const subfieldChanges = getSubfieldChanges(fieldName, oldFieldValue, newFieldValue);
+
+  /* Change selected option to "My changes" if user has modified resolved value */
+  const prevResolvedValue = usePrevious(resolvedValue);
+  useEffect(() => {
+    if (
+      selectedOption !== VersionsPickerOptionEnum.MyChanges &&
+      !isEqual(prevResolvedValue, resolvedValue)
+    ) {
+      setSelectedOption(VersionsPickerOptionEnum.MyChanges);
+    }
+  }, [hasResolvedValueDifferentFromSuggested, selectedOption, prevResolvedValue, resolvedValue]);
 
   return (
     <>
@@ -60,7 +72,6 @@ export function FieldComparisonSide(): JSX.Element {
               options={options}
               selectedOption={selectedOption}
               onChange={setSelectedOption}
-              resolvedValue={resolvedValue}
               hasResolvedValueDifferentFromSuggested={hasResolvedValueDifferentFromSuggested}
             />
           </EuiFlexItem>

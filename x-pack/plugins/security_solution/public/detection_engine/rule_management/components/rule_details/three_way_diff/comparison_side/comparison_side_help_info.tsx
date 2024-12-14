@@ -10,7 +10,7 @@ import useToggle from 'react-use/lib/useToggle';
 import { EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TITLE } from './translations';
-import type { VersionsPickerOption } from './versions_picker/versions_picker';
+import type { VersionsPickerOptionEnum } from './versions_picker/versions_picker';
 import { useFieldUpgradeContext } from '../rule_upgrade/field_upgrade_context';
 import { getOptionDetails } from './utils';
 
@@ -24,7 +24,7 @@ import { getOptionDetails } from './utils';
 const POPOVER_WIDTH = 320;
 
 interface ComparisonSideHelpInfoProps {
-  options: VersionsPickerOption[];
+  options: VersionsPickerOptionEnum[];
 }
 
 export function ComparisonSideHelpInfo({ options }: ComparisonSideHelpInfoProps): JSX.Element {

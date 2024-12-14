@@ -113,6 +113,10 @@ export function FieldUpgradeContextProvider({
       hasConflict:
         fieldUpgradeState === FieldUpgradeStateEnum.SolvableConflict ||
         fieldUpgradeState === FieldUpgradeStateEnum.NonSolvableConflict,
+      /*
+        Initially, we prefill the resolved value with the merged version.
+        If the current resolved value differs from the merged version, it indicates that the user has modified the suggestion.
+      */
       hasResolvedValueDifferentFromSuggested: !isEqual(
         fieldDiff.merged_version,
         finalDiffableRule[fieldName]

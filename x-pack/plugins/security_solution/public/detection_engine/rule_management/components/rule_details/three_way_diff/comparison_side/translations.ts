@@ -53,7 +53,7 @@ export const MY_CHANGES_EXPLANATION = i18n.translate(
   }
 );
 
-export const MY_CHANGES_FINAL_UPDATE_ONLY_EXPLANATION = i18n.translate(
+export const MY_CHANGES_IN_RULE_UPGRADE_WORKFLOW_EXPLANATION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.myChangesFinalUpdateOnlyExplanation',
   {
     defaultMessage: `view the changes you made in the {finalUpdateSectionLabel} section`,
