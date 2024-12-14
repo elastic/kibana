@@ -15,14 +15,12 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiBasicTable,
-  EuiBadge,
   EuiHealth,
 } from '@elastic/eui';
-import { Chart, BarSeries, Axis, Settings, Position, ScaleType } from '@elastic/charts';
+import { Chart, BarSeries, Settings, ScaleType } from '@elastic/charts';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { AssistantAvatar } from '@kbn/elastic-assistant/impl/assistant/assistant_avatar/assistant_avatar';
 import {
-  convertTranslationResultIntoColor,
   convertTranslationResultIntoText,
   statusToColorMap,
 } from '../../../../../../../siem_migrations/rules/utils/translation_results';
