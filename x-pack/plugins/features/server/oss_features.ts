@@ -344,7 +344,7 @@ export const buildOSSFeatures = ({
             all: ['query'],
             read: [],
           },
-          ui: ['saveQuery'],
+          ui: ['showQueries', 'saveQuery'],
           api: ['savedQuery:manage', 'savedQuery:read'],
         },
         read: {
@@ -352,7 +352,7 @@ export const buildOSSFeatures = ({
             all: [],
             read: ['query'],
           },
-          ui: [],
+          ui: ['showQueries'],
           api: ['savedQuery:read'],
         },
       },

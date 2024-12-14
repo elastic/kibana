@@ -77,6 +77,16 @@ describe('Querybar Menu component', () => {
       },
     };
     const services = {
+      application: {
+        ...startMock.application,
+        capabilities: {
+          ...startMock.application.capabilities,
+          savedQueryManagement: {
+            showQueries: true,
+            saveQuery: true,
+          },
+        },
+      },
       data: dataMock,
       storage: getStorage(storageValue),
       uiSettings: startMock.uiSettings,
