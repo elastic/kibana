@@ -18,6 +18,8 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
   const retryTimeout = 20 * 1000;
 
   describe('/api/telemetry/v2/config API Telemetry config', function () {
+    // see details: https://github.com/elastic/kibana/issues/204321
+    this.tags(['failsOnMKI']);
     before(async () => {
       supertestAdminWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
         withCommonHeaders: true,
