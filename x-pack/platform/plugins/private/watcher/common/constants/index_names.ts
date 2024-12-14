@@ -6,6 +6,7 @@
  */
 
 export const INDEX_NAMES: { [key: string]: string } = {
+  // to do should be able to remove this when complete
   WATCHES: '.watches',
   WATCHER_HISTORY: '.watcher-history-*',
 };
