@@ -114,6 +114,9 @@ module.exports = {
     // // conditionNames: ['require', 'node', 'module', 'import', 'default'],
     alias: {
       '@elastic/eui$': '@elastic/eui/optimize/es',
+      '@elastic/eui/lib/components/provider/nested$':
+        '@elastic/eui/optimize/es/components/provider/nested',
+      '@elastic/eui/lib/services/theme/warning$': '@elastic/eui/optimize/es/services/theme/warning',
       moment: MOMENT_SRC,
       // NOTE: Used to include react profiling on bundles
       // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4
