@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
   const browser = getService('browser');
-  const security = getService('security');
+  const samlAuth = getService('samlAuth');
   const testSubjects = getService('testSubjects');
   const es = getService('es');
 
@@ -21,7 +21,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Index component templates', function () {
     before(async () => {
-      await security.testUser.setRoles(['index_management_manage_index_templates']);
+      // await security.testUser.setRoles(['index_management_user']);
+      await pageObjects.svlCommonPage.loginAsAdmin();
+      // await security.testUser.setRoles(['index_management_manage_index_templates']);
     });
 
     beforeEach(async () => {
@@ -104,8 +106,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('no access', () => {
+      this.tags(['skipSvlOblt', 'skipMKI']);
       before(async () => {
-        await security.testUser.setRoles(['index_management_monitor_only']);
+        await samlAuth.setCustomRole({
+          elasticsearch: {
+            cluster: ['monitor'],
+            indices: [{ names: ['*'], privileges: ['all'] }],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await pageObjects.svlCommonPage.loginWithCustomRole();
         await pageObjects.common.navigateToApp('indexManagement');
         await pageObjects.header.waitUntilLoadingHasFinished();
       });
