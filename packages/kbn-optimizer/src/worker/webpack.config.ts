@@ -96,7 +96,7 @@ export function getWebpackConfig(
         context: worker.repoRoot,
         manifest: DLL_MANIFEST,
       }),
-      ...(worker.profileWebpack
+      ...((worker.profileWebpack
         ? [
             new EmitStatsPlugin(bundle),
             new BundleAnalyzerPlugin({
@@ -111,7 +111,7 @@ export function getWebpackConfig(
               statsOptions: STATS_OPTIONS_DEFAULT_USEFUL_FILTER,
             }),
           ]
-        : []),
+        : []) as any),
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
     ],
 
