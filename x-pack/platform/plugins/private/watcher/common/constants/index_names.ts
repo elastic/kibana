@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const INDEX_NAMES: { [key: string]: string } = {
-  // to do should be able to remove this when complete
-  WATCHES: '.watches',
+export const INDEX_NAMES = {
   WATCHER_HISTORY: '.watcher-history-*',
 };
