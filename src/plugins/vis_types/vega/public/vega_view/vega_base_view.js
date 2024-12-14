@@ -22,8 +22,6 @@ import { getEnableExternalUrls, getDataViews } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { normalizeDate, normalizeString, normalizeObject } from './utils';
 
-scheme('elastic', euiPaletteColorBlind());
-
 // Vega's extension functions are global. When called,
 // we forward execution to the instance-specific handler
 // This functions must be declared in the VegaBaseView class
@@ -309,6 +307,8 @@ export class VegaBaseView {
     if (this._view) {
       this._view.finalize();
     }
+
+    scheme('elastic', euiPaletteColorBlind());
 
     this._view = view;
 
