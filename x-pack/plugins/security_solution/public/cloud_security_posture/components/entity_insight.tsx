@@ -47,7 +47,9 @@ export const EntityInsight = <T,>({
     value,
     to,
     from,
-    queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
+    queryId: isPreviewMode
+      ? `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}PREVIEW_MODE_TRUE`
+      : `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}PREVIEW_MODE_FALSE`,
   });
 
   if (showAlertsPreview) {
