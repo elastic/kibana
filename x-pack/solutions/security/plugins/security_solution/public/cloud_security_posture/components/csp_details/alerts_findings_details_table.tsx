@@ -78,7 +78,7 @@ export const AlertsDetailsTable = memo(
 
     const [sortField, setSortField] = useState<
       'id' | 'ruleName' | 'severity' | 'status' | 'index' | 'ruleUuid'
-    >('ruleName');
+    >('severity');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
     const formatName = (name: string) => {

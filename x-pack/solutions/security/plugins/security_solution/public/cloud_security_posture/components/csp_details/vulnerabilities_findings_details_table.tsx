@@ -55,7 +55,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
 
   const [sortField, setSortField] = useState<
     'id' | 'score' | 'severity' | 'package' | 'vulnerability' | 'resource'
-  >('id');
+  >('severity');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const obj: { [key: string]: string } = {};
