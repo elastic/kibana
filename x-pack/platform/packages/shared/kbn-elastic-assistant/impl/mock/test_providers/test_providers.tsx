@@ -10,7 +10,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { euiDarkVars } from '@kbn/ui-theme';
 import React from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
+
 import { ThemeProvider } from 'styled-components';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
