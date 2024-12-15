@@ -376,10 +376,10 @@ export abstract class InferenceBase<TInferResponse> {
     };
   }
 
-  // @ts-expect-error error does not exist in type
   protected getDocFromResponse({ doc, error }: estypes.IngestSimulatePipelineSimulation) {
     if (doc === undefined) {
       if (error) {
+        // @ts-expect-error Error is now typed in estypes. However, I doubt that it doesn't get the HTTP wrapper expected.
         this.setFinishedWithErrors(error);
         throw Error(error.reason);
       }

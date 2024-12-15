@@ -2808,20 +2808,20 @@
             "path": "x-pack/platform/plugins/private/data_visualizer/common/types/index.ts"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
-          },
-          {
             "plugin": "dashboardEnhanced",
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
           },
           {
             "plugin": "dashboardEnhanced",
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
           },
           {
             "plugin": "graph",
