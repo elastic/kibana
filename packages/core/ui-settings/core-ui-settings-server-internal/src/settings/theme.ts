@@ -110,9 +110,7 @@ export const getThemeSettings = (
         }),
       },
       value: 'amsterdam',
-      readonly: Object.hasOwn(options, 'isThemeSwitcherEnabled')
-        ? !options.isThemeSwitcherEnabled
-        : true,
+      readonly: false,
       requiresPageReload: true,
       schema: schema.oneOf([
         schema.literal('amsterdam'),
