@@ -43,6 +43,7 @@ import {
   SUMMARY_TABLE_MIN_WIDTH,
 } from './common';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
+import { useRiskSeverityColors } from '../../common/utils';
 
 export interface RiskSummaryProps<T extends RiskScoreEntity> {
   riskScoreData: RiskScoreState<T>;
@@ -64,7 +65,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
   const riskData = data && data.length > 0 ? data[0] : undefined;
   const entityData = getEntityData(riskData);
   const { euiTheme } = useEuiTheme();
-
+  const riskColors = useRiskSeverityColors();
   const lensAttributes = useMemo(() => {
     const entityName = entityData?.name ?? '';
     const fieldName = isUserRiskData(riskData) ? 'user.name' : 'host.name';
@@ -74,8 +75,9 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
       query: `${fieldName}: ${entityName}`,
       spaceId: 'default',
       riskEntity: isUserRiskData(riskData) ? RiskScoreEntity.user : RiskScoreEntity.host,
+      riskColors,
     });
-  }, [entityData?.name, entityData?.risk?.calculated_level, riskData]);
+  }, [entityData?.name, entityData?.risk?.calculated_level, riskData, riskColors]);
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
   const rows = useMemo(() => getItems(entityData), [entityData]);
