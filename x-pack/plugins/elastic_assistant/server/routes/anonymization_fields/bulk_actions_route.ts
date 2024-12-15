@@ -203,7 +203,6 @@ export const bulkActionAnonymizationFieldsRoute = (
             docs_created: docsCreated,
             docs_updated: docsUpdated,
             docs_deleted: docsDeleted,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           } = await writer!.bulk({
             documentsToCreate: body.create?.map((doc) =>
               transformToCreateScheme(authenticatedUser, createdAt, doc)

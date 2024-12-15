@@ -20,7 +20,6 @@ describe('getKbResource', () => {
       { resource?: string | undefined },
       unknown,
       unknown,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       any
     >;
 
@@ -34,7 +33,6 @@ describe('getKbResource', () => {
       { resource?: string | undefined },
       unknown,
       unknown,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       any
     >;
 
@@ -48,7 +46,6 @@ describe('getKbResource', () => {
       { resource?: string | undefined },
       unknown,
       unknown,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       any
     >;
 

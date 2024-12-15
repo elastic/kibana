@@ -28,7 +28,7 @@ describe('Post Evaluate Route', () => {
   const { clients, context } = requestContextMock.createTools();
   const server: ReturnType<typeof serverMock.create> = serverMock.create();
   clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   (server as any).responseMock.notFound = jest.fn().mockReturnValue({
     status: 404,
     payload: 'Not Found',

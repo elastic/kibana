@@ -30,7 +30,6 @@ export const retryUntil = async (
 ): Promise<boolean> => {
   await delay(wait);
   while (count > 0) {
-    // eslint-disable-next-line no-param-reassign
     count--;
 
     if (await fn()) return true;

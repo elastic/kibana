@@ -50,7 +50,6 @@ export const transformESSearchToPrompts = (
   return response.hits.hits
     .filter((hit) => hit._source !== undefined)
     .map((hit) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const promptSchema = hit._source!;
       const prompt: PromptResponse = {
         timestamp: promptSchema['@timestamp'],
@@ -65,7 +64,7 @@ export const transformESSearchToPrompts = (
         isNewConversationDefault: promptSchema.is_new_conversation_default,
         updatedAt: promptSchema.updated_at,
         namespace: promptSchema.namespace,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         id: hit._id!,
         name: promptSchema.name,
         promptType: promptSchema.prompt_type as unknown as PromptType,

@@ -224,7 +224,7 @@ export interface LangChainExecuteParams {
     Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
   >;
   actionsClient: PublicMethodsOf<ActionsClient>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   request: KibanaRequest<unknown, unknown, any>;
   logger: Logger;
   onLlmResponse?: (
