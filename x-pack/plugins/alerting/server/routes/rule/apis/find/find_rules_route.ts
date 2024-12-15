@@ -18,6 +18,7 @@ import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../
 import { verifyAccessAndContext } from '../../../lib';
 import { trackLegacyTerminology } from '../../../lib/track_legacy_terminology';
 import { transformFindRulesBodyV1, transformFindRulesResponseV1 } from './transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const findRulesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -27,6 +28,7 @@ export const findRulesRoute = (
   router.get(
     {
       path: `${BASE_ALERTING_API_PATH}/rules/_find`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'public',
         summary: 'Get information about rules',
