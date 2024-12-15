@@ -6,26 +6,26 @@
  */
 import { IRouter } from '@kbn/core/server';
 import {
-  findQuerySchemaV1,
-  FindGapsRequestQueryV1,
-  FindGapsResponseV1,
-} from '../../../../../common/routes/gaps/apis/find';
+  getRulesWithGapQuerySchemaV1,
+  GetRulesWithGapQueryV1,
+  GetRulesWithGapResponseV1,
+} from '../../../../../common/routes/gaps/apis/get_rules_with_gaps';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import {
   AlertingRequestHandlerContext,
-  INTERNAL_ALERTING_GAPS_FIND_API_PATH,
+  INTERNAL_ALERTING_GAPS_GET_RULES_API_PATH,
 } from '../../../../types';
 
-export const findGapsRoute = (
+export const getRulesWithGapsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
-  router.post(
+  router.get(
     {
-      path: `${INTERNAL_ALERTING_GAPS_FIND_API_PATH}`,
+      path: `${INTERNAL_ALERTING_GAPS_GET_RULES_API_PATH}`,
       validate: {
-        query: findQuerySchemaV1,
+        query: getRulesWithGapQuerySchemaV1,
       },
       options: {
         access: 'internal',
@@ -34,11 +34,11 @@ export const findGapsRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const query: FindGapsRequestQueryV1 = req.query;
+        const query: GetRulesWithGapQueryV1 = req.query;
 
-        const result = await rulesClient.findGaps(transformRequestV1(query));
-        const response: FindGapsResponseV1 = {
-          body: transformResponseV1(result),
+        const result = await rulesClient.getRulesWithGaps(query);
+        const response: GetRulesWithGapResponseV1 = {
+          body: result,
         };
         return res.ok(response);
       })

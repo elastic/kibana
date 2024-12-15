@@ -27,16 +27,20 @@ export const findGaps = async ({
   page: number;
   perPage: number;
 }> => {
-  const { ruleIds, start, end, page, perPage, statuses } = params;
+  const { ruleId, start, end, page, perPage, statuses } = params;
   try {
     const statusesFilter = statuses
       ?.map((status) => `kibana.alert.rule.gap.status : ${status}`)
       .join(' OR ');
+    const rangeFilter =
+      end && start
+        ? `AND (kibana.alert.rule.gap.range <= "${end}" AND kibana.alert.rule.gap.range >= "${start}")`
+        : '';
     const gapsResponse = await eventLogClient.findEventsBySavedObjectIds(
       RULE_SAVED_OBJECT_TYPE,
-      ruleIds,
+      [ruleId],
       {
-        filter: `event.action: gap AND event.provider: alerting AND (kibana.alert.rule.gap.range <= "${end}" AND kibana.alert.rule.gap.range >= "${start}") ${
+        filter: `event.action: gap AND event.provider: alerting ${rangeFilter} ${
           statusesFilter ? `AND (${statusesFilter})` : ''
         }`,
         sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
@@ -52,7 +56,7 @@ export const findGaps = async ({
       perPage: gapsResponse.per_page,
     };
   } catch (err) {
-    logger.error(`Failed to find gaps for rule ${ruleIds.toString()}: ${err.message}`);
+    logger.error(`Failed to find gaps for rule ${ruleId.toString()}: ${err.message}`);
     throw err;
   }
 };
@@ -65,13 +69,13 @@ export const findAllGaps = async ({
   eventLogClient: IEventLogClient;
   logger: Logger;
   params: {
-    ruleIds: string[];
+    ruleId: string;
     start: Date;
     end: Date;
     statuses?: GapStatus[];
   };
 }): Promise<Gap[]> => {
-  const { ruleIds, start, end, statuses } = params;
+  const { ruleId, start, end, statuses } = params;
   const allGaps: Gap[] = [];
   let currentPage = 1;
   const perPage = 10000;
@@ -81,7 +85,7 @@ export const findAllGaps = async ({
       eventLogClient,
       logger,
       params: {
-        ruleIds,
+        ruleId,
         start: start.toISOString(),
         end: end.toISOString(),
         page: currentPage,

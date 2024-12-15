@@ -9,22 +9,17 @@ import Boom from '@hapi/boom';
 
 import { RulesClientContext } from '../../../../rules_client';
 
-import { findGapsByRuleId } from '../../../../lib/rule_gaps/find_gaps';
-
-interface FindGapsParams {
-  ruleId: string;
-}
+import { findGaps as _findGaps } from '../../../../lib/rule_gaps/find_gaps';
+import { FindGapsParams } from '../../../../lib/rule_gaps/types';
 
 export async function findGaps(context: RulesClientContext, params: FindGapsParams) {
   try {
     const eventLogClient = await context.getEventLogClient();
-    const gaps = await findGapsByRuleId({
-      ruleId: params.ruleId,
+    const gaps = await _findGaps({
+      params,
       eventLogClient,
       logger: context.logger,
     });
-
-    // transform gaps
 
     return gaps;
   } catch (err) {

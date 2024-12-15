@@ -7,7 +7,7 @@
 
 import { Subject } from 'rxjs';
 import { bufferTime, filter as rxFilter, concatMap } from 'rxjs';
-import { reject, isUndefined, isNumber, pick, isEmpty, get, mergeWith } from 'lodash';
+import { reject, isUndefined, isNumber, pick, isEmpty, get } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import util from 'util';
@@ -23,10 +23,17 @@ export const EVENT_BUFFER_LENGTH = 100;
 
 export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
 
+export interface DocMeta {
+  _id: string;
+  _index: string;
+  _seq_no: number;
+  _primary_term: number;
+}
+
 export interface Doc {
   index: string;
   body: IEvent;
-  meta?: {};
+  meta?: DocMeta;
 }
 
 type Wait = () => Promise<boolean>;
@@ -100,7 +107,12 @@ type AliasAny = any;
 const LEGACY_ID_CUTOFF_VERSION = '8.0.0';
 
 export class ClusterClientAdapter<
-  TDoc extends { body: AliasAny; index: string; id?: string } = Doc
+  TDoc extends {
+    body: AliasAny;
+    index: string;
+    id?: string;
+    meta?: DocMeta;
+  } = Doc
 > {
   private readonly logger: Logger;
   private readonly elasticsearchClientPromise: Promise<ElasticsearchClient>;
@@ -142,12 +154,16 @@ export class ClusterClientAdapter<
   public async updateDocument(doc: Required<TDoc>) {
     const esClient = await this.elasticsearchClientPromise;
     try {
+      if (!doc.meta) {
+        return;
+      }
       const result = await esClient.update({
         doc: doc.body,
         id: doc.meta._id,
         index: doc.meta._index,
         if_primary_term: doc.meta._primary_term,
         if_seq_no: doc.meta._seq_no,
+        refresh: 'wait_for',
       });
     } catch (e) {
       this.logger.error(`error update event: "${e.message}"; docs: ${JSON.stringify(doc)}`);
@@ -172,47 +188,19 @@ export class ClusterClientAdapter<
 
     const bulkBody: Array<Record<string, unknown>> = [];
 
-    const docsToUpdate = docs.filter((doc) => doc.id && doc.body);
     const docsToCreate = docs.filter((doc) => !doc.id);
 
     for (const doc of docsToCreate) {
       if (doc.body === undefined) continue;
 
-      bulkBody.push({ create: { _index: this.esNames.dataStream } });
+      bulkBody.push({ create: {} });
       bulkBody.push(doc.body);
     }
 
     try {
       const esClient = await this.elasticsearchClientPromise;
-
-      // for (const docToUpdate of docsToUpdate) {
-      //   bulkBody.push({
-      //     update: {
-      //       _index: docToUpdate.meta._index,
-      //       _id: docToUpdate.meta._id,
-      //       if_seq_no: docToUpdate.meta._seq_no,
-      //       if_primary_term: docToUpdate.meta._primary_term,
-      //     },
-      //   });
-
-      //   // const updatedDoc = mergeWith(
-      //   //   {},
-      //   //   originalDoc._source,
-      //   //   fieldsToUpdate.body,
-      //   //   (objValue, srcValue) => {
-      //   //     if (Array.isArray(srcValue)) {
-      //   //       return srcValue;
-      //   //     }
-      //   //   }
-      //   // );
-
-      //   // console.log('updatedDoc', JSON.stringify(updatedDoc));
-
-      //   bulkBody.push({ doc: docToUpdate.body });
-      // }
-
       const response = await esClient.bulk({
-        // index: this.esNames.dataStream,
+        index: this.esNames.dataStream,
         body: bulkBody,
       });
 

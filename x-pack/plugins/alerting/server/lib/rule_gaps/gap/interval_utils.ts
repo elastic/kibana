@@ -24,7 +24,7 @@ import { Interval, StringInterval } from '../types';
 export const getOverlap = (interval1: Interval, interval2: Interval): Interval | null => {
   const start = new Date(Math.max(interval1.gte.getTime(), interval2.gte.getTime()));
   const end = new Date(Math.min(interval1.lte.getTime(), interval2.lte.getTime()));
-  return start < end ? { gte: start, lte: end } : null;
+  return start <= end ? { gte: start, lte: end } : null;
 };
 
 /**
@@ -45,7 +45,9 @@ export const getOverlap = (interval1: Interval, interval2: Interval): Interval |
 export const mergeIntervals = (intervals: Interval[]): Interval[] => {
   if (!intervals.length) return [];
 
-  const sorted = [...intervals].sort((a, b) => a.gte.getTime() - b.gte.getTime());
+  const sorted = intervals
+    .map((interval) => ({ ...interval }))
+    .sort((a, b) => a.gte.getTime() - b.gte.getTime());
 
   return sorted.reduce((merged, current, index) => {
     if (index === 0) {
@@ -200,4 +202,24 @@ export const denormalizeInterval = (interval: Interval): StringInterval => {
     gte: interval.gte.toISOString(),
     lte: interval.lte.toISOString(),
   };
+};
+
+/**
+ * Clips an interval to ensure it falls within the given boundary range.
+ * If there's no overlap, returns null.
+ */
+export const clipInterval = (interval: Interval, boundary: Interval): Interval | null => {
+  const gte = interval.gte.getTime();
+  const lte = interval.lte.getTime();
+  const boundaryGte = boundary.gte.getTime();
+  const boundaryLte = boundary.lte.getTime();
+
+  const clippedGte = Math.max(gte, boundaryGte);
+  const clippedLte = Math.min(lte, boundaryLte);
+
+  if (clippedGte >= clippedLte) {
+    return null;
+  }
+
+  return { gte: new Date(clippedGte), lte: new Date(clippedLte) };
 };

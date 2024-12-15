@@ -72,7 +72,6 @@ import {
   processRunResults,
   clearExpiredSnoozes,
 } from './lib';
-import { getTotalUnfilledGapDuration } from '../lib/rule_gaps/get_total_unfilled_gap_duration';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -627,31 +626,11 @@ export class TaskRunner<
             );
           }
 
-          // TODO: it's not working yet
-          const unfiledGapDuration = await getTotalUnfilledGapDuration({
-            ruleId,
-            eventLog: this.context.eventLogger,
-            logger: this.logger,
-          });
-
-          const monitoring = {
-            ...this.ruleMonitoring.getMonitoring(),
-            run: {
-              ...this.ruleMonitoring.getMonitoring()?.run,
-              last_run: {
-                ...this.ruleMonitoring.getMonitoring()?.run?.last_run,
-                metrics: {
-                  ...this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics,
-                  // unfilled_gap_duration_ms: unfiledGapDuration.unfiled_gap_duration_ms,
-                },
-              },
-            },
-          };
           await this.updateRuleSavedObjectPostRun(ruleId, {
             executionStatus: ruleExecutionStatusToRaw(executionStatus),
             nextRun,
             lastRun: lastRunToRaw(lastRun),
-            monitoring,
+            monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
           });
         }
 

@@ -19,6 +19,7 @@ export type {
   IEventLogClient,
   QueryEventsBySavedObjectResult,
   AggregateEventsBySavedObjectResult,
+  DocMeta,
 } from './types';
 export { SAVED_OBJECT_REL_PRIMARY } from './types';
 

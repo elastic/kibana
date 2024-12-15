@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiConfirmModal, EuiEmptyPrompt, EuiProgress } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiConfirmModal,
+  EuiEmptyPrompt,
+  EuiProgress,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { Loader } from '../../../../common/components/loader';
@@ -38,6 +44,7 @@ import { useIsUpgradingSecurityPackages } from '../../../rule_management/logic/u
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
 import { BulkManualRuleRunLimitErrorModal } from './bulk_actions/bulk_manual_rule_run_limit_error_modal';
+import { RulesWithGapsOverviewPanel } from '../../../rule_gaps/components/rules_with_gaps_overview_panel';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -313,6 +320,13 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       )}
       {shouldShowRulesTable && (
         <>
+          {selectedTab === AllRulesTabs.monitoring && (
+            <>
+              <EuiSpacer />
+              <RulesWithGapsOverviewPanel />
+              <EuiSpacer />
+            </>
+          )}
           <RulesTableFilters />
           <RulesTableUtilityBar
             canBulkEdit={hasPermissions}

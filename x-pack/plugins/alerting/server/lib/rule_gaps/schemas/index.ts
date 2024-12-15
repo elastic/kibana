@@ -21,17 +21,16 @@ export const rangeSchema = schema.object({
 
 export const rangeListSchema = schema.arrayOf(rangeSchema);
 
-export const gapSchema = schema.object({
-  _id: schema.maybe(schema.string()),
+export const gapBaseSchema = schema.object({
   status: gapStatusSchema,
   range: rangeSchema,
-  inProgressIntervals: rangeListSchema,
-  filledIntervals: rangeListSchema,
-  unfilledIntervals: rangeListSchema,
-  totalGapDurationMs: schema.number(),
-  filledDurationMs: schema.number(),
-  unfilledDurationMs: schema.number(),
-  inProgressDurationMs: schema.number(),
+  in_progress_intervals: rangeListSchema,
+  filled_intervals: rangeListSchema,
+  unfilled_intervals: rangeListSchema,
+  total_gap_duration_ms: schema.number(),
+  filled_duration_ms: schema.number(),
+  unfilled_duration_ms: schema.number(),
+  in_progress_duration_ms: schema.number(),
 });
 
 export const findGapsParamsSchema = schema.object(
@@ -39,7 +38,7 @@ export const findGapsParamsSchema = schema.object(
     end: schema.maybe(schema.string()),
     page: schema.number({ defaultValue: 1, min: 1 }),
     perPage: schema.number({ defaultValue: 10, min: 0 }),
-    ruleIds: schema.arrayOf(schema.string()),
+    ruleId: schema.string(),
     start: schema.maybe(schema.string()),
     sortField: schema.maybe(schema.oneOf([schema.literal('@timestamp')])),
     sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
@@ -62,3 +61,8 @@ export const findGapsParamsSchema = schema.object(
     },
   }
 );
+
+export const findGapByIdParamsSchema = schema.object({
+  gapId: schema.string(),
+  ruleId: schema.string(),
+});

@@ -15,12 +15,14 @@ import { IEvent } from '../generated/schemas';
 import { AggregateOptionsType, FindOptionsType } from './event_log_client';
 import {
   AggregateEventsBySavedObjectResult,
+  DocMeta,
   QueryEventsBySavedObjectResult,
 } from './es/cluster_client_adapter';
 
 export type {
   QueryEventsBySavedObjectResult,
   AggregateEventsBySavedObjectResult,
+  DocMeta,
 } from './es/cluster_client_adapter';
 import { SavedObjectProvider } from './saved_object_provider_registry';
 
@@ -83,5 +85,5 @@ export interface IEventLogger {
   logEvent(properties: IEvent): void;
   startTiming(event: IEvent, startTime?: Date): void;
   stopTiming(event: IEvent): void;
-  updateEvent(meta: {}, event: IEvent): void;
+  updateEvent(meta: DocMeta, event: IEvent): Promise<void>;
 }

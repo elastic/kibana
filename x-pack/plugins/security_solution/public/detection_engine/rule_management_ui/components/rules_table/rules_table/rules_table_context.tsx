@@ -209,6 +209,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     enabled: savedFilter?.enabled,
     ruleExecutionStatus:
       savedFilter?.ruleExecutionStatus ?? DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
+    ruleIds: [],
   });
 
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
@@ -280,6 +281,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     }
   }, [selectedRuleIds, isRefreshOn]);
 
+  console.log('filterOptions', filterOptions);
   // Fetch rules
   const {
     data: { rules, total } = { rules: [], total: 0 },

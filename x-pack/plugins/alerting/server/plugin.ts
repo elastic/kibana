@@ -630,7 +630,7 @@ export class AlertingPlugin {
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
       uiSettings: core.uiSettings,
       usageCounter: this.usageCounter,
-      getEventLogClient: (spaceId: string) => plugins.eventLog.getClient(spaceId),
+      getEventLogClient: (request: KibanaRequest) => plugins.eventLog.getClient(request),
     });
 
     this.eventLogService!.registerSavedObjectProvider(RULE_SAVED_OBJECT_TYPE, (request) => {

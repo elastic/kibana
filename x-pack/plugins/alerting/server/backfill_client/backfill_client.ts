@@ -6,6 +6,7 @@
  */
 
 import {
+  ISavedObjectsRepository,
   Logger,
   SavedObject,
   SavedObjectReference,
@@ -22,6 +23,7 @@ import {
   TaskManagerStartContract,
   TaskPriority,
 } from '@kbn/task-manager-plugin/server';
+import { IEventLogger, IEventLogClient } from '@kbn/event-log-plugin/server';
 import { isNumber } from 'lodash';
 import {
   ScheduleBackfillError,
@@ -42,7 +44,7 @@ import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_o
 import { TaskRunnerFactory } from '../task_runner';
 import { RuleTypeRegistry } from '../types';
 import { createBackfillError } from './lib';
-import { updateGaps } from '../lib/rule_gaps/update_gaps';
+import { addInProgressIntervalsToGaps } from '../lib/rule_gaps/update/add_in_progress_intervals_to_gaps';
 
 export const BACKFILL_TASK_TYPE = 'ad_hoc_run-backfill';
 
@@ -60,6 +62,9 @@ interface BulkQueueOpts {
   ruleTypeRegistry: RuleTypeRegistry;
   spaceId: string;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  eventLogClient: IEventLogClient;
+  internalSavedObjectsRepository: ISavedObjectsRepository;
+  eventLogger: IEventLogger | undefined;
 }
 
 interface DeleteBackfillForRulesOpts {
@@ -234,33 +239,28 @@ export class BackfillClient {
       }
     });
 
-    if (adHocTasksToSchedule.length > 0) {
-      const taskManager = await this.taskManagerStartPromise;
-      await taskManager.bulkSchedule(adHocTasksToSchedule);
-    }
-
     try {
       // TODO: make it parallel
-
-      backfullsToSchedule.forEach((backfill) => {
-        console.log('backfill client update', JSON.stringify(backfill));
-        updateGaps({
-          ruleId: backfill.rule.id,
-          start: new Date(backfill.start),
-          end: backfill?.end ? new Date(backfill.end) : new Date(),
+      for (const backfill of backfullsToSchedule) {
+        await addInProgressIntervalsToGaps({
+          backfill,
           eventLogger,
           eventLogClient,
-          savedObjectsClient: internalSavedObjectsRepository,
+          savedObjectsRepository: internalSavedObjectsRepository,
           logger: this.logger,
-          needToFillGaps: false,
         });
-      });
+      }
     } catch {
       this.logger.warn(
         `Error updating gaps ƒor backfill jobs: ${backfullsToSchedule
           .map((backfill) => backfill.id)
           .join(', ')}`
       );
+    }
+
+    if (adHocTasksToSchedule.length > 0) {
+      const taskManager = await this.taskManagerStartPromise;
+      await taskManager.bulkSchedule(adHocTasksToSchedule);
     }
 
     return createSOResult;

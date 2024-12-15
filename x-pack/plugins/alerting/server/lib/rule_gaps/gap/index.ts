@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { GapStatus, gapStatus } from '../../../common/constants';
+import { DocMeta } from '@kbn/event-log-plugin/server/es/cluster_client_adapter';
+import { GapStatus, gapStatus } from '../../../../common/constants';
 
-import { Gap as GapType, Interval, StringInterval } from './types';
+import { Interval, StringInterval, GapBase } from '../types';
 
 import {
   mergeIntervals,
@@ -16,30 +17,21 @@ import {
   subtractIntervals,
   normalizeInterval,
   denormalizeInterval,
-} from './utils/intervals';
+  clipInterval,
+} from './interval_utils';
 
 interface GapConstructorParams {
   range: StringInterval;
   filledIntervals?: StringInterval[];
   inProgressIntervals?: StringInterval[];
-  meta?: {
-    _id: string;
-    _index: string;
-    _seq_no: string;
-    _primary_term: string;
-  };
+  meta?: DocMeta;
 }
 
 export class Gap {
   private _range: Interval;
   private _filledIntervals: Interval[];
   private _inProgressIntervals: Interval[];
-  private _meta?: {
-    _id: string;
-    _index: string;
-    _seq_no: string;
-    _primary_term: string;
-  };
+  private _meta?: DocMeta;
 
   constructor({
     range,
@@ -56,13 +48,27 @@ export class Gap {
   }
 
   public fillGap(interval: Interval): void {
-    this._filledIntervals = mergeIntervals([...this.filledIntervals, interval]);
+    const clipedInterval = clipInterval(interval, this.range);
+    if (clipedInterval === null) return;
+
+    const newFilledIntervals = mergeIntervals([...this.filledIntervals, clipedInterval]);
+    this._filledIntervals = newFilledIntervals;
+    const newInProgressIntervals = subtractAllIntervals(
+      this.inProgressIntervals,
+      newFilledIntervals
+    );
+    this._inProgressIntervals = newInProgressIntervals;
   }
 
-  public addInProgress(interval: StringInterval): void {
-    const normalized = normalizeInterval(interval);
-    const sanitized = subtractAllIntervals([normalized], this.filledIntervals);
-    this._inProgressIntervals = mergeIntervals([...this.inProgressIntervals, ...sanitized]);
+  public addInProgress(interval: Interval): void {
+    const clipedInterval = clipInterval(interval, this.range);
+    if (clipedInterval === null) return;
+
+    const inProgressIntervals = subtractAllIntervals([clipedInterval], this.filledIntervals);
+    this._inProgressIntervals = mergeIntervals([
+      ...this.inProgressIntervals,
+      ...inProgressIntervals,
+    ]);
   }
 
   public get range() {
@@ -111,11 +117,15 @@ export class Gap {
     }
   }
 
+  public resetInProgressIntervals(): void {
+    this._inProgressIntervals = [];
+  }
+
   public get meta() {
     return this._meta;
   }
 
-  public getState(): GapType {
+  public getState() {
     return {
       range: denormalizeInterval(this.range),
       filledIntervals: this.filledIntervals.map(denormalizeInterval),
@@ -132,7 +142,7 @@ export class Gap {
   /**
    * Returns the gap object for es
    */
-  public getEsObject() {
+  public getEsObject(): GapBase {
     return {
       range: denormalizeInterval(this.range),
       filled_intervals: this.filledIntervals.map(denormalizeInterval),

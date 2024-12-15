@@ -180,5 +180,5 @@ export interface TaskRunnerContext {
   supportsEphemeralTasks: boolean;
   uiSettings: UiSettingsServiceStart;
   usageCounter?: UsageCounter;
-  getEventLogClient: (spaceId: string) => IEventLogClient;
+  getEventLogClient: (request: KibanaRequest) => IEventLogClient;
 }

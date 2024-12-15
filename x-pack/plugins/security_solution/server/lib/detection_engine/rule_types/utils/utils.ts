@@ -69,7 +69,7 @@ import type {
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
 
-export const MAX_RULE_GAP_RATIO = 4;
+export const MAX_RULE_GAP_RATIO = 1;
 
 export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;

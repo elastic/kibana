@@ -15,6 +15,8 @@ import {
   AdHocRunAuditAction,
   adHocRunAuditEvent,
 } from '../../../../rules_client/common/audit_events';
+import { transformAdHocRunToBackfillResult } from '../../transforms';
+import { calculateInProgressIntervalsForGaps } from '../../../../lib/rule_gaps/update/caclculate_in_progress_intervals_for_gaps';
 
 export async function deleteBackfill(context: RulesClientContext, id: string): Promise<{}> {
   return await retryIfConflicts(
@@ -82,11 +84,35 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
       })
     );
 
-    // delete the saved object
-    const removeResult = await context.unsecuredSavedObjectsClient.delete(
+    const backfill = await context.unsecuredSavedObjectsClient.get<AdHocRunSO>(
       AD_HOC_RUN_SAVED_OBJECT_TYPE,
       id
     );
+
+    const backfillResult = transformAdHocRunToBackfillResult(backfill);
+
+    // delete the saved object
+    const removeResult = await context.unsecuredSavedObjectsClient.delete(
+      AD_HOC_RUN_SAVED_OBJECT_TYPE,
+      id,
+      {
+        refresh: 'wait_for',
+      }
+    );
+
+    if ('rule' in backfillResult) {
+      const eventLogClient = await context.getEventLogClient();
+
+      await calculateInProgressIntervalsForGaps({
+        ruleId: backfillResult.rule.id,
+        start: new Date(backfillResult.start),
+        end: backfillResult.end ? new Date(backfillResult.end) : new Date(),
+        savedObjectsRepository: context.internalSavedObjectsRepository,
+        logger: context.logger,
+        eventLogClient,
+        eventLogger: context.eventLogger,
+      });
+    }
 
     // remove the associated task
     await context.taskManager.removeIfExists(id);

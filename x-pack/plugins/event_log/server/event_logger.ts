@@ -23,7 +23,7 @@ import {
   EventSchema,
 } from './types';
 import { SAVED_OBJECT_REL_PRIMARY } from './types';
-import { Doc } from './es/cluster_client_adapter';
+import { Doc, DocMeta } from './es/cluster_client_adapter';
 
 type SystemLogger = Plugin['systemLogger'];
 
@@ -108,7 +108,7 @@ export class EventLogger implements IEventLogger {
     }
   }
 
-  async updateEvent(meta: {}, event: IEvent): Promise<void> {
+  async updateEvent(meta: DocMeta, event: IEvent): Promise<void> {
     const doc: Required<Doc> = {
       index: this.esContext.esNames.dataStream,
       body: event,
@@ -116,7 +116,7 @@ export class EventLogger implements IEventLogger {
     };
 
     if (this.eventLogService.isIndexingEntries()) {
-      const result = updateEventDoc(this.esContext, doc);
+      const result = await updateEventDoc(this.esContext, doc);
 
       if (this.eventLogService.isLoggingEntries()) {
         logUpdateEventDoc(this.systemLogger, doc);

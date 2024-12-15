@@ -38,20 +38,12 @@ export class EventLogClientService implements IEventLogClientService {
     this.spacesService = spacesService;
   }
 
-  getClient(requestOrSpaceId: KibanaRequest | string) {
-    if (typeof requestOrSpaceId === 'string') {
-      return new EventLogClient({
-        esContext: this.esContext,
-        spacesService: this.spacesService,
-        spaceId: requestOrSpaceId,
-      });
-    } else {
-      return new EventLogClient({
-        esContext: this.esContext,
-        savedObjectGetter: this.savedObjectProviderRegistry.getProvidersClient(requestOrSpaceId),
-        spacesService: this.spacesService,
-        request: requestOrSpaceId,
-      });
-    }
+  getClient(requestOrSpaceId: KibanaRequest) {
+    return new EventLogClient({
+      esContext: this.esContext,
+      savedObjectGetter: this.savedObjectProviderRegistry.getProvidersClient(requestOrSpaceId),
+      spacesService: this.spacesService,
+      request: requestOrSpaceId,
+    });
   }
 }

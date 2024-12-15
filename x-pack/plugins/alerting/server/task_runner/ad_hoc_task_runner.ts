@@ -52,7 +52,8 @@ import {
 import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { getEsErrorMessage } from '../lib/errors';
 import { Result, isOk, asOk, asErr } from '../lib/result_type';
-import { updateGaps } from '../lib/rule_gaps/update_gaps';
+import { addFilledIntervalToGaps } from '../lib/rule_gaps/update/add_filled_interval_to_gaps';
+import { calculateInProgressIntervalsForGaps } from '../lib/rule_gaps/update/caclculate_in_progress_intervals_for_gaps';
 
 interface ConstructorParams {
   context: TaskRunnerContext;
@@ -99,6 +100,7 @@ export class AdHocTaskRunner implements CancellableTask {
   private stackTraceLog: RuleRunnerErrorStackTraceLog | null = null;
   private taskRunning: AdHocTaskRunningHandler;
   private timer: TaskRunnerTimer;
+  private apiKeyToUse: string | null = null;
 
   constructor({ context, internalSavedObjectsRepository, taskInstance }: ConstructorParams) {
     this.context = context;
@@ -319,6 +321,7 @@ export class AdHocTaskRunner implements CancellableTask {
       }
 
       const { rule, apiKeyToUse, schedule } = adHocRunData;
+      this.apiKeyToUse = apiKeyToUse;
 
       let ruleType: UntypedNormalizedRuleType;
       try {
@@ -482,35 +485,22 @@ export class AdHocTaskRunner implements CancellableTask {
             executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.License ||
             executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.Validate);
 
+        if (startedAt) {
+          if (executionStatus.status === 'error') {
+            await this.calculateInProgressIntervalsForGaps();
+          } else {
+            await this.addFilledIntervalToGaps();
+          }
+
+          // Capture how long it took for the rule to run after being claimed
+          this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
+        }
+
         await this.updateAdHocRunSavedObjectPostRun(adHocRunParamsId, namespace, {
           ...(this.shouldDeleteTask ? { status: adHocRunStatus.ERROR } : {}),
           ...(this.scheduleToRunIndex > -1 ? { schedule: this.adHocRunSchedule } : {}),
         });
 
-        // TODO: check if we need to fill gaps
-        const needToFillGaps = true;
-
-        const eventLogClient = await this.context.getEventLogClient(spaceId);
-
-        if (startedAt) {
-          const intervalInMs = parseDuration(
-            this.adHocRunSchedule[this.scheduleToRunIndex].interval
-          );
-          const endGapsRange = new Date(this.adHocRunSchedule[this.scheduleToRunIndex].runAt);
-          const startGapsRange = new Date(endGapsRange.getTime() - intervalInMs);
-          await updateGaps({
-            ruleId: this.ruleId,
-            start: startGapsRange,
-            end: endGapsRange,
-            eventLogger: this.context.eventLogger,
-            eventLogClient,
-            savedObjectsClient: this.internalSavedObjectsRepository,
-            logger: this.logger,
-            needToFillGaps,
-          });
-          // Capture how long it took for the rule to run after being claimed
-          this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
-        }
         return { executionStatus, executionMetrics };
       });
     this.alertingEventLogger.done({
@@ -555,7 +545,6 @@ export class AdHocTaskRunner implements CancellableTask {
     await this.processAdHocRunResults(runMetrics);
 
     this.shouldDeleteTask = this.shouldDeleteTask || !this.hasAnyPendingRuns();
-
     return {
       state: {},
       ...(this.shouldDeleteTask ? {} : { runAt: new Date() }),
@@ -597,6 +586,8 @@ export class AdHocTaskRunner implements CancellableTask {
     });
     this.shouldDeleteTask = !this.hasAnyPendingRuns();
 
+    await this.calculateInProgressIntervalsForGaps();
+
     // cleanup function is not called for timed out tasks
     await this.cleanup();
   }
@@ -619,5 +610,48 @@ export class AdHocTaskRunner implements CancellableTask {
         `Failed to cleanup ${AD_HOC_RUN_SAVED_OBJECT_TYPE} object [id="${this.taskInstance.params.adHocRunParamsId}"]: ${e.message}`
       );
     }
+  }
+
+  private async getParamsForGapsUpdate() {
+    if (this.scheduleToRunIndex < 0) return null;
+
+    const intervalInMs = parseDuration(this.adHocRunSchedule[this.scheduleToRunIndex].interval);
+
+    const endGapsRange = new Date(this.adHocRunSchedule[this.scheduleToRunIndex].runAt);
+    const startGapsRange = new Date(endGapsRange.getTime() - intervalInMs);
+    const fakeRequest = getFakeKibanaRequest(
+      this.context,
+      this.taskInstance.params.spaceId,
+      this.apiKeyToUse
+    );
+    const eventLogClient = await this.context.getEventLogClient(fakeRequest);
+
+    return {
+      ruleId: this.ruleId,
+      start: startGapsRange,
+      end: endGapsRange,
+      eventLogger: this.context.eventLogger,
+      eventLogClient,
+      logger: this.logger,
+    };
+  }
+
+  private async calculateInProgressIntervalsForGaps() {
+    const params = await this.getParamsForGapsUpdate();
+    if (params === null) return;
+
+    return calculateInProgressIntervalsForGaps({
+      ...params,
+      savedObjectsRepository: this.internalSavedObjectsRepository,
+    });
+  }
+
+  private async addFilledIntervalToGaps() {
+    const params = await this.getParamsForGapsUpdate();
+    if (params === null) return;
+
+    return addFilledIntervalToGaps({
+      ...params,
+    });
   }
 }

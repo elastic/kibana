@@ -1,0 +1,93 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import Boom from '@hapi/boom';
+import { KueryNode } from '@kbn/es-query';
+import {
+  AlertingAuthorizationEntity,
+  AlertingAuthorizationFilterType,
+} from '../../../../authorization';
+import { RulesClientContext } from '../../../../rules_client';
+import { GetRulesWithGapsParams, GetRulesWithGapsResponse } from './types';
+
+export const RULE_SAVED_OBJECT_TYPE = 'alert';
+
+export async function getRulesWithGaps(
+  context: RulesClientContext,
+  params: GetRulesWithGapsParams
+) {
+  try {
+    let authorizationTuple;
+    try {
+      authorizationTuple = await context.authorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Alert,
+        {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'kibana.alert.rule.rule_type_id',
+            consumer: 'kibana.alert.rule.consumer',
+          },
+        }
+      );
+    } catch (error) {
+      // context.auditLogger?.log(
+      //   ruleAuditEvent({
+      //     action: RuleAuditAction.GET_GLOBAL_EXECUTION_KPI,
+      //     error,
+      //   })
+      // );
+      throw error;
+    }
+
+    const { start, end, statuses } = params;
+    const eventLogClient = await context.getEventLogClient();
+
+    const filter = 'kibana.alert.rule.gap: *';
+    const statusFilter = statuses
+      ?.map((status) => `kibana.alert.rule.gap.status:${status}`)
+      .join(' OR ');
+
+    const aggs = await eventLogClient.aggregateEventsWithAuthFilter(
+      RULE_SAVED_OBJECT_TYPE,
+      authorizationTuple.filter as KueryNode,
+      {
+        start,
+        end,
+        filter: `${filter} ${statusFilter ? `AND (${statusFilter})` : ''}`,
+        aggs: {
+          unique_rule_ids: {
+            terms: {
+              field: 'rule.id',
+              size: 10000,
+            },
+          },
+        },
+      }
+    );
+
+    interface UniqueRuleIdsAgg {
+      buckets: Array<{ key: string }>;
+    }
+
+    const uniqueRuleIdsAgg = aggs.aggregations?.unique_rule_ids as UniqueRuleIdsAgg;
+
+    const resultBuckets = uniqueRuleIdsAgg?.buckets ?? [];
+
+    const ruleIds = resultBuckets.map((bucket) => bucket.key) ?? [];
+
+    const result: GetRulesWithGapsResponse = {
+      total: ruleIds?.length,
+      ruleIds,
+    };
+
+    return result;
+  } catch (err) {
+    const errorMessage = `Failed to find rules with gaps`;
+    context.logger.error(`${errorMessage} - ${err}`);
+    throw Boom.boomify(err, { message: errorMessage });
+  }
+}

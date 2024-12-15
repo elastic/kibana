@@ -7,29 +7,29 @@
 
 import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
-import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { AlertingEventLogger } from '../alerting_event_logger/alerting_event_logger';
-import { findAllGaps } from './find_gaps';
-import { Gap } from './gap';
-import { AdHocRunSO } from '../../data/ad_hoc_run/types';
-import { adHocRunStatus, gapStatus } from '../../../common/constants';
-import { parseDuration } from '../../../common';
-import { transformAdHocRunToBackfillResult } from '../../application/backfill/transforms';
+import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
+import { findAllGaps } from '../find_gaps';
+import { AdHocRunSO } from '../../../data/ad_hoc_run/types';
+import { adHocRunStatus, gapStatus } from '../../../../common/constants';
+import { parseDuration } from '../../../../common';
+import { transformAdHocRunToBackfillResult } from '../../../application/backfill/transforms';
+import { Gap } from '../gap';
 
 /**
  * Find all overlapping backfill tasks and update the gap status accordingly
  */
 const updateGapStatus = async ({
   gap,
-  savedObjectsClient,
+  savedObjectsRepository,
   ruleId,
 }: {
   gap: Gap;
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepository: ISavedObjectsRepository;
   ruleId: string;
 }): Promise<Gap> => {
   // TODO: get all backfill, not first page
-  const { saved_objects: backfillSOs } = await savedObjectsClient.find<AdHocRunSO>({
+  const { saved_objects: backfillSOs } = await savedObjectsRepository.find<AdHocRunSO>({
     type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
     hasReference: {
       type: RULE_SAVED_OBJECT_TYPE,
@@ -47,6 +47,7 @@ const updateGapStatus = async ({
   // TODO: Extract backfill transform to another function, to reuse in API
   const transformedBackfills = backfillSOs.map((data) => transformAdHocRunToBackfillResult(data));
 
+  gap.resetInProgressIntervals();
   for (const backfill of transformedBackfills) {
     if ('error' in backfill) {
       break;
@@ -58,8 +59,8 @@ const updateGapStatus = async ({
       const from = runAt - intervalDuration;
       const to = runAt;
       const scheduleInterval = {
-        gte: new Date(from).toISOString(),
-        lte: new Date(to).toISOString(),
+        gte: new Date(from),
+        lte: new Date(to),
       };
       if (
         scheduleItem.status === adHocRunStatus.PENDING ||
@@ -69,65 +70,50 @@ const updateGapStatus = async ({
       }
     }
   }
-
   return gap;
 };
 
-export async function updateGaps(params: {
+/**
+ * Find all gaps for this date range and ruleId
+ * Then find all backfill tasks that overlap with these gaps
+ * Update the gap status accordingly, be reset and then calculate the new  inProgressIntervals
+ */
+export async function calculateInProgressIntervalsForGaps(params: {
   ruleId: string;
   start: Date;
   end: Date;
-  eventLogger: IEventLogger;
+  eventLogger: IEventLogger | undefined;
   eventLogClient: IEventLogClient;
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepository: ISavedObjectsRepository;
   logger: Logger;
-  needToFillGaps: boolean;
 }): Promise<void> {
-  const {
-    ruleId,
-    start,
-    end,
-    logger,
-    savedObjectsClient,
-    eventLogClient,
-    needToFillGaps,
-    eventLogger,
-  } = params;
-
-  const alertingEventLogger = new AlertingEventLogger(eventLogger);
+  const { ruleId, start, end, logger, savedObjectsRepository, eventLogClient, eventLogger } =
+    params;
 
   try {
+    if (!eventLogger) {
+      throw new Error('Event logger is required');
+    }
+
+    const alertingEventLogger = new AlertingEventLogger(eventLogger);
+
     const allGaps = await findAllGaps({
       eventLogClient,
       logger,
       params: {
-        ruleIds: [ruleId],
+        ruleId,
         start,
         end,
         statuses: [gapStatus.PARTIALLY_FILLED, gapStatus.UNFILLED],
       },
     });
 
-    console.log('start/endn', start, end);
-
-    console.log('needTofilleGap', needToFillGaps);
-    console.log('allGaps', allGaps.length);
-    console.log('gaps', JSON.stringify(allGaps));
     for (const gap of allGaps) {
-      if (needToFillGaps) {
-        gap.fillGap({
-          gte: start,
-          lte: end,
-        });
-      }
-
-      updateGapStatus({
+      await updateGapStatus({
         gap,
-        savedObjectsClient,
+        savedObjectsRepository,
         ruleId,
       });
-
-      console.log(gap);
 
       const esGap = gap.getEsObject();
       const meta = gap.meta;
@@ -139,7 +125,7 @@ export async function updateGaps(params: {
             gap: esGap,
           });
         } catch (e) {
-          // TODO version mismatch -> 
+          // TODO version mismatch ->
           // refetch gap
           // check status
           // retry
