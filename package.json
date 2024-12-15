@@ -1320,7 +1320,7 @@
     "yauzl": "^2.10.0",
     "yazl": "^2.5.1",
     "zod": "^3.22.3",
-    "@kbn/security-solution-connectors": "link:x-pack/packages/security-solution/connectors"
+    "@kbn/security-solution-connectors": "link:x-pack/solutions/security/packages/connectors"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
