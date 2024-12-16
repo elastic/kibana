@@ -6,12 +6,18 @@
  */
 
 import expect from '@kbn/expect';
+import { CreateTimelinesResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import {
   getTimelines,
   createBasicTimeline,
   deleteTimeline,
   patchTimeline,
+  favoriteTimeline,
+  pinEvent,
+  copyTimeline,
+  resolveTimeline,
+  installPrepackedTimelines,
 } from '../../utils/timelines';
 import * as users from '../privileges/users';
 import { roles } from '../privileges/roles';
@@ -20,6 +26,7 @@ const canOnlyReadUsers = [users.secReadV1User, users.secTimelineReadUser];
 const canWriteUsers = [users.secAllV1User, users.secTimelineAllUser];
 const canWriteOrReadUsers = [...canOnlyReadUsers, ...canWriteUsers];
 const cannotAccessUsers = [users.secNoneV1User, users.secTimelineNoneUser];
+const cannotWriteUsers = [...canOnlyReadUsers, ...cannotAccessUsers];
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
   const utils = getService('securitySolutionUtils');
@@ -46,16 +53,41 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       canWriteOrReadUsers.forEach((user) => {
         it(`user "${user.username}" can read timelines`, async () => {
           const superTest = await utils.createSuperTest(user.username, user.password);
-          const { status } = await getTimelines(superTest);
-          expect(status).to.be(200);
+          await getTimelines(superTest).expect(200);
         });
       });
 
       cannotAccessUsers.forEach((user) => {
         it(`user "${user.username}" cannot read timelines`, async () => {
           const superTest = await utils.createSuperTest(user.username, user.password);
-          const { status } = await getTimelines(superTest);
-          expect(status).to.be(403);
+          await getTimelines(superTest).expect(403);
+        });
+      });
+    });
+
+    describe('resolve timelines', () => {
+      let getTimelineId = () => '';
+      before(async () => {
+        const superTest = await utils.createSuperTest(
+          users.secTimelineAllUser.username,
+          users.secTimelineAllUser.password
+        );
+        const {
+          body: { savedObjectId },
+        } = await createBasicTimeline(superTest, 'test timeline');
+        getTimelineId = () => savedObjectId;
+      });
+      canWriteOrReadUsers.forEach((user) => {
+        it(`user "${user.username}" can resolve timelines`, async () => {
+          const superTest = await utils.createSuperTest(user.username, user.password);
+          await resolveTimeline(superTest, getTimelineId()).expect(200);
+        });
+      });
+
+      cannotAccessUsers.forEach((user) => {
+        it(`user "${user.username}" cannot resolve timelines`, async () => {
+          const superTest = await utils.createSuperTest(user.username, user.password);
+          await resolveTimeline(superTest, getTimelineId()).expect(403);
         });
       });
     });
@@ -68,31 +100,35 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
           const createResponse = await createBasicTimeline(superTest, 'test timeline');
           expect(createResponse.status).to.be(200);
 
-          const deleteResponse = await deleteTimeline(superTest, createResponse.body.savedObjectId);
-          expect(deleteResponse.status).to.be(200);
+          await deleteTimeline(superTest, createResponse.body.savedObjectId).expect(200);
         });
       });
 
-      [...canOnlyReadUsers, ...cannotAccessUsers].forEach((user) => {
-        it(`user "${user.username}" cannot create timelines`, async () => {
-          const superTest = await utils.createSuperTest(user.username, user.password);
-
-          const createResponse = await createBasicTimeline(superTest, 'test timeline');
-          expect(createResponse.status).to.be(403);
-        });
-
-        it(`user "${user.username}" cannot delete timelines`, async () => {
+      describe('insufficient privileges', () => {
+        let getTimelineToDeleteId = () => '';
+        before(async () => {
           // create a timeline with a privileged user
           const privilegedSuperTest = await utils.createSuperTest(
             users.secTimelineAllUser.username,
             users.secTimelineAllUser.password
           );
-          const createResponse = await createBasicTimeline(privilegedSuperTest, 'test timeline');
+          const {
+            body: { savedObjectId: timelineId },
+          } = await createBasicTimeline(privilegedSuperTest, 'test timeline');
+          getTimelineToDeleteId = () => timelineId;
+        });
 
-          // try to delete that timeline with a user that has insufficient privileges
-          const superTest = await utils.createSuperTest(user.username, user.password);
-          const deleteResponse = await deleteTimeline(superTest, createResponse.body.savedObjectId);
-          expect(deleteResponse.status).to.be(403);
+        cannotWriteUsers.forEach((user) => {
+          it(`user "${user.username}" cannot create timelines`, async () => {
+            const superTest = await utils.createSuperTest(user.username, user.password);
+            const createResponse = await createBasicTimeline(superTest, 'test timeline');
+            expect(createResponse.status).to.be(403);
+          });
+
+          it(`user "${user.username}" cannot delete timelines`, async () => {
+            const superTest = await utils.createSuperTest(user.username, user.password);
+            await deleteTimeline(superTest, getTimelineToDeleteId()).expect(403);
+          });
         });
       });
     });
@@ -105,29 +141,140 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             body: { savedObjectId: timelineId, version },
           } = await createBasicTimeline(superTest, 'test timeline');
 
-          const patchResponse = await patchTimeline(superTest, timelineId, version, {
+          await patchTimeline(superTest, timelineId, version, {
             title: 'updated title',
-          });
-          expect(patchResponse.status).to.be(200);
+          }).expect(200);
         });
       });
 
-      [...canOnlyReadUsers, ...cannotAccessUsers].forEach((user) => {
-        it(`user "${user.username}" cannot create timelines`, async () => {
-          // create a timeline with a privileged user
-          const privilegedSuperTest = await utils.createSuperTest(
+      describe('insufficient privileges', () => {
+        let getTimelineId = () => '';
+        let getVersion = () => '';
+        before(async () => {
+          const superTest = await utils.createSuperTest(
             users.secTimelineAllUser.username,
             users.secTimelineAllUser.password
           );
           const {
-            body: { savedObjectId: timelineId, version },
-          } = await createBasicTimeline(privilegedSuperTest, 'test timeline');
-
-          const superTest = await utils.createSuperTest(user.username, user.password);
-          const patchResponse = await patchTimeline(superTest, timelineId, version, {
-            title: 'updated title',
+            body: { savedObjectId, version },
+          } = await createBasicTimeline(superTest, 'test timeline');
+          getTimelineId = () => savedObjectId;
+          getVersion = () => version;
+        });
+        cannotWriteUsers.forEach((user) => {
+          it(`user "${user.username}" cannot create timelines`, async () => {
+            const superTest = await utils.createSuperTest(user.username, user.password);
+            await patchTimeline(superTest, getTimelineId(), getVersion(), {
+              title: 'updated title',
+            }).expect(403);
           });
-          expect(patchResponse.status).to.be(403);
+        });
+      });
+    });
+
+    describe('favorite/unfavorite timelines', () => {
+      let getTimelineId = () => '';
+      before(async () => {
+        const superTest = await utils.createSuperTest(
+          users.secTimelineAllUser.username,
+          users.secTimelineAllUser.password
+        );
+        const {
+          body: { savedObjectId },
+        } = await createBasicTimeline(superTest, 'test timeline');
+        getTimelineId = () => savedObjectId;
+      });
+      canWriteUsers.forEach((user) => {
+        it(`user "${user.username}" can favorite/unfavorite timelines`, async () => {
+          const superTest = await utils.createSuperTest(user.username, user.password);
+          await favoriteTimeline(superTest, getTimelineId()).expect(200);
+
+          // unfavorite
+          await favoriteTimeline(superTest, getTimelineId()).expect(200);
+        });
+      });
+
+      cannotWriteUsers.forEach((user) => {
+        it(`user "${user.username}" cannot favorite/unfavorite timelines`, async () => {
+          const superTest = await utils.createSuperTest(user.username, user.password);
+
+          await favoriteTimeline(superTest, getTimelineId()).expect(403);
+        });
+      });
+    });
+
+    describe('pin/unpin events', () => {
+      let getTimelineId = () => '';
+      const eventId = 'anId';
+      before(async () => {
+        const superTest = await utils.createSuperTest(
+          users.secTimelineAllUser.username,
+          users.secTimelineAllUser.password
+        );
+        const {
+          body: { savedObjectId },
+        } = await createBasicTimeline(superTest, 'test timeline');
+        getTimelineId = () => savedObjectId;
+      });
+      canWriteUsers.forEach((user) => {
+        it(`user "${user.username}" can pin/unpin events`, async () => {
+          const superTest = await utils.createSuperTest(user.username, user.password);
+          await pinEvent(superTest, getTimelineId(), eventId).expect(200);
+
+          // unpin
+          await pinEvent(superTest, getTimelineId(), eventId).expect(200);
+        });
+      });
+
+      cannotWriteUsers.forEach((user) => {
+        it(`user "${user.username}" cannot pin/unpin events`, async () => {
+          const superTest = await utils.createSuperTest(user.username, user.password);
+
+          await pinEvent(superTest, getTimelineId(), eventId).expect(403);
+        });
+      });
+    });
+
+    describe('copy timeline', () => {
+      let getTimeline: () => CreateTimelinesResponse = () =>
+        ({} as unknown as CreateTimelinesResponse);
+      before(async () => {
+        const superTest = await utils.createSuperTest(
+          users.secTimelineAllUser.username,
+          users.secTimelineAllUser.password
+        );
+        const { body } = await createBasicTimeline(superTest, 'test timeline');
+        getTimeline = () => body;
+      });
+      canWriteUsers.forEach((user) => {
+        it(`user "${user.username}" can copy timeline`, async () => {
+          const superTest = await utils.createSuperTest(user.username, user.password);
+          const timeline = getTimeline();
+          await copyTimeline(superTest, timeline.savedObjectId, timeline).expect(200);
+        });
+      });
+
+      cannotWriteUsers.forEach((user) => {
+        it(`user "${user.username}" cannot copy timeline`, async () => {
+          const superTest = await utils.createSuperTest(user.username, user.password);
+          const timeline = getTimeline();
+          await copyTimeline(superTest, timeline.savedObjectId, timeline).expect(403);
+        });
+      });
+    });
+
+    describe('install prepackaged timelines', () => {
+      canWriteUsers.forEach((user) => {
+        it(`user "${user.username}" can install prepackaged timelines`, async () => {
+          const superTest = await utils.createSuperTest(user.username, user.password);
+          await installPrepackedTimelines(superTest).expect(200);
+        });
+      });
+
+      cannotWriteUsers.forEach((user) => {
+        it(`user "${user.username}" cannot install prepackaged timelines`, async () => {
+          const superTest = await utils.createSuperTest(user.username, user.password);
+          await installPrepackedTimelines(superTest).expect(403);
         });
       });
     });
