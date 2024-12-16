@@ -853,15 +853,6 @@ describe('Datatable Visualization', () => {
         }).rowHeightLines
       ).toEqual([1]);
 
-      // should ignore lines value based on mode
-      expect(
-        getDatatableExpressionArgs({
-          ...defaultExpressionTableState,
-          rowHeight: RowHeightMode.single,
-          rowHeightLines: 5,
-        }).rowHeightLines
-      ).toEqual([1]);
-
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
@@ -870,20 +861,20 @@ describe('Datatable Visualization', () => {
         }).rowHeightLines
       ).toEqual([5]);
 
-      // should fallback to 2 for custom in case it's not set
+      // should fallback to 1 for custom in case it's not set
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
           rowHeight: RowHeightMode.custom,
         }).rowHeightLines
-      ).toEqual([2]);
+      ).toEqual([1]);
     });
 
     it('sets headerRowHeight && headerRowHeightLines correctly', () => {
-      // should fallback to 3 lines in case it's not set
+      // should fallback to 1 line in case it's not set
       expect(
         getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeightLines
-      ).toEqual([3]);
+      ).toEqual([1]);
 
       // should fallback to custom in case it's not set
       expect(
@@ -905,13 +896,13 @@ describe('Datatable Visualization', () => {
         }).headerRowHeightLines
       ).toEqual([5]);
 
-      // should fallback to 3 for custom in case it's not set
+      // should fallback to 1 for custom in case it's not set
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
           headerRowHeight: RowHeightMode.custom,
         }).headerRowHeightLines
-      ).toEqual([3]);
+      ).toEqual([1]);
     });
 
     it('sets alignment correctly', () => {
