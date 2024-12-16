@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../common/constants';
+import {
+  CASE_CONFIGURE_CONNECTORS_URL,
+  GET_CONNECTORS_CONFIGURE_API_TAG,
+} from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 
@@ -15,8 +18,13 @@ import { createCasesRoute } from '../create_cases_route';
 export const getConnectorsRoute = createCasesRoute({
   method: 'get',
   path: `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,
+  security: {
+    authz: {
+      requiredPrivileges: [GET_CONNECTORS_CONFIGURE_API_TAG],
+    },
+  },
   routerOptions: {
-    tags: ['access:casesGetConnectorsConfigure', 'oas-tag:cases'],
+    tags: ['oas-tag:cases'],
     access: 'public',
     summary: 'Get case connectors',
     description: 'Retrieves information about connectors that are supported for use in cases.',

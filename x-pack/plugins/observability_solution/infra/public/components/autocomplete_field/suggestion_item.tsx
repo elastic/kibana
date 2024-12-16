@@ -36,28 +36,28 @@ SuggestionItem.defaultProps = {
   isSelected: false,
 };
 
-const SuggestionItemContainer = euiStyled.div<{
+const SuggestionItemContainer = styled.div<{
   isSelected?: boolean;
 }>`
   display: flex;
   flex-direction: row;
-  font-size: ${(props) => props.theme.eui.euiFontSizeS};
-  height: ${(props) => props.theme.eui.euiSizeXL};
+  font-size: ${() => useEuiFontSize('m').fontSize};
+  height: ${({ theme }) => theme.euiTheme.size.xl};
   white-space: nowrap;
   background-color: ${(props) =>
-    props.isSelected ? props.theme.eui.euiColorLightestShade : 'transparent'};
+    props.isSelected ? props.theme.euiTheme.colors.lightestShade : 'transparent'};
 `;
 
-const SuggestionItemField = euiStyled.div`
+const SuggestionItemField = styled.div`
   align-items: center;
   cursor: pointer;
   display: flex;
   flex-direction: row;
-  height: ${(props) => props.theme.eui.euiSizeXL};
-  padding: ${(props) => props.theme.eui.euiSizeXS};
+  height: ${({ theme }) => theme.euiTheme.size.xl};
+  padding: ${({ theme }) => theme.euiTheme.size.xs};
 `;
 
-const SuggestionItemIconField = euiStyled(SuggestionItemField)<{
+const SuggestionItemIconField = styled(SuggestionItemField)<{
   suggestionType: QuerySuggestionTypes;
   euiTheme: EuiThemeComputed;
 }>`
@@ -66,22 +66,22 @@ const SuggestionItemIconField = euiStyled(SuggestionItemField)<{
   color: ${(props) => getEuiIconColor(props.euiTheme, props.suggestionType)};
   flex: 0 0 auto;
   justify-content: center;
-  width: ${(props) => props.theme.eui.euiSizeXL};
+  width: ${({ theme }) => theme.euiTheme.size.xl};
 `;
 
-const SuggestionItemTextField = euiStyled(SuggestionItemField)`
+const SuggestionItemTextField = styled(SuggestionItemField)`
   flex: 2 0 0;
-  font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
+  font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
 `;
 
-const SuggestionItemDescriptionField = euiStyled(SuggestionItemField)`
+const SuggestionItemDescriptionField = styled(SuggestionItemField)`
   flex: 3 0 0;
 
   p {
     display: inline;
 
     span {
-      font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
+      font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
     }
   }
 `;

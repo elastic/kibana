@@ -367,7 +367,7 @@ const columns: Array<{
 ];
 
 const CodeLine = ({ command }: { command: string }) => {
-  const euiTheme = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
   return (
     <div
       css={css`

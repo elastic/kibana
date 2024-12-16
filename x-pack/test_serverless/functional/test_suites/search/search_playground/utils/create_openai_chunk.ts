@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CreateChatCompletionResponseChunk } from '@kbn/observability-ai-assistant-plugin/server/service/client/adapters/process_openai_stream';
 import { v4 } from 'uuid';
+import type OpenAI from 'openai';
 
 export function createOpenAiChunk(
   msg: string | { content?: string; function_call?: { name: string; arguments?: string } }
-): CreateChatCompletionResponseChunk {
+): OpenAI.ChatCompletionChunk {
   msg = typeof msg === 'string' ? { content: msg } : msg;
 
   return {

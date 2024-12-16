@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, withEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { withTheme } from '@kbn/kibana-react-plugin/common';
 import React from 'react';
 import type { LayoutPropsWithTheme } from '../../types';
 import { ChartSectionVis } from '../chart_section_vis';
 import { Section } from '../section';
 import { SubSection } from '../sub_section';
 
-export const AwsSQSLayout = withTheme(
+export const AwsSQSLayout = withEuiTheme(
   ({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
     <EuiPanel>
       <Section
@@ -42,7 +41,7 @@ export const AwsSQSLayout = withTheme(
             formatter="abbreviatedNumber"
             seriesOverrides={{
               visible: {
-                color: theme.eui.euiColorVis1,
+                color: theme.euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.sqsMetricsLayout.messagesVisible.chartLabel',
                   { defaultMessage: 'Available' }
@@ -65,7 +64,7 @@ export const AwsSQSLayout = withTheme(
             formatter="abbreviatedNumber"
             seriesOverrides={{
               delayed: {
-                color: theme.eui.euiColorVis1,
+                color: theme.euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.sqsMetricsLayout.messagesDelayed.chartLabel',
                   { defaultMessage: 'Delayed' }
@@ -88,7 +87,7 @@ export const AwsSQSLayout = withTheme(
             formatter="abbreviatedNumber"
             seriesOverrides={{
               sent: {
-                color: theme.eui.euiColorVis1,
+                color: theme.euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.sqsMetricsLayout.messagesSent.chartLabel',
                   { defaultMessage: 'Added' }
@@ -111,7 +110,7 @@ export const AwsSQSLayout = withTheme(
             formatter="abbreviatedNumber"
             seriesOverrides={{
               sent: {
-                color: theme.eui.euiColorVis1,
+                color: theme.euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.sqsMetricsLayout.messagesEmpty.chartLabel',
                   { defaultMessage: 'Empty' }
@@ -134,7 +133,7 @@ export const AwsSQSLayout = withTheme(
             formatter="abbreviatedNumber"
             seriesOverrides={{
               oldest: {
-                color: theme.eui.euiColorVis1,
+                color: theme.euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.sqsMetricsLayout.oldestMessage.chartLabel',
                   { defaultMessage: 'Age' }

@@ -16,7 +16,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { LogEntry } from '@kbn/logs-shared-plugin/common';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
 import { useViewLogInProviderContext } from '../../../containers/logs/view_log_in_context';
@@ -71,7 +71,7 @@ export const PageViewLogInContext: React.FC = () => {
   );
 };
 
-const LogInContextWrapper = euiStyled.div<{ width: number | string; height: number | string }>`
+const LogInContextWrapper = styled.div<{ width: number | string; height: number | string }>`
   padding: 16px;
   width: ${(props) => (typeof props.width === 'number' ? `${props.width}px` : props.width)};
   height: ${(props) => (typeof props.height === 'number' ? `${props.height}px` : props.height)};

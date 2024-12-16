@@ -22,6 +22,8 @@ export interface EndpointAuthz {
   canReadFleetAgents: boolean;
   /** If the user has permissions to write Fleet Agents */
   canWriteFleetAgents: boolean;
+  /** If the user has permissions to write Integration policies in the Fleet app */
+  canWriteIntegrationPolicies: boolean;
   /** If the user has permissions to access Endpoint management (includes check to ensure they also have access to fleet) */
   canAccessEndpointManagement: boolean;
   /** If the user has permissions to access Actions Log management and also has a platinum license (used for endpoint details flyout) */

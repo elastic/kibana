@@ -18,12 +18,10 @@ import {
   APPS_WITH_DEPRECATION_LOGS,
   DEPRECATION_LOGS_ORIGIN_FIELD,
 } from '../../../common/constants';
-import { stringifySearchParams } from '../helpers/app_context.mock';
 
 // Once the logs team register the kibana locators in their app, we should be able
 // to remove this mock and follow a similar approach to how discover link is tested.
 // See: https://github.com/elastic/kibana/issues/104855
-const MOCKED_TIME = '2021-09-05T10:49:01.805Z';
 jest.mock('../../../public/application/lib/logs_checkpoint', () => {
   const originalModule = jest.requireActual('../../../public/application/lib/logs_checkpoint');
 
@@ -155,40 +153,6 @@ describe('ES deprecation logs', () => {
   describe('Step 2 - Analyze logs', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(true));
-    });
-
-    test('Has a link to see logs in observability app', async () => {
-      await act(async () => {
-        testBed = await setupESDeprecationLogsPage(httpSetup, {
-          http: {
-            basePath: {
-              prepend: (url: string) => url,
-            },
-          },
-        });
-      });
-
-      const { component, exists, find } = testBed;
-
-      component.update();
-
-      expect(exists('viewObserveLogs')).toBe(true);
-      const locatorParams = stringifySearchParams({
-        id: DEPRECATION_LOGS_INDEX,
-        timeRange: {
-          from: MOCKED_TIME,
-          to: 'now',
-        },
-        query: {
-          language: 'kuery',
-          query: `not ${DEPRECATION_LOGS_ORIGIN_FIELD} : (${APPS_WITH_DEPRECATION_LOGS.join(
-            ' or '
-          )})`,
-        },
-      });
-      const href = find('viewObserveLogs').props().href;
-      expect(href).toContain('logsExplorerUrl');
-      expect(href).toContain(locatorParams);
     });
 
     test('Has a link to see logs in discover app', async () => {
