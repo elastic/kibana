@@ -189,20 +189,20 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         },
       };
 
+      const { name, ...transformHealthRuleParams } = params;
+
       const { status, body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: params.name,
+          name,
           consumer: 'alerts',
           enabled: true,
           rule_type_id: RULE_TYPE_ID,
           schedule: { interval: '1d' },
           actions: [action],
           notify_when: 'onActiveAlert',
-          params: {
-            includeTransforms: params.includeTransforms,
-          },
+          params: transformHealthRuleParams,
         });
 
       // will print the error body, if an error occurred
