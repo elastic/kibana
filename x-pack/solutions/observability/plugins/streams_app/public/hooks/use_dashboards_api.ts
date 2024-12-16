@@ -8,7 +8,6 @@ import { useCallback } from 'react';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import { useKibana } from './use_kibana';
-import { useStreamsAppFetch } from './use_streams_app_fetch';
 
 export const useDashboardsApi = (id?: string) => {
   const { signal } = useAbortController();
@@ -19,20 +18,6 @@ export const useDashboardsApi = (id?: string) => {
       },
     },
   } = useKibana();
-
-  const dashboardsFetch = useStreamsAppFetch(() => {
-    if (!id) {
-      return Promise.resolve(undefined);
-    }
-    return streamsRepositoryClient.fetch('GET /api/streams/{id}/dashboards', {
-      signal,
-      params: {
-        path: {
-          id,
-        },
-      },
-    });
-  }, [id, signal, streamsRepositoryClient]);
 
   const addDashboards = useCallback(
     async (dashboards: SanitizedDashboardAsset[]) => {
@@ -53,10 +38,8 @@ export const useDashboardsApi = (id?: string) => {
           },
         },
       });
-
-      await dashboardsFetch.refresh();
     },
-    [dashboardsFetch, id, signal, streamsRepositoryClient]
+    [id, signal, streamsRepositoryClient]
   );
 
   const removeDashboards = useCallback(
@@ -77,14 +60,11 @@ export const useDashboardsApi = (id?: string) => {
           },
         },
       });
-
-      await dashboardsFetch.refresh();
     },
-    [dashboardsFetch, id, signal, streamsRepositoryClient]
+    [id, signal, streamsRepositoryClient]
   );
 
   return {
-    dashboardsFetch,
     addDashboards,
     removeDashboards,
   };

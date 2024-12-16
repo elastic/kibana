@@ -12,13 +12,15 @@ import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/
 import { AddDashboardFlyout } from './add_dashboard_flyout';
 import { DashboardsTable } from './dashboard_table';
 import { useDashboardsApi } from '../../hooks/use_dashboards_api';
+import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 
 export function StreamDetailDashboardsView({ definition }: { definition?: StreamDefinition }) {
   const [query, setQuery] = useState('');
 
   const [isAddDashboardFlyoutOpen, setIsAddDashboardFlyoutOpen] = useState(false);
 
-  const { dashboardsFetch, addDashboards, removeDashboards } = useDashboardsApi(definition?.id);
+  const dashboardsFetch = useDashboardsFetch(definition?.id);
+  const { addDashboards, removeDashboards } = useDashboardsApi(definition?.id);
 
   const [isUnlinkLoading, setIsUnlinkLoading] = useState(false);
   const linkedDashboards = useMemo(() => {
@@ -45,7 +47,10 @@ export function StreamDetailDashboardsView({ definition }: { definition?: Stream
               onClick={async () => {
                 try {
                   setIsUnlinkLoading(true);
+
                   await removeDashboards(selectedDashboards);
+                  await dashboardsFetch.refresh();
+
                   setSelectedDashboards([]);
                 } finally {
                   setIsUnlinkLoading(false);
@@ -93,6 +98,7 @@ export function StreamDetailDashboardsView({ definition }: { definition?: Stream
             entityId={definition.id}
             onAddDashboards={async (dashboards) => {
               await addDashboards(dashboards);
+              await dashboardsFetch.refresh();
               setIsAddDashboardFlyoutOpen(false);
             }}
             onClose={() => {
