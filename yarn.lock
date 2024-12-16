@@ -5961,7 +5961,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ingest-pipelines-plugin@link:x-pack/plugins/ingest_pipelines":
+"@kbn/ingest-pipelines-plugin@link:x-pack/platform/plugins/shared/ingest_pipelines":
   version "0.0.0"
   uid ""
 
