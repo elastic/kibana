@@ -13,9 +13,9 @@ import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { ServerlessProjectType } from '@kbn/es';
 import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
-import { CliSupportedServerModes, ScoutServerConfig } from '../types';
+import { CliSupportedServerModes, ScoutTestConfig } from '../types';
 import { getConfigFilePath } from './get_config_file';
-import { loadConfig } from './loader/config_load';
+import { readConfigFile } from './loader';
 import type { Config } from './config';
 
 export const formatCurrentDate = () => {
@@ -35,7 +35,7 @@ export const formatCurrentDate = () => {
  * @param testServersConfig configuration to be saved
  * @param log Logger instance to report errors or debug information.
  */
-const saveTestServersConfigOnDisk = (testServersConfig: ScoutServerConfig, log: ToolingLog) => {
+const saveScoutTestConfigOnDisk = (testServersConfig: ScoutTestConfig, log: ToolingLog) => {
   const configFilePath = path.join(SCOUT_SERVERS_ROOT, `local.json`);
 
   try {
@@ -69,12 +69,12 @@ export async function loadServersConfig(
   // get path to one of the predefined config files
   const configPath = getConfigFilePath(mode);
   // load config that is compatible with kbn-test input format
-  const config = await loadConfig(configPath);
+  const clusterConfig = await readConfigFile(configPath);
   // construct config for Playwright Test
-  const scoutServerConfig = config.getTestServersConfig();
+  const scoutServerConfig = clusterConfig.getScoutTestConfig();
   // save test config to the file
-  saveTestServersConfigOnDisk(scoutServerConfig, log);
-  return config;
+  saveScoutTestConfigOnDisk(scoutServerConfig, log);
+  return clusterConfig;
 }
 
 export const getProjectType = (kbnServerArgs: string[]) => {

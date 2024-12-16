@@ -22,7 +22,7 @@ export function formatTime(date: string, fmt: string = 'MMM D, YYYY @ HH:mm:ss.S
 }
 
 export const getPlaywrightGrepTag = (config: Config): string => {
-  const serversConfig = config.getTestServersConfig();
+  const serversConfig = config.getScoutTestConfig();
   return serversConfig.serverless
     ? tagsByMode.serverless[serversConfig.projectType!]
     : tagsByMode.stateful;

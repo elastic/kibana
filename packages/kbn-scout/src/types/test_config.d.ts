@@ -7,7 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { readConfigFile } from './loader';
-export { getConfigFilePath } from './get_config_file';
-export { loadServersConfig } from './utils';
-export type { Config } from './config';
+import { ServerlessProjectType } from '@kbn/es';
+
+export interface ScoutTestConfig {
+  serverless: boolean;
+  projectType?: ServerlessProjectType;
+  isCloud: boolean;
+  license: string;
+  cloudUsersFilePath: string;
+  hosts: {
+    kibana: string;
+    elasticsearch: string;
+  };
+  auth: {
+    username: string;
+    password: string;
+  };
+  metadata?: any;
+}

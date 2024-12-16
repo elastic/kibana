@@ -9,8 +9,8 @@
 
 import { Config } from './config';
 
-describe('Config.getTestServersConfig', () => {
-  it(`should return a properly structured 'ScoutServerConfig' object for 'stateful'`, async () => {
+describe('Config.getScoutTestConfig', () => {
+  it(`should return a properly structured 'ScoutTestConfig' object for 'stateful'`, async () => {
     const config = new Config({
       servers: {
         elasticsearch: {
@@ -43,7 +43,7 @@ describe('Config.getTestServersConfig', () => {
       },
     });
 
-    const scoutConfig = config.getTestServersConfig();
+    const scoutConfig = config.getScoutTestConfig();
 
     const expectedConfig = {
       serverless: false,
@@ -68,7 +68,7 @@ describe('Config.getTestServersConfig', () => {
     expect(scoutConfig).toEqual(expectedConfig);
   });
 
-  it(`should return a properly structured ScoutServerConfig object for 'serverless=es'`, async () => {
+  it(`should return a properly structured 'ScoutTestConfig' object for 'serverless=es'`, async () => {
     const config = new Config({
       serverless: true,
       servers: {
@@ -102,7 +102,7 @@ describe('Config.getTestServersConfig', () => {
       },
     });
 
-    const scoutConfig = config.getTestServersConfig();
+    const scoutConfig = config.getScoutTestConfig();
     const expectedConfig = {
       serverless: true,
       projectType: 'es',

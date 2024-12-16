@@ -10,7 +10,7 @@
 import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Config } from '../config';
-import { loadConfig } from './config_load';
+import { readConfigFile } from './read_config_file';
 
 jest.mock('path', () => ({
   resolve: jest.fn(),
@@ -20,7 +20,7 @@ jest.mock('../config', () => ({
   Config: jest.fn(),
 }));
 
-describe('loadConfig', () => {
+describe('readConfigFile', () => {
   const configPath = '/mock/config/path';
   const resolvedPath = '/resolved/config/path';
   const mockPathResolve = path.resolve as jest.Mock;
@@ -42,7 +42,7 @@ describe('loadConfig', () => {
       jest.mock(resolvedPath, () => mockConfigModule, { virtual: true });
       mockConfigConstructor.mockImplementation((servers) => ({ servers }));
 
-      const result = await loadConfig(configPath);
+      const result = await readConfigFile(configPath);
 
       expect(path.resolve).toHaveBeenCalledWith(configPath);
       expect(result).toEqual({ servers: mockConfigModule.servers });
@@ -57,7 +57,7 @@ describe('loadConfig', () => {
     jest.isolateModules(async () => {
       jest.mock(resolvedPath, () => mockConfigModule, { virtual: true });
 
-      await expect(loadConfig(configPath)).rejects.toThrow(
+      await expect(readConfigFile(configPath)).rejects.toThrow(
         `No 'servers' found in the config file at path: ${resolvedPath}`
       );
       expect(path.resolve).toHaveBeenCalledWith(configPath);
@@ -77,7 +77,7 @@ describe('loadConfig', () => {
         { virtual: true }
       );
 
-      await expect(loadConfig(configPath)).rejects.toThrow(
+      await expect(readConfigFile(configPath)).rejects.toThrow(
         `Failed to load config from ${configPath}: ${message}`
       );
       expect(path.resolve).toHaveBeenCalledWith(configPath);

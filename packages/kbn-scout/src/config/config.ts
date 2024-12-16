@@ -13,15 +13,15 @@ import Path from 'path';
 import { cloneDeepWith, get, has, toPath } from 'lodash';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from './schema';
-import { ScoutLoaderConfig, ScoutServerConfig } from '../types';
+import { ScoutServerConfig, ScoutTestConfig } from '../types';
 import { formatCurrentDate, getProjectType } from './utils';
 
 const $values = Symbol('values');
 
 export class Config {
-  private [$values]: ScoutLoaderConfig;
+  private [$values]: ScoutServerConfig;
 
-  constructor(data: ScoutLoaderConfig) {
+  constructor(data: ScoutServerConfig) {
     const { error, value } = schema.validate(data, {
       abortEarly: false,
     });
@@ -104,7 +104,7 @@ export class Config {
     });
   }
 
-  public getTestServersConfig(): ScoutServerConfig {
+  public getScoutTestConfig(): ScoutTestConfig {
     return {
       serverless: this.get('serverless'),
       projectType: this.get('serverless')
