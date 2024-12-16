@@ -52,7 +52,7 @@ function showPrivilege(allSpacesSelected: boolean, primaryFeature?: PrimaryFeatu
   if (
     primaryFeature?.name == null ||
     primaryFeature?.disabled ||
-    (primaryFeature.requireAllSpaces && !allSpacesSelected)
+    (primaryFeature?.requireAllSpaces && !allSpacesSelected)
   ) {
     return 'None';
   }
@@ -218,6 +218,8 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
       };
     });
 
+    const isAllSpacesSelected = props.spaces.some((space) => space.id === ALL_SPACES_ID);
+
     accordions.push(
       <EuiAccordion
         id={`privilegeSummaryFeatureCategory_${category.id}`}
@@ -242,6 +244,7 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
                 <PrivilegeSummaryExpandedRow
                   feature={props.kibanaPrivileges.getSecuredFeature(featureId)}
                   effectiveFeaturePrivileges={Object.values(privileges).map((p) => p[featureId])}
+                  isAllSpacesSelected={isAllSpacesSelected}
                 />
               ),
             };
