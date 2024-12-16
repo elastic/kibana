@@ -26,8 +26,10 @@ import { ApmMlJob } from '../../../../common/anomaly_detection/apm_ml_job';
 // get ML anomaly detection jobs for each environment
 const anomalyDetectionJobsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/anomaly-detection/jobs',
-  options: {
-    tags: ['access:apm', 'access:ml:canGetJobs'],
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'ml:canGetJobs'],
+    },
   },
   handler: async (
     resources
@@ -59,8 +61,10 @@ const anomalyDetectionJobsRoute = createApmServerRoute({
 // create new ML anomaly detection jobs for each given environment
 const createAnomalyDetectionJobsRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/settings/anomaly-detection/jobs',
-  options: {
-    tags: ['access:apm', 'access:apm_settings_write', 'access:ml:canCreateJob'],
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'apm_settings_write', 'ml:canCreateJob'],
+    },
   },
   params: t.type({
     body: t.type({
@@ -102,7 +106,7 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
 // get all available environments to create anomaly detection jobs for
 const anomalyDetectionEnvironmentsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/anomaly-detection/environments',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ environments: string[] }> => {
     const apmEventClient = await getApmEventClient(resources);
     const coreContext = await resources.context.core;
@@ -126,14 +130,16 @@ const anomalyDetectionEnvironmentsRoute = createApmServerRoute({
 
 const anomalyDetectionUpdateToV3Route = createApmServerRoute({
   endpoint: 'POST /internal/apm/settings/anomaly-detection/update_to_v3',
-  options: {
-    tags: [
-      'access:apm',
-      'access:apm_settings_write',
-      'access:ml:canCreateJob',
-      'access:ml:canGetJobs',
-      'access:ml:canCloseJob',
-    ],
+  security: {
+    authz: {
+      requiredPrivileges: [
+        'apm',
+        'apm_settings_write',
+        'ml:canCreateJob',
+        'ml:canGetJobs',
+        'ml:canCloseJob',
+      ],
+    },
   },
   handler: async (resources): Promise<{ update: boolean }> => {
     const { getApmIndices } = resources;
