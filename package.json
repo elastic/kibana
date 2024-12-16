@@ -828,6 +828,7 @@
     "@kbn/security-plugin-types-public": "link:x-pack/packages/security/plugin_types_public",
     "@kbn/security-plugin-types-server": "link:x-pack/packages/security/plugin_types_server",
     "@kbn/security-role-management-model": "link:x-pack/packages/security/role_management_model",
+    "@kbn/security-solution-connectors": "link:x-pack/solutions/security/packages/connectors",
     "@kbn/security-solution-distribution-bar": "link:x-pack/solutions/security/packages/distribution_bar",
     "@kbn/security-solution-ess": "link:x-pack/plugins/security_solution_ess",
     "@kbn/security-solution-features": "link:x-pack/solutions/security/packages/features",
@@ -1319,8 +1320,7 @@
     "yaml": "^2.5.1",
     "yauzl": "^2.10.0",
     "yazl": "^2.5.1",
-    "zod": "^3.22.3",
-    "@kbn/security-solution-connectors": "link:x-pack/solutions/security/packages/connectors"
+    "zod": "^3.22.3"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
