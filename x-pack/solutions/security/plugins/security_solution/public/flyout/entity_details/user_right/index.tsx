@@ -25,7 +25,7 @@ import { getCriteriaFromUsersType } from '../../../common/components/ml/criteria
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/risk_engine';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelContent } from './content';
@@ -72,7 +72,7 @@ export const UserPanel = ({
   );
 
   const riskScoreState = useRiskScore({
-    riskEntity: RiskScoreEntity.user,
+    riskEntity: RiskScoreEntityType.user,
     filterQuery: userNameFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
@@ -96,7 +96,7 @@ export const UserPanel = ({
   }, [refetch, refetchRiskInputsTab]);
 
   const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    RiskScoreEntity.user,
+    RiskScoreEntityType.user,
     userName,
     { onSuccess: refetchRiskScore }
   );

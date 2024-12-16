@@ -24,7 +24,7 @@ import type { BoolQuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
 import {
-  RiskScoreEntity,
+  RiskScoreEntityType,
   RISK_SCORE_INDEX_PATTERN,
 } from '../../../common/entity_analytics/risk_engine';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
@@ -39,7 +39,7 @@ interface IRiskScorePreviewPanel {
   hideMessage: string;
   isLoading: boolean;
   items: EntityRiskScoreRecord[];
-  type: RiskScoreEntity;
+  type: RiskScoreEntityType;
 }
 
 const getRiskiestScores = (scores: EntityRiskScoreRecord[] = [], field: string) =>
@@ -125,7 +125,7 @@ const RiskScorePreviewPanel = ({
         buttonContent={trigger === 'closed' ? showMessage : hideMessage}
         forceState={trigger}
         onToggle={onToggle}
-        extraAction={<EuiIcon type={type === RiskScoreEntity.host ? 'storage' : 'user'} />}
+        extraAction={<EuiIcon type={type === RiskScoreEntityType.host ? 'storage' : 'user'} />}
       >
         <>
           <EuiSpacer size={'m'} />
@@ -192,7 +192,7 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
         showMessage={i18n.SHOW_HOSTS_RISK_SCORE}
         hideMessage={i18n.HIDE_HOSTS_RISK_SCORE}
         isLoading={isLoading}
-        type={RiskScoreEntity.host}
+        type={RiskScoreEntityType.host}
       />
 
       <EuiSpacer />
@@ -202,7 +202,7 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
         showMessage={i18n.SHOW_USERS_RISK_SCORE}
         hideMessage={i18n.HIDE_USERS_RISK_SCORE}
         isLoading={isLoading}
-        type={RiskScoreEntity.user}
+        type={RiskScoreEntityType.user}
       />
     </>
   );

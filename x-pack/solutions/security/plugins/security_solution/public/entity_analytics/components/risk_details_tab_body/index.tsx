@@ -25,7 +25,7 @@ import { TopRiskScoreContributors } from '../top_risk_score_contributors';
 import { TopRiskScoreContributorsAlerts } from '../top_risk_score_contributors_alerts';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
-import { buildEntityNameFilter, RiskScoreEntity } from '../../../../common/search_strategy';
+import { buildEntityNameFilter, RiskScoreEntityType } from '../../../../common/search_strategy';
 import type { UsersComponentsQueryProps } from '../../../explore/users/pages/navigation/types';
 import type { HostsComponentsQueryProps } from '../../../explore/hosts/pages/navigation/types';
 import { useDashboardHref } from '../../../common/hooks/use_dashboard_href';
@@ -43,25 +43,27 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 
 type ComponentsQueryProps = HostsComponentsQueryProps | UsersComponentsQueryProps;
 
-const getDashboardTitle = (riskEntity: RiskScoreEntity) =>
-  riskEntity === RiskScoreEntity.host ? RISKY_HOSTS_DASHBOARD_TITLE : RISKY_USERS_DASHBOARD_TITLE;
+const getDashboardTitle = (riskEntity: RiskScoreEntityType) =>
+  riskEntity === RiskScoreEntityType.host
+    ? RISKY_HOSTS_DASHBOARD_TITLE
+    : RISKY_USERS_DASHBOARD_TITLE;
 
 const RiskDetailsTabBodyComponent: React.FC<
   Pick<ComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
     entityName: string;
-    riskEntity: RiskScoreEntity;
+    riskEntity: RiskScoreEntityType;
   }
 > = ({ entityName, startDate, endDate, setQuery, deleteQuery, riskEntity }) => {
   const queryId = useMemo(
     () =>
-      riskEntity === RiskScoreEntity.host
+      riskEntity === RiskScoreEntityType.host
         ? HostRiskScoreQueryId.HOST_DETAILS_RISK_SCORE
         : UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE,
     [riskEntity]
   );
 
   const severitySelectionRedux = useDeepEqualSelector((state: State) =>
-    riskEntity === RiskScoreEntity.host
+    riskEntity === RiskScoreEntityType.host
       ? hostsSelectors.hostRiskScoreSeverityFilterSelector()(state, hostsModel.HostsType.details)
       : usersSelectors.userRiskScoreSeverityFilterSelector()(state)
   );
@@ -99,7 +101,7 @@ const RiskDetailsTabBodyComponent: React.FC<
   const rules = useMemo(() => {
     const lastRiskItem = data && data.length > 0 ? data[data.length - 1] : null;
     if (lastRiskItem) {
-      return riskEntity === RiskScoreEntity.host
+      return riskEntity === RiskScoreEntityType.host
         ? (lastRiskItem as HostRiskScore).host.risk.rule_risks
         : (lastRiskItem as UserRiskScore).user.risk.rule_risks;
     }

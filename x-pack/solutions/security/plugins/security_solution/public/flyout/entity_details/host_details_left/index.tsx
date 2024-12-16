@@ -17,7 +17,7 @@ import {
   EntityDetailsLeftPanelTab,
   LeftPanelHeader,
 } from '../shared/components/left_panel/left_panel_header';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/risk_engine';
 
 export interface HostDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
@@ -55,7 +55,7 @@ export const HostDetailsPanel = ({
   const [tabs] = useMemo(() => {
     const isRiskScoreTabAvailable = isRiskScoreExist && name;
     const riskScoreTab = isRiskScoreTabAvailable
-      ? [getRiskInputTab({ entityName: name, entityType: RiskScoreEntity.host, scopeId })]
+      ? [getRiskInputTab({ entityName: name, entityType: RiskScoreEntityType.host, scopeId })]
       : [];
 
     // Determine if the Insights tab should be included

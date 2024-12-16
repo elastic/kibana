@@ -13,7 +13,7 @@ import { SEVERITY_COLOR } from '../../../overview/components/detection_response/
 import { LinkAnchor, useGetSecuritySolutionLinkProps } from '../../../common/components/links';
 import {
   Direction,
-  RiskScoreEntity,
+  RiskScoreEntityType,
   RiskScoreFields,
   RiskSeverity,
 } from '../../../../common/search_strategy';
@@ -60,7 +60,7 @@ export const EntityAnalyticsHeader = () => {
     refetch: refetchHostRiskScore,
   } = useRiskScoreKpi({
     timerange,
-    riskEntity: RiskScoreEntity.host,
+    riskEntity: RiskScoreEntityType.host,
     filterQuery,
   });
 
@@ -72,7 +72,7 @@ export const EntityAnalyticsHeader = () => {
   } = useRiskScoreKpi({
     filterQuery,
     timerange,
-    riskEntity: RiskScoreEntity.user,
+    riskEntity: RiskScoreEntityType.user,
   });
 
   const { data } = useAggregatedAnomaliesByJob({ skip: false, from, to });

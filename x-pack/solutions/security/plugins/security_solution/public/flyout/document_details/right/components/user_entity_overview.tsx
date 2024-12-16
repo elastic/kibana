@@ -33,7 +33,7 @@ import {
   FirstLastSeen,
   FirstLastSeenType,
 } from '../../../../common/components/first_last_seen/first_last_seen';
-import { buildUserNamesFilter, RiskScoreEntity } from '../../../../../common/search_strategy';
+import { buildUserNamesFilter, RiskScoreEntityType } from '../../../../../common/search_strategy';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
@@ -127,7 +127,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
     loading: isRiskScoreLoading,
   } = useRiskScore({
     filterQuery,
-    riskEntity: RiskScoreEntity.user,
+    riskEntity: RiskScoreEntityType.user,
     timerange,
   });
 

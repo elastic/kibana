@@ -6,14 +6,31 @@
  */
 
 import type { EntityRiskScoreRecord, RiskScoreInput } from '../../api/entity_analytics/common';
+import { RiskScoreFields } from '../../search_strategy';
 
-export enum RiskScoreEntity {
+export enum RiskScoreEntityType {
   host = 'host',
   user = 'user',
-  // TODO Add service when FE is updated https://github.com/elastic/security-team/issues/11326
+  service = 'service',
 }
-// TODO: Remove this when FE is updated https://github.com/elastic/security-team/issues/11326
-export const SERVICE_RISK_SCORE_ENTITY = 'service';
+
+export enum RiskScoreEntityNameField {
+  host = RiskScoreFields.hostName,
+  user = RiskScoreFields.userName,
+  service = RiskScoreFields.serviceName,
+}
+
+export enum RiskScoreEntityLevelField {
+  host = RiskScoreFields.hostRisk,
+  user = RiskScoreFields.userRisk,
+  service = RiskScoreFields.serviceRisk,
+}
+
+export enum RiskScoreEntityScoreField {
+  host = RiskScoreFields.hostRiskScore,
+  user = RiskScoreFields.userRiskScore,
+  service = RiskScoreFields.serviceRiskScore,
+}
 
 export interface InitRiskEngineResult {
   legacyRiskEngineDisabled: boolean;

@@ -18,7 +18,7 @@ import {
   prebuiltSavedObjectsBulkDeleteUrl,
 } from '../../../../common/constants';
 
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/search_strategy';
 
 import {
   DELETE_SAVED_OBJECTS_FAILURE,
@@ -28,7 +28,7 @@ import {
 
 const toastLifeTimeMs = 600000;
 
-type DashboardsSavedObjectTemplate = `${RiskScoreEntity}RiskScoreDashboards`;
+type DashboardsSavedObjectTemplate = `${RiskScoreEntityType}RiskScoreDashboards`;
 
 interface Options {
   templateName: DashboardsSavedObjectTemplate;
@@ -78,7 +78,7 @@ export const bulkCreatePrebuiltSavedObjects = async ({
         });
       } else {
         const dashboardTitle =
-          options.templateName === `${RiskScoreEntity.user}RiskScoreDashboards`
+          options.templateName === `${RiskScoreEntityType.user}RiskScoreDashboards`
             ? RISKY_USERS_DASHBOARD_TITLE
             : RISKY_HOSTS_DASHBOARD_TITLE;
 

@@ -32,13 +32,13 @@ import {
   buildUserNamesFilter,
   isUserRiskScore,
 } from '../../../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
+import { RiskScoreEntityType } from '../../../../../../common/entity_analytics/risk_engine';
 import { AssetCriticalityBadge } from '../../../asset_criticality';
 import { RiskInputsUtilityBar } from '../../components/utility_bar';
 import { ActionColumn } from '../../components/action_column';
 
 export interface RiskInputsTabProps extends Record<string, unknown> {
-  entityType: RiskScoreEntity;
+  entityType: RiskScoreEntityType;
   entityName: string;
   scopeId: string;
 }
@@ -56,9 +56,9 @@ export const RiskInputsTab = ({ entityType, entityName, scopeId }: RiskInputsTab
   const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
 
   const nameFilterQuery = useMemo(() => {
-    if (entityType === RiskScoreEntity.host) {
+    if (entityType === RiskScoreEntityType.host) {
       return buildHostNamesFilter([entityName]);
-    } else if (entityType === RiskScoreEntity.user) {
+    } else if (entityType === RiskScoreEntityType.user) {
       return buildUserNamesFilter([entityName]);
     }
   }, [entityName, entityType]);

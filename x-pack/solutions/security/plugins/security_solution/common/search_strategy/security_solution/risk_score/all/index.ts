@@ -10,17 +10,13 @@ import type { IEsSearchResponse } from '@kbn/search-types';
 import { EntityRiskLevels, EntityRiskLevelsEnum } from '../../../../api/entity_analytics/common';
 import type { EntityRiskScoreRecord } from '../../../../api/entity_analytics/common';
 import type { Inspect, Maybe, SortField } from '../../../common';
+import type { RiskScoreEntityType } from '../common';
 
-export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
+export interface RiskScoreStrategyResponse<T extends RiskScoreEntityType>
+  extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
   totalCount: number;
-  data: HostRiskScore[] | undefined;
-}
-
-export interface UsersRiskScoreStrategyResponse extends IEsSearchResponse {
-  inspect?: Maybe<Inspect>;
-  totalCount: number;
-  data: UserRiskScore[] | undefined;
+  data: Array<EntityRiskScore<T>> | undefined;
 }
 
 export interface RiskStats extends EntityRiskScoreRecord {
@@ -31,25 +27,15 @@ export interface RiskStats extends EntityRiskScoreRecord {
 export const RiskSeverity = EntityRiskLevels.enum;
 export type RiskSeverity = EntityRiskLevels;
 
-export interface HostRiskScore {
+export type EntityRiskScore<Entity extends RiskScoreEntityType> = {
   '@timestamp': string;
-  host: {
-    name: string;
-    risk: RiskStats;
-  };
   alertsCount?: number;
   oldestAlertTimestamp?: string;
-}
+} & Record<Entity, { name: string; risk: RiskStats }>;
 
-export interface UserRiskScore {
-  '@timestamp': string;
-  user: {
-    name: string;
-    risk: RiskStats;
-  };
-  alertsCount?: number;
-  oldestAlertTimestamp?: string;
-}
+export type HostRiskScore = EntityRiskScore<RiskScoreEntityType.host>;
+export type UserRiskScore = EntityRiskScore<RiskScoreEntityType.user>;
+export type ServiceRiskScore = EntityRiskScore<RiskScoreEntityType.service>;
 
 export interface RuleRisk {
   rule_name: string;
@@ -67,6 +53,9 @@ export enum RiskScoreFields {
   userName = 'user.name',
   userRiskScore = 'user.risk.calculated_score_norm',
   userRisk = 'user.risk.calculated_level',
+  serviceName = 'service.name',
+  serviceRiskScore = 'service.risk.calculated_score_norm',
+  serviceRisk = 'service.risk.calculated_level',
   alertsCount = 'alertsCount',
 }
 
@@ -74,20 +63,24 @@ export interface RiskScoreItem {
   _id?: Maybe<string>;
   [RiskScoreFields.hostName]: Maybe<string>;
   [RiskScoreFields.userName]: Maybe<string>;
+  [RiskScoreFields.serviceName]: Maybe<string>;
 
   [RiskScoreFields.timestamp]: Maybe<string>;
 
   [RiskScoreFields.hostRisk]: Maybe<EntityRiskLevels>;
   [RiskScoreFields.userRisk]: Maybe<EntityRiskLevels>;
+  [RiskScoreFields.serviceRisk]: Maybe<EntityRiskLevels>;
 
   [RiskScoreFields.hostRiskScore]: Maybe<number>;
   [RiskScoreFields.userRiskScore]: Maybe<number>;
+  [RiskScoreFields.serviceRiskScore]: Maybe<number>;
 
   [RiskScoreFields.alertsCount]: Maybe<number>;
 }
 
-export const isUserRiskScore = (risk: HostRiskScore | UserRiskScore): risk is UserRiskScore =>
-  'user' in risk;
+export const isUserRiskScore = (
+  risk: EntityRiskScore<RiskScoreEntityType>
+): risk is EntityRiskScore<RiskScoreEntityType> => 'user' in risk;
 
 export const EMPTY_SEVERITY_COUNT = {
   [EntityRiskLevelsEnum.Critical]: 0,

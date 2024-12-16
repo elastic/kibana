@@ -16,7 +16,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../../common/search_strategy';
 import { EntitiesList } from '../entities_list';
 import { useEntityStoreStatus } from '../hooks/use_entity_store';
 import { EntityAnalyticsRiskScores } from '../../entity_analytics_risk_score';
@@ -74,10 +74,10 @@ const EntityStoreDashboardPanelsComponent = () => {
       {riskEngineStatus.data?.risk_engine_status !== RiskEngineStatusEnum.NOT_INSTALLED && (
         <>
           <EuiFlexItem>
-            <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.user} />
+            <EntityAnalyticsRiskScores riskEntity={RiskScoreEntityType.user} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
+            <EntityAnalyticsRiskScores riskEntity={RiskScoreEntityType.host} />
           </EuiFlexItem>
         </>
       )}

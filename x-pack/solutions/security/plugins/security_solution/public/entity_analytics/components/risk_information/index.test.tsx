@@ -9,9 +9,9 @@ import { render, fireEvent, within } from '@testing-library/react';
 import React from 'react';
 import { RiskInformationButtonEmpty } from '.';
 import { TestProviders } from '../../../common/mock';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/search_strategy';
 
-describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
+describe.each([RiskScoreEntityType.host, RiskScoreEntityType.user])(
   'Risk Information entityType: %s',
   (riskEntity) => {
     describe('RiskInformationButtonEmpty', () => {

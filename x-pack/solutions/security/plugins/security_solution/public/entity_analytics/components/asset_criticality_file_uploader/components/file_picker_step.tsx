@@ -94,22 +94,24 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           <ul className={listStyle}>
             <li>
               <FormattedMessage
-                defaultMessage="Entity type: Indicate whether the entity is a {host} or a {user}."
+                defaultMessage="Entity type: Indicate whether the entity is a {host}, {user}, or {service}."
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetTypeDescription"
                 values={{
                   host: <b>{'host'}</b>,
                   user: <b>{'user'}</b>,
+                  service: <b>{'service'}</b>,
                 }}
               />
             </li>
             <li>
               {
                 <FormattedMessage
-                  defaultMessage="Identifier: Specify the entity's {hostName} or {userName}."
+                  defaultMessage="Identifier: Specify the entity's {hostName}, {userName} or {serviceName}"
                   id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetIdentifierDescription"
                   values={{
                     hostName: <b>{'host.name'}</b>,
                     userName: <b>{'user.name'}</b>,
+                    serviceName: <b>{'service.name'}</b>,
                   }}
                 />
               }

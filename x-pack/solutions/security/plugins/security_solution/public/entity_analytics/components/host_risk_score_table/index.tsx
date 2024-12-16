@@ -26,7 +26,7 @@ import type {
   RiskSeverity,
   RiskScoreFields,
 } from '../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/search_strategy';
 import type { State } from '../../../common/store';
 import * as i18n from '../../../explore/hosts/components/hosts_table/translations';
 import * as i18nHosts from './translations';
@@ -182,14 +182,14 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
       headerFilters={
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
-            <RiskInformationButtonEmpty riskEntity={RiskScoreEntity.host} />
+            <RiskInformationButtonEmpty riskEntity={RiskScoreEntityType.host} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFilterGroup>
               <SeverityFilter
                 selectedItems={severitySelectionRedux}
                 onSelect={onSelect}
-                riskEntity={RiskScoreEntity.host}
+                riskEntity={RiskScoreEntityType.host}
               />
             </EuiFilterGroup>
           </EuiFlexItem>

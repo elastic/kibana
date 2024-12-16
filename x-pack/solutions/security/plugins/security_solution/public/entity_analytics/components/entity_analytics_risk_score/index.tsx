@@ -14,7 +14,7 @@ import { getRiskScoreColumns } from './columns';
 import { LastUpdatedAt } from '../../../common/components/last_updated_at';
 import { HeaderSection } from '../../../common/components/header_section';
 import type { RiskSeverity } from '../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/search_strategy';
 import { generateSeverityFilter } from '../../../explore/hosts/store/helpers';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -42,7 +42,11 @@ import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 export const ENTITY_RISK_SCORE_TABLE_ID = 'entity-risk-score-table';
 
-const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
+const EntityAnalyticsRiskScoresComponent = <EntityType extends RiskScoreEntityType>({
+  riskEntity,
+}: {
+  riskEntity: EntityType;
+}) => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
   const entity = useEntityInfo(riskEntity);
@@ -57,7 +61,8 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
         {
           title: getRiskEntityTranslation(riskEntity),
           selectedOptions: [entityName],
-          fieldName: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
+          // TODO support service entity
+          fieldName: riskEntity === RiskScoreEntityType.host ? 'host.name' : 'user.name',
         },
       ]);
     },
@@ -67,9 +72,10 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
   const openEntityOnExpandableFlyout = useCallback(
     (entityName: string) => {
       openRightPanel({
-        id: riskEntity === RiskScoreEntity.host ? HostPanelKey : UserPanelKey,
+        id: riskEntity === RiskScoreEntityType.host ? HostPanelKey : UserPanelKey,
         params: {
-          [riskEntity === RiskScoreEntity.host ? 'hostName' : 'userName']: entityName,
+          // TODO support service entity
+          [riskEntity === RiskScoreEntityType.host ? 'hostName' : 'userName']: entityName,
           contextID: ENTITY_RISK_SCORE_TABLE_ID,
           scopeId: ENTITY_RISK_SCORE_TABLE_ID,
         },

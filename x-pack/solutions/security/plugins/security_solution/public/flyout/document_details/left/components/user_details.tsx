@@ -33,7 +33,7 @@ import { UserOverview } from '../../../../overview/components/user_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { NetworkDetailsLink } from '../../../../common/components/links';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../../common/search_strategy';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import { CellActions } from '../../shared/components/cell_actions';
@@ -227,7 +227,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
         ? [
             {
               field: 'risk',
-              name: ENTITY_RISK_LEVEL(RiskScoreEntity.host),
+              name: ENTITY_RISK_LEVEL(RiskScoreEntityType.host),
               truncateText: false,
               mobileOptions: { show: true },
               sortable: false,

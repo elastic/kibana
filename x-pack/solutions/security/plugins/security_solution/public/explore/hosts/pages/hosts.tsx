@@ -26,7 +26,7 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { LastEventIndexKey, RiskScoreEntity } from '../../../../common/search_strategy';
+import { LastEventIndexKey, RiskScoreEntityType } from '../../../../common/search_strategy';
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import type { State } from '../../../common/store';
@@ -97,7 +97,7 @@ const HostsComponent = () => {
     }
 
     if (tabName === HostsTableType.risk) {
-      const severityFilter = generateSeverityFilter(severitySelection, RiskScoreEntity.host);
+      const severityFilter = generateSeverityFilter(severitySelection, RiskScoreEntityType.host);
       return [...globalFilters, ...hostNameExistsFilter, ...severityFilter];
     }
 

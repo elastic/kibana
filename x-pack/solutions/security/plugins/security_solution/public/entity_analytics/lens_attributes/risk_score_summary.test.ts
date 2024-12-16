@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RiskScoreEntity } from '../../../common/entity_analytics/risk_engine';
+import { RiskScoreEntityType } from '../../../common/entity_analytics/risk_engine';
 import { renderHook } from '@testing-library/react-hooks';
 import { getRiskScoreSummaryAttributes } from './risk_score_summary';
 import { RiskSeverity } from '../../../common/search_strategy';
@@ -36,7 +36,7 @@ describe('getRiskScoreSummaryAttributes', () => {
             severity: RiskSeverity.Low,
             query: `user.name: test.user`,
             spaceId: 'default',
-            riskEntity: RiskScoreEntity.user,
+            riskEntity: RiskScoreEntityType.user,
           }),
         }),
       { wrapper }
@@ -53,7 +53,7 @@ describe('getRiskScoreSummaryAttributes', () => {
             severity: RiskSeverity.Low,
             query: `user.name: test.user`,
             spaceId: 'default',
-            riskEntity: RiskScoreEntity.user,
+            riskEntity: RiskScoreEntityType.user,
           }),
         }),
       { wrapper }
@@ -72,7 +72,7 @@ describe('getRiskScoreSummaryAttributes', () => {
             severity: RiskSeverity.Low,
             query,
             spaceId: 'default',
-            riskEntity: RiskScoreEntity.user,
+            riskEntity: RiskScoreEntityType.user,
           }),
           applyGlobalQueriesAndFilters: false,
         }),

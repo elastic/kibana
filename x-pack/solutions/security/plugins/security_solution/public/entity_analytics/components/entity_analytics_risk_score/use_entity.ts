@@ -11,7 +11,7 @@ import { UsersTableType } from '../../../explore/users/store/model';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 import { HostsTableType, HostsType } from '../../../explore/hosts/store/model';
 
-import { RiskScoreEntity } from '../../../../common/search_strategy/security_solution/risk_score';
+import { RiskScoreEntityType } from '../../../../common/search_strategy/security_solution/risk_score';
 import { usersActions } from '../../../explore/users/store';
 import { hostsActions } from '../../../explore/hosts/store';
 import { SecurityPageName } from '../../../app/types';
@@ -21,10 +21,10 @@ const HOST_RISK_KPI_QUERY_ID = 'headerHostRiskScoreKpiQuery';
 const USER_RISK_TABLE_QUERY_ID = 'userRiskDashboardTable';
 const USER_RISK_KPI_QUERY_ID = 'headerUserRiskScoreKpiQuery';
 
-export const useEntityInfo = (riskEntity: RiskScoreEntity) => {
+export const useEntityInfo = (riskEntity: RiskScoreEntityType) => {
   const dispatch = useDispatch();
 
-  return riskEntity === RiskScoreEntity.host
+  return riskEntity === RiskScoreEntityType.host
     ? {
         linkProps: {
           deepLinkId: SecurityPageName.hosts,
