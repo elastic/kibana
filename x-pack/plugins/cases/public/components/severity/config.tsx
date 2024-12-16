@@ -34,10 +34,10 @@ export const SeverityHealth: React.FC<Props> = ({ severity }) => {
   const { euiTheme } = useEuiTheme();
 
   const severityData = {
-    low: { color: euiTheme.colors.vis.euiColorVis0, label: LOW },
-    medium: { color: euiTheme.colors.vis.euiColorVis5, label: MEDIUM },
-    high: { color: euiTheme.colors.vis.euiColorVis7, label: HIGH },
-    critical: { color: euiTheme.colors.vis.euiColorVis9, label: CRITICAL },
+    low: { color: euiTheme.colors.success, label: LOW },
+    medium: { color: euiTheme.colors.warning, label: MEDIUM },
+    high: { color: euiTheme.colors.accent, label: HIGH },
+    critical: { color: euiTheme.colors.danger, label: CRITICAL },
   };
 
   const { color, label } = severityData[severity];

@@ -33,19 +33,19 @@ export const SeverityFilter: React.FC<Props> = ({ selectedSeverity, onSeverityCh
 
   const severities = {
     [CaseSeverity.LOW]: {
-      color: euiTheme.colors.vis.euiColorVis0,
+      color: euiTheme.colors.success,
       label: i18n.SEVERITY_LOW_LABEL,
     },
     [CaseSeverity.MEDIUM]: {
-      color: euiTheme.colors.vis.euiColorVis5,
+      color: euiTheme.colors.warning,
       label: i18n.SEVERITY_MEDIUM_LABEL,
     },
     [CaseSeverity.HIGH]: {
-      color: euiTheme.colors.vis.euiColorVis7,
+      color: euiTheme.colors.accent,
       label: i18n.SEVERITY_HIGH_LABEL,
     },
     [CaseSeverity.CRITICAL]: {
-      color: euiTheme.colors.vis.euiColorVis9,
+      color: euiTheme.colors.danger,
       label: i18n.SEVERITY_CRITICAL_LABEL,
     },
   };
