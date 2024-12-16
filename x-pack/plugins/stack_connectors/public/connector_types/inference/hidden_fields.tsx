@@ -57,32 +57,3 @@ export const getProviderConfigHiddenField = (
     }}
   />
 );
-
-export const getTaskTypeConfigHiddenField = (
-  taskTypeSchema: ConfigEntryView[],
-  setTaskTypeFormFields: React.Dispatch<React.SetStateAction<ConfigEntryView[]>>,
-  isSubmitting: boolean
-) => (
-  <UseField
-    path="config.taskTypeConfig"
-    component={HiddenField}
-    config={{
-      validations: [
-        {
-          validator: getNonEmptyValidator(
-            taskTypeSchema,
-            (requiredFormFields) => {
-              const formFields = [
-                ...requiredFormFields,
-                ...(taskTypeSchema ?? []).filter((f) => !f.required),
-              ];
-              setTaskTypeFormFields(formFields.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
-            },
-            isSubmitting
-          ),
-          isBlocking: true,
-        },
-      ],
-    }}
-  />
-);
