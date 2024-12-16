@@ -126,6 +126,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.header.waitUntilLoadingHasFinished();
       });
 
+      after(async () => {
+        await samlAuth.deleteCustomRole();
+      });
+
       it('hides the component templates tab', async () => {
         await testSubjects.missingOrFail('component_templatesTab');
       });
