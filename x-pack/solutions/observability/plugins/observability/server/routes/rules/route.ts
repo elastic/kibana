@@ -14,7 +14,8 @@ const alertsDynamicIndexPatternRoute = createObservabilityServerRoute({
   security: {
     authz: {
       enabled: false,
-      reason: 'This endpoint returns alert index names for a set of registration contexts and has traditionally required no specific authorization',
+      reason:
+        'This endpoint returns alert index names for a set of registration contexts and has traditionally required no specific authorization',
     },
   },
   options: { access: 'public' },
