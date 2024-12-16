@@ -13,9 +13,9 @@ import * as Fsp from 'fs/promises';
 import * as Peggy from '@kbn/peggy';
 import { asyncForEach } from '@kbn/std';
 import { withFastAsyncTransform, TransformConfig } from '@kbn/babel-transform';
-import { makeMatcher } from '@kbn/picomatcher/make_matcher';
+import { makeMatcher } from '@kbn/picomatcher';
 import { PackageFileMap } from '@kbn/repo-file-maps';
-import { getRepoFiles } from '@kbn/get-repo-files/get_repo_files';
+import { getRepoFiles } from '@kbn/get-repo-files';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import path from 'path';
