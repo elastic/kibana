@@ -5,6 +5,7 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
+      "list_executed_pipelines": "__flag__",
       "pipeline": "",
       "refresh": [
         "true",
@@ -25,7 +26,8 @@
         "all",
         "index-setting"
       ],
-      "require_alias": "__flag__"
+      "require_alias": "__flag__",
+      "require_data_stream": "__flag__"
     },
     "methods": [
       "POST",
