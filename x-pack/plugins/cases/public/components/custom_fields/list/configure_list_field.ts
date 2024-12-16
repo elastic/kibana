@@ -35,9 +35,12 @@ export const configureListCustomFieldFactory: CustomFieldFactory<
   getFilterOptions: ({ options }) => options.map((option) => ({ ...option, value: option.key })),
   convertValueToDisplayText: (
     value: CaseCustomFieldList['value'],
-    configuration: ListCustomFieldConfiguration
+    configuration?: ListCustomFieldConfiguration
   ) => {
     if (!value) return '';
+    // If field configuration was deleted, assume the label in the value is correct
+    if (!configuration) return Object.values(value)[0];
+    // If field configuration still exists, pull the most recent label in case it has been renamed
     const selectedKey = Object.keys(value)[0];
     const option = configuration.options.find((opt) => opt.key === selectedKey);
     return option?.label ?? '';

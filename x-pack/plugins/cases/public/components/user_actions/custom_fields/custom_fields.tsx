@@ -30,9 +30,7 @@ const getLabelTitle = (
   const value = Array.isArray(customFieldValue) ? customFieldValue[0] : customFieldValue;
 
   const { convertValueToDisplayText } = customFieldsBuilder[customField.type]();
-  const displayValue = customFieldConfiguration
-    ? convertValueToDisplayText?.(value, customFieldConfiguration) ?? value
-    : value;
+  const displayValue = convertValueToDisplayText?.(value, customFieldConfiguration) ?? value;
 
   return `${i18n.CHANGED_FIELD.toLowerCase()} ${label} ${i18n.TO} "${displayValue}"`;
 };

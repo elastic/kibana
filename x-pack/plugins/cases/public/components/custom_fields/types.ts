@@ -60,7 +60,7 @@ export type CustomFieldFactory<
   getFilterOptions?: (configuration: I) => CustomFieldFactoryFilterOption[];
   getDefaultValue?: () => T['value'];
   convertNullToEmpty?: (value: T['value']) => string;
-  convertValueToDisplayText?: (value: T['value'], configuration: I) => string;
+  convertValueToDisplayText?: (value: T['value'], configuration?: I) => string;
 };
 
 export type CustomFieldBuilderMap = {
