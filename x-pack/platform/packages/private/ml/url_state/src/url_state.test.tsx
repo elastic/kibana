@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, type FC } from 'react';
-import { render, act } from '@testing-library/react';
+import { render, act, renderHook } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import {
@@ -19,6 +19,12 @@ import {
 
 const mockHistoryInitialState =
   "?_a=(mlExplorerFilter:(),mlExplorerSwimlane:(viewByFieldName:action),query:(query_string:(analyze_wildcard:!t,query:'*')))&_g=(ml:(jobIds:!(dec-2)),refreshInterval:(display:Off,pause:!f,value:0),time:(from:'2019-01-01T00:03:40.000Z',mode:absolute,to:'2019-08-30T11:55:07.000Z'))&savedSearchId=571aaf70-4c88-11e8-b3d7-01146121b73d";
+
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <MemoryRouter>
+    <UrlStateProvider>{children}</UrlStateProvider>
+  </MemoryRouter>
+);
 
 describe('getUrlState', () => {
   test('properly decode url with _g and _a', () => {
@@ -152,39 +158,24 @@ describe('useUrlState', () => {
 
 describe('usePageUrlState', () => {
   it('manages page-specific state with default values', () => {
-    const TestComponent: FC = () => {
-      const [pageState, setPageState] = usePageUrlState<{
-        pageKey: 'testPage';
-        pageUrlState: {
-          defaultValue: string;
-        };
-      }>('testPage', {
-        defaultValue: 'initial',
-      });
-
-      return (
-        <>
-          <button onClick={() => setPageState({ defaultValue: 'updated' })}>Update</button>
-          <div data-test-subj="pageState">{pageState?.defaultValue}</div>
-        </>
-      );
+    const pageKey = 'testPage';
+    const defaultPageState = {
+      defaultValue: 'initial',
     };
 
-    const { getByText, getByTestId } = render(
-      <MemoryRouter>
-        <UrlStateProvider>
-          <TestComponent />
-        </UrlStateProvider>
-      </MemoryRouter>
-    );
+    const updatedPageState = {
+      defaultValue: 'updated',
+    };
 
-    expect(getByTestId('pageState').innerHTML).toBe('initial');
+    const { result } = renderHook(() => usePageUrlState(pageKey, defaultPageState), { wrapper });
+
+    expect(result.current[0]).toEqual(defaultPageState);
 
     act(() => {
-      getByText('Update').click();
+      result.current[1](updatedPageState);
     });
 
-    expect(getByTestId('pageState').innerHTML).toBe('updated');
+    expect(result.current[0]).toEqual(updatedPageState);
   });
 });
 
@@ -195,43 +186,19 @@ describe('useGlobalUrlState', () => {
       time: { from: 'now-15m', to: 'now' },
     };
 
-    const TestComponent: FC = () => {
-      const [globalState, setGlobalState] = useGlobalUrlState(defaultState);
-
-      return (
-        <>
-          <button
-            onClick={() =>
-              setGlobalState({
-                ml: { jobIds: ['updated-job'] },
-                time: { from: 'now-1h', to: 'now' },
-              })
-            }
-          >
-            Update
-          </button>
-          <div data-test-subj="globalState">{JSON.stringify(globalState)}</div>
-        </>
-      );
-    };
-
-    const { getByText, getByTestId } = render(
-      <MemoryRouter>
-        <UrlStateProvider>
-          <TestComponent />
-        </UrlStateProvider>
-      </MemoryRouter>
-    );
-
-    expect(JSON.parse(getByTestId('globalState').innerHTML)).toEqual(defaultState);
-
-    act(() => {
-      getByText('Update').click();
-    });
-
-    expect(JSON.parse(getByTestId('globalState').innerHTML)).toEqual({
+    const updatedState = {
       ml: { jobIds: ['updated-job'] },
       time: { from: 'now-1h', to: 'now' },
+    };
+
+    const { result } = renderHook(() => useGlobalUrlState(defaultState), { wrapper });
+
+    expect(result.current[0]).toEqual(defaultState);
+
+    act(() => {
+      result.current[1](updatedState);
     });
+
+    expect(result.current[0]).toEqual(updatedState);
   });
 });
