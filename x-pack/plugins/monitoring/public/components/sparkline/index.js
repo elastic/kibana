@@ -10,14 +10,15 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { isEqual } from 'lodash';
 import { transparentize } from 'polished';
+import { euiFontSize } from '@elastic/eui';
 
 import { SparklineFlotChart } from './sparkline_flot_chart';
 
 // TODO: Replace with EUI tooltip
 const sparklineTooltipStyle = (theme) => css`
-  font-weight: normal;
+  font-weight: ${theme.euiTheme.font.weight.regular};
   background: ${transparentize(0.3, theme.euiTheme.colors.darkestShade)};
-  font-size: ${theme.euiTheme.font.scale.xs};
+  font-size: ${euiFontSize(theme, 'xs')};
   padding: ${theme.euiTheme.size.xs};
   border-radius: ${theme.euiTheme.border.radius.medium};
   pointer-events: none;
@@ -41,7 +42,7 @@ const tooltipContainerStyle = (theme) => css`
 `;
 
 const tooltipCaretStyle = (theme) => css`
-  font-size: ${theme.euiTheme.font.scale.l};
+  font-size: ${euiFontSize(theme, 'l')};
   color: ${transparentize(0.3, theme.euiTheme.colors.darkestShade)};
   display: none;
 `;

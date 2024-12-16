@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiIcon,
   EuiToolTip,
+  euiFontSize,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,15 +34,15 @@ import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link'
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-const clusterCellExpired = (theme) => css`
+const clusterCellExpiredStyle = (theme) => css`
   color: ${theme.euiTheme.colors.textParagraph};
 `;
 
-const clusterCellLicense = (theme) => css`
-  font-size: ${theme.euiTheme.font.scale.m};
+const clusterCellLicenseStyle = (theme) => css`
+  font-size: ${euiFontSize(theme, 'm')};
 `;
 
-const clusterCellExpiration = (theme) => css`
+const clusterCellExpirationStyle = (theme) => css`
   color: ${theme.euiTheme.colors.darkShade};
 `;
 
@@ -209,7 +210,7 @@ const getColumns = (
         if (!licenseType) {
           return (
             <div>
-              <div css={clusterCellLicense}>N/A</div>
+              <div css={clusterCellLicenseStyle}>N/A</div>
             </div>
           );
         }
@@ -218,7 +219,7 @@ const getColumns = (
           const licenseExpiry = () => {
             if (license.expiry_date_in_millis < moment().valueOf()) {
               // license is expired
-              return <span css={clusterCellExpired}>Expired</span>;
+              return <span css={clusterCellExpiredStyle}>Expired</span>;
             }
 
             // license is fine
@@ -227,8 +228,8 @@ const getColumns = (
 
           return (
             <div>
-              <div css={clusterCellLicense}>{capitalize(licenseType)}</div>
-              <div css={clusterCellExpiration}>
+              <div css={clusterCellLicenseStyle}>{capitalize(licenseType)}</div>
+              <div css={clusterCellExpirationStyle}>
                 {showLicenseExpiration ? licenseExpiry() : null}
               </div>
             </div>

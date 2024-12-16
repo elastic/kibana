@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiToolTip,
   UseEuiTheme,
+  euiFontSize,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -45,7 +46,7 @@ import { formatLastSeenTimestamp } from '../format_last_seen_timestamp';
 import type { SetupMode } from '../../setup_mode/types';
 
 const tableCellSplitNumber = (theme: UseEuiTheme) => css`
-  font-size: ${theme.euiTheme.font.scale.m};
+  font-size: ${euiFontSize(theme, 'm')};
 `;
 
 const getColumns = (

@@ -16,7 +16,7 @@ import { PluginStatement } from './plugin_statement';
 import { Vertex } from './types';
 
 const spaceContainerStyle = (theme: UseEuiTheme) => css`
-  background-color: ${theme.euiTheme.colors.emptyShade};
+  background-color: ${theme.euiTheme.colors.backgroundBasePlain};
   align-self: stretch;
   display: flex;
   // Separates the left border spaces properly
@@ -55,8 +55,8 @@ const listItemStyle = (theme: UseEuiTheme) => css`
   }
 `;
 
-const conditionalStyle = css`
-  font-weight: bold;
+const conditionalStyle = (theme: UseEuiTheme) => css`
+  font-weight: ${theme.euiTheme.font.weight.bold};
 `;
 
 function renderStatementName(name: string, onVertexSelected: MouseEventHandler<HTMLButtonElement>) {

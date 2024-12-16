@@ -8,7 +8,7 @@
 import React from 'react';
 import { capitalize } from 'lodash';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiStat, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiStat, EuiToolTip, euiTextTruncate } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
@@ -21,9 +21,7 @@ import { KibanaStatusIcon } from '../status_icon';
 
 const summaryStatusNoWrapStatStyle = css`
   p {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    ${euiTextTruncate()}
   }
 `;
 

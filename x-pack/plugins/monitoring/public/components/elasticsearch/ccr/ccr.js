@@ -29,7 +29,7 @@ import { AlertsStatus } from '../../../alerts/status';
  * We want the collapsed table (that shows the shard data) to be inline
  * with the columns from the main table so we need to remove the padding
  */
-const ccrListingTableStyles = css`
+const ccrListingTableStyle = css`
   .euiTableRow-isExpandedRow > .euiTableRowCell > .euiTableCellContent {
     padding: 0;
   }
@@ -206,7 +206,7 @@ export const Ccr = (props) => {
 
     return (
       <EuiInMemoryTable
-        css={ccrListingTableStyles}
+        css={ccrListingTableStyle}
         columns={[
           {
             field: 'index',

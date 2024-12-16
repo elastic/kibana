@@ -29,7 +29,7 @@ import { LARGE_FLOAT, LARGE_BYTES, LARGE_ABBREVIATED } from '../../../../common/
 import { formatMetric } from '../../../lib/format_number';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
-const statusStyles = css`
+const statusStyle = css`
   display: flex;
   align-items: center;
 `;
@@ -77,7 +77,7 @@ const getColumns = (alerts) => {
       field: 'status',
       sortable: true,
       render: (value) => (
-        <div css={statusStyles} title={`Index status: ${value}`}>
+        <div css={statusStyle} title={`Index status: ${value}`}>
           <ElasticsearchStatusIcon status={value} />
           &nbsp;
           {capitalize(value)}
