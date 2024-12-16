@@ -9,9 +9,11 @@ import React, { useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { EuiSpacer } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
+import { useEuiTheme } from '@elastic/eui';
 import { EmbeddedMap } from './embedded_map';
 import { MapTypes } from '../../../../../../common/mobile/constants';
 import { EmbeddedMapSelect } from './embedded_map_select';
+import { StyleColorParams } from './map_layers/style_color_params';
 
 export function GeoMap({
   start,
@@ -27,7 +29,13 @@ export function GeoMap({
   dataView?: DataView;
 }) {
   const [selectedMap, selectMap] = useState(MapTypes.Http);
+  const { euiTheme } = useEuiTheme();
 
+  const styleColors = {
+    lineColor: euiTheme.colors.textParagraph,
+    labelColor: euiTheme.colors.textParagraph,
+    labelOutlineColor: euiTheme.colors.backgroundBasePlain,
+  } as StyleColorParams;
   return (
     <>
       <EmbeddedMapSelect selectedMap={selectedMap} onChange={selectMap} />
@@ -44,6 +52,7 @@ export function GeoMap({
           kuery={kuery}
           filters={filters}
           dataView={dataView}
+          styleColors={styleColors}
         />
       </div>
     </>

@@ -14,6 +14,7 @@ import { verifyApiAccess } from '../../lib/license_api_access';
 import { AlertingFrameworkHealth } from '../../types';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { getSecurityHealth } from '../../lib/get_security_health';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 
 export function healthRoute(
   router: AlertingRouter,
@@ -27,6 +28,7 @@ export function healthRoute(
     {
       path: '/api/alerts/_health',
       validate: false,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: isServerless ? 'internal' : 'public',
         summary: 'Get the alerting framework health',
