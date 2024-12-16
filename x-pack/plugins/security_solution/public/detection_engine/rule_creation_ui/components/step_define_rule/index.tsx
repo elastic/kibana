@@ -173,7 +173,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 }) => {
   const [{ ruleType, queryBar, machineLearningJobId, threshold }] = useFormData<DefineStepRule>({
     form,
-    watch: ['ruleType', 'queryBar', 'machineLearningJobId', 'threshold'],
+    watch: ['ruleType', 'queryBar', 'machineLearningJobId', 'threshold.field'],
   });
 
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
