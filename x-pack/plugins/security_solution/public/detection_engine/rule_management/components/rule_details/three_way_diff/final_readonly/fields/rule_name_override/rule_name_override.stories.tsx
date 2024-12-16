@@ -6,12 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
 import { RuleNameOverrideReadOnly } from './rule_name_override';
-import { FieldFinalReadOnly } from '../../field_final_readonly';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
-import { mockCustomQueryRule } from '../../storybook/mocks';
-import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: RuleNameOverrideReadOnly,
@@ -19,27 +14,12 @@ export default {
     'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/rule_name_override',
 };
 
-interface TemplateProps {
-  finalDiffableRule: DiffableRule;
-}
+export const Default = () => (
+  <RuleNameOverrideReadOnly ruleNameOverride={{ field_name: 'event.action' }} />
+);
 
-const Template: Story<TemplateProps> = (args) => {
-  return (
-    <ThreeWayDiffStorybookProviders
-      finalDiffableRule={args.finalDiffableRule}
-      fieldName="rule_name_override"
-    >
-      <FieldFinalReadOnly />
-    </ThreeWayDiffStorybookProviders>
-  );
-};
+export const EmptyStringValue = () => (
+  <RuleNameOverrideReadOnly ruleNameOverride={{ field_name: '' }} />
+);
 
-export const Default = Template.bind({});
-
-Default.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    rule_name_override: {
-      field_name: 'event.action',
-    },
-  }),
-};
+export const NoValue = () => <RuleNameOverrideReadOnly />;
