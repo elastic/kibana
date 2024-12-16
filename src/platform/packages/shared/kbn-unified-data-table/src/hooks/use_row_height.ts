@@ -108,8 +108,19 @@ export const useRowHeight = ({
 
   const onChangeRowHeight = useCallback(
     (newRowHeight: RowHeightSettingsProps['rowHeight']) => {
-      const newRowHeightLines: number =
-        newRowHeight === RowHeightMode.auto ? ROWS_HEIGHT_OPTIONS.auto : lineCountInput;
+      let newRowHeightLines: number;
+
+      switch (newRowHeight) {
+        case RowHeightMode.auto:
+          newRowHeightLines = ROWS_HEIGHT_OPTIONS.auto;
+          break;
+        case RowHeightMode.single:
+          newRowHeightLines = ROWS_HEIGHT_OPTIONS.single;
+          setLineCountInput(1); // normalize "single" to "custom" with value 1 and populate input
+          break;
+        default:
+          newRowHeightLines = lineCountInput;
+      }
 
       updateStoredRowHeight(newRowHeightLines, configRowHeight, storage, consumer, key);
       onUpdateRowHeight?.(newRowHeightLines);
