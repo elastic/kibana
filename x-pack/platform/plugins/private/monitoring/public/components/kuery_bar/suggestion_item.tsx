@@ -26,6 +26,8 @@ export const SuggestionItem: React.FC<Props> = ({
   suggestion,
 }) => {
   return (
+    // TODO: should be focusable and have relevant key events; try using an existing component from EUI
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
     <div
       css={suggestionItemContainerStyle(isSelected)}
       onClick={onClick}
