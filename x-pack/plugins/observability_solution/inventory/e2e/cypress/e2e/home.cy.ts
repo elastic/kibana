@@ -19,7 +19,7 @@ describe('Home page', () => {
     });
   });
 
-  after(() => {
+  afterEach(() => {
     cy.updateAdvancedSettings({
       'observability:entityCentricExperience': false,
     });

@@ -37,6 +37,10 @@ describe('Alert count', () => {
   beforeEach(() => {
     cy.loginAsSuperUser();
 
+    cy.updateAdvancedSettings({
+      'observability:entityCentricExperience': true,
+    });
+
     cy.intercept('GET', '/internal/entities/managed/enablement', {
       fixture: 'eem_enabled.json',
     }).as('getEEMStatus');
@@ -49,6 +53,9 @@ describe('Alert count', () => {
   });
 
   afterEach(() => {
+    cy.updateAdvancedSettings({
+      'observability:entityCentricExperience': false,
+    });
     entitiesSynthtrace.clean();
     cleanEntityAlerts();
   });
