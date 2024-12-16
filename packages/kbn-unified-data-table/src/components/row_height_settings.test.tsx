@@ -21,17 +21,24 @@ const renderRowHeightSettings = ({
 } = {}) => {
   const Wrapper = () => {
     const [rowHeight, setRowHeight] = useState<RowHeightSettingsProps['rowHeight']>();
-    const [rowHeightLines, setRowHeightLines] = useState<number>();
+    const [_, setRowHeightLines] = useState<number>();
+    const [lineCount, setLineCount] = useState<number>(3);
+
+    const onChange = (value: number) => {
+      setLineCount(value);
+      onChangeRowHeightLines?.(value);
+      setRowHeightLines(value);
+    };
 
     return (
       <RowHeightSettings
         label="Row height"
         rowHeight={rowHeight}
-        rowHeightLines={rowHeightLines}
         maxRowHeight={maxRowHeight}
         onChangeRowHeight={setRowHeight}
-        onChangeRowHeightLines={onChangeRowHeightLines || setRowHeightLines}
+        onChangeRowHeightLines={onChange}
         data-test-subj="rowHeightSettings"
+        lineCountInput={lineCount}
       />
     );
   };
@@ -68,7 +75,7 @@ describe('RowHeightSettings', () => {
     renderRowHeightSettings();
 
     const fieldNumber = screen.getByRole('spinbutton');
-    expect(fieldNumber).toHaveValue(2);
+    expect(fieldNumber).toHaveValue(3);
     fireEvent.change(fieldNumber, {
       target: { value: 10 },
     });
@@ -84,7 +91,7 @@ describe('RowHeightSettings', () => {
     renderRowHeightSettings({ onChangeRowHeightLines });
 
     const fieldNumber = screen.getByRole('spinbutton') as HTMLInputElement;
-    expect(fieldNumber).toHaveValue(2);
+    expect(fieldNumber).toHaveValue(3);
     fireEvent.change(fieldNumber, {
       target: { value: '10' },
     });
@@ -98,7 +105,7 @@ describe('RowHeightSettings', () => {
     renderRowHeightSettings({ onChangeRowHeightLines });
 
     const fieldNumber = screen.getByRole('spinbutton') as HTMLInputElement;
-    expect(fieldNumber).toHaveValue(2);
+    expect(fieldNumber).toHaveValue(3);
     fireEvent.change(fieldNumber, {
       target: { value: 10 },
     });
