@@ -19,7 +19,7 @@ export const createUpdatedColumn = (): TableColumn => {
       <FormattedRelativePreferenceDate value={value} dateFormat="M/D/YY" />
     ),
     sortable: true,
-    truncateText: false,
+    truncateText: true,
     align: 'center',
     width: '10%',
   };

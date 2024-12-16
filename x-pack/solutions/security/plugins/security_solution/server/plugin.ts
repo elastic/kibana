@@ -688,6 +688,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.telemetryReceiver
     );
 
+    this.siemMigrationsService.start(packageService);
+
     securityWorkflowInsightsService
       .start({
         esClient: core.elasticsearch.client.asInternalUser,

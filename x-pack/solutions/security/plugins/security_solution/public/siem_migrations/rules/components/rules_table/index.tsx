@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { EmptyMigration } from './empty_migration';
@@ -33,6 +34,7 @@ import { BulkActions } from './bulk_actions';
 import { SearchField } from './search_field';
 import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
+import { useGetRelatedIntegrations } from '../../service/hooks/use_get_integrations';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -63,6 +65,9 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     const { data: prebuiltRules = {}, isLoading: isPrebuiltRulesLoading } =
       useGetMigrationPrebuiltRules(migrationId);
+
+    const { integrations, isLoading: isIntegrationsLoading } =
+      useGetRelatedIntegrations(migrationId);
 
     const {
       data: { ruleMigrations, total } = { ruleMigrations: [], total: 0 },
@@ -180,7 +185,12 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [addError, installTranslatedMigrationRules]
     );
 
-    const isLoading = isStatsLoading || isPrebuiltRulesLoading || isDataLoading || isTableLoading;
+    const isLoading =
+      isStatsLoading ||
+      isPrebuiltRulesLoading ||
+      isIntegrationsLoading ||
+      isDataLoading ||
+      isTableLoading;
 
     const ruleActionsFactory = useCallback(
       (ruleMigration: RuleMigration, closeRulePreview: () => void) => {
@@ -221,13 +231,33 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [installSingleRule, isLoading]
     );
 
-    const getMigrationRule = useCallback(
+    const getMigrationRuleData = useCallback(
       (ruleId: string) => {
-        if (!isLoading && ruleMigrations.length) {
-          return ruleMigrations.find((item) => item.id === ruleId);
+        if (!isLoading && ruleMigrations.length && integrations) {
+          const ruleMigration = ruleMigrations.find((item) => item.id === ruleId);
+          let matchedPrebuiltRule: RuleResponse | undefined;
+          const relatedIntegrations: RelatedIntegration[] = [];
+          if (ruleMigration) {
+            // Find matched prebuilt rule if any and prioritize its installed version
+            const matchedPrebuiltRuleVersion = ruleMigration.elastic_rule?.prebuilt_rule_id
+              ? prebuiltRules[ruleMigration.elastic_rule.prebuilt_rule_id]
+              : undefined;
+            matchedPrebuiltRule =
+              matchedPrebuiltRuleVersion?.current ?? matchedPrebuiltRuleVersion?.target;
+
+            if (matchedPrebuiltRule?.related_integrations) {
+              relatedIntegrations.push(...matchedPrebuiltRule.related_integrations);
+            } else if (ruleMigration.elastic_rule?.integration_id) {
+              const integration = integrations[ruleMigration.elastic_rule.integration_id];
+              if (integration) {
+                relatedIntegrations.push(integration);
+              }
+            }
+          }
+          return { ruleMigration, matchedPrebuiltRule, relatedIntegrations };
         }
       },
-      [isLoading, ruleMigrations]
+      [integrations, isLoading, prebuiltRules, ruleMigrations]
     );
 
     const {
@@ -235,8 +265,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       openMigrationRuleDetails: openRulePreview,
     } = useMigrationRuleDetailsFlyout({
       isLoading,
-      prebuiltRules,
-      getMigrationRule,
+      getMigrationRuleData,
       ruleActionsFactory,
     });
 
@@ -244,6 +273,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       disableActions: isTableLoading,
       openMigrationRuleDetails: openRulePreview,
       installMigrationRule: installSingleRule,
+      getMigrationRuleData,
     });
 
     return (

@@ -396,6 +396,33 @@ paths:
                 additionalProperties:
                   $ref: '../../rule_migration.schema.yaml#/components/schemas/PrebuiltRuleVersion'
 
+  /internal/siem_migrations/rules/{migration_id}/integrations:
+    get:
+      summary: Retrieves all related integrations for a specific migration
+      operationId: GetRuleMigrationIntegrations
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves all related integrations
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to retrieve related integrations for
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates that related integrations have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: The map of related integrations, with the integration id as a key
+                additionalProperties:
+                  $ref: '../../../../../common/api/detection_engine/model/rule_schema/common_attributes.schema.yaml#/components/schemas/RelatedIntegration'
+
   # Rule migration resources APIs
 
   /internal/siem_migrations/rules/{migration_id}/resources:
