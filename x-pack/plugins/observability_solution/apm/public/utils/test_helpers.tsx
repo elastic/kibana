@@ -9,8 +9,8 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { render, waitFor } from '@testing-library/react';
-
 import type { MountRendererProps, ReactWrapper } from 'enzyme';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { mount } from 'enzyme';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import enzymeToJson from 'enzyme-to-json';
