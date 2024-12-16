@@ -35,6 +35,7 @@ export const NodeExpandButton = ({ x, y, onClick }: NodeExpandButtonProps) => {
         onClick={onClickHandler}
         iconSize="m"
         aria-label="Open or close node actions"
+        data-test-subj="nodeExpandButton"
       />
     </StyledNodeExpandButton>
   );

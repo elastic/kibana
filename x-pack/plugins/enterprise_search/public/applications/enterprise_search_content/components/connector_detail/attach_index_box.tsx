@@ -27,7 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { Connector } from '@kbn/search-connectors';
+import { Connector, MANAGED_CONNECTOR_INDEX_PREFIX } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 
@@ -65,66 +65,114 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
     createApiError,
     attachApiError,
   } = useValues(AttachIndexLogic);
-  const [selectedIndex, setSelectedIndex] = useState<
-    { label: string; shouldCreate?: boolean } | undefined
-  >(
-    connector.index_name
-      ? {
-          label: connector.index_name,
-        }
-      : undefined
-  );
-  const [selectedLanguage] = useState<string>();
-  const [query, setQuery] = useState<{
-    isFullMatch: boolean;
-    searchValue: string;
-  }>();
-  const [sanitizedName, setSanitizedName] = useState<string>(formatApiName(connector.name));
 
   const { makeRequest } = useActions(FetchAvailableIndicesAPILogic);
   const { data, status } = useValues(FetchAvailableIndicesAPILogic);
   const isLoading = [Status.IDLE, Status.LOADING].includes(status);
 
+  // Helper function to remove the managed connector index prefix from the index name
+  const removePrefixConnectorIndex = (connectorIndexName: string) => {
+    if (!connector.is_native) {
+      return connectorIndexName;
+    }
+    if (connectorIndexName.startsWith(MANAGED_CONNECTOR_INDEX_PREFIX)) {
+      return connectorIndexName.substring(MANAGED_CONNECTOR_INDEX_PREFIX.length);
+    }
+    return connectorIndexName;
+  };
+
+  // Helper function to add the managed connector index prefix to the index name
+  const prefixConnectorIndex = (connectorIndexName: string) => {
+    if (!connector.is_native) {
+      return connectorIndexName;
+    }
+    if (connectorIndexName.startsWith(MANAGED_CONNECTOR_INDEX_PREFIX)) {
+      return connectorIndexName;
+    }
+    return `${MANAGED_CONNECTOR_INDEX_PREFIX}${connectorIndexName}`;
+  };
+
+  const [query, setQuery] = useState<{
+    isFullMatch: boolean;
+    searchValue: string;
+  }>();
+  const [sanitizedName, setSanitizedName] = useState<string>(
+    prefixConnectorIndex(formatApiName(connector.name))
+  );
+
+  const [selectedIndex, setSelectedIndex] = useState<
+    { label: string; shouldCreate?: boolean } | undefined
+  >(
+    // For managed connectors, the index name should be displayed without prefix
+    // As `content-` is fixed UI element
+    connector.index_name
+      ? {
+          label: removePrefixConnectorIndex(connector.index_name),
+        }
+      : undefined
+  );
+
   const onSave = () => {
-    if (selectedIndex?.shouldCreate) {
-      createIndex({ indexName: selectedIndex.label, language: selectedLanguage ?? null });
-    } else if (selectedIndex && !(selectedIndex.label === connector.index_name)) {
-      attachIndex({ connectorId: connector.id, indexName: selectedIndex.label });
+    if (!selectedIndex) return;
+    // Always attach and/or create prefixed index for managed connectors
+    const prefixedIndex = prefixConnectorIndex(selectedIndex.label);
+    if (selectedIndex.shouldCreate) {
+      createIndex({
+        indexName: prefixedIndex,
+        language: null,
+      });
+    } else if (connector.index_name !== prefixedIndex) {
+      attachIndex({
+        connectorId: connector.id,
+        indexName: prefixedIndex,
+      });
     }
   };
 
+  // For managed connectors ensure that only prefixed indices are displayed in the dropdown
+  // This takes care of the initial component state where all indices could be displayed briefly
   const options: Array<EuiComboBoxOptionOption<string>> = isLoading
     ? []
-    : data?.indexNames.map((name) => {
-        return {
+    : data?.indexNames
+        .filter((name) => !connector.is_native || name.startsWith(MANAGED_CONNECTOR_INDEX_PREFIX))
+        .map((name) => ({
           label: name,
-        };
-      }) ?? [];
+          value: removePrefixConnectorIndex(name),
+        })) ?? [];
 
   const hasMatchingOptions =
     data?.indexNames.some((name) =>
-      name.toLocaleLowerCase().includes(query?.searchValue.toLocaleLowerCase() ?? '')
-    ) ?? false;
-  const isFullMatch =
-    data?.indexNames.some(
-      (name) => name.toLocaleLowerCase() === query?.searchValue.toLocaleLowerCase()
+      name
+        .toLocaleLowerCase()
+        .includes(prefixConnectorIndex(query?.searchValue?.toLocaleLowerCase() || ''))
     ) ?? false;
 
-  const shouldPrependUserInputAsOption = !!query?.searchValue && hasMatchingOptions && !isFullMatch;
+  const isFullMatch =
+    data?.indexNames.some(
+      (name) =>
+        name.toLocaleLowerCase() ===
+        prefixConnectorIndex(query?.searchValue?.toLocaleLowerCase() || '')
+    ) ?? false;
+
+  const shouldPrependUserInputAsOption =
+    !!query &&
+    !!query.searchValue &&
+    query.searchValue !== MANAGED_CONNECTOR_INDEX_PREFIX &&
+    hasMatchingOptions &&
+    !isFullMatch;
 
   const groupedOptions: Array<EuiComboBoxOptionOption<string>> = shouldPrependUserInputAsOption
     ? [
-        ...[
-          {
-            label: CREATE_NEW_INDEX_GROUP_LABEL,
-            options: [
-              {
-                label: query.searchValue,
-              },
-            ],
-          },
-        ],
-        ...[{ label: SELECT_EXISTING_INDEX_GROUP_LABEL, options }],
+        {
+          label: CREATE_NEW_INDEX_GROUP_LABEL,
+          options: [
+            {
+              label: prefixConnectorIndex(query!.searchValue),
+              value: query!.searchValue,
+            },
+          ],
+        },
+        { label: SELECT_EXISTING_INDEX_GROUP_LABEL, options },
       ]
     : [{ label: SELECT_EXISTING_INDEX_GROUP_LABEL, options }];
 
@@ -144,7 +192,8 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
   }, [query]);
 
   useEffect(() => {
-    setSanitizedName(formatApiName(connector.name));
+    // Suggested name for managed connector should include the content- prefix
+    setSanitizedName(prefixConnectorIndex(formatApiName(connector.name)));
   }, [connector.name]);
 
   const { hash } = useLocation();
@@ -170,9 +219,10 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
           }
         )
       : attachApiError?.body?.message || createApiError?.body?.message || undefined;
+
   if (indexName) {
-    // We don't want to let people edit indices when on the index route
-    return <></>;
+    // Do not render when on the index route
+    return null;
   }
 
   return (
@@ -189,8 +239,8 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
         <FormattedMessage
           id="xpack.enterpriseSearch.attachIndexBox.thisIndexWillHoldTextLabel"
           defaultMessage="This index will hold your data source content, and is optimized with default field mappings
-        for relevant search experiences. Give your index a unique name and optionally set a default
-        language analyzer for the index."
+          for relevant search experiences. Give your index a unique name and optionally set a default
+          language analyzer for the index."
         />
       </EuiText>
       <EuiSpacer />
@@ -201,10 +251,20 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
               'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexLabel',
               { defaultMessage: 'Associated index' }
             )}
-            helpText={i18n.translate(
-              'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexHelpTextLabel',
-              { defaultMessage: 'You can use an existing index or create a new one.' }
-            )}
+            helpText={
+              connector.is_native
+                ? i18n.translate(
+                    'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedManagedConnectorIndexHelpTextLabel',
+                    {
+                      defaultMessage:
+                        'Managed connector indices must be prefixed. Use an existing index or create a new one.',
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexHelpTextLabel',
+                    { defaultMessage: 'You can use an existing index or create a new one.' }
+                  )
+            }
             error={error}
             isInvalid={!!error}
           >
@@ -217,11 +277,13 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
                 'xpack.enterpriseSearch.attachIndexBox.euiFormRow.indexSelector.customOption',
                 {
                   defaultMessage: 'Create index {searchValue}',
-                  values: { searchValue: '{searchValue}' },
+                  values: { searchValue: prefixConnectorIndex('{searchValue}') },
                 }
               )}
               isLoading={isLoading}
               options={groupedOptions}
+              singleSelection={{ asPlainText: connector.is_native }}
+              prepend={connector.is_native ? MANAGED_CONNECTOR_INDEX_PREFIX : undefined}
               onKeyDown={(event) => {
                 // Index name should not contain spaces
                 if (event.key === ' ') {
@@ -229,28 +291,34 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
                 }
               }}
               onSearchChange={(searchValue) => {
+                // Match by option value to ensure accurate comparison with non-prefixed
+                // user input for managed connectors
                 setQuery({
-                  isFullMatch: options.some((option) => option.label === searchValue),
-                  searchValue,
+                  isFullMatch: options.some(
+                    (option) => option.value === prefixConnectorIndex(searchValue)
+                  ),
+                  searchValue: prefixConnectorIndex(searchValue),
                 });
               }}
               onChange={(selection) => {
-                const currentSelection = selection[0] ?? undefined;
+                const currentSelection = selection[0];
                 const selectedIndexOption = currentSelection
                   ? {
-                      label: currentSelection.label,
+                      label: removePrefixConnectorIndex(currentSelection.label),
                       shouldCreate:
                         shouldPrependUserInputAsOption &&
-                        !!(currentSelection?.label === query?.searchValue),
+                        currentSelection.value === query?.searchValue,
                     }
                   : undefined;
                 setSelectedIndex(selectedIndexOption);
               }}
               selectedOptions={selectedIndex ? [selectedIndex] : undefined}
               onCreateOption={(value) => {
-                setSelectedIndex({ label: value.trim(), shouldCreate: true });
+                setSelectedIndex({
+                  label: removePrefixConnectorIndex(value.trim()),
+                  shouldCreate: true,
+                });
               }}
-              singleSelection
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -261,8 +329,12 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
           <EuiButton
             data-test-subj="entSearchContent-connector-connectorDetail-saveConfigurationButton"
             data-telemetry-id="entSearchContent-connector-connectorDetail-saveConfigurationButton"
-            onClick={() => onSave()}
-            disabled={!selectedIndex || selectedIndex.label === connector.index_name}
+            onClick={onSave}
+            disabled={
+              !selectedIndex ||
+              prefixConnectorIndex(selectedIndex.label) === connector.index_name ||
+              !!error
+            }
             isLoading={isSaveLoading}
           >
             {i18n.translate('xpack.enterpriseSearch.attachIndexBox.saveConfigurationButtonLabel', {
@@ -314,15 +386,13 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
                   }
                 )}
               </EuiButton>
-              {indexExists[sanitizedName] ? (
+              {indexExists[sanitizedName] && (
                 <EuiText size="xs">
                   {i18n.translate('xpack.enterpriseSearch.attachIndexBox.indexNameExistsError', {
                     defaultMessage: 'Index with name {indexName} already exists',
                     values: { indexName: sanitizedName },
                   })}
                 </EuiText>
-              ) : (
-                <></>
               )}
             </EuiFlexItem>
           </EuiFlexGroup>

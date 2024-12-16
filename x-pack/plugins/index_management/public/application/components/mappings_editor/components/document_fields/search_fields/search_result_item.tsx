@@ -108,6 +108,7 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
               'mappingsEditor__fieldsListItem__content--toggle': hasChildFields || hasMultiFields,
               'mappingsEditor__fieldsListItem__content--multiField': isMultiField,
             })}
+            tabIndex={0}
           >
             <EuiFlexItem
               grow={false}

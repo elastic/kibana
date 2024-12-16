@@ -11,18 +11,20 @@
     "requiredPlugins": [
       "charts",
       "data",
-      "fieldFormats", 
+      "fieldFormats",
       "dataViews",
       "discoverShared",
       "logsDataAccess",
       "observabilityShared",
       "share",
+      "spaces",
       "usageCollection",
+      "embeddable",
     ],
     "optionalPlugins": [
       "observabilityAIAssistant",
     ],
-    "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedDocViewer"],
+    "requiredBundles": ["kibanaUtils", "kibanaReact"],
     "extraPublicDirs": ["common"]
   }
 }

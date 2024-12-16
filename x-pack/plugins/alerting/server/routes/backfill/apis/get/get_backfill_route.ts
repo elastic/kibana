@@ -14,6 +14,7 @@ import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { transformBackfillToBackfillResponseV1 } from '../../transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const getBackfillRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -22,6 +23,7 @@ export const getBackfillRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/backfill/{id}`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'internal',
       },
@@ -31,7 +33,8 @@ export const getBackfillRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const params: GetBackfillRequestParamsV1 = req.params;
 
         const result = await rulesClient.getBackfill(params.id);

@@ -22,6 +22,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { SchemaFieldTypeSelect } from '..';
@@ -78,10 +79,12 @@ export const SchemaAddFieldModal: React.FC<Props> = ({
       ? FIELD_NAME_CORRECTED_NOTE(formattedFieldName)
       : FIELD_NAME_CORRECT_NOTE;
 
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiModal onClose={closeAddFieldModal} maxWidth={500}>
+    <EuiModal onClose={closeAddFieldModal} maxWidth={500} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{ADD_FIELD_MODAL_TITLE}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>{ADD_FIELD_MODAL_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiCallOut
@@ -130,7 +133,12 @@ export const SchemaAddFieldModal: React.FC<Props> = ({
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeAddFieldModal}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchSchemaAddFieldModalButton"
+          onClick={closeAddFieldModal}
+        >
+          {CANCEL_BUTTON_LABEL}
+        </EuiButtonEmpty>
         <EuiButton
           fill
           type="submit"

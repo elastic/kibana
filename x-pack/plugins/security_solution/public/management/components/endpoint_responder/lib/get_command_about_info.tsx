@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { EuiToolTipProps } from '@elastic/eui';
 import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -17,23 +18,28 @@ const UNSUPPORTED_COMMAND_INFO = i18n.translate(
   }
 );
 
-const DisabledTooltip = React.memo(() => {
-  return <EuiIconTip content={UNSUPPORTED_COMMAND_INFO} type="warning" color="danger" />;
-});
-DisabledTooltip.displayName = 'DisabledTooltip';
-
 export const getCommandAboutInfo = ({
   aboutInfo,
   isSupported,
+  tooltipContent = UNSUPPORTED_COMMAND_INFO,
+  dataTestSubj,
 }: {
-  aboutInfo: string;
+  aboutInfo: React.ReactNode;
   isSupported: boolean;
+  tooltipContent?: EuiToolTipProps['content'];
+  dataTestSubj?: string;
 }) => {
   return isSupported ? (
     aboutInfo
   ) : (
     <>
-      {aboutInfo} <DisabledTooltip />
+      {aboutInfo}{' '}
+      <EuiIconTip
+        anchorProps={{ 'data-test-subj': dataTestSubj }}
+        content={tooltipContent}
+        type="warning"
+        color="danger"
+      />
     </>
   );
 };

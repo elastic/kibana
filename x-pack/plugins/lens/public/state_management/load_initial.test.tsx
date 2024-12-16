@@ -17,7 +17,7 @@ import { Location, History } from 'history';
 import { act } from 'react-dom/test-utils';
 import { InitialAppState, loadInitial } from './lens_slice';
 import { Filter } from '@kbn/es-query';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { DOC_TYPE } from '../../common/constants';
 
 const history = {

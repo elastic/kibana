@@ -7,9 +7,7 @@
 
 import { XJsonLang } from '@kbn/monaco';
 import React, { FunctionComponent, useCallback } from 'react';
-import { FieldHook, XJson } from '../../../../../../shared_imports';
-
-const { useXJsonMode } = XJson;
+import { FieldHook } from '../../../../../../shared_imports';
 
 import { TextEditor } from './text_editor';
 
@@ -25,20 +23,17 @@ const defaultEditorOptions = {
 
 export const XJsonEditor: FunctionComponent<Props> = ({ field, editorProps }) => {
   const { value, setValue } = field;
-  const { xJson, setXJson, convertToJson } = useXJsonMode(value);
-
   const onChange = useCallback(
     (s: any) => {
-      setXJson(s);
-      setValue(convertToJson(s));
+      setValue(s);
     },
-    [setValue, setXJson, convertToJson]
+    [setValue]
   );
   return (
     <TextEditor
       field={field}
       editorProps={{
-        value: xJson,
+        value,
         languageId: XJsonLang.ID,
         options: defaultEditorOptions,
         onChange,

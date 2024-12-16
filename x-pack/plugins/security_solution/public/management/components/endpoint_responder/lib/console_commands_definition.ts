@@ -42,7 +42,7 @@ import {
 import { getCommandAboutInfo } from './get_command_about_info';
 
 import { validateUnitOfTime } from './utils';
-import { CONSOLE_COMMANDS } from '../../../common/translations';
+import { CONSOLE_COMMANDS, CROWDSTRIKE_CONSOLE_COMMANDS } from '../../../common/translations';
 import { ScanActionResult } from '../command_render_components/scan_action';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
@@ -153,6 +153,8 @@ export interface GetEndpointConsoleCommandsOptions {
   /** Applicable only for Endpoint Agents */
   endpointCapabilities: ImmutableArray<string>;
   endpointPrivileges: EndpointPrivileges;
+  /** Host's platform: windows, linux, macos */
+  platform: string;
 }
 
 export const getEndpointConsoleCommands = ({
@@ -160,10 +162,12 @@ export const getEndpointConsoleCommands = ({
   agentType,
   endpointCapabilities,
   endpointPrivileges,
+  platform,
 }: GetEndpointConsoleCommandsOptions): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
 
   const isUploadEnabled = featureFlags.responseActionUploadEnabled;
+  const crowdstrikeRunScriptEnabled = featureFlags.crowdstrikeRunScriptEnabled;
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
     // Agent capabilities is only validated for Endpoint agent types
@@ -520,10 +524,75 @@ export const getEndpointConsoleCommands = ({
       privileges: endpointPrivileges,
     }),
   });
+  if (crowdstrikeRunScriptEnabled) {
+    consoleCommands.push({
+      name: 'runscript',
+      about: getCommandAboutInfo({
+        aboutInfo: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.about,
+        isSupported: doesEndpointSupportCommand('runscript'),
+      }),
+      RenderComponent: () => null,
+      meta: {
+        agentType,
+        endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
+      },
+      exampleUsage: `runscript --Raw="Get-ChildItem ." --CommandLine=""`,
+      helpUsage: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.helpUsage,
+      exampleInstruction: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.about,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
+      mustHaveArgs: true,
+      args: {
+        Raw: {
+          required: false,
+          allowMultiples: false,
+          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.raw.about,
+          mustHaveValue: 'non-empty-string',
+          exclusiveOr: true,
+        },
+        CloudFile: {
+          required: false,
+          allowMultiples: false,
+          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about,
+          mustHaveValue: 'non-empty-string',
+          exclusiveOr: true,
+        },
+        CommandLine: {
+          required: false,
+          allowMultiples: false,
+          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.commandLine.about,
+          mustHaveValue: 'non-empty-string',
+        },
+        HostPath: {
+          required: false,
+          allowMultiples: false,
+          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.hostPath.about,
+          mustHaveValue: 'non-empty-string',
+          exclusiveOr: true,
+        },
+        Timeout: {
+          required: false,
+          allowMultiples: false,
+          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.timeout.about,
+          mustHaveValue: 'number-greater-than-zero',
+        },
+        ...commandCommentArgument(),
+      },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 9,
+      helpDisabled: !doesEndpointSupportCommand('runscript'),
+      helpHidden: !getRbacControl({
+        commandName: 'runscript',
+        privileges: endpointPrivileges,
+      }),
+    });
+  }
 
   switch (agentType) {
     case 'sentinel_one':
-      return adjustCommandsForSentinelOne({ commandList: consoleCommands });
+      return adjustCommandsForSentinelOne({ commandList: consoleCommands, platform });
     case 'crowdstrike':
       return adjustCommandsForCrowdstrike({ commandList: consoleCommands });
     default:
@@ -543,8 +612,10 @@ const disableCommand = (command: CommandDefinition, agentType: ResponseActionAge
 /** @private */
 const adjustCommandsForSentinelOne = ({
   commandList,
+  platform,
 }: {
   commandList: CommandDefinition[];
+  platform: string;
 }): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
   const isKillProcessEnabled = featureFlags.responseActionsSentinelOneKillProcessEnabled;
@@ -580,6 +651,28 @@ const adjustCommandsForSentinelOne = ({
       )
     ) {
       disableCommand(command, 'sentinel_one');
+    } else {
+      // processes is not currently supported for Windows hosts
+      if (command.name === 'processes' && platform.toLowerCase() === 'windows') {
+        const message = i18n.translate(
+          'xpack.securitySolution.consoleCommandsDefinition.sentineloneProcessesWindowRestriction',
+          {
+            defaultMessage:
+              'Processes command is not currently supported for SentinelOne hosts running on Windows',
+          }
+        );
+
+        command.helpDisabled = true;
+        command.about = getCommandAboutInfo({
+          aboutInfo: command.about,
+          isSupported: false,
+          dataTestSubj: 'sentineloneProcessesWindowsWarningTooltip',
+          tooltipContent: message,
+        });
+        command.validate = () => {
+          return message;
+        };
+      }
     }
 
     return command;

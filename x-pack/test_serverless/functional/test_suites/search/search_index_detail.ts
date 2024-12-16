@@ -20,6 +20,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const svlSearchNavigation = getService('svlSearchNavigation');
   const es = getService('es');
   const security = getService('security');
+  const browser = getService('browser');
+  const retry = getService('retry');
 
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const indexName = 'test-my-index';
@@ -54,12 +56,52 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.expectConnectionDetails();
         });
 
-        it.skip('should show api key', async () => {
-          await pageObjects.svlApiKeys.deleteAPIKeys();
-          await svlSearchNavigation.navigateToIndexDetailPage(indexName);
-          await pageObjects.svlApiKeys.expectAPIKeyAvailable();
-          const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
-          await pageObjects.svlSearchIndexDetailPage.expectAPIKeyToBeVisibleInCodeBlock(apiKey);
+        describe('check code example texts', () => {
+          const indexNameCodeExample = 'test-my-index2';
+          before(async () => {
+            await es.indices.create({ index: indexNameCodeExample });
+            await svlSearchNavigation.navigateToIndexDetailPage(indexNameCodeExample);
+          });
+
+          after(async () => {
+            await esDeleteAllIndices(indexNameCodeExample);
+          });
+
+          it('should have basic example texts', async () => {
+            await pageObjects.svlSearchIndexDetailPage.expectHasSampleDocuments();
+          });
+
+          it('should have other example texts when mapping changed', async () => {
+            await es.indices.putMapping({
+              index: indexNameCodeExample,
+              properties: {
+                text: { type: 'text' },
+                number: { type: 'integer' },
+              },
+            });
+            await pageObjects.svlSearchIndexDetailPage.expectSampleDocumentsWithCustomMappings();
+          });
+        });
+
+        describe('API key details', () => {
+          it('should show api key', async () => {
+            await pageObjects.svlApiKeys.deleteAPIKeys();
+            await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+            // sometimes the API key exists in the cluster and its lost in sessionStorage
+            // if fails we retry to delete the API key and refresh the browser
+            await retry.try(
+              async () => {
+                await pageObjects.svlApiKeys.expectAPIKeyExists();
+              },
+              async () => {
+                await pageObjects.svlApiKeys.deleteAPIKeys();
+                await browser.refresh();
+              }
+            );
+            await pageObjects.svlApiKeys.expectAPIKeyAvailable();
+            const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
+            await pageObjects.svlSearchIndexDetailPage.expectAPIKeyToBeVisibleInCodeBlock(apiKey);
+          });
         });
 
         it('should have quick stats', async () => {
@@ -107,11 +149,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
         });
 
-        // FLAKY: https://github.com/elastic/kibana/issues/197144
-        describe.skip('With data', () => {
+        describe('With data', () => {
           before(async () => {
             await es.index({
               index: indexName,
+              refresh: true,
               body: {
                 my_field: [1, 0, 1],
               },
@@ -304,6 +346,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsOverviewMenuIsShown();
           await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonExistsInMoreOptions();
           await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonToBeDisabled();
+        });
+        it('show no privileges to create api key', async () => {
+          await pageObjects.svlApiKeys.expectAPIKeyNoPrivileges();
         });
       });
     });

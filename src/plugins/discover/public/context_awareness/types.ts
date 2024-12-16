@@ -20,7 +20,7 @@ import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
-import type { PropsWithChildren, ReactElement } from 'react';
+import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
@@ -123,6 +123,10 @@ export interface DefaultAppStateExtension {
    * * 1-20: number of lines to display
    */
   rowHeight?: number;
+  /**
+   * The field to apply for the histogram breakdown
+   */
+  breakdownField?: string;
 }
 
 /**
@@ -264,7 +268,7 @@ export interface Profile {
    * @param props The app wrapper props
    * @returns The custom app wrapper component
    */
-  getRenderAppWrapper: (props: PropsWithChildren<{}>) => ReactElement;
+  getRenderAppWrapper: FunctionComponent<PropsWithChildren<{}>>;
 
   /**
    * Gets default Discover app state that should be used when the profile is resolved

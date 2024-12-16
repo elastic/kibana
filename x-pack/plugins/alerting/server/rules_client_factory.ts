@@ -115,13 +115,18 @@ export class RulesClientFactory {
     this.securityService = options.securityService;
   }
 
-  public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
+  public async create(
+    request: KibanaRequest,
+    savedObjects: SavedObjectsServiceStart
+  ): Promise<RulesClient> {
     const { securityPluginSetup, securityService, securityPluginStart, actions, eventLog } = this;
     const spaceId = this.getSpaceId(request);
 
     if (!this.authorization) {
       throw new Error('AlertingAuthorizationClientFactory is not defined');
     }
+
+    const authorization = await this.authorization.create(request);
 
     return new RulesClient({
       spaceId,
@@ -139,7 +144,7 @@ export class RulesClientFactory {
           AD_HOC_RUN_SAVED_OBJECT_TYPE,
         ],
       }),
-      authorization: this.authorization.create(request),
+      authorization,
       actionsAuthorization: actions.getActionsAuthorizationWithRequest(request),
       namespace: this.spaceIdToNamespace(spaceId),
       internalSavedObjectsRepository: this.internalSavedObjectsRepository,
@@ -169,6 +174,7 @@ export class RulesClientFactory {
         if (!createAPIKeyResult) {
           return { apiKeysEnabled: false };
         }
+
         return {
           apiKeysEnabled: true,
           result: createAPIKeyResult,

@@ -100,7 +100,6 @@ const initDefaults = (tieBreakerFields: string[], dataViewId = 'the-data-view-id
         predecessorCount: 2,
         successorCount: 2,
       },
-      useNewFieldsApi: false,
     } as ContextAppFetchProps,
   };
 

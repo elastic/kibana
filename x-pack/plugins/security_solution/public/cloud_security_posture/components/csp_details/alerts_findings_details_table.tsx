@@ -19,6 +19,8 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { buildEntityAlertsQuery } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
+import type { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status/types';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import {
   OPEN_IN_ALERTS_TITLE_HOSTNAME,
   OPEN_IN_ALERTS_TITLE_STATUS,
@@ -34,6 +36,7 @@ import { getSeverityColor } from '../../../detections/components/alerts_kpis/sev
 import { SeverityBadge } from '../../../common/components/severity_badge';
 import { ALERT_PREVIEW_BANNER } from '../../../flyout/document_details/preview/constants';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
+import { useNonClosedAlerts } from '../../hooks/use_non_closed_alerts';
 
 type AlertSeverity = 'low' | 'medium' | 'high' | 'critical';
 
@@ -68,6 +71,8 @@ export const AlertsDetailsTable = memo(
       );
     }, []);
 
+    const [currentFilter, setCurrentFilter] = useState<string>('');
+
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
 
@@ -89,11 +94,45 @@ export const AlertsDetailsTable = memo(
 
     const { to, from } = useGlobalTime();
     const { signalIndexName } = useSignalIndex();
-    const { data } = useQueryAlerts({
-      query: buildEntityAlertsQuery(field, to, from, value, 500),
+    const { data, setQuery } = useQueryAlerts({
+      query: buildEntityAlertsQuery(field, to, from, value, 500, ''),
       queryName: ALERTS_QUERY_NAMES.BY_RULE_BY_STATUS,
       indexName: signalIndexName,
     });
+
+    const { filteredAlertsData: alertsData } = useNonClosedAlerts({
+      field,
+      value,
+      to,
+      from,
+      queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}`,
+    });
+
+    const severityMap = new Map<string, number>();
+    (Object.keys(alertsData || {}) as AlertsByStatus[]).forEach((status) => {
+      if (alertsData?.[status]?.severities) {
+        alertsData?.[status]?.severities.forEach((severity) => {
+          const currentSeverity = severityMap.get(severity.key) || 0;
+          severityMap.set(severity.key, currentSeverity + severity.value);
+        });
+      }
+    });
+
+    const alertStats = Array.from(severityMap, ([key, count]) => ({
+      key: capitalize(key),
+      count,
+      color: getSeverityColor(key),
+      filter: () => {
+        setCurrentFilter(key);
+        setQuery(buildEntityAlertsQuery(field, to, from, value, 500, key));
+      },
+      isCurrentFilter: currentFilter === key,
+      reset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
+        setCurrentFilter('');
+        setQuery(buildEntityAlertsQuery(field, to, from, value, 500, ''));
+        event?.stopPropagation();
+      },
+    }));
 
     const alertDataResults = (data?.hits?.hits as AlertsDetailsFields[])?.map(
       (item: AlertsDetailsFields) => {
@@ -107,19 +146,6 @@ export const AlertsDetailsTable = memo(
         };
       }
     );
-
-    const severitiesMap = alertDataResults?.map((item) => item.severity) || [];
-
-    const alertStats = Object.entries(
-      severitiesMap.reduce((acc: Record<string, number>, item) => {
-        acc[item] = (acc[item] || 0) + 1;
-        return acc;
-      }, {})
-    ).map(([key, count]) => ({
-      key: capitalize(key),
-      count,
-      color: getSeverityColor(key),
-    }));
 
     const { pageOfItems, totalItemCount } = alertsPagination(alertDataResults || []);
 

@@ -14,6 +14,7 @@ import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
 import { transformRequestParamsToApplicationV1 } from './transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const unmuteAlertRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -22,6 +23,7 @@ export const unmuteAlertRoute = (
   router.post(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{rule_id}/alert/{alert_id}/_unmute`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'public',
         summary: `Unmute an alert`,
@@ -49,7 +51,7 @@ export const unmuteAlertRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const rulesClient = await (await context.alerting).getRulesClient();
         const params: UnmuteAlertRequestParamsV1 = req.params;
         try {
           await rulesClient.unmuteInstance(transformRequestParamsToApplicationV1(params));

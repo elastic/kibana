@@ -257,6 +257,7 @@ export const runTask = async ({
     const configuration = await riskScoreService.getConfigurationWithDefaults(
       entityAnalyticsConfig
     );
+    log(`Risk engine running with configuration : ${JSON.stringify(configuration, null, 2)}`);
     if (configuration == null) {
       log(
         'Risk engine configuration not found; exiting task. Please reinitialize the risk engine and try again'

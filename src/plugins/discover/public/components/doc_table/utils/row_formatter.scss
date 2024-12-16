@@ -1,7 +1,0 @@
-// Special handling for images coming from the image field formatter
-// See discover_grid.scss for more explanation on those values
-.rowFormatter__value img {
-  vertical-align: middle;
-  max-height: lineHeightFromBaseline(2) !important;
-  max-width: ($euiSizeXXL * 12.5) !important;
-}

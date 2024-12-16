@@ -21,7 +21,7 @@ import type {
   FleetStartContract,
   MessageSigningServiceInterface,
 } from '@kbn/fleet-plugin/server';
-import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
+import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
@@ -73,7 +73,7 @@ export interface EndpointAppContextServiceStartContract {
   fleetStartServices: FleetStartContract;
   manifestManager: ManifestManager;
   security: SecurityServiceStart;
-  alerting: AlertsPluginStartContract;
+  alerting: AlertingServerStart;
   config: ConfigType;
   registerListsServerExtension?: ListsServerExtensionRegistrar;
   licenseService: LicenseService;

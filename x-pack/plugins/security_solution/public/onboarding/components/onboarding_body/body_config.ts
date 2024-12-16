@@ -12,8 +12,10 @@ import { dashboardsCardConfig } from './cards/dashboards';
 import { rulesCardConfig } from './cards/rules';
 import { alertsCardConfig } from './cards/alerts';
 import { assistantCardConfig } from './cards/assistant';
+import { aiConnectorCardConfig } from './cards/siem_migrations/ai_connector';
+import { startMigrationCardConfig } from './cards/siem_migrations/start_migration';
 
-export const bodyConfig: OnboardingGroupConfig[] = [
+export const defaultBodyConfig: OnboardingGroupConfig[] = [
   {
     title: i18n.translate('xpack.securitySolution.onboarding.dataGroup.title', {
       defaultMessage: 'Ingest your data',
@@ -32,5 +34,20 @@ export const bodyConfig: OnboardingGroupConfig[] = [
     }),
     // TODO: Add attackDiscoveryCardConfig when it is ready (https://github.com/elastic/kibana/issues/189487)
     cards: [assistantCardConfig],
+  },
+];
+
+export const siemMigrationsBodyConfig: OnboardingGroupConfig[] = [
+  {
+    title: i18n.translate('xpack.securitySolution.onboarding.configure.title', {
+      defaultMessage: 'Configure',
+    }),
+    cards: [aiConnectorCardConfig],
+  },
+  {
+    title: i18n.translate('xpack.securitySolution.onboarding.migrate.title', {
+      defaultMessage: 'Migrate rules & add data',
+    }),
+    cards: [startMigrationCardConfig],
   },
 ];

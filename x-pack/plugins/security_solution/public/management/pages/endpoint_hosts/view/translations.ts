@@ -11,6 +11,75 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.endpointDetails.o
   defaultMessage: 'Overview',
 });
 
+export const WORKFLOW_INSIGHTS = {
+  title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.sectionTitle', {
+    defaultMessage: 'Issues',
+  }),
+  titleRight: i18n.translate(
+    'xpack.securitySolution.endpointDetails.workflowInsights.extraAction',
+    {
+      defaultMessage: 'Last scans:',
+    }
+  ),
+  scan: {
+    title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.scan.title', {
+      defaultMessage: 'AI-Powered issue scan',
+    }),
+    button: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.scan.button', {
+      defaultMessage: 'Scan',
+    }),
+    loading: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.scan.loading',
+      {
+        defaultMessage: 'Loading...',
+      }
+    ),
+  },
+  issues: {
+    title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.issues.title', {
+      defaultMessage: 'Issues',
+    }),
+    emptyResults: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.issues.emptyResults',
+      {
+        defaultMessage: 'No issues had been found',
+      }
+    ),
+    insightRemediationButtonAriaLabel: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.issues.insightRemediationButtonAriaLabel',
+      {
+        defaultMessage: 'Create trusted app',
+      }
+    ),
+  },
+  toasts: {
+    scanError: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.error',
+      {
+        defaultMessage: 'Failed to start scan',
+      }
+    ),
+    fetchInsightsError: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.fetchInsightsError',
+      {
+        defaultMessage: 'Failed to fetch insights',
+      }
+    ),
+    fetchPendingInsightsError: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.fetchPendingInsightsError',
+      {
+        defaultMessage: 'Failed to retrieve insights in the generation process',
+      }
+    ),
+    updateInsightError: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.updateInsightError',
+      {
+        defaultMessage: 'Failed to mark insight as remediated',
+      }
+    ),
+  },
+};
+
 export const ACTIVITY_LOG = {
   tabTitle: i18n.translate('xpack.securitySolution.endpointDetails.responseActionsHistory', {
     defaultMessage: 'Response actions history',

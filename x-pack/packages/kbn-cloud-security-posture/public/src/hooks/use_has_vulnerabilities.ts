@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { useVulnerabilitiesPreview } from './use_vulnerabilities_preview';
 import { hasVulnerabilitiesData } from '../utils/vulnerability_helpers';
 
 export const useHasVulnerabilities = (field: 'host.name' | 'user.name', value: string) => {
   const { data: vulnerabilitiesData } = useVulnerabilitiesPreview({
-    query: buildEntityFlyoutPreviewQuery(field, value),
+    query: buildGenericEntityFlyoutPreviewQuery(field, value),
     sort: [],
     enabled: true,
     pageSize: 1,

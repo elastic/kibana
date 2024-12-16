@@ -8,7 +8,8 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "types/**/*"
+    "types/**/*",
+    "emotion.d.ts"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
@@ -49,5 +50,8 @@
     "@kbn/charts-plugin",
     "@kbn/core-ui-settings-common",
     "@kbn/field-formats-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/saved-search-plugin",
+    "@kbn/spaces-plugin",
   ]
 }

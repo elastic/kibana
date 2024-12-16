@@ -102,6 +102,7 @@ const GetDataStreamResponse: IndicesGetDataStreamResponse = {
       template: 'ignored',
       next_generation_managed_by: 'Index Lifecycle Management',
       prefer_ilm: false,
+      rollover_on_write: false,
     },
   ],
 };
@@ -275,6 +276,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
 
           await retryUntil(
@@ -308,6 +310,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$: test$,
+            isServerless: false,
           });
 
           await retryUntil(
@@ -350,6 +353,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
 
           await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
@@ -372,6 +376,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
 
           await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
@@ -453,6 +458,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
 
           await retryUntil(
@@ -495,6 +501,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
 
           await retryUntil(
@@ -1516,6 +1523,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: true,
           });
 
           await retryUntil(
@@ -1561,6 +1569,7 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
+            isServerless: true,
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1586,6 +1595,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
 
           await retryUntil(
@@ -1629,6 +1639,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -1693,6 +1704,7 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
+            isServerless: false,
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1736,6 +1748,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -1824,6 +1837,7 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
+            isServerless: false,
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1870,6 +1884,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -1911,6 +1926,7 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
+            isServerless: false,
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1960,6 +1976,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -2013,6 +2030,7 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
+            isServerless: false,
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2067,6 +2085,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -2134,6 +2153,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -2205,6 +2225,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -2283,6 +2304,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -2341,6 +2363,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
 
           await retryUntil(
@@ -2362,6 +2385,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
 
           await retryUntil(
@@ -2383,6 +2407,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
 
           await retryUntil(
@@ -2412,6 +2437,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
 
           await retryUntil(
@@ -2444,6 +2470,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
 
           await retryUntil(
@@ -2481,6 +2508,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
 
           await retryUntil(
@@ -2516,6 +2544,7 @@ describe('Alerts Service', () => {
             timeoutMs: 10,
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
 
           await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
@@ -2533,6 +2562,7 @@ describe('Alerts Service', () => {
             timeoutMs: 10,
             dataStreamAdapter,
             elasticsearchAndSOAvailability$,
+            isServerless: false,
           });
 
           await retryUntil('debug logger called', async () => logger.debug.mock.calls.length > 0);

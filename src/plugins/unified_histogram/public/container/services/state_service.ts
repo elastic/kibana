@@ -13,10 +13,8 @@ import { PublishingSubject } from '@kbn/presentation-publishing';
 import { UnifiedHistogramFetchStatus } from '../..';
 import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../../types';
 import {
-  getBreakdownField,
   getChartHidden,
   getTopPanelHeight,
-  setBreakdownField,
   setChartHidden,
   setTopPanelHeight,
 } from '../utils/local_storage_utils';
@@ -26,10 +24,6 @@ import type { UnifiedHistogramSuggestionContext } from '../../types';
  * The current state of the container
  */
 export interface UnifiedHistogramState {
-  /**
-   * The current field used for the breakdown
-   */
-  breakdownField: string | undefined;
   /**
    * The current Lens suggestion
    */
@@ -109,10 +103,6 @@ export interface UnifiedHistogramStateService {
    */
   setTopPanelHeight: (topPanelHeight: number | undefined) => void;
   /**
-   * Sets the current breakdown field
-   */
-  setBreakdownField: (breakdownField: string | undefined) => void;
-  /**
    * Sets the current time interval
    */
   setTimeInterval: (timeInterval: string) => void;
@@ -141,16 +131,13 @@ export const createStateService = (
 
   let initialChartHidden = false;
   let initialTopPanelHeight: number | undefined;
-  let initialBreakdownField: string | undefined;
 
   if (localStorageKeyPrefix) {
     initialChartHidden = getChartHidden(services.storage, localStorageKeyPrefix) ?? false;
     initialTopPanelHeight = getTopPanelHeight(services.storage, localStorageKeyPrefix);
-    initialBreakdownField = getBreakdownField(services.storage, localStorageKeyPrefix);
   }
 
   const state$ = new BehaviorSubject<UnifiedHistogramState>({
-    breakdownField: initialBreakdownField,
     chartHidden: initialChartHidden,
     currentSuggestionContext: undefined,
     lensRequestAdapter: undefined,
@@ -185,14 +172,6 @@ export const createStateService = (
       }
 
       updateState({ topPanelHeight });
-    },
-
-    setBreakdownField: (breakdownField: string | undefined) => {
-      if (localStorageKeyPrefix) {
-        setBreakdownField(services.storage, localStorageKeyPrefix, breakdownField);
-      }
-
-      updateState({ breakdownField });
     },
 
     setCurrentSuggestionContext: (

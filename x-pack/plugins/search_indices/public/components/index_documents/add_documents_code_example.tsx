@@ -6,10 +6,11 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import { MappingDenseVectorProperty, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
+import { isEqual } from 'lodash';
 
 import { useSearchApiKey } from '@kbn/search-api-keys-components';
 import { useKibana } from '../../hooks/use_kibana';
@@ -23,6 +24,13 @@ import { AnalyticsEvents } from '../../analytics/constants';
 import { CodeSample } from '../shared/code_sample';
 import { generateSampleDocument } from '../../utils/document_generation';
 import { getDefaultCodingLanguage } from '../../utils/language';
+
+export const basicExampleTexts = [
+  'Yellowstone National Park',
+  'Yosemite National Park',
+  'Rocky Mountain National Park',
+];
+export const exampleTextsWithCustomMapping = [1, 2, 3].map((num) => `Example text ${num}`);
 
 export interface AddDocumentsCodeExampleProps {
   indexName: string;
@@ -56,11 +64,20 @@ export const AddDocumentsCodeExample = ({
     [usageTracker]
   );
   const sampleDocuments = useMemo(() => {
-    return [1, 2, 3].map((num) =>
-      generateSampleDocument(codeSampleMappings, `Example text ${num}`)
-    );
-  }, [codeSampleMappings]);
-  const { apiKey, apiKeyIsVisible } = useSearchApiKey();
+    // If the default mapping was used, we need to exclude generated vector fields
+    const copyCodeSampleMappings = {
+      ...codeSampleMappings,
+      vector: {
+        type: codeSampleMappings.vector?.type,
+        dims: (codeSampleMappings.vector as MappingDenseVectorProperty)?.dims,
+      },
+    };
+    const isDefaultMapping = isEqual(copyCodeSampleMappings, ingestCodeExamples.defaultMapping);
+    const sampleTexts = isDefaultMapping ? basicExampleTexts : exampleTextsWithCustomMapping;
+
+    return sampleTexts.map((text) => generateSampleDocument(codeSampleMappings, text));
+  }, [codeSampleMappings, ingestCodeExamples.defaultMapping]);
+  const { apiKey } = useSearchApiKey();
   const codeParams: IngestCodeSnippetParameters = useMemo(() => {
     return {
       indexName,
@@ -68,17 +85,9 @@ export const AddDocumentsCodeExample = ({
       sampleDocuments,
       indexHasMappings,
       mappingProperties: codeSampleMappings,
-      apiKey: apiKeyIsVisible && apiKey ? apiKey : undefined,
+      apiKey: apiKey || undefined,
     };
-  }, [
-    indexName,
-    elasticsearchUrl,
-    sampleDocuments,
-    codeSampleMappings,
-    indexHasMappings,
-    apiKeyIsVisible,
-    apiKey,
-  ]);
+  }, [indexName, elasticsearchUrl, sampleDocuments, codeSampleMappings, indexHasMappings, apiKey]);
 
   return (
     <EuiPanel

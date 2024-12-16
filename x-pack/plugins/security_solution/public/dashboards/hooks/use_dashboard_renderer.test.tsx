@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook, act } from '@testing-library/react-hooks';
+
+import { renderHook, act } from '@testing-library/react';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 
 import { useDashboardRenderer } from './use_dashboard_renderer';
@@ -14,11 +15,11 @@ jest.mock('../../common/lib/kibana');
 const mockDashboardContainer = {} as DashboardApi;
 
 describe('useDashboardRenderer', () => {
-  it('should set dashboard container correctly when dashboard is loaded', async () => {
+  it('should set dashboard container correctly when dashboard is loaded', () => {
     const { result } = renderHook(() => useDashboardRenderer());
 
-    await act(async () => {
-      await result.current.handleDashboardLoaded(mockDashboardContainer);
+    act(() => {
+      result.current.handleDashboardLoaded(mockDashboardContainer);
     });
 
     expect(result.current.dashboardContainer).toEqual(mockDashboardContainer);

@@ -39,6 +39,8 @@ export const getOpsgenieConnectorType = (): SubActionConnectorType<Config, Secre
   };
 };
 
+export { OpsgenieConnectorTypeId };
+
 export type {
   Config as OpsgenieActionConfig,
   Secrets as OpsgenieActionSecrets,

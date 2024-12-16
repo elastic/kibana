@@ -13,7 +13,6 @@ const apiMock: jest.Mocked<CasesPublicStart['api']> = {
   cases: {
     find: jest.fn(),
     getCasesMetrics: jest.fn(),
-    getCasesStatus: jest.fn(),
     bulkGet: jest.fn(),
   },
 };

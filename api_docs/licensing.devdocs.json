@@ -808,59 +808,51 @@
             },
             {
               "plugin": "aiops",
-              "path": "x-pack/plugins/aiops/public/plugin.tsx"
+              "path": "x-pack/platform/plugins/shared/aiops/public/plugin.tsx"
             },
             {
               "plugin": "licenseManagement",
-              "path": "x-pack/plugins/license_management/public/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/license_management/public/plugin.ts"
             },
             {
               "plugin": "ml",
-              "path": "x-pack/plugins/ml/public/plugin.ts"
-            },
-            {
-              "plugin": "crossClusterReplication",
-              "path": "x-pack/plugins/cross_cluster_replication/public/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/ml/public/plugin.ts"
             },
             {
               "plugin": "logstash",
               "path": "x-pack/plugins/logstash/public/plugin.ts"
             },
             {
-              "plugin": "painlessLab",
-              "path": "x-pack/plugins/painless_lab/public/plugin.tsx"
-            },
-            {
-              "plugin": "painlessLab",
-              "path": "x-pack/plugins/painless_lab/public/plugin.tsx"
-            },
-            {
-              "plugin": "searchprofiler",
-              "path": "x-pack/plugins/searchprofiler/public/plugin.ts"
-            },
-            {
-              "plugin": "searchprofiler",
-              "path": "x-pack/plugins/searchprofiler/public/plugin.ts"
-            },
-            {
-              "plugin": "watcher",
-              "path": "x-pack/plugins/watcher/public/plugin.ts"
-            },
-            {
-              "plugin": "watcher",
-              "path": "x-pack/plugins/watcher/public/plugin.ts"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/components/contexts/license/license_context.tsx"
-            },
-            {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/public/context/license/license_context.tsx"
-            },
-            {
               "plugin": "slo",
               "path": "x-pack/plugins/observability_solution/slo/public/plugin.ts"
+            },
+            {
+              "plugin": "crossClusterReplication",
+              "path": "x-pack/platform/plugins/private/cross_cluster_replication/public/plugin.ts"
+            },
+            {
+              "plugin": "painlessLab",
+              "path": "x-pack/platform/plugins/private/painless_lab/public/plugin.tsx"
+            },
+            {
+              "plugin": "painlessLab",
+              "path": "x-pack/platform/plugins/private/painless_lab/public/plugin.tsx"
+            },
+            {
+              "plugin": "watcher",
+              "path": "x-pack/platform/plugins/private/watcher/public/plugin.ts"
+            },
+            {
+              "plugin": "watcher",
+              "path": "x-pack/platform/plugins/private/watcher/public/plugin.ts"
+            },
+            {
+              "plugin": "searchprofiler",
+              "path": "x-pack/platform/plugins/shared/searchprofiler/public/plugin.ts"
+            },
+            {
+              "plugin": "searchprofiler",
+              "path": "x-pack/platform/plugins/shared/searchprofiler/public/plugin.ts"
             }
           ]
         },
@@ -2203,28 +2195,16 @@
               "path": "x-pack/plugins/alerting/server/plugin.ts"
             },
             {
-              "plugin": "aiops",
-              "path": "x-pack/plugins/aiops/server/plugin.ts"
-            },
-            {
-              "plugin": "remoteClusters",
-              "path": "x-pack/plugins/remote_clusters/server/plugin.ts"
-            },
-            {
               "plugin": "ml",
-              "path": "x-pack/plugins/ml/server/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/ml/server/plugin.ts"
             },
             {
               "plugin": "graph",
               "path": "x-pack/plugins/graph/server/plugin.ts"
             },
             {
-              "plugin": "indexLifecycleManagement",
-              "path": "x-pack/plugins/index_lifecycle_management/server/services/license.ts"
-            },
-            {
               "plugin": "osquery",
-              "path": "x-pack/plugins/osquery/server/handlers/action/create_action_service.ts"
+              "path": "x-pack/platform/plugins/shared/osquery/server/handlers/action/create_action_service.ts"
             },
             {
               "plugin": "securitySolution",
@@ -2241,26 +2221,6 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/threshold/threshold.ts"
-            },
-            {
-              "plugin": "painlessLab",
-              "path": "x-pack/plugins/painless_lab/server/services/license.ts"
-            },
-            {
-              "plugin": "rollup",
-              "path": "x-pack/plugins/rollup/server/services/license.ts"
-            },
-            {
-              "plugin": "searchprofiler",
-              "path": "x-pack/plugins/searchprofiler/server/plugin.ts"
-            },
-            {
-              "plugin": "snapshotRestore",
-              "path": "x-pack/plugins/snapshot_restore/server/services/license.ts"
-            },
-            {
-              "plugin": "transform",
-              "path": "x-pack/plugins/transform/server/services/license.ts"
             },
             {
               "plugin": "upgradeAssistant",
@@ -2289,6 +2249,38 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
+            },
+            {
+              "plugin": "remoteClusters",
+              "path": "x-pack/platform/plugins/private/remote_clusters/server/plugin.ts"
+            },
+            {
+              "plugin": "indexLifecycleManagement",
+              "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/services/license.ts"
+            },
+            {
+              "plugin": "painlessLab",
+              "path": "x-pack/platform/plugins/private/painless_lab/server/services/license.ts"
+            },
+            {
+              "plugin": "rollup",
+              "path": "x-pack/platform/plugins/private/rollup/server/services/license.ts"
+            },
+            {
+              "plugin": "snapshotRestore",
+              "path": "x-pack/platform/plugins/private/snapshot_restore/server/services/license.ts"
+            },
+            {
+              "plugin": "transform",
+              "path": "x-pack/platform/plugins/private/transform/server/services/license.ts"
+            },
+            {
+              "plugin": "aiops",
+              "path": "x-pack/platform/plugins/shared/aiops/server/plugin.ts"
+            },
+            {
+              "plugin": "searchprofiler",
+              "path": "x-pack/platform/plugins/shared/searchprofiler/server/plugin.ts"
             },
             {
               "plugin": "actions",
