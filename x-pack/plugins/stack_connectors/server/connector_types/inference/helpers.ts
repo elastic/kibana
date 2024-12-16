@@ -33,3 +33,9 @@ export function eventSourceStreamIntoObservable(readable: Readable) {
     );
   });
 }
+
+export async function* arrayToAsyncIterator<T>(array: T[]): AsyncIterator<T> {
+  for (const item of array) {
+    yield item;
+  }
+}
