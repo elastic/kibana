@@ -34,6 +34,10 @@ export async function backfillPackagePolicySupportsAgentless(esClient: Elasticse
 
   const agentPolicyIds = findRes.saved_objects.map((so) => so.id);
 
+  if (agentPolicyIds.length === 0) {
+    return;
+  }
+
   const savedObjectType = await getPackagePolicySavedObjectType();
   const packagePoliciesToUpdate = (
     await appContextService
