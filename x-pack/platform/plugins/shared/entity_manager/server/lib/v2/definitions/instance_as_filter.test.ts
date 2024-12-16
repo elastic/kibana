@@ -81,7 +81,9 @@ describe('instanceAsFilter', () => {
     ];
     readSourceDefinitionsMock.mockResolvedValue(sources);
 
-    expect(instanceAsFilter(instance, esClientMock, logger)).resolves.toBe('(host.name: my_host)');
+    expect(instanceAsFilter(instance, esClientMock, logger)).resolves.toBe(
+      '(host.name: "my_host")'
+    );
   });
 
   it('creates a single source filter for multiple identity field', () => {
@@ -106,7 +108,7 @@ describe('instanceAsFilter', () => {
     readSourceDefinitionsMock.mockResolvedValue(sources);
 
     expect(instanceAsFilter(instance, esClientMock, logger)).resolves.toBe(
-      '(host.name: my_host AND host.os: my_os)'
+      '(host.name: "my_host" AND host.os: "my_os")'
     );
   });
 
@@ -140,7 +142,7 @@ describe('instanceAsFilter', () => {
     readSourceDefinitionsMock.mockResolvedValue(sources);
 
     expect(instanceAsFilter(instance, esClientMock, logger)).resolves.toBe(
-      '(host.name: my_host) OR (host.os: my_os)'
+      '(host.name: "my_host") OR (host.os: "my_os")'
     );
   });
 
@@ -175,7 +177,7 @@ describe('instanceAsFilter', () => {
     readSourceDefinitionsMock.mockResolvedValue(sources);
 
     expect(instanceAsFilter(instance, esClientMock, logger)).resolves.toBe(
-      '(host.name: my_host AND host.arch: my_arch) OR (host.os: my_os AND host.arch: my_arch)'
+      '(host.name: "my_host" AND host.arch: "my_arch") OR (host.os: "my_os" AND host.arch: "my_arch")'
     );
   });
 });

@@ -39,7 +39,7 @@ export async function instanceAsFilter(
       }
 
       const fieldFilters = identityFields.map(
-        (identityField) => `${identityField}: ${instance[identityField]}`
+        (identityField) => `${identityField}: "${instance[identityField]}"`
       );
 
       return `(${fieldFilters.join(' AND ')})`;
