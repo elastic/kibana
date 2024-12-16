@@ -336,7 +336,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Confirm dataset selector text in observability logs explorer
         const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-        originalExpect(datasetSelectorText).toMatch(regularDatasetName);
+        originalExpect(datasetSelectorText).toMatch(regularDataStreamName);
       });
 
       it('should go log explorer for degraded docs when the button next to breakdown selector is clicked', async () => {
@@ -350,7 +350,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Confirm dataset selector text in observability logs explorer
         const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-        originalExpect(datasetSelectorText).toMatch(regularDatasetName);
+        originalExpect(datasetSelectorText).toMatch(apacheAccessDataStreamName);
       });
     });
 
