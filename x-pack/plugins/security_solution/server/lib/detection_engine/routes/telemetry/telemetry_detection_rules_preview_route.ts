@@ -15,6 +15,7 @@ import { getDetectionRulesPreview } from './utils/get_detecton_rules_preview';
 import { getSecurityListsPreview } from './utils/get_security_lists_preview';
 import { getEndpointPreview } from './utils/get_endpoint_preview';
 import { getDiagnosticsPreview } from './utils/get_diagnostics_preview';
+import { getIndicesMetadataPreview } from './utils/get_indices_metadata_preview';
 
 export const telemetryDetectionRulesPreviewRoute = (
   router: SecuritySolutionPluginRouter,
@@ -60,12 +61,19 @@ export const telemetryDetectionRulesPreviewRoute = (
           telemetrySender,
         });
 
+        const indicesMetadata = await getIndicesMetadataPreview({
+          logger,
+          telemetryReceiver,
+          telemetrySender,
+        });
+
         return response.ok({
           body: {
             detection_rules: detectionRules,
             security_lists: securityLists,
             endpoints,
             diagnostics,
+            indices_metadata: indicesMetadata,
           },
         });
       }
