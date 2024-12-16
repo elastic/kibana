@@ -18,7 +18,14 @@
     "@kbn/presentation-publishing",
     "@kbn/presentation-containers",
     "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/esql-utils",
+    "@kbn/esql-editor",
+    "@kbn/ui-actions-plugin",
+    "@kbn/core",
+    "@kbn/es-query",
+    "@kbn/kibana-react-plugin",
+    "@kbn/data-plugin"
   ],
   "exclude": [
     "target/**/*",
