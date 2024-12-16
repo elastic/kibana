@@ -2,10 +2,10 @@
 
 exports[`Statement component renders a CollapsibleStatement with else body for non-IfElement 1`] = `
 <li
-  className="monPipelineViewer__listItem"
+  css={[Function]}
 >
   <div
-    className="monPipelineViewer__spaceContainer"
+    css={[Function]}
   />
   <CollapsibleStatement
     collapse={[MockFunction]}
@@ -25,7 +25,17 @@ exports[`Statement component renders a CollapsibleStatement with else body for n
         size="xs"
       >
         <span
-          className="monPipelineViewer__conditional"
+          css={
+            Object {
+              "map": undefined,
+              "name": "1xxe9l9",
+              "next": undefined,
+              "styles": "
+  font-weight: bold;
+",
+              "toString": [Function],
+            }
+          }
         >
           else
         </span>
@@ -37,10 +47,10 @@ exports[`Statement component renders a CollapsibleStatement with else body for n
 
 exports[`Statement component renders a CollapsibleStatement with if body for branch model 1`] = `
 <li
-  className="monPipelineViewer__listItem"
+  css={[Function]}
 >
   <div
-    className="monPipelineViewer__spaceContainer"
+    css={[Function]}
   />
   <CollapsibleStatement
     collapse={[MockFunction]}
@@ -60,7 +70,17 @@ exports[`Statement component renders a CollapsibleStatement with if body for bra
         size="xs"
       >
         <span
-          className="monPipelineViewer__conditional"
+          css={
+            Object {
+              "map": undefined,
+              "name": "1xxe9l9",
+              "next": undefined,
+              "styles": "
+  font-weight: bold;
+",
+              "toString": [Function],
+            }
+          }
         >
           if
         </span>
@@ -82,10 +102,10 @@ exports[`Statement component renders a CollapsibleStatement with if body for bra
 
 exports[`Statement component renders a PluginStatement component for plugin model 1`] = `
 <li
-  className="monPipelineViewer__listItem"
+  css={[Function]}
 >
   <div
-    className="monPipelineViewer__spaceContainer"
+    css={[Function]}
   />
   <PluginStatement
     onShowVertexDetails={[MockFunction]}
@@ -114,17 +134,17 @@ exports[`Statement component renders a PluginStatement component for plugin mode
 
 exports[`Statement component renders spacers for element with depth > 0 1`] = `
 <li
-  className="monPipelineViewer__listItem"
+  css={[Function]}
 >
   <div
-    className="monPipelineViewer__spaceContainer"
+    css={[Function]}
   >
     <div
-      className="monPipelineViewer__spacer"
+      css={[Function]}
       key="spacer_0"
     />
     <div
-      className="monPipelineViewer__spacer"
+      css={[Function]}
       key="spacer_1"
     />
   </div>
@@ -146,7 +166,17 @@ exports[`Statement component renders spacers for element with depth > 0 1`] = `
         size="xs"
       >
         <span
-          className="monPipelineViewer__conditional"
+          css={
+            Object {
+              "map": undefined,
+              "name": "1xxe9l9",
+              "next": undefined,
+              "styles": "
+  font-weight: bold;
+",
+              "toString": [Function],
+            }
+          }
         >
           else
         </span>
