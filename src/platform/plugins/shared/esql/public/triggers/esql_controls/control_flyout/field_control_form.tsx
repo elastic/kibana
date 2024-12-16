@@ -23,7 +23,7 @@ import { getQueryForFields } from '@kbn/esql-validation-autocomplete/src/autocom
 import { buildQueryUntilPreviousCommand } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
 import { parse } from '@kbn/esql-ast';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
-import { esqlVariablesService } from '@kbn/esql-variables/public';
+import { esqlVariablesService } from '@kbn/esql-variables/common';
 import type { ESQLControlState } from '../types';
 import {
   Header,

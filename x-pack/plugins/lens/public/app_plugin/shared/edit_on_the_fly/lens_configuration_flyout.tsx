@@ -29,7 +29,7 @@ import {
   getLanguageDisplayName,
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { esqlVariablesService } from '@kbn/esql-variables/public';
+import { esqlVariablesService } from '@kbn/esql-variables/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';

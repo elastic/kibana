@@ -11,7 +11,7 @@ import React, { useCallback } from 'react';
 import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { monaco } from '@kbn/monaco';
-import { esqlVariablesService } from '@kbn/esql-variables/public';
+import { esqlVariablesService } from '@kbn/esql-variables/common';
 import type { ESQLControlState } from '../types';
 import { IntervalControlForm } from './interval_control_form';
 import { ValueControlForm } from './value_control_form';

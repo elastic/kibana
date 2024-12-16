@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLVariablesPlugin } from './plugin';
+import { EsqlVariablesService } from './esql_variables_service';
 
-export function plugin() {
-  return new ESQLVariablesPlugin();
-}
+const esqlVariablesService = new EsqlVariablesService();
+
+export { esqlVariablesService, type EsqlVariablesService };

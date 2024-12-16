@@ -33,7 +33,7 @@ import fastIsEqual from 'fast-deep-equal';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { cloneDeep } from 'lodash';
-import { esqlVariablesService } from '@kbn/esql-variables/public';
+import { esqlVariablesService } from '@kbn/esql-variables/common';
 import {
   GlobalQueryStateFromUrl,
   RefreshInterval,

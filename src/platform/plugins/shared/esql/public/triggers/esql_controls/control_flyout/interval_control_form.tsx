@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFieldText, EuiFormRow, EuiFlyoutBody, type EuiSwitchEvent } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
-import { esqlVariablesService } from '@kbn/esql-variables/public';
+import { esqlVariablesService } from '@kbn/esql-variables/common';
 import { areValuesIntervalsValid } from './helpers';
 import type { ESQLControlState } from '../types';
 import {

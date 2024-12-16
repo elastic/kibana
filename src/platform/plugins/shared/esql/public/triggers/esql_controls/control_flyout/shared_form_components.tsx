@@ -29,7 +29,7 @@ import {
   EuiBetaBadge,
   EuiToolTip,
 } from '@elastic/eui';
-import { esqlVariablesService } from '@kbn/esql-variables/public';
+import { esqlVariablesService } from '@kbn/esql-variables/common';
 import { EsqlControlFlyoutType } from '../types';
 
 const controlTypeOptions = [

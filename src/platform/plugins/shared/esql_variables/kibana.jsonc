@@ -10,5 +10,8 @@
     "browser": true,
     "requiredPlugins": [],
     "requiredBundles": [],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }
