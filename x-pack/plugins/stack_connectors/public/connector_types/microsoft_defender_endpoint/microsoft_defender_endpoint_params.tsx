@@ -24,7 +24,9 @@ const MicrosoftDefenderEndpointParamsFields = memo<
   return (
     <>
       <EuiFormRow fullWidth>
-        <EuiText size="s">{RUN_CONNECTOR_TEST_MESSAGE}</EuiText>
+        <EuiText size="s" data-test-subj="msDefenderParams">
+          {RUN_CONNECTOR_TEST_MESSAGE}
+        </EuiText>
       </EuiFormRow>
     </>
   );
