@@ -92,14 +92,14 @@ export const getSecurityBaseKibanaFeature = ({
     all: {
       replacedBy: {
         default: [
-          { feature: SECURITY_FEATURE_ID_V2, privileges: ['all'] },
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
+          { feature: SECURITY_FEATURE_ID_V2, privileges: ['all'] },
         ],
         minimal: [
-          { feature: SECURITY_FEATURE_ID_V2, privileges: ['minimal_all'] },
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
+          { feature: SECURITY_FEATURE_ID_V2, privileges: ['minimal_all'] },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
@@ -114,6 +114,8 @@ export const getSecurityBaseKibanaFeature = ({
         'cloud-security-posture-read',
         'cloud-defend-all',
         'cloud-defend-read',
+        'timeline_write',
+        'timeline_read',
       ],
       savedObject: {
         all: ['alert', ...savedObjects],
@@ -135,19 +137,26 @@ export const getSecurityBaseKibanaFeature = ({
     read: {
       replacedBy: {
         default: [
-          { feature: SECURITY_FEATURE_ID_V2, privileges: ['read'] },
           { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
           { feature: NOTES_FEATURE_ID, privileges: ['read'] },
+          { feature: SECURITY_FEATURE_ID_V2, privileges: ['read'] },
         ],
         minimal: [
-          { feature: SECURITY_FEATURE_ID_V2, privileges: ['minimal_read'] },
           { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
           { feature: NOTES_FEATURE_ID, privileges: ['read'] },
+          { feature: SECURITY_FEATURE_ID_V2, privileges: ['minimal_read'] },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
-      api: [APP_ID, 'lists-read', 'rac', 'cloud-security-posture-read', 'cloud-defend-read'],
+      api: [
+        APP_ID,
+        'lists-read',
+        'rac',
+        'cloud-security-posture-read',
+        'cloud-defend-read',
+        'timeline_read',
+      ],
       savedObject: {
         all: [],
         read: [...savedObjects],
