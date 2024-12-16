@@ -22,7 +22,7 @@ export enum SecurityPageName {
   caseCreate = 'cases_create', // must match `CasesDeepLinkId.casesCreate`
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
-   * All cloud security posture page names must match `CloudSecurityPosturePageId` in x-pack/plugins/cloud_security_posture/public/common/navigation/types.ts
+   * All cloud security posture page names must match `CloudSecurityPosturePageId` in x-pack/solutions/security/plugins/cloud_security_posture/public/common/navigation/types.ts
    */
   cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
   cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
@@ -30,7 +30,7 @@ export enum SecurityPageName {
   cloudSecurityPostureRules = 'cloud_security_posture-rules',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
-   * All cloud defend page names must match `CloudDefendPageId` in x-pack/plugins/cloud_defend/public/common/navigation/types.ts
+   * All cloud defend page names must match `CloudDefendPageId` in x-pack/solutions/security/plugins/cloud_defend/public/common/navigation/types.ts
    */
   cloudDefend = 'cloud_defend',
   cloudDefendPolicies = 'cloud_defend-policies',
