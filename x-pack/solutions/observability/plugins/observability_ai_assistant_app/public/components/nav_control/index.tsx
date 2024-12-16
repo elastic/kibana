@@ -13,7 +13,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { AIAssistantAppService, useAIAssistantAppService, ChatFlyout } from '@kbn/ai-assistant';
-import { AssistantBeacon } from '@kbn/ai-assistant-icon';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { useKibana } from '../../hooks/use_kibana';
 import { useTheme } from '../../hooks/use_theme';
 import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_context';
@@ -158,7 +158,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
             color="primary"
             size="s"
           >
-            {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantBeacon size="m" />}
+            {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantIcon size="m" />}
           </EuiButtonEmpty>
         ) : (
           <EuiButton
@@ -175,7 +175,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
             fullWidth={false}
             minWidth={0}
           >
-            {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantBeacon size="m" />}
+            {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantIcon size="m" />}
           </EuiButton>
         )}
       </EuiToolTip>
