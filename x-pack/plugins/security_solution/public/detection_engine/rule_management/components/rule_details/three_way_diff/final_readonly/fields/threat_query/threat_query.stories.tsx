@@ -6,16 +6,12 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
-import { FieldFinalReadOnly } from '../../field_final_readonly';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreatQueryReadOnly } from './threat_query';
 import {
   dataSourceWithDataView,
   dataSourceWithIndexPatterns,
   inlineKqlQuery,
   mockDataView,
-  mockThreatMatchRule,
 } from '../../storybook/mocks';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
@@ -24,51 +20,30 @@ export default {
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/threat_query',
 };
 
-interface TemplateProps {
-  finalDiffableRule: DiffableRule;
-  kibanaServicesOverrides?: Record<string, unknown>;
-}
-
-const Template: Story<TemplateProps> = (args) => {
-  return (
-    <ThreeWayDiffStorybookProviders
-      kibanaServicesOverrides={args.kibanaServicesOverrides}
-      finalDiffableRule={args.finalDiffableRule}
-      fieldName="threat_query"
-    >
-      <FieldFinalReadOnly />
-    </ThreeWayDiffStorybookProviders>
-  );
-};
-
-export const ThreatQueryWithIndexPatterns = Template.bind({});
-
-ThreatQueryWithIndexPatterns.args = {
-  finalDiffableRule: mockThreatMatchRule({
-    threat_query: inlineKqlQuery,
-    data_source: dataSourceWithIndexPatterns,
-  }),
-  kibanaServicesOverrides: {
-    data: {
-      dataViews: {
-        create: async () => mockDataView(),
+export const ThreatQueryWithIndexPatterns = () => (
+  <ThreeWayDiffStorybookProviders
+    kibanaServicesOverrides={{
+      data: {
+        dataViews: {
+          create: async () => mockDataView(),
+        },
       },
-    },
-  },
-};
+    }}
+  >
+    <ThreatQueryReadOnly threatQuery={inlineKqlQuery} dataSource={dataSourceWithIndexPatterns} />
+  </ThreeWayDiffStorybookProviders>
+);
 
-export const ThreatQueryWithDataView = Template.bind({});
-
-ThreatQueryWithDataView.args = {
-  finalDiffableRule: mockThreatMatchRule({
-    threat_query: inlineKqlQuery,
-    data_source: dataSourceWithDataView,
-  }),
-  kibanaServicesOverrides: {
-    data: {
-      dataViews: {
-        get: async () => mockDataView(),
+export const ThreatQueryWithDataView = () => (
+  <ThreeWayDiffStorybookProviders
+    kibanaServicesOverrides={{
+      data: {
+        dataViews: {
+          get: async () => mockDataView(),
+        },
       },
-    },
-  },
-};
+    }}
+  >
+    <ThreatQueryReadOnly threatQuery={inlineKqlQuery} dataSource={dataSourceWithDataView} />
+  </ThreeWayDiffStorybookProviders>
+);

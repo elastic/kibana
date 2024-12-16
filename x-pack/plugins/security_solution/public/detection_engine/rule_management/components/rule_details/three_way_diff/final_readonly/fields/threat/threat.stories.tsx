@@ -6,35 +6,16 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
-import { FieldFinalReadOnly } from '../../field_final_readonly';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreatReadOnly } from './threat';
-import { mockCustomQueryRule } from '../../storybook/mocks';
-import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: ThreatReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/threat',
 };
 
-interface TemplateProps {
-  finalDiffableRule: DiffableRule;
-}
-
-const Template: Story<TemplateProps> = (args) => {
-  return (
-    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule} fieldName="threat">
-      <FieldFinalReadOnly />
-    </ThreeWayDiffStorybookProviders>
-  );
-};
-
-export const Default = Template.bind({});
-
-Default.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    threat: [
+export const Default = () => (
+  <ThreatReadOnly
+    threat={[
       {
         framework: 'MITRE ATT&CK',
         tactic: {
@@ -57,6 +38,8 @@ Default.args = {
           },
         ],
       },
-    ],
-  }),
-};
+    ]}
+  />
+);
+
+export const EmptyArrayValue = () => <ThreatReadOnly threat={[]} />;
