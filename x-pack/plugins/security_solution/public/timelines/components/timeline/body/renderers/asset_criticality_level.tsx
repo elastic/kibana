@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { isString, startCase } from 'lodash/fp';
 import type { CriticalityLevel } from '../../../../../../common/entity_analytics/asset_criticality/types';
-import { CRITICALITY_LEVEL_COLOR } from '../../../../../entity_analytics/components/asset_criticality';
+import { useCriticalityLevelColors } from '../../../../../entity_analytics/hooks/use_criticality_level_colors';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 
 interface Props {
@@ -31,9 +31,10 @@ const AssetCriticalityLevelComponent: React.FC<Props> = ({
   isDraggable,
   value,
 }) => {
-  const color = isString(value) ? CRITICALITY_LEVEL_COLOR[value as CriticalityLevel] : 'normal';
+  const criticalityColors = useCriticalityLevelColors();
+  const color = isString(value) ? criticalityColors[value as CriticalityLevel] : 'normal';
   const stringValue = isString(value) ? value : '';
-
+  
   const badge = useMemo(
     () => (
       <EuiBadge color={color} data-test-subj="AssetCriticalityLevel-score-badge">
