@@ -9,22 +9,12 @@
 
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiComboBox,
-  EuiFormRow,
-  EuiFlyoutBody,
-  type EuiSwitchEvent,
-  type EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiFlyoutBody, type EuiSwitchEvent } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ISearchGeneric } from '@kbn/search-types';
 import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
-import { getQueryForFields } from '@kbn/esql-validation-autocomplete/src/autocomplete/helper';
-import { buildQueryUntilPreviousCommand } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
-import { parse } from '@kbn/esql-ast';
-import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { esqlVariablesService } from '../../../../common';
+import { esqlVariablesService } from '../../common';
+import { areValuesIntervalsValid } from './helpers';
 import type { ESQLControlState } from '../types';
 import {
   Header,
@@ -37,8 +27,7 @@ import {
 import { getRecurrentVariableName } from './helpers';
 import { EsqlControlFlyoutType } from '../types';
 
-interface FieldControlFormProps {
-  search: ISearchGeneric;
+interface IntervalControlFormProps {
   controlType: EsqlControlType;
   dashboardApi: DashboardApi;
   queryString: string;
@@ -48,42 +37,34 @@ interface FieldControlFormProps {
   initialState?: ESQLControlState;
 }
 
-export function FieldControlForm({
+const SUGGESTED_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
+
+export function IntervalControlForm({
   controlType,
   initialState,
   dashboardApi,
   queryString,
+  closeFlyout,
   onCreateControl,
   onEditControl,
-  search,
-  closeFlyout,
-}: FieldControlFormProps) {
+}: IntervalControlFormProps) {
+  const suggestedStaticValues = useMemo(
+    () => (initialState ? initialState.availableOptions : SUGGESTED_VALUES),
+    [initialState]
+  );
+
   const suggestedVariableName = useMemo(() => {
     const existingVariables = esqlVariablesService.getVariablesByType(controlType);
 
     return initialState
       ? `${initialState.variableName}`
       : getRecurrentVariableName(
-          'field',
+          'interval',
           existingVariables.map((variable) => variable.key)
         );
   }, [controlType, initialState]);
 
-  const [availableFieldsOptions, setAvailableFieldsOptions] = useState<EuiComboBoxOptionOption[]>(
-    []
-  );
-
-  const [selectedFields, setSelectedFields] = useState<EuiComboBoxOptionOption[]>(
-    initialState
-      ? initialState.availableOptions.map((option) => {
-          return {
-            label: option,
-            'data-test-subj': option,
-            key: option,
-          };
-        })
-      : []
-  );
+  const [values, setValues] = useState<string | undefined>(suggestedStaticValues.join(','));
   const [formIsInvalid, setFormIsInvalid] = useState(false);
   const [variableName, setVariableName] = useState(suggestedVariableName);
   const [label, setLabel] = useState(initialState?.title ?? '');
@@ -92,40 +73,22 @@ export function FieldControlForm({
 
   const isControlInEditMode = useMemo(() => !!initialState, [initialState]);
 
-  useEffect(() => {
-    if (controlType === EsqlControlType.FIELDS && !availableFieldsOptions.length) {
-      // get the valid query until the prev command and get the columns
-      const { root } = parse(queryString);
-      const queryForFields = getQueryForFields(
-        buildQueryUntilPreviousCommand(root.commands, queryString),
-        root.commands
-      );
-      getESQLQueryColumnsRaw({
-        esqlQuery: queryForFields,
-        search,
-      }).then((columns) => {
-        setAvailableFieldsOptions(
-          columns.map((col) => {
-            return {
-              label: col.name,
-              'data-test-subj': col.name,
-              key: col.name,
-            };
-          })
-        );
-      });
-    }
-  }, [availableFieldsOptions.length, controlType, queryString, search]);
+  const areValuesValid = useMemo(() => {
+    return areValuesIntervalsValid(values);
+  }, [values]);
 
   useEffect(() => {
     const variableExists =
       esqlVariablesService.variableExists(variableName.replace('?', '')) && !isControlInEditMode;
-    setFormIsInvalid(!selectedFields.length || !variableName || variableExists);
-  }, [isControlInEditMode, selectedFields.length, variableName]);
+    setFormIsInvalid(!values || !variableName || variableExists || !areValuesValid);
+  }, [areValuesValid, isControlInEditMode, values, variableName]);
 
-  const onFieldsChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
-    setSelectedFields(selectedOptions);
-  }, []);
+  const onValuesChange = useCallback(
+    (e: { target: { value: React.SetStateAction<string | undefined> } }) => {
+      setValues(e.target.value);
+    },
+    []
+  );
 
   const onVariableNameChange = useCallback(
     (e: { target: { value: React.SetStateAction<string> } }) => {
@@ -146,34 +109,8 @@ export function FieldControlForm({
     setGrow(e.target.checked);
   }, []);
 
-  const onCreateOption = useCallback(
-    (searchValue: string, flattenedOptions: EuiComboBoxOptionOption[] = []) => {
-      if (!searchValue) {
-        return;
-      }
-
-      const normalizedSearchValue = searchValue.trim().toLowerCase();
-
-      const newOption = {
-        value: searchValue,
-        label: searchValue,
-      };
-
-      if (
-        flattenedOptions.findIndex(
-          (option) => option.label.trim().toLowerCase() === normalizedSearchValue
-        ) === -1
-      ) {
-        setAvailableFieldsOptions([...availableFieldsOptions, newOption]);
-      }
-
-      setSelectedFields((prevSelected) => [...prevSelected, newOption]);
-    },
-    [availableFieldsOptions]
-  );
-
   const onCreateIntervalControl = useCallback(async () => {
-    const availableOptions = selectedFields.map((field) => field.label);
+    const availableOptions = values?.split(',').map((value) => value.trim()) ?? [];
     const state = {
       availableOptions,
       selectedOptions: [availableOptions[0]],
@@ -194,15 +131,15 @@ export function FieldControlForm({
     }
     closeFlyout();
   }, [
-    selectedFields,
+    values,
     minimumWidth,
     label,
     variableName,
     controlType,
     queryString,
     grow,
-    isControlInEditMode,
     closeFlyout,
+    isControlInEditMode,
     onCreateControl,
     onEditControl,
   ]);
@@ -239,33 +176,36 @@ export function FieldControlForm({
         />
 
         <EuiFormRow
-          label={i18n.translate('esql.flyout.values.label', {
+          label={i18n.translate('esqlVariables.flyout.values.label', {
             defaultMessage: 'Values',
           })}
-          helpText={i18n.translate('esql.flyout.values.multipleValuesDropdownLabel', {
-            defaultMessage: 'Select multiple values',
+          helpText={i18n.translate('esqlVariables.flyout.values.helpText', {
+            defaultMessage:
+              'Comma separated values (e.g. 5 minutes, 1 hour, 1 day, 1 week, 1 year)',
           })}
           fullWidth
-          isInvalid={!selectedFields.length}
+          isInvalid={!values || !areValuesValid}
           error={
-            !selectedFields.length
-              ? i18n.translate('esql.flyout.fieldvalues.error', {
-                  defaultMessage: 'At least one field is required',
+            !values
+              ? i18n.translate('esqlVariables.flyout.values.error', {
+                  defaultMessage: 'Values are required',
+                })
+              : !areValuesValid
+              ? i18n.translate('esqlVariables.flyout.valuesInterval.error', {
+                  defaultMessage: 'Interval values are not valid',
                 })
               : undefined
           }
         >
-          <EuiComboBox
-            aria-label={i18n.translate('esql.flyout.fieldsOptions.placeholder', {
-              defaultMessage: 'Select the fields options',
+          <EuiFieldText
+            placeholder={i18n.translate('esqlVariables.flyout.values.placeholder', {
+              defaultMessage: 'Set the static values',
             })}
-            placeholder={i18n.translate('esql.flyout.fieldsOptions.placeholder', {
-              defaultMessage: 'Select the fields options',
+            value={values}
+            onChange={onValuesChange}
+            aria-label={i18n.translate('esqlVariables.flyout.values.placeholder', {
+              defaultMessage: 'Set the static values',
             })}
-            options={availableFieldsOptions}
-            selectedOptions={selectedFields}
-            onChange={onFieldsChange}
-            onCreateOption={onCreateOption}
             fullWidth
           />
         </EuiFormRow>

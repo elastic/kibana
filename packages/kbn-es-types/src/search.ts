@@ -680,7 +680,7 @@ export interface ESQLSearchResponse {
   _clusters?: estypes.ClusterStatistics;
 }
 
-interface ESQLFieldNamedParam {
+export interface ESQLFieldNamedParam {
   [key: string]: string | number;
 }
 

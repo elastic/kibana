@@ -18,7 +18,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { monaco } from '@kbn/monaco';
 import { ESQLControlsFlyout } from './control_flyout';
-import { untilPluginStartServicesReady } from '../../kibana_services';
+import { untilPluginStartServicesReady } from './kibana_services';
 import type { ESQLControlState } from './types';
 
 import './flyout.scss';

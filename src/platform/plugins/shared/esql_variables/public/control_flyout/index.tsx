@@ -14,7 +14,7 @@ import { monaco } from '@kbn/monaco';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { esqlVariablesService } from '../../../../common';
+import { esqlVariablesService } from '../../common';
 import type { ESQLControlState } from '../types';
 import { IntervalControlForm } from './interval_control_form';
 import { ValueControlForm } from './value_control_form';

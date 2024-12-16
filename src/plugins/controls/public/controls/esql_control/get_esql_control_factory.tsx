@@ -13,7 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 import { EuiComboBox } from '@elastic/eui';
 import { useBatchedPublishingSubjects, PublishingSubject } from '@kbn/presentation-publishing';
 import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
-import { esqlVariablesService } from '@kbn/esql/common';
+import { esqlVariablesService } from '@kbn/esql-variables/common';
 import { ESQL_CONTROL } from '../../../common';
 import type { ESQLControlState, ESQLControlApi } from './types';
 import { ControlFactory } from '../types';

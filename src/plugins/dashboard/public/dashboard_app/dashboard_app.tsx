@@ -17,7 +17,7 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import { esqlVariablesService } from '@kbn/esql/common';
+import { esqlVariablesService } from '@kbn/esql-variables/common';
 import { DashboardApi, DashboardCreationOptions, DashboardRenderer } from '..';
 import { SharedDashboardState } from '../../common';
 import {

@@ -126,6 +126,7 @@
     "languageDocumentation": "src/platform/packages/private/kbn-language-documentation/src",
     "esql": "src/platform/plugins/shared/esql",
     "esqlDataGrid": "src/platform/plugins/shared/esql_datagrid",
+    "esqlVariables": "src/platform/plugins/shared/esql_datagrid",
     "statusPage": "src/legacy/core_plugins/status_page",
     "telemetry": ["src/plugins/telemetry", "src/plugins/telemetry_management_section"],
     "timelion": ["src/plugins/vis_types/timelion"],

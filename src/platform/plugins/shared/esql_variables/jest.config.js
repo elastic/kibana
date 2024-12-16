@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  updateESQLQueryTrigger,
-  UPDATE_ESQL_QUERY_TRIGGER,
-} from './update_esql_query/update_esql_query_trigger';
-export { UpdateESQLQueryAction } from './update_esql_query/update_esql_query_actions';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/shared/esql_datagrid'],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/esql_datagrid',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/src/platform/plugins/shared/esql_datagrid/{common,public,server}/**/*.{js,ts,tsx}',
+  ],
+  setupFiles: ['jest-canvas-mock'],
+};

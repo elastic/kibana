@@ -31,19 +31,19 @@ import {
 } from '@elastic/eui';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { esqlVariablesService } from '../../../../common';
+import { esqlVariablesService } from '../../common';
 import { EsqlControlFlyoutType } from '../types';
 
 const controlTypeOptions = [
   {
-    label: i18n.translate('esql.flyout.controlTypeOptions.staticValuesLabel', {
+    label: i18n.translate('esqlVariables.flyout.controlTypeOptions.staticValuesLabel', {
       defaultMessage: 'Static Values',
     }),
     'data-test-subj': 'staticValues',
     key: EsqlControlFlyoutType.STATIC_VALUES,
   },
   {
-    label: i18n.translate('esql.flyout.controlTypeOptions.valuesFromQueryLabel', {
+    label: i18n.translate('esqlVariables.flyout.controlTypeOptions.valuesFromQueryLabel', {
       defaultMessage: 'Values from a query',
     }),
     'data-test-subj': 'valuesFromQuery',
@@ -54,19 +54,19 @@ const controlTypeOptions = [
 const minimumWidthButtonGroup = [
   {
     id: `small`,
-    label: i18n.translate('esql.flyout.minimumWidth.small', {
+    label: i18n.translate('esqlVariables.flyout.minimumWidth.small', {
       defaultMessage: 'Small',
     }),
   },
   {
     id: `medium`,
-    label: i18n.translate('esql.flyout.minimumWidth.medium', {
+    label: i18n.translate('esqlVariables.flyout.minimumWidth.medium', {
       defaultMessage: 'Medium',
     }),
   },
   {
     id: `large`,
-    label: i18n.translate('esql.flyout.minimumWidth.large', {
+    label: i18n.translate('esqlVariables.flyout.minimumWidth.large', {
       defaultMessage: 'Large',
     }),
   },
@@ -97,16 +97,16 @@ export function ControlType({
 
   return (
     <EuiFormRow
-      label={i18n.translate('esql.flyout.controlTypeOptions.label', {
+      label={i18n.translate('esqlVariables.flyout.controlTypeOptions.label', {
         defaultMessage: 'Type',
       })}
       fullWidth
     >
       <EuiComboBox
-        aria-label={i18n.translate('esql.flyout.controlTypeOptions.placeholder', {
+        aria-label={i18n.translate('esqlVariables.flyout.controlTypeOptions.placeholder', {
           defaultMessage: 'Select a control type',
         })}
-        placeholder={i18n.translate('esql.flyout.controlTypeOptions.placeholder', {
+        placeholder={i18n.translate('esqlVariables.flyout.controlTypeOptions.placeholder', {
           defaultMessage: 'Select a control type',
         })}
         singleSelection={{ asPlainText: true }}
@@ -131,7 +131,7 @@ export function VariableName({
 }) {
   return (
     <EuiFormRow
-      label={i18n.translate('esql.flyout.variableName.label', {
+      label={i18n.translate('esqlVariables.flyout.variableName.label', {
         defaultMessage: 'Name',
       })}
       fullWidth
@@ -142,23 +142,23 @@ export function VariableName({
       }
       error={
         !variableName
-          ? i18n.translate('esql.flyout.variableName.error', {
+          ? i18n.translate('esqlVariables.flyout.variableName.error', {
               defaultMessage: 'Variable name is required',
             })
           : esqlVariablesService.variableExists(variableName) && !isControlInEditMode
-          ? i18n.translate('esql.flyout.variableNameExists.error', {
+          ? i18n.translate('esqlVariables.flyout.variableNameExists.error', {
               defaultMessage: 'Variable name already exists',
             })
           : undefined
       }
     >
       <EuiFieldText
-        placeholder={i18n.translate('esql.flyout.variableName.placeholder', {
+        placeholder={i18n.translate('esqlVariables.flyout.variableName.placeholder', {
           defaultMessage: 'Set a variable name',
         })}
         value={variableName}
         onChange={onVariableNameChange}
-        aria-label={i18n.translate('esql.flyout.variableName.placeholder', {
+        aria-label={i18n.translate('esqlVariables.flyout.variableName.placeholder', {
           defaultMessage: 'Set a variable name',
         })}
         fullWidth
@@ -177,21 +177,21 @@ export function ControlLabel({
 }) {
   return (
     <EuiFormRow
-      label={i18n.translate('esql.flyout.label.label', {
+      label={i18n.translate('esqlVariables.flyout.label.label', {
         defaultMessage: 'Label',
       })}
-      labelAppend={i18n.translate('esql.flyout.label.extraLabel', {
+      labelAppend={i18n.translate('esqlVariables.flyout.label.extraLabel', {
         defaultMessage: 'Optional',
       })}
       fullWidth
     >
       <EuiFieldText
-        placeholder={i18n.translate('esql.flyout.label.placeholder', {
+        placeholder={i18n.translate('esqlVariables.flyout.label.placeholder', {
           defaultMessage: 'Set a label',
         })}
         value={label}
         onChange={onLabelChange}
-        aria-label={i18n.translate('esql.flyout.label.placeholder', {
+        aria-label={i18n.translate('esqlVariables.flyout.label.placeholder', {
           defaultMessage: 'Set a label',
         })}
         fullWidth
@@ -214,13 +214,13 @@ export function ControlWidth({
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('esql.flyout.minimumWidth.label', {
+        label={i18n.translate('esqlVariables.flyout.minimumWidth.label', {
           defaultMessage: 'Minimum Width',
         })}
         fullWidth
       >
         <EuiButtonGroup
-          legend={i18n.translate('esql.flyout.minimumWidth.label', {
+          legend={i18n.translate('esqlVariables.flyout.minimumWidth.label', {
             defaultMessage: 'Minimum Width',
           })}
           options={minimumWidthButtonGroup}
@@ -233,7 +233,7 @@ export function ControlWidth({
       <EuiSpacer size="m" />
       <EuiSwitch
         compressed
-        label={i18n.translate('esql.flyout.grow.label', {
+        label={i18n.translate('esqlVariables.flyout.grow.label', {
           defaultMessage: 'Expand width to fit available space',
         })}
         color="primary"
@@ -251,7 +251,7 @@ export function Header() {
         <EuiFlexItem grow={false}>
           <EuiTitle size="m">
             <h2>
-              {i18n.translate('esql.flyout.title', {
+              {i18n.translate('esqlVariables.flyout.title', {
                 defaultMessage: 'Create ES|QL control',
               })}
             </h2>
@@ -259,10 +259,10 @@ export function Header() {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip
-            title={i18n.translate('esql.flyout.experimentalLabel.title', {
+            title={i18n.translate('esqlVariables.flyout.experimentalLabel.title', {
               defaultMessage: 'Technical preview',
             })}
-            content={i18n.translate('esql.flyout.experimentalLabel.content', {
+            content={i18n.translate('esqlVariables.flyout.experimentalLabel.content', {
               defaultMessage: 'ES|QL variables are currently on Technical preview.',
             })}
           >
@@ -315,12 +315,12 @@ export function Footer({
             id="lnsCancelEditOnFlyFlyout"
             onClick={onCancel}
             flush="left"
-            aria-label={i18n.translate('esql.flyout..cancelFlyoutAriaLabel', {
+            aria-label={i18n.translate('esqlVariables.flyout..cancelFlyoutAriaLabel', {
               defaultMessage: 'Cancel applied changes',
             })}
             data-test-subj="cancelEsqlControlsFlyoutButton"
           >
-            {i18n.translate('esql.flyout.cancelLabel', {
+            {i18n.translate('esqlVariables.flyout.cancelLabel', {
               defaultMessage: 'Cancel',
             })}
           </EuiButtonEmpty>
@@ -329,7 +329,7 @@ export function Footer({
           <EuiButton
             onClick={onCreateControl}
             fill
-            aria-label={i18n.translate('esql.flyout..applyFlyoutAriaLabel', {
+            aria-label={i18n.translate('esqlVariables.flyout..applyFlyoutAriaLabel', {
               defaultMessage: 'Apply changes',
             })}
             disabled={isSaveDisabled}
@@ -337,7 +337,7 @@ export function Footer({
             iconType="check"
             data-test-subj="saveEsqlControlsFlyoutButton"
           >
-            {i18n.translate('esql.flyout.saveLabel', {
+            {i18n.translate('esqlVariables.flyout.saveLabel', {
               defaultMessage: 'Save',
             })}
           </EuiButton>

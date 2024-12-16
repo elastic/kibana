@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  updateESQLQueryTrigger,
-  UPDATE_ESQL_QUERY_TRIGGER,
-} from './update_esql_query/update_esql_query_trigger';
-export { UpdateESQLQueryAction } from './update_esql_query/update_esql_query_actions';
+import { ESQLVariablesPlugin } from './plugin';
+
+export type { ESQLControlState } from './types';
+
+export function plugin() {
+  return new ESQLVariablesPlugin();
+}

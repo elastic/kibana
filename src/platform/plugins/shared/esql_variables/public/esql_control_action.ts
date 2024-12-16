@@ -38,7 +38,7 @@ export class CreateESQLControlAction implements Action<Context> {
   constructor(protected readonly core: CoreStart, protected readonly search: ISearchGeneric) {}
 
   public getDisplayName(): string {
-    return i18n.translate('esql.createESQLControlLabel', {
+    return i18n.translate('esqlVariables.createESQLControlLabel', {
       defaultMessage: 'Creates an ES|QL control',
     });
   }

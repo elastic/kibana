@@ -22,7 +22,7 @@ import ESQLEditor from '@kbn/esql-editor';
 import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { getIndexPatternFromESQLQuery, getESQLResults } from '@kbn/esql-utils';
-import { esqlVariablesService } from '../../../../common';
+import { esqlVariablesService } from '../../common';
 import type { ESQLControlState } from '../types';
 import {
   Header,
@@ -245,14 +245,14 @@ export function ValueControlForm({
         {controlFlyoutType === EsqlControlFlyoutType.VALUES_FROM_QUERY && (
           <>
             <EuiFormRow
-              label={i18n.translate('esql.flyout.valuesQueryEditor.label', {
+              label={i18n.translate('esqlVariables.flyout.valuesQueryEditor.label', {
                 defaultMessage: 'Values query',
               })}
               fullWidth
               isInvalid={!valuesQuery}
               error={
                 !valuesQuery
-                  ? i18n.translate('esql.flyout.valuesQueryEditor.error', {
+                  ? i18n.translate('esqlVariables.flyout.valuesQueryEditor.error', {
                       defaultMessage: 'Query is required',
                     })
                   : undefined
@@ -278,20 +278,20 @@ export function ValueControlForm({
               />
             </EuiFormRow>
             <EuiFormRow
-              label={i18n.translate('esql.flyout.previewValues.placeholder', {
+              label={i18n.translate('esqlVariables.flyout.previewValues.placeholder', {
                 defaultMessage: 'Values preview',
               })}
               fullWidth
             >
               <EuiTextArea
-                placeholder={i18n.translate('esql.flyout.values.placeholder', {
+                placeholder={i18n.translate('esqlVariables.flyout.values.placeholder', {
                   defaultMessage: 'Set the static values',
                 })}
                 value={values}
                 disabled
                 compressed
                 onChange={() => {}}
-                aria-label={i18n.translate('esql.flyout.previewValues.placeholder', {
+                aria-label={i18n.translate('esqlVariables.flyout.previewValues.placeholder', {
                   defaultMessage: 'Values preview',
                 })}
                 fullWidth
@@ -301,10 +301,10 @@ export function ValueControlForm({
         )}
         {controlFlyoutType === EsqlControlFlyoutType.STATIC_VALUES && (
           <EuiFormRow
-            label={i18n.translate('esql.flyout.values.label', {
+            label={i18n.translate('esqlVariables.flyout.values.label', {
               defaultMessage: 'Values',
             })}
-            helpText={i18n.translate('esql.flyout.values.helpText', {
+            helpText={i18n.translate('esqlVariables.flyout.values.helpText', {
               defaultMessage:
                 'Comma separated values (e.g. 5 minutes, 1 hour, 1 day, 1 week, 1 year)',
             })}
@@ -312,19 +312,19 @@ export function ValueControlForm({
             isInvalid={!values}
             error={
               !values
-                ? i18n.translate('esql.flyout.values.error', {
+                ? i18n.translate('esqlVariables.flyout.values.error', {
                     defaultMessage: 'Values are required',
                   })
                 : undefined
             }
           >
             <EuiFieldText
-              placeholder={i18n.translate('esql.flyout.values.placeholder', {
+              placeholder={i18n.translate('esqlVariables.flyout.values.placeholder', {
                 defaultMessage: 'Set the static values',
               })}
               value={values}
               onChange={onValuesChange}
-              aria-label={i18n.translate('esql.flyout.values.placeholder', {
+              aria-label={i18n.translate('esqlVariables.flyout.values.placeholder', {
                 defaultMessage: 'Set the static values',
               })}
               fullWidth

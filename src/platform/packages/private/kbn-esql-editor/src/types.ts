@@ -82,7 +82,7 @@ export interface ESQLEditorProps {
    * Pass the embedable id if the editor is part of an embeddable **/
   panelId?: string;
 }
-
+// Cawn't import from the esql plugin due to circular dependencies
 interface EsqlVariablesService {
   enable: () => void;
   disable: () => void;

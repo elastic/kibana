@@ -13,10 +13,10 @@ export const ESQL_CONTROL_TRIGGER = 'ESQL_CONTROL_TRIGGER';
 
 export const esqlControlTrigger: Trigger = {
   id: ESQL_CONTROL_TRIGGER,
-  title: i18n.translate('esql.triggers.esqlControlTigger', {
+  title: i18n.translate('esqlVariables.triggers.esqlControlTigger', {
     defaultMessage: 'Create an ES|QL control',
   }),
-  description: i18n.translate('esql.triggers.esqlControlTiggerDescription', {
+  description: i18n.translate('esqlVariables.triggers.esqlControlTiggerDescription', {
     defaultMessage: 'Create an ES|QL control to interact with the charts',
   }),
 };
