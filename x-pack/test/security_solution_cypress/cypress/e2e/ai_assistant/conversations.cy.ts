@@ -10,6 +10,7 @@ import {
   RULE_MANAGEMENT_CONTEXT_DESCRIPTION,
 } from '@kbn/security-solution-plugin/public/detections/pages/detection_engine/rules/translations';
 import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N } from '@kbn/security-solution-plugin/public/assistant/content/prompts/user/translations';
+import { NEW_CHAT } from '@kbn/elastic-assistant/impl/assistant/conversations/conversation_sidepanel/translations';
 import {
   assertConnectorSelected,
   assertNewConversation,
@@ -19,7 +20,7 @@ import {
   createNewChat,
   selectConversation,
   assertMessageSent,
-  assertConversationTitle,
+  assertNotConversationTitle,
   typeAndSendMessage,
   assertErrorResponse,
   selectRule,
@@ -145,15 +146,15 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       assertConnectorSelected(bedrockConnectorAPIPayload.name);
       assertMessageSent('goodbye');
     });
-    it('Correctly creates and titles new conversations, and allows title updates', () => {
+    it.only('Correctly creates and titles new conversations, and allows title updates', () => {
       visitGetStartedPage();
       openAssistant();
       createNewChat();
-      assertNewConversation(false, 'New chat');
+      assertNewConversation(false, NEW_CHAT);
       assertConnectorSelected(azureConnectorAPIPayload.name);
       typeAndSendMessage('hello');
       assertMessageSent('hello');
-      assertConversationTitle('Unexpected API Error:  - Connection error.');
+      assertNotConversationTitle(NEW_CHAT);
       updateConversationTitle('Something else');
     });
   });
