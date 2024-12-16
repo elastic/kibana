@@ -987,6 +987,7 @@ x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-tea
 x-pack/solutions/observability/plugins/synthetics/e2e @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/uptime @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/ux @elastic/obs-ux-management-team
+x-pack/solutions/security/packages/connectors @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/data_table @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/data-stream-adapter @elastic/security-threat-hunting
 x-pack/solutions/security/packages/distribution_bar @elastic/kibana-cloud-security-posture
