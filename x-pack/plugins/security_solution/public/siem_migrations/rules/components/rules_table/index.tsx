@@ -224,11 +224,22 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [installSingleRule, isLoading]
     );
 
+    const getMigrationRule = useCallback(
+      (ruleId: string) => {
+        if (!isLoading && ruleMigrations.length) {
+          return ruleMigrations.find((item) => item.id === ruleId);
+        }
+      },
+      [isLoading, ruleMigrations]
+    );
+
     const {
       migrationRuleDetailsFlyout: rulePreviewFlyout,
       openMigrationRuleDetails: openRulePreview,
     } = useMigrationRuleDetailsFlyout({
+      isLoading,
       prebuiltRules,
+      getMigrationRule,
       ruleActionsFactory,
     });
 
