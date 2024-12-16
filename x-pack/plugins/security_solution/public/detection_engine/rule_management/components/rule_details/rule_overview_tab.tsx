@@ -88,7 +88,7 @@ const ExpandableSection = ({ title, isOpen, toggle, children }: ExpandableSectio
 };
 
 interface RuleOverviewTabProps {
-  rule: RuleResponse;
+  rule: Partial<RuleResponse>;
   columnWidths?: EuiDescriptionListProps['columnWidths'];
   expandedOverviewSections: Record<keyof typeof defaultOverviewOpenSections, boolean>;
   toggleOverviewSection: Record<keyof typeof defaultOverviewOpenSections, () => void>;
