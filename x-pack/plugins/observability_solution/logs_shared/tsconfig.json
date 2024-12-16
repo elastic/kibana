@@ -11,7 +11,9 @@
     "types/**/*",
     "emotion.d.ts"
   ],
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n",
@@ -53,5 +55,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/saved-search-plugin",
     "@kbn/discover-plugin",
+    "@kbn/spaces-plugin",
   ]
 }
