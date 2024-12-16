@@ -67,7 +67,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/esql",
     "@kbn/ui-actions-plugin",
-    "@kbn/ui-theme",
     "@kbn/unified-search-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/utility-types",
