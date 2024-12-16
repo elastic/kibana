@@ -630,6 +630,7 @@ src/platform/plugins/shared/dev_tools @elastic/kibana-management
 src/platform/plugins/shared/es_ui_shared @elastic/kibana-management
 src/platform/plugins/shared/esql @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
+src/platform/plugins/shared/esql_variables @elastic/kibana-esql
 src/platform/plugins/shared/management @elastic/kibana-management
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/bfetch @elastic/appex-sharedux
