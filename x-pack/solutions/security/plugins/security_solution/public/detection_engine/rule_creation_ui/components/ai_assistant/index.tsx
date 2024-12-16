@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { NewChat } from '@kbn/elastic-assistant';
 
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { css } from '@emotion/react';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import * as i18nAssistant from '../../../../detections/pages/detection_engine/translations';
@@ -117,7 +118,13 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
               isAssistantEnabled={isAssistantEnabled}
               onExportCodeBlock={handleOnExportCodeBlock}
             >
-              <AssistantIcon size="s" /> {i18n.ASK_ASSISTANT_ERROR_BUTTON}
+              <AssistantIcon
+                size="s"
+                css={css`
+                  vertical-align: inherit;
+                `}
+              />{' '}
+              {i18n.ASK_ASSISTANT_ERROR_BUTTON}
             </NewChat>
           ),
         }}
