@@ -6,12 +6,21 @@
  */
 
 import type { HealthParameters, HealthSnapshot } from './health_metadata';
-import type { HealthOverviewStats, HealthOverviewState, HealthHistory } from './health_stats';
+import type {
+  HealthOverviewState,
+  HealthHistory,
+  ClusterHealthOverviewStats,
+} from './health_stats';
 
 /**
  * Health calculation parameters for the whole cluster.
  */
-export type ClusterHealthParameters = HealthParameters;
+export interface ClusterHealthParameters extends HealthParameters {
+  /**
+   * Number of fetched top rules by metrics
+   */
+  num_of_top_rules: number;
+}
 
 /**
  * Health calculation result for the whole cluster.
@@ -41,4 +50,4 @@ export type ClusterHealthState = HealthOverviewState;
 /**
  * Health stats calculated over a given interval.
  */
-export type ClusterHealthStats = HealthOverviewStats;
+export type ClusterHealthStats = ClusterHealthOverviewStats;

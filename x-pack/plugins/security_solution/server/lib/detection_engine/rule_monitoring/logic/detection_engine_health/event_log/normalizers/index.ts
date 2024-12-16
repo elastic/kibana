@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-export * from './cluster_health';
-export * from './health_interval';
-export * from './health_metadata';
-export * from './health_stats';
-export * from './rule_health';
-export * from './space_health';
-export * from './default_top_n_rules_limit';
+export * from './normalize_rule_health_aggregation_result';
+export * from './normalize_spaces_health_aggregation_result';
