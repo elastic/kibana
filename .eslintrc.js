@@ -764,7 +764,6 @@ module.exports = {
         ],
       },
     },
-
     /**
      * Jest specific rules
      */
