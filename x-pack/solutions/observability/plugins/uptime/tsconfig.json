@@ -79,6 +79,7 @@
     "@kbn/deeplinks-observability",
     "@kbn/ebt-tools",
     "@kbn/core-rendering-browser",
+    "@kbn/charts-theme",
   ],
   "exclude": ["target/**/*"]
 }
