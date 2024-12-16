@@ -26,7 +26,7 @@ import {
 import { isEqual } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4, NIL as UUID_NIL } from 'uuid';
 import type { ListCustomFieldOption } from '../../../../../common/types/domain';
 import * as i18n from '../../translations';
 
@@ -44,7 +44,7 @@ export const INITIAL_OPTIONS = [
     // Key used to identify the initial default option
     // String literal 'default' is not used to avoid confusion in case the user changes the
     // default value to a different option,
-    key: '00000000-0000-0000-0000-000000000000',
+    key: UUID_NIL, // '00000000-0000-0000-0000-000000000000'
     label: '',
   },
 ];
