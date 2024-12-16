@@ -116,6 +116,8 @@ export const getSecurityBaseKibanaFeature = ({
         'cloud-defend-read',
         'timeline_write',
         'timeline_read',
+        'notes_write',
+        'notes_read',
       ],
       savedObject: {
         all: ['alert', ...savedObjects],
@@ -156,6 +158,7 @@ export const getSecurityBaseKibanaFeature = ({
         'cloud-security-posture-read',
         'cloud-defend-read',
         'timeline_read',
+        'notes_read',
       ],
       savedObject: {
         all: [],
