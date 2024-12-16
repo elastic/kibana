@@ -141,27 +141,34 @@ export const UnifiedChatCompleteResponseSchema = schema.object({
   id: schema.string(),
   choices: schema.arrayOf(
     schema.object({
-      finish_reason: schema.oneOf([
-        schema.literal('stop'),
-        schema.literal('length'),
-        schema.literal('tool_calls'),
-        schema.literal('content_filter'),
-        schema.literal('function_call'),
-      ]),
-      index: schema.number(),
+      finish_reason: schema.maybe(
+        schema.nullable(
+          schema.oneOf([
+            schema.literal('stop'),
+            schema.literal('length'),
+            schema.literal('tool_calls'),
+            schema.literal('content_filter'),
+            schema.literal('function_call'),
+          ])
+        )
+      ),
+      index: schema.maybe(schema.number()),
       message: schema.object({
-        content: schema.nullable(schema.string()),
-        refusal: schema.nullable(schema.string()),
-        role: schema.string(),
+        content: schema.maybe(schema.nullable(schema.string())),
+        refusal: schema.maybe(schema.nullable(schema.string())),
+        role: schema.maybe(schema.string()),
         tool_calls: schema.arrayOf(
           schema.object({
-            id: schema.string(),
-            function: schema.object({
-              arguments: schema.maybe(schema.string()),
-              name: schema.maybe(schema.string()),
-            }),
-            type: schema.string(),
-          })
+            id: schema.maybe(schema.string()),
+            function: schema.maybe(
+              schema.object({
+                arguments: schema.maybe(schema.string()),
+                name: schema.maybe(schema.string()),
+              })
+            ),
+            type: schema.maybe(schema.string()),
+          }),
+          { defaultValue: [] }
         ),
       }),
     }),
