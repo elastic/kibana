@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import type { Config, Secrets } from '@kbn/inference-endpoint-ui-common';
+
 export enum APIRoutes {
   GET_INFERENCE_ENDPOINTS = '/internal/inference_endpoints/endpoints',
-  DELETE_INFERENCE_ENDPOINT = '/internal/inference_endpoint/endpoints/{type}/{id}',
+  INFERENCE_ENDPOINT = '/internal/inference_endpoint/endpoints/{type}/{id}',
+  GET_INFERENCE_SERVICES = 'internal/inference_endpoints/_inference/_services',
 }
 
 export interface SearchInferenceEndpointsConfigType {
@@ -21,4 +24,11 @@ export enum TaskTypes {
   rerank = 'rerank',
   sparse_embedding = 'sparse_embedding',
   text_embedding = 'text_embedding',
+}
+
+export type { InferenceProvider } from '@kbn/inference-endpoint-ui-common';
+
+export interface InferenceEndpoint {
+  config: Config;
+  secrets: Secrets;
 }

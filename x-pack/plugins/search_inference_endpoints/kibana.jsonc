@@ -29,7 +29,8 @@
       "searchNavigation",
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "esUiShared"
     ]
   }
 }
