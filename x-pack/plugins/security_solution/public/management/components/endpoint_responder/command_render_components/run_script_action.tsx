@@ -8,6 +8,7 @@
 import React, { memo, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 import { useSendRunScriptEndpoint } from '../../../hooks/response_actions/use_send_run_script_endpoint_request';
 import type { RunScriptActionRequestBody } from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
@@ -18,14 +19,7 @@ import type {
 import type { ActionRequestComponentProps } from '../types';
 
 export const RunScriptActionResult = memo<
-  ActionRequestComponentProps<
-    {
-      command: string;
-      timeout?: string;
-    },
-    ResponseActionRunScriptOutputContent,
-    ResponseActionRunScriptParameters
-  >
+  ActionRequestComponentProps<ResponseActionRunScriptParameters>
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendRunScriptEndpoint();
   const actionRequestBody = useMemo<undefined | RunScriptActionRequestBody>(() => {
@@ -67,24 +61,24 @@ export const RunScriptActionResult = memo<
     return result;
   }
 
-  // Show results
   return (
     <ResultComponent
       data-test-subj="executeSuccess"
       showAs="success"
       title={i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.executeAction.successTitle',
-        { defaultMessage: 'Command execution was successful.' }
+        'xpack.securitySolution.endpointResponseActions.runScriptAction.successTitle',
+        { defaultMessage: 'RunScript was successful.' }
       )}
     >
-      {/* TODO: create a new component*/}
-      {/* <ExecuteActionHostResponse*/}
-      {/*  action={completedActionDetails}*/}
-      {/*  canAccessFileDownloadLink={true}*/}
-      {/*  agentId={command.commandDefinition?.meta?.endpointId}*/}
-      {/*  textSize="s"*/}
-      {/*  data-test-subj="console"*/}
-      {/* />*/}
+      <ExecuteActionHostResponse
+        action={completedActionDetails}
+        canAccessFileDownloadLink={true}
+        agentId={command.commandDefinition?.meta?.endpointId}
+        textSize="s"
+        data-test-subj="console"
+        showFile={false}
+        showContext={false}
+      />
     </ResultComponent>
   );
 });

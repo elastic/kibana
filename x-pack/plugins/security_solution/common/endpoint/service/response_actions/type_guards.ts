@@ -15,6 +15,8 @@ import type {
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
   GetProcessesActionOutputContent,
+  ResponseActionRunScriptOutputContent,
+  ResponseActionRunScriptParameters,
 } from '../../types';
 import { RESPONSE_ACTION_AGENT_TYPE, RESPONSE_ACTION_TYPE } from './constants';
 
@@ -45,6 +47,15 @@ export const isProcessesAction = (
   action: MaybeImmutable<SomeObjectWithCommand>
 ): action is ActionDetails<GetProcessesActionOutputContent> => {
   return action.command === 'running-processes';
+};
+
+export const isRunScriptAction = (
+  action: MaybeImmutable<SomeObjectWithCommand>
+): action is ActionDetails<
+  ResponseActionRunScriptOutputContent,
+  ResponseActionRunScriptParameters
+> => {
+  return action.command === 'runscript';
 };
 
 // type guards to ensure only the matching string values are attached to the types filter type
