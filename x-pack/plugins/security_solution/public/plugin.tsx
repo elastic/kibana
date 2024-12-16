@@ -109,7 +109,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
       const store = await this.store(coreStart, startPlugins, subPlugins);
 
-      const services = await this.services.generateServices(coreStart, startPlugins, params);
+      const startBaseServices = await this.services.generateServices(coreStart, startPlugins);
+      const services: StartServices = {
+        ...startBaseServices,
+        ...(params && {
+          onAppLeave: params.onAppLeave,
+          setHeaderActionMenu: params.setHeaderActionMenu,
+        }),
+      };
+
       return { renderApp, subPlugins, store, services };
     };
 

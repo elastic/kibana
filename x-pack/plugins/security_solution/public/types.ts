@@ -173,7 +173,7 @@ export interface ContractStartServices {
   onboarding: OnboardingService;
 }
 
-export type StartServices = CoreStart &
+export type BaseStartServices = CoreStart &
   StartPlugins &
   ContractStartServices & {
     configSettings: ConfigSettings;
@@ -198,6 +198,11 @@ export type StartServices = CoreStart &
     timelineDataService: DataPublicPluginStart;
     siemMigrations: SiemMigrationsService;
   };
+
+export type StartServices = BaseStartServices & {
+  setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
+  onAppLeave?: (handler: AppLeaveHandler) => void;
+};
 
 export type StartRenderServices = Pick<
   CoreStart,

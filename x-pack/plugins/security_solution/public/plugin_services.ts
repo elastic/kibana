@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AppMountParameters, CoreSetup, CoreStart, PackageInfo } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, PackageInfo } from '@kbn/core/public';
 import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import type { DataPublicPluginStart, QueryStart } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -24,6 +24,7 @@ import type { SecuritySolutionUiConfigType } from './common/types';
 import type {
   PluginStart,
   SetupPlugins,
+  BaseStartServices,
   StartPlugins,
   StartPluginsDependencies,
   StartServices,
@@ -37,6 +38,8 @@ export class PluginServices {
   private readonly sessionStorage = new Storage(sessionStorage);
 
   private readonly configSettings: ConfigSettings;
+
+  private startServices?: StartServices;
 
   /**
    * For internal use. Specify which version of the Detection Rules fleet package to install
@@ -111,9 +114,11 @@ export class PluginServices {
 
   public async generateServices(
     coreStart: CoreStart,
-    startPlugins: StartPluginsDependencies,
-    params?: AppMountParameters<unknown>
-  ): Promise<StartServices> {
+    startPlugins: StartPluginsDependencies
+  ): Promise<BaseStartServices> {
+    if (this.startServices) {
+      return this.startServices;
+    }
     const { apm } = await import('@elastic/apm-rum');
     const { SecuritySolutionTemplateWrapper } = await import('./app/home/template_wrapper');
 
@@ -137,7 +142,7 @@ export class PluginServices {
       startPlugins.data
     );
 
-    return {
+    this.startServices = {
       ...coreStart,
       ...plugins,
       ...this.contract.getStartServices(),
@@ -154,11 +159,8 @@ export class PluginServices {
       timelineDataService,
       topValuesPopover: new TopValuesPopoverService(),
       siemMigrations: await createSiemMigrationsService(coreStart, startPlugins),
-      ...(params && {
-        onAppLeave: params.onAppLeave,
-        setHeaderActionMenu: params.setHeaderActionMenu,
-      }),
     };
+    return this.startServices;
   }
 
   public getExperimentalFeatures() {
