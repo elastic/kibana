@@ -35,8 +35,7 @@ const {
   expectFieldOptionsNotRendered,
 } = trustedAppsFormSelectors;
 
-// Failing: See https://github.com/elastic/kibana/issues/203929
-describe.skip(
+describe(
   'Trusted Apps',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'], // @skipInServerlessMKI until kibana is rebuilt after merge

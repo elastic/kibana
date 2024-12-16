@@ -27,6 +27,12 @@ export function registerExploreRoute({
   router.post(
     {
       path: '/internal/graph/graphExplore',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client.',
+        },
+      },
       validate: {
         body: schema.object({
           index: schema.string(),
