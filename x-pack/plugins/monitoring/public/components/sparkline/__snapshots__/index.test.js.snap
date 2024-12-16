@@ -3,7 +3,11 @@
 exports[`Sparkline component does not show tooltip initially 1`] = `
 <div>
   <div
-    className="monSparkline"
+    css={
+      Object {
+        "height": "2em",
+      }
+    }
   />
 </div>
 `;
@@ -11,7 +15,11 @@ exports[`Sparkline component does not show tooltip initially 1`] = `
 exports[`Sparkline component shows tooltip on hover 1`] = `
 <div>
   <div
-    className="monSparkline"
+    css={
+      Object {
+        "height": "2em",
+      }
+    }
   />
   <div
     className="monSparklineTooltip__container"
@@ -23,7 +31,7 @@ exports[`Sparkline component shows tooltip on hover 1`] = `
     }
   >
     <i
-      className="fa fa-caret-left monSparklineTooltip__caret"
+      className="fa fa-caret-left"
       style={
         Object {
           "display": "block",
@@ -32,7 +40,7 @@ exports[`Sparkline component shows tooltip on hover 1`] = `
       }
     />
     <div
-      className="monSparklineTooltip"
+      css={[Function]}
       style={
         Object {
           "height": 56,
@@ -41,18 +49,18 @@ exports[`Sparkline component shows tooltip on hover 1`] = `
       }
     >
       <div
-        className="monSparklineTooltip__yValue"
+        css={[Function]}
       >
         1513814914
       </div>
       <div
-        className="monSparklineTooltip__xValue"
+        css={[Function]}
       >
         25
       </div>
     </div>
     <i
-      className="fa fa-caret-right monSparklineTooltip__caret"
+      className="fa fa-caret-right"
       style={
         Object {
           "width": 6,

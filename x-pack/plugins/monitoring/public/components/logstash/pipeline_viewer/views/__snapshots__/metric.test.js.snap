@@ -2,12 +2,12 @@
 
 exports[`Metric component does not render warning badge when no warning present 1`] = `
 <EuiFlexItem
-  className="monPipelineViewer__metricFlexItem"
+  css={[Function]}
   grow={false}
 >
   <EuiText
-    className="monPipelineViewer__metric metricClass"
     color="subdued"
+    css={[Function]}
     size="s"
   >
     <span>
@@ -19,11 +19,10 @@ exports[`Metric component does not render warning badge when no warning present 
 
 exports[`Metric component renders warning badge 1`] = `
 <EuiFlexItem
-  className="monPipelineViewer__metricFlexItem"
+  css={[Function]}
   grow={false}
 >
   <EuiBadge
-    className="metricClass"
     color="warning"
   >
     220

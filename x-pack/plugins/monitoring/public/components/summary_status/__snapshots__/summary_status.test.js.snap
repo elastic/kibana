@@ -1,9 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Summary Status Component should allow label to be optional 1`] = `
-<div
-  class="monSummaryStatusNoWrap"
->
+<div>
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
   >
@@ -12,7 +10,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
       style="max-width:200px"
     >
       <div
-        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
+        class="euiStat emotion-EuiStat"
         data-test-subj="status"
       >
         <div
@@ -42,7 +40,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
       style="max-width:200px"
     >
       <div
-        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
+        class="euiStat emotion-EuiStat"
       >
         <div
           class="euiText euiStat__description emotion-euiText-s"
@@ -62,7 +60,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
       style="max-width:200px"
     >
       <div
-        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
+        class="euiStat emotion-EuiStat"
       >
         <div
           class="euiText euiStat__description emotion-euiText-s"
@@ -83,9 +81,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
 `;
 
 exports[`Summary Status Component should allow status to be optional 1`] = `
-<div
-  class="monSummaryStatusNoWrap"
->
+<div>
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
   >
@@ -99,7 +95,7 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
       style="max-width:200px"
     >
       <div
-        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
+        class="euiStat emotion-EuiStat"
       >
         <div
           class="euiText euiStat__description emotion-euiText-s"
@@ -121,7 +117,7 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
       style="max-width:200px"
     >
       <div
-        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
+        class="euiStat emotion-EuiStat"
       >
         <div
           class="euiText euiStat__description emotion-euiText-s"
@@ -142,9 +138,7 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
 `;
 
 exports[`Summary Status Component should render metrics in a summary bar 1`] = `
-<div
-  class="monSummaryStatusNoWrap"
->
+<div>
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
   >
@@ -153,7 +147,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
       style="max-width:200px"
     >
       <div
-        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
+        class="euiStat emotion-EuiStat"
         data-test-subj="status"
       >
         <div
@@ -183,7 +177,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
       style="max-width:200px"
     >
       <div
-        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
+        class="euiStat emotion-EuiStat"
       >
         <div
           class="euiText euiStat__description emotion-euiText-s"
@@ -205,7 +199,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
       style="max-width:200px"
     >
       <div
-        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
+        class="euiStat emotion-EuiStat"
       >
         <div
           class="euiText euiStat__description emotion-euiText-s"
