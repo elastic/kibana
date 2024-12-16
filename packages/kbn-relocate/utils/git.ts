@@ -38,6 +38,7 @@ export const findPr = async (number: string): Promise<PullRequest> => {
 export const isManualCommit = (commit: Commit) =>
   !commit.messageHeadline.startsWith('Relocating module ') &&
   !commit.messageHeadline.startsWith('Moving modules owned by ') &&
+  !commit.messageHeadline.startsWith('Merge branch ') &&
   commit.authors.some(
     (author) => author.login !== 'kibanamachine' && author.login !== 'elasticmachine'
   );

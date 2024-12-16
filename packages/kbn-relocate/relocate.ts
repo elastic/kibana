@@ -213,7 +213,7 @@ export const findAndRelocateModules = async (params: RelocateModulesParams, log:
   await inquirer.prompt({
     type: 'confirm',
     name: 'readyRelocate',
-    message: `Ready to relocate! You can commit changes previous at the relocation at this point. Confirm to proceed with the relocation`,
+    message: `Ready to relocate! You can commit changes previous to the relocation at this point. Confirm to proceed with the relocation`,
   });
 
   // relocate modules
