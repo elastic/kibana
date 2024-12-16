@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { wrapErrorAndRejectPromise } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import {
   ACTION_AGENT_FILE_INFO_ROUTE,
   EXECUTE_ROUTE,

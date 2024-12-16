@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import TestAgent from 'supertest/lib/agent';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
