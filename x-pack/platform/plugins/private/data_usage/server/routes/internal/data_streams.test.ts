@@ -233,14 +233,18 @@ describe('registerDataStreamsRoute', () => {
 
     // @ts-expect-error
     if (stats && stats.datastreams && stats.datastreams.length) {
-      expect(mockResponse.ok).toHaveBeenCalledTimes(1);
-      expect(mockResponse.ok.mock.calls[0][0]).toEqual({
-        body: res,
+      expect(mockResponse.customError).toHaveBeenCalledTimes(1);
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        body: new CustomHttpRequestError(
+          'No relevant user defined data streams found with storage size greater than zero',
+          404
+        ),
+        statusCode: 404,
       });
     } else {
       expect(mockResponse.customError).toHaveBeenCalledTimes(1);
       expect(mockResponse.customError).toHaveBeenCalledWith({
-        body: new CustomHttpRequestError('No user defined data streams found', 404),
+        body: new CustomHttpRequestError('No data streams found', 404),
         statusCode: 404,
       });
     }
