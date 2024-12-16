@@ -185,15 +185,23 @@ interface ThresholdProps {
   threshold: ThresholdType;
 }
 
-export const Threshold = ({ threshold }: ThresholdProps) => (
-  <div data-test-subj="thresholdPropertyValue">
-    {isEmpty(threshold.field[0])
-      ? `${descriptionStepI18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
-      : `${descriptionStepI18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${
-          Array.isArray(threshold.field) ? threshold.field.join(',') : threshold.field
-        } >= ${threshold.value}`}
-  </div>
-);
+export const Threshold = ({ threshold }: ThresholdProps) => {
+  let thresholdDescription = isEmpty(threshold.field[0])
+    ? `${descriptionStepI18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
+    : `${descriptionStepI18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${
+        Array.isArray(threshold.field) ? threshold.field.join(',') : threshold.field
+      } >= ${threshold.value}`;
+
+  if (threshold.cardinality && threshold.cardinality.length > 0) {
+    thresholdDescription = descriptionStepI18n.THRESHOLD_CARDINALITY(
+      thresholdDescription,
+      threshold.cardinality[0].field,
+      threshold.cardinality[0].value
+    );
+  }
+
+  return <div data-test-subj="thresholdPropertyValue">{thresholdDescription}</div>;
+};
 
 interface AnomalyThresholdProps {
   anomalyThreshold: number;
@@ -835,7 +843,7 @@ export const RuleDefinitionSection = ({
     ruleType: rule.type,
   });
 
-  const { isSuppressionEnabled } = useAlertSuppression(rule.type);
+  const { isSuppressionEnabled } = useAlertSuppression();
 
   const definitionSectionListItems = prepareDefinitionSectionListItems(
     rule,

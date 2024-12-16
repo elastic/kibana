@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import {
   FeatureCollection,
   GeoJsonProperties,
@@ -22,6 +22,7 @@ import { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import { IVectorStyle } from '../../styles/vector/vector_style';
 import { GEO_JSON_TYPE, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { TooltipFeatureAction } from '../../../../common/descriptor_types';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
@@ -145,6 +146,15 @@ export interface IVectorSource extends ISource {
    * Provide unique ids for managing source requests in Inspector
    */
   getInspectorRequestIds(): string[];
+
+  /**
+   * specifies if a source provides its own legend details or if the default vector_style is used if the source has this method it must also implement renderLegendDetails
+   */
+  hasLegendDetails?(): Promise<boolean>;
+  /**
+   * specifies if a source provides its own legend details or if the default vector_style is used
+   */
+  renderLegendDetails?(vectorStyle: IVectorStyle): ReactElement<any> | null;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {

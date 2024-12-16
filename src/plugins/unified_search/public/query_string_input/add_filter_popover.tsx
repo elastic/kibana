@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiFlexItem,
   EuiButtonIcon,
@@ -43,6 +44,11 @@ interface AddFilterPopoverProps extends WithCloseFilterEditorConfirmModalProps {
   suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
+const customButtonStyles = css({
+  borderTopLeftRadius: 0,
+  borderBottomLeftRadius: 0,
+});
+
 const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
   indexPatterns,
   filters,
@@ -69,7 +75,7 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
         size="m"
         disabled={isDisabled}
         {...buttonProps}
-        style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+        css={[buttonProps?.css, customButtonStyles]}
       />
     </EuiToolTip>
   );

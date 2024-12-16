@@ -9,7 +9,7 @@ import { get, groupBy } from 'lodash';
 import {
   getIndexPatterns,
   getElasticsearchDataset,
-} from '../../../../lib/cluster/get_index_patterns';
+} from '../../../../../common/get_index_patterns';
 import {
   postElasticsearchCcrRequestParamsRT,
   postElasticsearchCcrRequestPayloadRT,

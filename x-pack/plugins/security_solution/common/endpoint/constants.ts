@@ -96,6 +96,7 @@ export const GET_FILE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/get_file`;
 export const EXECUTE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/execute`;
 export const UPLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/upload`;
 export const SCAN_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/scan`;
+export const RUN_SCRIPT_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/run_script`;
 
 /** Endpoint Actions Routes */
 export const ENDPOINT_ACTION_LOG_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_log/{agent_id}`;
@@ -129,3 +130,11 @@ export const ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY = 'endpointPackagePolicies
 /** The list of OS types that support. Value usually found in ECS `host.os.type` */
 export const SUPPORTED_HOST_OS_TYPE = Object.freeze(['macos', 'windows', 'linux'] as const);
 export type SupportedHostOsType = (typeof SUPPORTED_HOST_OS_TYPE)[number];
+
+/**
+ * Workflow Insights
+ */
+
+export const BASE_WORKFLOW_INSIGHTS_ROUTE = `/workflow_insights`;
+export const WORKFLOW_INSIGHTS_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}${BASE_WORKFLOW_INSIGHTS_ROUTE}`;
+export const WORKFLOW_INSIGHTS_UPDATE_ROUTE = `${WORKFLOW_INSIGHTS_ROUTE}/{insightId}`;

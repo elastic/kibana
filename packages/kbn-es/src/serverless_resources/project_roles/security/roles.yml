@@ -140,7 +140,7 @@ editor:
   run_as: []
 
 t1_analyst:
-  cluster:
+  cluster: []
   indices:
     - names:
         - '.alerts-security*'
@@ -191,7 +191,7 @@ t1_analyst:
       resources: '*'
 
 t2_analyst:
-  cluster:
+  cluster: []
   indices:
     - names:
         - .alerts-security*
@@ -246,7 +246,7 @@ t2_analyst:
       resources: '*'
 
 t3_analyst:
-  cluster:
+  cluster: []
   indices:
     - names:
         - apm-*-transaction*
@@ -316,7 +316,7 @@ t3_analyst:
       resources: '*'
 
 threat_intelligence_analyst:
-  cluster:
+  cluster: []
   indices:
     - names:
         - apm-*-transaction*
@@ -378,7 +378,7 @@ threat_intelligence_analyst:
       resources: '*'
 
 rule_author:
-  cluster:
+  cluster: []
   indices:
     - names:
         - apm-*-transaction*
@@ -446,7 +446,7 @@ rule_author:
       resources: '*'
 
 soc_manager:
-  cluster:
+  cluster: []
   indices:
     - names:
         - apm-*-transaction*
@@ -641,7 +641,7 @@ platform_engineer:
       resources: '*'
 
 endpoint_operations_analyst:
-  cluster:
+  cluster: []
   indices:
     - names:
         - metrics-endpoint.metadata_current_*
@@ -713,7 +713,7 @@ endpoint_operations_analyst:
       resources: '*'
 
 endpoint_policy_manager:
-  cluster:
+  cluster: []
   indices:
     - names:
         - metrics-endpoint.metadata_current_*

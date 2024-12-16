@@ -15,6 +15,7 @@ import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { trackLegacyTerminology } from '../lib/track_legacy_terminology';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 const rulesClient = rulesClientMock.create();
 
@@ -35,11 +36,13 @@ beforeEach(() => {
 });
 
 describe('findAlertRoute', () => {
+  const docLinks = docLinksServiceMock.createSetupContract();
+
   it('finds alerts with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    findAlertRoute(router, licenseState);
+    findAlertRoute(router, licenseState, docLinks);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -100,7 +103,7 @@ describe('findAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    findAlertRoute(router, licenseState, undefined, true);
+    findAlertRoute(router, licenseState, docLinks, undefined, true);
 
     const [config] = router.get.mock.calls[0];
 
@@ -112,7 +115,7 @@ describe('findAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    findAlertRoute(router, licenseState);
+    findAlertRoute(router, licenseState, docLinks);
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -147,7 +150,7 @@ describe('findAlertRoute', () => {
       throw new Error('OMG');
     });
 
-    findAlertRoute(router, licenseState);
+    findAlertRoute(router, licenseState, docLinks);
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -173,7 +176,7 @@ describe('findAlertRoute', () => {
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    findAlertRoute(router, licenseState, mockUsageCounter);
+    findAlertRoute(router, licenseState, docLinks, mockUsageCounter);
     const [, handler] = router.get.mock.calls[0];
     const findResult = {
       page: 1,
@@ -195,7 +198,7 @@ describe('findAlertRoute', () => {
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    findAlertRoute(router, licenseState, mockUsageCounter);
+    findAlertRoute(router, licenseState, docLinks, mockUsageCounter);
     const [, handler] = router.get.mock.calls[0];
 
     const findResult = {
@@ -232,7 +235,7 @@ describe('findAlertRoute', () => {
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    findAlertRoute(router, licenseState, mockUsageCounter);
+    findAlertRoute(router, licenseState, docLinks, mockUsageCounter);
     const [, handler] = router.get.mock.calls[0];
     const findResult = {
       page: 1,
@@ -263,7 +266,7 @@ describe('findAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    findAlertRoute(router, licenseState);
+    findAlertRoute(router, licenseState, docLinks);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -406,5 +409,31 @@ describe('findAlertRoute', () => {
     expect(res.ok).toHaveBeenCalledWith({
       body: omit(findResult, 'data[0].systemActions'),
     });
+  });
+
+  it('should be deprecated', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    findAlertRoute(router, licenseState, docLinks);
+
+    const [config] = router.get.mock.calls[0];
+
+    expect(config.options?.deprecated).toMatchInlineSnapshot(
+      {
+        documentationUrl: expect.stringMatching(/#breaking-201550$/),
+      },
+      `
+      Object {
+        "documentationUrl": StringMatching /#breaking-201550\\$/,
+        "reason": Object {
+          "newApiMethod": "GET",
+          "newApiPath": "/api/alerting/rules/_find",
+          "type": "migrate",
+        },
+        "severity": "warning",
+      }
+    `
+    );
   });
 });

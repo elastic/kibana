@@ -41,7 +41,8 @@ describe(
       login();
     });
 
-    describe('Scan operation:', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/187932
+    describe.skip('Scan operation:', () => {
       const homeFilePath = Cypress.env('IS_CI') ? '/home/vagrant' : '/home';
 
       const fileContent = 'This is a test file for the scan command.';
@@ -78,6 +79,15 @@ describe(
 
         if (createdHost) {
           deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+        }
+      });
+
+      afterEach(function () {
+        if (Cypress.env('IS_CI') && this.currentTest?.isFailed() && createdHost) {
+          cy.task('captureHostVmAgentDiagnostics', {
+            hostname: createdHost.hostname,
+            fileNamePrefix: this.currentTest?.fullTitle(),
+          });
         }
       });
 

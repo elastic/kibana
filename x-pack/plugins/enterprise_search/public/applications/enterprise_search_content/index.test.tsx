@@ -15,7 +15,6 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { SetupGuide } from '../enterprise_search_overview/components/setup_guide';
-import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { SearchIndicesRouter } from './components/search_indices';
 
@@ -26,15 +25,6 @@ describe('EnterpriseSearchContent', () => {
     const wrapper = shallow(<EnterpriseSearchContent />);
 
     expect(wrapper.find(SetupGuide)).toHaveLength(1);
-  });
-
-  it('renders VersionMismatchPage when there are mismatching versions', () => {
-    setMockValues({ config: { canDeployEntSearch: true, host: 'host' } });
-    const wrapper = shallow(
-      <EnterpriseSearchContent enterpriseSearchVersion="7.15.0" kibanaVersion="7.16.0" />
-    );
-
-    expect(wrapper.find(VersionMismatchPage)).toHaveLength(1);
   });
 
   it('renders EnterpriseSearchContentConfigured when config.host is set & available', () => {

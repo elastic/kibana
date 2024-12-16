@@ -30,6 +30,7 @@
     "@kbn/alerting-plugin",
     "@kbn/rison",
     "@kbn/embeddable-plugin",
+    "@kbn/embeddable-enhanced-plugin",
     "@kbn/lens-plugin",
     "@kbn/ui-theme",
     "@kbn/es-query",
@@ -99,5 +100,6 @@
     "@kbn/observability-alerting-rule-utils",
     "@kbn/discover-shared-plugin",
     "@kbn/server-route-repository-client",
+    "@kbn/security-plugin-types-public",
   ]
 }

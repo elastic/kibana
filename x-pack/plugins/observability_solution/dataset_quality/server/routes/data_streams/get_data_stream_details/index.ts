@@ -16,37 +16,11 @@ import { rangeQuery } from '@kbn/observability-plugin/server';
 
 import { MAX_HOSTS_METRIC_VALUE } from '../../../../common/constants';
 import { _IGNORED } from '../../../../common/es_fields';
-import { DataStreamDetails, DataStreamSettings } from '../../../../common/api_types';
+import { DataStreamDetails } from '../../../../common/api_types';
 import { createDatasetQualityESClient } from '../../../utils';
-import { dataStreamService, datasetQualityPrivileges } from '../../../services';
+import { datasetQualityPrivileges } from '../../../services';
 import { getDataStreams } from '../get_data_streams';
 import { getDataStreamsMeteringStats } from '../get_data_streams_metering_stats';
-
-export async function getDataStreamSettings({
-  esClient,
-  dataStream,
-}: {
-  esClient: ElasticsearchClient;
-  dataStream: string;
-}): Promise<DataStreamSettings> {
-  const [createdOn, [dataStreamInfo], datasetUserPrivileges] = await Promise.all([
-    getDataStreamCreatedOn(esClient, dataStream),
-    dataStreamService.getMatchingDataStreams(esClient, dataStream),
-    datasetQualityPrivileges.getDatasetPrivileges(esClient, dataStream),
-  ]);
-
-  const integration = dataStreamInfo?._meta?.package?.name;
-  const lastBackingIndex = dataStreamInfo?.indices?.slice(-1)[0];
-  const indexTemplate = dataStreamInfo?.template;
-
-  return {
-    createdOn,
-    integration,
-    datasetUserPrivileges,
-    lastBackingIndexName: lastBackingIndex?.index_name,
-    indexTemplate,
-  };
-}
 
 export async function getDataStreamDetails({
   esClient,
@@ -116,16 +90,6 @@ export async function getDataStreamDetails({
     }
     throw e;
   }
-}
-
-async function getDataStreamCreatedOn(esClient: ElasticsearchClient, dataStream: string) {
-  const indexSettings = await dataStreamService.getDataStreamIndexSettings(esClient, dataStream);
-
-  const indexesList = Object.values(indexSettings);
-
-  return indexesList
-    .map((index) => Number(index.settings?.index?.creation_date))
-    .sort((a, b) => a - b)[0];
 }
 
 type TermAggregation = Record<string, { terms: { field: string; size: number } }>;

@@ -12,7 +12,7 @@ import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { standaloneClusterFilter } from '../standalone_clusters/standalone_cluster_query_filter';
-import { getIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 
 export function handleResponse(resp: ElasticsearchResponse) {

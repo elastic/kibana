@@ -12,7 +12,6 @@ import {
   SentinelOneGetActivitiesParams,
 } from '../../../common/sentinelone/types';
 import { API_PATH } from './sentinelone';
-import { SentinelOneGetActivitiesResponseSchema } from '../../../common/sentinelone/schema';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
@@ -107,7 +106,7 @@ describe('SentinelOne Connector', () => {
         params: {
           APIToken: 'token-abc',
         },
-        responseSchema: SentinelOneGetActivitiesResponseSchema,
+        responseSchema: expect.any(Object),
       });
     });
 

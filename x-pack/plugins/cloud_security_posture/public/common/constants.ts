@@ -16,8 +16,6 @@ import {
   CLOUDBEAT_AZURE,
   CLOUDBEAT_VULN_MGMT_AWS,
   VULN_MGMT_POLICY_TEMPLATE,
-  CLOUDBEAT_VULN_MGMT_GCP,
-  CLOUDBEAT_VULN_MGMT_AZURE,
   CLOUDBEAT_AKS,
   CLOUDBEAT_GKE,
 } from '../../common/constants';
@@ -156,30 +154,6 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'Amazon Web Services',
         }),
         icon: 'logoAWS',
-        benchmark: 'N/A', // TODO: change benchmark to be optional
-      },
-      {
-        type: CLOUDBEAT_VULN_MGMT_GCP,
-        name: i18n.translate('xpack.csp.vulnMgmtIntegration.gcpOption.nameTitle', {
-          defaultMessage: 'GCP',
-        }),
-        disabled: true,
-        icon: googleCloudLogo,
-        tooltip: i18n.translate('xpack.csp.vulnMgmtIntegration.gcpOption.tooltipContent', {
-          defaultMessage: 'Coming soon',
-        }),
-        benchmark: 'N/A', // TODO: change benchmark to be optional
-      },
-      {
-        type: CLOUDBEAT_VULN_MGMT_AZURE,
-        name: i18n.translate('xpack.csp.vulnMgmtIntegration.azureOption.nameTitle', {
-          defaultMessage: 'Azure',
-        }),
-        disabled: true,
-        icon: 'logoAzure',
-        tooltip: i18n.translate('xpack.csp.vulnMgmtIntegration.azureOption.tooltipContent', {
-          defaultMessage: 'Coming soon',
-        }),
         benchmark: 'N/A', // TODO: change benchmark to be optional
       },
     ],

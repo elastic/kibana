@@ -1,0 +1,16 @@
+{
+  "ingest.get_ip_location_database": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ingest/ip_location/database",
+      "_ingest/ip_location/database/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-ip-location-database-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

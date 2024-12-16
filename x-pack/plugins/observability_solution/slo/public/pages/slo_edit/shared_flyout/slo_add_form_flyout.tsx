@@ -7,12 +7,11 @@
 
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CreateSLOInput } from '@kbn/slo-schema';
 import { RecursivePartial } from '@kbn/utility-types';
-import { merge } from 'lodash';
 import React from 'react';
 import { OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import { SloEditForm } from '../components/slo_edit_form';
-import { CreateSLOForm } from '../types';
 
 export const sloEditFormFooterPortal = createHtmlPortalNode();
 
@@ -22,7 +21,7 @@ export default function SloAddFormFlyout({
   initialValues,
 }: {
   onClose: () => void;
-  initialValues?: RecursivePartial<CreateSLOForm>;
+  initialValues?: RecursivePartial<CreateSLOInput>;
 }) {
   return (
     <EuiFlyout
@@ -40,29 +39,7 @@ export default function SloAddFormFlyout({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <SloEditForm
-          onSave={onClose}
-          initialValues={
-            initialValues
-              ? merge(
-                  {
-                    indicator: {
-                      type: 'sli.kql.custom',
-                    },
-                    objective: {
-                      target: 99,
-                    },
-                    timeWindow: {
-                      duration: '30d',
-                      type: 'rolling',
-                    },
-                    budgetingMethod: 'occurrences',
-                  },
-                  { ...initialValues }
-                )
-              : undefined
-          }
-        />
+        <SloEditForm onSave={onClose} initialValues={initialValues} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <OutPortal node={sloEditFormFooterPortal} />

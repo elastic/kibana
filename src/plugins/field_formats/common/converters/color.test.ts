@@ -56,6 +56,29 @@ describe('Color Format', () => {
     });
   });
 
+  describe('field is a boolean', () => {
+    test('should add colors if the value is true or false', () => {
+      const colorer = new ColorFormat(
+        {
+          fieldType: 'boolean',
+          colors: [
+            {
+              boolean: 'true',
+              text: 'blue',
+              background: 'yellow',
+            },
+          ],
+        },
+        jest.fn()
+      );
+
+      expect(colorer.convert(true, HTML_CONTEXT_TYPE)).toBe(
+        '<span style="color:blue;background-color:yellow">true</span>'
+      );
+      expect(colorer.convert(false, HTML_CONTEXT_TYPE)).toBe('false');
+    });
+  });
+
   describe('field is a string', () => {
     test('should add colors if the regex matches', () => {
       const colorer = new ColorFormat(

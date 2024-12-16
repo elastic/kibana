@@ -22,7 +22,7 @@ import {
   DS_INDEX_PATTERN_METRICS,
 } from '../../../common/constants';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
-import { getIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 import type { Metric } from '../metrics/metrics';
 

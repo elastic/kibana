@@ -21,7 +21,7 @@ export type TestEnvironmentUtils = Awaited<ReturnType<typeof setupIntegrationEnv
 
 export async function setupIntegrationEnvironment() {
   const fileKind: string = 'test-file-kind';
-  const testIndex = '.kibana-test-files';
+  const testIndex = 'kibana-test-files';
 
   /**
    * Functionality to create files easily

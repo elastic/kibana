@@ -36,12 +36,13 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
   savedSearchId?: string;
+  enableDocumentViewer: boolean;
 }
 
 export const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
-  const { interceptedWarnings, ...gridProps } = props;
+  const { interceptedWarnings, enableDocumentViewer, ...gridProps } = props;
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
@@ -131,7 +132,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         expandedDoc={expandedDoc}
         showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-        renderDocumentView={renderDocumentView}
+        renderDocumentView={enableDocumentViewer ? renderDocumentView : undefined}
         renderCustomToolbar={renderCustomToolbarWithElements}
         externalCustomRenderers={cellRenderers}
         enableComparisonMode

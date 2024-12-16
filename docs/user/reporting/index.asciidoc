@@ -72,7 +72,7 @@ NOTE: You can use the *Copy POST URL* option instead to generate the report from
 
 You can then download it from that message, or go to the *Stack Management > Reporting* page to view and access all of your reports.
 
-NOTE: In "stateful" deployments, reports are stored in {es} and managed by the `kibana-reporting` {ilm}
+NOTE: In self-managed and Cloud hosted deployments, reports are stored in {es} and managed by the `kibana-reporting` {ilm}
 ({ilm-init}) policy. By default, the policy stores reports forever. To learn more about {ilm-init} policies, refer
 to the {es} {ref}/index-lifecycle-management.html[{ilm-init} documentation].
 
@@ -108,7 +108,7 @@ Create and share JSON files for workpads.
 * *Embed code* &mdash; Embed fully interactive dashboards as an iframe on web pages.
 
 [[reporting-on-cloud-resource-requirements]]
-NOTE: For Elastic Cloud deployments, {kib} instances require a minimum of 2GB RAM to generate PDF or PNG reports. To
+NOTE: For Elastic Cloud hosted deployments, {kib} instances require a minimum of 2GB RAM to generate PDF or PNG reports. To
 change {kib} sizing, {ess-console}[edit the deployment].
 
 

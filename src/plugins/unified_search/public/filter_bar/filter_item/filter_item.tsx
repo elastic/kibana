@@ -388,7 +388,7 @@ function FilterItemComponent(props: FilterItemProps) {
       ) : (
         <EuiContextMenuPanel
           items={[
-            <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }} key="filter-editor">
+            <div css={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }} key="filter-editor">
               <FilterEditor
                 filter={filter}
                 indexPatterns={indexPatterns}

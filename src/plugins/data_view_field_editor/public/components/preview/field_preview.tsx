@@ -148,7 +148,7 @@ export const FieldPreview = () => {
                   {/* List of other fields in the document */}
                   <EuiResizeObserver onResize={onFieldListResize}>
                     {(resizeRef) => (
-                      <div ref={resizeRef} style={{ flex: 1 }}>
+                      <div ref={resizeRef} css={{ flex: 1 }}>
                         <PreviewFieldList
                           height={fieldListHeight}
                           clearSearch={() => setSearchValue('')}

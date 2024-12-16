@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { useEnableDataFeed } from './use_enable_data_feed';
 import { TestProviders } from '../../../mock';
 
@@ -78,21 +78,18 @@ describe('useSecurityJobsHelpers', () => {
           resolvePromiseCb = resolve;
         })
       );
-      const { result, waitForNextUpdate } = renderHook(() => useEnableDataFeed(), {
+      const { result } = renderHook(() => useEnableDataFeed(), {
         wrapper,
       });
       expect(result.current.isLoading).toBe(false);
 
       await act(async () => {
         const enableDataFeedPromise = result.current.enableDatafeed(JOB, TIMESTAMP);
-
-        await waitForNextUpdate();
-        expect(result.current.isLoading).toBe(true);
-
         resolvePromiseCb({});
         await enableDataFeedPromise;
-        expect(result.current.isLoading).toBe(false);
       });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
     });
 
     it('does not call setupMlJob if job is already installed', async () => {

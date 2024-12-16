@@ -27,6 +27,7 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
       if (entry.entryType === 'measure' && entry.detail?.type === 'kibana:performance') {
         const target = entry?.name;
         const duration = entry.duration;
+        const meta = entry.detail?.meta;
         const customMetrics = Object.keys(entry.detail?.customMetrics ?? {}).reduce(
           (acc, metric) => {
             if (ALLOWED_CUSTOM_METRICS_KEYS_VALUES.includes(metric)) {
@@ -72,6 +73,8 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
             ...customMetrics,
             meta: {
               target,
+              query_range_secs: meta?.queryRangeSecs,
+              query_offset_secs: meta?.queryOffsetSecs,
             },
           });
         } catch (error) {

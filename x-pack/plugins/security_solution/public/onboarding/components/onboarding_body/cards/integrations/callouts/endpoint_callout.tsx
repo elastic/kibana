@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import { LinkAnchor } from '../../../../../../common/components/links';
 import { CardCallOut } from '../../common/card_callout';
-import { trackOnboardingLinkClick } from '../../../../../common/lib/telemetry';
+import { trackOnboardingLinkClick } from '../../../../lib/telemetry';
 import { TELEMETRY_ENDPOINT_LEARN_MORE } from '../constants';
 
 export const EndpointCallout = React.memo(() => {

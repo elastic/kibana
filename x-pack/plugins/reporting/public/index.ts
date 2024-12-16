@@ -14,13 +14,6 @@ import { ReportingPublicPlugin } from './plugin';
  */
 export interface ReportingSetup {
   /**
-   * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
-   *
-   * @returns boolean
-   */
-  usesUiCapabilities: () => boolean;
-
-  /**
    * A set of React components for displaying a Reporting share menu in an application
    */
   components: ReportingPublicComponents;

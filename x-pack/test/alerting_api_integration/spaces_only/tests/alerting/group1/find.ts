@@ -33,10 +33,13 @@ export default function createFindTests({ getService }: FtrProviderContext) {
   describe('find public API', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    afterEach(() => objectRemover.removeAll());
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     describe('handle find alert request', function () {
       this.tags('skipFIPS');
+
       it('should handle find alert request appropriately', async () => {
         const { body: createdAction } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
@@ -289,6 +292,48 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         expect(response.body.message).to.eql(
           'Error find rules: Filter is not supported on this field alert.attributes.mapped_params.risk_score'
         );
+      });
+
+      it('should throw when using rule_type_ids', async () => {
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rules/_find?rule_type_ids=foo`
+        );
+
+        expect(response.statusCode).to.eql(400);
+        expect(response.body).to.eql({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: '[request query.rule_type_ids]: definition for this key is missing',
+        });
+      });
+
+      it('should throw when using consumers', async () => {
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rules/_find?consumers=foo`
+        );
+
+        expect(response.statusCode).to.eql(400);
+        expect(response.body).to.eql({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: '[request query.consumers]: definition for this key is missing',
+        });
       });
     });
 

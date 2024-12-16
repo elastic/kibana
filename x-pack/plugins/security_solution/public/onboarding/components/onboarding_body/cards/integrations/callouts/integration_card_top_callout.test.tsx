@@ -9,10 +9,10 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { of } from 'rxjs';
 import { IntegrationCardTopCallout } from './integration_card_top_callout';
-import { useOnboardingService } from '../../../../../hooks/use_onboarding_service';
+import { useOnboardingService } from '../../../../hooks/use_onboarding_service';
 import { IntegrationTabId } from '../types';
 
-jest.mock('../../../../../hooks/use_onboarding_service', () => ({
+jest.mock('../../../../hooks/use_onboarding_service', () => ({
   useOnboardingService: jest.fn(),
 }));
 

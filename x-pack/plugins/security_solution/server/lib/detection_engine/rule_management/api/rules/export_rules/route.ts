@@ -56,7 +56,7 @@ export const exportRulesRoute = (
       },
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
-        const rulesClient = (await context.alerting).getRulesClient();
+        const rulesClient = await (await context.alerting).getRulesClient();
         const exceptionsClient = (await context.lists)?.getExceptionListClient();
         const actionsClient = (await context.actions)?.getActionsClient();
 

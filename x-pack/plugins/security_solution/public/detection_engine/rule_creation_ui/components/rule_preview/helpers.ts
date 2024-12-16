@@ -10,7 +10,7 @@ import type { EuiSelectOption } from '@elastic/eui';
 import type { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as i18n from './translations';
 
-import type { FieldValueQueryBar } from '../query_bar';
+import type { FieldValueQueryBar } from '../query_bar_field';
 import type { TimeframePreviewOptions } from '../../../../detections/pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';

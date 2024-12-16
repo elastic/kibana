@@ -7,6 +7,7 @@
 
 import {
   EuiCallOut,
+  euiCanAnimate,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -14,6 +15,7 @@ import {
   euiScrollBarStyles,
   EuiSpacer,
   useEuiTheme,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
@@ -28,7 +30,6 @@ import {
   type Feedback,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { findLastIndex } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
@@ -56,14 +57,16 @@ const timelineClassName = (scrollBarStyles: string) => css`
   ${scrollBarStyles}
 `;
 
-const promptEditorClassname = css`
+const promptEditorClassname = (euiTheme: UseEuiTheme['euiTheme']) => css`
   overflow: hidden;
-  transition: height ${euiThemeVars.euiAnimSpeedFast} ${euiThemeVars.euiAnimSlightResistance};
+  ${euiCanAnimate} {
+    transition: height ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
+  }
 `;
 
-const incorrectLicenseContainer = css`
+const incorrectLicenseContainer = (euiTheme: UseEuiTheme['euiTheme']) => css`
   height: 100%;
-  padding: ${euiThemeVars.euiPanelPaddingModifiers.paddingMedium};
+  padding: ${euiTheme.size.base};
 `;
 
 const chatBodyContainerClassNameWithError = css`
@@ -86,11 +89,13 @@ const fadeInAnimation = keyframes`
   }
 `;
 
-const animClassName = css`
+const animClassName = (euiTheme: UseEuiTheme['euiTheme']) => css`
   height: 100%;
   opacity: 0;
-  animation: ${fadeInAnimation} ${euiThemeVars.euiAnimSpeedNormal}
-    ${euiThemeVars.euiAnimSlightBounce} ${euiThemeVars.euiAnimSpeedNormal} forwards;
+  ${euiCanAnimate} {
+    animation: ${fadeInAnimation} ${euiTheme.animation.normal} ${euiTheme.animation.bounce}
+      ${euiTheme.animation.normal} forwards;
+  }
 `;
 
 const containerClassName = css`
@@ -127,8 +132,9 @@ export function ChatBody({
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
-  const euiTheme = useEuiTheme();
-  const scrollBarStyles = euiScrollBarStyles(euiTheme);
+  const theme = useEuiTheme();
+  const scrollBarStyles = euiScrollBarStyles(theme);
+  const { euiTheme } = theme;
 
   const chatService = useAIAssistantChatService();
 
@@ -310,7 +316,7 @@ export function ChatBody({
   if (!hasCorrectLicense && !initialConversationId) {
     footer = (
       <>
-        <EuiFlexItem grow className={incorrectLicenseContainer}>
+        <EuiFlexItem grow className={incorrectLicenseContainer(euiTheme)}>
           <IncorrectLicensePanel />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -347,7 +353,7 @@ export function ChatBody({
               hasBorder={false}
               hasShadow={false}
               paddingSize="m"
-              className={animClassName}
+              className={animClassName(euiTheme)}
             >
               {connectors.connectors?.length === 0 || messages.length === 1 ? (
                 <WelcomeMessage
@@ -400,7 +406,7 @@ export function ChatBody({
 
         <EuiFlexItem
           grow={false}
-          className={promptEditorClassname}
+          className={promptEditorClassname(euiTheme)}
           style={{ height: promptEditorHeight }}
         >
           <EuiHorizontalRule margin="none" />
@@ -503,7 +509,9 @@ export function ChatBody({
             saveTitle(newTitle);
           }}
           onToggleFlyoutPositionMode={onToggleFlyoutPositionMode}
-          navigateToConversation={navigateToConversation}
+          navigateToConversation={
+            initialMessages?.length && !initialConversationId ? undefined : navigateToConversation
+          }
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

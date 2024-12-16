@@ -64,6 +64,11 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
     );
     return rootContextProvider;
   } else {
-    return <KibanaEuiProvider {...props}>{rootContextProvider}</KibanaEuiProvider>;
+    const { theme, userProfile, globalStyles, colorMode, modify } = props;
+    return (
+      <KibanaEuiProvider {...{ theme, userProfile, globalStyles, colorMode, modify }}>
+        {rootContextProvider}
+      </KibanaEuiProvider>
+    );
   }
 };

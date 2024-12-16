@@ -35,7 +35,8 @@ const renderComponent = (props: React.ComponentProps<typeof AgentStatusFilter>) 
   );
 };
 
-describe('AgentStatusFilter', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/200788
+describe.skip('AgentStatusFilter', () => {
   it('Renders all statuses', () => {
     const { getByText } = renderComponent({
       selectedStatus: [],

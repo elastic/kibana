@@ -1415,12 +1415,7 @@
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
-          "references": [
-            {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/public/plugin.ts"
-            }
-          ]
+          "references": []
         }
       ],
       "lifecycle": "setup",

@@ -147,9 +147,7 @@ export const packageToPackagePolicyInputs = (
       return stream;
     });
 
-    // If non-integration package, collect input-level vars, otherwise skip them,
-    // we do not support input-level vars for packages with integrations yet)
-    if (packageInput.vars?.length && !hasIntegrations) {
+    if (packageInput.vars?.length) {
       varsForInput = packageInput.vars.reduce(varsReducer, {});
     }
 
