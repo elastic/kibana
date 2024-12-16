@@ -13,19 +13,6 @@ import {
   type DarkModeValue as ColorMode,
 } from '@kbn/user-profile-components';
 
-const parseDarkModeValue = (rawValue: unknown): ColorMode => {
-  if (rawValue === true || rawValue === 'true' || rawValue === 'enabled') {
-    return 'dark';
-  }
-  if (rawValue === false || rawValue === 'false' || rawValue === 'disabled') {
-    return 'light';
-  }
-  if (rawValue === 'system') {
-    return 'system';
-  }
-  return 'space_default';
-};
-
 interface Deps {
   uiSettingsClient: IUiSettingsClient;
 }
@@ -52,13 +39,10 @@ export const useAppearance = ({ uiSettingsClient }: Deps) => {
     },
   });
 
-  const {
-    userSettings: {
-      darkMode: colorModeUserProfile = parseDarkModeValue(uiSettingsClient.get('theme:darkMode')),
-    } = {},
-  } = userProfileData ?? {
-    userSettings: {},
-  };
+  const { userSettings: { darkMode: colorModeUserProfile = 'space_default' } = {} } =
+    userProfileData ?? {
+      userSettings: {},
+    };
 
   const [colorMode, setColorMode] = useState<ColorMode>(colorModeUserProfile);
 
