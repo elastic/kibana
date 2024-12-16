@@ -4013,7 +4013,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/asset-inventory-plugin@link:x-pack/plugins/asset_inventory":
+"@kbn/asset-inventory-plugin@link:x-pack/solutions/security/plugins/asset_inventory":
   version "0.0.0"
   uid ""
 
@@ -4050,10 +4050,6 @@
   uid ""
 
 "@kbn/bfetch-error@link:packages/kbn-bfetch-error":
-  version "0.0.0"
-  uid ""
-
-"@kbn/bfetch-explorer-plugin@link:examples/bfetch_explorer":
   version "0.0.0"
   uid ""
 
@@ -4145,7 +4141,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-defend-plugin@link:x-pack/plugins/cloud_defend":
+"@kbn/cloud-defend-plugin@link:x-pack/solutions/security/plugins/cloud_defend":
   version "0.0.0"
   uid ""
 
@@ -4169,19 +4165,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture-common@link:x-pack/packages/kbn-cloud-security-posture/common":
+"@kbn/cloud-security-posture-common@link:x-pack/platform/packages/shared/kbn-cloud-security-posture/common":
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture-graph@link:x-pack/packages/kbn-cloud-security-posture/graph":
+"@kbn/cloud-security-posture-graph@link:x-pack/solutions/security/packages/kbn-cloud-security-posture/graph":
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture-plugin@link:x-pack/plugins/cloud_security_posture":
+"@kbn/cloud-security-posture-plugin@link:x-pack/solutions/security/plugins/cloud_security_posture":
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture@link:x-pack/packages/kbn-cloud-security-posture/public":
+"@kbn/cloud-security-posture@link:x-pack/solutions/security/packages/kbn-cloud-security-posture/public":
   version "0.0.0"
   uid ""
 
@@ -5517,6 +5513,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/eslint-plugin-css@link:packages/kbn-eslint-plugin-css":
+  version "0.0.0"
+  uid ""
+
 "@kbn/eslint-plugin-disable@link:packages/kbn-eslint-plugin-disable":
   version "0.0.0"
   uid ""
@@ -5961,7 +5961,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ingest-pipelines-plugin@link:x-pack/plugins/ingest_pipelines":
+"@kbn/ingest-pipelines-plugin@link:x-pack/platform/plugins/shared/ingest_pipelines":
   version "0.0.0"
   uid ""
 
@@ -6081,7 +6081,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kubernetes-security-plugin@link:x-pack/plugins/kubernetes_security":
+"@kbn/kubernetes-security-plugin@link:x-pack/solutions/security/plugins/kubernetes_security":
   version "0.0.0"
   uid ""
 
@@ -7269,7 +7269,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/session-view-plugin@link:x-pack/plugins/session_view":
+"@kbn/session-view-plugin@link:x-pack/solutions/security/plugins/session_view":
   version "0.0.0"
   uid ""
 
@@ -7489,7 +7489,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/slo-plugin@link:x-pack/plugins/observability_solution/slo":
+"@kbn/slo-plugin@link:x-pack/solutions/observability/plugins/slo":
   version "0.0.0"
   uid ""
 
@@ -11344,6 +11344,11 @@
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/@types/cookiejar/-/cookiejar-2.1.5.tgz#14a3e83fa641beb169a2dd8422d91c3c345a9a78"
   integrity sha512-he+DHOWReW0nghN24E1WUqM0efK4kI9oTqDm6XmK8ZPe2djZ90BSNdGnIyCLzCPw7/pogPlGbzI2wHGGmi4O/Q==
+
+"@types/cssstyle@^2.2.4":
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/@types/cssstyle/-/cssstyle-2.2.4.tgz#3d333ab9f8e6c40183ad1d6ebeebfcb8da2bfe4b"
+  integrity sha512-FTGMeuHZtLB7hRm+NGvOLZElslR1UkKvZmEmFevOZe/e7Av0nFleka1s8ZwoX+QvbJ2y7r9NDZXIzyqpRWDJXQ==
 
 "@types/cytoscape@^3.14.0":
   version "3.14.0"
@@ -16337,6 +16342,13 @@ cssstyle@^2.3.0:
   integrity sha512-AZL67abkUzIuvcHqk7c09cezpGNcxUxU4Ioi/05xHk4DQeTkWmGYftIE6ctU6AEt+Gn4n1lDStOtj7FKycP71A==
   dependencies:
     cssom "~0.3.6"
+
+cssstyle@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/cssstyle/-/cssstyle-4.1.0.tgz#161faee382af1bafadb6d3867a92a19bcb4aea70"
+  integrity sha512-h66W1URKpBS5YMI/V8PyXvTMFT8SupJ1IzoIV8IeBC/ji8WVmrO8dGlTi+2dh6whmdk6BiKJLD/ZBkhWbcg6nA==
+  dependencies:
+    rrweb-cssom "^0.7.1"
 
 csstype@3.1.2:
   version "3.1.2"
@@ -28893,6 +28905,11 @@ robust-predicates@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/robust-predicates/-/robust-predicates-3.0.1.tgz#ecde075044f7f30118682bd9fb3f123109577f9a"
   integrity sha512-ndEIpszUHiG4HtDsQLeIuMvRsDnn8c8rYStabochtUeCvfuvNptb5TUbVD68LRAILPX7p9nqQGh4xJgn3EHS/g==
+
+rrweb-cssom@^0.7.1:
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/rrweb-cssom/-/rrweb-cssom-0.7.1.tgz#c73451a484b86dd7cfb1e0b2898df4b703183e4b"
+  integrity sha512-TrEMa7JGdVm0UThDJSx7ddw5nVm3UJS9o9CCIZ72B1vSyEZoziDqBYP3XIoi/12lKrJR8rE3jeFHMok2F/Mnsg==
 
 rst-selector-parser@^2.2.3:
   version "2.2.3"
