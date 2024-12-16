@@ -773,7 +773,7 @@
     "@kbn/router-utils": "link:packages/kbn-router-utils",
     "@kbn/routing-example-plugin": "link:examples/routing_example",
     "@kbn/rrule": "link:packages/kbn-rrule",
-    "@kbn/rule-data-utils": "link:packages/kbn-rule-data-utils",
+    "@kbn/rule-data-utils": "link:src/platform/packages/shared/kbn-rule-data-utils",
     "@kbn/rule-registry-plugin": "link:x-pack/plugins/rule_registry",
     "@kbn/runtime-fields-plugin": "link:x-pack/platform/plugins/private/runtime_fields",
     "@kbn/safer-lodash-set": "link:packages/kbn-safer-lodash-set",
