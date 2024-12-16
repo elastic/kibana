@@ -10,11 +10,7 @@
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { getRepoFiles } from '@kbn/get-repo-files';
-import {
-  getCodeOwnersForFile,
-  getPathsWithOwnersReversed,
-  type CodeOwnership,
-} from '@kbn/code-owners';
+import { getOwningTeamsForPath, getCodeOwnersEntries } from '@kbn/code-owners';
 
 const TEST_DIRECTORIES = ['test', 'x-pack/test', 'x-pack/test_serverless'];
 
@@ -36,15 +32,22 @@ export async function runCheckFtrCodeOwnersCli() {
       const missingOwners = new Set<string>();
 
       // cache codeowners for quicker lookup
-      const reversedCodeowners = getPathsWithOwnersReversed();
+      log.info('Reading CODEOWNERS file');
+      const codeOwnersEntries = getCodeOwnersEntries();
 
       const testFiles = await getRepoFiles(TEST_DIRECTORIES);
+      log.info(`Checking ownership for ${testFiles.length} test files (this will take a while)`);
+
       for (const { repoRel } of testFiles) {
-        const owners: CodeOwnership = getCodeOwnersForFile(repoRel, reversedCodeowners);
-        if (owners === undefined || owners.teams === '') missingOwners.add(repoRel);
+        const owners = getOwningTeamsForPath(repoRel, codeOwnersEntries);
+
+        if (owners.length === 0) {
+          missingOwners.add(repoRel);
+        }
       }
 
       const timeSpent = fmtMs(performance.now() - start);
+      log.info(`Ownership check complete (took ${timeSpent})`);
 
       if (missingOwners.size) {
         log.error(
@@ -55,9 +58,7 @@ export async function runCheckFtrCodeOwnersCli() {
         );
       }
 
-      log.success(
-        `All test files have a code owner (checked ${testFiles.length} test files in ${timeSpent})`
-      );
+      log.success(`All test files have a code owner. 🥳`);
     },
     {
       description: 'Check that all test files are covered by GitHub CODEOWNERS',

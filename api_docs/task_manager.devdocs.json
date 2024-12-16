@@ -456,42 +456,6 @@
       },
       {
         "parentPluginId": "taskManager",
-        "id": "def-server.isEphemeralTaskRejectedDueToCapacityError",
-        "type": "Function",
-        "tags": [],
-        "label": "isEphemeralTaskRejectedDueToCapacityError",
-        "description": [],
-        "signature": [
-          "(error: Error | ",
-          "EphemeralTaskRejectedDueToCapacityError",
-          ") => boolean"
-        ],
-        "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "taskManager",
-            "id": "def-server.isEphemeralTaskRejectedDueToCapacityError.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "error",
-            "description": [],
-            "signature": [
-              "Error | ",
-              "EphemeralTaskRejectedDueToCapacityError"
-            ],
-            "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "taskManager",
         "id": "def-server.isUnrecoverableError",
         "type": "Function",
         "tags": [],
@@ -1675,23 +1639,6 @@
     "misc": [
       {
         "parentPluginId": "taskManager",
-        "id": "def-server.EphemeralTask",
-        "type": "Type",
-        "tags": [],
-        "label": "EphemeralTask",
-        "description": [
-          "\nA task instance that has an id and is ready for storage."
-        ],
-        "signature": [
-          "{ params: Record<string, any>; scope?: string[] | undefined; enabled?: boolean | undefined; state: Record<string, any>; taskType: string; }"
-        ],
-        "path": "x-pack/plugins/task_manager/server/task.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "taskManager",
         "id": "def-server.TaskDefinitionRegistry",
         "type": "Type",
         "tags": [],
@@ -1988,9 +1935,9 @@
       "signature": [
         "Pick<",
         "TaskScheduling",
-        ", \"schedule\" | \"runSoon\" | \"bulkEnable\" | \"ephemeralRunNow\" | \"ensureScheduled\" | \"bulkUpdateSchedules\" | \"bulkDisable\" | \"bulkSchedule\" | \"bulkUpdateState\"> & Pick<",
+        ", \"schedule\" | \"runSoon\" | \"bulkEnable\" | \"ensureScheduled\" | \"bulkUpdateSchedules\" | \"bulkDisable\" | \"bulkSchedule\" | \"bulkUpdateState\"> & Pick<",
         "TaskStore",
-        ", \"get\" | \"aggregate\" | \"fetch\" | \"remove\" | \"bulkRemove\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; getRegisteredTypes: () => string[]; }"
+        ", \"get\" | \"aggregate\" | \"fetch\" | \"remove\" | \"bulkRemove\"> & { removeIfExists: (id: string) => Promise<void>; } & { getRegisteredTypes: () => string[]; }"
       ],
       "path": "x-pack/plugins/task_manager/server/plugin.ts",
       "deprecated": false,

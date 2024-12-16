@@ -19,6 +19,7 @@ import { renameKeys } from '../lib/rename_keys';
 import { IndexType } from '../../rules_client';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { trackLegacyTerminology } from '../lib/track_legacy_terminology';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 
 export interface FindOptions extends IndexType {
   perPage?: number;
@@ -75,6 +76,7 @@ export const findAlertRoute = (
       validate: {
         query: querySchema,
       },
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: isServerless ? 'internal' : 'public',
         summary: 'Find alerts',

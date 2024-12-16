@@ -12,7 +12,7 @@ import {
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { GRAPH_ROUTE_PATH } from '../../../common/constants';
-import { CspRouter } from '../../types';
+import { CspRequestHandlerContext, CspRouter } from '../../types';
 import { getGraph as getGraphV1 } from './v1';
 
 export const defineGraphRoute = (router: CspRouter) =>
@@ -39,10 +39,11 @@ export const defineGraphRoute = (router: CspRouter) =>
           },
         },
       },
-      async (context, request, response) => {
+      async (context: CspRequestHandlerContext, request, response) => {
+        const cspContext = await context.csp;
+
         const { nodesLimit, showUnknownTarget = false } = request.body;
         const { eventIds, start, end, esQuery } = request.body.query as GraphRequest['query'];
-        const cspContext = await context.csp;
         const spaceId = (await cspContext.spaces?.spacesService?.getActiveSpace(request))?.id;
 
         try {

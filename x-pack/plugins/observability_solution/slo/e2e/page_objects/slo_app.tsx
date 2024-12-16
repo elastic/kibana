@@ -7,7 +7,7 @@
 import { Page } from '@elastic/synthetics';
 import { loginPageProvider } from '@kbn/synthetics-e2e/page_objects/login';
 import { utilsPageProvider } from '@kbn/synthetics-e2e/page_objects/utils';
-import { recordVideo } from '@kbn/synthetics-e2e/helpers/record_video';
+import { recordVideo } from '@kbn/observability-synthetics-test-data';
 
 export function sloAppPageProvider({ page, kibanaUrl }: { page: Page; kibanaUrl: string }) {
   page.setDefaultTimeout(60 * 1000);

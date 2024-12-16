@@ -13,6 +13,7 @@ import {
 import { entitySourceDefinitionRt } from '../../lib/v2/types';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 import { EntityDefinitionConflict } from '../../lib/v2/errors/entity_definition_conflict';
+import { UnknownEntityType } from '../../lib/v2/errors/unknown_entity_type';
 
 const createSourceDefinitionRoute = createEntityManagerServerRoute({
   endpoint: 'POST /internal/entities/v2/definitions/sources',
@@ -40,8 +41,16 @@ const createSourceDefinitionRoute = createEntityManagerServerRoute({
         },
       });
     } catch (error) {
+      if (error instanceof UnknownEntityType) {
+        return response.notFound({
+          body: {
+            message: error.message,
+          },
+        });
+      }
+
       if (error instanceof EntityDefinitionConflict) {
-        response.conflict({
+        return response.conflict({
           body: {
             message: error.message,
           },

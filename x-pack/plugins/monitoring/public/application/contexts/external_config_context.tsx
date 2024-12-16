@@ -14,6 +14,7 @@ export interface ExternalConfig {
   renderReactApp: boolean;
   staleStatusThresholdSeconds: number;
   isCcsEnabled: boolean;
+  logsIndices: string;
 }
 
 export const ExternalConfigContext = createContext({} as ExternalConfig);

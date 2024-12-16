@@ -11,6 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DiscoverEBTManager } from './discover_ebt_manager';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
 
 describe('DiscoverEBTManager', () => {
   let discoverEBTContextManager: DiscoverEBTManager;
@@ -31,6 +32,7 @@ describe('DiscoverEBTManager', () => {
 
   beforeEach(() => {
     discoverEBTContextManager = new DiscoverEBTManager();
+    (coreSetupMock.analytics.reportEvent as jest.Mock).mockClear();
   });
 
   describe('register', () => {
@@ -95,7 +97,7 @@ describe('DiscoverEBTManager', () => {
         shouldInitializeCustomContext: true,
         shouldInitializeCustomEvents: false,
       });
-      discoverEBTContextManager.enableContext();
+      discoverEBTContextManager.onDiscoverAppMounted();
 
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
@@ -112,7 +114,7 @@ describe('DiscoverEBTManager', () => {
         shouldInitializeCustomContext: true,
         shouldInitializeCustomEvents: false,
       });
-      discoverEBTContextManager.enableContext();
+      discoverEBTContextManager.onDiscoverAppMounted();
 
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
@@ -140,14 +142,14 @@ describe('DiscoverEBTManager', () => {
         shouldInitializeCustomContext: true,
         shouldInitializeCustomEvents: false,
       });
-      discoverEBTContextManager.enableContext();
+      discoverEBTContextManager.onDiscoverAppMounted();
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
-      discoverEBTContextManager.disableAndResetContext();
+      discoverEBTContextManager.onDiscoverAppUnmounted();
       expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
-      discoverEBTContextManager.enableContext();
+      discoverEBTContextManager.onDiscoverAppMounted();
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
     });
@@ -237,6 +239,119 @@ describe('DiscoverEBTManager', () => {
         eventName: 'filterAddition', // non-ECS fields would not be included in properties
         filterOperation: '_exists_',
       });
+    });
+  });
+
+  describe('trackContextualProfileResolvedEvent', () => {
+    it('should track the event when a next contextual profile is resolved', async () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        shouldInitializeCustomContext: false,
+        shouldInitializeCustomEvents: true,
+      });
+
+      discoverEBTContextManager.trackContextualProfileResolvedEvent({
+        contextLevel: ContextualProfileLevel.rootLevel,
+        profileId: 'test',
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenNthCalledWith(
+        1,
+        'discover_profile_resolved',
+        {
+          contextLevel: 'rootLevel',
+          profileId: 'test',
+        }
+      );
+
+      discoverEBTContextManager.trackContextualProfileResolvedEvent({
+        contextLevel: ContextualProfileLevel.dataSourceLevel,
+        profileId: 'data-source-test',
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenNthCalledWith(
+        2,
+        'discover_profile_resolved',
+        {
+          contextLevel: 'dataSourceLevel',
+          profileId: 'data-source-test',
+        }
+      );
+
+      discoverEBTContextManager.trackContextualProfileResolvedEvent({
+        contextLevel: ContextualProfileLevel.documentLevel,
+        profileId: 'document-test',
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenNthCalledWith(
+        3,
+        'discover_profile_resolved',
+        {
+          contextLevel: 'documentLevel',
+          profileId: 'document-test',
+        }
+      );
+    });
+
+    it('should not trigger duplicate requests', async () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        shouldInitializeCustomContext: false,
+        shouldInitializeCustomEvents: true,
+      });
+
+      discoverEBTContextManager.trackContextualProfileResolvedEvent({
+        contextLevel: ContextualProfileLevel.rootLevel,
+        profileId: 'test1',
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
+
+      discoverEBTContextManager.trackContextualProfileResolvedEvent({
+        contextLevel: ContextualProfileLevel.rootLevel,
+        profileId: 'test1',
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
+
+      discoverEBTContextManager.trackContextualProfileResolvedEvent({
+        contextLevel: ContextualProfileLevel.rootLevel,
+        profileId: 'test2',
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(2);
+    });
+
+    it('should trigger similar requests after remount', async () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        shouldInitializeCustomContext: false,
+        shouldInitializeCustomEvents: true,
+      });
+
+      discoverEBTContextManager.trackContextualProfileResolvedEvent({
+        contextLevel: ContextualProfileLevel.rootLevel,
+        profileId: 'test1',
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
+
+      discoverEBTContextManager.trackContextualProfileResolvedEvent({
+        contextLevel: ContextualProfileLevel.rootLevel,
+        profileId: 'test1',
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
+
+      discoverEBTContextManager.onDiscoverAppUnmounted();
+      discoverEBTContextManager.onDiscoverAppMounted();
+
+      discoverEBTContextManager.trackContextualProfileResolvedEvent({
+        contextLevel: ContextualProfileLevel.rootLevel,
+        profileId: 'test1',
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(2);
     });
   });
 });

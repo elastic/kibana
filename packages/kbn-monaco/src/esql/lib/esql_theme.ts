@@ -45,7 +45,7 @@ export const buildESQLTheme = ({
       // source commands
       ...buildRuleGroup(
         ['from', 'row', 'show'],
-        euiThemeVars.euiColorPrimaryText,
+        euiThemeVars.euiColorPrimary,
         true // isBold
       ),
 
@@ -88,12 +88,12 @@ export const buildESQLTheme = ({
           'desc',
           'nulls_order',
         ],
-        euiThemeVars.euiColorAccentText,
+        euiThemeVars.euiColorAccent,
         true // isBold
       ),
 
       // functions
-      ...buildRuleGroup(['functions'], euiThemeVars.euiColorPrimaryText),
+      ...buildRuleGroup(['functions'], euiThemeVars.euiColorPrimary),
 
       // operators
       ...buildRuleGroup(
@@ -116,7 +116,7 @@ export const buildESQLTheme = ({
           'percent', // '%'
           'cast_op', // '::'
         ],
-        euiThemeVars.euiColorPrimaryText
+        euiThemeVars.euiColorPrimary
       ),
 
       // comments
@@ -156,7 +156,7 @@ export const buildESQLTheme = ({
           'closing_metrics_line_comment',
           'closing_metrics_multiline_comment',
         ],
-        euiThemeVars.euiColorDisabledText
+        euiThemeVars.euiTextSubduedColor
       ),
 
       // values

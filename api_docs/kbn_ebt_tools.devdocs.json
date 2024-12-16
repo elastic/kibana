@@ -176,7 +176,9 @@
         "signature": [
           "(state: { customMetrics?: ",
           "CustomMetrics",
-          " | undefined; isReady: boolean; }) => void"
+          " | undefined; isReady: boolean; meta?: ",
+          "Meta",
+          " | undefined; }) => void"
         ],
         "path": "packages/kbn-ebt-tools/src/performance_metrics/context/use_page_ready.ts",
         "deprecated": false,
@@ -215,6 +217,21 @@
                 "tags": [],
                 "label": "isReady",
                 "description": [],
+                "path": "packages/kbn-ebt-tools/src/performance_metrics/context/use_page_ready.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ebt-tools",
+                "id": "def-common.usePageReady.$1.meta",
+                "type": "Object",
+                "tags": [],
+                "label": "meta",
+                "description": [],
+                "signature": [
+                  "Meta",
+                  " | undefined"
+                ],
                 "path": "packages/kbn-ebt-tools/src/performance_metrics/context/use_page_ready.ts",
                 "deprecated": false,
                 "trackAdoption": false

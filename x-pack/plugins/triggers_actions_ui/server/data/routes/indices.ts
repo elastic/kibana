@@ -6,7 +6,7 @@
  */
 
 // the business logic of this code is from watcher, in:
-//   x-pack/plugins/watcher/server/routes/api/indices/register_get_route.ts
+//   x-pack/platform/plugins/private/watcher/server/routes/api/indices/register_get_route.ts
 
 const MAX_INDICES = 20;
 

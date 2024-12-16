@@ -116,6 +116,7 @@ const LensApiMock: LensApi = {
   disabledActionIds: new BehaviorSubject<string[] | undefined>(undefined),
   setDisabledActionIds: jest.fn(),
   rendered$: new BehaviorSubject<boolean>(false),
+  searchSessionId$: new BehaviorSubject<string | undefined>(undefined),
 };
 
 const LensSerializedStateMock: LensSerializedState = createEmptyLensState(

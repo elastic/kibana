@@ -5,40 +5,20 @@
  * 2.0.
  */
 import React from 'react';
-import type { Story } from '@storybook/react';
 import { RequiredFieldsReadOnly } from './required_fields';
-import { FieldFinalReadOnly } from '../../field_final_readonly';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
-import { mockCustomQueryRule } from '../../storybook/mocks';
-import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: RequiredFieldsReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/required_fields',
 };
 
-interface TemplateProps {
-  finalDiffableRule: DiffableRule;
-}
-
-const Template: Story<TemplateProps> = (args) => {
-  return (
-    <ThreeWayDiffStorybookProviders
-      finalDiffableRule={args.finalDiffableRule}
-      fieldName="required_fields"
-    >
-      <FieldFinalReadOnly />
-    </ThreeWayDiffStorybookProviders>
-  );
-};
-
-export const Default = Template.bind({});
-
-Default.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    required_fields: [
+export const Default = () => (
+  <RequiredFieldsReadOnly
+    requiredFields={[
       { name: 'event.kind', type: 'keyword', ecs: true },
       { name: 'event.module', type: 'keyword', ecs: true },
-    ],
-  }),
-};
+    ]}
+  />
+);
+
+export const EmptyArrayValue = () => <RequiredFieldsReadOnly requiredFields={[]} />;

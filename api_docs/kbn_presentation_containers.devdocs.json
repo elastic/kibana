@@ -1247,21 +1247,13 @@
             "signature": [
               "() => ",
               {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.MaybePromise",
-                "text": "MaybePromise"
-              },
-              "<",
-              {
                 "pluginId": "@kbn/presentation-containers",
                 "scope": "public",
                 "docId": "kibKbnPresentationContainersPluginApi",
                 "section": "def-public.SerializedPanelState",
                 "text": "SerializedPanelState"
               },
-              "<State>>"
+              "<State>"
             ],
             "path": "packages/presentation/presentation_containers/interfaces/serialized_state.ts",
             "deprecated": false,
@@ -1914,7 +1906,9 @@
                 "section": "def-public.OverlayRef",
                 "text": "OverlayRef"
               },
-              ", options?: TracksOverlaysOptions | undefined) => void"
+              ", options?: ",
+              "TracksOverlaysOptions",
+              " | undefined) => void"
             ],
             "path": "packages/presentation/presentation_containers/interfaces/tracks_overlays.ts",
             "deprecated": false,
@@ -1949,7 +1943,8 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "TracksOverlaysOptions | undefined"
+                  "TracksOverlaysOptions",
+                  " | undefined"
                 ],
                 "path": "packages/presentation/presentation_containers/interfaces/tracks_overlays.ts",
                 "deprecated": false,
@@ -1974,73 +1969,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-public.TracksQueryPerformance",
-        "type": "Interface",
-        "tags": [],
-        "label": "TracksQueryPerformance",
-        "description": [],
-        "path": "packages/presentation/presentation_containers/interfaces/performance_trackers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.TracksQueryPerformance.firstLoad",
-            "type": "boolean",
-            "tags": [],
-            "label": "firstLoad",
-            "description": [],
-            "path": "packages/presentation/presentation_containers/interfaces/performance_trackers.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.TracksQueryPerformance.creationStartTime",
-            "type": "number",
-            "tags": [],
-            "label": "creationStartTime",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "packages/presentation/presentation_containers/interfaces/performance_trackers.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.TracksQueryPerformance.creationEndTime",
-            "type": "number",
-            "tags": [],
-            "label": "creationEndTime",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "packages/presentation/presentation_containers/interfaces/performance_trackers.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.TracksQueryPerformance.lastLoadStartTime",
-            "type": "number",
-            "tags": [],
-            "label": "lastLoadStartTime",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "packages/presentation/presentation_containers/interfaces/performance_trackers.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

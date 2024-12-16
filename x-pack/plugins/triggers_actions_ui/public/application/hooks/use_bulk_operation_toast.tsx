@@ -50,6 +50,7 @@ export const useBulkOperationToast = ({
   const {
     i18n,
     theme,
+    userProfile,
     notifications: { toasts },
   } = useKibana().services;
 
@@ -122,7 +123,7 @@ export const useBulkOperationToast = ({
             SINGLE_RULE_TITLE,
             MULTIPLE_RULE_TITLE
           ),
-          text: toMountPoint(renderToastErrorBody(errors, 'danger'), { i18n, theme }),
+          text: toMountPoint(renderToastErrorBody(errors, 'danger'), { i18n, theme, userProfile }),
         });
         return;
       }
@@ -135,10 +136,10 @@ export const useBulkOperationToast = ({
           SINGLE_RULE_TITLE,
           MULTIPLE_RULE_TITLE
         ),
-        text: toMountPoint(renderToastErrorBody(errors, 'warning'), { i18n, theme }),
+        text: toMountPoint(renderToastErrorBody(errors, 'warning'), { i18n, theme, userProfile }),
       });
     },
-    [i18n, theme, toasts, renderToastErrorBody]
+    [i18n, theme, userProfile, toasts, renderToastErrorBody]
   );
 
   return useMemo(() => {

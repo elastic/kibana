@@ -50,13 +50,31 @@ const requiredPrivilegesSchema = schema.arrayOf(
         }
       });
 
+      if (anyRequired.includes(ReservedPrivilegesSet.superuser)) {
+        return 'Using superuser privileges in anyRequired is not allowed';
+      }
+
+      const hasSuperuserInAllRequired = allRequired.includes(ReservedPrivilegesSet.superuser);
+      const hasOperatorInAllRequired = allRequired.includes(ReservedPrivilegesSet.operator);
+
       // Combining superuser with other privileges is redundant.
       // If user is a superuser, they inherently have access to all the privileges that may come with other roles.
+      // The exception is when superuser and operator are the only required privileges.
       if (
-        anyRequired.includes(ReservedPrivilegesSet.superuser) ||
-        (allRequired.includes(ReservedPrivilegesSet.superuser) && allRequired.length > 1)
+        hasSuperuserInAllRequired &&
+        allRequired.length > 1 &&
+        !(hasOperatorInAllRequired && allRequired.length === 2)
       ) {
         return 'Combining superuser with other privileges is redundant, superuser privileges set can be only used as a standalone privilege.';
+      }
+
+      // Operator privilege requires at least one additional non-operator privilege to be defined, that's why it's not allowed in anyRequired.
+      if (anyRequired.includes(ReservedPrivilegesSet.operator)) {
+        return 'Using operator privileges in anyRequired is not allowed';
+      }
+
+      if (hasOperatorInAllRequired && allRequired.length === 1) {
+        return 'Operator privilege requires at least one additional non-operator privilege to be defined';
       }
 
       if (anyRequired.length && allRequired.length) {
@@ -68,10 +86,18 @@ const requiredPrivilegesSchema = schema.arrayOf(
       }
 
       if (anyRequired.length) {
-        const uniquePrivileges = new Set([...anyRequired]);
+        const uniqueAnyPrivileges = new Set([...anyRequired]);
 
-        if (anyRequired.length !== uniquePrivileges.size) {
+        if (anyRequired.length !== uniqueAnyPrivileges.size) {
           return 'anyRequired privileges must contain unique values';
+        }
+      }
+
+      if (allRequired.length) {
+        const uniqueAllPrivileges = new Set([...allRequired]);
+
+        if (allRequired.length !== uniqueAllPrivileges.size) {
+          return 'allRequired privileges must contain unique values';
         }
       }
     },

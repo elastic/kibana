@@ -270,6 +270,22 @@
             "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.AuthenticatedUser.operator",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "operator",
+            "description": [
+              "\nIndicates whether user is an operator."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

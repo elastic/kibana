@@ -286,7 +286,7 @@ export const ControlGeneralViewResponse = ({
               <b>{i18n.actions}: </b>
               {response.actions?.map((action, i) => (
                 <span key={action}>
-                  <b style={{ color: action === 'block' ? colors.danger : colors.ink }}>
+                  <b css={{ color: action === 'block' ? colors.danger : colors.ink }}>
                     {action[0].toUpperCase() + action.slice(1)}
                   </b>
                   {i !== (response.actions?.length || 0) - 1 && ', '}

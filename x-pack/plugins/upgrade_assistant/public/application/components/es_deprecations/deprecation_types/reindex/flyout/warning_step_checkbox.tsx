@@ -82,42 +82,6 @@ export interface WarningCheckboxProps {
   meta?: ReindexWarning['meta'];
 }
 
-export const CustomTypeNameWarningCheckbox: React.FunctionComponent<WarningCheckboxProps> = ({
-  isChecked,
-  onChange,
-  docLinks,
-  id,
-  meta,
-}) => {
-  return (
-    <WarningCheckbox
-      isChecked={isChecked}
-      onChange={onChange}
-      warningId={id}
-      label={
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningTitle"
-          defaultMessage="Replace mapping type {mappingType} with {defaultType}"
-          values={{
-            mappingType: <EuiCode>{meta!.typeName as string}</EuiCode>,
-            defaultType: <EuiCode>_doc</EuiCode>,
-          }}
-        />
-      }
-      description={
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningDetail"
-          defaultMessage="Mapping types are no longer supported in Elastic 8.x. Ensure no application code or scripts rely on {mappingType}."
-          values={{
-            mappingType: <EuiCode>{meta!.typeName as string}</EuiCode>,
-          }}
-        />
-      }
-      documentationUrl={docLinks.elasticsearch.typesRemoval}
-    />
-  );
-};
-
 export const DeprecatedSettingWarningCheckbox: React.FunctionComponent<WarningCheckboxProps> = ({
   isChecked,
   onChange,

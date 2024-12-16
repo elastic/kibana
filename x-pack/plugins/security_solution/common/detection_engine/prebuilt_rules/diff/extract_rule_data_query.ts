@@ -46,7 +46,7 @@ export const extractInlineKqlQuery = (
 ): InlineKqlQuery => {
   return {
     type: KqlQueryType.inline_query,
-    query: query ?? '',
+    query: query?.trim() ?? '',
     language: language ?? 'kuery',
     filters: filters ?? [],
   };
@@ -63,7 +63,7 @@ interface ExtractRuleEqlQueryParams {
 
 export const extractRuleEqlQuery = (params: ExtractRuleEqlQueryParams): RuleEqlQuery => {
   return {
-    query: params.query,
+    query: params.query.trim(),
     language: params.language,
     filters: params.filters ?? [],
     event_category_override: params.eventCategoryOverride,
@@ -77,7 +77,7 @@ export const extractRuleEsqlQuery = (
   language: EsqlQueryLanguage
 ): RuleEsqlQuery => {
   return {
-    query,
+    query: query.trim(),
     language,
   };
 };

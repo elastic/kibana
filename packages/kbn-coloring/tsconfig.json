@@ -23,6 +23,7 @@
     "@kbn/data-plugin",
     "@kbn/ui-theme",
     "@kbn/visualization-utils",
+    "@kbn/palettes",
   ],
   "exclude": [
     "target/**/*",

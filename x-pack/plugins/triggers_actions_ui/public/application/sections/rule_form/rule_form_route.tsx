@@ -17,8 +17,6 @@ import { getCurrentDocTitle } from '../../lib/doc_title';
 export const RuleFormRoute = () => {
   const {
     http,
-    i18n,
-    theme,
     application,
     notifications,
     charts,
@@ -31,6 +29,7 @@ export const RuleFormRoute = () => {
     actionTypeRegistry,
     chrome,
     setBreadcrumbs,
+    ...startServices
   } = useKibana().services;
 
   const location = useLocation<{ returnApp?: string; returnPath?: string }>();
@@ -64,8 +63,6 @@ export const RuleFormRoute = () => {
       <RuleForm
         plugins={{
           http,
-          i18n,
-          theme,
           application,
           notifications,
           charts,
@@ -76,6 +73,7 @@ export const RuleFormRoute = () => {
           docLinks,
           ruleTypeRegistry,
           actionTypeRegistry,
+          ...startServices,
         }}
         onCancel={() => {
           if (returnApp && returnPath) {

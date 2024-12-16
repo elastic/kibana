@@ -9,7 +9,8 @@ import { merge } from 'lodash';
 import moment from 'moment';
 import { ReplaySubject } from 'rxjs';
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { DefendInsight, DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
 
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
@@ -21,6 +22,7 @@ import type {
   SearchParams,
   SecurityWorkflowInsight,
 } from '../../../../common/endpoint/types/workflow_insights';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 import {
   Category,
@@ -28,9 +30,11 @@ import {
   TargetType,
   ActionType,
 } from '../../../../common/endpoint/types/workflow_insights';
+import { createMockEndpointAppContext } from '../../mocks';
 import { createDatastream, createPipeline } from './helpers';
 import { securityWorkflowInsightsService } from '.';
 import { DATA_STREAM_NAME } from './constants';
+import { buildWorkflowInsights } from './builders';
 
 jest.mock('./helpers', () => {
   const original = jest.requireActual('./helpers');
@@ -38,6 +42,14 @@ jest.mock('./helpers', () => {
     ...original,
     createDatastream: jest.fn(),
     createPipeline: jest.fn(),
+  };
+});
+
+jest.mock('./builders', () => {
+  const original = jest.requireActual('./builders');
+  return {
+    ...original,
+    buildWorkflowInsights: jest.fn(),
   };
 });
 
@@ -95,10 +107,14 @@ function getDefaultInsight(overrides?: Partial<SecurityWorkflowInsight>): Securi
 describe('SecurityWorkflowInsightsService', () => {
   let logger: Logger;
   let esClient: ElasticsearchClient;
+  let mockEndpointAppContextService: jest.Mocked<EndpointAppContextService>;
 
   beforeEach(() => {
     logger = loggerMock.create();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    mockEndpointAppContextService = createMockEndpointAppContext()
+      .service as jest.Mocked<EndpointAppContextService>;
   });
 
   afterEach(() => {
@@ -118,6 +134,7 @@ describe('SecurityWorkflowInsightsService', () => {
         kibanaVersion: kibanaPackageJson.version,
         logger,
         isFeatureEnabled: true,
+        endpointContext: mockEndpointAppContextService,
       });
 
       expect(createDatastreamMock).toHaveBeenCalledTimes(1);
@@ -134,6 +151,7 @@ describe('SecurityWorkflowInsightsService', () => {
         kibanaVersion: kibanaPackageJson.version,
         logger,
         isFeatureEnabled: true,
+        endpointContext: mockEndpointAppContextService,
       });
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
@@ -158,6 +176,7 @@ describe('SecurityWorkflowInsightsService', () => {
         kibanaVersion: kibanaPackageJson.version,
         logger,
         isFeatureEnabled: true,
+        endpointContext: mockEndpointAppContextService,
       });
       expect(createDatastreamMock).toHaveBeenCalledTimes(1);
       expect(createDatastreamMock).toHaveBeenCalledWith(kibanaPackageJson.version);
@@ -181,6 +200,7 @@ describe('SecurityWorkflowInsightsService', () => {
         kibanaVersion: kibanaPackageJson.version,
         logger,
         isFeatureEnabled: true,
+        endpointContext: mockEndpointAppContextService,
       });
 
       const createPipelineMock = createPipeline as jest.Mock;
@@ -192,6 +212,60 @@ describe('SecurityWorkflowInsightsService', () => {
 
       expect(logger.warn).toHaveBeenCalledTimes(2);
       expect(logger.warn).toHaveBeenNthCalledWith(1, expect.stringContaining('test error'));
+    });
+  });
+
+  describe('createFromDefendInsights', () => {
+    it('should create workflow insights from defend insights', async () => {
+      const isInitializedSpy = jest
+        .spyOn(securityWorkflowInsightsService, 'isInitialized', 'get')
+        .mockResolvedValueOnce([undefined, undefined]);
+
+      const defendInsights: DefendInsight[] = [
+        {
+          group: 'AVGAntivirus',
+          events: [
+            {
+              id: 'lqw5opMB9Ke6SNgnxRSZ',
+              endpointId: 'f6e2f338-6fb7-4c85-9c23-d20e9f96a051',
+              value: '/Applications/AVGAntivirus.app/Contents/Backend/services/com.avg.activity',
+            },
+          ],
+        },
+      ];
+
+      const request = {} as KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
+      const workflowInsights: SecurityWorkflowInsight[] = [getDefaultInsight()];
+
+      const buildWorkflowInsightsMock = buildWorkflowInsights as jest.Mock;
+      buildWorkflowInsightsMock.mockResolvedValueOnce(workflowInsights);
+
+      const esClientIndexResp = {
+        _index: DATA_STREAM_NAME,
+        _id: '1',
+        result: 'created' as const,
+        _shards: {
+          total: 1,
+          successful: 1,
+          failed: 0,
+        },
+        _version: 1,
+      };
+      jest.spyOn(esClient, 'index').mockResolvedValue(esClientIndexResp);
+      await securityWorkflowInsightsService.start({ esClient });
+      const result = await securityWorkflowInsightsService.createFromDefendInsights(
+        defendInsights,
+        request
+      );
+
+      // twice since it calls securityWorkflowInsightsService.create internally
+      expect(isInitializedSpy).toHaveBeenCalledTimes(2);
+      expect(buildWorkflowInsightsMock).toHaveBeenCalledWith({
+        defendInsights,
+        request,
+        endpointMetadataService: expect.any(Object),
+      });
+      expect(result).toEqual(workflowInsights.map(() => esClientIndexResp));
     });
   });
 
@@ -289,28 +363,53 @@ describe('SecurityWorkflowInsightsService', () => {
                   },
                 },
                 {
-                  terms: {
-                    'source.type': ['llm-connector'],
+                  nested: {
+                    path: 'source',
+                    query: {
+                      terms: {
+                        'source.type': ['llm-connector'],
+                      },
+                    },
                   },
                 },
                 {
-                  terms: {
-                    'source.id': ['source-id1', 'source-id2'],
+                  nested: {
+                    path: 'source',
+                    query: {
+                      terms: {
+                        'source.id': ['source-id1', 'source-id2'],
+                      },
+                    },
                   },
                 },
                 {
-                  terms: {
-                    'target.type': ['endpoint'],
+                  nested: {
+                    path: 'target',
+                    query: {
+                      terms: {
+                        'target.type': ['endpoint'],
+                      },
+                    },
                   },
                 },
                 {
-                  terms: {
-                    'target.id': ['target-id1', 'target-id2'],
+                  nested: {
+                    path: 'target',
+                    query: {
+                      terms: {
+                        'target.ids': ['target-id1', 'target-id2'],
+                      },
+                    },
                   },
                 },
                 {
-                  terms: {
-                    'action.type': ['refreshed', 'remediated'],
+                  nested: {
+                    path: 'action',
+                    query: {
+                      terms: {
+                        'action.type': ['refreshed', 'remediated'],
+                      },
+                    },
                   },
                 },
               ],

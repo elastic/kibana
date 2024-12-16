@@ -41,6 +41,7 @@ export const AddAnalyticsCollectionModal: React.FC<AddAnalyticsCollectionModalPr
 }) => {
   const { isLoading, isSuccess, isSystemError, canSubmit } = useValues(AddAnalyticsCollectionLogic);
   const modalFormId = useGeneratedHtmlId({ prefix: 'createAnalyticsCollection' });
+  const modalTitleId = useGeneratedHtmlId({ prefix: 'modalTitleId' });
 
   useEffect(() => {
     if (isSuccess || isSystemError) {
@@ -52,11 +53,12 @@ export const AddAnalyticsCollectionModal: React.FC<AddAnalyticsCollectionModalPr
     <EuiModal
       onClose={onClose}
       maxWidth={minModalWidth}
+      aria-labelledby={modalTitleId}
       initialFocus={`[name=${collectionNameField}]`}
     >
       <EuiModalHeader>
         <EuiFlexItem>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
             {i18n.translate('xpack.enterpriseSearch.analytics.collectionsCreate.form.title', {
               defaultMessage: 'Name your Collection',
             })}
@@ -81,13 +83,17 @@ export const AddAnalyticsCollectionModal: React.FC<AddAnalyticsCollectionModalPr
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose}>
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchAddAnalyticsCollectionModalCancelButton"
+          onClick={onClose}
+        >
           {i18n.translate('xpack.enterpriseSearch.analytics.collectionsCreate.form.cancelButton', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
 
         <EuiButton
+          data-test-subj="enterpriseSearchAddAnalyticsCollectionModalCreateButton"
           fill
           type="submit"
           form={modalFormId}

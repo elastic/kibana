@@ -28,7 +28,7 @@
             "text": "SerializableRecord"
           }
         ],
-        "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+        "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,7 +42,7 @@
             "signature": [
               "\"policies_list\" | \"policy_edit\" | \"policy_create\""
             ],
-            "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+            "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -56,7 +56,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+            "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/locator.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -76,7 +76,7 @@
         "signature": [
           "\"ILM_LOCATOR_ID\""
         ],
-        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/index.ts",
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

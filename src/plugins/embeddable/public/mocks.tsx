@@ -35,13 +35,9 @@ import {
 import { setKibanaServices } from './kibana_services';
 import { SelfStyledOptions } from './lib/self_styled_embeddable/types';
 import { EmbeddablePublicPlugin } from './plugin';
-import {
-  reactEmbeddableRegistryHasKey,
-  registerReactEmbeddableFactory,
-} from './react_embeddable_system';
+import { registerReactEmbeddableFactory } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
 
-export { mockAttributeService } from './lib/attribute_service/attribute_service.mock';
 export type Setup = jest.Mocked<EmbeddableSetup>;
 export type Start = jest.Mocked<EmbeddableStart>;
 
@@ -103,14 +99,12 @@ const createSetupContract = (): Setup => {
     registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
     registerEmbeddableFactory: jest.fn(),
     registerEnhancement: jest.fn(),
-    setCustomEmbeddableFactoryProvider: jest.fn(),
   };
   return setupContract;
 };
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    reactEmbeddableRegistryHasKey: jest.fn().mockImplementation(reactEmbeddableRegistryHasKey),
     getEmbeddableFactories: jest.fn(),
     getEmbeddableFactory: jest.fn(),
     telemetry: jest.fn(),
@@ -118,7 +112,6 @@ const createStartContract = (): Start => {
     inject: jest.fn(),
     getAllMigrations: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
-    getAttributeService: jest.fn(),
   };
   return startContract;
 };
