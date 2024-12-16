@@ -12,7 +12,9 @@
     "__jest__/**/*",
     "../../../../typings/**/*"
   ],
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
@@ -41,7 +43,6 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/utils",
     "@kbn/zod",
-    "@kbn/tooling-log",
-    "@kbn/features-plugin"
+    "@kbn/tooling-log"
   ]
 }
