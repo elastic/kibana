@@ -34,7 +34,7 @@ export type AddUploadedLookups = (lookups: RuleMigrationResourceData[]) => void;
 interface LookupsDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
   missingLookups: string[];
-  onLookupsCreated: OnResourcesCreated;
+  onAllLookupsCreated: OnResourcesCreated;
 }
 interface LookupsDataInputProps
   extends Omit<LookupsDataInputSubStepsProps, 'migrationStats' | 'missingLookups'> {
@@ -43,7 +43,7 @@ interface LookupsDataInputProps
   missingLookups?: string[];
 }
 export const LookupsDataInput = React.memo<LookupsDataInputProps>(
-  ({ dataInputStep, migrationStats, missingLookups, onLookupsCreated }) => {
+  ({ dataInputStep, migrationStats, missingLookups, onAllLookupsCreated }) => {
     const dataInputStatus = useMemo(
       () => getStatus(DataInputStep.Lookups, dataInputStep),
       [dataInputStep]
@@ -79,7 +79,7 @@ export const LookupsDataInput = React.memo<LookupsDataInputProps>(
                 <LookupsDataInputSubSteps
                   migrationStats={migrationStats}
                   missingLookups={missingLookups}
-                  onLookupsCreated={onLookupsCreated}
+                  onAllLookupsCreated={onAllLookupsCreated}
                 />
               </EuiFlexItem>
             </>
@@ -94,7 +94,7 @@ LookupsDataInput.displayName = 'LookupsDataInput';
 const END = 10 as const;
 type SubStep = 1 | 2 | typeof END;
 export const LookupsDataInputSubSteps = React.memo<LookupsDataInputSubStepsProps>(
-  ({ migrationStats, missingLookups, onLookupsCreated }) => {
+  ({ migrationStats, missingLookups, onAllLookupsCreated }) => {
     const [subStep, setSubStep] = useState<SubStep>(1);
     const [uploadedLookups, setUploadedLookups] = useState<UploadedLookups>({});
 
@@ -110,9 +110,9 @@ export const LookupsDataInputSubSteps = React.memo<LookupsDataInputSubStepsProps
     useEffect(() => {
       if (missingLookups.every((lookupName) => uploadedLookups[lookupName])) {
         setSubStep(END);
-        onLookupsCreated();
+        onAllLookupsCreated();
       }
-    }, [uploadedLookups, missingLookups, onLookupsCreated]);
+    }, [uploadedLookups, missingLookups, onAllLookupsCreated]);
 
     // Copy query step
     const onCopied = useCallback(() => {

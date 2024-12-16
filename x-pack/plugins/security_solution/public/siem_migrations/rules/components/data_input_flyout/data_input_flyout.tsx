@@ -86,10 +86,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
       []
     );
 
-    const onMacrosCreated = useCallback(() => {
-      setDataInputStep(DataInputStep.Lookups);
-    }, []);
-    const onLookupsCreated = useCallback(() => {
+    const onAllLookupsCreated = useCallback(() => {
       setDataInputStep(DataInputStep.End);
     }, []);
 
@@ -126,7 +123,6 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                 dataInputStep={dataInputStep}
                 missingMacros={missingResourcesIndexed?.macros}
                 migrationStats={migrationStats}
-                onMacrosCreated={onMacrosCreated}
                 onMissingResourcesFetched={onMissingResourcesFetched}
               />
             </EuiFlexItem>
@@ -135,7 +131,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                 dataInputStep={dataInputStep}
                 missingLookups={missingResourcesIndexed?.lookups}
                 migrationStats={migrationStats}
-                onLookupsCreated={onLookupsCreated}
+                onAllLookupsCreated={onAllLookupsCreated}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

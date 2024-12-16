@@ -21,7 +21,6 @@ import { useCheckResourcesStep } from './sub_steps/check_resources';
 interface MacrosDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
   missingMacros: string[];
-  onMacrosCreated: OnResourcesCreated;
   onMissingResourcesFetched: OnMissingResourcesFetched;
 }
 interface MacrosDataInputProps
@@ -31,13 +30,7 @@ interface MacrosDataInputProps
   missingMacros?: string[];
 }
 export const MacrosDataInput = React.memo<MacrosDataInputProps>(
-  ({
-    dataInputStep,
-    migrationStats,
-    missingMacros,
-    onMacrosCreated,
-    onMissingResourcesFetched,
-  }) => {
+  ({ dataInputStep, migrationStats, missingMacros, onMissingResourcesFetched }) => {
     const dataInputStatus = useMemo(
       () => getStatus(DataInputStep.Macros, dataInputStep),
       [dataInputStep]
@@ -67,7 +60,6 @@ export const MacrosDataInput = React.memo<MacrosDataInputProps>(
               <MacrosDataInputSubSteps
                 migrationStats={migrationStats}
                 missingMacros={missingMacros}
-                onMacrosCreated={onMacrosCreated}
                 onMissingResourcesFetched={onMissingResourcesFetched}
               />
             </EuiFlexItem>
@@ -82,7 +74,7 @@ MacrosDataInput.displayName = 'MacrosDataInput';
 const END = 10 as const;
 type SubStep = 1 | 2 | 3 | typeof END;
 export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
-  ({ migrationStats, missingMacros, onMacrosCreated, onMissingResourcesFetched }) => {
+  ({ migrationStats, missingMacros, onMissingResourcesFetched }) => {
     const [subStep, setSubStep] = useState<SubStep>(missingMacros.length ? 1 : 3);
 
     // Copy query step
@@ -93,9 +85,8 @@ export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
 
     // Upload macros step
     const onMacrosCreatedStep = useCallback<OnResourcesCreated>(() => {
-      onMacrosCreated();
       setSubStep(3);
-    }, [onMacrosCreated]);
+    }, []);
     const uploadStep = useMacrosFileUploadStep({
       status: getStatus(2, subStep),
       migrationStats,

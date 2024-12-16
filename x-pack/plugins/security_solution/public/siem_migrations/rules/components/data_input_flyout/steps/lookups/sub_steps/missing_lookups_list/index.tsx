@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
 import { EMPTY_RESOURCE_PLACEHOLDER } from '../../../../../../../../../common/siem_migrations/constants';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
@@ -30,7 +30,7 @@ export const useMissingLookupsListStep = ({
   addUploadedLookups,
   onCopied,
 }: MissingLookupsListStepProps): EuiStepProps => {
-  const { upsertResources, isLoading } = useUpsertResources(addUploadedLookups);
+  const { upsertResources, isLoading, error } = useUpsertResources(addUploadedLookups);
 
   const clearLookup = useCallback(
     (lookupName: string) => {
@@ -41,16 +41,25 @@ export const useMissingLookupsListStep = ({
     [upsertResources, migrationStats]
   );
 
+  const listStepStatus = useMemo(() => {
+    if (isLoading) {
+      return 'loading';
+    }
+    if (error) {
+      return 'danger';
+    }
+    return status;
+  }, [isLoading, error, status]);
+
   return {
     title: i18n.LOOKUPS_DATA_INPUT_COPY_TITLE,
-    status,
+    status: listStepStatus,
     children: (
       <MissingLookupsList
         onCopied={onCopied}
         missingLookups={missingLookups}
         uploadedLookups={uploadedLookups}
         clearLookup={clearLookup}
-        isLoading={isLoading}
       />
     ),
   };

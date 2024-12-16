@@ -337,7 +337,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     const index = await this.getIndexName();
     const aggregations: { migrationIds: AggregationsAggregationContainer } = {
       migrationIds: {
-        terms: { field: 'migration_id', order: { createdAt: 'asc' } },
+        terms: { field: 'migration_id', order: { createdAt: 'asc' }, size: 10000 },
         aggregations: {
           status: { terms: { field: 'status' } },
           createdAt: { min: { field: '@timestamp' } },

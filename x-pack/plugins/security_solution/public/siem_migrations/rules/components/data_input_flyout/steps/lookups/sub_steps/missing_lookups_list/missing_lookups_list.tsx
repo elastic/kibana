@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/css';
 import {
   EuiButtonIcon,
@@ -32,15 +32,14 @@ interface MissingLookupsListProps {
   missingLookups: string[];
   uploadedLookups: UploadedLookups;
   clearLookup: (lookupsName: string) => void;
-  isLoading: boolean;
   onCopied: () => void;
 }
 export const MissingLookupsList = React.memo<MissingLookupsListProps>(
-  ({ missingLookups, uploadedLookups, clearLookup, isLoading, onCopied }) => {
+  ({ missingLookups, uploadedLookups, clearLookup, onCopied }) => {
     const { euiTheme } = useEuiTheme();
     return (
       <>
-        <EuiPanel hasShadow={false} hasBorder className={scrollPanelCss} disabled={isLoading}>
+        <EuiPanel hasShadow={false} hasBorder className={scrollPanelCss}>
           <EuiFlexGroup direction="column" gutterSize="s">
             {missingLookups.map((lookupName) => {
               return (
@@ -136,19 +135,25 @@ interface ClearLookupButtonProps {
   isDisabled: boolean;
 }
 const ClearLookupButton = React.memo<ClearLookupButtonProps>(
-  ({ lookupName, clearLookup, isDisabled }) => {
+  ({ lookupName, clearLookup, isDisabled: isDisabledDefault }) => {
+    const [isDisabled, setIsDisabled] = useState(isDisabledDefault);
+    const onClick = useCallback(() => {
+      setIsDisabled(true);
+      clearLookup(lookupName);
+    }, [clearLookup, lookupName]);
+
     const button = useMemo(
       () => (
         <EuiButtonIcon
-          onClick={() => clearLookup(lookupName)}
+          onClick={onClick}
           iconType="cross"
           color="text"
-          aria-label={`${i18n.CLEAR_EMPTY_LOOKUP_TOOLTIP} ${lookupName}`}
+          aria-label={i18n.CLEAR_EMPTY_LOOKUP_TOOLTIP}
           data-test-subj="lookupNameClear"
           isDisabled={isDisabled}
         />
       ),
-      [clearLookup, isDisabled, lookupName]
+      [onClick, isDisabled]
     );
     if (isDisabled) {
       return button;

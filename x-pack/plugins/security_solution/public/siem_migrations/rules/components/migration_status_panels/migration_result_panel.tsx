@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiBasicTable,
   EuiHealth,
+  EuiText,
 } from '@elastic/eui';
 import { Chart, BarSeries, Settings, ScaleType } from '@elastic/charts';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
@@ -30,6 +31,7 @@ import { CenteredLoadingSpinner } from '../../../../common/components/centered_l
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import type { RuleMigrationStats } from '../../types';
 import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
+import { RuleMigrationsUploadMissingPanel } from './upload_missing_panel';
 import * as i18n from './translations';
 
 export interface MigrationResultPanelProps {
@@ -76,13 +78,16 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(({ mig
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder paddingSize="m">
-              <EuiFlexGroup direction="column" alignItems="stretch">
+              <EuiFlexGroup direction="column" alignItems="stretch" justifyContent="center">
                 <EuiFlexItem>
                   {isLoadingTranslationStats ? (
                     <CenteredLoadingSpinner />
                   ) : (
                     translationStats && (
                       <>
+                        <EuiText size="m" style={{ textAlign: 'center' }}>
+                          <b>{i18n.RULE_MIGRATION_SUMMARY_CHART_TITLE}</b>
+                        </EuiText>
                         <TranslationResultsChart translationStats={translationStats} />
                         <TranslationResultsTable translationStats={translationStats} />
                       </>
@@ -105,6 +110,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(({ mig
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <RuleMigrationsUploadMissingPanel migrationStats={migrationStats} spacerSizeTop="s" />
       </EuiPanel>
     </EuiPanel>
   );
@@ -145,7 +151,7 @@ const TranslationResultsChart = React.memo<{
   ];
 
   return (
-    <Chart size={{ height: 100 }}>
+    <Chart size={{ height: 130 }}>
       <Settings showLegend={false} rotation={90} />
       <BarSeries
         id="results"
@@ -170,25 +176,21 @@ const TranslationResultsTable = React.memo<{
   const items = useMemo(() => {
     return [
       {
-        id: 'full',
         title: convertTranslationResultIntoText(RuleTranslationResult.FULL),
         value: translationStats.rules.success.result.full,
         color: statusToColorMap[RuleTranslationResult.FULL],
       },
       {
-        id: 'partial',
         title: convertTranslationResultIntoText(RuleTranslationResult.PARTIAL),
         value: translationStats.rules.success.result.partial,
         color: statusToColorMap[RuleTranslationResult.PARTIAL],
       },
       {
-        id: 'untranslatable',
         title: convertTranslationResultIntoText(RuleTranslationResult.UNTRANSLATABLE),
         value: translationStats.rules.success.result.untranslatable,
         color: statusToColorMap[RuleTranslationResult.UNTRANSLATABLE],
       },
       {
-        id: 'failed',
         title: i18n.RULE_MIGRATION_TRANSLATION_FAILED,
         value: translationStats.rules.failed,
         color: 'danger',
