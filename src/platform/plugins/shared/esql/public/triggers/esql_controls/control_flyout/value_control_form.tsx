@@ -41,14 +41,14 @@ interface ValueControlFormProps {
   closeFlyout: () => void;
   onCreateControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
   onEditControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
-  onCancelControlCallback?: () => void;
+  onCancelControlCb?: () => void;
   initialState?: ESQLControlState;
 }
 
 export function ValueControlForm({
   controlType,
   initialState,
-  onCancelControlCallback,
+  onCancelControlCb,
   queryString,
   search,
   closeFlyout,
@@ -342,7 +342,7 @@ export function ValueControlForm({
       <Footer
         isControlInEditMode={isControlInEditMode}
         variableName={variableName}
-        onCancelControlCallback={onCancelControlCallback}
+        onCancelControlCb={onCancelControlCb}
         isSaveDisabled={formIsInvalid}
         closeFlyout={closeFlyout}
         onCreateControl={onCreateValueControl}

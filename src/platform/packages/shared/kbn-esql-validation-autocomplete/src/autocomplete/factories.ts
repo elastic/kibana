@@ -224,7 +224,7 @@ export const buildFieldsDefinitionsWithMetadata = (
     openSuggestions?: boolean;
     addComma?: boolean;
     controlType?: EsqlControlType;
-    supportsVariables?: boolean;
+    supportsControls?: boolean;
   },
   getVariablesByType?: (type: EsqlControlType) => ESQLControlVariable[]
 ): SuggestionRawDefinition[] => {
@@ -245,7 +245,7 @@ export const buildFieldsDefinitionsWithMetadata = (
   }) as SuggestionRawDefinition[];
 
   const suggestions = [...fieldsSuggestions];
-  if (options?.supportsVariables) {
+  if (options?.supportsControls) {
     const controlType = options?.controlType ?? EsqlControlType.FIELDS;
     const variables = getVariablesByType?.(controlType) ?? [];
 
@@ -487,7 +487,7 @@ export function getCompatibleLiterals(
   options?: {
     advanceCursorAndOpenSuggestions?: boolean;
     addComma?: boolean;
-    supportsVariables?: boolean;
+    supportsControls?: boolean;
   },
   getVariablesByType?: (type: EsqlControlType) => ESQLControlVariable[]
 ) {
@@ -506,7 +506,7 @@ export function getCompatibleLiterals(
     const timeLiteralSuggestions = [
       ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options),
     ];
-    if (options?.supportsVariables) {
+    if (options?.supportsControls) {
       const variables = getVariablesByType?.(EsqlControlType.TIME_LITERAL) ?? [];
       timeLiteralSuggestions.push(
         ...getControlSuggestion(

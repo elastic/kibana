@@ -69,16 +69,16 @@ export interface ESQLEditorProps {
   /** adds a documentation icon in the footer which opens the inline docs as a flyout **/
   displayDocumentationAsFlyout?: boolean;
 
-  /** The component by default focuses on the editor when it is mounted, this flag disabled it**/
+  /** The component by default focuses on the editor when it is mounted, this flag disables it**/
   disableAutoFocus?: boolean;
   /** The editor supports the creation of controls,
    * This flag should be set to true to display the "Create control" suggestion
    **/
-  supportsVariables?: boolean;
+  supportsControls?: boolean;
   /** Function to be called after the control creation **/
-  onSaveControlCallback?: (controlState: Record<string, unknown>) => Promise<void>;
+  onSaveControlCb?: (controlState: Record<string, unknown>) => Promise<void>;
   /** Function to be called after cancelling the control creation **/
-  onCancelControlCallback?: () => void;
+  onCancelControlCb?: () => void;
 }
 
 interface EsqlVariablesService {

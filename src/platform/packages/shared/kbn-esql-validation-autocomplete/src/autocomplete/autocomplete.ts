@@ -181,7 +181,7 @@ export async function suggest(
     queryForFields.replace(EDITOR_MARKER, ''),
     resourceRetriever
   );
-  const supportsVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
+  const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
   const getVariablesByType = resourceRetriever?.getVariablesByType;
   const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
@@ -264,7 +264,7 @@ export async function suggest(
       fullText,
       offset,
       getVariablesByType,
-      supportsVariables
+      supportsControls
     );
   }
   if (astContext.type === 'list') {
@@ -286,8 +286,7 @@ export function getFieldsByTypeRetriever(
 ): { getFieldsByType: GetColumnsByTypeFn; getFieldsMap: GetFieldsMapFn } {
   const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
   const getVariablesByType = resourceRetriever?.getVariablesByType;
-  const supportsVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
-  // console.log(supportsVariables);
+  const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
   return {
     getFieldsByType: async (
       expectedType: string | string[] = 'any',
@@ -296,7 +295,7 @@ export function getFieldsByTypeRetriever(
     ) => {
       const updatedOptions = {
         ...options,
-        supportsVariables,
+        supportsControls,
       };
       const fields = await helpers.getFieldsByType(expectedType, ignored);
       return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getVariablesByType);
@@ -1047,7 +1046,7 @@ async function getFunctionArgsSuggestions(
   fullText: string,
   offset: number,
   getVariablesByType?: (type: EsqlControlType) => ESQLControlVariable[],
-  supportsVariables?: boolean
+  supportsControls?: boolean
 ): Promise<SuggestionRawDefinition[]> {
   const fnDefinition = getFunctionDefinition(node.name);
   // early exit on no hit
@@ -1172,7 +1171,7 @@ async function getFunctionArgsSuggestions(
         {
           addComma: shouldAddComma,
           advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
-          supportsVariables,
+          supportsControls,
         },
         getVariablesByType
       )

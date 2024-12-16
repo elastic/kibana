@@ -44,7 +44,7 @@ interface FieldControlFormProps {
   onCreateControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
   onEditControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
   initialState?: ESQLControlState;
-  onCancelControlCallback?: () => void;
+  onCancelControlCb?: () => void;
 }
 
 export function FieldControlForm({
@@ -53,7 +53,7 @@ export function FieldControlForm({
   queryString,
   onCreateControl,
   onEditControl,
-  onCancelControlCallback,
+  onCancelControlCb,
   search,
   closeFlyout,
 }: FieldControlFormProps) {
@@ -281,7 +281,7 @@ export function FieldControlForm({
       <Footer
         isControlInEditMode={isControlInEditMode}
         variableName={variableName}
-        onCancelControlCallback={onCancelControlCallback}
+        onCancelControlCb={onCancelControlCb}
         isSaveDisabled={formIsInvalid}
         closeFlyout={closeFlyout}
         onCreateControl={onCreateIntervalControl}

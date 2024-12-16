@@ -72,15 +72,15 @@ const triggerControl = async (
   controlType: EsqlControlType,
   position: monaco.Position | null | undefined,
   uiActions: ESQLEditorDeps['uiActions'],
-  onSaveControlCallback?: ESQLEditorProps['onSaveControlCallback'],
-  onCancelControlCallback?: ESQLEditorProps['onCancelControlCallback']
+  onSaveControlCb?: ESQLEditorProps['onSaveControlCb'],
+  onCancelControlCb?: ESQLEditorProps['onCancelControlCb']
 ) => {
   await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
     queryString,
     controlType,
-    onSaveControlCallback,
-    onCancelControlCallback,
     cursorPosition: position,
+    onSaveControlCb,
+    onCancelControlCb,
   });
 };
 
@@ -102,10 +102,10 @@ export const ESQLEditor = memo(function ESQLEditor({
   hideQueryHistory,
   hasOutline,
   displayDocumentationAsFlyout,
-  onSaveControlCallback,
-  onCancelControlCallback,
   disableAutoFocus,
-  supportsVariables,
+  onSaveControlCb,
+  onCancelControlCb,
+  supportsControls,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -229,12 +229,12 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
-    if (supportsVariables) {
+    if (supportsControls) {
       esqlService.enable();
     } else {
       esqlService.disable();
     }
-  }, [esqlService, supportsVariables]);
+  }, [esqlService, supportsControls]);
 
   const toggleHistory = useCallback((status: boolean) => {
     setIsHistoryOpen(status);
@@ -286,8 +286,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       EsqlControlType.TIME_LITERAL,
       position,
       uiActions,
-      onSaveControlCallback,
-      onCancelControlCallback
+      onSaveControlCb,
+      onCancelControlCb
     );
   });
 
@@ -298,8 +298,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       EsqlControlType.FIELDS,
       position,
       uiActions,
-      onSaveControlCallback,
-      onCancelControlCallback
+      onSaveControlCb,
+      onCancelControlCb
     );
   });
 
@@ -310,8 +310,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       EsqlControlType.VALUES,
       position,
       uiActions,
-      onSaveControlCallback,
-      onCancelControlCallback
+      onSaveControlCb,
+      onCancelControlCb
     );
   });
 

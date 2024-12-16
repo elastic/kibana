@@ -282,7 +282,7 @@ export function Header() {
 export function Footer({
   isControlInEditMode,
   variableName,
-  onCancelControlCallback,
+  onCancelControlCb,
   isSaveDisabled,
   closeFlyout,
   onCreateControl,
@@ -292,7 +292,7 @@ export function Footer({
   isSaveDisabled: boolean;
   closeFlyout: () => void;
   onCreateControl: () => void;
-  onCancelControlCallback?: () => void;
+  onCancelControlCb?: () => void;
 }) {
   const onCancel = useCallback(() => {
     closeFlyout();
@@ -301,8 +301,8 @@ export function Footer({
       esqlVariablesService.removeVariable(variableName);
     }
 
-    onCancelControlCallback?.();
-  }, [closeFlyout, isControlInEditMode, onCancelControlCallback, variableName]);
+    onCancelControlCb?.();
+  }, [closeFlyout, isControlInEditMode, onCancelControlCb, variableName]);
 
   return (
     <EuiFlyoutFooter>

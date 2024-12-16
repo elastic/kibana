@@ -33,7 +33,7 @@ interface IntervalControlFormProps {
   onCreateControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
   onEditControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
   initialState?: ESQLControlState;
-  onCancelControlCallback?: () => void;
+  onCancelControlCb?: () => void;
 }
 
 const SUGGESTED_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
@@ -45,7 +45,7 @@ export function IntervalControlForm({
   closeFlyout,
   onCreateControl,
   onEditControl,
-  onCancelControlCallback,
+  onCancelControlCb,
 }: IntervalControlFormProps) {
   const suggestedStaticValues = useMemo(
     () => (initialState ? initialState.availableOptions : SUGGESTED_VALUES),
@@ -221,7 +221,7 @@ export function IntervalControlForm({
       <Footer
         isControlInEditMode={isControlInEditMode}
         variableName={variableName}
-        onCancelControlCallback={onCancelControlCallback}
+        onCancelControlCb={onCancelControlCb}
         isSaveDisabled={formIsInvalid}
         closeFlyout={closeFlyout}
         onCreateControl={onCreateIntervalControl}

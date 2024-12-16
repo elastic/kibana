@@ -22,8 +22,8 @@ interface ESQLControlsFlyoutProps {
   search: ISearchGeneric;
   controlType: EsqlControlType;
   queryString: string;
-  onSaveControlCallback?: (controlState: ESQLControlState) => Promise<void>;
-  onCancelControlCallback?: () => void;
+  onSaveControlCb?: (controlState: ESQLControlState) => Promise<void>;
+  onCancelControlCb?: () => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
   closeFlyout: () => void;
@@ -33,8 +33,8 @@ export function ESQLControlsFlyout({
   search,
   controlType,
   queryString,
-  onSaveControlCallback,
-  onCancelControlCallback,
+  onSaveControlCb,
+  onCancelControlCb,
   cursorPosition,
   initialState,
   closeFlyout,
@@ -59,18 +59,19 @@ export function ESQLControlsFlyout({
       if (cursorPosition) {
         const query = updateQueryStringWithVariable(queryString, variableName, cursorPosition);
         addToESQLVariablesService(variableName, variableValue, controlType, query);
+
+        await onSaveControlCb?.(state);
       }
-      await onSaveControlCallback?.(state);
     },
-    [addToESQLVariablesService, controlType, cursorPosition, onSaveControlCallback, queryString]
+    [addToESQLVariablesService, controlType, cursorPosition, onSaveControlCb, queryString]
   );
 
   const onEditControl = useCallback(
     async (state: ESQLControlState, variableName: string, variableValue: string) => {
-      await onSaveControlCallback?.(state);
+      await onSaveControlCb?.(state);
       addToESQLVariablesService(variableName, variableValue, controlType, '');
     },
-    [addToESQLVariablesService, controlType, onSaveControlCallback]
+    [addToESQLVariablesService, controlType, onSaveControlCb]
   );
 
   if (controlType === EsqlControlType.TIME_LITERAL) {
@@ -79,7 +80,7 @@ export function ESQLControlsFlyout({
         queryString={queryString}
         controlType={controlType}
         closeFlyout={closeFlyout}
-        onCancelControlCallback={onCancelControlCallback}
+        onCancelControlCb={onCancelControlCb}
         initialState={initialState}
         onCreateControl={onCreateControl}
         onEditControl={onEditControl}
@@ -91,7 +92,7 @@ export function ESQLControlsFlyout({
         queryString={queryString}
         controlType={controlType}
         closeFlyout={closeFlyout}
-        onCancelControlCallback={onCancelControlCallback}
+        onCancelControlCb={onCancelControlCb}
         initialState={initialState}
         onCreateControl={onCreateControl}
         onEditControl={onEditControl}
@@ -103,7 +104,7 @@ export function ESQLControlsFlyout({
       <FieldControlForm
         controlType={controlType}
         queryString={queryString}
-        onCancelControlCallback={onCancelControlCallback}
+        onCancelControlCb={onCancelControlCb}
         onCreateControl={onCreateControl}
         onEditControl={onEditControl}
         initialState={initialState}

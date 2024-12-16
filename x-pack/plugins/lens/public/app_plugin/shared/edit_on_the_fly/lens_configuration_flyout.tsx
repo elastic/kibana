@@ -108,7 +108,7 @@ export function LensEditConfigurationFlyout({
   const dashboardPanels = useStateFromPublishingSubject(dashboardApi?.children$);
   const controlGroupApi = useStateFromPublishingSubject(dashboardApi?.controlGroupApi$);
 
-  const onSaveControlCallback = useCallback(
+  const onSaveControlCb = useCallback(
     async (controlState: Record<string, unknown>) => {
       if (!panelId) {
         return;
@@ -132,7 +132,7 @@ export function LensEditConfigurationFlyout({
     [controlGroupApi, dashboardPanels, panelId]
   );
 
-  const onCancelControlCallback = useCallback(() => {
+  const onCancelControlCb = useCallback(() => {
     closeFlyout?.();
   }, [closeFlyout]);
 
@@ -569,7 +569,7 @@ export function LensEditConfigurationFlyout({
                     : undefined
                 }
                 editorIsInline
-                supportsVariables
+                supportsControls
                 hideRunQueryText
                 onTextLangQuerySubmit={async (q, a) => {
                   // do not run the suggestions if the query is the same as the previous one
@@ -581,8 +581,8 @@ export function LensEditConfigurationFlyout({
                 isDisabled={false}
                 allowQueryCancellation
                 isLoading={isVisualizationLoading}
-                onSaveControlCallback={onSaveControlCallback}
-                onCancelControlCallback={onCancelControlCallback}
+                onSaveControlCb={onSaveControlCb}
+                onCancelControlCb={onCancelControlCb}
               />
             </EuiFlexItem>
           )}

@@ -53,8 +53,7 @@ export const setKibanaServices = (
   uiActions: UiActionsStart,
   indexManagement?: IndexManagementPluginSetup,
   fieldsMetadata?: FieldsMetadataPublicStart,
-  usageCollection?: UsageCollectionStart,
-  esqlService?: EsqlVariablesService
+  usageCollection?: UsageCollectionStart
 ) => {
   core = kibanaCore;
   servicesReady$.next({

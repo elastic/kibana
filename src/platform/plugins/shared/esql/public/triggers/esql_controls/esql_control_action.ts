@@ -20,8 +20,8 @@ const ACTION_CREATE_ESQL_CONTROL = 'ACTION_CREATE_ESQL_CONTROL';
 interface Context {
   queryString: string;
   controlType: EsqlControlType;
-  onSaveControlCallback?: (controlState: ESQLControlState) => Promise<void>;
-  onCancelControlCallback?: () => void;
+  onSaveControlCb?: (controlState: ESQLControlState) => Promise<void>;
+  onCancelControlCb?: () => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
 }
@@ -53,8 +53,8 @@ export class CreateESQLControlAction implements Action<Context> {
   public async execute({
     queryString,
     controlType,
-    onSaveControlCallback,
-    onCancelControlCallback,
+    onSaveControlCb,
+    onCancelControlCb,
     cursorPosition,
     initialState,
   }: Context) {
@@ -64,8 +64,8 @@ export class CreateESQLControlAction implements Action<Context> {
       core: this.core,
       search: this.search,
       controlType,
-      onSaveControlCallback,
-      onCancelControlCallback,
+      onSaveControlCb,
+      onCancelControlCb,
       cursorPosition,
       initialState,
     });
