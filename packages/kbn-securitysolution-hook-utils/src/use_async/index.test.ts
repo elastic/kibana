@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook, act } from '@testing-library/react';
 
 import { useAsync } from '.';
 
@@ -20,8 +20,8 @@ type TestReturn = Promise<unknown>;
 
 describe('useAsync', () => {
   /**
-   * Timeout for both jest tests and for the waitForNextUpdate.
-   * jest tests default to 5 seconds and waitForNextUpdate defaults to 1 second.
+   * Timeout for both jest tests and for the waitFor.
+   * jest tests default to 5 seconds and waitFor defaults to 1 second.
    * 20_0000 = 20,000 milliseconds = 20 seconds
    */
   const timeout = 20_000;
@@ -42,43 +42,42 @@ describe('useAsync', () => {
   it(
     'invokes the function when start is called',
     async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useAsync(fn));
+      const { result } = renderHook(() => useAsync(fn));
 
       act(() => {
         result.current.start(args);
       });
-      await waitForNextUpdate({ timeout });
-
-      expect(fn).toHaveBeenCalled();
+      await waitFor(() => expect(fn).toHaveBeenCalled(), { timeout });
     },
     timeout
   );
 
   it('invokes the function with start args', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useAsync(fn));
+    const { result } = renderHook(() => useAsync(fn));
     const expectedArgs = { ...args };
 
     act(() => {
       result.current.start(args);
     });
-    await waitForNextUpdate({ timeout });
-
-    expect(fn).toHaveBeenCalledWith(expectedArgs);
+    await waitFor(() => expect(fn).toHaveBeenCalledWith(expectedArgs), { timeout });
   });
 
   it(
     'populates result with the resolved value of the fn',
     async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useAsync(fn));
+      const { result } = renderHook(() => useAsync(fn));
       fn.mockResolvedValue({ resolved: 'value' });
 
       act(() => {
         result.current.start(args);
       });
-      await waitForNextUpdate({ timeout });
-
-      expect(result.current.result).toEqual({ resolved: 'value' });
-      expect(result.current.error).toBeUndefined();
+      await waitFor(
+        () => {
+          expect(result.current.result).toEqual({ resolved: 'value' });
+          expect(result.current.error).toBeUndefined();
+        },
+        { timeout }
+      );
     },
     timeout
   );
@@ -87,15 +86,19 @@ describe('useAsync', () => {
     'populates error if function rejects',
     async () => {
       fn.mockRejectedValue(new Error('whoops'));
-      const { result, waitForNextUpdate } = renderHook(() => useAsync(fn));
+      const { result } = renderHook(() => useAsync(fn));
 
       act(() => {
         result.current.start(args);
       });
-      await waitForNextUpdate({ timeout });
 
-      expect(result.current.result).toBeUndefined();
-      expect(result.current.error).toEqual(new Error('whoops'));
+      await waitFor(
+        () => {
+          expect(result.current.result).toBeUndefined();
+          expect(result.current.error).toEqual(new Error('whoops'));
+        },
+        { timeout }
+      );
     },
     timeout
   );
@@ -106,7 +109,7 @@ describe('useAsync', () => {
       let resolve: () => void;
       fn.mockImplementation(() => new Promise<void>((_resolve) => (resolve = _resolve)));
 
-      const { result, waitForNextUpdate } = renderHook(() => useAsync(fn));
+      const { result } = renderHook(() => useAsync(fn));
 
       act(() => {
         result.current.start(args);
@@ -115,9 +118,7 @@ describe('useAsync', () => {
       expect(result.current.loading).toBe(true);
 
       act(() => resolve());
-      await waitForNextUpdate({ timeout });
-
-      expect(result.current.loading).toBe(false);
+      await waitFor(() => expect(result.current.loading).toBe(false), { timeout });
     },
     timeout
   );
@@ -128,7 +129,7 @@ describe('useAsync', () => {
       let resolve: (result: string) => void;
       fn.mockImplementation(() => new Promise((_resolve) => (resolve = _resolve)));
 
-      const { result, waitForNextUpdate } = renderHook(() => useAsync(fn));
+      const { result } = renderHook(() => useAsync(fn));
 
       act(() => {
         result.current.start(args);
@@ -137,10 +138,13 @@ describe('useAsync', () => {
       expect(result.current.loading).toBe(true);
 
       act(() => resolve('result'));
-      await waitForNextUpdate({ timeout });
-
-      expect(result.current.loading).toBe(false);
-      expect(result.current.result).toBe('result');
+      await waitFor(
+        () => {
+          expect(result.current.loading).toBe(false);
+          expect(result.current.result).toBe('result');
+        },
+        { timeout }
+      );
 
       act(() => {
         result.current.start(args);
@@ -149,10 +153,13 @@ describe('useAsync', () => {
       expect(result.current.loading).toBe(true);
       expect(result.current.result).toBe(undefined);
       act(() => resolve('result'));
-      await waitForNextUpdate({ timeout });
-
-      expect(result.current.loading).toBe(false);
-      expect(result.current.result).toBe('result');
+      await waitFor(
+        () => {
+          expect(result.current.loading).toBe(false);
+          expect(result.current.result).toBe('result');
+        },
+        { timeout }
+      );
     },
     timeout
   );
