@@ -103,31 +103,13 @@ export const useRowHeight = ({
   );
 
   const rowHeight = useMemo<RowHeightSettingsProps['rowHeight']>(() => {
-    switch (rowHeightLines) {
-      case ROWS_HEIGHT_OPTIONS.auto:
-        return RowHeightMode.auto;
-      case ROWS_HEIGHT_OPTIONS.single:
-        return RowHeightMode.custom;
-      default:
-        return RowHeightMode.custom;
-    }
+    return rowHeightLines === ROWS_HEIGHT_OPTIONS.auto ? RowHeightMode.auto : RowHeightMode.custom;
   }, [rowHeightLines]);
 
   const onChangeRowHeight = useCallback(
     (newRowHeight: RowHeightSettingsProps['rowHeight']) => {
-      let newRowHeightLines: number;
-
-      switch (newRowHeight) {
-        case RowHeightMode.auto:
-          newRowHeightLines = ROWS_HEIGHT_OPTIONS.auto;
-          break;
-        case RowHeightMode.single:
-          newRowHeightLines = ROWS_HEIGHT_OPTIONS.single;
-          setLineCountInput(1); // normalize "single" to "custom" with value 1 and populate input
-          break;
-        default:
-          newRowHeightLines = lineCountInput;
-      }
+      const newRowHeightLines: number =
+        newRowHeight === RowHeightMode.auto ? ROWS_HEIGHT_OPTIONS.auto : lineCountInput;
 
       updateStoredRowHeight(newRowHeightLines, configRowHeight, storage, consumer, key);
       onUpdateRowHeight?.(newRowHeightLines);
