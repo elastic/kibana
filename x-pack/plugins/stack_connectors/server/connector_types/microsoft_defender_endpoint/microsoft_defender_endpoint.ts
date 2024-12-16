@@ -47,7 +47,10 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   ) {
     super(params);
 
-    this.oAuthToken = new OAuthTokenManager({ ...params, apiRequest: this.request.bind(this) });
+    this.oAuthToken = new OAuthTokenManager({
+      ...params,
+      apiRequest: async (...args) => this.request(...args),
+    });
 
     this.urls = {
       machines: `${this.config.apiUrl}/api/machines`,

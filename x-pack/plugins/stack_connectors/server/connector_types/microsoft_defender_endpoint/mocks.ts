@@ -50,8 +50,17 @@ const createMicrosoftDefenderConnectorMock = (): CreateMicrosoftDefenderConnecto
     services: actionsMock.createServices(),
   };
   const instanceMock = createConnectorInstanceMock(MicrosoftDefenderEndpointConnector, options);
+
   // Default MS API response mocks. These (or additinoal ones) can always be defined directly in test
   const apiMock: CreateMicrosoftDefenderConnectorMockResponse['apiMock'] = {
+    [`${options.config.oAuthServerUrl}/${options.config.tenantId}/oauth2/v2.0/token`]: () => {
+      return createAxiosResponseMock({
+        token_type: 'Bearer',
+        expires_in: 3599,
+        access_token: 'eyJN_token_JIE',
+      });
+    },
+
     // Agent Details
     [`${apiUrl}/api/machines/1-2-3`]: () => createAxiosResponseMock(createMicrosoftMachineMock()),
 

@@ -37,7 +37,6 @@ export class OAuthTokenManager {
   private async generateNewToken(connectorUsageCollector: ConnectorUsageCollector): Promise<void> {
     // FYI: API Docs: https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow#get-a-token
     const { oAuthScope, clientId } = this.params.config;
-
     const newToken = await this.params.apiRequest<MicrosoftDefenderEndpointApiTokenResponse>(
       {
         url: this.oAuthTokenUrl,
@@ -56,9 +55,9 @@ export class OAuthTokenManager {
 
     this.params.logger.debug(
       () =>
-        `Successfuly created an access token for Microsoft Defend for Endpoint:\n${JSON.stringify({
+        `Successfully created an access token for Microsoft Defend for Endpoint:\n${JSON.stringify({
           ...newToken.data,
-          access_token: '[RECDACTED]',
+          access_token: '[REDACTED]',
         })}`
     );
 
@@ -71,6 +70,10 @@ export class OAuthTokenManager {
   public async get(connectorUsageCollector: ConnectorUsageCollector): Promise<string> {
     if (!this.accessToken) {
       await this.generateNewToken(connectorUsageCollector);
+    }
+
+    if (!this.accessToken) {
+      throw new Error('Access token for Microsoft Defend for Endpoint not available!');
     }
 
     return this.accessToken;

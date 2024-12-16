@@ -10,6 +10,7 @@
 import { AxiosResponse } from 'axios';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
 
 /**
  * Create an Axios response object mock
@@ -54,16 +55,21 @@ export const createConnectorInstanceMock = <T extends typeof SubActionConnector<
   ConnectorClass: T,
   constructorArguments: ConstructorParameters<T>[0]
 ): ConnectorInstanceMock<InstanceType<T>> => {
+  const requestMock = jest.fn();
+
   const ConnectorClassExtended =
     // @ts-expect-error
     class extends ConnectorClass {
-      public async request<R>(params: SubActionRequestParams<R>): Promise<AxiosResponse<R>> {
-        return createAxiosResponseMock<R>({} as R);
+      public async request<R>(
+        params: SubActionRequestParams<R>,
+        usageCollector: ConnectorUsageCollector
+      ): Promise<AxiosResponse<R>> {
+        return requestMock(params, usageCollector);
       }
     };
   // @ts-expect-error
   const instance = new ConnectorClassExtended(constructorArguments);
-  const mockedMethods: { [K in keyof InstanceType<T>]?: jest.Mock } = {};
+  const mockedMethods: { [K in keyof InstanceType<T>]?: jest.Mock } = { request: requestMock };
   const instanceAccessorHandler: ProxyHandler<InstanceType<T>> = {};
   const proxiedInstance = new Proxy(instance, instanceAccessorHandler) as ConnectorInstanceMock<
     InstanceType<T>
