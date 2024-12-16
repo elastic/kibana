@@ -18,11 +18,8 @@ const serviceEntitiesSummaryRoute = createApmServerRoute({
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   async handler(resources) {
-    const { context, params, request, plugins } = resources;
-    const [_coreContext, entityManagerStart] = await Promise.all([
-      context.core,
-      plugins.entityManager.start(),
-    ]);
+    const { params, request, plugins } = resources;
+    const entityManagerStart = await plugins.entityManager.start();
 
     const entityManagerClient = await entityManagerStart.getScopedClient({ request });
     const { serviceName } = params.path;

@@ -296,11 +296,9 @@ const serviceAgentRoute = createApmServerRoute({
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceAgentResponse> => {
-    const { context, request, plugins } = resources;
-    const [_coreContext, entityManagerStart] = await Promise.all([
-      context.core,
-      plugins.entityManager.start(),
-    ]);
+    const { request, plugins } = resources;
+    const entityManagerStart = await plugins.entityManager.start();
+
     const apmEventClient = await getApmEventClient(resources);
     const entityManagerClient = await entityManagerStart.getScopedClient({ request });
     const { params } = resources;
