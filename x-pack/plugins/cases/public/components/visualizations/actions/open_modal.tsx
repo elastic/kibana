@@ -88,7 +88,7 @@ export function openModal(
     >
       <AddExistingCaseModalWrapper lensApi={lensApi} onClose={onClose} onSuccess={onSuccess} />
     </ActionWrapper>,
-    { i18n: services.core.i18n, theme: services.core.theme }
+    services.core
   );
 
   mount(targetDomElement);

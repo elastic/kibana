@@ -115,6 +115,7 @@ export class TimeSeriesExplorer extends React.Component {
     tableInterval: PropTypes.string,
     tableSeverity: PropTypes.number,
     zoom: PropTypes.object,
+    handleJobSelectionChange: PropTypes.func,
   };
 
   state = getTimeseriesexplorerDefaultState();
@@ -1009,7 +1010,11 @@ export class TimeSeriesExplorer extends React.Component {
 
     if (selectedDetectorIndex === undefined || mlJobService.getJob(selectedJobId) === undefined) {
       return (
-        <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef}>
+        <TimeSeriesExplorerPage
+          handleJobSelectionChange={this.props.handleJobSelectionChange}
+          dateFormatTz={dateFormatTz}
+          resizeRef={this.resizeRef}
+        >
           <ExplorerNoJobsSelected />
         </TimeSeriesExplorerPage>
       );
@@ -1039,7 +1044,12 @@ export class TimeSeriesExplorer extends React.Component {
     this.previousShowModelBounds = showModelBounds;
 
     return (
-      <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef}>
+      <TimeSeriesExplorerPage
+        dateFormatTz={dateFormatTz}
+        resizeRef={this.resizeRef}
+        handleJobSelectionChange={this.props.handleJobSelectionChange}
+        selectedJobId={[selectedJobId]}
+      >
         {fieldNamesWithEmptyValues.length > 0 && (
           <>
             <EuiCallOut
@@ -1130,19 +1140,20 @@ export class TimeSeriesExplorer extends React.Component {
                         )}
                       </span>
                       &nbsp;
-                      {chartDetails.entityData.count === 1 && (
-                        <EuiTextColor color={'success'} size={'s'} component={'span'}>
-                          {chartDetails.entityData.entities.length > 0 && '('}
-                          {chartDetails.entityData.entities
-                            .map((entity) => {
-                              return `${entity.fieldName}: ${entity.fieldValue}`;
-                            })
-                            .join(', ')}
-                          {chartDetails.entityData.entities.length > 0 && ')'}
-                        </EuiTextColor>
-                      )}
-                      {chartDetails.entityData.count !== 1 && (
-                        <EuiTextColor color={'success'} size={'s'} component={'span'}>
+                      {chartDetails.entityData.count === 1 &&
+                        chartDetails.entityData.entities.length > 0 && (
+                          <EuiTextColor color="accentSecondary" size="s" component="span">
+                            (
+                            {chartDetails.entityData.entities
+                              .map((entity) => {
+                                return `${entity.fieldName}: ${entity.fieldValue}`;
+                              })
+                              .join(', ')}
+                            )
+                          </EuiTextColor>
+                        )}
+                      {chartDetails.entityData.count > 1 && (
+                        <EuiTextColor color="accentSecondary" size="s" component="span">
                           {chartDetails.entityData.entities.map((countData, i) => {
                             return (
                               <Fragment key={countData.fieldName}>

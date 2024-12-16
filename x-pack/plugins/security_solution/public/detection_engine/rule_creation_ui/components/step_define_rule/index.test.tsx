@@ -419,7 +419,8 @@ describe('StepDefineRule', () => {
     });
   });
 
-  describe('related integrations', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/199648
+  describe.skip('related integrations', () => {
     beforeEach(() => {
       fleetIntegrationsApi.fetchAllIntegrations.mockResolvedValue({
         integrations: [

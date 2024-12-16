@@ -29,10 +29,10 @@ import { generateNavLink } from './nav_link_helpers';
  * @returns The Enterprise Search navigation items
  */
 export const useEnterpriseSearchNav = (alwaysReturn = false) => {
-  const { isSidebarEnabled, productAccess, getNavLinks } = useValues(KibanaLogic);
+  const { isSidebarEnabled, getNavLinks } = useValues(KibanaLogic);
 
   const navItems: Array<EuiSideNavItemTypeEnhanced<unknown>> = useMemo(() => {
-    const baseNavItems = buildBaseClassicNavItems({ productAccess });
+    const baseNavItems = buildBaseClassicNavItems();
     const deepLinks = getNavLinks().reduce((links, link) => {
       links[link.id] = link;
       return links;

@@ -124,6 +124,92 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/timerange",
+        "id": "def-common.getOffsetFromNowInSeconds",
+        "type": "Function",
+        "tags": [],
+        "label": "getOffsetFromNowInSeconds",
+        "description": [],
+        "signature": [
+          "(epochDate: number) => number"
+        ],
+        "path": "packages/kbn-timerange/src/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/timerange",
+            "id": "def-common.getOffsetFromNowInSeconds.$1",
+            "type": "number",
+            "tags": [],
+            "label": "epochDate",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-timerange/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/timerange",
+        "id": "def-common.getTimeDifferenceInSeconds",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeDifferenceInSeconds",
+        "description": [],
+        "signature": [
+          "({\n  startDate,\n  endDate,\n}: { startDate: number; endDate: number; }) => number"
+        ],
+        "path": "packages/kbn-timerange/src/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/timerange",
+            "id": "def-common.getTimeDifferenceInSeconds.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  startDate,\n  endDate,\n}",
+            "description": [],
+            "path": "packages/kbn-timerange/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/timerange",
+                "id": "def-common.getTimeDifferenceInSeconds.$1.startDate",
+                "type": "number",
+                "tags": [],
+                "label": "startDate",
+                "description": [],
+                "path": "packages/kbn-timerange/src/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/timerange",
+                "id": "def-common.getTimeDifferenceInSeconds.$1.endDate",
+                "type": "number",
+                "tags": [],
+                "label": "endDate",
+                "description": [],
+                "path": "packages/kbn-timerange/src/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],

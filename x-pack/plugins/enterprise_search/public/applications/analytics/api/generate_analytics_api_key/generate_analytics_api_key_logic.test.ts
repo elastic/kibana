@@ -34,7 +34,7 @@ describe('GenerateAnalyticsApiKeyLogic', () => {
       });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
-        '/internal/enterprise_search/analytics/collections/puggles/api_key',
+        '/internal/elasticsearch/analytics/collections/puggles/api_key',
         {
           body: JSON.stringify({
             keyName: 'puggles read only key',
