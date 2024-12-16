@@ -19,22 +19,24 @@ import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboa
 import { getDashboardBackupService } from '../../dashboard_backup_service';
 import { contentManagementService, coreServices } from '../../kibana_services';
 import { SaveDashboardProps, SaveDashboardReturn } from '../types';
-import { getDashboardState } from './get_dashboard_state';
+import { getDashboardState } from '../../../dashboard_api/get_dashboard_state';
 
 export const saveDashboardState = async ({
   controlGroupReferences,
   lastSavedId,
   saveOptions,
-  currentState,
+  dashboardState,
   panelReferences,
+  searchSourceReferences,
 }: SaveDashboardProps): Promise<SaveDashboardReturn> => {
   const dashboardContentManagementCache = getDashboardContentManagementCache();
 
-  const { attributes, references } = await getDashboardState({
+  const { attributes, references } = getDashboardState({
     controlGroupReferences,
     generateNewIds: saveOptions.saveAsCopy,
-    currentState,
+    dashboardState,
     panelReferences,
+    searchSourceReferences,
   });
 
   /**
@@ -65,7 +67,7 @@ export const saveDashboardState = async ({
 
     if (newId) {
       coreServices.notifications.toasts.addSuccess({
-        title: dashboardSaveToastStrings.getSuccessString(currentState.title),
+        title: dashboardSaveToastStrings.getSuccessString(dashboardState.title),
         className: 'eui-textBreakWord',
         'data-test-subj': 'saveDashboardSuccess',
       });
@@ -83,7 +85,7 @@ export const saveDashboardState = async ({
     return { id: newId, references };
   } catch (error) {
     coreServices.notifications.toasts.addDanger({
-      title: dashboardSaveToastStrings.getFailureString(currentState.title, error.message),
+      title: dashboardSaveToastStrings.getFailureString(dashboardState.title, error.message),
       'data-test-subj': 'saveDashboardFailure',
     });
     return { error };

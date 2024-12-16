@@ -9,21 +9,19 @@
 
 import { pick } from 'lodash';
 import moment, { Moment } from 'moment';
-import { isFilterPinned } from '@kbn/es-query';
-import type { SavedObjectReference } from '@kbn/core/server';
-import { RefreshInterval, extractSearchSourceReferences } from '@kbn/data-plugin/public';
+import { RefreshInterval } from '@kbn/data-plugin/public';
 
+import { convertPanelMapToPanelsArray, extractReferences, generateNewPanelIds } from '../../common';
+import type { DashboardAttributes } from '../../server';
+
+import { convertDashboardVersionToNumber } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
+import { GetDashboardStateProps } from '../services/dashboard_content_management_service/types';
 import {
-  convertPanelMapToPanelsArray,
-  extractReferences,
-  generateNewPanelIds,
-} from '../../../../common';
-import type { DashboardAttributes } from '../../../../server';
-
-import { convertDashboardVersionToNumber } from './dashboard_versioning';
-import { DashboardSearchSource, GetDashboardStateProps } from '../types';
-import { dataService, embeddableService, savedObjectsTaggingService } from '../../kibana_services';
-import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../../../dashboard_container';
+  dataService,
+  embeddableService,
+  savedObjectsTaggingService,
+} from '../services/kibana_services';
+import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../dashboard_container';
 
 export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
   if (moment(time).isValid()) {
@@ -35,14 +33,14 @@ export const convertTimeToUTCString = (time?: string | Moment): undefined | stri
   }
 };
 
-export const getDashboardState = async ({
+export const getDashboardState = ({
   controlGroupReferences,
   generateNewIds,
-  currentState,
+  dashboardState,
   panelReferences,
+  searchSourceReferences,
 }: GetDashboardStateProps) => {
   const {
-    search: dataSearchService,
     query: {
       timefilter: { timefilter },
     },
@@ -63,9 +61,9 @@ export const getDashboardState = async ({
     syncTooltips,
     hidePanelTitles,
     controlGroupInput,
-  } = currentState;
+  } = dashboardState;
 
-  let { panels } = currentState;
+  let { panels } = dashboardState;
   let prefixedPanelReferences = panelReferences;
   if (generateNewIds) {
     const { panels: newPanels, references: newPanelReferences } = generateNewPanelIds(
@@ -80,22 +78,7 @@ export const getDashboardState = async ({
     //
   }
 
-  const { searchSource, searchSourceReferences } = await (async () => {
-    const searchSourceFields = await dataSearchService.searchSource.create();
-    searchSourceFields.setField(
-      'filter', // save only unpinned filters
-      filters.filter((filter) => !isFilterPinned(filter))
-    );
-    searchSourceFields.setField('query', query);
-
-    const rawSearchSourceFields = searchSourceFields.getSerializedFields();
-    const [fields, references] = extractSearchSourceReferences(rawSearchSourceFields) as [
-      DashboardSearchSource,
-      SavedObjectReference[]
-    ];
-    return { searchSourceReferences: references, searchSource: fields };
-  })();
-
+  const searchSource = { filter: filters, query };
   const options = {
     useMargins,
     syncColors,
@@ -140,7 +123,7 @@ export const getDashboardState = async ({
   const { attributes, references: dashboardReferences } = extractReferences(
     {
       attributes: rawDashboardAttributes,
-      references: searchSourceReferences,
+      references: searchSourceReferences ?? [],
     },
     { embeddablePersistableStateService: embeddableService }
   );
@@ -154,6 +137,7 @@ export const getDashboardState = async ({
     ...references,
     ...(prefixedPanelReferences ?? []),
     ...(controlGroupReferences ?? []),
+    ...(searchSourceReferences ?? []),
   ];
   return { attributes, references: allReferences };
 };

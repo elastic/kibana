@@ -154,10 +154,10 @@ export type DashboardApi = CanExpandPanels &
     focusedPanelId$: PublishingSubject<string | undefined>;
     forceRefresh: () => void;
     getSettings: () => DashboardStateFromSettingsFlyout;
-    getSerializedState: () => Promise<{
+    getSerializedState: () => {
       attributes: DashboardAttributes;
       references: SavedObjectReference[];
-    }>;
+    };
     getDashboardPanelFromId: (id: string) => DashboardPanelState;
     hasOverlays$: PublishingSubject<boolean>;
     hasUnsavedChanges$: PublishingSubject<boolean>;

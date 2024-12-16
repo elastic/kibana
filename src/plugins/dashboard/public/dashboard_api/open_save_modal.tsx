@@ -102,7 +102,7 @@ export async function openSaveModal({
             controlGroupReferences,
             panelReferences,
             saveOptions,
-            currentState: dashboardStateToSave,
+            dashboardState: dashboardStateToSave,
             lastSavedId,
           });
 
