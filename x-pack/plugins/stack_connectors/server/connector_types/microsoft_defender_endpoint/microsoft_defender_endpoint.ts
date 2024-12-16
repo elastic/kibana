@@ -138,19 +138,25 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       throw err;
     };
 
-    await this.getAgentDetails({ id: 'foo' }, connectorUsageCollector)
+    await this.getAgentDetails({ id: 'elastic-connector-test' }, connectorUsageCollector)
       .catch(catchErrorAndIgnoreExpectedErrors)
       .then(() => {
         results.push('API call to Machines API was successful');
       });
 
-    await this.isolateHost({ id: 'foo', comment: 'connector test' }, connectorUsageCollector)
+    await this.isolateHost(
+      { id: 'elastic-connector-test', comment: 'connector test' },
+      connectorUsageCollector
+    )
       .catch(catchErrorAndIgnoreExpectedErrors)
       .then(() => {
         results.push('API call to Machine Isolate was successful');
       });
 
-    await this.isolateHost({ id: 'foo', comment: 'connector test' }, connectorUsageCollector)
+    await this.isolateHost(
+      { id: 'elastic-connector-test', comment: 'connector test' },
+      connectorUsageCollector
+    )
       .catch(catchErrorAndIgnoreExpectedErrors)
       .then(() => {
         results.push('API call to Machine Release was successful');

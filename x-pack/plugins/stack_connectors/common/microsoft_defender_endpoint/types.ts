@@ -93,7 +93,7 @@ export interface MicrosoftDefenderEndpointMachine {
  */
 export interface MicrosoftDefenderEndpointMachineAction {
   /** Identity of the Machine Action entity. */
-  ID: string;
+  id: string;
   /** Type of the action. Possible values are: RunAntiVirusScan, Offboard, LiveResponse, CollectInvestigationPackage, Isolate, Unisolate, StopAndQuarantineFile, RestrictCodeExecution, and UnrestrictCodeExecution. */
   type:
     | 'RunAntiVirusScan'
@@ -136,7 +136,7 @@ export interface MicrosoftDefenderEndpointMachineAction {
   /** Machine action title. */
   title: string;
   /** Contains two Properties. string fileIdentifier, Enum fileIdentifierType with the possible values: Sha1, Sha256, and Md5. */
-  relatedFileInfo: { fileIdentifier: string; fileIdentifierType: 'Sha1' | 'Sha256' | 'Md5' };
+  relatedFileInfo?: { fileIdentifier: string; fileIdentifierType: 'Sha1' | 'Sha256' | 'Md5' };
 }
 
 export type MicrosoftDefenderEndpointTestConnectorParams = TypeOf<typeof TestConnectorParamsSchema>;
