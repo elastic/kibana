@@ -1,3 +1,716 @@
 {
-  "properties": {}
+  "properties": {
+    "cloud_defend": {
+      "properties": {
+        "indices": {
+          "properties": {
+            "alerts": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "file": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "process": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "latestPackageVersion": {
+              "type": "keyword"
+            },
+            "packageStatus": {
+              "properties": {
+                "status": {
+                  "type": "keyword"
+                },
+                "installedPackagePolicies": {
+                  "type": "long"
+                },
+                "healthyAgents": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "pods_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
+              "container_image_name": {
+                "type": "keyword"
+              },
+              "container_image_tag": {
+                "type": "keyword"
+              },
+              "pod_name": {
+                "type": "keyword"
+              },
+              "total_doc_count": {
+                "type": "long"
+              },
+              "process_doc_count": {
+                "type": "long"
+              },
+              "file_doc_count": {
+                "type": "long"
+              },
+              "alert_doc_count": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "accounts_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
+              "cloud_provider": {
+                "type": "keyword"
+              },
+              "kubernetes_version": {
+                "type": "keyword"
+              },
+              "total_doc_count": {
+                "type": "long"
+              },
+              "file_doc_count": {
+                "type": "long"
+              },
+              "process_doc_count": {
+                "type": "long"
+              },
+              "alert_doc_count": {
+                "type": "long"
+              },
+              "agents_count": {
+                "type": "short"
+              },
+              "nodes_count": {
+                "type": "short"
+              },
+              "pods_count": {
+                "type": "short"
+              }
+            }
+          }
+        },
+        "installation_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "package_policy_id": {
+                "type": "keyword"
+              },
+              "package_version": {
+                "type": "keyword"
+              },
+              "agent_policy_id": {
+                "type": "keyword"
+              },
+              "created_at": {
+                "type": "date"
+              },
+              "agent_count": {
+                "type": "long"
+              },
+              "policy_yaml": {
+                "type": "keyword"
+              },
+              "selectors": {
+                "type": "array",
+                "items": {
+                  "properties": {
+                    "type": {
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "type": "keyword"
+                    },
+                    "operation": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "containerImageFullName": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "containerImageName": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "containerImageTag": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "kubernetesClusterId": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "kubernetesClusterName": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "kubernetesNamespace": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "kubernetesPodLabel": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "kubernetesPodName": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "targetFilePath": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "ignoreVolumeFiles": {
+                      "type": "boolean"
+                    },
+                    "ignoreVolumeMounts": {
+                      "type": "boolean"
+                    },
+                    "processExecutable": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "processName": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "sessionLeaderInteractive": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "type": "array",
+                "items": {
+                  "properties": {
+                    "type": {
+                      "type": "keyword"
+                    },
+                    "match": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "exclude": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "actions": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "cloud_security_posture": {
+      "properties": {
+        "indices": {
+          "properties": {
+            "findings": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "latest_findings": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "vulnerabilities": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "latest_vulnerabilities": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "score": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "latestPackageVersion": {
+              "type": "keyword"
+            },
+            "cspm": {
+              "properties": {
+                "status": {
+                  "type": "keyword"
+                },
+                "installedPackagePolicies": {
+                  "type": "long"
+                },
+                "healthyAgents": {
+                  "type": "long"
+                }
+              }
+            },
+            "kspm": {
+              "properties": {
+                "status": {
+                  "type": "keyword"
+                },
+                "installedPackagePolicies": {
+                  "type": "long"
+                },
+                "healthyAgents": {
+                  "type": "long"
+                }
+              }
+            },
+            "vuln_mgmt": {
+              "properties": {
+                "status": {
+                  "type": "keyword"
+                },
+                "installedPackagePolicies": {
+                  "type": "long"
+                },
+                "healthyAgents": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "resources_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
+              "resource_type": {
+                "type": "keyword"
+              },
+              "resource_type_doc_count": {
+                "type": "long"
+              },
+              "resource_sub_type": {
+                "type": "keyword"
+              },
+              "resource_sub_type_doc_count": {
+                "type": "long"
+              },
+              "passed_findings_count": {
+                "type": "long"
+              },
+              "failed_findings_count": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "accounts_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
+              "posture_score": {
+                "type": "long"
+              },
+              "latest_findings_doc_count": {
+                "type": "long"
+              },
+              "benchmark_id": {
+                "type": "keyword"
+              },
+              "benchmark_name": {
+                "type": "keyword"
+              },
+              "benchmark_version": {
+                "type": "keyword"
+              },
+              "kubernetes_version": {
+                "type": "keyword"
+              },
+              "passed_findings_count": {
+                "type": "long"
+              },
+              "failed_findings_count": {
+                "type": "long"
+              },
+              "agents_count": {
+                "type": "short"
+              },
+              "nodes_count": {
+                "type": "short"
+              },
+              "pods_count": {
+                "type": "short"
+              }
+            }
+          }
+        },
+        "rules_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
+              "rule_id": {
+                "type": "keyword"
+              },
+              "rule_name": {
+                "type": "keyword"
+              },
+              "rule_section": {
+                "type": "keyword"
+              },
+              "rule_version": {
+                "type": "keyword"
+              },
+              "rule_number": {
+                "type": "keyword"
+              },
+              "posture_type": {
+                "type": "keyword"
+              },
+              "benchmark_id": {
+                "type": "keyword"
+              },
+              "benchmark_name": {
+                "type": "keyword"
+              },
+              "benchmark_version": {
+                "type": "keyword"
+              },
+              "passed_findings_count": {
+                "type": "long"
+              },
+              "failed_findings_count": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "installation_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "package_policy_id": {
+                "type": "keyword"
+              },
+              "feature": {
+                "type": "keyword"
+              },
+              "package_version": {
+                "type": "keyword"
+              },
+              "agent_policy_id": {
+                "type": "keyword"
+              },
+              "deployment_mode": {
+                "type": "keyword"
+              },
+              "created_at": {
+                "type": "date"
+              },
+              "agent_count": {
+                "type": "long"
+              },
+              "is_agentless": {
+                "type": "boolean"
+              },
+              "account_type": {
+                "type": "keyword"
+              },
+              "is_setup_automatic": {
+                "type": "boolean"
+              },
+              "setup_access_option": {
+                "type": "keyword"
+              }
+            }
+          }
+        },
+        "alerts_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "posture_type": {
+                "type": "keyword"
+              },
+              "rules_count": {
+                "type": "long"
+              },
+              "alerts_count": {
+                "type": "long"
+              },
+              "alerts_open_count": {
+                "type": "long"
+              },
+              "alerts_closed_count": {
+                "type": "long"
+              },
+              "alerts_acknowledged_count": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "cloud_account_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
+              "cloud_provider": {
+                "type": "keyword"
+              },
+              "product": {
+                "type": "keyword"
+              },
+              "package_policy_id": {
+                "type": "keyword"
+              },
+              "latest_doc_count": {
+                "type": "long"
+              },
+              "latest_doc_updated_timestamp": {
+                "type": "date"
+              },
+              "posture_management_stats": {
+                "properties": {
+                  "posture_score": {
+                    "type": "long"
+                  },
+                  "benchmark_name": {
+                    "type": "keyword"
+                  },
+                  "benchmark_version": {
+                    "type": "keyword"
+                  },
+                  "passed_findings_count": {
+                    "type": "long"
+                  },
+                  "failed_findings_count": {
+                    "type": "long"
+                  }
+                }
+              },
+              "posture_management_stats_enabled_rules": {
+                "properties": {
+                  "posture_score": {
+                    "type": "long"
+                  },
+                  "benchmark_name": {
+                    "type": "keyword"
+                  },
+                  "benchmark_version": {
+                    "type": "keyword"
+                  },
+                  "passed_findings_count": {
+                    "type": "long"
+                  },
+                  "failed_findings_count": {
+                    "type": "long"
+                  }
+                }
+              },
+              "kspm_stats": {
+                "properties": {
+                  "kubernetes_version": {
+                    "type": "keyword"
+                  },
+                  "agents_count": {
+                    "type": "short"
+                  },
+                  "nodes_count": {
+                    "type": "short"
+                  },
+                  "pods_count": {
+                    "type": "short"
+                  }
+                }
+              },
+              "has_muted_rules": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "muted_rules_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "keyword"
+              },
+              "section": {
+                "type": "keyword"
+              },
+              "benchmark_id": {
+                "type": "keyword"
+              },
+              "benchmark_name": {
+                "type": "keyword"
+              },
+              "benchmark_version": {
+                "type": "keyword"
+              },
+              "rule_number": {
+                "type": "keyword"
+              },
+              "posture_type": {
+                "type": "keyword"
+              },
+              "version": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }

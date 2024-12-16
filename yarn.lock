@@ -4013,7 +4013,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/asset-inventory-plugin@link:x-pack/plugins/asset_inventory":
+"@kbn/asset-inventory-plugin@link:x-pack/solutions/security/plugins/asset_inventory":
   version "0.0.0"
   uid ""
 
@@ -4141,7 +4141,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-defend-plugin@link:x-pack/plugins/cloud_defend":
+"@kbn/cloud-defend-plugin@link:x-pack/solutions/security/plugins/cloud_defend":
   version "0.0.0"
   uid ""
 
@@ -4165,19 +4165,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture-common@link:x-pack/packages/kbn-cloud-security-posture/common":
+"@kbn/cloud-security-posture-common@link:x-pack/platform/packages/shared/kbn-cloud-security-posture/common":
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture-graph@link:x-pack/packages/kbn-cloud-security-posture/graph":
+"@kbn/cloud-security-posture-graph@link:x-pack/solutions/security/packages/kbn-cloud-security-posture/graph":
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture-plugin@link:x-pack/plugins/cloud_security_posture":
+"@kbn/cloud-security-posture-plugin@link:x-pack/solutions/security/plugins/cloud_security_posture":
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture@link:x-pack/packages/kbn-cloud-security-posture/public":
+"@kbn/cloud-security-posture@link:x-pack/solutions/security/packages/kbn-cloud-security-posture/public":
   version "0.0.0"
   uid ""
 
@@ -6081,7 +6081,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kubernetes-security-plugin@link:x-pack/plugins/kubernetes_security":
+"@kbn/kubernetes-security-plugin@link:x-pack/solutions/security/plugins/kubernetes_security":
   version "0.0.0"
   uid ""
 
@@ -7269,7 +7269,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/session-view-plugin@link:x-pack/plugins/session_view":
+"@kbn/session-view-plugin@link:x-pack/solutions/security/plugins/session_view":
   version "0.0.0"
   uid ""
 

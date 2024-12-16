@@ -74,7 +74,7 @@ paths-ignore:
   - scripts
   - test
   - x-pack/plugins/canvas/scripts
-  - x-pack/plugins/cloud_security_posture/common/scripts
+  - x-pack/solutions/security/plugins/cloud_security_posture/common/scripts
   - x-pack/solutions/security/plugins/elastic_assistant/scripts
   - x-pack/plugins/event_log/scripts
   - x-pack/plugins/fleet/scripts
