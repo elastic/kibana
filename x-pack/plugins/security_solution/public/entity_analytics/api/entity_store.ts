@@ -19,10 +19,11 @@ import type {
 } from '../../../common/api/entity_analytics';
 import { API_VERSIONS } from '../../../common/entity_analytics/constants';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 export const useEntityStoreRoutes = () => {
   const http = useKibana().services.http;
-
+  const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
   return useMemo(() => {
     const enableEntityStore = async (
       options: InitEntityStoreRequestBody = { fieldHistoryLength: 10 }
@@ -35,6 +36,9 @@ export const useEntityStoreRoutes = () => {
     };
 
     const getEntityStoreStatus = async (withComponents = false) => {
+      if (isEntityStoreFeatureFlagDisabled) {
+        return null;
+      }
       return http.fetch<GetEntityStoreStatusResponse>('/api/entity_store/status', {
         method: 'GET',
         version: API_VERSIONS.public.v1,
@@ -81,5 +85,5 @@ export const useEntityStoreRoutes = () => {
       deleteEntityEngine,
       listEntityEngines,
     };
-  }, [http]);
+  }, [http, isEntityStoreFeatureFlagDisabled]);
 };
