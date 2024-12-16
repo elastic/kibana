@@ -106,7 +106,7 @@ const getErrorMessage = (error: Error | ServerError): string => {
 
 export const useCasesToast = () => {
   const { appId } = useApplication();
-  const { application, i18n, theme } = useKibana().services;
+  const { application, i18n, theme, userProfile } = useKibana().services;
   const { getUrlForApp, navigateToUrl } = application;
 
   const toasts = useToasts();
@@ -148,13 +148,13 @@ export const useCasesToast = () => {
         return toasts.addSuccess({
           color: 'success',
           iconType: 'check',
-          title: toMountPoint(<TruncatedText text={renderTitle} />, { i18n, theme }),
+          title: toMountPoint(<TruncatedText text={renderTitle} />, { i18n, theme, userProfile }),
           text: toMountPoint(
             <CaseToastSuccessContent
               content={renderContent}
               onViewCaseClick={url != null ? onViewCaseClick : undefined}
             />,
-            { i18n, theme }
+            { i18n, theme, userProfile }
           ),
         });
       },
@@ -177,7 +177,7 @@ export const useCasesToast = () => {
         });
       },
     }),
-    [i18n, theme, appId, getUrlForApp, navigateToUrl, toasts]
+    [i18n, theme, userProfile, appId, getUrlForApp, navigateToUrl, toasts]
   );
 };
 

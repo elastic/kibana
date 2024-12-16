@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import type { EuiBasicTableColumn, EuiSearchBarProps, EuiTableSelectionType } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiTableSelectionType } from '@elastic/eui';
 import {
   EuiConfirmModal,
   EuiFlexGroup,
@@ -67,12 +67,6 @@ export const AgentExportCSVModal: React.FunctionComponent<Props> = ({
     initialSelected: INITIAL_AGENT_FIELDS_TO_EXPORT,
   };
 
-  const search: EuiSearchBarProps = {
-    box: {
-      incremental: true,
-    },
-  };
-
   return (
     <EuiConfirmModal
       data-test-subj="agentExportCSVModal"
@@ -129,7 +123,6 @@ export const AgentExportCSVModal: React.FunctionComponent<Props> = ({
             items={items}
             itemId="field"
             columns={columns}
-            search={search}
             selection={selectionValue}
           />
         </EuiFlexItem>
