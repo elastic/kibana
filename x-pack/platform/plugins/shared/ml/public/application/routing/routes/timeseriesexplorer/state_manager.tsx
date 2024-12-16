@@ -189,6 +189,25 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   const getJobSelection = useJobSelectionFlyout();
 
+  const handleJobSelectionChange = useCallback(
+    ({
+      jobIds,
+      time,
+    }: {
+      jobIds: string[];
+
+      time?: { from: string; to: string };
+    }) => {
+      setGlobalState({
+        ml: {
+          jobIds,
+        },
+        ...(time !== undefined ? { time } : {}),
+      });
+    },
+    [setGlobalState]
+  );
+
   // Use a side effect to clear appState when changing jobs.
   useEffect(() => {
     if (selectedJobIds !== undefined && previousSelectedJobIds !== undefined) {
@@ -268,7 +287,11 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   if (timeSeriesJobs.length === 0 || selectedJobId === undefined) {
     return (
-      <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} noSingleMetricJobsFound>
+      <TimeSeriesExplorerPage
+        dateFormatTz={dateFormatTz}
+        noSingleMetricJobsFound
+        handleJobSelectionChange={handleJobSelectionChange}
+      >
         <TimeseriesexplorerNoJobsFound />
       </TimeSeriesExplorerPage>
     );
@@ -276,7 +299,11 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   if (!bounds) {
     return (
-      <TimeSeriesExplorerPage dateFormatTz={dateFormatTz}>
+      <TimeSeriesExplorerPage
+        dateFormatTz={dateFormatTz}
+        handleJobSelectionChange={handleJobSelectionChange}
+        selectedJobId={[selectedJobId]}
+      >
         <TimeseriesexplorerNoChartData />
       </TimeSeriesExplorerPage>
     );
@@ -306,6 +333,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         zoom: zoomProp,
         invalidTimeRangeError,
         functionDescription: selectedFunctionDescription,
+        handleJobSelectionChange,
       }}
     />
   );
