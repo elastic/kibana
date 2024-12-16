@@ -61,7 +61,6 @@
     "@kbn/observability-utils-common",
     "@kbn/observability-utils-browser",
     "@kbn/observability-utils-server",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/management-settings-ids"
+    "@kbn/kibana-utils-plugin"
   ]
 }

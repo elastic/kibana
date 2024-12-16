@@ -18,7 +18,6 @@ import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import { from, map, mergeMap, of } from 'rxjs';
-import { OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE } from '@kbn/management-settings-ids';
 import { createCallInventoryAPI } from './api';
 import { TelemetryService } from './services/telemetry/telemetry_service';
 import { InventoryServices } from './services/types';
@@ -57,7 +56,7 @@ export class InventoryPlugin
   ): InventoryPublicSetup {
     const inventoryAPIClient = createCallInventoryAPI(coreSetup);
     const isEntityCentricExperienceSettingEnabled = coreSetup.uiSettings.get<boolean>(
-      OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE
+      'observability:entityCentricExperience'
     );
 
     this.telemetry.setup({
