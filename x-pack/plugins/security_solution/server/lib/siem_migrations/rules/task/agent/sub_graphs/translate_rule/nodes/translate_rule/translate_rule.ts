@@ -64,7 +64,7 @@ export const getTranslateRuleNode = ({
 };
 
 const getTranslationResult = (esqlQuery: string): RuleTranslationResult => {
-  if (esqlQuery.match(/\[(macro|lookup):[\s\S]*\]/)) {
+  if (esqlQuery.match(/\[(macro):[\s\S]*\]/)) {
     return RuleTranslationResult.PARTIAL;
   }
   return RuleTranslationResult.FULL;
