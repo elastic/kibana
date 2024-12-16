@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -199,7 +198,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, RULE_SAVED_OBJECT_TYPE, 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix(space.id)}/api/actions/connectors`)
