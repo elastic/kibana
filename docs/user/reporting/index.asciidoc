@@ -60,7 +60,7 @@ image::user/reporting/images/shareable-container.png["Shareable Container"]
 
 * If you are creating dashboard PDFs, select *For printing* to create printer-friendly PDFs with multiple A4 portrait pages and two visualizations per page.
 +
-NOTE: When you create a dashboard report that includes a data table, the PDF includes only the visible data.
+NOTE: When you create a dashboard report that includes a data table or Discover session, the PDF includes only the visible data.
 
 * If you are creating workpad PDFs, select *Full page layout* to create PDFs without margins that surround the workpad.
 
