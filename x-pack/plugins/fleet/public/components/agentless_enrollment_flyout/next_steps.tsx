@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useStartServices } from '../../hooks';
 import type { PackagePolicy, RegistryPolicyTemplate } from '../../types';
-import type { ConfigurationLink } from '../../../common/types';
+import { ELASTICSEARCH_PLUGIN_ID } from '../../../common/constants/plugin';
 
 export const NextSteps = ({
   packagePolicy,
@@ -60,10 +60,13 @@ export const NextSteps = ({
       if (isExternal(url)) {
         application.navigateToUrl(`${url}`);
       } else if (url.startsWith('kbn:/')) {
-        const { appId, path } = parseKbnLink(url);
-        application.navigateToApp(appId, {
-          path,
-        });
+        const parsedLink = parseKbnLink(url);
+        if (parsedLink) {
+          const { appId, path } = parsedLink;
+          application.navigateToApp(appId, {
+            path,
+          });
+        }
       }
     },
     [application]
@@ -99,8 +102,10 @@ export const NextSteps = ({
               }
             )}
             onClick={() => {
-              application.navigateToApp('enterprise_search', {
-                path: `content/connectors/${input?.vars?.connector_id.value}`,
+              application.navigateToApp(ELASTICSEARCH_PLUGIN_ID, {
+                path: input?.vars?.connector_id.value
+                  ? `content/connectors/${input?.vars?.connector_id.value}`
+                  : `content/connectors`,
               });
             }}
           />

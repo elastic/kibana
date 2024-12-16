@@ -186,6 +186,7 @@ export const AgentlessEnrollmentFlyout = ({
                   <AgentlessStepConfirmData
                     agent={agentData}
                     packagePolicy={packagePolicy}
+                    policyTemplates={packageInfoData?.item.policy_templates}
                     setConfirmDataStatus={setConfirmDataStatus}
                   />
                 ) : (
@@ -194,10 +195,6 @@ export const AgentlessEnrollmentFlyout = ({
               status: confirmDataStatus,
             },
           ]}
-        />
-        <NextSteps
-          packagePolicy={packagePolicy}
-          policyTemplates={packageInfoData?.item.policy_templates}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
