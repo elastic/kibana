@@ -12,7 +12,7 @@ import { FindSLO } from './find_slo';
 import { createSLO } from './fixtures/slo';
 import { createSLORepositoryMock, createSummarySearchClientMock } from './mocks';
 import { SLORepository } from './slo_repository';
-import { SummaryResult, SummarySearchClient } from './summary_search_client';
+import type { SummaryResult, SummarySearchClient } from './summary_search_client/types';
 
 describe('FindSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
@@ -151,15 +151,26 @@ describe('FindSLO', () => {
   });
 
   describe('validation', () => {
-    it("throws an error when 'perPage > 5000'", async () => {
+    beforeEach(() => {
       const slo = createSLO();
       mockSummarySearchClient.search.mockResolvedValueOnce(summarySearchResult(slo));
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+    });
 
+    it("throws an error when 'perPage' > 5000", async () => {
       await expect(findSLO.execute({ perPage: '5000' })).resolves.not.toThrow();
       await expect(findSLO.execute({ perPage: '5001' })).rejects.toThrowError(
         'perPage limit set to 5000'
       );
+    });
+
+    describe('Cursor Pagination', () => {
+      it("throws an error when 'size' > 5000", async () => {
+        await expect(findSLO.execute({ size: '5000' })).resolves.not.toThrow();
+        await expect(findSLO.execute({ size: '5001' })).rejects.toThrowError(
+          'size limit set to 5000'
+        );
+      });
     });
   });
 });
