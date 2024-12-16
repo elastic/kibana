@@ -17,7 +17,7 @@ const legendItemStyles = (isDisabled: boolean) => (theme: UseEuiTheme) =>
   css`
   font-size: ${theme.euiTheme.font.scale.xs}
   cursor: pointer;
-  color: var(--euiTextColor);
+  color: ${theme.euiTheme.colors.textParagraph};
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -25,7 +25,7 @@ const legendItemStyles = (isDisabled: boolean) => (theme: UseEuiTheme) =>
 `;
 
 const legendHorizontalStyles = (theme: UseEuiTheme) => css`
-  margin-top: var(--euiSizeXS);
+  margin-top: ${theme.euiTheme.size.xs};
 `;
 
 const legendLabelStyles = css`
@@ -39,7 +39,7 @@ const legendLabelStyles = css`
 const legendValueStyles = (theme: UseEuiTheme) => css`
   overflow: hidden;
   white-space: nowrap;
-  margin-left: var(--euiSizeXS);
+  margin-left: ${theme.euiTheme.size.xs};
 `;
 
 interface Row {
