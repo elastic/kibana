@@ -25,6 +25,7 @@ import {
 } from './security_response_headers_config';
 import { CdnConfig } from './cdn_config';
 import { PermissionsPolicyConfigType } from './permissions_policy';
+import { get } from 'lodash';
 
 const SECOND = 1000;
 
@@ -123,9 +124,16 @@ const configSchema = schema.object(
         }
       },
     }),
-    protocol: schema.oneOf([schema.literal('http1'), schema.literal('http2')], {
-      defaultValue: 'http1',
-    }),
+    protocol: schema.conditional(
+      schema.siblingRef('ssl.enabled'),
+      schema.literal(true),
+      schema.oneOf([schema.literal('http1'), schema.literal('http2')], {
+        defaultValue: 'http2',
+      }),
+      schema.oneOf([schema.literal('http1'), schema.literal('http2')], {
+        defaultValue: 'http1',
+      })
+    ),
     host: schema.string({
       defaultValue: 'localhost',
       hostname: true,
@@ -290,7 +298,25 @@ export type HttpConfigType = TypeOf<typeof configSchema>;
 export const config: ServiceConfigDescriptor<HttpConfigType> = {
   path: 'server' as const,
   schema: configSchema,
-  deprecations: ({ rename }) => [rename('maxPayloadBytes', 'maxPayload', { level: 'warning' })],
+  deprecations: ({ rename }) => [
+    rename('maxPayloadBytes', 'maxPayload', { level: 'warning' }),
+    (settings, fromPath, addDeprecation) => {
+      const cfg = get(settings, fromPath);
+      if (!cfg?.ssl?.enabled || cfg?.protocol === 'http1') {
+        addDeprecation({
+          level: 'warning',
+          configPath: `${fromPath}.protocol,${fromPath}.ssl.enabled`,
+          message: `TLS is not enabled, or the HTTP protocol is set to HTTP/1. Enabling TLS and using HTTP/2 improves security and performance.`,
+          correctiveActions: {
+            manualSteps: [
+              `Set up TLS by configuring ${fromPath}.ssl.`,
+              `Set the protocol to 'http2' by updating ${fromPath}.protocol to 'http2' in your configuration.`,
+            ],
+          },
+        });
+      }
+    }
+  ],
 };
 
 export class HttpConfig implements IHttpConfig {
