@@ -857,6 +857,7 @@ export class SessionIndex {
           size: SESSION_INDEX_CLEANUP_BATCH_SIZE,
           sort: '_shard_doc',
           track_total_hits: false, // for performance
+          allow_partial_search_results: true,
         });
         const { hits } = searchResponse.hits;
         if (hits.length > 0) {

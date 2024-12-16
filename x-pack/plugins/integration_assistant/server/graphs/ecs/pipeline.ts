@@ -186,6 +186,9 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
   const env = new Environment(new FileSystemLoader(templatesPath), {
     autoescape: false,
   });
+  env.addFilter('includes', function (str, substr) {
+    return str.includes(substr);
+  });
   env.addFilter('startswith', function (str, prefix) {
     return str.startsWith(prefix);
   });

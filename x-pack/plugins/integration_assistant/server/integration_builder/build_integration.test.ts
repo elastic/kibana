@@ -259,6 +259,13 @@ describe('renderPackageManifestYAML', () => {
     expect(manifest.name).toBe(integration.name);
     expect(manifest.type).toBe('integration');
     expect(manifest.description).toBe(integration.description);
-    expect(manifest.icons).toBeTruthy();
+    expect(Array.isArray(manifest.icons)).toBe(true);
+    expect((manifest.icons as object[]).length).toBe(1);
+    expect((manifest.icons as object[])[0]).toEqual({
+      src: '/img/logo.svg',
+      title: 'Sample Integration Logo',
+      size: '32x32',
+      type: 'image/svg+xml',
+    });
   });
 });

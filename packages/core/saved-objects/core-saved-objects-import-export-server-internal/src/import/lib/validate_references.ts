@@ -101,30 +101,35 @@ export async function validateReferences(params: ValidateReferencesParams) {
   const nonExistingReferenceKeys = await getNonExistingReferenceAsKeys(params);
 
   // Filter out objects with missing references, add to error object
-  objects.forEach(({ type, id, references, attributes }) => {
-    if (objectsToSkip.has(`${type}:${id}`)) {
+  for (const obj of objects) {
+    const { type, id, references, attributes } = obj;
+    const objectKey = `${type}:${id}`;
+    if (objectsToSkip.has(objectKey)) {
       // skip objects with retries that have specified `ignoreMissingReferences`
-      return;
+      continue;
     }
 
-    const missingReferences = [];
-    const enforcedTypeReferences = (references || []).filter(filterReferencesToValidate);
+    const missingReferences: Array<{ type: string; id: string }> = [];
+    const enforcedTypeReferences = references?.filter(filterReferencesToValidate) || [];
+
+    const seenReferences = new Set();
     for (const { type: refType, id: refId } of enforcedTypeReferences) {
-      if (nonExistingReferenceKeys.includes(`${refType}:${refId}`)) {
+      const refKey = `${refType}:${refId}`;
+
+      if (nonExistingReferenceKeys.includes(refKey) && !seenReferences.has(refKey)) {
         missingReferences.push({ type: refType, id: refId });
+        seenReferences.add(refKey);
       }
     }
-    if (missingReferences.length === 0) {
-      return;
+    if (missingReferences.length > 0) {
+      errorMap[objectKey] = {
+        id,
+        type,
+        meta: { title: attributes.title },
+        error: { type: 'missing_references', references: missingReferences },
+      };
     }
-    const { title } = attributes;
-    errorMap[`${type}:${id}`] = {
-      id,
-      type,
-      meta: { title },
-      error: { type: 'missing_references', references: missingReferences },
-    };
-  });
+  }
 
   return Object.values(errorMap);
 }

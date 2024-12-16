@@ -1,0 +1,28 @@
+##########################################################################
+##                                                                      ##
+## This OpenSSL config is only loaded when running Kibana in FIPS mode. ##
+##                                                                      ##
+## See:                                                                 ##
+## https://github.com/openssl/openssl/blob/openssl-3.0/README-FIPS.md   ##
+## https://www.openssl.org/docs/man3.0/man7/fips_module.html            ##
+##                                                                      ##
+##########################################################################
+
+nodejs_conf = nodejs_init
+.include /home/vscode/openssl/ssl/fipsmodule.cnf
+
+[nodejs_init]
+providers = provider_sect
+alg_section = algorithm_sect
+
+[provider_sect]
+default = default_sect
+# The fips section name should match the section name inside the
+# included fipsmodule.cnf.
+fips = fips_sect
+
+[default_sect]
+activate = 1
+
+[algorithm_sect]
+default_properties = fips=yes 
