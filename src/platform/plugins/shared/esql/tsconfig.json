@@ -31,7 +31,8 @@
     "@kbn/esql-ast",
     "@kbn/search-types",
     "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/esql-variables"
   ],
   "exclude": [
     "target/**/*",

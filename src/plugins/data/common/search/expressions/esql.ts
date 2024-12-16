@@ -15,7 +15,7 @@ import type {
   IKibanaSearchResponse,
   ISearchGeneric,
 } from '@kbn/search-types';
-import { esqlVariablesService } from '@kbn/esql/common';
+import { esqlVariablesService } from '@kbn/esql-variables/public';
 import type {
   Datatable,
   DatatableColumn,

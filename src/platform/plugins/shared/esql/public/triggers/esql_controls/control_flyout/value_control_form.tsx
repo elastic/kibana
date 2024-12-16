@@ -21,7 +21,7 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import ESQLEditor from '@kbn/esql-editor';
 import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
 import { getIndexPatternFromESQLQuery, getESQLResults } from '@kbn/esql-utils';
-import { esqlVariablesService } from '../../../../common';
+import { esqlVariablesService } from '@kbn/esql-variables/public';
 import type { ESQLControlState } from '../types';
 import {
   Header,

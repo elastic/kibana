@@ -41,7 +41,7 @@
     "@kbn/std",
     "@kbn/react-hooks",
     "@kbn/esql-validation-autocomplete",
-    "@kbn/esql",
+    "@kbn/esql-variables",
   ],
   "exclude": ["target/**/*"]
 }

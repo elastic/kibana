@@ -83,7 +83,7 @@
     "@kbn/visualization-utils",
     "@kbn/std",
     "@kbn/core-rendering-browser",
-    "@kbn/esql"
+    "@kbn/esql-variables"
   ],
   "exclude": ["target/**/*"]
 }

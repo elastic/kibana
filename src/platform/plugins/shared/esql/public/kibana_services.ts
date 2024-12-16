@@ -16,7 +16,7 @@ import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-ty
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { esqlVariablesService, type EsqlVariablesService } from '../common';
+import { esqlVariablesService, type EsqlVariablesService } from '@kbn/esql-variables/public';
 
 export let core: CoreStart;
 

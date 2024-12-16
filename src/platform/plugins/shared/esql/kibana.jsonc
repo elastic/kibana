@@ -23,9 +23,7 @@
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
-    ],
-    "extraPublicDirs": [
-      "common"
+      "esqlVariables"
     ]
   }
 }
