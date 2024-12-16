@@ -40,6 +40,8 @@ export const operatorContainer = cx(
     text-align: center;
 
     @container (min-width: ${CONTAINER_BREAKPOINT}px) {
+      margin-top: ${euiThemeVars.euiSizeXL};
+      justify-content: flex-start;
       flex: 0 0 40px;
     }
   `
