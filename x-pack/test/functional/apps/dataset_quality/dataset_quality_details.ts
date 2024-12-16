@@ -52,7 +52,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     version: '1.14.0',
   };
 
-  const regularDatasetName = datasetNames[0];
   const regularDataStreamName = `logs-${datasetNames[0]}-${defaultNamespace}`;
   const degradedDatasetName = datasetNames[2];
   const degradedDataStreamName = `logs-${degradedDatasetName}-${defaultNamespace}`;
