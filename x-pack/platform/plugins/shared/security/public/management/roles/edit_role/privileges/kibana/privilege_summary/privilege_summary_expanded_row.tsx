@@ -20,6 +20,7 @@ import type { EffectiveFeaturePrivileges } from './privilege_summary_calculator'
 interface Props {
   feature: SecuredFeature;
   effectiveFeaturePrivileges: Array<EffectiveFeaturePrivileges['featureId']>;
+  isAllSpacesSelected: boolean;
 }
 
 export const PrivilegeSummaryExpandedRow = (props: Props) => {
@@ -37,7 +38,9 @@ export const PrivilegeSummaryExpandedRow = (props: Props) => {
               {props.effectiveFeaturePrivileges.map((privs, index) => {
                 return (
                   <EuiFlexItem key={index} data-test-subj={`entry-${index}`}>
-                    {subFeature.getPrivilegeGroups().map(renderPrivilegeGroup(privs.subFeature))}
+                    {subFeature
+                      .getPrivilegeGroups()
+                      .map(renderPrivilegeGroup(privs.subFeature, subFeature.requireAllSpaces))}
                   </EuiFlexItem>
                 );
               })}
@@ -48,7 +51,10 @@ export const PrivilegeSummaryExpandedRow = (props: Props) => {
     </EuiFlexGroup>
   );
 
-  function renderPrivilegeGroup(effectiveSubFeaturePrivileges: string[]) {
+  function renderPrivilegeGroup(
+    effectiveSubFeaturePrivileges: string[],
+    requireAllSpaces: boolean
+  ) {
     return (privilegeGroup: SubFeaturePrivilegeGroup, index: number) => {
       switch (privilegeGroup.groupType) {
         case 'independent':
@@ -61,7 +67,8 @@ export const PrivilegeSummaryExpandedRow = (props: Props) => {
           return renderMutuallyExclusivePrivilegeGroup(
             effectiveSubFeaturePrivileges,
             privilegeGroup,
-            index
+            index,
+            requireAllSpaces
           );
         default:
           throw new Error(`Unsupported privilege group type: ${privilegeGroup.groupType}`);
@@ -112,11 +119,14 @@ export const PrivilegeSummaryExpandedRow = (props: Props) => {
   function renderMutuallyExclusivePrivilegeGroup(
     effectiveSubFeaturePrivileges: string[],
     privilegeGroup: SubFeaturePrivilegeGroup,
-    index: number
+    index: number,
+    requireAllSpaces: boolean
   ) {
-    const firstSelectedPrivilege = privilegeGroup.privileges.find((p) =>
-      effectiveSubFeaturePrivileges.includes(p.id)
-    )?.name;
+    const isDisabledDueToSpaceSelection = requireAllSpaces && !props.isAllSpacesSelected;
+
+    const firstSelectedPrivilege = !isDisabledDueToSpaceSelection
+      ? privilegeGroup.privileges.find((p) => effectiveSubFeaturePrivileges.includes(p.id))?.name
+      : null;
 
     return (
       <EuiFlexGroup gutterSize="s" key={index} data-test-subj="mutexPrivilege">
