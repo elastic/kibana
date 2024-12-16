@@ -13,7 +13,6 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { JsonFieldWrapper } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ServiceNowITSMFieldsType } from '../../../../common/types/domain';
 import * as i18n from './translations';
 
@@ -24,6 +23,7 @@ import type { Fields } from './types';
 import { choicesToEuiOptions } from './helpers';
 import { DeprecatedCallout } from '../deprecated_callout';
 import { validateJSON } from './validate_json';
+import { JsonEditorField } from './json_editor_field';
 
 const choicesToGet = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {
@@ -211,7 +211,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<ConnectorFieldsProp
           <EuiFlexItem>
             <UseField
               path="fields.additionalFields"
-              component={JsonFieldWrapper}
+              component={JsonEditorField}
               config={{
                 label: i18n.ADDITIONAL_FIELDS_LABEL,
                 validations: [
