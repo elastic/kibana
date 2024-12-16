@@ -18,7 +18,11 @@ import {
   ScoutReportEventAction,
   datasources,
 } from '@kbn/scout-reporting';
-import { getCodeOwnersForFile, getPathsWithOwnersReversed, PathWithOwners } from '@kbn/code-owners';
+import {
+  getOwningTeamsForPath,
+  getCodeOwnersEntries,
+  type CodeOwnersEntry,
+} from '@kbn/code-owners';
 import { Runner, Test } from '../../../fake_mocha_types';
 
 /**
@@ -37,7 +41,7 @@ export class ScoutFTRReporter {
   readonly name: string;
   readonly runId: string;
   private report: ScoutReport;
-  private readonly pathsWithOwners: PathWithOwners[];
+  private readonly codeOwnersEntries: CodeOwnersEntry[];
 
   constructor(private runner: Runner, private reporterOptions: ScoutFTRReporterOptions = {}) {
     this.log = new ToolingLog({
@@ -50,7 +54,7 @@ export class ScoutFTRReporter {
     this.log.info(`Scout test run ID: ${this.runId}`);
 
     this.report = new ScoutReport(this.log);
-    this.pathsWithOwners = getPathsWithOwnersReversed();
+    this.codeOwnersEntries = getCodeOwnersEntries();
 
     // Register event listeners
     for (const [eventName, listener] of Object.entries({
@@ -64,16 +68,7 @@ export class ScoutFTRReporter {
   }
 
   private getFileOwners(filePath: string): string[] {
-    const concatenatedOwners = getCodeOwnersForFile(filePath, this.pathsWithOwners);
-
-    if (concatenatedOwners === undefined) {
-      return [];
-    }
-
-    return concatenatedOwners
-      .replace(/#.+$/, '')
-      .split(',')
-      .filter((value) => value.length > 0);
+    return getOwningTeamsForPath(filePath, this.codeOwnersEntries);
   }
 
   /**

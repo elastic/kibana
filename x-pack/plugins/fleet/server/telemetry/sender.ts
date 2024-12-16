@@ -14,9 +14,9 @@ import axios from 'axios';
 
 import type { InfoResponse, LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
 
-import { appContextService } from '../services';
-
 import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
+
+import { appContextService } from '../services';
 
 import { TelemetryQueue } from './queue';
 
