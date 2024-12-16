@@ -381,7 +381,6 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     );
 
     try {
-      console.log({ reqBody: req.body, command });
       const action: ActionDetails = await handleActionCreation(
         command,
         req.body,
@@ -442,7 +441,6 @@ async function handleActionCreation(
     case 'scan':
       return responseActionsClient.scan(body as ScanActionRequestBody);
     case 'runscript':
-      console.log('runscript', body);
       return responseActionsClient.runscript(body as RunScriptActionRequestBody);
     default:
       throw new CustomHttpRequestError(

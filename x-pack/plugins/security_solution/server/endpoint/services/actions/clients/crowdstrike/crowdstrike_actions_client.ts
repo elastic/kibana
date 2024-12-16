@@ -16,6 +16,8 @@ import type {
   CrowdStrikeExecuteRTRResponse,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import { v4 as uuidv4 } from 'uuid';
+import { upperFirst } from 'lodash';
+
 import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
 import type {
   CommonResponseActionMethodOptions,
@@ -339,7 +341,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         } else {
           sanitizedValue = value;
         }
-        return `--${key}=${sanitizedValue}`;
+        return `--${upperFirst(key)}=${sanitizedValue}`;
       });
 
       // Combine the base command with the constructed parameters
@@ -355,7 +357,6 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         }
 
         try {
-          // TODO change the url
           actionResponse = (await this.sendAction(SUB_ACTION.EXECUTE_ADMIN_RTR, {
             actionParameters: { comment: this.buildExternalComment(reqIndexOptions) },
             command: transformCommands(actionRequest.parameters),

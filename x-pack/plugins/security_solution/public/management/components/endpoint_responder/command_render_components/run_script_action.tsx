@@ -19,7 +19,18 @@ import type {
 import type { ActionRequestComponentProps } from '../types';
 
 export const RunScriptActionResult = memo<
-  ActionRequestComponentProps<ResponseActionRunScriptParameters>
+  ActionRequestComponentProps<
+    {
+      Raw?: string;
+      HostPath?: string;
+      CloudFile?: string;
+      CommandLine?: string;
+      Timeout?: number;
+      comment?: string;
+    },
+    ResponseActionRunScriptOutputContent,
+    ResponseActionRunScriptParameters
+  >
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendRunScriptEndpoint();
   const actionRequestBody = useMemo<undefined | RunScriptActionRequestBody>(() => {
@@ -32,11 +43,11 @@ export const RunScriptActionResult = memo<
       agent_type: agentType,
       endpoint_ids: [endpointId],
       parameters: {
-        Raw: command.args.args.Raw?.[0],
-        HostPath: command.args.args.HostPath?.[0],
-        CloudFile: command.args.args.CloudFile?.[0],
-        CommandLine: command.args.args.CommandLine?.[0],
-        Timeout: command.args.args.Timeout?.[0],
+        raw: command.args.args.Raw?.[0],
+        hostPath: command.args.args.HostPath?.[0],
+        cloudFile: command.args.args.CloudFile?.[0],
+        commandLine: command.args.args.CommandLine?.[0],
+        timeout: command.args.args.Timeout?.[0],
       },
       comment: command.args.args?.comment?.[0],
     };
