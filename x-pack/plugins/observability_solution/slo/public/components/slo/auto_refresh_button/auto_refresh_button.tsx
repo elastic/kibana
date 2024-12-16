@@ -32,7 +32,7 @@ export function AutoRefreshButton({ disabled, isAutoRefreshing, onClick }: Props
       data-test-subj="autoRefreshButton"
       disabled={disabled}
       iconSide="left"
-      iconType="play"
+      iconType="refresh"
       onClick={onClick}
     >
       {i18n.translate('xpack.slo.slosPage.autoRefreshButtonLabel', {

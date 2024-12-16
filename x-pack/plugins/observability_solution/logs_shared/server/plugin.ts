@@ -42,7 +42,7 @@ export class LogsSharedPlugin
   private logViews: LogViewsService;
   private usageCollector: UsageCollector;
 
-  constructor(context: PluginInitializerContext<LogsSharedConfig>) {
+  constructor(private readonly context: PluginInitializerContext<LogsSharedConfig>) {
     this.config = context.config.get();
     this.logger = context.logger.get();
     this.usageCollector = {};
@@ -51,11 +51,13 @@ export class LogsSharedPlugin
   }
 
   public setup(core: LogsSharedPluginCoreSetup, plugins: LogsSharedServerPluginSetupDeps) {
+    const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
+
     const framework = new KibanaFramework(core, plugins);
 
     const logViews = this.logViews.setup();
 
-    if (this.config.savedObjects.logView.enabled) {
+    if (!isServerless) {
       // Conditionally register log view saved objects
       core.savedObjects.registerType(logViewSavedObjectType);
     } else {
@@ -78,6 +80,7 @@ export class LogsSharedPlugin
       getStartServices: () => core.getStartServices(),
       getUsageCollector: () => this.usageCollector,
       logger: this.logger,
+      isServerless,
     };
 
     // Register server side APIs

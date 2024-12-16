@@ -64,7 +64,7 @@ export const bulkUpdateRulesRoute = (router: SecuritySolutionPluginRouter, logge
 
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
-          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesClient = await ctx.alerting.getRulesClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           const rules = await Promise.all(

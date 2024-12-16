@@ -6,11 +6,12 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { BrushEndListener, type XYBrushEvent } from '@elastic/charts';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import { useBoolean } from '@kbn/react-hooks';
 import type { TimeRange } from '@kbn/es-query';
+import { INFRA_ALERT_CONSUMERS } from '../../../../../../../common/constants';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { HeightRetainer } from '../../../../../../components/height_retainer';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -20,7 +21,6 @@ import { AlertsEsQuery } from '../../../../../../utils/filters/create_alerts_es_
 import {
   ALERTS_PER_PAGE,
   ALERTS_TABLE_ID,
-  infraAlertFeatureIds,
 } from '../../../../../../components/shared/alerts/constants';
 import AlertsStatusFilter from '../../../../../../components/shared/alerts/alerts_status_filter';
 import { CreateAlertRuleButton } from '../../../../../../components/shared/alerts/links/create_alert_rule_button';
@@ -43,11 +43,7 @@ export const AlertsTabContent = () => {
 
   const { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable } =
     triggersActionsUi;
-
-  const hostsWithAlertsKuery = hostNodes
-    .filter((host) => host.alertsCount)
-    .map((host) => `"${host.name}"`)
-    .join(' OR ');
+  const hostNamesKuery = hostNodes.map((host) => `host.name: "${host.name}"`).join(' OR ');
 
   return (
     <HeightRetainer>
@@ -69,7 +65,7 @@ export const AlertsTabContent = () => {
               <LinkToAlertsPage
                 dateRange={searchCriteria.dateRange}
                 data-test-subj="infraHostAlertsTabAlertsShowAllButton"
-                kuery={`${hostsWithAlertsKuery}`}
+                kuery={hostNamesKuery}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -86,7 +82,8 @@ export const AlertsTabContent = () => {
             <AlertsStateTable
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               configurationId={AlertConsumers.OBSERVABILITY}
-              featureIds={infraAlertFeatureIds}
+              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
+              consumers={INFRA_ALERT_CONSUMERS}
               id={ALERTS_TABLE_ID}
               initialPageSize={ALERTS_PER_PAGE}
               query={alertsEsQueryByStatus}
@@ -141,7 +138,8 @@ const MemoAlertSummaryWidget = React.memo(
     return (
       <AlertSummaryWidget
         chartProps={chartProps}
-        featureIds={infraAlertFeatureIds}
+        ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
+        consumers={INFRA_ALERT_CONSUMERS}
         filter={alertsQuery}
         fullSize
         timeRange={summaryTimeRange}

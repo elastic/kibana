@@ -10,6 +10,7 @@ import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '
 import { RewriteRequestCase, verifyAccessAndContext, rewriteNamespaces } from './lib';
 import { GetGlobalExecutionKPIParams } from '../rules_client';
 import { ILicenseState } from '../lib';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from './constants';
 
 const querySchema = schema.object({
   date_start: schema.string(),
@@ -37,6 +38,7 @@ export const getGlobalExecutionKPIRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/_global_execution_kpi`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'internal',
       },
@@ -46,7 +48,8 @@ export const getGlobalExecutionKPIRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         return res.ok({
           body: await rulesClient.getGlobalExecutionKpiWithAuth(rewriteReq(req.query)),
         });

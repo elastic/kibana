@@ -25,6 +25,7 @@ import {
   AlertingAuthorizationFilterType,
 } from '../../authorization';
 import { RuleAuditAction, ruleAuditEvent } from '../../rules_client/common/audit_events';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.ESDSL,
@@ -49,6 +50,7 @@ export function registerRulesValueSuggestionsRoute(
   router.post(
     {
       path: '/internal/rules/suggestions/values',
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: RulesSuggestionsSchema,
     },
@@ -59,15 +61,14 @@ export function registerRulesValueSuggestionsRoute(
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
         const { savedObjects, elasticsearch } = await context.core;
 
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         let authorizationTuple;
         try {
-          authorizationTuple = await rulesClient
-            .getAuthorization()
-            .getFindAuthorizationFilter(
-              AlertingAuthorizationEntity.Rule,
-              alertingAuthorizationFilterOpts
-            );
+          authorizationTuple = await rulesClient.getAuthorization().getFindAuthorizationFilter({
+            authorizationEntity: AlertingAuthorizationEntity.Rule,
+            filterOpts: alertingAuthorizationFilterOpts,
+          });
         } catch (error) {
           rulesClient.getAuditLogger()?.log(
             ruleAuditEvent({

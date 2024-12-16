@@ -673,49 +673,59 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderQueryInput() {
+      const filterButtonGroup = !renderFilterMenuOnly() && renderFilterButtonGroup();
+      const queryInput = shouldRenderQueryInput() && (
+        <EuiFlexItem data-test-subj="unifiedQueryInput">
+          <QueryStringInputUI
+            disableAutoFocus={props.disableAutoFocus}
+            indexPatterns={props.indexPatterns!}
+            query={props.query! as Query}
+            screenTitle={props.screenTitle}
+            onChange={onQueryChange}
+            onChangeQueryInputFocus={onChangeQueryInputFocus}
+            onSubmit={onInputSubmit}
+            persistedLog={persistedLog}
+            dataTestSubj={props.dataTestSubj}
+            placeholder={props.placeholder}
+            isClearable={props.isClearable}
+            iconType={props.iconType}
+            nonKqlMode={props.nonKqlMode}
+            timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+            filtersForSuggestions={props.filtersForSuggestions}
+            disableLanguageSwitcher={true}
+            prepend={renderFilterMenuOnly() && renderFilterButtonGroup()}
+            size={props.suggestionsSize}
+            suggestionsAbstraction={props.suggestionsAbstraction}
+            isDisabled={props.isDisabled}
+            appName={appName}
+            submitOnBlur={props.submitOnBlur}
+            deps={{
+              unifiedSearch,
+              data,
+              storage,
+              usageCollection,
+              notifications,
+              docLinks,
+              http,
+              uiSettings,
+              dataViews,
+            }}
+          />
+        </EuiFlexItem>
+      );
+      if (isQueryLangSelected || (!filterButtonGroup && !queryInput)) {
+        return null;
+      }
       return (
-        <EuiFlexGroup gutterSize="s" responsive={false}>
-          {!renderFilterMenuOnly() && renderFilterButtonGroup()}
-          {shouldRenderQueryInput() && (
-            <EuiFlexItem data-test-subj="unifiedQueryInput">
-              <QueryStringInputUI
-                disableAutoFocus={props.disableAutoFocus}
-                indexPatterns={props.indexPatterns!}
-                query={props.query! as Query}
-                screenTitle={props.screenTitle}
-                onChange={onQueryChange}
-                onChangeQueryInputFocus={onChangeQueryInputFocus}
-                onSubmit={onInputSubmit}
-                persistedLog={persistedLog}
-                dataTestSubj={props.dataTestSubj}
-                placeholder={props.placeholder}
-                isClearable={props.isClearable}
-                iconType={props.iconType}
-                nonKqlMode={props.nonKqlMode}
-                timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-                filtersForSuggestions={props.filtersForSuggestions}
-                disableLanguageSwitcher={true}
-                prepend={renderFilterMenuOnly() && renderFilterButtonGroup()}
-                size={props.suggestionsSize}
-                suggestionsAbstraction={props.suggestionsAbstraction}
-                isDisabled={props.isDisabled}
-                appName={appName}
-                submitOnBlur={props.submitOnBlur}
-                deps={{
-                  unifiedSearch,
-                  data,
-                  storage,
-                  usageCollection,
-                  notifications,
-                  docLinks,
-                  http,
-                  uiSettings,
-                  dataViews,
-                }}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        <EuiFlexItem
+          grow={!shouldShowDatePickerAsBadge()}
+          style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}
+        >
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            {filterButtonGroup}
+            {queryInput}
+          </EuiFlexGroup>
+        </EuiFlexItem>
       );
     }
 
@@ -787,12 +797,7 @@ export const QueryBarTopRow = React.memo(
                   adHocDataview={props.indexPatterns?.[0]}
                 />
               )}
-              <EuiFlexItem
-                grow={!shouldShowDatePickerAsBadge()}
-                css={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}
-              >
-                {!isQueryLangSelected ? renderQueryInput() : null}
-              </EuiFlexItem>
+              {renderQueryInput()}
               {props.renderQueryInputAppend?.()}
               {shouldShowDatePickerAsBadge() && props.filterBar}
               {renderUpdateButton()}

@@ -27,36 +27,145 @@ describe('Stack Alerts Feature Privileges', () => {
     const featuresSetup = featuresPluginMock.createSetup();
     plugin.setup(coreSetup, { alerting: alertingSetup, features: featuresSetup });
 
-    expect(BUILT_IN_ALERTS_FEATURE.alerting).toMatchInlineSnapshot(`
+    const ruleTypeAlerting = BUILT_IN_ALERTS_FEATURE.alerting ?? [];
+    const ruleTypeAll = BUILT_IN_ALERTS_FEATURE.privileges?.all?.alerting?.rule?.all ?? [];
+    const ruleTypeRead = BUILT_IN_ALERTS_FEATURE.privileges?.read?.alerting?.rule?.read ?? [];
+
+    expect(ruleTypeAlerting).toMatchInlineSnapshot(`
       Array [
-        ".index-threshold",
-        ".geo-containment",
-        ".es-query",
-        "transform_health",
-        "observability.rules.custom_threshold",
-        "xpack.ml.anomaly_detection_alert",
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": ".index-threshold",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": ".geo-containment",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": "transform_health",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+            "discover",
+          ],
+          "ruleTypeId": ".es-query",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+          ],
+          "ruleTypeId": "xpack.ml.anomaly_detection_alert",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+          ],
+          "ruleTypeId": "observability.rules.custom_threshold",
+        },
       ]
     `);
 
-    expect(BUILT_IN_ALERTS_FEATURE.privileges?.all?.alerting?.rule?.all).toMatchInlineSnapshot(`
+    expect(ruleTypeAll).toMatchInlineSnapshot(`
       Array [
-        ".index-threshold",
-        ".geo-containment",
-        ".es-query",
-        "transform_health",
-        "observability.rules.custom_threshold",
-        "xpack.ml.anomaly_detection_alert",
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": ".index-threshold",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": ".geo-containment",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": "transform_health",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+            "discover",
+          ],
+          "ruleTypeId": ".es-query",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+          ],
+          "ruleTypeId": "xpack.ml.anomaly_detection_alert",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+          ],
+          "ruleTypeId": "observability.rules.custom_threshold",
+        },
       ]
     `);
 
-    expect(BUILT_IN_ALERTS_FEATURE.privileges?.read?.alerting?.rule?.read).toMatchInlineSnapshot(`
+    expect(ruleTypeRead).toMatchInlineSnapshot(`
       Array [
-        ".index-threshold",
-        ".geo-containment",
-        ".es-query",
-        "transform_health",
-        "observability.rules.custom_threshold",
-        "xpack.ml.anomaly_detection_alert",
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": ".index-threshold",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": ".geo-containment",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+          ],
+          "ruleTypeId": "transform_health",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+            "alerts",
+            "discover",
+          ],
+          "ruleTypeId": ".es-query",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+          ],
+          "ruleTypeId": "xpack.ml.anomaly_detection_alert",
+        },
+        Object {
+          "consumers": Array [
+            "stackAlerts",
+          ],
+          "ruleTypeId": "observability.rules.custom_threshold",
+        },
       ]
     `);
   });

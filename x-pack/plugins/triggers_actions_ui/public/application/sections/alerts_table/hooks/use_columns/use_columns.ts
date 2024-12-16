@@ -9,7 +9,6 @@ import { EuiDataGridColumn, EuiDataGridOnColumnResizeData } from '@elastic/eui';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { BrowserField, BrowserFields } from '@kbn/alerting-types';
 import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
 import { useFetchAlertsFieldsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
@@ -18,7 +17,7 @@ import { toggleColumn } from './toggle_column';
 import { useKibana } from '../../../../../common';
 
 export interface UseColumnsArgs {
-  featureIds: AlertConsumers[];
+  ruleTypeIds: string[];
   storageAlertsTable: React.MutableRefObject<AlertsTableStorage>;
   storage: React.MutableRefObject<IStorageWrapper>;
   id: string;
@@ -155,7 +154,7 @@ const persist = ({
 };
 
 export const useColumns = ({
-  featureIds,
+  ruleTypeIds,
   storageAlertsTable,
   storage,
   id,
@@ -167,7 +166,7 @@ export const useColumns = ({
   const fieldsQuery = useFetchAlertsFieldsQuery(
     {
       http,
-      featureIds,
+      ruleTypeIds,
     },
     {
       enabled: !alertsFields,

@@ -53,6 +53,9 @@ export function registerAPIRoutes({
     description: TECHNICAL_PREVIEW_WARNING,
     options: {
       tags: ['oas-tag:Dashboards'],
+      availability: {
+        stability: 'experimental',
+      },
     },
   });
 
@@ -62,7 +65,11 @@ export function registerAPIRoutes({
       validate: {
         request: {
           params: schema.object({
-            id: schema.maybe(schema.string()),
+            id: schema.maybe(
+              schema.string({
+                meta: { description: 'A unique identifier for the dashboard.' },
+              })
+            ),
           }),
           body: schema.object({
             attributes: dashboardAttributesSchema,
@@ -115,10 +122,13 @@ export function registerAPIRoutes({
   const updateRoute = versionedRouter.put({
     path: `${PUBLIC_API_PATH}/{id}`,
     access: 'public',
-    summary: `Update an existing dashboard.`,
+    summary: `Update an existing dashboard`,
     description: TECHNICAL_PREVIEW_WARNING,
     options: {
       tags: ['oas-tag:Dashboards'],
+      availability: {
+        stability: 'experimental',
+      },
     },
   });
 
@@ -128,7 +138,9 @@ export function registerAPIRoutes({
       validate: {
         request: {
           params: schema.object({
-            id: schema.string(),
+            id: schema.string({
+              meta: { description: 'A unique identifier for the dashboard.' },
+            }),
           }),
           body: schema.object({
             attributes: dashboardAttributesSchema,
@@ -172,10 +184,13 @@ export function registerAPIRoutes({
   const listRoute = versionedRouter.get({
     path: `${PUBLIC_API_PATH}`,
     access: 'public',
-    summary: `Get a list of dashboards.`,
+    summary: `Get a list of dashboards`,
     description: TECHNICAL_PREVIEW_WARNING,
     options: {
       tags: ['oas-tag:Dashboards'],
+      availability: {
+        stability: 'experimental',
+      },
     },
   });
 
@@ -185,8 +200,22 @@ export function registerAPIRoutes({
       validate: {
         request: {
           query: schema.object({
-            page: schema.number({ defaultValue: 1 }),
-            perPage: schema.maybe(schema.number()),
+            page: schema.number({
+              meta: { description: 'The page number to return. Default is "1".' },
+              min: 1,
+              defaultValue: 1,
+            }),
+            perPage: schema.maybe(
+              schema.number({
+                meta: {
+                  description:
+                    'The number of dashboards to display on each page (max 1000). Default is "20".',
+                },
+                defaultValue: 20,
+                min: 1,
+                max: 1000,
+              })
+            ),
           }),
         },
         response: {
@@ -229,10 +258,13 @@ export function registerAPIRoutes({
   const getRoute = versionedRouter.get({
     path: `${PUBLIC_API_PATH}/{id}`,
     access: 'public',
-    summary: `Get a dashboard.`,
+    summary: `Get a dashboard`,
     description: TECHNICAL_PREVIEW_WARNING,
     options: {
       tags: ['oas-tag:Dashboards'],
+      availability: {
+        stability: 'experimental',
+      },
     },
   });
 
@@ -242,7 +274,11 @@ export function registerAPIRoutes({
       validate: {
         request: {
           params: schema.object({
-            id: schema.string(),
+            id: schema.string({
+              meta: {
+                description: 'A unique identifier for the dashboard.',
+              },
+            }),
           }),
         },
         response: {
@@ -283,10 +319,13 @@ export function registerAPIRoutes({
   const deleteRoute = versionedRouter.delete({
     path: `${PUBLIC_API_PATH}/{id}`,
     access: 'public',
-    summary: `Delete a dashboard.`,
+    summary: `Delete a dashboard`,
     description: TECHNICAL_PREVIEW_WARNING,
     options: {
       tags: ['oas-tag:Dashboards'],
+      availability: {
+        stability: 'experimental',
+      },
     },
   });
 
@@ -296,7 +335,11 @@ export function registerAPIRoutes({
       validate: {
         request: {
           params: schema.object({
-            id: schema.string(),
+            id: schema.string({
+              meta: {
+                description: 'A unique identifier for the dashboard.',
+              },
+            }),
           }),
         },
       },

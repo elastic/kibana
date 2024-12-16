@@ -21,7 +21,7 @@ const alertingAuthMock = alertingAuthorizationMock.create();
 
 const alertsClientFactoryParams: AlertsClientFactoryProps = {
   logger: loggingSystemMock.create().get(),
-  getAlertingAuthorization: (_: KibanaRequest) => alertingAuthMock,
+  getAlertingAuthorization: (_: KibanaRequest) => Promise.resolve(alertingAuthMock),
   securityPluginSetup,
   esClient: {} as ElasticsearchClient,
   ruleDataService: ruleDataServiceMock.create(),

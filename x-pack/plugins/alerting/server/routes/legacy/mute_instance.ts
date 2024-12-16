@@ -16,6 +16,7 @@ import { renameKeys } from '../lib/rename_keys';
 import { MuteOptions } from '../../rules_client';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 
 const paramSchema = schema.object({
   alert_id: schema.string(),
@@ -35,6 +36,7 @@ export const muteAlertInstanceRoute = (
       validate: {
         params: paramSchema,
       },
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: isServerless ? 'internal' : 'public',
         summary: 'Mute an alert',
@@ -58,7 +60,8 @@ export const muteAlertInstanceRoute = (
 
       trackLegacyRouteUsage('muteInstance', usageCounter);
 
-      const rulesClient = (await context.alerting).getRulesClient();
+      const alertingContext = await context.alerting;
+      const rulesClient = await alertingContext.getRulesClient();
 
       const renameMap = {
         alert_id: 'alertId',
