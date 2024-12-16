@@ -14,7 +14,7 @@ import { ChatOpenAI } from '@langchain/openai';
 import { Stream } from 'openai/streaming';
 import type OpenAI from 'openai';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { DEFAULT_OPEN_AI_MODEL } from './constants';
+import { DEFAULT_OPEN_AI_MODEL, DEFAULT_TIMEOUT } from './constants';
 import {
   InferenceChatCompleteParamsSchema,
   InvokeAIActionParamsSchema,
@@ -149,7 +149,6 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       );
 
       const actionResult = await this.#actionsClient.execute(requestBody);
-      console.log('==> actionResult', JSON.stringify(actionResult.data, null, 2));
 
       if (actionResult.status === 'error') {
         const error = new Error(
@@ -197,7 +196,6 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     };
     signal?: AbortSignal;
   } {
-    console.log('==> completionRequest', completionRequest);
     const body = {
       temperature: this.#temperature,
       // possible client model override
@@ -234,15 +232,10 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       ...(llmType === 'inference'
         ? { body }
         : completionRequest.stream
-        ? body
-        : { body: JSON.stringify(body) }),
-      // signal: this.#signal,
-      // This timeout is large because LangChain prompts can be complicated and take a long time
-      // timeout: this.#timeout ?? DEFAULT_TIMEOUT,
+        ? { ...body, timeout: this.#timeout ?? DEFAULT_TIMEOUT }
+        : { body: JSON.stringify(body), timeout: this.#timeout ?? DEFAULT_TIMEOUT }),
+      signal: this.#signal,
     };
-
-    console.log('==> subAction', subAction);
-    console.log('==> subActionParams', JSON.stringify(subActionParams, null, 2));
     return {
       actionId: this.#connectorId,
       params: {

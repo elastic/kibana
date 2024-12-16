@@ -127,9 +127,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   public async performApiUnifiedCompletion(
     params: UnifiedChatCompleteParams
   ): Promise<UnifiedChatCompleteResponse> {
-    console.log('==> unified request', params);
     const res = await this.performApiUnifiedCompletionStream(params);
-    console.log('==> unified res', res);
 
     const v = from(eventSourceStreamIntoObservable(res as Readable)).pipe(
       filter((line) => !!line && line !== '[DONE]'),
