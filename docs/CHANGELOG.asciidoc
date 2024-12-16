@@ -230,7 +230,7 @@ The 8.16.2 release includes the following enhancements and bug fixes.
 [float]
 [[enhancement-v8.16.2]]
 === Enhancements
-In this release, we've introduced an image based on the hardened link:https://github.com/wolfi-dev/[Wolfi] image to provide secure containers to our self-managed customers, help with compliance regulations, and improve our supply chain security posture. Wolfi-based images require Docker version 20.10.10 or higher.
+In this release, we've introduced an image based on the hardened link:https://github.com/wolfi-dev/[Wolfi] image to provide additional security to our self-managed customers, and improve our supply chain security posture. Wolfi-based images require Docker version 20.10.10 or higher.
 
 [float]
 [[fixes-v8.16.2]]
