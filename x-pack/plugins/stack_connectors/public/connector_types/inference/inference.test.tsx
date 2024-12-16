@@ -44,8 +44,8 @@ describe('OpenAI action params validation', () => {
       subActionParams: { input: ['message test'], query: 'foobar' },
     },
     {
-      subAction: SUB_ACTION.COMPLETION,
-      subActionParams: { input: 'message test' },
+      subAction: SUB_ACTION.UNIFIED_COMPLETION,
+      subActionParams: { body: { messages: [{ role: 'user', content: 'What is Elastic?' }] } },
     },
     {
       subAction: SUB_ACTION.TEXT_EMBEDDING,
@@ -74,7 +74,7 @@ describe('OpenAI action params validation', () => {
 
   test('params validation fails when params is a wrong object', async () => {
     const actionParams = {
-      subAction: SUB_ACTION.COMPLETION,
+      subAction: SUB_ACTION.UNIFIED_COMPLETION,
       subActionParams: { body: 'message {test}' },
     };
 

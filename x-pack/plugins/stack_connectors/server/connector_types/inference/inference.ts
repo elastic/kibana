@@ -30,6 +30,8 @@ import {
   tap,
 } from 'rxjs';
 import OpenAI from 'openai';
+import { ChatCompletionChunk } from 'openai/resources';
+import { IncomingMessage } from 'http';
 import {
   RerankParamsSchema,
   SparseEmbeddingParamsSchema,
@@ -52,7 +54,7 @@ import {
 } from '../../../common/inference/types';
 import { SUB_ACTION } from '../../../common/inference/constants';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
-import { eventSourceStreamIntoObservable } from './helpers';
+import { arrayToAsyncIterator, eventSourceStreamIntoObservable } from './helpers';
 
 export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   // Not using Axios
@@ -177,24 +179,17 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
                 prev.choices[0].message.content += chunk.choices[0].message.content ?? '';
 
                 chunk.choices[0].message.tool_calls?.forEach((toolCall) => {
-                  let prevToolCall = prev.choices[0].message.tool_calls;
-                  if (!prevToolCall) {
-                    prev.choices[0].message.tool_calls = [
-                      {
-                        function: {
-                          name: '',
-                          arguments: '',
-                        },
-                        id: '',
-                      },
-                    ];
+                  const toolCallLength = prev.choices[0].message.tool_calls?.length ?? 0;
+                  const toolCalls = toolCallLength === 0 ? [] : prev.choices[0].message.tool_calls;
 
-                    prevToolCall = prev.choices[0].message.tool_calls;
-                  }
-
-                  prevToolCall.function.name += toolCall.function?.name;
-                  prevToolCall.function.arguments += toolCall.function?.arguments;
-                  prevToolCall.toolCall.id += toolCall.id;
+                  toolCalls.push({
+                    function: {
+                      name: toolCall.function?.name,
+                      arguments: toolCall.function?.arguments,
+                    },
+                    id: toolCall.id,
+                  });
+                  prev.choices[0].message.tool_calls = toolCalls;
                 });
               } else if (chunk.usage) {
                 prev.usage = chunk.usage;
@@ -231,7 +226,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   public async performApiUnifiedCompletionStream(
     params: UnifiedChatCompleteParams & { signal?: AbortSignal }
   ) {
-    return await this.esClient.transport.request(
+    return (await this.esClient.transport.request<UnifiedChatCompleteResponse>(
       {
         method: 'POST',
         path: `_inference/completion/${this.inferenceId}/_unified`,
@@ -240,7 +235,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       {
         asStream: true,
       }
-    );
+    )) as unknown as IncomingMessage;
   }
 
   /**
@@ -256,16 +251,51 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     params: UnifiedChatCompleteParams & { signal?: AbortSignal },
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<{
-    consumerStream: Stream<UnifiedChatCompleteResponse>;
-    tokenCountStream: Stream<UnifiedChatCompleteResponse>;
+    consumerStream: Stream<ChatCompletionChunk>;
+    tokenCountStream: Stream<ChatCompletionChunk>;
   }> {
     try {
       connectorUsageCollector.addRequestBodyBytes(undefined, params.body);
       const res = await this.performApiUnifiedCompletionStream(params);
       // splits the stream in two, teed[0] is used for the UI and teed[1] for token tracking
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const teed = res as any;
-      return { consumerStream: teed[0], tokenCountStream: teed[1] };
+      const controller = new AbortController();
+      const iter: OpenAI.ChatCompletionChunk[] = [];
+      from(eventSourceStreamIntoObservable(res as Readable)).pipe(
+        filter((line) => !!line && line !== '[DONE]'),
+        map((line) => {
+          return JSON.parse(line) as OpenAI.ChatCompletionChunk | { error: { message: string } };
+        }),
+        tap((line) => {
+          if ('error' in line) {
+            throw new Error(line.error.message);
+          }
+          if (
+            'choices' in line &&
+            line.choices.length &&
+            line.choices[0].finish_reason === 'length'
+          ) {
+            throw new Error('createTokenLimitReachedError()');
+          }
+        }),
+        filter((line): line is OpenAI.ChatCompletionChunk => {
+          return 'object' in line && line.object === 'chat.completion.chunk' && !line.usage;
+        }),
+        mergeMap((chunk: OpenAI.ChatCompletionChunk) => {
+          iter.push(chunk);
+          return iter;
+        }),
+        identity
+      );
+      return {
+        consumerStream: new Stream<ChatCompletionChunk>(
+          () => arrayToAsyncIterator(iter),
+          controller
+        ),
+        tokenCountStream: new Stream<ChatCompletionChunk>(
+          () => arrayToAsyncIterator(iter),
+          controller
+        ),
+      };
       // since we do not use the sub action connector request method, we need to do our own error handling
     } catch (e) {
       const errorMessage = this.getResponseErrorMessage(e);
@@ -393,7 +423,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       logger: this.logger,
       savedObjectsClient: this.savedObjectsClient,
       dashboardId,
-      genAIProvider: 'OpenAI',
+      genAIProvider: 'Inference',
     });
 
     return { available: response.success };
