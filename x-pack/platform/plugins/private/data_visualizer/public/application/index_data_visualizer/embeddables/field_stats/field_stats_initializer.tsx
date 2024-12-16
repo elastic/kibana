@@ -6,6 +6,7 @@
  */
 
 import {
+  useEuiTheme,
   EuiButton,
   EuiButtonEmpty,
   EuiCodeBlock,
@@ -28,7 +29,6 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { ENABLE_ESQL, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldStatsESQLEditor } from './field_stats_esql_editor';
 import type {
@@ -61,6 +61,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
   onPreview,
   isNewPanel,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const {
     data: { dataViews },
     unifiedSearch: {
@@ -130,7 +131,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
         hasBorder={true}
         css={css`
           pointer-events: auto;
-          background-color: ${euiThemeVars.euiColorEmptyShade};
+          background-color: ${euiTheme.colors.emptyShade};
         `}
         data-test-subj="editFlyoutHeader"
       >
@@ -171,8 +172,16 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
         css={css`
           // styles needed to display extra drop targets that are outside of the config panel main area
           overflow-y: auto;
-          padding-left: ${euiThemeVars.euiFormMaxWidth};
-          margin-left: -${euiThemeVars.euiFormMaxWidth};
+          padding-left: ${
+            // TODO fix EUI types
+            // @ts-expect-error
+            euiTheme.components.forms.maxWidth
+          };
+          margin-left: -${
+              // TODO fix EUI types
+              // @ts-expect-error
+              euiTheme.components.forms.maxWidth
+            };
           pointer-events: none;
           .euiFlyoutBody__overflow {
             -webkit-mask-image: none;
@@ -190,7 +199,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
             padding: 0;
             block-size: 100%;
           }
-          border-bottom: 2px solid ${euiThemeVars.euiBorderColor};
+          border-bottom: 2px solid ${euiTheme.border.color};
         `}
       >
         <EuiFlexGroup
@@ -234,7 +243,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
                   defaultMessage: 'Data view',
                 }
               )}
-              css={css({ padding: euiThemeVars.euiSizeM })}
+              css={css({ padding: euiTheme.size.m })}
             >
               <IndexPatternSelect
                 autoFocus={!dataViewId}
