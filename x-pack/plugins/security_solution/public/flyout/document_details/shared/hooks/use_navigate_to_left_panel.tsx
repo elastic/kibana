@@ -8,60 +8,49 @@
 import { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { Maybe } from '@kbn/timelines-plugin/common/search_strategy/common';
+import { DocumentEventTypes } from '../../../../common/lib/telemetry/types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { SESSION_VIEW_ID } from '../../left/components/session_view';
 import { DocumentDetailsLeftPanelKey, DocumentDetailsRightPanelKey } from '../constants/panel_keys';
-import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+import { useDocumentDetailsContext } from '../context';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-
-export interface UseNavigateToSessionViewParams {
+export interface UseNavigateToLeftPanelParams {
   /**
-   * When flyout is already open, call open left panel only
-   * When flyout is not open, open a new flyout
+   * The tab to navigate to
    */
-  isFlyoutOpen: boolean;
+  tab: string;
   /**
-   * Id of the document
+   * Optional sub tab to navigate to
    */
-  eventId: string;
-  /**
-   * Name of the index used in the parent's page
-   */
-  indexName: Maybe<string> | undefined;
-  /**
-   * Scope id of the page
-   */
-  scopeId: string;
-  /**
-   * Whether the preview mode is enabled
-   */
-  isPreviewMode?: boolean;
+  subTab?: string;
 }
 
-export interface UseNavigateToSessionViewResult {
+export interface UseNavigateToLeftPanelResult {
   /**
-   * Callback to open session view in visualize tab
+   * Callback to open analyzer in visualize tab
    */
-  navigateToSessionView: () => void;
+  navigateToLeftPanel: () => void;
+  /**
+   * Whether the button should be disabled
+   */
+  isEnabled: boolean;
 }
 
 /**
- * Hook that returns a callback to navigate to session view in the flyout
+ * Hook that returns the a callback to navigate to the analyzer in the flyout
  */
-export const useNavigateToSessionView = ({
-  isFlyoutOpen,
-  eventId,
-  indexName,
-  scopeId,
-  isPreviewMode,
-}: UseNavigateToSessionViewParams): UseNavigateToSessionViewResult => {
+export const useNavigateToLeftPanel = ({
+  tab,
+  subTab,
+}: UseNavigateToLeftPanelParams): UseNavigateToLeftPanelResult => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
+  const { eventId, indexName, scopeId, isPreviewMode } = useDocumentDetailsContext();
 
   const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
     'newExpandableFlyoutNavigationEnabled'
   );
+
+  const isEnabled = isNewNavigationEnabled || (!isNewNavigationEnabled && !isPreviewMode);
 
   const right: FlyoutPanelProps = useMemo(
     () => ({
@@ -84,26 +73,22 @@ export const useNavigateToSessionView = ({
         scopeId,
       },
       path: {
-        tab: 'visualize',
-        subTab: SESSION_VIEW_ID,
+        tab,
+        subTab,
       },
     }),
-    [eventId, indexName, scopeId]
+    [eventId, indexName, scopeId, tab, subTab]
   );
 
-  const navigateToSessionView = useCallback(() => {
-    // open left panel if not in preview mode
-    if (isFlyoutOpen && !isPreviewMode) {
+  const navigateToLeftPanel = useCallback(() => {
+    if (!isPreviewMode) {
       openLeftPanel(left);
       telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutTabClicked, {
         location: scopeId,
         panel: 'left',
-        tabId: 'visualize',
+        tabId: tab,
       });
-    }
-    // if flyout is not currently open, open flyout with right and left panels
-    // if new navigation is enabled and in preview mode, open flyout with right and left panels
-    else if (!isFlyoutOpen || (isNewNavigationEnabled && isPreviewMode)) {
+    } else if (isNewNavigationEnabled && isPreviewMode) {
       openFlyout({
         right,
         left,
@@ -120,10 +105,10 @@ export const useNavigateToSessionView = ({
     left,
     scopeId,
     telemetry,
-    isFlyoutOpen,
-    isNewNavigationEnabled,
     isPreviewMode,
+    tab,
+    isNewNavigationEnabled,
   ]);
 
-  return useMemo(() => ({ navigateToSessionView }), [navigateToSessionView]);
+  return useMemo(() => ({ navigateToLeftPanel, isEnabled }), [navigateToLeftPanel, isEnabled]);
 };

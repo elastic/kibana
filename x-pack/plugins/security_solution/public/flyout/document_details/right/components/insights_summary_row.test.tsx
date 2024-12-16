@@ -9,18 +9,10 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { InsightsSummaryRow } from './insights_summary_row';
-import { useDocumentDetailsContext } from '../../shared/context';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { LeftPanelInsightsTab } from '../../left';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../shared/context');
-
-const mockOpenLeftPanel = jest.fn();
-const scopeId = 'scopeId';
-const eventId = 'eventId';
-const indexName = 'indexName';
+const mockNavigateToLeftPanel = jest.fn();
+jest.mock('../../shared/hooks/use_navigate_to_left_panel');
 
 const testId = 'test';
 const textTestId = `${testId}Text`;
@@ -32,13 +24,10 @@ describe('<InsightsSummaryRow />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useDocumentDetailsContext as jest.Mock).mockReturnValue({
-      eventId,
-      indexName,
-      scopeId,
-      isPreviewMode: false,
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
+      navigateToLeftPanel: mockNavigateToLeftPanel,
+      isEnabled: true,
     });
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
   });
 
   it('should render loading skeleton if loading is true', () => {
@@ -113,26 +102,13 @@ describe('<InsightsSummaryRow />', () => {
     );
     getByTestId(buttonTestId).click();
 
-    expect(mockOpenLeftPanel).toHaveBeenCalledWith({
-      id: DocumentDetailsLeftPanelKey,
-      path: {
-        tab: LeftPanelInsightsTab,
-        subTab: 'subTab',
-      },
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
+    expect(mockNavigateToLeftPanel).toHaveBeenCalled();
   });
 
-  it('should disabled the click when in preview mode', () => {
-    (useDocumentDetailsContext as jest.Mock).mockReturnValue({
-      eventId,
-      indexName,
-      scopeId,
-      isPreviewMode: true,
+  it('should disabled the click when navigation is disabled', () => {
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
+      navigateToLeftPanel: undefined,
+      isEnabled: false,
     });
 
     const { getByTestId } = render(
@@ -150,6 +126,6 @@ describe('<InsightsSummaryRow />', () => {
     expect(button).toHaveAttribute('disabled');
 
     button.click();
-    expect(mockOpenLeftPanel).not.toHaveBeenCalled();
+    expect(mockNavigateToLeftPanel).not.toHaveBeenCalled();
   });
 });

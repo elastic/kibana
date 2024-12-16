@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
@@ -15,39 +14,28 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { getField } from '../../shared/utils';
 import { HostEntityOverview } from './host_entity_overview';
 import { UserEntityOverview } from './user_entity_overview';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
 /**
  * Entities section under Insights section, overview tab. It contains a preview of host and user information.
  */
 export const EntitiesOverview: React.FC = () => {
-  const { eventId, getFieldsData, indexName, scopeId, isPreviewMode } = useDocumentDetailsContext();
-  const { openLeftPanel } = useExpandableFlyoutApi();
+  const { getFieldsData, isPreviewMode } = useDocumentDetailsContext();
   const hostName = getField(getFieldsData('host.name'));
   const userName = getField(getFieldsData('user.name'));
 
-  const goToEntitiesTab = useCallback(() => {
-    openLeftPanel({
-      id: DocumentDetailsLeftPanelKey,
-      path: {
-        tab: LeftPanelInsightsTab,
-        subTab: ENTITIES_TAB_ID,
-      },
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
-  }, [eventId, openLeftPanel, indexName, scopeId]);
+  const { navigateToLeftPanel, isEnabled: isLinkEnabled } = useNavigateToLeftPanel({
+    tab: LeftPanelInsightsTab,
+    subTab: ENTITIES_TAB_ID,
+  });
 
   const link = useMemo(
     () =>
-      !isPreviewMode
+      isLinkEnabled
         ? {
-            callback: goToEntitiesTab,
+            callback: navigateToLeftPanel,
             tooltip: (
               <FormattedMessage
                 id="xpack.securitySolution.flyout.right.insights.entities.entitiesTooltip"
@@ -56,7 +44,7 @@ export const EntitiesOverview: React.FC = () => {
             ),
           }
         : undefined,
-    [goToEntitiesTab, isPreviewMode]
+    [navigateToLeftPanel, isLinkEnabled]
   );
 
   return (

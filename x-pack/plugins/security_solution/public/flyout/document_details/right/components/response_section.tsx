@@ -16,6 +16,7 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
 import { RESPONSE_SECTION_TEST_ID } from './test_ids';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const KEY = 'response';
 
@@ -27,6 +28,10 @@ export const ResponseSection = memo(() => {
 
   const expanded = useExpandSection({ title: KEY, defaultValue: false });
   const eventKind = getField(getFieldsData('event.kind'));
+
+  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationEnabled'
+  );
 
   const content = useMemo(() => {
     if (isPreview) {
@@ -53,7 +58,7 @@ export const ResponseSection = memo(() => {
       );
     }
 
-    if (isPreviewMode) {
+    if (!isNewNavigationEnabled && isPreviewMode) {
       return (
         <EuiCallOut
           iconType="documentation"
@@ -78,7 +83,7 @@ export const ResponseSection = memo(() => {
     }
 
     return <ResponseButton />;
-  }, [isPreview, isPreviewMode]);
+  }, [isPreview, isPreviewMode, isNewNavigationEnabled]);
 
   if (eventKind !== EventKind.signal) {
     return null;

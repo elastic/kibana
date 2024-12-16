@@ -6,15 +6,13 @@
  */
 
 import type { ReactElement, VFC } from 'react';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useDocumentDetailsContext } from '../../shared/context';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { FormattedCount } from '../../../../common/components/formatted_number';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
 const LOADING = i18n.translate(
   'xpack.securitySolution.flyout.right.insights.insightSummaryLoadingAriaLabel',
@@ -66,23 +64,10 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
   expandedSubTab,
   'data-test-subj': dataTestSubj,
 }) => {
-  const { eventId, indexName, scopeId, isPreviewMode } = useDocumentDetailsContext();
-  const { openLeftPanel } = useExpandableFlyoutApi();
-
-  const onClick = useCallback(() => {
-    openLeftPanel({
-      id: DocumentDetailsLeftPanelKey,
-      path: {
-        tab: LeftPanelInsightsTab,
-        subTab: expandedSubTab,
-      },
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
-  }, [eventId, expandedSubTab, indexName, openLeftPanel, scopeId]);
+  const { navigateToLeftPanel: onClick, isEnabled: isLinkEnabled } = useNavigateToLeftPanel({
+    tab: LeftPanelInsightsTab,
+    subTab: expandedSubTab,
+  });
 
   const textDataTestSubj = useMemo(() => `${dataTestSubj}Text`, [dataTestSubj]);
   const loadingDataTestSubj = useMemo(() => `${dataTestSubj}Loading`, [dataTestSubj]);
@@ -100,7 +85,7 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
               onClick={onClick}
               flush={'both'}
               size="xs"
-              disabled={isPreviewMode}
+              disabled={!isLinkEnabled}
               data-test-subj={buttonDataTestSubj}
             >
               <FormattedCount count={value} />
@@ -111,7 +96,7 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
         )}
       </>
     );
-  }, [dataTestSubj, isPreviewMode, onClick, value]);
+  }, [dataTestSubj, onClick, value, isLinkEnabled]);
 
   if (loading) {
     return (

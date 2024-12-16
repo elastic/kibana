@@ -16,19 +16,13 @@ import {
 } from './test_ids';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { LeftPanelInsightsTab } from '../../left';
-import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
-import { useDocumentDetailsContext } from '../../shared/context';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../shared/context');
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_session');
 
-const mockOpenLeftPanel = jest.fn();
-const eventId = 'eventId';
-const indexName = 'indexName';
+const mockNavigateToLeftPanel = jest.fn();
+jest.mock('../../shared/hooks/use_navigate_to_left_panel');
+
 const entityId = 'entityId';
 const scopeId = 'scopeId';
 
@@ -47,13 +41,10 @@ describe('<RelatedAlertsBySession />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useDocumentDetailsContext as jest.Mock).mockReturnValue({
-      eventId,
-      indexName,
-      scopeId,
-      isPreviewMode: false,
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
+      navigateToLeftPanel: mockNavigateToLeftPanel,
+      isEnabled: true,
     });
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
   });
 
   it('should render single related alerts correctly', () => {
@@ -109,17 +100,6 @@ describe('<RelatedAlertsBySession />', () => {
     const { getByTestId } = renderRelatedAlertsBySession();
     getByTestId(BUTTON_TEST_ID).click();
 
-    expect(mockOpenLeftPanel).toHaveBeenCalledWith({
-      id: DocumentDetailsLeftPanelKey,
-      path: {
-        tab: LeftPanelInsightsTab,
-        subTab: CORRELATIONS_TAB_ID,
-      },
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
+    expect(mockNavigateToLeftPanel).toHaveBeenCalled();
   });
 });

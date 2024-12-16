@@ -18,7 +18,7 @@ import { TestProviders } from '../../../../common/mock';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
-import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
@@ -26,10 +26,13 @@ import {
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.;000Z';
 const selectedPatterns = 'alerts';
+
+jest.mock('../../shared/hooks/use_navigate_to_left_panel');
 
 const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
 jest.mock('../../../../common/containers/use_global_time', () => {
@@ -62,12 +65,7 @@ const TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(INSIGHTS_E
 const TITLE_ICON_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
 const TITLE_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
 
-const mockContextValue = {
-  eventId: 'event id',
-  indexName: 'index',
-  scopeId: 'scopeId',
-  getFieldsData: mockGetFieldsData,
-} as unknown as DocumentDetailsContext;
+const mockNavigateToLeftPanel = jest.fn();
 
 const renderEntitiesOverview = (contextValue: DocumentDetailsContext) =>
   render(
@@ -86,6 +84,10 @@ describe('<EntitiesOverview />', () => {
     mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: false });
     mockUseHostDetails.mockReturnValue([false, { hostDetails: null }]);
     mockUseFirstLastSeen.mockReturnValue([false, { lastSeen: null }]);
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
+      navigateToLeftPanel: mockNavigateToLeftPanel,
+      isEnabled: true,
+    });
   });
   it('should render wrapper component', () => {
     const { getByTestId, queryByTestId } = renderEntitiesOverview(mockContextValue);
@@ -97,15 +99,25 @@ describe('<EntitiesOverview />', () => {
     expect(queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('should not render link if isPreviewMode is true', () => {
+  it('should render link without icon if in preview mode', () => {
     const { getByTestId, queryByTestId } = renderEntitiesOverview({
       ...mockContextValue,
       isPreviewMode: true,
     });
-
     expect(queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Entities');
     expect(queryByTestId(TITLE_ICON_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should not render link if navigation is disabled', () => {
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
+      navigateToLeftPanel: mockNavigateToLeftPanel,
+      isEnabled: false,
+    });
+    const { getByTestId, queryByTestId } = renderEntitiesOverview(mockContextValue);
+
+    expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(TITLE_TEXT_TEST_ID)).toBeInTheDocument();
   });
 

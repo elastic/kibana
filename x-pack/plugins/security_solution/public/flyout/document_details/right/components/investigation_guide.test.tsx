@@ -16,16 +16,13 @@ import {
   INVESTIGATION_GUIDE_TEST_ID,
 } from './test_ids';
 import { mockContextValue } from '../../shared/mocks/mock_context';
-import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { LeftPanelInvestigationTab } from '../../left';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
 jest.mock('../../shared/hooks/use_investigation_guide');
-jest.mock('@kbn/expandable-flyout');
+jest.mock('../../shared/hooks/use_navigate_to_left_panel');
 
-const mockFlyoutContextValue = { openLeftPanel: jest.fn() };
+const mockNavigateToLeftPanel = jest.fn();
 
 const NO_DATA_MESSAGE = "Investigation guideThere's no investigation guide for this rule.";
 const PREVIEW_MESSAGE = 'Investigation guide is not available in alert preview.';
@@ -42,10 +39,11 @@ const renderInvestigationGuide = () =>
   );
 
 describe('<InvestigationGuide />', () => {
-  beforeAll(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
-      openLeftPanel: mockFlyoutContextValue.openLeftPanel,
-    } as unknown as ExpandableFlyoutApi);
+  beforeEach(() => {
+    jest.mocked(useNavigateToLeftPanel).mockReturnValue({
+      navigateToLeftPanel: mockNavigateToLeftPanel,
+      isEnabled: true,
+    });
   });
 
   it('should render investigation guide button correctly', () => {
@@ -126,10 +124,14 @@ describe('<InvestigationGuide />', () => {
     expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE);
   });
 
-  it('should render open flyout message if isPreviewMode is true', () => {
+  it('should render open flyout message if navigation is disabled', () => {
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
+      navigateToLeftPanel: undefined,
+      isEnabled: false,
+    });
     const { queryByTestId, getByTestId } = render(
       <IntlProvider locale="en">
-        <DocumentDetailsContext.Provider value={{ ...mockContextValue, isPreviewMode: true }}>
+        <DocumentDetailsContext.Provider value={mockContextValue}>
           <InvestigationGuide />
         </DocumentDetailsContext.Provider>
       </IntlProvider>
@@ -150,16 +152,6 @@ describe('<InvestigationGuide />', () => {
     const { getByTestId } = renderInvestigationGuide();
     getByTestId(INVESTIGATION_GUIDE_BUTTON_TEST_ID).click();
 
-    expect(mockFlyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
-      id: DocumentDetailsLeftPanelKey,
-      path: {
-        tab: LeftPanelInvestigationTab,
-      },
-      params: {
-        id: mockContextValue.eventId,
-        indexName: mockContextValue.indexName,
-        scopeId: mockContextValue.scopeId,
-      },
-    });
+    expect(mockNavigateToLeftPanel).toHaveBeenCalled();
   });
 });
