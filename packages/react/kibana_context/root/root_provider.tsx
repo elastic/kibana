@@ -25,10 +25,10 @@ import { KibanaEuiProvider, type KibanaEuiProviderProps } from './eui_provider';
 export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
   /** The `I18nStart` API from `CoreStart`. */
   i18n: I18nStart;
+  /** The `ExecutionContextStart` API from `CoreStart`. */
+  executionContext: ExecutionContextStart;
   /** The `AnalyticsServiceStart` API from `CoreStart`. */
   analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
-  /** The `ExecutionContextStart` API from `CoreStart`. */
-  executionContext?: ExecutionContextStart;
 }
 
 /**

@@ -15,6 +15,7 @@ import {
   RouteProps,
   useRouteMatch,
 } from 'react-router-dom';
+import { useSharedUXRoutesContext } from './routes_context';
 import { useKibanaSharedUX } from './services';
 import { useSharedUXExecutionContext } from './use_execution_context';
 
@@ -30,17 +31,19 @@ export const Route = <T extends {}>({
   render,
   ...rest
 }: RouteProps<string, { [K: string]: string } & T>) => {
+  const { disableExecutionContextTracking } = useSharedUXRoutesContext();
+  const enableDefaultTracking = !disableExecutionContextTracking;
   const component = useMemo(() => {
     if (!Component) {
       return undefined;
     }
     return (props: RouteComponentProps) => (
       <>
-        <MatchPropagator />
+        {enableDefaultTracking && <MatchPropagator />}
         <Component {...props} />
       </>
     );
-  }, [Component]);
+  }, [Component, enableDefaultTracking]);
 
   if (component) {
     return <ReactRouterRoute {...rest} component={component} />;
@@ -52,7 +55,7 @@ export const Route = <T extends {}>({
         {...rest}
         render={(props) => (
           <>
-            <MatchPropagator />
+            {enableDefaultTracking && <MatchPropagator />}
             {/* @ts-ignore  else condition exists if renderFunction is undefined*/}
             {renderFunction(props)}
           </>
@@ -62,7 +65,7 @@ export const Route = <T extends {}>({
   }
   return (
     <ReactRouterRoute {...rest}>
-      <MatchPropagator />
+      {enableDefaultTracking && <MatchPropagator />}
       {children}
     </ReactRouterRoute>
   );
