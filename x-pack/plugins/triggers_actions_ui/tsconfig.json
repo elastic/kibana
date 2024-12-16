@@ -73,7 +73,8 @@
     "@kbn/observability-alerting-rule-utils",
     "@kbn/core-application-browser",
     "@kbn/cloud-plugin",
-    "@kbn/response-ops-rule-form"
+    "@kbn/response-ops-rule-form",
+    "@kbn/core-user-profile-browser-mocks"
   ],
   "exclude": ["target/**/*"]
 }

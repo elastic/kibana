@@ -6,16 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@tanstack/react-query';
 import { GetEventsResponse } from '@kbn/investigation-shared';
+import { useQuery } from '@tanstack/react-query';
+import { isArray } from 'lodash';
 import { investigationKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
 
 export interface Response {
-  isInitialLoading: boolean;
   isLoading: boolean;
-  isRefetching: boolean;
-  isSuccess: boolean;
   isError: boolean;
   data?: GetEventsResponse;
 }
@@ -24,10 +22,12 @@ export function useFetchEvents({
   rangeFrom,
   rangeTo,
   filter,
+  eventTypes,
 }: {
   rangeFrom?: string;
   rangeTo?: string;
   filter?: string;
+  eventTypes?: string[];
 }): Response {
   const {
     core: {
@@ -36,21 +36,20 @@ export function useFetchEvents({
     },
   } = useKibana();
 
-  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: investigationKeys.events(rangeFrom, rangeTo, filter),
+  const { isLoading, isError, data } = useQuery({
+    queryKey: investigationKeys.events({ rangeFrom, rangeTo, filter, eventTypes }),
     queryFn: async ({ signal }) => {
-      return await http.get<GetEventsResponse>(`/api/observability/events`, {
+      return http.get<GetEventsResponse>(`/api/observability/events`, {
         query: {
           rangeFrom,
           rangeTo,
           filter,
+          ...(isArray(eventTypes) && eventTypes.length > 0 && { eventTypes: eventTypes.join(',') }),
         },
         version: '2023-10-31',
         signal,
       });
     },
-    cacheTime: 600 * 1000, // 10_minutes
-    staleTime: 0,
     refetchOnWindowFocus: false,
     retry: false,
     onError: (error: Error) => {
@@ -64,10 +63,7 @@ export function useFetchEvents({
 
   return {
     data,
-    isInitialLoading,
     isLoading,
-    isRefetching,
-    isSuccess,
     isError,
   };
 }

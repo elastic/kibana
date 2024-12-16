@@ -9,44 +9,48 @@
 
 import { esVersionCompatibleWithKibana } from './es_kibana_version_compatability';
 
-describe('plugins/elasticsearch', () => {
-  describe('lib/is_es_compatible_with_kibana', () => {
-    describe('returns false', () => {
-      it('when ES major is greater than Kibana major', () => {
-        expect(esVersionCompatibleWithKibana('1.0.0', '0.0.0')).toBe(false);
-      });
-
-      it('when ES major is less than Kibana major', () => {
-        expect(esVersionCompatibleWithKibana('0.0.0', '1.0.0')).toBe(false);
-      });
-
-      it('when majors are equal, but ES minor is less than Kibana minor', () => {
-        expect(esVersionCompatibleWithKibana('1.0.0', '1.1.0')).toBe(false);
-      });
-
-      it('ES is not SemVer-compliant', () => {
-        expect(
-          esVersionCompatibleWithKibana('615c621a8416c444941dc97b142a0122d5c878d0', '1.1.0')
-        ).toBe(false);
-      });
+describe('esVersionCompatibleWithKibana', () => {
+  describe('returns false', () => {
+    it('when ES major is greater than Kibana major + 1', () => {
+      expect(esVersionCompatibleWithKibana('2.0.0', '0.0.0')).toBe(false);
     });
 
-    describe('returns true', () => {
-      it('when version numbers are the same', () => {
-        expect(esVersionCompatibleWithKibana('1.1.1', '1.1.1')).toBe(true);
-      });
+    it('when ES major is less than Kibana major', () => {
+      expect(esVersionCompatibleWithKibana('0.0.0', '1.0.0')).toBe(false);
+    });
 
-      it('when majors are equal, and ES minor is greater than Kibana minor', () => {
-        expect(esVersionCompatibleWithKibana('1.1.0', '1.0.0')).toBe(true);
-      });
+    it('when majors are equal, but ES minor is less than Kibana minor', () => {
+      expect(esVersionCompatibleWithKibana('1.0.0', '1.1.0')).toBe(false);
+    });
 
-      it('when majors and minors are equal, and ES patch is greater than Kibana patch', () => {
-        expect(esVersionCompatibleWithKibana('1.1.1', '1.1.0')).toBe(true);
-      });
+    it('ES is not SemVer-compliant', () => {
+      expect(
+        esVersionCompatibleWithKibana('615c621a8416c444941dc97b142a0122d5c878d0', '1.1.0')
+      ).toBe(false);
+    });
+  });
 
-      it('when majors and minors are equal, but ES patch is less than Kibana patch', () => {
-        expect(esVersionCompatibleWithKibana('1.1.0', '1.1.1')).toBe(true);
-      });
+  describe('returns true', () => {
+    it('when version numbers are the same', () => {
+      expect(esVersionCompatibleWithKibana('1.1.1', '1.1.1')).toBe(true);
+    });
+
+    it('when majors are equal, and ES minor is greater than Kibana minor', () => {
+      expect(esVersionCompatibleWithKibana('1.1.0', '1.0.0')).toBe(true);
+    });
+
+    it('when majors and minors are equal, and ES patch is greater than Kibana patch', () => {
+      expect(esVersionCompatibleWithKibana('1.1.1', '1.1.0')).toBe(true);
+    });
+
+    it('when majors and minors are equal, but ES patch is less than Kibana patch', () => {
+      expect(esVersionCompatibleWithKibana('1.1.0', '1.1.1')).toBe(true);
+    });
+
+    it('when ES major is 9 and Kibana major 8 (8.18 forward compatibility)', () => {
+      expect(esVersionCompatibleWithKibana('9.0.0', '8.0.0')).toBe(true);
+      expect(esVersionCompatibleWithKibana('9.0.0', '8.7.0')).toBe(true);
+      expect(esVersionCompatibleWithKibana('9.9.2', '8.7.12')).toBe(true);
     });
   });
 });
