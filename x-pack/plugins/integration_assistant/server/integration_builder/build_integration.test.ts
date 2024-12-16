@@ -204,7 +204,6 @@ describe('buildPackage', () => {
     expect(createReadme).toHaveBeenCalledWith(
       integrationPath,
       testIntegration.name,
-      testIntegration.dataStreams,
       [
         {
           datastream: firstDatastreamName,
