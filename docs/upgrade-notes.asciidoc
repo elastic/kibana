@@ -1516,7 +1516,6 @@ The original host and risk score modules have been superseded since v8.10.0 by t
 
 In 9.0.0 these modules will no longer be supported, the scores will no longer display in the UI 
 and all UI controls associated with managing or upgrading the legacy modules will be removed.
-Additionally,
 --
 
 *Impact* +
