@@ -13,7 +13,7 @@ import { hasEntitiesData } from './has_historical_entities_data';
 
 const hasDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/has_data',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ hasData: boolean }> => {
     const apmEventClient = await getApmEventClient(resources);
     const hasData = await hasHistoricalAgentData(apmEventClient);
@@ -23,7 +23,7 @@ const hasDataRoute = createApmServerRoute({
 
 const hasEntitiesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/has_entities',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ hasData: boolean }> => {
     const { context, request, logger } = resources;
     const coreContext = await context.core;

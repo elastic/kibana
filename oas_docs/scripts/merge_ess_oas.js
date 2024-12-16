@@ -30,7 +30,7 @@ const { REPO_ROOT } = require('@kbn/repo-info');
       `${REPO_ROOT}/packages/kbn-securitysolution-lists-common/docs/openapi/ess/*.schema.yaml`,
       `${REPO_ROOT}/packages/kbn-securitysolution-exceptions-common/docs/openapi/ess/*.schema.yaml`,
       `${REPO_ROOT}/packages/kbn-securitysolution-endpoint-exceptions-common/docs/openapi/ess/*.schema.yaml`,
-      `${REPO_ROOT}/x-pack/packages/kbn-elastic-assistant-common/docs/openapi/ess/*.schema.yaml`,
+      `${REPO_ROOT}/x-pack/platform/packages/shared/kbn-elastic-assistant-common/docs/openapi/ess/*.schema.yaml`,
       `${REPO_ROOT}/x-pack/platform/plugins/shared/osquery/docs/openapi/ess/*.schema.yaml`,
     ],
     outputFilePath: `${REPO_ROOT}/oas_docs/output/kibana.yaml`,

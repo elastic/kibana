@@ -16,7 +16,7 @@ const fallbackToTransactionsRoute = createApmServerRoute({
   params: t.partial({
     query: t.intersection([kueryRt, t.partial(rangeRt.props)]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ fallbackToTransactions: boolean }> => {
     const apmEventClient = await getApmEventClient(resources);
     const {

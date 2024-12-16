@@ -96,4 +96,6 @@ This PR aims at relocating some of the Kibana modules (plugins and packages) int
 > * Try to obtain the missing reviews / approvals before applying manual fixes, and/or keep your changes in a .patch / git stash.
 > * Please use [#sustainable_kibana_architecture](https://elastic.slack.com/archives/C07TCKTA22E) Slack channel for feedback.
 
+Are you trying to rebase this PR to solve merge conflicts? Please follow the steps describe [here](https://elastic.slack.com/archives/C07TCKTA22E/p1734019532879269?thread_ts=1734019339.935419&cid=C07TCKTA22E).
+
 `;

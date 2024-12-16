@@ -139,9 +139,17 @@ describe('UrlFormat', () => {
       expect(url.convert('url', TEXT_CONTEXT_TYPE)).toBe('external url');
     });
 
-    test('can use the raw value', () => {
+    test('can use the raw value with {{value}}', () => {
       const url = new UrlFormat({
         labelTemplate: 'external {{value}}',
+      });
+
+      expect(url.convert('url?', TEXT_CONTEXT_TYPE)).toBe('external url?');
+    });
+
+    test('can use the raw value with {{rawValue}}', () => {
+      const url = new UrlFormat({
+        labelTemplate: 'external {{rawValue}}',
       });
 
       expect(url.convert('url?', TEXT_CONTEXT_TYPE)).toBe('external url?');

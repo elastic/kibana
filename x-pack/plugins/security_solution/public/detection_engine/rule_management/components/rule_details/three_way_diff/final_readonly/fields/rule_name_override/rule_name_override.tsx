@@ -10,22 +10,23 @@ import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
 import type { RuleNameOverrideObject } from '../../../../../../../../../common/api/detection_engine';
 import { RuleNameOverride } from '../../../../rule_about_section';
+import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 
 interface RuleNameOverrideReadOnlyProps {
   ruleNameOverride?: RuleNameOverrideObject;
 }
 
 export function RuleNameOverrideReadOnly({ ruleNameOverride }: RuleNameOverrideReadOnlyProps) {
-  if (!ruleNameOverride) {
-    return null;
-  }
-
   return (
     <EuiDescriptionList
       listItems={[
         {
           title: ruleDetailsI18n.RULE_NAME_OVERRIDE_FIELD_LABEL,
-          description: <RuleNameOverride ruleNameOverride={ruleNameOverride.field_name} />,
+          description: ruleNameOverride?.field_name ? (
+            <RuleNameOverride ruleNameOverride={ruleNameOverride.field_name} />
+          ) : (
+            <EmptyFieldValuePlaceholder />
+          ),
         },
       ]}
     />

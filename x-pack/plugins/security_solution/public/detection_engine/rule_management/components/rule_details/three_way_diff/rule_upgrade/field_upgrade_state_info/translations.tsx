@@ -22,6 +22,21 @@ export const NO_UPDATE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const SAME_UPDATE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.sameUpdate',
+  {
+    defaultMessage: 'Matching update',
+  }
+);
+
+export const SAME_UPDATE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.sameUpdateDescription',
+  {
+    defaultMessage:
+      'The field was modified after rule installation, and your changes are the same as the update from Elastic.',
+  }
+);
+
 export const NO_CONFLICT = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.noConflict',
   {

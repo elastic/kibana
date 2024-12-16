@@ -29,8 +29,7 @@ import { indexNewCase } from '../../tasks/index_new_case';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
 
-// Failing: See https://github.com/elastic/kibana/issues/182459
-describe.skip('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   describe('from Manage', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let isolatedEndpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;

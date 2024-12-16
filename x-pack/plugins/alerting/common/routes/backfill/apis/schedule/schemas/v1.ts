@@ -15,7 +15,6 @@ export const scheduleBodySchema = schema.arrayOf(
       rule_id: schema.string(),
       start: schema.string(),
       end: schema.maybe(schema.string()),
-      run_actions: schema.maybe(schema.boolean()),
     },
     {
       validate({ start, end }) {

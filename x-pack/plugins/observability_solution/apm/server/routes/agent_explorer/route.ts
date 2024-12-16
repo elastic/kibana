@@ -19,7 +19,7 @@ import {
 
 const agentExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/get_agents_per_service',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({
     query: t.intersection([
       environmentRt,
@@ -62,7 +62,7 @@ const agentExplorerRoute = createApmServerRoute({
 
 const latestAgentVersionsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/get_latest_agent_versions',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   async handler(resources): Promise<AgentLatestVersionsResponse> {
     const { logger, config } = resources;
 
@@ -72,7 +72,7 @@ const latestAgentVersionsRoute = createApmServerRoute({
 
 const agentExplorerInstanceRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/agent_instances',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([environmentRt, kueryRt, rangeRt, probabilityRt]),

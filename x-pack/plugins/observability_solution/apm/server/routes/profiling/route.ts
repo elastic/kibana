@@ -33,7 +33,7 @@ const servicesFlamegraphRoute = createApmServerRoute({
       }),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<BaseFlameGraph | undefined> => {
     const { context, plugins, params } = resources;
     const core = await context.core;
@@ -87,7 +87,7 @@ const servicesFunctionsRoute = createApmServerRoute({
       kueryRt,
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<TopNFunctions | undefined> => {
     const { context, plugins, params } = resources;
     const core = await context.core;
@@ -136,7 +136,7 @@ const servicesFunctionsRoute = createApmServerRoute({
 
 const profilingStatusRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/profiling/status',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ initialized: boolean }> => {
     const { context, plugins, logger } = resources;
     const [esClient, profilingDataAccessStart] = await Promise.all([

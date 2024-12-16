@@ -10,6 +10,7 @@ import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
 import type { RequiredFieldArray } from '../../../../../../../../../common/api/detection_engine';
 import { RequiredFields } from '../../../../rule_definition_section';
+import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 
 interface RequiredFieldsReadOnlyProps {
   requiredFields: RequiredFieldArray;
@@ -21,7 +22,11 @@ export function RequiredFieldsReadOnly({ requiredFields }: RequiredFieldsReadOnl
       listItems={[
         {
           title: ruleDetailsI18n.REQUIRED_FIELDS_FIELD_LABEL,
-          description: <RequiredFields requiredFields={requiredFields} />,
+          description: requiredFields.length ? (
+            <RequiredFields requiredFields={requiredFields} />
+          ) : (
+            <EmptyFieldValuePlaceholder />
+          ),
         },
       ]}
     />

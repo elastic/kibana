@@ -3,7 +3,7 @@ info:
   title: Auto Import Analyze Logs API endpoint
   version: "1"
 paths:
-  /api/integration_assistant/analyzelogs:
+  /internal/automatic_import/analyzelogs:
     post:
       summary: Analyzes log samples and processes them.
       operationId: AnalyzeLogs
