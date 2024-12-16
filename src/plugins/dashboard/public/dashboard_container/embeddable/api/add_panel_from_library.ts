@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isErrorEmbeddable, openAddFromLibraryFlyout } from '@kbn/embeddable-plugin/public';
-import { DashboardContainer } from '../dashboard_container';
+import { openAddFromLibraryFlyout } from '@kbn/embeddable-plugin/public';
+import { DashboardApi } from '../../../dashboard_api/types';
 
-export function addFromLibrary(this: DashboardContainer) {
-  if (isErrorEmbeddable(this)) return;
-  this.openOverlay(
+export function addFromLibrary(dashboardApi: DashboardApi) {
+  dashboardApi.openOverlay(
     openAddFromLibraryFlyout({
-      container: this,
+      container: dashboardApi,
       onClose: () => {
-        this.clearOverlays();
+        dashboardApi.clearOverlays();
       },
     })
   );

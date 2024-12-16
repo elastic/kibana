@@ -23,6 +23,14 @@ export const migrateRuleState = Annotation.Root({
   elastic_rule: Annotation<ElasticRule>({
     reducer: (state, action) => ({ ...state, ...action }),
   }),
+  semantic_query: Annotation<string>({
+    reducer: (current, value) => value ?? current,
+    default: () => '',
+  }),
+  inline_query: Annotation<string>({
+    reducer: (current, value) => value ?? current,
+    default: () => '',
+  }),
   translation_result: Annotation<SiemMigrationRuleTranslationResult>(),
   comments: Annotation<RuleMigration['comments']>({
     reducer: (current, value) => (value ? (current ?? []).concat(value) : current),

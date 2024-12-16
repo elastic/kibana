@@ -40,6 +40,8 @@ import { PluginsService } from '@kbn/core-plugins-browser-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-browser-internal';
 import { SecurityService } from '@kbn/core-security-browser-internal';
 import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
+import { version as REACT_VERSION } from 'react';
+import { muteLegacyRootWarning } from '@kbn/react-mute-legacy-root-warning';
 import { KBN_LOAD_MARKS } from './events';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import {
@@ -127,6 +129,15 @@ export class CoreSystem {
       env: injectedMetadata.env,
       logger: this.loggingSystem.asLoggerFactory(),
     };
+
+    if (this.coreContext.env.mode.dev && REACT_VERSION.startsWith('18.')) {
+      muteLegacyRootWarning();
+      this.coreContext.logger
+        .get('core-system')
+        .info(
+          `Kibana is built with and running React@${REACT_VERSION}, muting legacy root warning.`
+        );
+    }
 
     this.i18n = new I18nService();
     this.analytics = new AnalyticsService(this.coreContext);
