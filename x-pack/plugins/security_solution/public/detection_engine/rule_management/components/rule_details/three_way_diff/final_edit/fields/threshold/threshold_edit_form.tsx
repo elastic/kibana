@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { FormData } from '../../../../../../../../shared_imports';
-import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
+import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import { ThresholdAdapter } from './threshold_adapter';
 import type { FieldValueThreshold } from '../../../../../../../rule_creation_ui/components/threshold_input';
 import type { Threshold } from '../../../../../../../../../common/api/detection_engine';

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
+import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import { AnomalyThresholdAdapter } from './anomaly_threshold_adapter';
 
 export function AnomalyThresholdForm(): JSX.Element {

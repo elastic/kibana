@@ -7,8 +7,8 @@
 
 import React from 'react';
 import type { FormData } from '../../../../../../../../shared_imports';
-import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
 import { type MachineLearningJobId } from '../../../../../../../../../common/api/detection_engine';
+import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import { normalizeMachineLearningJobId } from '../../../../../../../../common/utils/normalize_machine_learning_job_id';
 import { MachineLearningJobIdAdapter } from './machine_learning_job_id_adapter';
 
