@@ -2873,6 +2873,7 @@ src/platform/packages/private/shared-ux/page/kibana_no_data/types @elastic/appex
 src/platform/packages/private/shared-ux/prompt/no_data_views/impl @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/prompt/no_data_views/mocks @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/table_persist @elastic/appex-sharedux
+src/platform/packages/shared/chart_expressions/common @elastic/kibana-visualizations
 src/platform/packages/shared/cloud @elastic/kibana-core
 src/platform/packages/shared/content-management/content_editor @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_insights/content_insights_public @elastic/appex-sharedux
@@ -3055,8 +3056,6 @@ src/platform/packages/shared/shared-ux/prompt/no_data_views/types @elastic/appex
 src/platform/packages/shared/shared-ux/prompt/not_found @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/router/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/storybook/mock @elastic/appex-sharedux
-src/platform/packages/shared/Users/gsoldevila/Work/kibana-secondary/Users/gsoldevila/Work/kibana-secondary/src/core @elastic/kibana-core
-src/platform/packages/shared/Users/gsoldevila/Work/kibana-secondary/Users/gsoldevila/Work/kibana-secondary/src/plugins/chart_expressions/common @elastic/kibana-visualizations
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
