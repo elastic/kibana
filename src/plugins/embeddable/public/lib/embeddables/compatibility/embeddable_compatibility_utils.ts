@@ -9,15 +9,8 @@
 
 import { ViewMode } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
-import {
-  BehaviorSubject,
-  distinctUntilChanged,
-  distinctUntilKeyChanged,
-  map,
-  Subscription,
-} from 'rxjs';
+import { BehaviorSubject, distinctUntilKeyChanged, map, Subscription } from 'rxjs';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '../..';
-import { Container } from '../../containers';
 import { ViewMode as LegacyViewMode } from '../../types';
 import { CommonLegacyEmbeddable } from './legacy_embeddable_to_api';
 
@@ -33,33 +26,16 @@ export const embeddableInputToSubject = <
   const subject = new BehaviorSubject<ValueType | undefined>(
     embeddable.getExplicitInput()?.[key] as ValueType
   );
-  if (useExplicitInput && embeddable.parent) {
-    subscription.add(
-      embeddable.parent
-        .getInput$()
-        .pipe(
-          distinctUntilChanged((prev, current) => {
-            const previousValue = (prev.panels[embeddable.id]?.explicitInput as LegacyInput)[key];
-            const currentValue = (current.panels[embeddable.id]?.explicitInput as LegacyInput)?.[
-              key
-            ];
-            return deepEqual(previousValue, currentValue);
-          })
-        )
-        .subscribe(() => subject.next(embeddable.getExplicitInput()?.[key] as ValueType))
-    );
-  } else {
-    subscription.add(
-      embeddable
-        .getInput$()
-        .pipe(
-          distinctUntilKeyChanged(key, (prev, current) => {
-            return deepEqual(prev, current);
-          })
-        )
-        .subscribe(() => subject.next(embeddable.getInput()?.[key] as ValueType))
-    );
-  }
+  subscription.add(
+    embeddable
+      .getInput$()
+      .pipe(
+        distinctUntilKeyChanged(key, (prev, current) => {
+          return deepEqual(prev, current);
+        })
+      )
+      .subscribe(() => subject.next(embeddable.getInput()?.[key] as ValueType))
+  );
   return subject;
 };
 
@@ -121,21 +97,4 @@ export const viewModeToSubject = (
       .subscribe((viewMode: ViewMode) => subject.next(viewMode))
   );
   return subject;
-};
-
-/**
- * Temporarily copying types from dashboard_container.ts because we cannot import it here.
- */
-interface DashboardRequiredMethods {
-  getExpandedPanelId: () => string | undefined;
-  setExpandedPanelId: (expandedPanelId: string | undefined) => void;
-}
-
-export const hasDashboardRequiredMethods = (
-  container: unknown
-): container is DashboardRequiredMethods & Container => {
-  return (
-    typeof (container as DashboardRequiredMethods).getExpandedPanelId === 'function' &&
-    typeof (container as DashboardRequiredMethods).setExpandedPanelId === 'function'
-  );
 };

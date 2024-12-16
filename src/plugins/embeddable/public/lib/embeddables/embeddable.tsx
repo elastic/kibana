@@ -13,9 +13,7 @@ import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
 import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
-import { EmbeddableAppContext } from '@kbn/presentation-publishing';
 import { Adapters } from '../types';
-import { IContainer } from '../containers';
 import {
   EmbeddableError,
   EmbeddableOutput,
@@ -48,8 +46,6 @@ export abstract class Embeddable<
 
   public readonly runtimeId = Embeddable.runtimeId++;
 
-  public readonly parent?: IContainer;
-  public readonly isContainer: boolean = false;
   public readonly deferEmbeddableLoad: boolean = false;
   public catchError?(error: EmbeddableError, domNode: HTMLElement | Element): TNode | (() => void);
 
@@ -69,13 +65,9 @@ export abstract class Embeddable<
 
   protected renderComplete = new RenderCompleteDispatcher();
 
-  // Listener to parent changes, if this embeddable exists in a parent, in order
-  // to update input when the parent changes.
-  private parentSubscription?: Rx.Subscription;
-
   protected destroyed: boolean = false;
 
-  constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
+  constructor(input: TEmbeddableInput, output: TEmbeddableOutput) {
     this.id = input.id;
 
     this.output = {
@@ -93,20 +85,10 @@ export abstract class Embeddable<
       viewMode: ViewMode.EDIT,
       ...input,
     };
-    this.parent = parent;
 
     this.inputSubject.next(this.input);
     this.outputSubject.next(this.output);
 
-    if (parent) {
-      this.parentSubscription = Rx.merge(parent.getInput$(), parent.getOutput$()).subscribe(() => {
-        // Make sure this panel hasn't been removed immediately after it was added, but before it finished loading.
-        if (!parent.getInput().panels[this.id]) return;
-
-        const newInput = parent.getInputForChild<TEmbeddableInput>(this.id);
-        this.onResetInput(newInput);
-      });
-    }
     this.getOutput$()
       .pipe(
         map(({ title }) => title || ''),
@@ -122,7 +104,6 @@ export abstract class Embeddable<
       onEdit: this.onEdit,
       viewMode: this.viewMode,
       dataViews: this.dataViews,
-      parentApi: this.parentApi,
       panelTitle: this.panelTitle,
       query$: this.query$,
       dataLoading: this.dataLoading,
@@ -166,7 +147,6 @@ export abstract class Embeddable<
   public disableTriggers: LegacyEmbeddableAPI['disableTriggers'];
   public onEdit: LegacyEmbeddableAPI['onEdit'];
   public viewMode: LegacyEmbeddableAPI['viewMode'];
-  public parentApi: LegacyEmbeddableAPI['parentApi'];
   public dataViews: LegacyEmbeddableAPI['dataViews'];
   public query$: LegacyEmbeddableAPI['query$'];
   public panelTitle: LegacyEmbeddableAPI['panelTitle'];
@@ -200,25 +180,8 @@ export abstract class Embeddable<
     return this.getOutput().editUrl ?? undefined;
   }
 
-  public getAppContext(): EmbeddableAppContext | undefined {
-    return this.parent?.getAppContext();
-  }
-
   public reportsEmbeddableLoad() {
     return false;
-  }
-
-  public refreshInputFromParent() {
-    if (!this.parent) return;
-    // Make sure this panel hasn't been removed immediately after it was added, but before it finished loading.
-    if (!this.parent.getInput().panels[this.id]) return;
-
-    const newInput = this.parent.getInputForChild<TEmbeddableInput>(this.id);
-    this.onResetInput(newInput);
-  }
-
-  public getIsContainer(): this is IContainer {
-    return this.isContainer === true;
   }
 
   /**
@@ -274,12 +237,6 @@ export abstract class Embeddable<
   }
 
   public getExplicitInput() {
-    const root = this.getRoot();
-    if (root?.getIsContainer?.()) {
-      return (
-        (root.getInput().panels?.[this.id]?.explicitInput as TEmbeddableInput) ?? this.getInput()
-      );
-    }
     return this.getInput();
   }
 
@@ -299,28 +256,11 @@ export abstract class Embeddable<
     return this.output.description ?? '';
   }
 
-  /**
-   * Returns the top most parent embeddable, or itself if this embeddable
-   * is not within a parent.
-   */
-  public getRoot(): IEmbeddable | IContainer {
-    let root: IEmbeddable | IContainer = this;
-    while (root.parent) {
-      root = root.parent;
-    }
-    return root;
-  }
-
   public updateInput(changes: Partial<TEmbeddableInput>): void {
     if (this.destroyed) {
       throw new Error('Embeddable has been destroyed');
     }
-    if (this.parent) {
-      // Ensures state changes flow from container downward.
-      this.parent.updateInputForChild<TEmbeddableInput>(this.id, changes);
-    } else {
-      this.onInputChanged(changes);
-    }
+    this.onInputChanged(changes);
   }
 
   public render(el: HTMLElement): TNode | void {
@@ -352,9 +292,6 @@ export abstract class Embeddable<
     this.outputSubject.complete();
     this.destroyAPI();
 
-    if (this.parentSubscription) {
-      this.parentSubscription.unsubscribe();
-    }
     return;
   }
 
@@ -374,9 +311,6 @@ export abstract class Embeddable<
    */
   protected setInitializationFinished() {
     if (!this.deferEmbeddableLoad) return;
-    if (this.deferEmbeddableLoad && this.parent?.isContainer) {
-      this.parent.setChildLoaded(this);
-    }
     this.initializationFinished.complete();
   }
 
@@ -399,11 +333,6 @@ export abstract class Embeddable<
   protected onFatalError(e: Error) {
     this.fatalError = e;
     this.outputSubject.error(e);
-    // if the container is waiting for this embeddable to complete loading,
-    // a fatal error counts as complete.
-    if (this.deferEmbeddableLoad && this.parent?.isContainer) {
-      this.parent.setChildLoaded(this);
-    }
   }
 
   private onResetInput(newInput: TEmbeddableInput) {
