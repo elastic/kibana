@@ -15,9 +15,6 @@ import {
   CategorizationResponse,
 } from '../../common';
 import {
-  ACTIONS_AND_CONNECTORS_ALL_ROLE,
-  FLEET_ALL_ROLE,
-  INTEGRATIONS_ALL_ROLE,
   ROUTE_HANDLER_TIMEOUT,
 } from '../constants';
 import { getCategorizationGraph } from '../graphs/categorization';
