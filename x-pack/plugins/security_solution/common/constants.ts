@@ -281,8 +281,6 @@ export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
 export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
 
-export const EVENT_GRAPH_VISUALIZATION_API = '/internal/cloud_security_posture/graph' as const;
-
 /**
  * Default signals index key for kibana.dev.yml
  */

@@ -10,18 +10,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
-  EuiHorizontalRule,
-  EuiLink,
   EuiSpacer,
   EuiSwitch,
-  EuiTitle,
   EuiLoadingSpinner,
   EuiText,
   EuiCallOut,
   EuiAccordion,
 } from '@elastic/eui';
-import { LinkAnchor } from '@kbn/security-solution-navigation/links';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
 import type { RiskEngineStatus } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import { RiskEngineStatusEnum } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import * as i18n from '../translations';
@@ -30,8 +25,6 @@ import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mut
 import { useEnableRiskEngineMutation } from '../api/hooks/use_enable_risk_engine_mutation';
 import { useDisableRiskEngineMutation } from '../api/hooks/use_disable_risk_engine_mutation';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
-import { RiskInformationFlyout } from './risk_information';
-import { useOnOpenCloseHandler } from '../../helper_hooks';
 import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 
 const MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING = '50px';
@@ -68,12 +61,12 @@ const RiskEngineHealth: React.FC<{ currentRiskEngineStatus?: RiskEngineStatus | 
   currentRiskEngineStatus,
 }) => {
   if (!currentRiskEngineStatus) {
-    return <EuiHealth color="subdued">{'-'}</EuiHealth>;
+    return <EuiHealth color="danger">{'-'}</EuiHealth>;
   }
   if (currentRiskEngineStatus === RiskEngineStatusEnum.ENABLED) {
     return <EuiHealth color="success">{i18n.RISK_ENGINE_STATUS_ON}</EuiHealth>;
   }
-  return <EuiHealth color="subdued">{i18n.RISK_ENGINE_STATUS_OFF}</EuiHealth>;
+  return <EuiHealth color="danger">{i18n.RISK_ENGINE_STATUS_OFF}</EuiHealth>;
 };
 
 const RiskEngineStatusRow: React.FC<{
@@ -105,7 +98,6 @@ const RiskEngineStatusRow: React.FC<{
           data-test-subj="risk-score-switch"
           checked={currentRiskEngineStatus === RiskEngineStatusEnum.ENABLED}
           onChange={onSwitchClick}
-          compressed
           disabled={btnIsDisabled}
           aria-describedby={'switchRiskModule'}
         />
@@ -138,8 +130,6 @@ export const RiskScoreEnableSection: React.FC<{
 
   const currentRiskEngineStatus = riskEngineStatus?.risk_engine_status;
 
-  const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
-
   const isLoading =
     initRiskEngineMutation.isLoading ||
     enableRiskEngineMutation.isLoading ||
@@ -169,9 +159,6 @@ export const RiskScoreEnableSection: React.FC<{
   return (
     <>
       <>
-        <EuiTitle>
-          <h2>{i18n.RISK_ENGINE_STATUS}</h2>
-        </EuiTitle>
         {initRiskEngineMutation.isError && <RiskScoreErrorPanel errors={initRiskEngineErrors} />}
         {disableRiskEngineMutation.isError && (
           <RiskScoreErrorPanel errors={[disableRiskEngineMutation.error.body.message]} />
@@ -181,47 +168,16 @@ export const RiskScoreEnableSection: React.FC<{
         )}
 
         <EuiSpacer size="m" />
-        <EuiFlexItem grow={0}>
-          <EuiHorizontalRule margin="s" />
-
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" alignItems={'baseline'}>
-                {i18n.ENTITY_RISK_SCORING}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <RiskEngineStatusRow
-                currentRiskEngineStatus={currentRiskEngineStatus}
-                onSwitchClick={onSwitchClick}
-                isLoading={isLoading}
-                privileges={privileges}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiHorizontalRule margin="s" />
+        <EuiFlexItem grow={false}>
+          <RiskEngineStatusRow
+            currentRiskEngineStatus={currentRiskEngineStatus}
+            onSwitchClick={onSwitchClick}
+            isLoading={isLoading}
+            privileges={privileges}
+          />
         </EuiFlexItem>
       </>
       <EuiSpacer />
-      <>
-        <EuiTitle>
-          <h2>{i18n.USEFUL_LINKS}</h2>
-        </EuiTitle>
-        <EuiSpacer />
-        <ul>
-          <li>
-            <LinkAnchor id={SecurityPageName.entityAnalytics}>{i18n.EA_DASHBOARD_LINK}</LinkAnchor>
-            <EuiSpacer size="s" />
-          </li>
-          <li>
-            <EuiLink onClick={handleOnOpen} data-test-subj="open-risk-information-flyout-trigger">
-              {i18n.EA_DOCS_ENTITY_RISK_SCORE}
-            </EuiLink>
-            {isFlyoutVisible && <RiskInformationFlyout handleOnClose={handleOnClose} />}
-            <EuiSpacer size="s" />
-          </li>
-        </ul>
-      </>
     </>
   );
 };
