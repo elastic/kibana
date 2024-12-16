@@ -166,7 +166,7 @@ describe('SessionsView', () => {
       ]);
     });
   });
-  it('Action tab should have 4 columns for non Enterprise users', async () => {
+  it('Action tab should have 5 columns for non Enterprise users', async () => {
     render(
       <TestProviders>
         <SessionsView {...testProps} />
@@ -174,11 +174,11 @@ describe('SessionsView', () => {
     );
 
     await waitFor(() => {
-      expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(4);
+      expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(5);
     });
   });
 
-  it('Action tab should have 5 columns for Enterprise or above users', async () => {
+  it('Action tab should have 6 columns for Enterprise or above users', async () => {
     const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
 
     licenseServiceMock.isEnterprise.mockReturnValue(true);
@@ -189,11 +189,11 @@ describe('SessionsView', () => {
     );
 
     await waitFor(() => {
-      expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(5);
+      expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(6);
     });
   });
 
-  it('Action tab should have 5 columns when accessed via K8S dahsboard', async () => {
+  it('Action tab should have 6 columns when accessed via K8S dahsboard', async () => {
     render(
       <TestProviders>
         <SessionsView {...testProps} tableId={TableId.kubernetesPageSessions} />
@@ -201,7 +201,7 @@ describe('SessionsView', () => {
     );
 
     await waitFor(() => {
-      expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(5);
+      expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(6);
     });
   });
 });
