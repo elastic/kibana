@@ -21,10 +21,12 @@ import type {
   GetAgentsResponse,
   GetInfoResponse,
   GetOneAgentPolicyResponse,
+  GetOnePackagePolicyResponse,
   GetPackagePoliciesRequest,
   GetPackagePoliciesResponse,
   PackagePolicy,
   PostFleetSetupResponse,
+  UpdatePackagePolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_API_ROUTES,
@@ -39,6 +41,7 @@ import {
   PACKAGE_POLICY_API_ROUTES,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SETUP_API_ROUTE,
+  packagePolicyRouteService,
 } from '@kbn/fleet-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
@@ -66,6 +69,7 @@ import semver from 'semver';
 import axios from 'axios';
 import { userInfo } from 'os';
 import pRetry from 'p-retry';
+import { getPolicyDataForUpdate } from '../../../common/endpoint/service/policy';
 import { fetchActiveSpace } from './spaces';
 import { fetchKibanaStatus } from '../../../common/endpoint/utils/kibana_status';
 import { isFleetServerRunning } from './fleet_server/fleet_server_services';
@@ -80,6 +84,7 @@ import {
 } from '../../../common/endpoint/data_loaders/utils';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
+import type { PolicyData } from '../../../common/endpoint/types';
 
 const fleetGenerator = new FleetAgentGenerator();
 const CURRENT_USERNAME = userInfo().username.toLowerCase();
@@ -104,6 +109,39 @@ export const randomAgentPolicyName = (() => {
  * @param version Version string
  */
 const isValidArtifactVersion = (version: string) => !!version.match(/^\d+\.\d+\.\d+(-SNAPSHOT)?$/);
+
+const getAgentPolicyDataForUpdate = (
+  agentPolicy: AgentPolicy
+): UpdateAgentPolicyRequest['body'] => {
+  return pick(agentPolicy, [
+    'advanced_settings',
+    'agent_features',
+    'data_output_id',
+    'description',
+    'download_source_id',
+    'fleet_server_host_id',
+    'global_data_tags',
+    'has_fleet_server',
+    'id',
+    'inactivity_timeout',
+    'is_default',
+    'is_default_fleet_server',
+    'is_managed',
+    'is_protected',
+    'keep_monitoring_alive',
+    'monitoring_diagnostics',
+    'monitoring_enabled',
+    'monitoring_http',
+    'monitoring_output_id',
+    'monitoring_pprof_enabled',
+    'name',
+    'namespace',
+    'overrides',
+    'space_ids',
+    'supports_agentless',
+    'unenroll_timeout',
+  ]) as UpdateAgentPolicyRequest['body'];
+};
 
 export const checkInFleetAgent = async (
   esClient: Client,
