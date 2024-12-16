@@ -7,15 +7,10 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import {
-  ServiceParams,
-  SubActionRequestParams,
-} from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { SubActionConnector } from '@kbn/actions-plugin/server';
+import { ServiceParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { AxiosResponse } from 'axios';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
 import {
   MicrosoftDefenderEndpointConfig,
@@ -25,59 +20,11 @@ import {
 } from '../../../common/microsoft_defender_endpoint/types';
 import { MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '../../../common/microsoft_defender_endpoint/constants';
 import { MicrosoftDefenderEndpointConnector } from './microsoft_defender_endpoint';
-import { createAxiosResponseMock } from '../lib/mocks';
-
-export type ConnectorInstanceMock<T extends SubActionConnector<any, any>> = jest.Mocked<
-  T & {
-    // Protected methods that will also be exposed for testing purposes
-    request: SubActionConnector<any, any>['request'];
-  }
->;
-
-/**
- * Creates an instance of the Connector class that is passed in on input, wraps it in a `Proxy`, and
- * intercepts calls to public methods (and a few protected methods) and wraps those in `jest.fn()` so
- * that they can be mocked.
- * @param ConnectorClass
- * @param constructorArguments
- */
-const createConnectorInstanceMock = <T extends typeof SubActionConnector<any, any>>(
-  ConnectorClass: T,
-  constructorArguments: ConstructorParameters<T>[0]
-): ConnectorInstanceMock<InstanceType<T>> => {
-  const ConnectorClassExtended =
-    // @ts-expect-error
-    class extends ConnectorClass {
-      public async request<R>(params: SubActionRequestParams<R>): Promise<AxiosResponse<R>> {
-        return createAxiosResponseMock<R>({} as R);
-      }
-    };
-  // @ts-expect-error
-  const instance = new ConnectorClassExtended(constructorArguments);
-  const mockedMethods: { [K in keyof InstanceType<T>]?: jest.Mock } = {};
-  const instanceAccessorHandler: ProxyHandler<InstanceType<T>> = {};
-  const proxiedInstance = new Proxy(instance, instanceAccessorHandler) as ConnectorInstanceMock<
-    InstanceType<T>
-  >;
-
-  instanceAccessorHandler.get = function (target, prop, receiver) {
-    if (typeof instance[prop] === 'function') {
-      if (!mockedMethods[prop as keyof InstanceType<T>]) {
-        mockedMethods[prop as keyof InstanceType<T>] = jest.fn(
-          instance[prop].bind(proxiedInstance) // << Magic sauce!
-        );
-      }
-
-      return mockedMethods[prop as keyof InstanceType<T>];
-    }
-
-    // @ts-expect-error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
-    // eslint-disable-next-line prefer-rest-params
-    return Reflect.get(...arguments);
-  };
-
-  return proxiedInstance;
-};
+import {
+  ConnectorInstanceMock,
+  createAxiosResponseMock,
+  createConnectorInstanceMock,
+} from '../lib/mocks';
 
 export interface CreateMicrosoftDefenderConnectorMockResponse {
   options: ServiceParams<MicrosoftDefenderEndpointConfig, MicrosoftDefenderEndpointSecrets>;
