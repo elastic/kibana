@@ -507,7 +507,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       DEFAULT_QUEUE_CONFIG,
       this.telemetryReceiver,
       plugins.telemetry,
-      this.telemetryUsageCounter
+      this.telemetryUsageCounter,
+      core.analytics
     );
 
     this.telemetryEventsSender.setup(
@@ -531,6 +532,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       kibanaVersion: pluginContext.env.packageInfo.version,
       logger: this.logger,
       isFeatureEnabled: config.experimentalFeatures.defendInsights,
+      endpointContext: this.endpointContext.service,
     });
 
     return {
