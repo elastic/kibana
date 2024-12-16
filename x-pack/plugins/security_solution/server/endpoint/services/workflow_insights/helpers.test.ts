@@ -5,25 +5,34 @@
  * 2.0.
  */
 
+import moment from 'moment';
+import { merge } from 'lodash';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { kibanaPackageJson } from '@kbn/repo-info';
+import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
 import type { HostMetadata } from '../../../../common/endpoint/types';
-import type { SearchParams } from '../../../../common/endpoint/types/workflow_insights';
+import type {
+  SearchParams,
+  SecurityWorkflowInsight,
+} from '../../../../common/endpoint/types/workflow_insights';
 
 import {
   ActionType,
   Category,
   SourceType,
+  TargetType,
 } from '../../../../common/endpoint/types/workflow_insights';
 import type { EndpointMetadataService } from '../metadata';
 import {
   buildEsQueryParams,
   createDatastream,
   createPipeline,
+  generateInsightId,
   groupEndpointIdsByOS,
 } from './helpers';
 import {
@@ -42,6 +51,57 @@ jest.mock('@kbn/data-stream-adapter', () => ({
     setIndexTemplate: jest.fn(),
   })),
 }));
+
+function getDefaultInsight(overrides?: Partial<SecurityWorkflowInsight>): SecurityWorkflowInsight {
+  const defaultInsight = {
+    '@timestamp': moment(),
+    message: 'This is a test message',
+    category: Category.Endpoint,
+    type: DefendInsightType.Enum.incompatible_antivirus,
+    source: {
+      type: SourceType.LlmConnector,
+      id: 'openai-connector-id',
+      data_range_start: moment(),
+      data_range_end: moment(),
+    },
+    target: {
+      type: TargetType.Endpoint,
+      ids: ['endpoint-1', 'endpoint-2'],
+    },
+    action: {
+      type: ActionType.Refreshed,
+      timestamp: moment(),
+    },
+    value: 'unique-key',
+    remediation: {
+      exception_list_items: [
+        {
+          list_id: 'example-list-id',
+          name: 'Example List Name',
+          description: 'Example description',
+          entries: [
+            {
+              field: 'example-field',
+              operator: 'included',
+              type: 'match',
+              value: 'example-value',
+            },
+          ],
+          tags: ['example-tag'],
+          os_types: ['windows', 'linux'],
+        },
+      ],
+    },
+    metadata: {
+      notes: {
+        key1: 'value1',
+        key2: 'value2',
+      },
+      message_variables: ['variable1', 'variable2'],
+    },
+  };
+  return merge(defaultInsight, overrides);
+}
 
 describe('helpers', () => {
   describe('createDatastream', () => {
@@ -191,6 +251,15 @@ describe('helpers', () => {
         linux: ['agent2'],
         macos: ['agent3'],
       });
+    });
+  });
+
+  describe('generateInsightId', () => {
+    it('should generate the correct hashed id', () => {
+      const insight = getDefaultInsight();
+      const result = generateInsightId(insight);
+      const expectedHash = '6b1a7a9625decbf899db4fbf78105a0eff9ef98e3f2dadc2781d59996b55445e';
+      expect(result).toBe(expectedHash);
     });
   });
 });
