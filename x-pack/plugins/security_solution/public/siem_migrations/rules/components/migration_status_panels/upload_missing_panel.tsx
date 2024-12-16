@@ -36,7 +36,7 @@ export const RuleMigrationsUploadMissingPanel = React.memo<RuleMigrationsUploadM
 
     useEffect(() => {
       getMissingResources(migrationStats.id);
-    }, [getMissingResources, migrationStats]);
+    }, [getMissingResources, migrationStats.id]);
 
     const onOpenFlyout = useCallback(() => {
       openFlyout(migrationStats);

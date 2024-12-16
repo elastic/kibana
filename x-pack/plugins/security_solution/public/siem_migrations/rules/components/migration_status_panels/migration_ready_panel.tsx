@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiPanel } from '@elastic/eui';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
 import type { RuleMigrationResourceData } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { PanelText } from '../../../../common/components/panel_text';
@@ -26,7 +26,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
 
   useEffect(() => {
     getMissingResources(migrationStats.id);
-  }, [getMissingResources, migrationStats]);
+  }, [getMissingResources, migrationStats.id]);
 
   const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
     openFlyout(migrationStats);
@@ -48,6 +48,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
               <EuiFlexItem>
                 <PanelText size="s" subdued>
                   {i18n.RULE_MIGRATION_READY_DESCRIPTION(
+                    migrationStats.rules.total,
                     missingResources.length > 0 ? i18n.RULE_MIGRATION_READY_MISSING_RESOURCES : ''
                   )}
                 </PanelText>

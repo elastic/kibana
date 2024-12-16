@@ -7,11 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const RULE_MIGRATION_READY_DESCRIPTION = (missingResourcesText: string) =>
+export const RULE_MIGRATION_READY_DESCRIPTION = (
+  totalRules: number,
+  missingResourcesText: string
+) =>
   i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.ready.description', {
     defaultMessage:
-      'Migration is created but the translation has not started yet. {missingResourcesText}',
-    values: { missingResourcesText },
+      'Migration of {totalRules} rules is created but the translation has not started yet. {missingResourcesText}',
+    values: { totalRules, missingResourcesText },
   });
 export const RULE_MIGRATION_READY_MISSING_RESOURCES = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.ready.description',
