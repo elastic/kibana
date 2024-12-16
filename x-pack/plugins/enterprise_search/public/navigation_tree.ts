@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 
 import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
-import { SEARCH_INDICES_PATH } from './applications/enterprise_search_content/routes';
 
 export interface DynamicSideNavItems {
   appSearch?: Array<EuiSideNavItemType<unknown>>;

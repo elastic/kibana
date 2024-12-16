@@ -59,11 +59,7 @@ import { hasEnterpriseLicense } from '../common/utils/licensing';
 
 import { ENGINES_PATH } from './applications/app_search/routes';
 import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
-import {
-  CONNECTORS_PATH,
-  INDEX_MANAGEMENT_INDICES_PATH,
-  CRAWLERS_PATH,
-} from './applications/enterprise_search_content/routes';
+import { CONNECTORS_PATH, CRAWLERS_PATH } from './applications/enterprise_search_content/routes';
 
 import { docLinks } from './applications/shared/doc_links';
 import type { DynamicSideNavItems } from './navigation_tree';
