@@ -12,8 +12,8 @@ import {
   ActionConnectorMode,
   JsonEditorWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
-import { DEFAULT_BODY, DEFAULT_BODY_AZURE } from './constants';
+import { SUB_ACTION } from '../../../common/openai/constants';
+import { getDefaultBody } from './constants';
 import { OpenAIActionConnector, ActionParams } from './types';
 
 const ParamsFields: React.FunctionComponent<ActionParamsProps<ActionParams>> = ({
@@ -41,16 +41,10 @@ const ParamsFields: React.FunctionComponent<ActionParamsProps<ActionParams>> = (
 
   useEffect(() => {
     if (!subActionParams) {
-      // default to OpenAiProviderType.OpenAi sample data
-      let sampleBody = DEFAULT_BODY;
-
-      if (typedActionConnector?.config?.apiProvider === OpenAiProviderType.AzureAi) {
-        // update sample data if AzureAi
-        sampleBody = DEFAULT_BODY_AZURE;
-      }
+      const sampleBody = getDefaultBody(typedActionConnector?.config);
       editAction('subActionParams', { body: sampleBody }, index);
     }
-  }, [typedActionConnector?.config?.apiProvider, editAction, index, subActionParams]);
+  }, [typedActionConnector?.config, editAction, index, subActionParams]);
 
   const editSubActionParams = useCallback(
     (params: ActionParams['subActionParams']) => {

@@ -6,11 +6,14 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
+import { isEqual } from 'lodash';
 import { useBoolean } from '@kbn/react-hooks';
-import type {
-  DiffableRule,
-  FieldsDiff,
-  ThreeWayDiff,
+import { assertUnreachable } from '../../../../../../../common/utility_types';
+import {
+  ThreeWayDiffOutcome,
+  type DiffableRule,
+  type FieldsDiff,
+  type ThreeWayDiff,
 } from '../../../../../../../common/api/detection_engine';
 import { invariant } from '../../../../../../../common/utils/invariant';
 import { convertRuleToDiffable } from '../../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
@@ -34,9 +37,19 @@ interface FieldUpgradeContextType {
    */
   fieldUpgradeState: FieldUpgradeStateEnum;
   /**
-   * Whether rule has an unresolved conflict. This state is derived from `fieldUpgradeState`.
+   * Whether the field has an unresolved conflict. This state is derived from `fieldUpgradeState`.
    */
   hasConflict: boolean;
+  /**
+   * Whether field value is different from Elastic's suggestion.
+   * It's true only if user has made changes to the suggested field value.
+   */
+  hasResolvedValueDifferentFromSuggested: boolean;
+  /**
+   * Whether the field was changed after prebuilt rule installation, i.e. customized
+   * It's true only if user has made changes to the suggested field value.
+   */
+  isCustomized: boolean;
   /**
    * Field's three way diff
    */
@@ -91,6 +104,8 @@ export function FieldUpgradeContextProvider({
 
   invariant(fieldDiff, `Field diff is not found for ${fieldName}.`);
 
+  const finalDiffableRule = calcFinalDiffableRule(ruleUpgradeState);
+
   const contextValue: FieldUpgradeContextType = useMemo(
     () => ({
       fieldName,
@@ -98,8 +113,17 @@ export function FieldUpgradeContextProvider({
       hasConflict:
         fieldUpgradeState === FieldUpgradeStateEnum.SolvableConflict ||
         fieldUpgradeState === FieldUpgradeStateEnum.NonSolvableConflict,
+      /*
+        Initially, we prefill the resolved value with the merged version.
+        If the current resolved value differs from the merged version, it indicates that the user has modified the suggestion.
+      */
+      hasResolvedValueDifferentFromSuggested: !isEqual(
+        fieldDiff.merged_version,
+        finalDiffableRule[fieldName]
+      ),
+      isCustomized: calcIsCustomized(fieldDiff),
       fieldDiff,
-      finalDiffableRule: calcFinalDiffableRule(ruleUpgradeState),
+      finalDiffableRule,
       rightSideMode: editing ? FieldFinalSideMode.Edit : FieldFinalSideMode.Readonly,
       setRuleFieldResolvedValue,
       setReadOnlyMode,
@@ -109,7 +133,7 @@ export function FieldUpgradeContextProvider({
       fieldName,
       fieldUpgradeState,
       fieldDiff,
-      ruleUpgradeState,
+      finalDiffableRule,
       editing,
       setRuleFieldResolvedValue,
       setReadOnlyMode,
@@ -131,6 +155,24 @@ export function useFieldUpgradeContext() {
   );
 
   return context;
+}
+
+function calcIsCustomized(fieldDiff: ThreeWayDiff<unknown>): boolean {
+  switch (fieldDiff.diff_outcome) {
+    case ThreeWayDiffOutcome.StockValueNoUpdate:
+    case ThreeWayDiffOutcome.StockValueCanUpdate:
+    case ThreeWayDiffOutcome.MissingBaseCanUpdate:
+    case ThreeWayDiffOutcome.MissingBaseNoUpdate:
+      return false;
+
+    case ThreeWayDiffOutcome.CustomizedValueCanUpdate:
+    case ThreeWayDiffOutcome.CustomizedValueSameUpdate:
+    case ThreeWayDiffOutcome.CustomizedValueNoUpdate:
+      return true;
+
+    default:
+      return assertUnreachable(fieldDiff.diff_outcome);
+  }
 }
 
 function calcFinalDiffableRule(ruleUpgradeState: RuleUpgradeState): DiffableRule {

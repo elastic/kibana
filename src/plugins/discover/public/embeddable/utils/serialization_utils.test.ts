@@ -121,7 +121,6 @@ describe('Serialization utils', () => {
         savedSearch,
         serializeTitles: jest.fn(),
         serializeTimeRange: jest.fn(),
-        discoverServices: discoverServiceMock,
       });
 
       expect(serializedState).toEqual({
@@ -148,19 +147,16 @@ describe('Serialization utils', () => {
         searchSource,
       };
 
-      beforeAll(() => {
-        discoverServiceMock.savedSearch.get = jest.fn().mockResolvedValue(savedSearch);
-      });
-
-      test('equal state', async () => {
-        const serializedState = await serializeState({
+      test('equal state', () => {
+        const serializedState = serializeState({
           uuid,
-          initialState: {},
+          initialState: {
+            rawSavedObjectAttributes: savedSearch,
+          },
           savedSearch,
           serializeTitles: jest.fn(),
           serializeTimeRange: jest.fn(),
           savedObjectId: 'test-id',
-          discoverServices: discoverServiceMock,
         });
 
         expect(serializedState).toEqual({
@@ -171,15 +167,16 @@ describe('Serialization utils', () => {
         });
       });
 
-      test('overwrite state', async () => {
-        const serializedState = await serializeState({
+      test('overwrite state', () => {
+        const serializedState = serializeState({
           uuid,
-          initialState: {},
+          initialState: {
+            rawSavedObjectAttributes: savedSearch,
+          },
           savedSearch: { ...savedSearch, sampleSize: 500, sort: [['order_date', 'asc']] },
           serializeTitles: jest.fn(),
           serializeTimeRange: jest.fn(),
           savedObjectId: 'test-id',
-          discoverServices: discoverServiceMock,
         });
 
         expect(serializedState).toEqual({

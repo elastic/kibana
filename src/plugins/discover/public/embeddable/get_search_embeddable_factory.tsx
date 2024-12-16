@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   FetchContext,
+  getUnchangingComparator,
   initializeTimeRange,
   initializeTitles,
   useBatchedPublishingSubjects,
@@ -186,7 +187,7 @@ export const getSearchEmbeddableFactory = ({
             defaultPanelTitle$.next(undefined);
             defaultPanelDescription$.next(undefined);
           },
-          serializeState: async () =>
+          serializeState: () =>
             serializeState({
               uuid,
               initialState,
@@ -194,7 +195,6 @@ export const getSearchEmbeddableFactory = ({
               serializeTitles,
               serializeTimeRange: timeRange.serialize,
               savedObjectId: savedObjectId$.getValue(),
-              discoverServices,
             }),
           getInspectorAdapters: () => searchEmbeddable.stateManager.inspectorAdapters.getValue(),
         },
@@ -202,6 +202,7 @@ export const getSearchEmbeddableFactory = ({
           ...titleComparators,
           ...timeRange.comparators,
           ...searchEmbeddable.comparators,
+          rawSavedObjectAttributes: getUnchangingComparator(),
           savedObjectId: [savedObjectId$, (value) => savedObjectId$.next(value)],
           savedObjectTitle: [defaultPanelTitle$, (value) => defaultPanelTitle$.next(value)],
           savedObjectDescription: [

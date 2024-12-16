@@ -34,12 +34,13 @@ export const CancelButton: FunctionComponent<Props> = ({ onClick, compressed }) 
     />
   ) : (
     <EuiButton
+      color="danger"
+      fill={true}
       key="cancelButton"
       size="s"
       data-test-subj="cancelButton"
       disabled={disabled}
       onClick={onClick}
-      color="danger"
     >
       {i18nTexts.cancel}
     </EuiButton>

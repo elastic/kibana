@@ -1199,7 +1199,7 @@
               },
               {
                 "plugin": "management",
-                "path": "src/plugins/management/public/application.tsx"
+                "path": "src/platform/plugins/shared/management/public/application.tsx"
               },
               {
                 "plugin": "assetInventory",

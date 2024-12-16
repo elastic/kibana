@@ -6,12 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
 import { InvestigationFieldsReadOnly } from './investigation_fields';
-import { FieldFinalReadOnly } from '../../field_final_readonly';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
-import { mockCustomQueryRule } from '../../storybook/mocks';
-import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: InvestigationFieldsReadOnly,
@@ -19,27 +14,12 @@ export default {
     'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/investigation_fields',
 };
 
-interface TemplateProps {
-  finalDiffableRule: DiffableRule;
-}
-
-const Template: Story<TemplateProps> = (args) => {
-  return (
-    <ThreeWayDiffStorybookProviders
-      finalDiffableRule={args.finalDiffableRule}
-      fieldName="investigation_fields"
-    >
-      <FieldFinalReadOnly />
-    </ThreeWayDiffStorybookProviders>
-  );
-};
-
-export const Default = Template.bind({});
-
-Default.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    investigation_fields: {
+export const Default = () => (
+  <InvestigationFieldsReadOnly
+    investigationFields={{
       field_names: ['host.name', 'source.ip'],
-    },
-  }),
-};
+    }}
+  />
+);
+
+export const NoValue = () => <InvestigationFieldsReadOnly />;

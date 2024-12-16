@@ -91,7 +91,7 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
 
   return (
     <EuiFlexItem grow={false} key={metricType}>
-      <EuiPanel hasShadow={false} hasBorder={true}>
+      <EuiPanel hasShadow={false} hasBorder={true} data-test-subj={`${metricType}-chart`}>
         <EuiTitle size="xs">
           <h5>{chartKeyToTitleMap[metricType as ChartKey] || metricType}</h5>
         </EuiTitle>

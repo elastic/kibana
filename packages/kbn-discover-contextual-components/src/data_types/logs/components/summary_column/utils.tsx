@@ -11,7 +11,6 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
 import { css } from '@emotion/react';
 import { AgentName } from '@kbn/elastic-agent-utils';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
@@ -28,6 +27,7 @@ import {
 } from '@kbn/discover-utils';
 import { DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { LogDocument, ResourceFields, getAvailableResourceFields } from '@kbn/discover-utils/src';
+import { useEuiTheme } from '@elastic/eui';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
 import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
 /**
@@ -94,15 +94,18 @@ export const createResourceFields = (
       value: resourceDoc[name] as string,
       ResourceBadge: resourceBadgeComponentWithDependencies,
       ...(name === SERVICE_NAME_FIELD && {
-        Icon: () => (
-          <AgentIcon
-            agentName={resourceDoc[AGENT_NAME_FIELD] as AgentName}
-            size="m"
-            css={css`
-              margin-right: ${euiThemeVars.euiSizeXS};
-            `}
-          />
-        ),
+        Icon: () => {
+          const { euiTheme } = useEuiTheme();
+          return (
+            <AgentIcon
+              agentName={resourceDoc[AGENT_NAME_FIELD] as AgentName}
+              size="m"
+              css={css`
+                margin-right: ${euiTheme.size.xs};
+              `}
+            />
+          );
+        },
       }),
     };
   });

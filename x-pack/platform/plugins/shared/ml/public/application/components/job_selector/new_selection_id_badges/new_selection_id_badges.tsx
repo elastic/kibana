@@ -10,24 +10,24 @@ import React from 'react';
 import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { JobSelectorBadge } from '../job_selector_badge';
-import type { JobSelectionMaps } from '../job_selector';
+import type { MlJobGroupWithTimeRange } from '../job_selector_flyout';
 
-interface NewSelectionIdBadgesProps {
+export interface NewSelectionIdBadgesProps {
   limit: number;
-  maps: JobSelectionMaps;
   newSelection: string[];
   onDeleteClick?: Function;
   onLinkClick?: MouseEventHandler<HTMLAnchorElement>;
   showAllBadges?: boolean;
+  groups: MlJobGroupWithTimeRange[];
 }
 
 export const NewSelectionIdBadges: FC<NewSelectionIdBadgesProps> = ({
   limit,
-  maps,
   newSelection,
   onDeleteClick,
   onLinkClick,
   showAllBadges,
+  groups,
 }) => {
   const badges = [];
 
@@ -41,7 +41,7 @@ export const NewSelectionIdBadges: FC<NewSelectionIdBadgesProps> = ({
         <JobSelectorBadge
           id={newSelection[i]}
           icon={true}
-          isGroup={maps.groupsMap[newSelection[i]] !== undefined}
+          isGroup={groups.some((g) => g.id === newSelection[i])}
           removeId={onDeleteClick}
         />
       </EuiFlexItem>

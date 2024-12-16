@@ -35,9 +35,18 @@ export const TopNavMenuItems = ({
       className={className}
       popoverBreakpoints={popoverBreakpoints}
     >
-      {config.map((menuItem: TopNavMenuData, i: number) => {
-        return <TopNavMenuItem key={`nav-menu-${i}`} isMobileMenu={isMobileMenu} {...menuItem} />;
-      })}
+      {(closePopover) =>
+        config.map((menuItem: TopNavMenuData, i: number) => {
+          return (
+            <TopNavMenuItem
+              key={`nav-menu-${i}`}
+              isMobileMenu={isMobileMenu}
+              closePopover={closePopover}
+              {...menuItem}
+            />
+          );
+        })
+      }
     </EuiHeaderLinks>
   );
 };

@@ -26,7 +26,6 @@ interface ToggleAllButtonProps {
 
 export const ToggleAllButton = memo<ToggleAllButtonProps>(
   ({ color, 'data-test-subj': dataTestSubj, icon, isDisabled, label, onClick }) => {
-    // const getTestId = useTestIdGenerator(dataTestSubj);
     return (
       <EuiButtonEmpty
         color={color}

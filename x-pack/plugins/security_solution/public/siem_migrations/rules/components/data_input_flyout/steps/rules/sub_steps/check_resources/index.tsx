@@ -5,22 +5,45 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiText, type EuiStepProps, type EuiStepStatus } from '@elastic/eui';
+import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import { useGetMissingResources } from '../../../../../../service/hooks/use_get_missing_resources';
+import type { OnMissingResourcesFetched } from '../../../../types';
 import * as i18n from './translations';
 
 export interface CheckResourcesStepProps {
   status: EuiStepStatus;
-  onComplete: () => void;
+  migrationStats: RuleMigrationTaskStats | undefined;
+  onMissingResourcesFetched: OnMissingResourcesFetched;
 }
 export const useCheckResourcesStep = ({
   status,
-  onComplete,
+  migrationStats,
+  onMissingResourcesFetched,
 }: CheckResourcesStepProps): EuiStepProps => {
-  // onComplete(); // TODO: check the resources
+  const { getMissingResources, isLoading, error } =
+    useGetMissingResources(onMissingResourcesFetched);
+
+  useEffect(() => {
+    if (status === 'current' && migrationStats?.id) {
+      getMissingResources(migrationStats.id);
+    }
+  }, [getMissingResources, status, migrationStats?.id]);
+
+  const uploadStepStatus = useMemo(() => {
+    if (isLoading) {
+      return 'loading';
+    }
+    if (error) {
+      return 'danger';
+    }
+    return status;
+  }, [isLoading, error, status]);
+
   return {
     title: i18n.RULES_DATA_INPUT_CHECK_RESOURCES_TITLE,
-    status,
+    status: uploadStepStatus,
     children: (
       <EuiText size="xs" color="subdued">
         {i18n.RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION}

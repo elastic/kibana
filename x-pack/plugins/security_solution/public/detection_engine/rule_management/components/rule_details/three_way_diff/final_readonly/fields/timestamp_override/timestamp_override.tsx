@@ -10,22 +10,23 @@ import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
 import type { TimestampOverrideObject } from '../../../../../../../../../common/api/detection_engine';
 import { TimestampOverride } from '../../../../rule_about_section';
+import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 
 interface TimestampOverrideReadOnlyProps {
   timestampOverride?: TimestampOverrideObject;
 }
 
 export function TimestampOverrideReadOnly({ timestampOverride }: TimestampOverrideReadOnlyProps) {
-  if (!timestampOverride) {
-    return null;
-  }
-
   return (
     <EuiDescriptionList
       listItems={[
         {
           title: ruleDetailsI18n.TIMESTAMP_OVERRIDE_FIELD_LABEL,
-          description: <TimestampOverride timestampOverride={timestampOverride.field_name} />,
+          description: timestampOverride?.field_name ? (
+            <TimestampOverride timestampOverride={timestampOverride.field_name} />
+          ) : (
+            <EmptyFieldValuePlaceholder />
+          ),
         },
       ]}
     />

@@ -10,7 +10,7 @@ export JOB=kibana-osquery-cypress
 
 echo "--- Osquery Cypress tests"
 
-cd x-pack/plugins/osquery
+cd x-pack/platform/plugins/shared/osquery
 
 set +e
 yarn cypress:run; status=$?; yarn junit:merge || :; exit $status

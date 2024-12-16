@@ -17,6 +17,7 @@ import {
 } from '../../../../types';
 import { getSecurityHealth } from '../../../../lib/get_security_health';
 import { transformHealthBodyResponse } from './transforms/transform_health_response/v1';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const healthRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -26,6 +27,7 @@ export const healthRoute = (
   router.get(
     {
       path: `${BASE_ALERTING_API_PATH}/_health`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'public',
         summary: `Get the alerting framework health`,

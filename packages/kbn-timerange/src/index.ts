@@ -52,3 +52,24 @@ export function getDateISORange({ from, to }: { from: string; to: string }) {
     endDate,
   };
 }
+
+export function getTimeDifferenceInSeconds({
+  startDate,
+  endDate,
+}: {
+  startDate: number;
+  endDate: number;
+}): number {
+  if (!startDate || !endDate || startDate > endDate) {
+    throw new Error(`Invalid Dates: from: ${startDate}, to: ${endDate}`);
+  }
+
+  const rangeInSeconds = (endDate - startDate) / 1000;
+  return Math.round(rangeInSeconds);
+}
+
+export function getOffsetFromNowInSeconds(epochDate: number) {
+  const now = Date.now();
+
+  return Math.round((epochDate - now) / 1000);
+}

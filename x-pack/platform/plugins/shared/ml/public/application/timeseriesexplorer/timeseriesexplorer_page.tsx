@@ -25,6 +25,14 @@ interface TimeSeriesExplorerPageProps {
   dateFormatTz?: string;
   resizeRef?: any;
   noSingleMetricJobsFound?: boolean;
+  handleJobSelectionChange: ({
+    jobIds,
+    time,
+  }: {
+    jobIds: string[];
+    time?: { from: string; to: string };
+  }) => void;
+  selectedJobId?: string[];
 }
 
 const timeseriesExplorerStyles = getTimeseriesExplorerStyles();
@@ -35,6 +43,8 @@ export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPage
   dateFormatTz,
   resizeRef,
   noSingleMetricJobsFound,
+  handleJobSelectionChange,
+  selectedJobId = [],
 }) => {
   const {
     services: { cases, docLinks },
@@ -66,7 +76,13 @@ export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPage
         </MlPageHeader>
 
         {noSingleMetricJobsFound ? null : (
-          <JobSelector dateFormatTz={dateFormatTz!} singleSelection={true} timeseriesOnly={true} />
+          <JobSelector
+            dateFormatTz={dateFormatTz!}
+            singleSelection={true}
+            timeseriesOnly={true}
+            onSelectionChange={handleJobSelectionChange}
+            selectedJobIds={selectedJobId}
+          />
         )}
         <CasesContext owner={[]} permissions={casesPermissions!}>
           {children}

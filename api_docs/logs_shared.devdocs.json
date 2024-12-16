@@ -344,23 +344,7 @@
         "label": "LogColumnHeadersWrapper",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<(Omit<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
-          {
-            "pluginId": "@kbn/react-kibana-context-styled",
-            "scope": "common",
-            "docId": "kibKbnReactKibanaContextStyledPluginApi",
-            "section": "def-common.EuiTheme",
-            "text": "EuiTheme"
-          },
-          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\"> | Omit<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
-          {
-            "pluginId": "@kbn/react-kibana-context-styled",
-            "scope": "common",
-            "docId": "kibKbnReactKibanaContextStyledPluginApi",
-            "section": "def-common.EuiTheme",
-            "text": "EuiTheme"
-          },
-          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\">) & React.RefAttributes<{}>>"
+          "React.ForwardRefExoticComponent<Omit<{ [x: string]: any; role?: string | undefined; }, \"ref\"> & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
         "deprecated": false,

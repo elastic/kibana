@@ -40,7 +40,7 @@
           ", \"error\" | \"debug\">; signal: AbortSignal; }) => ",
           "PassThrough"
         ],
-        "path": "packages/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+        "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -55,7 +55,7 @@
               "Observable",
               "<Record<string, unknown> & { type: string; }>"
             ],
-            "path": "packages/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+            "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -67,7 +67,7 @@
             "tags": [],
             "label": "{\n    logger,\n    signal,\n  }",
             "description": [],
-            "path": "packages/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+            "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -129,7 +129,7 @@
                   },
                   ", meta?: Meta | undefined) => void; }"
                 ],
-                "path": "packages/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+                "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -143,7 +143,7 @@
                 "signature": [
                   "AbortSignal"
                 ],
-                "path": "packages/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+                "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -169,7 +169,7 @@
           "Observable",
           "<T>"
         ],
-        "path": "packages/kbn-sse-utils-server/src/supertest_to_observable.ts",
+        "path": "src/platform/packages/shared/kbn-sse-utils-server/src/supertest_to_observable.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -183,7 +183,7 @@
             "signature": [
               "Test"
             ],
-            "path": "packages/kbn-sse-utils-server/src/supertest_to_observable.ts",
+            "path": "src/platform/packages/shared/kbn-sse-utils-server/src/supertest_to_observable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

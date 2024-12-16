@@ -32,7 +32,7 @@
         "signature": [
           "\"dev_tools\""
         ],
-        "path": "packages/deeplinks/devtools/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/devtools/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -47,7 +47,7 @@
         "signature": [
           "\"dev_tools\" | \"dev_tools:console\" | \"dev_tools:searchprofiler\" | \"dev_tools:painless_lab\" | \"dev_tools:grokdebugger\""
         ],
-        "path": "packages/deeplinks/devtools/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/devtools/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -69,7 +69,7 @@
           },
           "[]"
         ],
-        "path": "packages/deeplinks/devtools/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/devtools/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -84,7 +84,7 @@
         "signature": [
           "\"dev_tools\""
         ],
-        "path": "packages/deeplinks/devtools/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/devtools/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -99,7 +99,7 @@
         "signature": [
           "\"console\" | \"searchprofiler\" | \"painless_lab\" | \"grokdebugger\""
         ],
-        "path": "packages/deeplinks/devtools/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/devtools/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

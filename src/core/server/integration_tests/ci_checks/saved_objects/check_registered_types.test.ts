@@ -57,8 +57,8 @@ describe('checking migration metadata changes on all registered SO types', () =>
     expect(hashMap).toMatchInlineSnapshot(`
       Object {
         "action": "0e6fc0b74c7312a8c11ff6b14437b93a997358b8",
-        "action_task_params": "2e475d8b62e2de50b77f58cda309efb537e1d543",
-        "ad_hoc_run_params": "c7419760e878207231c3c8a25ec4d78360e07bf7",
+        "action_task_params": "b50cb5c8a493881474918e8d4985e61374ca4c30",
+        "ad_hoc_run_params": "d4e3c5c794151d0a4f5c71e886b2aa638da73ad2",
         "alert": "556a03378f5ee1c31593c3a37c66b54555ee14ff",
         "api_key_pending_invalidation": "8f5554d1984854011b8392d9a6f7ef985bcac03c",
         "apm-custom-dashboards": "b67128f78160c288bd7efe25b2da6e2afd5e82fc",
@@ -170,7 +170,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "synthetics-private-location": "8cecc9e4f39637d2f8244eb7985c0690ceab24be",
         "synthetics-privates-locations": "f53d799d5c9bc8454aaa32c6abc99a899b025d5c",
         "tag": "e2544392fe6563e215bb677abc8b01c2601ef2dc",
-        "task": "ca8020259e46f713965a754ffae286c02d3cf05d",
+        "task": "3c89a7c918d5b896a5f8800f06e9114ad7e7aea3",
         "telemetry": "7b00bcf1c7b4f6db1192bb7405a6a63e78b699fd",
         "threshold-explorer-view": "175306806f9fc8e13fcc1c8953ec4ba89bda1b70",
         "ui-metric": "d227284528fd19904e9d972aea0a13716fc5fe24",

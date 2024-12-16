@@ -5905,7 +5905,7 @@
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/read_pack_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -10805,11 +10805,11 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_monitor.ts"
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor.ts"
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/saved_objects/uptime_settings.ts"
+                "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/lib/saved_objects/uptime_settings.ts"
               },
               {
                 "plugin": "eventAnnotation",

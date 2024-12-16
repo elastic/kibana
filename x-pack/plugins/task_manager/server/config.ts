@@ -16,7 +16,6 @@ export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
 export const MGET_DEFAULT_POLL_INTERVAL = 500;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
-export const DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY = MAX_WORKERS_LIMIT;
 
 // Monitoring Constants
 // ===================
@@ -101,16 +100,8 @@ export const configSchema = schema.object(
         max: MAX_DISCOVERY_INTERVAL_MS,
       }),
     }),
-    ephemeral_tasks: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
-      /* How many requests can Task Manager buffer before it rejects new requests. */
-      request_capacity: schema.number({
-        // a nice round contrived number, feel free to change as we learn how it behaves
-        defaultValue: 10,
-        min: 1,
-        max: DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY,
-      }),
-    }),
+    /* Allows for old kibana config to start kibana without crashing since ephemeral tasks are deprecated*/
+    ephemeral_tasks: schema.maybe(schema.any()),
     event_loop_delay: eventLoopDelaySchema,
     kibanas_per_partition: schema.number({
       defaultValue: DEFAULT_KIBANAS_PER_PARTITION,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import { of } from 'rxjs';
 
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -46,6 +47,13 @@ describe('Security Plugin', () => {
     mockCoreSetup = coreMock.createSetup({
       pluginStartContract: { userProfiles: userProfileServiceMock.createStart() },
     });
+
+    const core = coreMock.createRequestHandlerContext();
+
+    core.elasticsearch.client.asInternalUser.xpack.usage.mockResolvedValue({
+      security: { operator_privileges: { enabled: false, available: false } },
+    } as Awaited<ReturnType<Client['xpack']['usage']>>);
+
     mockCoreSetup.http.getServerInfo.mockReturnValue({
       hostname: 'localhost',
       name: 'kibana',
@@ -63,6 +71,12 @@ describe('Security Plugin', () => {
     } as unknown as PluginSetupDependencies;
 
     mockCoreStart = coreMock.createStart();
+
+    mockCoreSetup.getStartServices.mockResolvedValue([
+      // @ts-expect-error only mocking the client we use
+      { elasticsearch: core.elasticsearch },
+      mockSetupDependencies.features,
+    ]);
 
     mockStartDependencies = {
       features: featuresPluginMock.createStart(),
