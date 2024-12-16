@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import { IClusterClient } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 import moment from 'moment';
+
+export type InternalClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 
 // Definitions
 
 export const entityTypeDefinitionRt = z.object({
   id: z.string(),
+  display_name: z.string(),
 });
 
 export type EntityTypeDefinition = z.TypeOf<typeof entityTypeDefinitionRt>;
@@ -28,6 +32,11 @@ export const entitySourceDefinitionRt = z.object({
 });
 
 export type EntitySourceDefinition = z.TypeOf<typeof entitySourceDefinitionRt>;
+
+export interface BuiltInDefinition {
+  type: EntityTypeDefinition;
+  sources: EntitySourceDefinition[];
+}
 
 // Stored definitions
 
@@ -74,6 +83,8 @@ const searchCommonRt = z.object({
   filters: z.optional(z.array(z.string())).default([]),
 });
 
+export type SearchCommon = z.output<typeof searchCommonRt>;
+
 export const searchByTypeRt = z.intersection(
   searchCommonRt,
   z.object({
@@ -91,3 +102,22 @@ export const searchBySourcesRt = z.intersection(
 );
 
 export type SearchBySources = z.output<typeof searchBySourcesRt>;
+
+export const countByTypesRt = z.object({
+  types: z.optional(z.array(z.string())),
+  filters: z.optional(z.array(z.string())),
+  start: z
+    .optional(z.string())
+    .default(() => moment().subtract(5, 'minutes').toISOString())
+    .refine((val) => moment(val).isValid(), {
+      message: '[start] should be a date in ISO format',
+    }),
+  end: z
+    .optional(z.string())
+    .default(() => moment().toISOString())
+    .refine((val) => moment(val).isValid(), {
+      message: '[end] should be a date in ISO format',
+    }),
+});
+
+export type CountByTypes = z.output<typeof countByTypesRt>;

@@ -29,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
   const mockAutoopsApiService = setupMockServer();
   describe('Metrics', function () {
     let mockApiServer: http.Server;
-    // due to the plugin depending on yml config (xpack.dataUsage.enabled), we cannot test in MKI until it is on by default
+    // MKI has a different config in the QA environment and will ignore the mock service
     this.tags(['skipMKI']);
 
     before(async () => {
