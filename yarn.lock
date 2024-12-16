@@ -2305,25 +2305,25 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-theme-borealis@0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.4.tgz#5a1e8d5cd02f25634928106c9845389f6b8568bb"
-  integrity sha512-6RV49J0saf2zjcf1uXYpoU9AgRlWs+ot+GszZz6iCBavPl7MdMlR13x5WdT7ewtx7cju9taEWhS1YDVfGVCFSA==
+"@elastic/eui-theme-borealis@0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.5.tgz#d4cba2a44b63dbb435786fc4208c964c805b1540"
+  integrity sha512-M4hrS88L+D5GCRFUooVGRE+8GoU2CxArCqhnNVVcE3Ws4OTOGx7Auqs7ihQ4sIGX+CTFKe6+tjyj/F5Bg2jtMg==
 
-"@elastic/eui-theme-common@0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.4.tgz#83db50a46251c75e6a3c07df0dee3eedb5d49e17"
-  integrity sha512-IDQ15ytDwlB5OO2UlPKccUR37QnRp1xZE8zPy8LoCPQAX8hgDYjikk8gjA2eixCuTm9+t6Suz+Xuha69VcMMZg==
+"@elastic/eui-theme-common@0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.5.tgz#e808f2d93fd51042f225584e6dc051a5da98b955"
+  integrity sha512-Xp6zuJ9Pqd2LnAOP6FwJ81xUml01UotKLdLvNEFM8XvbWfJOPfMWqzIgrttpbio44jyuEmJ/t+UcfLsiOAGsPA==
   dependencies:
     "@types/lodash" "^4.14.202"
     lodash "^4.17.21"
 
-"@elastic/eui@98.1.0-borealis.0":
-  version "98.1.0-borealis.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-98.1.0-borealis.0.tgz#b0db1416d81863816939ae4dc067cc089a9f9789"
-  integrity sha512-DMu+H0j5WrByhJr3Xc3strmsIiwKHLYCOKsTWOqv9CS8tcRFaYa2zHhwhgVhRuBE7XdX++uCsV4vVGrd8qJMVw==
+"@elastic/eui@98.2.0-borealis.0":
+  version "98.2.0-borealis.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-98.2.0-borealis.0.tgz#a56ef258bd82151bf9cd6ce1d33de2b08a0f2443"
+  integrity sha512-t48eJnGuNC+2cP9iWrq7PQtn5y/zb3tRFkvqwWWd9zX7nbQ2YoqoAU8Xr3zKDFcAWkadCBcWiEIS8ZDFUM4HKQ==
   dependencies:
-    "@elastic/eui-theme-common" "0.0.4"
+    "@elastic/eui-theme-common" "0.0.5"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
     "@types/numeral" "^2.0.5"
