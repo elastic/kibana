@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 
 import { formatMetric } from '../../../lib/format_number';
 
-const offlineStyles = (theme) => css`
+const offlineStyle = (theme) => css`
   color: ${theme.euiTheme.colors.textParagraph};
 `;
 
@@ -34,7 +34,7 @@ const TRENDING_UP = i18n.translate('xpack.monitoring.elasticsearch.node.cells.tr
 });
 
 function OfflineCell() {
-  return <div css={offlineStyles}>N/A</div>;
+  return <div css={offlineStyle}>N/A</div>;
 }
 
 const getDirection = (slope) => {

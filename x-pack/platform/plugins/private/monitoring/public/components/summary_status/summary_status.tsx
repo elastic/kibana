@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiStat, UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat, UseEuiTheme, euiTextTruncate } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { css } from '@emotion/react';
 
@@ -24,9 +24,7 @@ const summaryStatusNoWrapStyle = (theme: UseEuiTheme) => css`
 
 const summaryStatusNoWrapStatStyle = css`
   p {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    ${euiTextTruncate()}
   }
 `;
 

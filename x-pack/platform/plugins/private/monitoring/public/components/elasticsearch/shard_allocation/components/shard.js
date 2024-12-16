@@ -8,7 +8,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { get } from 'lodash';
-import { EuiToolTip, EuiBadge } from '@elastic/eui';
+import { EuiToolTip, EuiBadge, euiFontSize } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -18,7 +18,7 @@ import { vents } from '../lib/vents';
 const shardStyle = (theme) => css`
   align-self: center;
   padding: ${theme.euiTheme.size.xs} ${theme.euiTheme.size.s};
-  font-size: ${theme.euiTheme.font.scale.xs};
+  font-size: ${euiFontSize(theme, 'xs')};
   position: relative;
   display: inline-block;
 `;

@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  euiFontSize,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -41,11 +42,11 @@ import { ClusterStatus } from '../cluster_status';
 import { MetricCell, OfflineCell } from './cells';
 
 const tableCellNameStyle = (theme) => css`
-  font-size: ${theme.euiTheme.font.scale.m};
+  font-size: ${euiFontSize(theme, 'm')};
 `;
 
 const tableCellTransportAddressStyle = (theme) => css`
-  font-size: ${theme.euiTheme.font.scale.s};
+  font-size: ${euiFontSize(theme, 's')};
   color: ${theme.euiTheme.colors.darkShade};
 `;
 

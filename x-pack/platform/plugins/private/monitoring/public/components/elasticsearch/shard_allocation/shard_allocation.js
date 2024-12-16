@@ -20,7 +20,7 @@ const clusterStyle = (theme) => css`
   }
 
   td:first-child {
-    width: calc(${theme.euiTheme.colors.textDanger} * 12.5);
+    width: calc(${theme.euiTheme.base} * 12.5);
   }
 `;
 

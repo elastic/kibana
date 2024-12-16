@@ -8,7 +8,7 @@
 import React from 'react';
 import { get, sortBy } from 'lodash';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, euiFontSize, logicalCSS } from '@elastic/eui';
 
 import { Shard } from './shard';
 import { getSafeForExternalLink } from '../../../../lib/get_safe_for_external_link';
@@ -20,7 +20,7 @@ const assignedChildrenStyle = (theme) => css`
 const childTitleStyle = (theme) => css`
   padding: ${theme.euiTheme.size.xs} ${theme.euiTheme.size.s};
   text-align: center;
-  font-size: ${theme.euiTheme.font.scale.xs};
+  font-size: ${euiFontSize(theme, 'xs')};
   color: ${theme.euiTheme.colors.ghost};
   display: flex;
   flex-direction: row;
@@ -30,7 +30,7 @@ const childTitleStyle = (theme) => css`
 const shardStyle = (theme) => css`
   align-self: center;
   padding: ${theme.euiTheme.size.xs} ${theme.euiTheme.size.s};
-  font-size: ${theme.euiTheme.font.scale.xs};
+  font-size: ${euiFontSize(theme, 'xs')};
   position: relative;
   display: inline-block;
 `;
@@ -46,13 +46,22 @@ const childStyle = (data, shardStats) => (theme) =>
     padding: calc(${theme.euiTheme.size.xs} / 2) 0;
 
     ${data.type === 'index' &&
-    `border-left: ${theme.euiTheme.size.xs} solid ${theme.euiTheme.colors.success};`}
+    logicalCSS(
+      'border-left',
+      `${theme.euiTheme.size.xs} solid ${theme.euiTheme.colors.borderStrongSuccess}`
+    )}
 
     ${shardStats?.status === 'red' &&
-    `border-left: ${theme.euiTheme.size.xs} solid ${theme.euiTheme.colors.danger};`}
+    logicalCSS(
+      'border-left',
+      `${theme.euiTheme.size.xs} solid ${theme.euiTheme.colors.borderStrongDanger}`
+    )}
 
     ${shardStats?.status === 'yellow' &&
-    `border-left: ${theme.euiTheme.size.xs} solid ${theme.euiTheme.colors.warning};`}
+    logicalCSS(
+      'border-left',
+      `${theme.euiTheme.size.xs} solid ${theme.euiTheme.colors.borderStrongWarning}`
+    )}
 
     ${data.type === 'shard' && shardStyle(theme)}
   `;

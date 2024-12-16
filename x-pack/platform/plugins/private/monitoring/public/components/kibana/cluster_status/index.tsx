@@ -8,7 +8,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiLink, EuiStat, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiStat, euiTextTruncate, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -21,9 +21,7 @@ import { KibanaStatusIcon } from '../status_icon';
 
 const summaryStatusNoWrapStatStyle = css`
   p {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    ${euiTextTruncate()}
   }
 `;
 

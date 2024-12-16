@@ -18,6 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiScreenReaderOnly,
+  euiFontSize
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -30,7 +31,7 @@ import { EuiMonitoringSSPTable } from '../../table';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
 const tableCellNumberStyle = (theme) => css`
-  font-size: ${theme.euiTheme.font.scale.l};
+  font-size: ${euiFontSize(theme, 'l')};
 `;
 
 export class PipelineListing extends Component {

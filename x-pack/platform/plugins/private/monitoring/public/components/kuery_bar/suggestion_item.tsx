@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiIcon, UseEuiTheme } from '@elastic/eui';
+import { EuiIcon, UseEuiTheme, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { transparentize } from 'polished';
 
@@ -46,7 +46,7 @@ const suggestionItemContainerStyle = (isSelected?: boolean) => (theme: UseEuiThe
   css`
     display: flex;
     flex-direction: row;
-    font-size: ${theme.euiTheme.font.scale.s};
+    font-size: ${euiFontSize(theme, 's')};
     height: ${theme.euiTheme.size.xl};
     white-space: nowrap;
     background-color: ${isSelected ? theme.euiTheme.colors.lightestShade : 'transparent'};

@@ -32,7 +32,7 @@ import { AlertsBadge } from '../../alerts/badge';
 import type { AlertsByName } from '../../alerts/types';
 import { Series } from './types';
 
-const zoomStyles = (theme: UseEuiTheme) => css`
+const zoomStyle = (theme: UseEuiTheme) => css`
   visibility: hidden;
   padding-right: ${theme.euiTheme.size.m};
 `;
@@ -68,7 +68,7 @@ const zoomOutBtn = (zoomInfo?: ZoomInfo) => {
   }
 
   return (
-    <EuiFlexItem className="rhythmChart__zoom" css={zoomStyles}>
+    <EuiFlexItem className="rhythmChart__zoom" css={zoomStyle}>
       <EuiTextAlign textAlign="right">
         <EuiButtonEmpty
           color="primary"
