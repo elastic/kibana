@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export { getIndexPattern } from './get_index_pattern';
-export { explorerReducer } from './reducer';
-export type { ExplorerState } from './state';
-export { getExplorerDefaultState } from './state';
+/**
+ * Number of spaces to address concurrently.
+ * We don't want to loop through all the spaces concurrently to avoid putting too much pressure on the memory in case that there are too many spaces.
+ */
+export const CONCURRENT_SPACES_TO_CHECK = 500;

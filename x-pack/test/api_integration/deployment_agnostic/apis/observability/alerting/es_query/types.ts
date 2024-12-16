@@ -5,5 +5,12 @@
  * 2.0.
  */
 
-export type { ExplorerState } from './explorer_reducer';
-export { explorerReducer, getExplorerDefaultState, getIndexPattern } from './explorer_reducer';
+export interface ActionDocument {
+  ruleId: string;
+  ruleName: string;
+  ruleParams: string;
+  spaceId: string;
+  tags: string;
+  alertId: string;
+  alertActionGroup: string;
+}
