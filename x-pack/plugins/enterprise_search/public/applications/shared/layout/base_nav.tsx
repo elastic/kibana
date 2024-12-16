@@ -21,11 +21,7 @@ import type { ClassicNavItem } from '@kbn/search-navigation/public';
 
 import { GETTING_STARTED_TITLE } from '../../../../common/constants';
 
-import { BuildClassicNavParameters } from '../types';
-
-export const buildBaseClassicNavItems = ({
-  productAccess,
-}: BuildClassicNavParameters): ClassicNavItem[] => {
+export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
   const navItems: ClassicNavItem[] = [];
 
   // Home
@@ -167,36 +163,6 @@ export const buildBaseClassicNavItems = ({
     ],
     name: GETTING_STARTED_TITLE,
   });
-
-  if (productAccess.hasAppSearchAccess || productAccess.hasWorkplaceSearchAccess) {
-    const entSearchItems: ClassicNavItem[] = [];
-    if (productAccess.hasAppSearchAccess) {
-      entSearchItems.push({
-        'data-test-subj': 'searchSideNav-AppSearch',
-        deepLink: {
-          link: 'appSearch:engines',
-        },
-        id: 'app_search',
-      });
-    }
-    if (productAccess.hasWorkplaceSearchAccess) {
-      entSearchItems.push({
-        'data-test-subj': 'searchSideNav-WorkplaceSearch',
-        deepLink: {
-          link: 'workplaceSearch',
-        },
-        id: 'workplace_search',
-      });
-    }
-    navItems.push({
-      'data-test-subj': 'searchSideNav-EnterpriseSearch',
-      id: 'enterpriseSearch',
-      items: entSearchItems,
-      name: i18n.translate('xpack.enterpriseSearch.nav.title', {
-        defaultMessage: 'Enterprise Search',
-      }),
-    });
-  }
 
   return navItems;
 };

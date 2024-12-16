@@ -13,6 +13,7 @@ import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { AlertSummary, LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -42,6 +43,7 @@ export const getAlertInstanceSummaryRoute = (
         params: paramSchema,
         query: querySchema,
       },
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: isServerless ? 'internal' : 'public',
         summary: 'Get an alert summary',
