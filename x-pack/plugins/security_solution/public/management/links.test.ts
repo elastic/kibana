@@ -6,12 +6,11 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
 
 import { SecurityPageName } from '../app/types';
 
 import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
-import type { StartPlugins } from '../types';
+import type { StartServices } from '../types';
 import { getManagementFilteredLinks, links } from './links';
 import { allowedExperimentalValues } from '../../common/experimental_features';
 import { ExperimentalFeaturesService } from '../common/experimental_features_service';
@@ -21,6 +20,7 @@ import type { LicenseService } from '../../common/license';
 import { createLicenseServiceMock } from '../../common/license/mocks';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { createStartServicesMock } from '../common/lib/kibana/kibana_react.mock';
 
 jest.mock('../common/hooks/use_license');
 
@@ -37,7 +37,7 @@ jest.mock('../common/lib/kibana');
 const licenseServiceMock = _licenseService as jest.Mocked<LicenseService>;
 
 describe('links', () => {
-  let coreMockStarted: ReturnType<typeof coreMock.createStart>;
+  let startServicesMock: StartServices;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
 
   const getLinksWithout = (...excludedLinks: SecurityPageName[]) => ({
@@ -45,8 +45,9 @@ describe('links', () => {
     links: links.links?.filter((link) => !excludedLinks.includes(link.id)),
   });
 
-  const getPlugins = (noUserAuthz: boolean = false): StartPlugins => {
+  const getStartServices = (noUserAuthz: boolean = false): StartServices => {
     return {
+      ...startServicesMock,
       security: {
         authc: {
           getCurrentUser: noUserAuthz
@@ -57,7 +58,7 @@ describe('links', () => {
       fleet: {
         authz: createFleetAuthzMock(),
       },
-    } as unknown as StartPlugins;
+    } as unknown as StartServices;
   };
 
   beforeAll(() => {
@@ -67,8 +68,8 @@ describe('links', () => {
   });
 
   beforeEach(() => {
-    coreMockStarted = coreMock.createStart();
-    fakeHttpServices = coreMockStarted.http as jest.Mocked<HttpSetup>;
+    startServicesMock = createStartServicesMock();
+    fakeHttpServices = startServicesMock.http as jest.Mocked<HttpSetup>;
   });
 
   afterEach(() => {
@@ -79,12 +80,12 @@ describe('links', () => {
   it('should return all links for user with all sub-feature privileges', async () => {
     (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
 
-    const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
+    const filteredLinks = await getManagementFilteredLinks(getStartServices());
     expect(filteredLinks).toEqual(links);
   });
 
   it('should not return any endpoint management link for user with all sub-feature privileges when no user authz', async () => {
-    const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins(true));
+    const filteredLinks = await getManagementFilteredLinks(getStartServices(true));
     expect(filteredLinks).toEqual(
       getLinksWithout(
         SecurityPageName.blocklist,
@@ -109,7 +110,7 @@ describe('links', () => {
       );
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
 
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
+      const filteredLinks = await getManagementFilteredLinks(getStartServices());
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.responseActionsHistory));
     });
   });
@@ -121,7 +122,7 @@ describe('links', () => {
         getEndpointAuthzInitialStateMock({ canAccessHostIsolationExceptions: true })
       );
 
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
+      const filteredLinks = await getManagementFilteredLinks(getStartServices());
 
       expect(filteredLinks).toEqual(links);
       expect(fakeHttpServices.get).not.toHaveBeenCalled();
@@ -135,7 +136,7 @@ describe('links', () => {
         })
       );
 
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
+      const filteredLinks = await getManagementFilteredLinks(getStartServices());
 
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
       expect(fakeHttpServices.get).not.toHaveBeenCalled();
@@ -151,7 +152,7 @@ describe('links', () => {
 
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
 
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
+      const filteredLinks = await getManagementFilteredLinks(getStartServices());
 
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
       expect(fakeHttpServices.get).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
@@ -172,7 +173,7 @@ describe('links', () => {
 
       fakeHttpServices.get.mockResolvedValue({ total: 100 });
 
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
+      const filteredLinks = await getManagementFilteredLinks(getStartServices());
 
       expect(filteredLinks).toEqual(links);
       expect(fakeHttpServices.get).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
@@ -188,7 +189,7 @@ describe('links', () => {
     it('should return all links for user with all sub-feature privileges', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
 
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
+      const filteredLinks = await getManagementFilteredLinks(getStartServices());
 
       expect(filteredLinks).toEqual(links);
     });
@@ -200,7 +201,7 @@ describe('links', () => {
         })
       );
 
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
+      const filteredLinks = await getManagementFilteredLinks(getStartServices());
 
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.trustedApps));
     });
@@ -212,7 +213,7 @@ describe('links', () => {
         })
       );
 
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
+      const filteredLinks = await getManagementFilteredLinks(getStartServices());
 
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.eventFilters));
     });
@@ -224,7 +225,7 @@ describe('links', () => {
         })
       );
 
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
+      const filteredLinks = await getManagementFilteredLinks(getStartServices());
 
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.blocklist));
     });
@@ -236,7 +237,7 @@ describe('links', () => {
         })
       );
 
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
+      const filteredLinks = await getManagementFilteredLinks(getStartServices());
 
       expect(filteredLinks).toEqual(
         getLinksWithout(SecurityPageName.policies, SecurityPageName.cloudDefendPolicies)
@@ -251,7 +252,7 @@ describe('links', () => {
           canReadEndpointList: false,
         })
       );
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
+      const filteredLinks = await getManagementFilteredLinks(getStartServices());
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.endpoints));
     });
   });
