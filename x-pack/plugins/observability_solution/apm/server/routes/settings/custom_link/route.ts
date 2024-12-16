@@ -25,7 +25,7 @@ import { CustomLink } from '../../../../common/custom_link/custom_link_types';
 
 const customLinkTransactionRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/custom_links/transaction',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.partial({
     query: filterOptionsRt,
   }),
@@ -41,7 +41,7 @@ const customLinkTransactionRoute = createApmServerRoute({
 
 const listCustomLinksRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/custom_links',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.partial({
     query: filterOptionsRt,
   }),
@@ -75,7 +75,11 @@ const createCustomLinkRoute = createApmServerRoute({
   params: t.type({
     body: payloadRt,
   }),
-  options: { tags: ['access:apm', 'access:apm_settings_write'] },
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'apm_settings_write'],
+    },
+  },
   handler: async (resources): Promise<void> => {
     const { context, params } = resources;
     const licensingContext = await context.licensing;
@@ -104,8 +108,10 @@ const updateCustomLinkRoute = createApmServerRoute({
     }),
     body: payloadRt,
   }),
-  options: {
-    tags: ['access:apm', 'access:apm_settings_write'],
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'apm_settings_write'],
+    },
   },
   handler: async (resources): Promise<void> => {
     const { params, context } = resources;
@@ -135,8 +141,10 @@ const deleteCustomLinkRoute = createApmServerRoute({
       id: t.string,
     }),
   }),
-  options: {
-    tags: ['access:apm', 'access:apm_settings_write'],
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'apm_settings_write'],
+    },
   },
   handler: async (resources): Promise<{ result: string }> => {
     const { context, params } = resources;
