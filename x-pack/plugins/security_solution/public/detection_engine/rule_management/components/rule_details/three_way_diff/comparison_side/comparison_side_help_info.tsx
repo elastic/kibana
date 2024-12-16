@@ -9,14 +9,10 @@ import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { TITLE } from './translations';
-import {
-  BASE_VERSION,
-  CURRENT_VERSION,
-  FINAL_VERSION,
-  TARGET_VERSION,
-} from './versions_picker/translations';
+import type { VersionsPickerOptionEnum } from './versions_picker/versions_picker';
+import { useFieldUpgradeContext } from '../rule_upgrade/field_upgrade_context';
+import { getOptionDetails } from './utils';
 
 /**
  * Theme doesn't expose width variables. Using provided size variables will require
@@ -27,8 +23,17 @@ import {
  */
 const POPOVER_WIDTH = 320;
 
-export function ComparisonSideHelpInfo(): JSX.Element {
+interface ComparisonSideHelpInfoProps {
+  options: VersionsPickerOptionEnum[];
+}
+
+export function ComparisonSideHelpInfo({ options }: ComparisonSideHelpInfoProps): JSX.Element {
   const [isPopoverOpen, togglePopover] = useToggle(false);
+
+  const { hasResolvedValueDifferentFromSuggested } = useFieldUpgradeContext();
+  const optionsWithDescriptions = options.map((option) =>
+    getOptionDetails(option, hasResolvedValueDifferentFromSuggested)
+  );
 
   const button = (
     <EuiButtonIcon
@@ -43,25 +48,20 @@ export function ComparisonSideHelpInfo(): JSX.Element {
       <EuiText style={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.rules.upgradeRules.comparisonSide.upgradeHelpText"
-          defaultMessage="{title} shows field's JSON diff between prebuilt rule field versions affecting the rule update process. {versions}"
+          defaultMessage="The {title} lets you compare the values of a field across different versions of a rule: {versions} Differences are shown as JSON, with red lines showing what was removed, green lines showing additions, and bold text highlighting changes. Use {title} to review and understand changes across versions."
           values={{
             title: <strong>{TITLE}</strong>,
             versions: (
               <>
                 <br />
                 <ul>
-                  <li>
-                    <strong>{BASE_VERSION}</strong> {'-'} {BASE_VERSION_EXPLANATION}
-                  </li>
-                  <li>
-                    <strong>{CURRENT_VERSION}</strong> {'-'} {CURRENT_VERSION_EXPLANATION}
-                  </li>
-                  <li>
-                    <strong>{TARGET_VERSION}</strong> {'-'} {TARGET_VERSION_EXPLANATION}
-                  </li>
-                  <li>
-                    <strong>{FINAL_VERSION}</strong> {'-'} {FINAL_VERSION_EXPLANATION}
-                  </li>
+                  {optionsWithDescriptions.map(
+                    ({ title: displayName, description: explanation }) => (
+                      <li>
+                        <strong>{displayName}</strong> {'-'} {explanation}
+                      </li>
+                    )
+                  )}
                 </ul>
               </>
             ),
@@ -71,35 +71,3 @@ export function ComparisonSideHelpInfo(): JSX.Element {
     </EuiPopover>
   );
 }
-
-const BASE_VERSION_EXPLANATION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.baseVersionExplanation',
-  {
-    defaultMessage: 'version originally installed from Elastic prebuilt rules package',
-  }
-);
-
-const CURRENT_VERSION_EXPLANATION = (
-  <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.currentVersionExplanation"
-    defaultMessage="current version including modification made after prebuilt rule installation. With lack of modifications it matches with {base}."
-    values={{
-      base: <strong>{BASE_VERSION}</strong>,
-    }}
-  />
-);
-
-const TARGET_VERSION_EXPLANATION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.targetVersionExplanation',
-  {
-    defaultMessage: 'version coming from a new version of Elastic prebuilt rules package',
-  }
-);
-
-const FINAL_VERSION_EXPLANATION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.finalVersionExplanation',
-  {
-    defaultMessage:
-      'version used to the update the rule. Initial value is suggested by the diff algorithm.',
-  }
-);
