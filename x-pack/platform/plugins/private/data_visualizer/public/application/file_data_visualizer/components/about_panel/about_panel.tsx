@@ -42,8 +42,7 @@ export const AboutPanel: FC<Props> = ({ onFilePickerChange, hasPermissionToImpor
           height: euiTheme.size.xxl,
         },
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [euiTheme]
   );
 
   return (
