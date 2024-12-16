@@ -56,9 +56,11 @@ export const useListDetailsView = (exceptionListId: string) => {
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
 
   const [isLoading, setIsLoading] = useState<boolean>();
-  const [showManageButtonLoader, setShowManageButtonLoader] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
   const [list, setList] = useState<ExceptionListSchema | null>();
   const [invalidListId, setInvalidListId] = useState(false);
+  const [linkedRulesLoaded, setLinkedRulesLoaded] = useState(false);
+  const [newLinkedRulesLoaded, setNewLinkedRulesLoaded] = useState(false);
   const [linkedRules, setLinkedRules] = useState<UIRule[]>([]);
   const [newLinkedRules, setNewLinkedRules] = useState<UIRule[]>([]);
   const [canUserEditList, setCanUserEditList] = useState(true);
@@ -107,6 +109,7 @@ export const useListDetailsView = (exceptionListId: string) => {
       if (result) {
         const listRules = await getListRules(result.list_id);
         setLinkedRules(listRules);
+        setLinkedRulesLoaded(true);
       }
     },
     []
@@ -319,7 +322,7 @@ export const useListDetailsView = (exceptionListId: string) => {
     setLinkedRules(newLinkedRules);
     setNewLinkedRules(newLinkedRules);
     setShowManageRulesFlyout(false);
-    setShowManageButtonLoader(false);
+    setIsSaving(false);
     setDisableManageButton(true);
   }, [newLinkedRules]);
   const onManageRules = useCallback(() => {
@@ -336,6 +339,7 @@ export const useListDetailsView = (exceptionListId: string) => {
 
   const onRuleSelectionChange = useCallback((value: UIRule[]) => {
     setNewLinkedRules(value);
+    setNewLinkedRulesLoaded(true);
     setDisableManageButton(false);
   }, []);
 
@@ -343,7 +347,7 @@ export const useListDetailsView = (exceptionListId: string) => {
     try {
       if (!list) return setShowManageRulesFlyout(false);
 
-      setShowManageButtonLoader(true);
+      setIsSaving(true);
       const rulesToAdd = getRulesToAdd();
       const rulesToRemove = getRulesToRemove();
 
@@ -373,10 +377,11 @@ export const useListDetailsView = (exceptionListId: string) => {
             i18n.EXCEPTION_MANAGE_RULES_ERROR,
             i18n.EXCEPTION_MANAGE_RULES_ERROR_DESCRIPTION
           );
-          setShowManageButtonLoader(false);
+          setIsSaving(false);
         })
         .finally(() => {
           initializeList();
+          setIsSaving(false);
         });
     } catch (err) {
       handleErrorStatus(err);
@@ -401,6 +406,8 @@ export const useListDetailsView = (exceptionListId: string) => {
     isLoading: isLoading || userInfoLoading,
     invalidListId,
     isReadOnly: !!(!canUserCRUD && canUserREAD),
+    isSaving,
+    rulesLoading: !(linkedRulesLoaded && newLinkedRulesLoaded),
     list,
     listName: list?.name,
     listDescription: list?.description,
@@ -414,7 +421,6 @@ export const useListDetailsView = (exceptionListId: string) => {
     headerBackOptions,
     referenceModalState,
     showReferenceErrorModal,
-    showManageButtonLoader,
     refreshExceptions,
     disableManageButton,
     handleDelete,
