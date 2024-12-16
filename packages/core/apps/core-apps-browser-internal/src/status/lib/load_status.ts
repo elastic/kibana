@@ -155,7 +155,9 @@ function formatStatus(id: string, status: ServiceStatus): FormattedStatus {
     },
   };
 }
-
+/**
+ * Maps status to health color for frontend views
+ */
 export const STATUS_LEVEL_UI_ATTRS: Record<ServiceStatusLevelId, StatusUIAttributes> = {
   critical: {
     title: i18n.translate('core.status.redTitle', {
