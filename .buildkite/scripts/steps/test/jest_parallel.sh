@@ -55,7 +55,7 @@ echo "
 "
 
 while read -r config; do
-  echo "--- $ node scripts/jest --config $config"
+  echo "--- $ node scripts/jest --trace-gc --config $config"
 
   # --trace-warnings to debug
   # Node.js process-warning detected:
@@ -66,7 +66,7 @@ while read -r config; do
     cmd=$cmd" --enable-fips --openssl-config=$HOME/nodejs.cnf"
   fi
 
-  cmd=$cmd"\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
+  cmd=$cmd"\" node ./scripts/jest --trace-gc --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
 
   echo "actual full command is:"
   echo "$cmd"
