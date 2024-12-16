@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useLoadFieldsByIndices } from './use_load_fields_by_indices';
 import { useUsageTracker } from './use_usage_tracker';
 import { useIndicesFields } from './use_indices_fields';

@@ -5,12 +5,7 @@
  * 2.0.
  */
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import {
-  act,
-  renderHook,
-  type RenderHookResult,
-  type WrapperComponent,
-} from '@testing-library/react-hooks';
+import { renderHook, act, type RenderHookResult } from '@testing-library/react';
 import { merge } from 'lodash';
 import React, { PropsWithChildren } from 'react';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
@@ -33,7 +28,7 @@ import type { NotificationsStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { AssistantScope } from '@kbn/ai-assistant-common';
 
-let hookResult: RenderHookResult<UseConversationProps, UseConversationResult>;
+let hookResult: RenderHookResult<UseConversationResult, UseConversationProps>;
 
 type MockedService = DeeplyMockedKeys<Omit<AIAssistantAppService, 'conversations'>> & {
   conversations: DeeplyMockedKeys<
@@ -81,34 +76,32 @@ const useKibanaMockServices = {
 };
 
 describe('useConversation', () => {
-  let wrapper: WrapperComponent<PropsWithChildren<UseConversationProps>>;
+  const wrapper = ({ children }: PropsWithChildren) => (
+    <KibanaContextProvider services={useKibanaMockServices}>{children}</KibanaContextProvider>
+  );
 
-  beforeEach(() => {
+  afterEach(() => {
     jest.clearAllMocks();
-    wrapper = ({ children }: PropsWithChildren<unknown>) => (
-      <KibanaContextProvider services={useKibanaMockServices}>{children}</KibanaContextProvider>
-    );
   });
 
   describe('with initial messages and a conversation id', () => {
-    beforeEach(() => {
-      hookResult = renderHook(useConversation, {
-        initialProps: {
-          chatService: mockChatService,
-          connectorId: 'my-connector',
-          initialMessages: [
-            {
-              '@timestamp': new Date().toISOString(),
-              message: { content: '', role: MessageRole.User },
-            },
-          ],
-          initialConversationId: 'foo',
-        },
-        wrapper,
-      });
-    });
     it('throws an error', () => {
-      expect(hookResult.result.error).toBeTruthy();
+      expect(() =>
+        renderHook(useConversation, {
+          initialProps: {
+            chatService: mockChatService,
+            connectorId: 'my-connector',
+            initialMessages: [
+              {
+                '@timestamp': new Date().toISOString(),
+                message: { content: '', role: MessageRole.User },
+              },
+            ],
+            initialConversationId: 'foo',
+          },
+          wrapper,
+        })
+      ).toThrow(/Cannot set initialMessages if initialConversationId is set/);
     });
   });
 
@@ -434,25 +427,29 @@ describe('useConversation', () => {
 
   describe('when the title is updated', () => {
     describe('without a stored conversation', () => {
-      beforeEach(() => {
-        hookResult = renderHook(useConversation, {
-          initialProps: {
-            chatService: mockChatService,
-            connectorId: 'my-connector',
-            initialMessages: [
-              {
-                '@timestamp': new Date().toISOString(),
-                message: { content: '', role: MessageRole.User },
-              },
-            ],
-            initialConversationId: 'foo',
-          },
-          wrapper,
-        });
-      });
+      it('throws an error', (done) => {
+        try {
+          const { result } = renderHook(useConversation, {
+            initialProps: {
+              chatService: mockChatService,
+              connectorId: 'my-connector',
+              initialMessages: [
+                {
+                  '@timestamp': new Date().toISOString(),
+                  message: { content: '', role: MessageRole.User },
+                },
+              ],
+              initialConversationId: 'foo',
+            },
+            wrapper,
+          });
 
-      it('throws an error', () => {
-        expect(() => hookResult.result.current.saveTitle('my-new-title')).toThrow();
+          result.current.saveTitle('my-new-title');
+        } catch (e) {
+          expect(e).toBeInstanceOf(Error);
+          expect(e.message).toBe('Cannot set initialMessages if initialConversationId is set');
+          done();
+        }
       });
     });
 
