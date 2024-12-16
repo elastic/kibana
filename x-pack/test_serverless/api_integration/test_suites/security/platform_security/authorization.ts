@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
 
-  describe.only('security/authorization', function () {
+  describe('security/authorization', function () {
     describe('available features', () => {
       const svlUserManager = getService('svlUserManager');
       const supertestWithoutAuth = getService('supertestWithoutAuth');
