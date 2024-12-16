@@ -1018,11 +1018,9 @@ export const UnifiedDataTable = ({
           {onUpdateDataGridDensity ? <EuiHorizontalRule margin="s" /> : null}
           <UnifiedDataTableAdditionalDisplaySettings
             rowHeight={rowHeight}
-            rowHeightLines={rowHeightLines}
             onChangeRowHeight={onChangeRowHeight}
             onChangeRowHeightLines={onChangeRowHeightLines}
             headerRowHeight={headerRowHeight}
-            headerRowHeightLines={headerRowHeightLines}
             onChangeHeaderRowHeight={onChangeHeaderRowHeight}
             onChangeHeaderRowHeightLines={onChangeHeaderRowHeightLines}
             maxAllowedSampleSize={maxAllowedSampleSize}
@@ -1036,7 +1034,6 @@ export const UnifiedDataTable = ({
     };
   }, [
     headerRowHeight,
-    headerRowHeightLines,
     maxAllowedSampleSize,
     onChangeHeaderRowHeight,
     onChangeHeaderRowHeightLines,
@@ -1046,7 +1043,6 @@ export const UnifiedDataTable = ({
     onUpdateRowHeight,
     onUpdateSampleSize,
     rowHeight,
-    rowHeightLines,
     sampleSizeState,
     onUpdateDataGridDensity,
     lineCountInput,

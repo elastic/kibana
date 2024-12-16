@@ -106,7 +106,6 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
       >
         <RowHeightSettings
           rowHeight={state.headerRowHeight ?? DEFAULT_HEADER_ROW_HEIGHT}
-          rowHeightLines={state.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES}
           label={i18n.translate('xpack.lens.table.visualOptionsHeaderRowHeightLabel', {
             defaultMessage: 'Max header cell lines',
           })}
@@ -122,7 +121,6 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
         />
         <RowHeightSettings
           rowHeight={state.rowHeight ?? DEFAULT_ROW_HEIGHT}
-          rowHeightLines={state.rowHeightLines ?? DEFAULT_ROW_HEIGHT_LINES}
           label={i18n.translate('xpack.lens.table.visualOptionsFitRowToContentLabel', {
             defaultMessage: 'Max body cell lines',
           })}

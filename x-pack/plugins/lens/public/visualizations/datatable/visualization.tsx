@@ -51,8 +51,6 @@ import {
   DEFAULT_HEADER_ROW_HEIGHT,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
   DEFAULT_ROW_HEIGHT_LINES,
-  DEFAULT_ROW_HEIGHT,
-  ROWS_HEIGHT_OPTIONS,
 } from './components/constants';
 import {
   defaultPaletteParams,
