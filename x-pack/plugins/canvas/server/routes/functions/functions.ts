@@ -29,7 +29,8 @@ export function initializeGetFunctionsRoute(deps: RouteInitializerDeps) {
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason:
+              'This route is opted out from authorization because it only provides non-sensitive information about functions available to Canvas.',
           },
         },
         validate: false,
