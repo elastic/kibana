@@ -11,6 +11,7 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 
 /**
  * The deprecations service provides a way for the Kibana platform to communicate deprecated
@@ -121,6 +122,7 @@ export interface GetDeprecationsContext {
   esClient: IScopedClusterClient;
   /** Saved Objects client scoped to the current user and space */
   savedObjectsClient: SavedObjectsClientContract;
+  request: KibanaRequest;
 }
 
 /**
