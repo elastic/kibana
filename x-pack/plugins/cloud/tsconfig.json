@@ -18,6 +18,7 @@
     "@kbn/logging-mocks",
     "@kbn/logging",
     "@kbn/core-saved-objects-server",
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",
