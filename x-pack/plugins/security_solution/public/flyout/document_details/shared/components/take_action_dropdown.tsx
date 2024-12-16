@@ -12,7 +12,7 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { FLYOUT_FOOTER_DEOPDOEN_BUTTON_TEST_ID } from '../test_ids';
+import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
 import { GuidedOnboardingTourStep } from '../../../../common/components/guided_onboarding_tour/tour_step';
 import {
@@ -362,7 +362,7 @@ export const TakeActionDropdown = memo(
           tourId={SecurityStepId.alertsCases}
         >
           <EuiButton
-            data-test-subj={FLYOUT_FOOTER_DEOPDOEN_BUTTON_TEST_ID}
+            data-test-subj={FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID}
             fill
             iconSide="right"
             iconType="arrowDown"
