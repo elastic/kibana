@@ -24,20 +24,44 @@ describe('transformHealthServiceProvider', () => {
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-    (esClient.transform.getTransform as jest.Mock).mockResolvedValue({
-      count: 3,
-      transforms: [
-        // Mock continuous transforms
-        ...new Array(102).fill(null).map((_, i) => ({
-          id: `transform${i}`,
-          sync: true,
-        })),
-        {
-          id: 'transform102',
-          sync: false,
-        },
-      ],
-    } as unknown as TransformGetTransformResponse);
+    (esClient.transform.getTransform as jest.Mock).mockImplementation(
+      async ({ transform_id: transformId }) => {
+        if (transformId === 'transform4,transform6,transform6*') {
+          // arrangement for exclude transforms
+          return {
+            transforms: [
+              {
+                id: `transform4`,
+                sync: true,
+              },
+              {
+                id: `transform6`,
+                sync: true,
+              },
+              ...new Array(10).fill(null).map((_, i) => ({
+                id: `transform6${i}`,
+                sync: true,
+              })),
+            ],
+          } as unknown as TransformGetTransformResponse;
+        } else {
+          return {
+            transforms: [
+              // Mock continuous transforms
+              ...new Array(102).fill(null).map((_, i) => ({
+                id: `transform${i}`,
+                sync: true,
+              })),
+              {
+                id: 'transform102',
+                sync: false,
+              },
+            ],
+          } as unknown as TransformGetTransformResponse;
+        }
+      }
+    );
+
     (esClient.transform.getTransformStats as jest.Mock).mockResolvedValue({
       count: 2,
       transforms: [{}],
@@ -57,19 +81,27 @@ describe('transformHealthServiceProvider', () => {
     const service = transformHealthServiceProvider({ esClient, rulesClient, fieldFormatsRegistry });
     const result = await service.getHealthChecksResults({
       includeTransforms: ['*'],
-      excludeTransforms: ['transform4', 'transform6', 'transform62'],
+      excludeTransforms: ['transform4', 'transform6', 'transform6*'],
       testsConfig: null,
     });
+
+    expect(esClient.transform.getTransform).toHaveBeenCalledTimes(2);
 
     expect(esClient.transform.getTransform).toHaveBeenCalledWith({
       allow_no_match: true,
       size: 1000,
     });
+    expect(esClient.transform.getTransform).toHaveBeenCalledWith({
+      transform_id: 'transform4,transform6,transform6*',
+      allow_no_match: true,
+      size: 1000,
+    });
+
     expect(esClient.transform.getTransformStats).toHaveBeenCalledTimes(1);
     expect(esClient.transform.getTransformStats).toHaveBeenNthCalledWith(1, {
       basic: true,
       transform_id:
-        'transform0,transform1,transform2,transform3,transform5,transform7,transform8,transform9,transform10,transform11,transform12,transform13,transform14,transform15,transform16,transform17,transform18,transform19,transform20,transform21,transform22,transform23,transform24,transform25,transform26,transform27,transform28,transform29,transform30,transform31,transform32,transform33,transform34,transform35,transform36,transform37,transform38,transform39,transform40,transform41,transform42,transform43,transform44,transform45,transform46,transform47,transform48,transform49,transform50,transform51,transform52,transform53,transform54,transform55,transform56,transform57,transform58,transform59,transform60,transform61,transform63,transform64,transform65,transform66,transform67,transform68,transform69,transform70,transform71,transform72,transform73,transform74,transform75,transform76,transform77,transform78,transform79,transform80,transform81,transform82,transform83,transform84,transform85,transform86,transform87,transform88,transform89,transform90,transform91,transform92,transform93,transform94,transform95,transform96,transform97,transform98,transform99,transform100,transform101',
+        'transform0,transform1,transform2,transform3,transform5,transform7,transform8,transform9,transform10,transform11,transform12,transform13,transform14,transform15,transform16,transform17,transform18,transform19,transform20,transform21,transform22,transform23,transform24,transform25,transform26,transform27,transform28,transform29,transform30,transform31,transform32,transform33,transform34,transform35,transform36,transform37,transform38,transform39,transform40,transform41,transform42,transform43,transform44,transform45,transform46,transform47,transform48,transform49,transform50,transform51,transform52,transform53,transform54,transform55,transform56,transform57,transform58,transform59,transform70,transform71,transform72,transform73,transform74,transform75,transform76,transform77,transform78,transform79,transform80,transform81,transform82,transform83,transform84,transform85,transform86,transform87,transform88,transform89,transform90,transform91,transform92,transform93,transform94,transform95,transform96,transform97,transform98,transform99,transform100,transform101',
     });
 
     expect(result).toBeDefined();
