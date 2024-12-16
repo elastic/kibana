@@ -107,8 +107,7 @@ export const KEBAB_CASE_DIRECTORY_GLOBS = [
   'src/platform/packages/shared/*',
   'x-pack/platform/packages/private/*',
   'x-pack/platform/packages/shared/*',
-  'x-pack/solutions/observability/packages/private/*',
-  'x-pack/solutions/observability/packages/shared/*',
+  'x-pack/solutions/observability/packages/*',
   'x-pack/solutions/security/packages/*',
   'x-pack/solutions/security/packages/*',
 ];
