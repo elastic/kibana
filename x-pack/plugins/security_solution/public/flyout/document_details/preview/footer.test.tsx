@@ -13,8 +13,8 @@ import { mockFlyoutApi } from '../shared/mocks/mock_flyout_context';
 import { mockContextValue } from '../shared/mocks/mock_context';
 import { DocumentDetailsContext } from '../shared/context';
 import { PreviewPanelFooter } from './footer';
-import { PREVIEW_FOOTER_LINK_TEST_ID } from './test_ids';
-import { FLYOUT_FOOTER_TEST_ID, FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from '../right/test_ids';
+import { PREVIEW_FOOTER_TEST_ID, PREVIEW_FOOTER_LINK_TEST_ID } from './test_ids';
+import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from '../shared/components/test_ids';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAlertExceptionActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
@@ -56,6 +56,18 @@ describe('<PreviewPanelFooter />', () => {
     (useAddToCaseActions as jest.Mock).mockReturnValue({ addToCaseActionItems: [] });
   });
 
+  it('should not render the take action dropdown if preview mode', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <DocumentDetailsContext.Provider value={{ ...mockContextValue, isPreview: true }}>
+          <PreviewPanelFooter />
+        </DocumentDetailsContext.Provider>
+      </TestProviders>
+    );
+
+    expect(queryByTestId(PREVIEW_FOOTER_TEST_ID)).not.toBeInTheDocument();
+  });
+
   it('should render footer for alert', () => {
     const { getByTestId } = render(
       <TestProviders>
@@ -64,7 +76,7 @@ describe('<PreviewPanelFooter />', () => {
         </DocumentDetailsContext.Provider>
       </TestProviders>
     );
-    expect(getByTestId(FLYOUT_FOOTER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(PREVIEW_FOOTER_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(PREVIEW_FOOTER_LINK_TEST_ID)).toHaveTextContent('Show full alert details');
   });
 

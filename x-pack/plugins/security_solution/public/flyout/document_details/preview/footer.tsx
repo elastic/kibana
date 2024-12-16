@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
+import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
+import { EuiLink, EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { TakeActionButton } from '../shared/components/take_action_button';
 import { getField } from '../shared/utils';
 import { EventKind } from '../shared/constants/event_kinds';
 import { DocumentDetailsRightPanelKey } from '../shared/constants/panel_keys';
 import { useDocumentDetailsContext } from '../shared/context';
-import { PREVIEW_FOOTER_LINK_TEST_ID } from './test_ids';
+import { PREVIEW_FOOTER_TEST_ID, PREVIEW_FOOTER_LINK_TEST_ID } from './test_ids';
 import { useKibana } from '../../../common/lib/kibana';
 import { DocumentEventTypes } from '../../../common/lib/telemetry';
-import { PanelFooter } from '../right/footer';
 
 /**
  * Footer at the bottom of preview panel with a link to open document details flyout
  */
-export const PreviewPanelFooter = () => {
+export const PreviewPanelFooter: FC = () => {
   const { eventId, indexName, scopeId, getFieldsData, isPreview } = useDocumentDetailsContext();
   const { openFlyout } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
@@ -48,7 +49,7 @@ export const PreviewPanelFooter = () => {
     });
   }, [openFlyout, eventId, indexName, scopeId, telemetry]);
 
-  const additionalActions = useMemo(
+  const fullDetailsLink = useMemo(
     () => (
       <EuiLink
         onClick={openDocumentFlyout}
@@ -65,5 +66,19 @@ export const PreviewPanelFooter = () => {
     ),
     [isAlert, openDocumentFlyout]
   );
-  return <PanelFooter isPreview={isPreview} additionalActions={additionalActions} />;
+
+  if (isPreview) return null;
+
+  return (
+    <EuiFlyoutFooter data-test-subj={PREVIEW_FOOTER_TEST_ID}>
+      <EuiPanel color="transparent">
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+          <EuiFlexItem grow={false}>{fullDetailsLink}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <TakeActionButton />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </EuiFlyoutFooter>
+  );
 };
