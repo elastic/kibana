@@ -37,8 +37,8 @@ const RULE_PAGE_PATH = '/app/security/rules/id/';
 
 interface TakeActionProps {
   createRuleFn?: (http: HttpSetup) => Promise<RuleResponse>;
-  enableBenchmarkRuleFn?: () => Promise<void>;
-  disableBenchmarkRuleFn?: () => Promise<void>;
+  enableBenchmarkRuleFn?: () => void;
+  disableBenchmarkRuleFn?: () => void;
   isCreateDetectionRuleDisabled?: boolean;
   isDataGridControlColumn?: boolean;
 }
@@ -263,7 +263,7 @@ const EnableBenchmarkRule = ({
   setIsLoading,
   closePopover,
 }: {
-  enableBenchmarkRuleFn: () => Promise<void>;
+  enableBenchmarkRuleFn: () => void;
   setIsLoading: (isLoading: boolean) => void;
   closePopover: () => void;
 }) => {
@@ -288,7 +288,7 @@ const DisableBenchmarkRule = ({
   setIsLoading,
   closePopover,
 }: {
-  disableBenchmarkRuleFn: () => Promise<void>;
+  disableBenchmarkRuleFn: () => void;
   setIsLoading: (isLoading: boolean) => void;
   closePopover: () => void;
 }) => {

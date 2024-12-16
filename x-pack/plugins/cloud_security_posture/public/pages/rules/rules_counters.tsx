@@ -29,6 +29,7 @@ import { RULE_FAILED, RULE_PASSED } from '../../../common/constants';
 import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
 import { CspCounterCard } from '../../components/csp_counter_card';
 import { useKibana } from '../../common/hooks/use_kibana';
+import { useRules } from './rules_context';
 
 const EvaluationPieChart = ({ failed, passed }: { failed: number; passed: number }) => {
   const {
@@ -84,18 +85,13 @@ const EvaluationPieChart = ({ failed, passed }: { failed: number; passed: number
   );
 };
 
-export const RulesCounters = ({
-  mutedRulesCount,
-  setEnabledDisabledItemsFilter,
-}: {
-  mutedRulesCount: number;
-  setEnabledDisabledItemsFilter: (filterState: string) => void;
-}) => {
+export const RulesCounters = () => {
   const { http } = useKibana().services;
   const { getBenchmarkDynamicValues } = useBenchmarkDynamicValues();
   const rulesPageParams = useParams<{ benchmarkId: string; benchmarkVersion: string }>();
   const getBenchmarks = useCspBenchmarkIntegrationsV2();
   const navToFindings = useNavigateFindings();
+  const { setEnabledDisabledItemsFilter, mutedRulesCount } = useRules();
 
   const benchmarkRulesStats = getBenchmarks.data?.items.find(
     (benchmark) =>
