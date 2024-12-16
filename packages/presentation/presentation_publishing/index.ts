@@ -130,24 +130,24 @@ export {
   type ViewMode,
 } from './interfaces/publishes_view_mode';
 export {
-  apiPublishesPanelDescription,
-  apiPublishesWritablePanelDescription,
-  getPanelDescription,
-  type PublishesPanelDescription,
-  type PublishesWritablePanelDescription,
-} from './interfaces/titles/publishes_panel_description';
+  apiPublishesDescription,
+  apiPublishesWritableDescription,
+  getDescription,
+  type PublishesDescription,
+  type PublishesWritableDescription,
+} from './interfaces/titles/publishes_description';
 export {
-  apiPublishesPanelTitle,
+  apiPublishesTitle,
   apiPublishesWritablePanelTitle,
-  getPanelTitle,
-  type PublishesPanelTitle,
-  type PublishesWritablePanelTitle,
-} from './interfaces/titles/publishes_panel_title';
+  getTitle,
+  type PublishesTitle,
+  type PublishesWritableTitle,
+} from './interfaces/titles/publishes_title';
 export {
   initializeTitles,
   stateHasTitles,
   type SerializedTitles,
-} from './interfaces/titles/titles_api';
+} from './interfaces/titles/initialize_titles';
 export {
   useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,

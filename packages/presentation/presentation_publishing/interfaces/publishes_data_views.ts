@@ -11,7 +11,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { PublishingSubject } from '../publishing_subject';
 
 export interface PublishesDataViews {
-  dataViews: PublishingSubject<DataView[] | undefined>;
+  dataViews$: PublishingSubject<DataView[] | undefined>;
 }
 
 export type PublishesWritableDataViews = PublishesDataViews & {
@@ -21,5 +21,5 @@ export type PublishesWritableDataViews = PublishesDataViews & {
 export const apiPublishesDataViews = (
   unknownApi: null | unknown
 ): unknownApi is PublishesDataViews => {
-  return Boolean(unknownApi && (unknownApi as PublishesDataViews)?.dataViews !== undefined);
+  return Boolean(unknownApi && (unknownApi as PublishesDataViews)?.dataViews$ !== undefined);
 };

@@ -33,7 +33,7 @@ export function childrenUnsavedChanges$(children$: PresentationContainer['childr
         ? of([])
         : combineLatest(
             childrenThatPublishUnsavedChanges.map(([childId, child]) =>
-              child.unsavedChanges.pipe(map((unsavedChanges) => ({ childId, unsavedChanges })))
+              child.unsavedChanges$.pipe(map((unsavedChanges) => ({ childId, unsavedChanges })))
             )
           );
     }),

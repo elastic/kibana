@@ -43,14 +43,14 @@ describe('unsavedChanges api', () => {
   });
 
   test('should have no unsaved changes after initialization', () => {
-    expect(api?.unsavedChanges.value).toBeUndefined();
+    expect(api?.unsavedChanges$.value).toBeUndefined();
   });
 
   test('should have unsaved changes when state changes', async () => {
     key1$.next('modified key1 value');
     await waitFor(
       () =>
-        expect(api?.unsavedChanges.value).toEqual({
+        expect(api?.unsavedChanges$.value).toEqual({
           key1: 'modified key1 value',
         }),
       {
@@ -61,28 +61,28 @@ describe('unsavedChanges api', () => {
 
   test('should have no unsaved changes after save', async () => {
     key1$.next('modified key1 value');
-    await waitFor(() => expect(api?.unsavedChanges.value).not.toBeUndefined(), {
+    await waitFor(() => expect(api?.unsavedChanges$.value).not.toBeUndefined(), {
       interval: COMPARATOR_SUBJECTS_DEBOUNCE + 1,
     });
 
     // trigger save
     parentApi.saveNotification$.next();
 
-    await waitFor(() => expect(api?.unsavedChanges.value).toBeUndefined(), {
+    await waitFor(() => expect(api?.unsavedChanges$.value).toBeUndefined(), {
       interval: COMPARATOR_SUBJECTS_DEBOUNCE + 1,
     });
   });
 
   test('should have no unsaved changes after reset', async () => {
     key1$.next('modified key1 value');
-    await waitFor(() => expect(api?.unsavedChanges.value).not.toBeUndefined(), {
+    await waitFor(() => expect(api?.unsavedChanges$.value).not.toBeUndefined(), {
       interval: COMPARATOR_SUBJECTS_DEBOUNCE + 1,
     });
 
     // trigger reset
     api?.resetUnsavedChanges();
 
-    await waitFor(() => expect(api?.unsavedChanges.value).toBeUndefined(), {
+    await waitFor(() => expect(api?.unsavedChanges$.value).toBeUndefined(), {
       interval: COMPARATOR_SUBJECTS_DEBOUNCE + 1,
     });
   });
