@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
 import { ThreatIndex } from '../../../../rule_definition_section';
+import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 
 export interface ThreatIndexReadOnlyProps {
   threatIndex: string[];
@@ -20,7 +21,11 @@ export const ThreatIndexReadOnly = ({ threatIndex }: ThreatIndexReadOnlyProps) =
       listItems={[
         {
           title: ruleDetailsI18n.THREAT_INDEX_FIELD_LABEL,
-          description: <ThreatIndex threatIndex={threatIndex} />,
+          description: threatIndex.length ? (
+            <ThreatIndex threatIndex={threatIndex} />
+          ) : (
+            <EmptyFieldValuePlaceholder />
+          ),
         },
       ]}
     />
