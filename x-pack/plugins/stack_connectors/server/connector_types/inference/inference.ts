@@ -123,9 +123,11 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    * @signal abort signal
    */
   public async performApiUnifiedCompletion(
-    params: UnifiedChatCompleteParams & { signal?: AbortSignal }
+    params: UnifiedChatCompleteParams
   ): Promise<UnifiedChatCompleteResponse> {
+    console.log('==> unified request', params);
     const res = await this.performApiUnifiedCompletionStream(params);
+    console.log('==> unified res', res);
 
     const v = from(eventSourceStreamIntoObservable(res as Readable)).pipe(
       filter((line) => !!line && line !== '[DONE]'),
@@ -191,10 +193,12 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
 
                     prevToolCall = prev.choices[0].message.tool_calls;
                   }
+                  console.log('==> prevToolCall', JSON.stringify(prevToolCall, null, 2));
+                  console.log('==> toolCall', JSON.stringify(toolCall, null, 2));
 
-                  prevToolCall.function.name += toolCall.function?.name;
-                  prevToolCall.function.arguments += toolCall.function?.arguments;
-                  prevToolCall.toolCall.id += toolCall.id;
+                  prevToolCall[0].function.name += toolCall.function?.name;
+                  prevToolCall[0].function.arguments += toolCall.function?.arguments;
+                  prevToolCall[0].id += toolCall.id;
                 });
               } else if (chunk.usage) {
                 prev.usage = chunk.usage;
@@ -228,10 +232,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    * @param input the text on which you want to perform the inference task.
    * @signal abort signal
    */
-  public async performApiUnifiedCompletionStream(
-    params: UnifiedChatCompleteParams & { signal?: AbortSignal }
-  ) {
-    console.log('==> unified request', params.body);
+  public async performApiUnifiedCompletionStream(params: UnifiedChatCompleteParams) {
     return await this.esClient.transport.request(
       {
         method: 'POST',
@@ -254,7 +255,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    * }
    */
   public async performApiUnifiedCompletionAsyncIterator(
-    params: UnifiedChatCompleteParams & { signal?: AbortSignal },
+    params: UnifiedChatCompleteParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<{
     consumerStream: Stream<UnifiedChatCompleteResponse>;

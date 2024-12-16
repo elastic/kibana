@@ -101,7 +101,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     this.#logger = logger;
     this.#timeout = timeout;
     this.#actionResultData = '';
-    this.streaming = this.llmType === 'inference' ? true : streaming;
+    this.streaming = streaming;
     this.#signal = signal;
     this.model = model ?? DEFAULT_OPEN_AI_MODEL;
     // to be passed to the actions client
@@ -149,7 +149,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       );
 
       const actionResult = await this.#actionsClient.execute(requestBody);
-      console.log('actionResult', actionResult);
+      console.log('==> actionResult', JSON.stringify(actionResult.data, null, 2));
 
       if (actionResult.status === 'error') {
         const error = new Error(
@@ -197,7 +197,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     };
     signal?: AbortSignal;
   } {
-    const toolsKeyword = llmType === 'inference' ? 'tools' : 'functions';
+    console.log('==> completionRequest', completionRequest);
     const body = {
       temperature: this.#temperature,
       // possible client model override
@@ -205,14 +205,15 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       // this should be undefined otherwise so the connector handles the model (stack_connector has access to preconfigured connector model values)
       model: this.model,
       // ensure we take the messages from the completion request, not the client request
-      n: completionRequest.n,
+      // n: completionRequest.n,
       stop: completionRequest.stop,
-      [toolsKeyword]: completionRequest.functions,
+      tools: completionRequest.tools,
+      ...('tool_choice' in completionRequest ? { tool_choice: completionRequest.tool_choice } : {}),
       messages: completionRequest.messages.map((message) => ({
         role: message.role,
         content: message.content ?? '',
         ...('name' in message ? { name: message?.name } : {}),
-        ...('function_call' in message ? { function_call: message?.function_call } : {}),
+        // ...('function_call' in message ? { function_call: message?.function_call } : {}),
         ...('tool_calls' in message ? { tool_calls: message?.tool_calls } : {}),
         ...('tool_call_id' in message ? { tool_call_id: message?.tool_call_id } : {}),
       })),
@@ -230,15 +231,16 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
         : 'run';
     // create a new connector request body with the assistant message:
     const subActionParams = {
-      ...(completionRequest.stream
-        ? llmType === 'inference'
-          ? { body }
-          : body
+      ...(llmType === 'inference'
+        ? { body }
+        : completionRequest.stream
+        ? body
         : { body: JSON.stringify(body) }),
       // signal: this.#signal,
       // This timeout is large because LangChain prompts can be complicated and take a long time
       // timeout: this.#timeout ?? DEFAULT_TIMEOUT,
     };
+
     console.log('==> subAction', subAction);
     console.log('==> subActionParams', JSON.stringify(subActionParams, null, 2));
     return {
