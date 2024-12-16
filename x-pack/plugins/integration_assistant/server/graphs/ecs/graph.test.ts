@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { FakeLLM } from '@langchain/core/utils/testing';
-import { getEcsGraph } from './graph';
-import {
-  ecsInitialMappingMockedResponse,
-  ecsDuplicateMockedResponse,
-  ecsInvalidMappingMockedResponse,
-  ecsMissingKeysMockedResponse,
-  ecsMappingExpectedResults,
-} from '../../../__jest__/fixtures/ecs_mapping';
-import { mockedRequest } from '../../../__jest__/fixtures';
-import { handleEcsMapping } from './mapping';
-import { handleDuplicates } from './duplicates';
-import { handleMissingKeys } from './missing';
-import { handleInvalidEcs } from './invalid';
 import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
+import { FakeLLM } from '@langchain/core/utils/testing';
+import { mockedRequest } from '../../../__jest__/fixtures';
+import {
+  ecsDuplicateMockedResponse,
+  ecsInitialMappingMockedResponse,
+  ecsInvalidMappingMockedResponse,
+  ecsMappingExpectedResults,
+  ecsMissingKeysMockedResponse,
+} from '../../../__jest__/fixtures/ecs_mapping';
+import { handleDuplicates } from './duplicates';
+import { getEcsGraph } from './graph';
+import { handleInvalidEcs } from './invalid';
+import { handleEcsMapping } from './mapping';
+import { handleMissingKeys } from './missing';
 
 const model = new FakeLLM({
   response: "I'll callback later.",

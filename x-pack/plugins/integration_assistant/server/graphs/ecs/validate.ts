@@ -40,10 +40,11 @@ function findMissingFields(combinedSamples: string, ecsMapping: AnyObject): stri
   const parsedSamples = JSON.parse(combinedSamples);
   const uniqueKeysFromSamples = extractKeys(parsedSamples);
   const ecsResponseKeys = extractKeys(ecsMapping);
+  console.log('ecsMapping', ecsMapping);
 
   const missingKeys = [...uniqueKeysFromSamples].filter((key) => !ecsResponseKeys.has(key));
-  if (isMissingTimestampKey(parsedSamples, ecsResponseKeys)) {
-    console.log('MISSING TIMESTAMP FIELD');
+  if (!ecsResponseKeys.has(ECS_TIMESTAMP_FIELD)) {
+    console.log('ECS timestamp field is missing');
     missingKeys.push(ECS_TIMESTAMP_FIELD);
   }
   return missingKeys;
@@ -55,42 +56,6 @@ interface ECSFieldTarget {
   type: string;
   confidence: number;
   date_formats: string[];
-}
-
-function isValidDate(dateString: string): boolean {
-  console.log('DATE STRING');
-  console.log(dateString);
-  const date = new Date(dateString);
-  console.log(date);
-  return !isNaN(date.getTime());
-}
-
-function hasDateTimeKeyValue(json: any): boolean {
-  for (const key in json) {
-    console.log('KEY');
-    console.log(key);
-    if (typeof json[key] === 'object' && json[key] !== null) {
-      if (hasDateTimeKeyValue(json[key])) {
-        return true;
-      }
-    } else if (typeof json[key] === 'string' && isValidDate(json[key])) {
-      return true;
-    }
-  }
-  return false;
-}
-
-// Ensure that the ECS mapping has a timestamp key if the samples have a valid timestamp.
-function isMissingTimestampKey(parsedSamples: any, ecsResponseKeys: Set<String>): boolean {
-  console.log('ECS RESPONSE KEYS');
-  console.log(ecsResponseKeys);
-  if (ecsResponseKeys.has(ECS_TIMESTAMP_FIELD)) {
-    return false;
-  }
-  console.log('PARSED SAMPLES');
-  console.log(hasDateTimeKeyValue(parsedSamples));
-
-  return hasDateTimeKeyValue(parsedSamples);
 }
 
 /**

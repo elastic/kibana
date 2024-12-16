@@ -299,6 +299,7 @@ describe('handleValidateMappings', () => {
           event: { target: 'event.action', confidence: 0.95, type: 'string' },
         },
       },
+      '@timestamp': { target: '@timestamp', confidence: 0.95, type: 'date', date_formats: [] },
     };
     state.combinedSamples = JSON.stringify({
       test: {
@@ -320,6 +321,7 @@ describe('handleValidateMappings', () => {
           event: { target: 'event.action', confidence: 0.95, type: 'string' },
         },
       },
+      '@timestamp': { target: '@timestamp', confidence: 0.95, type: 'date', date_formats: [] },
     };
     state.combinedSamples = JSON.stringify({
       test: {
@@ -334,24 +336,24 @@ describe('handleValidateMappings', () => {
     expect(missingKeys).toEqual(['test.test.version']);
   });
 
-  // it('should return missing timestamp field not in mapping', () => {
-  //   const state: EcsMappingState = ecsTestState;
-  //   state.currentMapping = {
-  //     test: {
-  //       test: {
-  //         event: { target: 'event.action', confidence: 0.95, type: 'string' },
-  //       },
-  //     },
-  //   };
-  //   state.combinedSamples = JSON.stringify({
-  //     test: {
-  //       test: {
-  //         event: '2024-02-24T06:56:50.648137154Z',
-  //       },
-  //     },
-  //   });
-  //   const { missingKeys } = handleValidateMappings({ state });
+  it('should return missing timestamp field not in mapping', () => {
+    const state: EcsMappingState = ecsTestState;
+    state.currentMapping = {
+      test: {
+        test: {
+          event: { target: 'event.action', confidence: 0.95, type: 'string' },
+        },
+      },
+    };
+    state.combinedSamples = JSON.stringify({
+      test: {
+        test: {
+          event: '2024-02-24T06:56:50.648137154Z',
+        },
+      },
+    });
+    const { missingKeys } = handleValidateMappings({ state });
 
-  //   expect(missingKeys).toEqual(['@timestamp']);
-  // });
+    expect(missingKeys).toEqual(['@timestamp']);
+  });
 });
