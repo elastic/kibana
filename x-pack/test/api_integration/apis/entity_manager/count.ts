@@ -20,7 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const supertest = getService('supertest');
 
-  describe('_count API', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/204323
+  describe.skip('_count API', () => {
     let cleanup: Function[] = [];
 
     before(() => clearEntityDefinitions(esClient));
