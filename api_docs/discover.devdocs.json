@@ -4736,15 +4736,15 @@
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/packs/pack_queries_status_table.tsx"
+                "path": "x-pack/platform/plugins/shared/osquery/public/packs/pack_queries_status_table.tsx"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/discover/view_results_in_discover.tsx"
+                "path": "x-pack/platform/plugins/shared/osquery/public/discover/view_results_in_discover.tsx"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/common/hooks/use_discover_link.tsx"
+                "path": "x-pack/platform/plugins/shared/osquery/public/common/hooks/use_discover_link.tsx"
               },
               {
                 "plugin": "exploratoryView",
