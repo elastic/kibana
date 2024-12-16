@@ -12,17 +12,14 @@ import {
   SavedTimelineWithSavedObjectId,
   TimelineTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/timeline';
-import { TIMELINE_URL } from '@kbn/security-solution-plugin/common/constants';
+import { TIMELINE_URL, TIMELINES_URL } from '@kbn/security-solution-plugin/common/constants';
 
 /**
  * Deletes the first 100 timelines.
  * This works in ess, serverless and on the MKI environments as it avoids having to look at hidden indexes.
  */
 export const deleteTimelines = async (supertest: SuperTest.Agent): Promise<void> => {
-  const response = await supertest
-    .get('/api/timelines')
-    .set('kbn-xsrf', 'true')
-    .set('elastic-api-version', '2023-10-31');
+  const response = await getTimelines(supertest);
   const { timeline: timelines } = response.body as GetTimelinesResponse;
 
   await supertest
@@ -34,6 +31,29 @@ export const deleteTimelines = async (supertest: SuperTest.Agent): Promise<void>
       ),
     });
 };
+
+export const deleteTimeline = async (
+  supertest: SuperTest.Agent,
+  savedObjectId: string
+): Promise<void> =>
+  await supertest
+    .delete(TIMELINE_URL)
+    .set('kbn-xsrf', 'true')
+    .send({
+      savedObjectIds: [savedObjectId],
+    });
+
+export const patchTimeline = async (
+  supertest: SuperTest.Agent,
+  timelineId: string,
+  version: string,
+  timelineObj: unknown
+) =>
+  await supertest.patch(TIMELINE_URL).set('kbn-xsrf', 'true').send({
+    timelineId,
+    version,
+    timeline: timelineObj,
+  });
 
 export const createBasicTimeline = async (supertest: SuperTest.Agent, titleToSaved: string) =>
   await supertest
@@ -64,3 +84,9 @@ export const createBasicTimelineTemplate = async (
         timelineType: TimelineTypeEnum.template,
       },
     });
+
+export const getTimelines = async (supertest: SuperTest.Agent) =>
+  await supertest
+    .get(TIMELINES_URL)
+    .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31');

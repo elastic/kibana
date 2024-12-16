@@ -8,7 +8,7 @@
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
 import { FtrProviderContextWithSpaces } from '../../ftr_provider_context_with_spaces';
-import { SecuritySolutionESSUtilsInterface } from './types';
+import { SecuritySolutionESSUtilsInterface, Role, User } from './types';
 
 export function SecuritySolutionESSUtils({
   getService,
@@ -16,6 +16,7 @@ export function SecuritySolutionESSUtils({
   const config = getService('config');
   const search = getService('search');
   const supertestWithoutAuth = getService('supertest');
+  const security = getService('security');
 
   return {
     getUsername: (_role?: string) =>
@@ -31,6 +32,35 @@ export function SecuritySolutionESSUtils({
       });
 
       return supertest.agent(kbnUrl).auth(role, password);
+    },
+
+    async createUser(user: User): Promise<void> {
+      const { username, roles, password } = user;
+      await security.user.create(username, { roles, password: password ?? 'changeme' });
+    },
+
+    /**
+     * Deletes specified users by username
+     * @param names[]
+     */
+    async deleteUsers(names: string[]): Promise<void> {
+      for (const name of names) {
+        await security.user.delete(name);
+      }
+    },
+
+    async createRole(name: string, role: Role) {
+      return await security.role.create(name, role.privileges);
+    },
+
+    /**
+     * Deletes specified roles by name
+     * @param roles[]
+     */
+    async deleteRoles(roles: string[]): Promise<void> {
+      for (const role of roles) {
+        await security.role.delete(role);
+      }
     },
   };
 }
