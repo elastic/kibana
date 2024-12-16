@@ -26,7 +26,10 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { requiredOptional } from '@kbn/zod-helpers';
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type {
+  BuildingBlockType,
+  RuleResponse,
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
@@ -76,9 +79,15 @@ export const Author = ({ author }: AuthorProps) => (
   <BadgeList badges={author} data-test-subj="authorPropertyValue" />
 );
 
-export const BuildingBlock = () => (
+interface BuildingBlockProps {
+  type: BuildingBlockType | undefined;
+}
+
+export const BuildingBlock = ({ type }: BuildingBlockProps) => (
   <EuiText size="s" data-test-subj="buildingBlockPropertyValue">
-    {i18n.BUILDING_BLOCK_FIELD_DESCRIPTION}
+    {type
+      ? i18n.BUILDING_BLOCK_ENABLED_FIELD_DESCRIPTION
+      : i18n.BUILDING_BLOCK_DISABLED_FIELD_DESCRIPTION}
   </EuiText>
 );
 
@@ -294,7 +303,7 @@ const prepareAboutSectionListItems = (
       title: (
         <span data-test-subj="buildingBlockPropertyTitle">{i18n.BUILDING_BLOCK_FIELD_LABEL}</span>
       ),
-      description: <BuildingBlock />,
+      description: <BuildingBlock type="default" />,
     });
   }
 
