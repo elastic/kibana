@@ -5,7 +5,6 @@
 ## `node scripts/generate codeowners`.
 ####
 
-examples/bfetch_explorer @elastic/appex-sharedux
 examples/content_management_examples @elastic/appex-sharedux
 examples/controls_example @elastic/kibana-presentation
 examples/data_view_field_editor_example @elastic/kibana-data-discovery
@@ -2617,7 +2616,6 @@ x-pack/plugins/observability_solution/observability_shared/public/components/pro
 /test/examples/state_sync/*.ts @elastic/appex-sharedux
 /test/examples/error_boundary/index.ts @elastic/appex-sharedux
 /test/examples/content_management/*.ts @elastic/appex-sharedux
-/test/examples/bfetch_explorer/*.ts @elastic/appex-sharedux
 /test/api_integration/apis/guided_onboarding @elastic/appex-sharedux
 /x-pack/test/banners_functional @elastic/appex-sharedux
 /x-pack/test/custom_branding @elastic/appex-sharedux

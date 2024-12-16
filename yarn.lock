@@ -4053,10 +4053,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/bfetch-explorer-plugin@link:examples/bfetch_explorer":
-  version "0.0.0"
-  uid ""
-
 "@kbn/bfetch-plugin@link:src/plugins/bfetch":
   version "0.0.0"
   uid ""
