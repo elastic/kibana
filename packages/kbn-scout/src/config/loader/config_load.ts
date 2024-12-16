@@ -9,6 +9,7 @@
 
 import path from 'path';
 import { Config } from '../config';
+import { ScoutLoaderConfig } from '../../types';
 
 /**
  * Dynamically loads server configuration file in the "kbn-scout" framework. It reads
@@ -23,7 +24,7 @@ export const loadConfig = async (configPath: string): Promise<Config> => {
     const configModule = await import(absolutePath);
 
     if (configModule.servers) {
-      return new Config(configModule.servers);
+      return new Config(configModule.servers as ScoutLoaderConfig);
     } else {
       throw new Error(`No 'servers' found in the config file at path: ${absolutePath}`);
     }

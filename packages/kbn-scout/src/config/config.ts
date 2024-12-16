@@ -13,15 +13,15 @@ import Path from 'path';
 import { cloneDeepWith, get, has, toPath } from 'lodash';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from './schema';
-import { ScoutServerConfig } from '../types';
+import { ScoutLoaderConfig, ScoutServerConfig } from '../types';
 import { formatCurrentDate, getProjectType } from './utils';
 
 const $values = Symbol('values');
 
 export class Config {
-  private [$values]: Record<string, any>;
+  private [$values]: ScoutLoaderConfig;
 
-  constructor(data: Record<string, any>) {
+  constructor(data: ScoutLoaderConfig) {
     const { error, value } = schema.validate(data, {
       abortEarly: false,
     });
@@ -111,6 +111,7 @@ export class Config {
         ? getProjectType(this.get('kbnTestServer.serverArgs'))
         : undefined,
       isCloud: false,
+      license: this.get('esTestCluster.license'),
       cloudUsersFilePath: Path.resolve(REPO_ROOT, '.ftr', 'role_users.json'),
       hosts: {
         kibana: Url.format({
