@@ -4,12 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { lazy, Suspense, useMemo, useCallback, useEffect, useRef } from 'react';
-import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
+import React, { lazy, Suspense, useMemo, useCallback, useEffect, useRef, useState } from 'react';
+
+import {
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiPortal,
+  EuiSkeletonText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { noop } from 'lodash';
 
 import { css } from '@emotion/react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DetailViewPanelName } from '@kbn/fleet-plugin/public/applications/integrations/sections/epm/screens/detail';
 import { withLazyHook } from '../../../../../common/components/with_lazy_hook';
 import {
   useStoredIntegrationSearchTerm,
@@ -45,9 +58,39 @@ export const PackageListGrid = lazy(async () => ({
     .then((pkg) => pkg.PackageListGrid),
 }));
 
+const Detail = lazy(async () => ({
+  default: await import('@kbn/fleet-plugin/public')
+    .then((module) => module.Detail())
+    .then((pkg) => pkg.Detail),
+}));
+
+const CreatePackagePolicyPage = lazy(async () => ({
+  default: await import('@kbn/fleet-plugin/public')
+    .then((module) => module.CreatePackagePolicyPage())
+    .then((pkg) => pkg.CreatePackagePolicyPage),
+}));
+
+const FleetIntegrationsStateContextProvider = lazy(async () => ({
+  default: await import('@kbn/fleet-plugin/public')
+    .then((module) => module.FleetIntegrationsStateContextProvider())
+    .then((pkg) => pkg.FleetIntegrationsStateContextProvider),
+}));
+
+const integrationStepMap = [
+  'Add integration',
+  'Check fleet server requirement',
+  'Add Fleet server',
+  'Install Elastic Agent',
+  'Confirm incoming data',
+];
+
 export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGridTabsProps>(
   ({ installedIntegrationsCount, isAgentRequired, useAvailablePackages }) => {
     const { spaceId } = useOnboardingContext();
+    const startServices = useKibana().services;
+    const {
+      services: { fleet },
+    } = useKibana();
     const scrollElement = useRef<HTMLDivElement>(null);
     const [toggleIdSelected, setSelectedTabIdToStorage] = useStoredIntegrationTabId(
       spaceId,
@@ -65,6 +108,26 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
       [setSelectedTabIdToStorage]
     );
 
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [integrationName, setIntegrationName] = useState<string>();
+    const [modalView, setModalView] = useState<'overview' | 'configure-integration' | 'add-agent'>(
+      'overview'
+    );
+    const [integrationStep, onStepNext] = useState(0);
+    const onAddIntegrationPolicyClick = useCallback(() => {
+      setModalView('configure-integration');
+    }, []);
+    const closeModal = useCallback(() => {
+      setIsModalVisible(false);
+      setModalView('overview');
+      setSelectedDetailsTab('overview');
+      onStepNext(0);
+    }, []);
+    const onCardClicked = useCallback((name: string) => {
+      setIsModalVisible(true);
+      setIntegrationName(name);
+    }, []);
+    const modalTitleId = useGeneratedHtmlId();
     const {
       filteredCards,
       isLoading,
@@ -77,7 +140,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
     });
 
     const selectedTab = useMemo(() => INTEGRATION_TABS_BY_ID[toggleIdSelected], [toggleIdSelected]);
-
+    const [selectedDetailsTab, setSelectedDetailsTab] = useState<DetailViewPanelName>('overview');
     const onSearchTermChanged = useCallback(
       (searchQuery: string) => {
         setSearchTerm(searchQuery);
@@ -89,6 +152,15 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
       },
       [selectedTab.showSearchTools, setSearchTerm, setSearchTermToStorage]
     );
+
+    const handleViewAssets = useCallback(() => {
+      setModalView('overview');
+      setSelectedDetailsTab('assets');
+    }, []);
+
+    const onDetailsTabClick = useCallback((detailsTab: DetailViewPanelName) => {
+      setSelectedDetailsTab(detailsTab);
+    }, []);
 
     useEffect(() => {
       setCategory(selectedTab.category ?? '');
@@ -116,10 +188,10 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
       setSelectedSubCategory,
       toggleIdSelected,
     ]);
-
     const list: IntegrationCardItem[] = useIntegrationCardList({
       integrationsList: filteredCards,
       featuredCardIds: selectedTab.featuredCardIds,
+      onCardClicked,
     });
 
     if (isLoading) {
@@ -132,68 +204,111 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
       );
     }
     return (
-      <EuiFlexGroup
-        direction="column"
-        className="step-paragraph"
-        gutterSize={selectedTab.showSearchTools ? 'm' : 'none'}
-        css={css`
-          height: ${selectedTab.showSearchTools
-            ? WITH_SEARCH_BOX_HEIGHT
-            : WITHOUT_SEARCH_BOX_HEIGHT};
-        `}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            buttonSize="compressed"
-            color="primary"
-            idSelected={toggleIdSelected}
-            isFullWidth
-            legend="Categories"
-            onChange={onTabChange}
-            options={INTEGRATION_TABS}
-            type="single"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem
+      <>
+        <EuiFlexGroup
+          direction="column"
+          className="step-paragraph"
+          gutterSize={selectedTab.showSearchTools ? 'm' : 'none'}
           css={css`
-            overflow-y: ${selectedTab.overflow ?? 'auto'};
+            height: ${selectedTab.showSearchTools
+              ? WITH_SEARCH_BOX_HEIGHT
+              : WITHOUT_SEARCH_BOX_HEIGHT};
           `}
-          grow={1}
-          id={SCROLL_ELEMENT_ID}
-          ref={scrollElement}
         >
-          <Suspense
-            fallback={<EuiSkeletonText isLoading={true} lines={LOADING_SKELETON_TEXT_LINES} />}
-          >
-            <PackageListGrid
-              callout={
-                <IntegrationCardTopCallout
-                  isAgentRequired={isAgentRequired}
-                  installedIntegrationsCount={installedIntegrationsCount}
-                  selectedTabId={toggleIdSelected}
-                />
-              }
-              calloutTopSpacerSize="m"
-              categories={SEARCH_FILTER_CATEGORIES} // We do not want to show categories and subcategories as the search bar filter
-              emptyStateStyles={emptyStateStyles}
-              list={list}
-              scrollElementId={SCROLL_ELEMENT_ID}
-              searchTerm={searchTerm}
-              selectedCategory={selectedTab.category ?? ''}
-              selectedSubCategory={selectedTab.subCategory}
-              setCategory={setCategory}
-              setSearchTerm={onSearchTermChanged}
-              setUrlandPushHistory={noop}
-              setUrlandReplaceHistory={noop}
-              showCardLabels={false}
-              showControls={false}
-              showSearchTools={selectedTab.showSearchTools}
-              sortByFeaturedIntegrations={selectedTab.sortByFeaturedIntegrations}
-              spacer={false}
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              buttonSize="compressed"
+              color="primary"
+              idSelected={toggleIdSelected}
+              isFullWidth
+              legend="Categories"
+              onChange={onTabChange}
+              options={INTEGRATION_TABS}
+              type="single"
             />
-          </Suspense>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem
+            css={css`
+              overflow-y: ${selectedTab.overflow ?? 'auto'};
+            `}
+            grow={1}
+            id={SCROLL_ELEMENT_ID}
+            ref={scrollElement}
+          >
+            <Suspense
+              fallback={<EuiSkeletonText isLoading={true} lines={LOADING_SKELETON_TEXT_LINES} />}
+            >
+              <PackageListGrid
+                callout={
+                  <IntegrationCardTopCallout
+                    isAgentRequired={isAgentRequired}
+                    installedIntegrationsCount={installedIntegrationsCount}
+                    selectedTabId={toggleIdSelected}
+                  />
+                }
+                calloutTopSpacerSize="m"
+                categories={SEARCH_FILTER_CATEGORIES} // We do not want to show categories and subcategories as the search bar filter
+                emptyStateStyles={emptyStateStyles}
+                list={list}
+                scrollElementId={SCROLL_ELEMENT_ID}
+                searchTerm={searchTerm}
+                selectedCategory={selectedTab.category ?? ''}
+                selectedSubCategory={selectedTab.subCategory}
+                setCategory={setCategory}
+                setSearchTerm={onSearchTermChanged}
+                setUrlandPushHistory={noop}
+                setUrlandReplaceHistory={noop}
+                showCardLabels={false}
+                showControls={false}
+                showSearchTools={selectedTab.showSearchTools}
+                sortByFeaturedIntegrations={selectedTab.sortByFeaturedIntegrations}
+                spacer={false}
+              />
+            </Suspense>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {isModalVisible && fleet && (
+          <EuiPortal>
+            <EuiModal
+              aria-labelledby={modalTitleId}
+              onClose={closeModal}
+              css={css`
+                width: 1024px;
+              `}
+            >
+              {modalView === 'configure-integration' && (
+                <EuiModalHeader>{`step indicator place holder. Integration step: ${integrationStepMap[integrationStep]}`}</EuiModalHeader>
+              )}
+              <EuiModalBody>
+                <FleetIntegrationsStateContextProvider
+                  values={{ startServices, useMultiPageLayoutProp: true, kibanaVersion: '9.0.0' }}
+                >
+                  {modalView === 'overview' && (
+                    <Detail
+                      onAddIntegrationPolicyClick={onAddIntegrationPolicyClick}
+                      originFrom="onboarding-hub"
+                      routesEnabled={false}
+                      onDetailsTabClick={onDetailsTabClick}
+                      selectedDetailsTab={selectedDetailsTab}
+                    />
+                  )}
+                  {modalView === 'configure-integration' && (
+                    <CreatePackagePolicyPage
+                      useMultiPageLayoutProp={true}
+                      originFrom="onboarding-hub"
+                      integrationName={integrationName}
+                      onStepNext={onStepNext}
+                      onCancel={closeModal}
+                      handleViewAssets={handleViewAssets}
+                    />
+                  )}
+                </FleetIntegrationsStateContextProvider>
+              </EuiModalBody>
+              {/* <EuiModalFooter><EuiButton onClick={closeModal}>Close</EuiButton></EuiModalFooter> */}
+            </EuiModal>
+          </EuiPortal>
+        )}
+      </>
     );
   }
 );

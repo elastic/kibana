@@ -53,7 +53,7 @@ const fleetManagedSteps = [installAgentStep, addIntegrationStep, confirmDataStep
 
 const standaloneSteps = [addIntegrationStep, installAgentStep, confirmDataStep];
 
-export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
+export const CreatePackagePolicyMultiPage: React.FC<CreatePackagePolicyParams> = ({
   queryParamsPolicyId,
   prerelease,
 }) => {
@@ -65,10 +65,12 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   const [isManaged, setIsManaged] = useState(true);
   const { getHref } = useLink();
   const [enrolledAgentIds, setEnrolledAgentIds] = useState<string[]>([]);
+
   const toggleIsManaged = (newIsManaged: boolean) => {
     setIsManaged(newIsManaged);
     setCurrentStep(0);
   };
+
   const agentPolicyId = policyId || queryParamsPolicyId;
   const {
     data: packageInfoData,
@@ -106,6 +108,8 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     ...(agentPolicyId ? { agentPolicyId } : {}),
   });
 
+  const steps = isManaged ? fleetManagedSteps : standaloneSteps;
+
   if (onSplash || !packageInfo) {
     return (
       <AddFirstIntegrationSplashScreen
@@ -119,7 +123,6 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     );
   }
 
-  const steps = isManaged ? fleetManagedSteps : standaloneSteps;
   const stepsNext = () => {
     if (currentStep === steps.length - 1) {
       return;

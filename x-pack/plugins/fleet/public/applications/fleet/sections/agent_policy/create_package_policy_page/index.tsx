@@ -8,18 +8,38 @@ import React, { useEffect } from 'react';
 import { useMemo } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 
+import { noop } from 'lodash/fp';
+
 import { useGetSettings } from '../../../hooks';
 
 import type { AddToPolicyParams, EditPackagePolicyFrom } from './types';
 
 import { CreatePackagePolicySinglePage } from './single_page_layout';
 import { CreatePackagePolicyMultiPage } from './multi_page_layout';
+import { EmbeddedIntegrationFlow } from './embedded_integration_flow';
 
-export const CreatePackagePolicyPage: React.FC<{}> = () => {
+export const CreatePackagePolicyPage: React.FC<{
+  useMultiPageLayoutProp?: boolean;
+  originFrom?: EditPackagePolicyFrom;
+  integrationName?: string;
+  onStepNext?: (step: number) => void;
+  onCancel?: () => void;
+  handleViewAssets?: () => void;
+}> = ({
+  useMultiPageLayoutProp,
+  originFrom,
+  integrationName,
+  onStepNext,
+  onCancel = noop,
+  handleViewAssets = noop,
+}) => {
   const { search } = useLocation();
   const { params } = useRouteMatch<AddToPolicyParams>();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
-  const useMultiPageLayout = useMemo(() => queryParams.has('useMultiPageLayout'), [queryParams]);
+  const useMultiPageLayout = useMemo(
+    () => useMultiPageLayoutProp ?? queryParams.has('useMultiPageLayout'),
+    [queryParams, useMultiPageLayoutProp]
+  );
   const queryParamsPolicyId = useMemo(
     () => queryParams.get('policyId') ?? undefined,
     [queryParams]
@@ -47,13 +67,25 @@ export const CreatePackagePolicyPage: React.FC<{}> = () => {
    * creation possible if a user has not chosen one from the packages UI.
    */
   const from: EditPackagePolicyFrom =
-    'policyId' in params || queryParamsPolicyId ? 'policy' : 'package';
+    originFrom ?? ('policyId' in params || queryParamsPolicyId ? 'policy' : 'package');
 
   const pageParams = {
     from,
     queryParamsPolicyId,
     prerelease,
   };
+
+  if (from === 'onboarding-hub') {
+    return (
+      <EmbeddedIntegrationFlow
+        {...pageParams}
+        onCancel={onCancel}
+        handleViewAssets={handleViewAssets}
+        onStepNext={onStepNext}
+        integrationName={integrationName}
+      />
+    );
+  }
 
   if (useMultiPageLayout) {
     return <CreatePackagePolicyMultiPage {...pageParams} />;
