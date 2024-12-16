@@ -86,12 +86,17 @@ const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
     indicate a one-hour duration.
     The same helper is used in the rule editing UI to format "from" before submitting the edits.
     So, after the rule is saved, the "from" property unit/value might differ from what's in the package.
+
+    Skips conversion when `to` isn't equal to "now". Conversion may be not valid in that case.
   */
-  rule.from = formatScheduleStepData({
-    interval: rule.interval,
-    from: getHumanizedDuration(rule.from, rule.interval),
-    to: rule.to,
-  }).from;
+  rule.from =
+    rule.to !== 'now'
+      ? rule.from
+      : formatScheduleStepData({
+          interval: rule.interval,
+          from: getHumanizedDuration(rule.from, rule.interval),
+          to: rule.to,
+        }).from;
 
   /*
     Default "note" to an empty string if it's not present.
