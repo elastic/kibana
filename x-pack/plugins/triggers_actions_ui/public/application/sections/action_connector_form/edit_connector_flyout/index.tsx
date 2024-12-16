@@ -6,7 +6,14 @@
  */
 
 import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import { EuiFlyout, EuiFlyoutBody, EuiButton, EuiConfirmModal } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiButton,
+  EuiConfirmModal,
+  EuiCallOut,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeExecutorResult, isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
@@ -62,6 +69,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const canSave = hasSaveActionsCapability(capabilities);
   const { isLoading: isUpdatingConnector, updateConnector } = useUpdateConnector();
   const { isLoading: isExecutingConnector, executeConnector } = useExecuteConnector();
+  const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
 
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
     useState<ReactNode>(null);
@@ -90,6 +98,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
       if (nextPage === EditConnectorTabs.Configuration && testExecutionResult !== none) {
         setTestExecutionResult(none);
       }
+      setShowFormErrors(false);
       setTab(nextPage);
     },
     [testExecutionResult, setTestExecutionResult]
@@ -146,6 +155,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
 
   const onClickSave = useCallback(async () => {
     setPreSubmitValidationErrorMessage(null);
+    setShowFormErrors(false);
 
     const { isValid, data } = await submit();
     if (!isMounted.current) {
@@ -194,6 +204,8 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
       }
 
       return updatedConnector;
+    } else {
+      setShowFormErrors(true);
     }
   }, [
     onConnectorUpdated,
@@ -218,6 +230,23 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         <>
           {isEdit && (
             <>
+              {showFormErrors && (
+                <>
+                  <EuiCallOut
+                    size="s"
+                    color="danger"
+                    iconType="warning"
+                    data-test-subj="connector-form-header-error-label"
+                    title={i18n.translate(
+                      'xpack.triggersActionsUI.sections.editConnectorForm.headerFormLabel',
+                      {
+                        defaultMessage: 'There are errors in the form',
+                      }
+                    )}
+                  />
+                  <EuiSpacer size="m" />
+                </>
+              )}
               <ConnectorForm
                 actionTypeModel={actionTypeModel}
                 connector={getConnectorWithoutSecrets(connector)}
@@ -265,17 +294,18 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     );
   }, [
     connector,
+    docLinks.links.alerting.preconfiguredConnectors,
     actionTypeModel,
     isEdit,
-    docLinks.links.alerting.preconfiguredConnectors,
-    hasErrors,
-    isFormModified,
-    isSaved,
-    isSaving,
+    showFormErrors,
+    onFormModifiedChange,
     preSubmitValidationErrorMessage,
     showButtons,
+    isSaved,
+    isSaving,
     onClickSave,
-    onFormModifiedChange,
+    isFormModified,
+    hasErrors,
   ]);
 
   const renderTestTab = useCallback(() => {
