@@ -26,7 +26,15 @@ import {
 } from './utils/relocate';
 import { safeExec } from './utils/exec';
 import { relocatePlan, relocateSummary } from './utils/logging';
-import { checkoutBranch, checkoutResetPr, cherryPickManualCommits, findGithubLogin, findPr, findRemoteName, getManualCommits } from './utils/git';
+import {
+  checkoutBranch,
+  checkoutResetPr,
+  cherryPickManualCommits,
+  findGithubLogin,
+  findPr,
+  findRemoteName,
+  getManualCommits,
+} from './utils/git';
 
 const moveModule = async (module: Package, log: ToolingLog) => {
   const destination = calculateModuleTargetFolder(module);

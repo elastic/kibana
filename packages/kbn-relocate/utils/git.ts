@@ -105,7 +105,6 @@ export const checkoutBranch = async (branch: string) => {
   }
 };
 
-
 export const cherryPickManualCommits = async (pr: PullRequest, log: ToolingLog) => {
   const manualCommits = getManualCommits(pr.commits);
   if (manualCommits.length) {

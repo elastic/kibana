@@ -24,11 +24,9 @@ import {
 
 export const createModuleTable = (entries: string[][]) => {
   const table = new Table({
-
     head: ['Id', 'Target folder'],
     colAligns: ['left', 'left'],
     style: {
-
       'padding-left': 2,
       'padding-right': 2,
     },
@@ -36,7 +34,7 @@ export const createModuleTable = (entries: string[][]) => {
 
   table.push(...entries);
   return table;
-}
+};
 
 export const relocatePlan = (modules: Package[], log: ToolingLog) => {
   const plugins = modules.filter((module) => module.manifest.type === 'plugin');
@@ -54,10 +52,8 @@ export const relocatePlan = (modules: Package[], log: ToolingLog) => {
     \n\n`;
 
     appendFileSync(DESCRIPTION, pluginList);
-    const plgTable = createModuleTable(plugins.map((plg) => [plg.id, target(plg)]))
-    log.info(
-      `${plugins.length} plugin(s) are going to be relocated:\n${plgTable.toString()}`
-    );
+    const plgTable = createModuleTable(plugins.map((plg) => [plg.id, target(plg)]));
+    log.info(`${plugins.length} plugin(s) are going to be relocated:\n${plgTable.toString()}`);
   }
 
   if (packages.length) {
@@ -69,10 +65,8 @@ export const relocatePlan = (modules: Package[], log: ToolingLog) => {
     \n\n`;
 
     appendFileSync(DESCRIPTION, packageList);
-    const pkgTable = createModuleTable(packages.map((pkg) => [pkg.id, target(pkg)]))
-    log.info(
-      `${packages.length} packages(s) are going to be relocated:\n${pkgTable.toString()}`
-    );
+    const pkgTable = createModuleTable(packages.map((pkg) => [pkg.id, target(pkg)]));
+    log.info(`${packages.length} packages(s) are going to be relocated:\n${pkgTable.toString()}`);
   }
 };
 
