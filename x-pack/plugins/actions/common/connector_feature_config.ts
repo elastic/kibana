@@ -28,12 +28,12 @@ export const SecurityConnectorFeatureId = 'siem';
 export const GenerativeAIForSecurityConnectorFeatureId = 'generativeAIForSecurity';
 export const GenerativeAIForObservabilityConnectorFeatureId = 'generativeAIForObservability';
 export const GenerativeAIForSearchPlaygroundConnectorFeatureId = 'generativeAIForSearchPlayground';
-export const EdrForSecurityConnectorFeatureId = 'edrForSecurity';
+export const EdrConnectorFeatureId = 'edr';
 
-const compatibilityEdrForSecurity = i18n.translate(
-  'xpack.actions.availableConnectorFeatures.compatibility.edrForSecurity',
+const compatibilityEdr = i18n.translate(
+  'xpack.actions.availableConnectorFeatures.compatibility.edr',
   {
-    defaultMessage: 'EDR for Security',
+    defaultMessage: 'Endpoint Security',
   }
 );
 
@@ -128,10 +128,10 @@ export const GenerativeAIForSearchPlaygroundFeature: ConnectorFeatureConfig = {
   compatibility: compatibilityGenerativeAIForSearchPlayground,
 };
 
-export const EdrForSecurityFeature: ConnectorFeatureConfig = {
-  id: EdrForSecurityConnectorFeatureId,
-  name: compatibilityEdrForSecurity,
-  compatibility: compatibilityEdrForSecurity,
+export const EdrConnectorFeature: ConnectorFeatureConfig = {
+  id: EdrConnectorFeatureId,
+  name: compatibilityEdr,
+  compatibility: compatibilityEdr,
 };
 
 const AllAvailableConnectorFeatures = {
@@ -142,7 +142,7 @@ const AllAvailableConnectorFeatures = {
   [GenerativeAIForSecurityFeature.id]: GenerativeAIForSecurityFeature,
   [GenerativeAIForObservabilityFeature.id]: GenerativeAIForObservabilityFeature,
   [GenerativeAIForSearchPlaygroundFeature.id]: GenerativeAIForSearchPlaygroundFeature,
-  [EdrForSecurityFeature.id]: EdrForSecurityFeature,
+  [EdrConnectorFeature.id]: EdrConnectorFeature,
 };
 
 export function areValidFeatures(ids: string[]) {

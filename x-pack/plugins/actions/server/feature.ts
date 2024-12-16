@@ -83,7 +83,7 @@ export const ACTIONS_FEATURE: KibanaFeatureConfig = {
           privileges: [
             {
               api: [EDR_EXECUTE_PRIVILEGE_API_TAG],
-              id: 'execute_edr',
+              id: 'edr_execute',
               name: i18n.translate('xpack.actions.featureRegistry.edrSubFeaturePrivilege', {
                 defaultMessage: 'Execute',
               }),
@@ -92,7 +92,7 @@ export const ACTIONS_FEATURE: KibanaFeatureConfig = {
                 all: [ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, CONNECTOR_TOKEN_SAVED_OBJECT_TYPE],
                 read: [ACTION_SAVED_OBJECT_TYPE],
               },
-              ui: ['executeSubFeature'],
+              ui: ['edrExecute'],
             },
           ],
         },

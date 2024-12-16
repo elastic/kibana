@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SubFeatureType } from '@kbn/actions-plugin/common';
 import { RuleType } from '../../types';
 import { InitialRule } from '../sections/rule_form/rule_reducer';
 
@@ -20,9 +21,11 @@ export const hasShowActionsCapability = (capabilities: Capabilities) => capabili
 export const hasSaveActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.save;
 export const hasExecuteActionsCapability = (
   capabilities: Capabilities,
-  isSubFeatureAction?: boolean
+  subFeatureType?: SubFeatureType
 ) =>
-  isSubFeatureAction ? capabilities?.actions?.executeSubFeature : capabilities?.actions?.execute;
+  subFeatureType
+    ? capabilities?.actions[`${subFeatureType}Execute`]
+    : capabilities?.actions?.execute;
 
 export const hasDeleteActionsCapability = (capabilities: Capabilities) =>
   capabilities?.actions?.delete;

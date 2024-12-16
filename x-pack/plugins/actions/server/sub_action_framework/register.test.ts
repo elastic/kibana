@@ -146,6 +146,7 @@ describe('Registration', () => {
       actionTypeRegistry,
       connector: {
         ...connector,
+        isSystemActionType: true,
         getKibanaPrivileges,
       },
       configurationUtilities: mockedActionsConfig,
@@ -162,6 +163,7 @@ describe('Registration', () => {
       executor: expect.any(Function),
       getService: expect.any(Function),
       renderParameterTemplates: expect.any(Function),
+      isSystemActionType: true,
       getKibanaPrivileges,
     });
   });
