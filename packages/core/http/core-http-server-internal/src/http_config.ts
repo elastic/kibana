@@ -17,6 +17,7 @@ import { uuidRegexp } from '@kbn/core-base-server-internal';
 import type { HttpProtocol, ICspConfig, IExternalUrlConfig } from '@kbn/core-http-server';
 import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import type { HandlerResolutionStrategy } from '@kbn/core-http-router-server-internal';
+import { get } from 'lodash';
 import { CspConfig, CspConfigType } from './csp';
 import { ExternalUrlConfig } from './external_url';
 import {
@@ -25,7 +26,6 @@ import {
 } from './security_response_headers_config';
 import { CdnConfig } from './cdn_config';
 import { PermissionsPolicyConfigType } from './permissions_policy';
-import { get } from 'lodash';
 
 const SECOND = 1000;
 
@@ -315,7 +315,7 @@ export const config: ServiceConfigDescriptor<HttpConfigType> = {
           },
         });
       }
-    }
+    },
   ],
 };
 
