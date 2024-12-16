@@ -7,6 +7,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  roots: ['<rootDir>/x-pack/packages/security-solution/connectors'],
-  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/solutions/security/packages/connectors'],
+  rootDir: '../../../../..',
 };
