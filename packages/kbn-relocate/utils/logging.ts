@@ -10,6 +10,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import { appendFileSync, writeFileSync } from 'fs';
 import dedent from 'dedent';
+import Table from 'cli-table3';
 import type { Package } from '../types';
 import { calculateModuleTargetFolder } from './relocate';
 import {
@@ -20,6 +21,22 @@ import {
   UPDATED_REFERENCES,
   UPDATED_RELATIVE_PATHS,
 } from '../constants';
+
+export const createModuleTable = (entries: string[][]) => {
+  const table = new Table({
+
+    head: ['Id', 'Target folder'],
+    colAligns: ['left', 'left'],
+    style: {
+
+      'padding-left': 2,
+      'padding-right': 2,
+    },
+  });
+
+  table.push(...entries);
+  return table;
+}
 
 export const relocatePlan = (modules: Package[], log: ToolingLog) => {
   const plugins = modules.filter((module) => module.manifest.type === 'plugin');
@@ -37,10 +54,9 @@ export const relocatePlan = (modules: Package[], log: ToolingLog) => {
     \n\n`;
 
     appendFileSync(DESCRIPTION, pluginList);
+    const plgTable = createModuleTable(plugins.map((plg) => [plg.id, target(plg)]))
     log.info(
-      `${plugins.length} plugin(s) are going to be relocated:\n${plugins
-        .map((plg) => `${plg.id} => ${target(plg)}`)
-        .join('\n')}`
+      `${plugins.length} plugin(s) are going to be relocated:\n${plgTable.toString()}`
     );
   }
 
@@ -53,10 +69,9 @@ export const relocatePlan = (modules: Package[], log: ToolingLog) => {
     \n\n`;
 
     appendFileSync(DESCRIPTION, packageList);
+    const pkgTable = createModuleTable(packages.map((pkg) => [pkg.id, target(pkg)]))
     log.info(
-      `${packages.length} packages(s) are going to be relocated:\n${packages
-        .map((plg) => `${plg.id} => ${target(plg)}`)
-        .join('\n')}`
+      `${packages.length} packages(s) are going to be relocated:\n${pkgTable.toString()}`
     );
   }
 };
