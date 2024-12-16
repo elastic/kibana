@@ -21,6 +21,7 @@
       "discoverShared",
       "logsDataAccess",
       "share",
+      "spaces",
       "uiActions",
       "usageCollection",
       "embeddable",
