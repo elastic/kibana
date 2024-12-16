@@ -6,10 +6,10 @@
  */
 
 import { journey, step } from '@elastic/synthetics';
+import { recordVideo } from '@kbn/observability-synthetics-test-data';
 import moment from 'moment';
-import { recordVideo } from '../record_video';
 import { createExploratoryViewUrl } from '../../public/components/shared/exploratory_view/configurations/exploratory_view_url';
-import { byTestId, loginToKibana, TIMEOUT_60_SEC, waitForLoadingToFinish } from '../utils';
+import { loginToKibana, TIMEOUT_60_SEC, waitForLoadingToFinish } from '../utils';
 
 journey('Step Duration series', async ({ page, params }) => {
   recordVideo(page);
@@ -56,7 +56,8 @@ journey('Step Duration series', async ({ page, params }) => {
     await page.click('[aria-label="Remove report metric"]');
     await page.click('button:has-text("Select report metric")');
     await page.click('button:has-text("Step duration")');
-    await page.click(byTestId('seriesBreakdown'));
+    await page.waitForSelector('[data-test-subj=seriesBreakdown]');
+    await page.getByTestId('seriesBreakdown').click();
     await page.click('button[role="option"]:has-text("Step name")');
     await page.click('.euiComboBox__inputWrap');
     await page.click('[role="combobox"][placeholder="Search Monitor name"]');

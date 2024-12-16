@@ -11,8 +11,9 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { intersection } from 'lodash';
+import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils';
+import { periodToMs } from '../../routes/overview_status/utils';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { periodToMs } from '../../routes/overview_status/overview_status';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitorAttributes,
@@ -34,26 +35,28 @@ export const getAllMonitors = async ({
   filter?: string;
   showFromAllSpaces?: boolean;
 } & Pick<SavedObjectsFindOptions, 'sortField' | 'sortOrder' | 'fields' | 'searchFields'>) => {
-  const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
-    type: syntheticsMonitorType,
-    perPage: 1000,
-    search,
-    sortField,
-    sortOrder,
-    fields,
-    filter,
-    searchFields,
-    ...(showFromAllSpaces && { namespaces: ['*'] }),
+  return withApmSpan('get_all_monitors', async () => {
+    const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
+      type: syntheticsMonitorType,
+      perPage: 5000,
+      search,
+      sortField,
+      sortOrder,
+      fields,
+      filter,
+      searchFields,
+      ...(showFromAllSpaces && { namespaces: ['*'] }),
+    });
+
+    const hits: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
+    for await (const result of finder.find()) {
+      hits.push(...result.saved_objects);
+    }
+
+    finder.close().catch(() => {});
+
+    return hits;
   });
-
-  const hits: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
-  for await (const result of finder.find()) {
-    hits.push(...result.saved_objects);
-  }
-
-  finder.close().catch(() => {});
-
-  return hits;
 };
 
 export const processMonitors = (
@@ -86,13 +89,13 @@ export const processMonitors = (
 
     monitorQueryIdToConfigIdMap[attrs[ConfigKey.MONITOR_QUERY_ID]] = attrs[ConfigKey.CONFIG_ID];
 
-    const monitorLocations = attrs[ConfigKey.LOCATIONS].map((location) => location.id);
+    const monitorLocIds = attrs[ConfigKey.LOCATIONS].map((location) => location.id);
 
     if (attrs[ConfigKey.ENABLED] === false) {
       const queriedLocations = Array.isArray(queryLocations) ? queryLocations : [queryLocations];
       const intersectingLocations = intersection(
-        monitorLocations,
-        queryLocations ? queriedLocations : monitorLocations
+        monitorLocIds,
+        queryLocations ? queriedLocations : monitorLocIds
       );
       disabledCount += intersectingLocations.length;
       disabledMonitorsCount += 1;
@@ -101,9 +104,9 @@ export const processMonitors = (
       enabledMonitorQueryIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
 
       monitorLocationsMap[attrs[ConfigKey.MONITOR_QUERY_ID]] = queryLocations
-        ? intersection(monitorLocations, queryLocations)
-        : monitorLocations;
-      listOfLocationsSet = new Set([...listOfLocationsSet, ...monitorLocations]);
+        ? intersection(monitorLocIds, queryLocations)
+        : monitorLocIds;
+      listOfLocationsSet = new Set([...listOfLocationsSet, ...monitorLocIds]);
 
       maxPeriod = Math.max(maxPeriod, periodToMs(attrs[ConfigKey.SCHEDULE]));
     }
