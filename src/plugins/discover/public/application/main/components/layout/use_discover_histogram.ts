@@ -307,7 +307,9 @@ export const useDiscoverHistogram = ({
       if (!skipRefetch.current) {
         if (source === 'discover') addLog('Unified Histogram - Discover refetch');
         if (source === 'lens') addLog('Unified Histogram - Lens suggestion refetch');
-        unifiedHistogram.refetch();
+        if (query === esqlQuery) {
+          unifiedHistogram.refetch();
+        }
       }
 
       skipRefetch.current = false;
@@ -321,7 +323,14 @@ export const useDiscoverHistogram = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [isEsqlMode, stateContainer.dataState.fetchChart$, esqlFetchComplete$, unifiedHistogram]);
+  }, [
+    query,
+    esqlQuery,
+    isEsqlMode,
+    stateContainer.dataState.fetchChart$,
+    esqlFetchComplete$,
+    unifiedHistogram,
+  ]);
 
   const dataView = useInternalStateSelector((state) => state.dataView!);
 

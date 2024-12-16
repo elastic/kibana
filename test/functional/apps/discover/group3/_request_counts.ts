@@ -40,6 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         enableESQL: true,
       });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await common.navigateToApp('discover');
     });
 
     after(async () => {
@@ -49,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await common.navigateToApp('discover');
+      await discover.clickNewSearchButton();
       await header.waitUntilLoadingHasFinished();
     });
 
@@ -121,10 +122,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it(`should send no more than ${expectedRequests} requests (documents + chart) when changing the query`, async () => {
-        await expectSearches(type, expectedRequests, async () => {
-          await setQuery(query1);
-          await queryBar.clickQuerySubmitButton();
-        });
+        await expectSearches(
+          type,
+          type === 'esql' ? expectedRequests + 1 : expectedRequests,
+          async () => {
+            await setQuery(query1);
+            await queryBar.clickQuerySubmitButton();
+          }
+        );
       });
 
       it(`should send no more than ${expectedRequests} requests (documents + chart) when changing the time range`, async () => {
@@ -144,9 +149,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Sep 23, 2015 @ 00:00:00.000'
         );
         await waitForLoadingToFinish();
-        // TODO: Check why the request happens 4 times in case of opening a saved search
-        // https://github.com/elastic/kibana/issues/165192
-        // creating the saved search
         const actualExpectedRequests = savedSearchesRequests ?? expectedRequests;
         await expectSearches(
           type,
@@ -159,13 +161,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await setQuery(query2);
         await queryBar.clickQuerySubmitButton();
         await waitForLoadingToFinish();
-        await expectSearches(
-          type,
-          type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
-          async () => {
-            await discover.revertUnsavedChanges();
-          }
-        );
+        await expectSearches(type, actualExpectedRequests, async () => {
+          await discover.revertUnsavedChanges();
+        });
         // clearing the saved search
         await expectSearches(
           type,
@@ -175,8 +173,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await waitForLoadingToFinish();
           }
         );
-        // loading the saved search
-        // TODO: https://github.com/elastic/kibana/issues/165192
         await expectSearches(
           type,
           type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
@@ -251,11 +247,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('ES|QL mode', () => {
       const type = 'esql';
 
-      beforeEach(async () => {
+      before(async () => {
         await discover.selectTextBaseLang();
-        await monacoEditor.setCodeEditorValue('from logstash-* | where bytes > 1000 ');
-        await queryBar.clickQuerySubmitButton();
-        await waitForLoadingToFinish();
       });
 
       getSharedTests({
