@@ -75,9 +75,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await listingTable.searchForItemWithName('lnsTableVis');
           await lens.clickVisualizeListItemTitle('lnsTableVis');
           await lens.goToTimeRange();
-          await navigationalSearch.focus();
-          await navigationalSearch.searchFor('type:application lens');
-          await navigationalSearch.clickOnOption(0);
+          await retry.try(async () => {
+            await navigationalSearch.focus();
+            await navigationalSearch.searchFor('type:application lens');
+            await navigationalSearch.clickOnOption(0);
+          });
           await lens.waitForEmptyWorkspace();
           await lens.switchToVisualization('lnsLegacyMetric');
           await lens.dragFieldToWorkspace('@timestamp', 'legacyMtrVis');

@@ -27,16 +27,26 @@ const objectiveSchema = t.intersection([
   t.partial({ timesliceTarget: t.number, timesliceWindow: durationType }),
 ]);
 
-const settingsSchema = t.type({
-  syncDelay: durationType,
-  frequency: durationType,
-  preventInitialBackfill: t.boolean,
-});
+const settingsSchema = t.intersection([
+  t.type({
+    syncDelay: durationType,
+    frequency: durationType,
+    preventInitialBackfill: t.boolean,
+  }),
+  t.partial({ syncField: t.union([t.string, t.null]) }),
+]);
 
 const groupBySchema = allOrAnyStringOrArray;
 
-const optionalSettingsSchema = t.partial({ ...settingsSchema.props });
+const optionalSettingsSchema = t.partial({
+  syncDelay: durationType,
+  frequency: durationType,
+  preventInitialBackfill: t.boolean,
+  syncField: t.union([t.string, t.null]),
+});
+
 const tagsSchema = t.array(t.string);
+
 // id cannot contain special characters and spaces
 const sloIdSchema = new t.Type<string, string, unknown>(
   'sloIdSchema',
