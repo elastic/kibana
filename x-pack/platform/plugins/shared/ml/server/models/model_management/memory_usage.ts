@@ -181,6 +181,7 @@ export class MemoryUsageService {
 
     const mlNodes = Object.entries(response.nodes).filter(([, node]) => node.roles.includes('ml'));
 
+    // @ts-expect-error `throughput_last_minute` is not declared in ES Types
     const nodeDeploymentStatsResponses: NodeDeploymentStatsResponse[] = mlNodes.map(
       ([nodeId, node]) => {
         const nodeFields = pick(node, NODE_FIELDS) as RequiredNodeFields;
