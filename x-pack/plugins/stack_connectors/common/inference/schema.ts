@@ -157,18 +157,21 @@ export const UnifiedChatCompleteResponseSchema = schema.object({
         content: schema.maybe(schema.nullable(schema.string())),
         refusal: schema.maybe(schema.nullable(schema.string())),
         role: schema.maybe(schema.string()),
-        tool_calls: schema.arrayOf(
-          schema.object({
-            id: schema.maybe(schema.string()),
-            function: schema.maybe(
-              schema.object({
-                arguments: schema.maybe(schema.string()),
-                name: schema.maybe(schema.string()),
-              })
-            ),
-            type: schema.maybe(schema.string()),
-          }),
-          { defaultValue: [] }
+        tool_calls: schema.maybe(
+          schema.arrayOf(
+            schema.object({
+              id: schema.maybe(schema.string()),
+              index: schema.maybe(schema.number()),
+              function: schema.maybe(
+                schema.object({
+                  arguments: schema.maybe(schema.string()),
+                  name: schema.maybe(schema.string()),
+                })
+              ),
+              type: schema.maybe(schema.string()),
+            }),
+            { defaultValue: [] }
+          )
         ),
       }),
     }),
@@ -178,11 +181,13 @@ export const UnifiedChatCompleteResponseSchema = schema.object({
   model: schema.maybe(schema.string()),
   object: schema.maybe(schema.string()),
   usage: schema.maybe(
-    schema.object({
-      completion_tokens: schema.maybe(schema.number()),
-      prompt_tokens: schema.maybe(schema.number()),
-      total_tokens: schema.maybe(schema.number()),
-    })
+    schema.nullable(
+      schema.object({
+        completion_tokens: schema.maybe(schema.number()),
+        prompt_tokens: schema.maybe(schema.number()),
+        total_tokens: schema.maybe(schema.number()),
+      })
+    )
   ),
 });
 
