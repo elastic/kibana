@@ -145,8 +145,16 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
 
   return (
     <>
+      <EuiText>
+        <p>
+          {i18n.translate('xpack.upgradeAssistant.overview.cloudBackup.description', {
+            defaultMessage: 'Back up your data using snapshots before proceeding.',
+          })}
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
       {statusMessage}
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
       <EuiButton
         href={cloudSnapshotsUrl}
