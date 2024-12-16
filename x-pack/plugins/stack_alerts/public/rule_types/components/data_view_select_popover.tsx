@@ -64,7 +64,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   onSelectDataView,
   onChangeMetaData,
 }) => {
-  const [loadingDataViews, setLoadingDataViews] = useState(true);
+  const [loadingDataViews, setLoadingDataViews] = useState(false);
   const [dataViewItems, setDataViewsItems] = useState<DataViewListItemEnhanced[]>([]);
   const [dataViewPopoverOpen, setDataViewPopoverOpen] = useState(false);
 
