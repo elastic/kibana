@@ -18,7 +18,6 @@ import {
   EuiSpacer,
   EuiSteps,
   EuiStepsProps,
-  useEuiBackgroundColorCSS,
 } from '@elastic/eui';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -70,7 +69,9 @@ export const RulePage = (props: RulePageProps) => {
 
   const canReadConnectors = !!application.capabilities.actions?.show;
 
-  const styles = useEuiBackgroundColorCSS().transparent;
+  const styles = {
+    backgroundColor: 'transparent',
+  };
 
   const onSaveInternal = useCallback(() => {
     onSave({
