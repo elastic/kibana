@@ -7,9 +7,16 @@
 
 import React, { FunctionComponent, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTextColor } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiTextColor,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,6 +29,7 @@ import { OverviewCard } from './overview_card';
 export const DataStreamDetails: FunctionComponent<{ dataStreamName: string }> = ({
   dataStreamName,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { error, data: dataStream, isLoading, resendRequest } = useLoadDataStream(dataStreamName);
   const {
     core: { getUrlForApp },
@@ -32,7 +40,7 @@ export const DataStreamDetails: FunctionComponent<{ dataStreamName: string }> = 
       <EuiFlexItem grow={false}>
         <EuiText
           css={css`
-            font-size: ${euiThemeVars.euiFontSizeL};
+            font-size: ${euiTheme.font.scale.l};
           `}
         >
           {dataStream?.generation}
