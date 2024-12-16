@@ -869,12 +869,15 @@ x-pack/platform/plugins/private/runtime_fields @elastic/kibana-management
 x-pack/platform/plugins/private/snapshot_restore @elastic/kibana-management
 x-pack/platform/plugins/private/transform @elastic/ml-ui
 x-pack/platform/plugins/private/translations @elastic/kibana-localization
+x-pack/platform/plugins/private/upgrade_assistant @elastic/kibana-management
 x-pack/platform/plugins/private/watcher @elastic/kibana-management
 x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
+x-pack/platform/plugins/shared/index_management @elastic/kibana-management
 x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
+x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
 x-pack/platform/plugins/shared/integration_assistant @elastic/security-scalability
 x-pack/platform/plugins/shared/license_management @elastic/kibana-management
 x-pack/platform/plugins/shared/ml @elastic/ml-ui
@@ -911,8 +914,6 @@ x-pack/plugins/global_search @elastic/appex-sharedux
 x-pack/plugins/global_search_bar @elastic/appex-sharedux
 x-pack/plugins/global_search_providers @elastic/appex-sharedux
 x-pack/plugins/graph @elastic/kibana-visualizations
-x-pack/plugins/index_management @elastic/kibana-management
-x-pack/plugins/ingest_pipelines @elastic/kibana-management
 x-pack/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
 x-pack/plugins/lens @elastic/kibana-visualizations
 x-pack/plugins/licensing @elastic/kibana-core
@@ -964,7 +965,6 @@ x-pack/plugins/stack_connectors @elastic/response-ops
 x-pack/plugins/task_manager @elastic/response-ops
 x-pack/plugins/telemetry_collection_xpack @elastic/kibana-core
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
-x-pack/plugins/upgrade_assistant @elastic/kibana-management
 x-pack/solutions/observability/packages/alert_details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting_test_data @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/get_padded_alert_time_range_util @elastic/obs-ux-management-team

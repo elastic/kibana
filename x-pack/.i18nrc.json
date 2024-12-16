@@ -56,7 +56,7 @@
       "plugins/graph"
     ],
     "xpack.grokDebugger": "platform/plugins/private/grokdebugger",
-    "xpack.idxMgmt": "plugins/index_management",
+    "xpack.idxMgmt": "platform/plugins/shared/index_management",
     "xpack.idxMgmtPackage": "packages/index-management",
     "xpack.indexLifecycleMgmt": "platform/plugins/private/index_lifecycle_management",
     "xpack.infra": "plugins/observability_solution/infra",
@@ -64,7 +64,7 @@
     "xpack.logsExplorer": "plugins/observability_solution/logs_explorer",
     "xpack.logsShared": "plugins/observability_solution/logs_shared",
     "xpack.fleet": "plugins/fleet",
-    "xpack.ingestPipelines": "plugins/ingest_pipelines",
+    "xpack.ingestPipelines": "platform/plugins/shared/ingest_pipelines",
     "xpack.integrationAssistant": "platform/plugins/shared/integration_assistant",
     "xpack.inference": "platform/plugins/shared/inference",
     "xpack.inventory": "plugins/observability_solution/inventory",
@@ -164,7 +164,7 @@
     "xpack.timelines": "solutions/security/plugins/timelines",
     "xpack.transform": "platform/plugins/private/transform",
     "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
-    "xpack.upgradeAssistant": "plugins/upgrade_assistant",
+    "xpack.upgradeAssistant": "platform/plugins/private/upgrade_assistant",
     "xpack.uptime": [
       "solutions/observability/plugins/uptime"
     ],

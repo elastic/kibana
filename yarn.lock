@@ -5933,7 +5933,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/index-management-plugin@link:x-pack/plugins/index_management":
+"@kbn/index-management-plugin@link:x-pack/platform/plugins/shared/index_management":
   version "0.0.0"
   uid ""
 
@@ -5965,7 +5965,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ingest-pipelines-plugin@link:x-pack/plugins/ingest_pipelines":
+"@kbn/ingest-pipelines-plugin@link:x-pack/platform/plugins/shared/ingest_pipelines":
   version "0.0.0"
   uid ""
 
@@ -7821,7 +7821,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/upgrade-assistant-plugin@link:x-pack/plugins/upgrade_assistant":
+"@kbn/upgrade-assistant-plugin@link:x-pack/platform/plugins/private/upgrade_assistant":
   version "0.0.0"
   uid ""
 

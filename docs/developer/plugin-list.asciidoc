@@ -639,7 +639,7 @@ which are particularly useful for ingesting logs.
 Index Management by running this series of requests in Console:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/index_management/README.md[indexManagement]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/index_management/README.md[indexManagement]
 |This service is exposed from the Index Management setup contract and can be used to add content to the indices list and the index details page.
 
 
@@ -653,7 +653,7 @@ external LLM APIs. Its goals are:
 the infrastructure monitoring use-case within Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ingest_pipelines/README.md[ingestPipelines]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/ingest_pipelines/README.md[ingestPipelines]
 |The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines.
 
 
@@ -960,7 +960,7 @@ For adding localizations and instrument a ui to support translated content, see 
 As a developer you can reuse and extend built-in alerts and actions UI functionality:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/upgrade_assistant/README.md[upgradeAssistant]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/upgrade_assistant/README.md[upgradeAssistant]
 |Upgrade Assistant helps users prepare their Stack for being upgraded to the next version of the Elastic stack.
 
 

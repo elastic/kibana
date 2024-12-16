@@ -155,6 +155,24 @@
           }
         }
       }
+    },
+    "upgrade-assistant-telemetry": {
+      "properties": {
+        "features": {
+          "properties": {
+            "deprecation_logging": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "_meta": {
+                    "description": "Whether user has enabled Elasticsearch deprecation logging"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
