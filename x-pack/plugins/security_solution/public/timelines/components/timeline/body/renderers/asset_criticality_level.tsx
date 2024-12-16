@@ -34,7 +34,7 @@ const AssetCriticalityLevelComponent: React.FC<Props> = ({
   const criticalityColors = useCriticalityLevelColors();
   const color = isString(value) ? criticalityColors[value as CriticalityLevel] : 'normal';
   const stringValue = isString(value) ? value : '';
-  
+
   const badge = useMemo(
     () => (
       <EuiBadge color={color} data-test-subj="AssetCriticalityLevel-score-badge">
