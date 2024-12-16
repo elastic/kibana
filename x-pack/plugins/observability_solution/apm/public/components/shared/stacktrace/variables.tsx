@@ -9,9 +9,8 @@ import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { KeyValueTable, flattenObject } from '@kbn/key-value-metadata-table';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
-import { KeyValueTable } from '../key_value_table';
-import { flattenObject } from '../../../../common/utils/flatten_object';
 
 const VariablesContainer = euiStyled.div`
   background: ${({ theme }) => theme.eui.euiColorEmptyShade};
@@ -28,6 +27,7 @@ export function Variables({ vars }: Props) {
   if (!vars) {
     return null;
   }
+  console.log(vars);
   const flattenedVariables = flattenObject(vars);
   return (
     <React.Fragment>
