@@ -15,7 +15,7 @@ jest.mock('../../enterprise_search_content/components/search_index/indices/indic
 
 import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { EuiSideNavItemType } from '@elastic/eui';
 
