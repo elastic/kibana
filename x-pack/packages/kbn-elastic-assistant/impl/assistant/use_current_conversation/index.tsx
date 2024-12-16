@@ -207,6 +207,11 @@ export const useCurrentConversation = ({
         // if no Welcome convo exists, create one
         getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE });
 
+      // on the off chance that the conversation is not found, return
+      if (!nextConversation) {
+        return;
+      }
+
       if (nextConversation && nextConversation.id === '') {
         // This is a default conversation that has not yet been initialized
         const conversation = await initializeDefaultConversationWithConnector(nextConversation);
@@ -260,18 +265,24 @@ export const useCurrentConversation = ({
     }
     const newSystemPrompt = getDefaultNewSystemPrompt(allSystemPrompts);
 
+    let conversation: Partial<Conversation> = {};
+    if (currentConversation?.apiConfig) {
+      const { defaultSystemPromptId: _, ...restApiConfig } = currentConversation?.apiConfig;
+      conversation =
+        restApiConfig.actionTypeId != null
+          ? {
+              apiConfig: {
+                ...restApiConfig,
+                ...(newSystemPrompt?.id != null
+                  ? { defaultSystemPromptId: newSystemPrompt.id }
+                  : {}),
+              },
+            }
+          : {};
+    }
     const newConversation = await createConversation({
       title: NEW_CHAT,
-      ...(currentConversation?.apiConfig != null &&
-      currentConversation?.apiConfig?.actionTypeId != null
-        ? {
-            apiConfig: {
-              connectorId: currentConversation.apiConfig.connectorId,
-              actionTypeId: currentConversation.apiConfig.actionTypeId,
-              ...(newSystemPrompt?.id != null ? { defaultSystemPromptId: newSystemPrompt.id } : {}),
-            },
-          }
-        : {}),
+      ...conversation,
     });
 
     if (newConversation) {

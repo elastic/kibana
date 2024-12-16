@@ -6,13 +6,13 @@
  */
 
 import { journey, step, before } from '@elastic/synthetics';
+import { recordVideo } from '@kbn/observability-synthetics-test-data';
 import {
   assertNotText,
   assertText,
   byTestId,
   waitForLoadingToFinish,
 } from '../../../helpers/utils';
-import { recordVideo } from '../../../helpers/record_video';
 
 import { settingsPageProvider } from '../../page_objects/settings';
 
