@@ -6,29 +6,28 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react'; // eslint-disable-line import/no-extraneous-dependencies
+import { render } from '@testing-library/react';
+import type { IdBadgesProps } from './id_badges';
 import { IdBadges } from './id_badges';
 
-const props = {
+const props: IdBadgesProps = {
   limit: 2,
-  maps: {
-    groupsMap: {
-      group1: ['job1', 'job2'],
-      group2: ['job3'],
+  selectedGroups: [
+    {
+      groupId: 'group1',
+      jobIds: ['job1', 'job2'],
     },
-    jobsMap: {
-      job1: ['group1'],
-      job2: ['group1'],
-      job3: ['group2'],
-      job4: [],
+    {
+      groupId: 'group2',
+      jobIds: ['job3'],
     },
-  },
+  ],
+  selectedJobIds: ['job1', 'job2', 'job3'],
   onLinkClick: jest.fn(),
-  selectedIds: ['group1', 'job1', 'job3'],
   showAllBarBadges: false,
 };
 
-const overLimitProps = { ...props, selectedIds: ['group1', 'job1', 'job3', 'job4'] };
+const overLimitProps: IdBadgesProps = { ...props, selectedJobIds: ['job4'] };
 
 describe('IdBadges', () => {
   test('When group selected renders groupId and not corresponding jobIds', () => {
@@ -56,10 +55,16 @@ describe('IdBadges', () => {
   });
 
   describe('showAllBarBadges is true', () => {
-    const overLimitShowAllProps = {
+    const overLimitShowAllProps: IdBadgesProps = {
       ...props,
       showAllBarBadges: true,
-      selectedIds: ['group1', 'job1', 'job3', 'job4'],
+      selectedGroups: [
+        {
+          groupId: 'group1',
+          jobIds: ['job1', 'job2'],
+        },
+      ],
+      selectedJobIds: ['job3', 'job4'],
     };
 
     test('shows all badges when selection is over limit', () => {
