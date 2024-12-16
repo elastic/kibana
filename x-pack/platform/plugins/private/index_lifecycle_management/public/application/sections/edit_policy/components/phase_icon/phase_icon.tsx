@@ -6,7 +6,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { Phases } from '../../../../../../common/types';
 import './phase_icon.scss';
 interface Props {
@@ -14,13 +14,17 @@ interface Props {
   phase: string & keyof Phases;
 }
 export const PhaseIcon: FunctionComponent<Props> = ({ enabled, phase }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const themeName = euiTheme.themeName === 'EUI_THEME_BOREALIS' ? 'borealis' : 'amsterdam';
+
   return (
     <div
       className={`ilmPhaseIcon ilmPhaseIcon--${phase} ${enabled ? '' : 'ilmPhaseIcon--disabled'}`}
     >
       {enabled ? (
         <EuiIcon
-          className={`ilmPhaseIcon__inner--${phase}`}
+          className={`ilmPhaseIcon__inner--${phase}--${themeName}`}
           type={phase === 'delete' ? 'trash' : 'checkInCircleFilled'}
           size={phase === 'delete' ? 'm' : 'l'}
         />
