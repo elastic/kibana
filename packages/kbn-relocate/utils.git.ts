@@ -21,7 +21,9 @@ export function hasManualCommits(commits: Commit[]) {
     (commit) =>
       !commit.messageHeadline.startsWith('Relocating module ') &&
       !commit.messageHeadline.startsWith('Moving modules owned by ') &&
-      commit.authors.some((author) => author.login !== 'kibanamachine')
+      commit.authors.some(
+        (author) => author.login !== 'kibanamachine' && author.login !== 'elasticmachine'
+      )
   );
 
   return manualCommits.length > 0;

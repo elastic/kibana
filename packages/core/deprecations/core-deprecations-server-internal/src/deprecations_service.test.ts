@@ -12,7 +12,7 @@ import {
   registerConfigDeprecationsInfoMock,
 } from './deprecations_service.test.mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -83,12 +83,13 @@ describe('DeprecationsService', () => {
       it('returns client with #getAllDeprecations method', async () => {
         const esClient = elasticsearchServiceMock.createScopedClusterClient();
         const savedObjectsClient = savedObjectsClientMock.create();
+        const request = httpServerMock.createKibanaRequest();
         const deprecationsService = new DeprecationsService(coreContext);
 
         await deprecationsService.setup(deprecationsCoreSetupDeps);
 
         const start = deprecationsService.start();
-        const deprecationsClient = start.asScopedToClient(esClient, savedObjectsClient);
+        const deprecationsClient = start.asScopedToClient(esClient, savedObjectsClient, request);
 
         expect(deprecationsClient.getAllDeprecations).toBeDefined();
       });
