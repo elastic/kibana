@@ -25,6 +25,7 @@ interface Props {
   timeRangeMin: number;
   timeRangeMax: number;
   compressed: boolean;
+  onMouseUp?: () => void;
 }
 
 export function TimeSliderPopoverContent(props: Props) {
@@ -59,6 +60,7 @@ export function TimeSliderPopoverContent(props: Props) {
       gutterSize="none"
       data-test-subj="timeSlider-popoverContents"
       responsive={false}
+      onMouseUp={props.onMouseUp}
     >
       <EuiFlexItem grow={false}>
         <EuiToolTip content={anchorStartToggleButtonLabel} position="left">

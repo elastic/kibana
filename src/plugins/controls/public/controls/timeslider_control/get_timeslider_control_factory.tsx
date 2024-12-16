@@ -113,10 +113,6 @@ export const getTimesliderControlFactory = (): ControlFactory<
         setSelectedRange(nextSelectedRange);
       }
 
-      const debouncedOnChange = debounce((updateTimeslice) => {
-        onChange(updateTimeslice);
-      }, 300);
-
       function onPrevious() {
         const { ticks, timeRangeMax, timeRangeMin } = timeRangeMeta$.value;
         const value = timeslice$.value;
@@ -292,6 +288,17 @@ export const getTimesliderControlFactory = (): ControlFactory<
           const to = useMemo(() => {
             return timeslice ? timeslice[TO_INDEX] : timeRangeMeta.timeRangeMax;
           }, [timeslice, timeRangeMeta.timeRangeMax]);
+          const debouncedOnChange = useMemo(
+            () =>
+              debounce((updateTimeslice: Timeslice | undefined) => {
+                onChange(updateTimeslice);
+              }, 5000),
+            []
+          );
+          /**
+           * The following `useEffect` ensures that the changes to the value that come from the embeddable (for example,
+           * from the `clear` button on the dashboard) are reflected in the displayed value
+           */
           useEffect(() => {
             setLocalTimeslice([from, to]);
           }, [from, to]);
@@ -320,6 +327,13 @@ export const getTimesliderControlFactory = (): ControlFactory<
                 onChange={(value) => {
                   setLocalTimeslice(value as Timeslice);
                   debouncedOnChange(value);
+                }}
+                onMouseUp={() => {
+                  // when the pin is dropped (on mouse up), cancel any pending debounced changes and force the change
+                  // in value to happen instantly (which, in turn, will re-calculate the from/to for the slider due to
+                  // the `useEffect` above.
+                  debouncedOnChange.cancel();
+                  onChange(localTimeslice);
                 }}
                 stepSize={timeRangeMeta.stepSize}
                 ticks={timeRangeMeta.ticks}
