@@ -21,17 +21,23 @@ interface Props {
   security: SecurityPluginStart;
   core: CoreStart;
   closePopover: () => void;
+  isServerless: boolean;
 }
 
-export const AppearanceSelector = ({ security, core, closePopover }: Props) => {
+export const AppearanceSelector = ({ security, core, closePopover, isServerless }: Props) => {
   return (
     <UserProfilesKibanaProvider core={core} security={security} toMountPoint={toMountPoint}>
-      <AppearanceSelectorUI core={core} security={security} closePopover={closePopover} />
+      <AppearanceSelectorUI
+        core={core}
+        security={security}
+        closePopover={closePopover}
+        isServerless={isServerless}
+      />
     </UserProfilesKibanaProvider>
   );
 };
 
-function AppearanceSelectorUI({ security, core, closePopover }: Props) {
+function AppearanceSelectorUI({ security, core, closePopover, isServerless }: Props) {
   const { isVisible } = useAppearance({
     uiSettingsClient: core.uiSettings,
   });
@@ -47,7 +53,11 @@ function AppearanceSelectorUI({ security, core, closePopover }: Props) {
     modalRef.current = core.overlays.openModal(
       toMountPoint(
         <UserProfilesKibanaProvider core={core} security={security} toMountPoint={toMountPoint}>
-          <AppearanceModal closeModal={closeModal} uiSettingsClient={core.uiSettings} />
+          <AppearanceModal
+            closeModal={closeModal}
+            uiSettingsClient={core.uiSettings}
+            isServerless={isServerless}
+          />
         </UserProfilesKibanaProvider>,
         core
       ),

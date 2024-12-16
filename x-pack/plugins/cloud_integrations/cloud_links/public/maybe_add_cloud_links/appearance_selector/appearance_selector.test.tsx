@@ -21,7 +21,12 @@ describe('AppearanceSelector', () => {
     const core = coreMock.createStart();
 
     const { getByTestId } = render(
-      <AppearanceSelector core={core} security={security} closePopover={closePopover} />
+      <AppearanceSelector
+        core={core}
+        security={security}
+        closePopover={closePopover}
+        isServerless={false}
+      />
     );
 
     const appearanceSelector = getByTestId('appearanceSelector');

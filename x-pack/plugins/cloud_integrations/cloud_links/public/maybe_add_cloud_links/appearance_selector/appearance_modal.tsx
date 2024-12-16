@@ -70,9 +70,10 @@ const colorModeOptions: Array<Value<ColorMode>> = [
 interface Props {
   closeModal: () => void;
   uiSettingsClient: IUiSettingsClient;
+  isServerless: boolean;
 }
 
-export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient }) => {
+export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient, isServerless }) => {
   const modalTitleId = useGeneratedHtmlId();
 
   const { onChange, colorMode, isLoading } = useAppearance({
@@ -94,7 +95,11 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient }) => 
           title={i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceModalColorModeTitle', {
             defaultMessage: 'Color mode',
           })}
-          values={colorModeOptions}
+          values={
+            isServerless
+              ? colorModeOptions.filter(({ id }) => id !== 'space_default')
+              : colorModeOptions
+          }
           selectedValue={colorMode}
           onChange={(id) => {
             onChange({ colorMode: id }, false);

@@ -16,10 +16,12 @@ export const createUserMenuLinks = ({
   core,
   cloud,
   security,
+  isServerless,
 }: {
   core: CoreStart;
   cloud: CloudStart;
   security: SecurityPluginStart;
+  isServerless: boolean;
 }): UserMenuLink[] => {
   const { profileUrl, billingUrl, organizationUrl } = cloud;
 
@@ -61,7 +63,12 @@ export const createUserMenuLinks = ({
 
   userMenuLinks.push({
     content: ({ closePopover }) => (
-      <AppearanceSelector core={core} security={security} closePopover={closePopover} />
+      <AppearanceSelector
+        core={core}
+        security={security}
+        closePopover={closePopover}
+        isServerless={isServerless}
+      />
     ),
     order: 400,
     label: '',
