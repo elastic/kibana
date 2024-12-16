@@ -27,7 +27,7 @@ export const WebCrawlersOverview = () => {
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchConnectorsPage">
       <EuiPageTemplate.Header
         pageTitle={i18n.translate('xpack.serverlessSearch.webcrawlers.title', {
-          defaultMessage: 'Web crawlers',
+          defaultMessage: 'Web Crawlers',
         })}
         data-test-subj="serverlessSearchConnectorsTitle"
         restrictWidth

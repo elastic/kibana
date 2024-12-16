@@ -22,6 +22,7 @@ async function createAlert(
     .set('kbn-xsrf', 'foo')
     .send(getTestRuleData(overwrites))
     .expect(200);
+
   objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
   return createdAlert;
 }
@@ -33,10 +34,13 @@ export default function createFindTests({ getService }: FtrProviderContext) {
   describe('find internal API', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    afterEach(() => objectRemover.removeAll());
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     describe('handle find alert request', function () {
       this.tags('skipFIPS');
+
       it('should handle find alert request appropriately', async () => {
         const { body: createdAction } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
@@ -276,7 +280,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
       it('should filter on parameters', async () => {
         const response = await supertest
-          .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
           .set('kbn-xsrf', 'foo')
           .send({
             filter: 'alert.attributes.params.risk_score:40',
@@ -286,17 +290,52 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         expect(response.body.total).to.equal(1);
         expect(response.body.data[0].params.risk_score).to.eql(40);
       });
+    });
 
-      it('should error if filtering on mapped parameters directly using the public API', async () => {
-        const response = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            filter: 'alert.attributes.mapped_params.risk_score:40',
-          });
-
-        expect(response.status).to.eql(200);
+    it('should filter rules by rule type IDs', async () => {
+      await createAlert(objectRemover, supertest, {
+        rule_type_id: 'test.noop',
+        consumer: 'alertsFixture',
       });
+
+      await createAlert(objectRemover, supertest, {
+        rule_type_id: 'test.restricted-noop',
+        consumer: 'alertsRestrictedFixture',
+      });
+
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          rule_type_ids: ['test.restricted-noop'],
+        });
+
+      expect(response.status).to.eql(200);
+      expect(response.body.total).to.equal(1);
+      expect(response.body.data[0].rule_type_id).to.eql('test.restricted-noop');
+    });
+
+    it('should filter rules by consumers', async () => {
+      await createAlert(objectRemover, supertest, {
+        rule_type_id: 'test.noop',
+        consumer: 'alertsFixture',
+      });
+
+      await createAlert(objectRemover, supertest, {
+        rule_type_id: 'test.restricted-noop',
+        consumer: 'alertsRestrictedFixture',
+      });
+
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          consumers: ['alertsRestrictedFixture'],
+        });
+
+      expect(response.status).to.eql(200);
+      expect(response.body.total).to.equal(1);
+      expect(response.body.data[0].consumer).to.eql('alertsRestrictedFixture');
     });
 
     describe('legacy', function () {
@@ -309,11 +348,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           .expect(200);
         objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
-        const response = await supertest.get(
-          `${getUrlPrefix(
-            Spaces.space1.id
-          )}/api/alerts/_find?search=test.noop&search_fields=alertTypeId`
-        );
+        const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/_find`);
 
         expect(response.status).to.eql(200);
         expect(response.body.page).to.equal(1);

@@ -28,6 +28,7 @@ interface PatchRuleOptions {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   rulePatch: RulePatchProps;
   mlAuthz: MlAuthz;
+  isRuleCustomizationEnabled: boolean;
 }
 
 export const patchRule = async ({
@@ -36,6 +37,7 @@ export const patchRule = async ({
   prebuiltRuleAssetClient,
   rulePatch,
   mlAuthz,
+  isRuleCustomizationEnabled,
 }: PatchRuleOptions): Promise<RuleResponse> => {
   const { rule_id: ruleId, id } = rulePatch;
 
@@ -58,6 +60,7 @@ export const patchRule = async ({
     prebuiltRuleAssetClient,
     existingRule,
     rulePatch,
+    isRuleCustomizationEnabled,
   });
 
   const patchedInternalRule = await rulesClient.update({

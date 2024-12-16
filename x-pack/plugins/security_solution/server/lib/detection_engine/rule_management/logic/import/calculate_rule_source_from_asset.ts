@@ -24,10 +24,12 @@ export const calculateRuleSourceFromAsset = ({
   rule,
   assetWithMatchingVersion,
   isKnownPrebuiltRule,
+  isRuleCustomizationEnabled,
 }: {
   rule: RuleResponse;
   assetWithMatchingVersion: PrebuiltRuleAsset | undefined;
   isKnownPrebuiltRule: boolean;
+  isRuleCustomizationEnabled: boolean;
 }): RuleSource => {
   if (!isKnownPrebuiltRule) {
     return {
@@ -38,11 +40,15 @@ export const calculateRuleSourceFromAsset = ({
   if (assetWithMatchingVersion == null) {
     return {
       type: 'external',
-      is_customized: true,
+      is_customized: isRuleCustomizationEnabled ? true : false,
     };
   }
 
-  const isCustomized = calculateIsCustomized(assetWithMatchingVersion, rule);
+  const isCustomized = calculateIsCustomized({
+    baseRule: assetWithMatchingVersion,
+    nextRule: rule,
+    isRuleCustomizationEnabled,
+  });
 
   return {
     type: 'external',

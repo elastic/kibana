@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const SIEM_TRANSLATION_RESULT_FULL_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationResult.full',
   {
-    defaultMessage: 'Fully translated',
+    defaultMessage: 'Translated',
   }
 );
 
@@ -34,3 +34,13 @@ export const SIEM_TRANSLATION_RESULT_UNKNOWN_LABEL = i18n.translate(
     defaultMessage: 'Unknown',
   }
 );
+
+export const SIEM_TRANSLATION_RESULT_UNKNOWN_ERROR = (status?: string) => {
+  return i18n.translate(
+    'xpack.securitySolution.siemMigrations.rules.translationResult.unknownError',
+    {
+      defaultMessage: 'Unknown translation result status: ({status})',
+      values: { status },
+    }
+  );
+};

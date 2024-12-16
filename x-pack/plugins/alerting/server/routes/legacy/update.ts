@@ -20,6 +20,7 @@ import {
   LEGACY_BASE_ALERT_API_PATH,
   validateNotifyWhenType,
 } from '../../../common';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -59,6 +60,7 @@ export const updateAlertRoute = (
         body: bodySchema,
         params: paramSchema,
       },
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: isServerless ? 'internal' : 'public',
         summary: 'Update an alert',
@@ -81,7 +83,8 @@ export const updateAlertRoute = (
           return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
         }
         trackLegacyRouteUsage('update', usageCounter);
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const { id } = req.params;
         const { name, actions, params, schedule, tags, throttle, notifyWhen } = req.body;
         try {

@@ -61,29 +61,8 @@ xpack.reporting.encryptionKey: "something_secret"
 [[reporting-advanced-settings]]
 === Security settings
 
-Reporting has two forms of access control: each user can only access their own reports,
-and custom roles determine who has the privilege to generate reports. When Reporting is configured with
-<<kibana-privileges, {kib} application privileges>>, you can control the spaces and applications where users
-are allowed to generate reports.
-
-[NOTE]
-============================================================================
-The `xpack.reporting.roles` settings are for a deprecated system of access control in Reporting. Turning off
-this feature allows API keys to generate reports, and allows reporting access through {kib} application
-privileges. We recommend that you explicitly turn off reporting's deprecated access control feature by adding
-`xpack.reporting.roles.enabled: false` to kibana.yml. This will enable you to create custom roles that provide
-application privileges for reporting, as described in <<grant-user-access, granting users access to
-reporting>>.
-============================================================================
-
-[[xpack-reporting-roles-enabled]] `xpack.reporting.roles.enabled`::
-deprecated:[7.14.0,The default for this setting will be `false` in an upcoming version of {kib}.] Sets access
-control to a set of assigned reporting roles, specified by `xpack.reporting.roles.allow`. Defaults to `true`.
-
-`xpack.reporting.roles.allow`::
-deprecated:[7.14.0] In addition to superusers, specifies the roles that can generate reports using the
-{ref}/security-api.html#security-role-apis[{es} role management APIs]. Requires `xpack.reporting.roles.enabled`
-to be `true`. Defaults to `[ "reporting_user" ]`.
+Reporting privileges are configured with <<kibana-privileges, {kib} application privileges>>. You can control
+the spaces and applications where users are allowed to generate reports.
 
 [float]
 [[reporting-job-queue-settings]]

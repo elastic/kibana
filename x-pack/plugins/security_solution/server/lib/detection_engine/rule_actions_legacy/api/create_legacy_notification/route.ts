@@ -64,7 +64,7 @@ export const legacyCreateLegacyNotificationRoute = (
         },
       },
       async (context, request, response) => {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const rulesClient = await (await context.alerting).getRulesClient();
         const savedObjectsClient = (await context.core).savedObjects.client;
         const { alert_id: ruleAlertId } = request.query;
         const { actions, interval, name } = request.body;

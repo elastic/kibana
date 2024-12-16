@@ -49,6 +49,7 @@ export class EngineDescriptorClient {
       const old = engineDescriptor.saved_objects[0].attributes;
       const update = {
         ...old,
+        error: undefined, // if the engine is being re-initialized, clear any previous error
         status: ENGINE_STATUS.INSTALLING,
         filter,
         fieldHistoryLength,

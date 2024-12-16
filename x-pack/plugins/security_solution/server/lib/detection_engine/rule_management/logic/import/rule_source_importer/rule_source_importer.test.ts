@@ -138,6 +138,7 @@ describe('ruleSourceImporter', () => {
         rule,
         prebuiltRuleAssetsByRuleId: { 'rule-1': expect.objectContaining({ rule_id: 'rule-1' }) },
         isKnownPrebuiltRule: true,
+        isRuleCustomizationEnabled: true,
       });
     });
 
@@ -166,6 +167,7 @@ describe('ruleSourceImporter', () => {
           rule,
           prebuiltRuleAssetsByRuleId: { 'rule-1': expect.objectContaining({ rule_id: 'rule-1' }) },
           isKnownPrebuiltRule: true,
+          isRuleCustomizationEnabled: true,
         });
       });
     });

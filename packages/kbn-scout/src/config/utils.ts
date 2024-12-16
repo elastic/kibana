@@ -12,10 +12,11 @@ import getopts from 'getopts';
 import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { ServerlessProjectType } from '@kbn/es';
-import { REPO_ROOT } from '@kbn/repo-info';
+import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import { CliSupportedServerModes, ScoutServerConfig } from '../types';
 import { getConfigFilePath } from './get_config_file';
 import { loadConfig } from './loader/config_load';
+import type { Config } from './config';
 
 export const formatCurrentDate = () => {
   const now = new Date();
@@ -29,16 +30,20 @@ export const formatCurrentDate = () => {
   );
 };
 
+/**
+ * Saves Scout server configuration to the disk.
+ * @param testServersConfig configuration to be saved
+ * @param log Logger instance to report errors or debug information.
+ */
 const saveTestServersConfigOnDisk = (testServersConfig: ScoutServerConfig, log: ToolingLog) => {
-  const configDirPath = path.resolve(REPO_ROOT, '.scout', 'servers');
-  const configFilePath = path.join(configDirPath, `local.json`);
+  const configFilePath = path.join(SCOUT_SERVERS_ROOT, `local.json`);
 
   try {
     const jsonData = JSON.stringify(testServersConfig, null, 2);
 
-    if (!Fs.existsSync(configDirPath)) {
-      log.debug(`scout: creating configuration directory: ${configDirPath}`);
-      Fs.mkdirSync(configDirPath, { recursive: true });
+    if (!Fs.existsSync(SCOUT_SERVERS_ROOT)) {
+      log.debug(`scout: creating configuration directory: ${SCOUT_SERVERS_ROOT}`);
+      Fs.mkdirSync(SCOUT_SERVERS_ROOT, { recursive: true });
     }
 
     Fs.writeFileSync(configFilePath, jsonData, 'utf-8');
@@ -49,16 +54,26 @@ const saveTestServersConfigOnDisk = (testServersConfig: ScoutServerConfig, log: 
   }
 };
 
-export async function loadServersConfig(mode: CliSupportedServerModes, log: ToolingLog) {
+/**
+ * Loads server configuration based on the mode, creates "kbn-test" compatible Config
+ * instance, that can be used to start local servers and saves its "Scout"-format copy
+ * to the disk.
+ * @param mode server local run mode
+ * @param log Logger instance to report errors or debug information.
+ * @returns "kbn-test" compatible Config instance
+ */
+export async function loadServersConfig(
+  mode: CliSupportedServerModes,
+  log: ToolingLog
+): Promise<Config> {
   // get path to one of the predefined config files
   const configPath = getConfigFilePath(mode);
   // load config that is compatible with kbn-test input format
-  const config = await loadConfig(configPath, log);
+  const config = await loadConfig(configPath);
   // construct config for Playwright Test
   const scoutServerConfig = config.getTestServersConfig();
   // save test config to the file
   saveTestServersConfigOnDisk(scoutServerConfig, log);
-
   return config;
 }
 
