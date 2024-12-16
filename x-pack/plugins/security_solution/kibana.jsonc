@@ -59,7 +59,8 @@
       "charts",
       "entityManager",
       "inference",
-      "discoverShared"
+      "discoverShared",
+      "telemetry",
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -71,7 +72,6 @@
       "lists",
       "home",
       "management",
-      "telemetry",
       "dataViewFieldEditor",
       "osquery",
       "savedObjectsTaggingOss",

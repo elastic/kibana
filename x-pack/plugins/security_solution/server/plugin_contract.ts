@@ -83,7 +83,7 @@ export interface SecuritySolutionPluginStartDependencies {
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   taskManager?: TaskManagerPluginStart;
-  telemetry?: TelemetryPluginStart;
+  telemetry: TelemetryPluginStart;
   share: SharePluginStart;
   actions: ActionsPluginStartContract;
   inference: InferenceServerStart;
