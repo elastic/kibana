@@ -18,6 +18,7 @@ import {
   updateConnectorParamsSchemaV1,
 } from '../../../../common/routes/connector/apis/update';
 import { transformUpdateConnectorResponseV1 } from './transforms';
+import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 
 export const updateConnectorRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
@@ -26,6 +27,7 @@ export const updateConnectorRoute = (
   router.put(
     {
       path: `${BASE_ACTION_API_PATH}/connector/{id}`,
+      security: DEFAULT_ACTION_ROUTE_SECURITY,
       options: {
         access: 'public',
         summary: `Update a connector`,
