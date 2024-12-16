@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import type { RuleMigrationStats } from '../../../../../../siem_migrations/rules/types';
-import { UploadRulesPanel } from './panels/upload_rules_panel';
-import { MigrationProgressPanel } from './panels/migration_progress_panel';
-import { MigrationResultPanel } from './panels/migration_result_panel';
-import { MigrationReadyPanel } from './panels/migration_ready_panel';
+import { UploadRulesPanel } from '../../../../../../siem_migrations/rules/components/panels/upload_rules_panel';
+import { MigrationProgressPanel } from '../../../../../../siem_migrations/rules/components/panels/migration_progress_panel';
+import { MigrationResultPanel } from '../../../../../../siem_migrations/rules/components/panels/migration_result_panel';
+import { MigrationReadyPanel } from '../../../../../../siem_migrations/rules/components/panels/migration_ready_panel';
 
 export interface UploadRulesPanelsProps {
   migrationsStats: RuleMigrationStats[];
