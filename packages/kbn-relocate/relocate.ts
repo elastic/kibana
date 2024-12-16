@@ -73,7 +73,7 @@ const relocateModules = async (toMove: Package[], log: ToolingLog): Promise<numb
 
     // single commit per module now
     await safeExec(`git add .`);
-    await safeExec(`git commit -m "Relocating module \\\`${module.id}\\\`"`);
+    await safeExec(`git commit --no-verify -m "Relocating module \\\`${module.id}\\\`"`);
     ++relocated;
   }
   return relocated;
