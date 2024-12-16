@@ -310,6 +310,124 @@ function _generateMappings(
     }
   }
 
+  function addObjectAsDynamicMapping(field: Field) {
+    const path = ctx.groupFieldName ? `${ctx.groupFieldName}.${field.name}` : field.name;
+    const pathMatch = path.includes('*') ? path : `${path}.*`;
+
+    let dynProperties: Properties = getDefaultProperties(field);
+    let matchingType: string | undefined;
+    switch (field.object_type) {
+      case 'histogram':
+        dynProperties = histogram(field);
+        matchingType = field.object_type_mapping_type ?? '*';
+        break;
+      case 'ip':
+      case 'keyword':
+      case 'match_only_text':
+      case 'text':
+      case 'wildcard':
+        dynProperties.type = field.object_type;
+        matchingType = field.object_type_mapping_type ?? 'string';
+        break;
+      case 'scaled_float':
+        dynProperties = scaledFloat(field);
+        matchingType = field.object_type_mapping_type ?? '*';
+        break;
+      case 'aggregate_metric_double':
+        dynProperties.type = field.object_type;
+        dynProperties.metrics = field.metrics;
+        dynProperties.default_metric = field.default_metric;
+        matchingType = field.object_type_mapping_type ?? '*';
+        break;
+      case 'double':
+      case 'float':
+      case 'half_float':
+        dynProperties.type = field.object_type;
+        if (isIndexModeTimeSeries) {
+          dynProperties.time_series_metric = field.metric_type;
+        }
+        matchingType = field.object_type_mapping_type ?? 'double';
+        break;
+      case 'byte':
+      case 'long':
+      case 'short':
+      case 'unsigned_long':
+        dynProperties.type = field.object_type;
+        if (isIndexModeTimeSeries) {
+          dynProperties.time_series_metric = field.metric_type;
+        }
+        matchingType = field.object_type_mapping_type ?? 'long';
+        break;
+      case 'integer':
+        // Map integers as long, as in other cases.
+        dynProperties.type = 'long';
+        if (isIndexModeTimeSeries) {
+          dynProperties.time_series_metric = field.metric_type;
+        }
+        matchingType = field.object_type_mapping_type ?? 'long';
+        break;
+      case 'boolean':
+        dynProperties.type = field.object_type;
+        if (isIndexModeTimeSeries) {
+          dynProperties.time_series_metric = field.metric_type;
+        }
+        matchingType = field.object_type_mapping_type ?? field.object_type;
+        break;
+      case 'group':
+        if (!field?.fields) {
+          break;
+        }
+        const subFields = field.fields.map((subField) => ({
+          ...subField,
+          type: 'object',
+          object_type: subField.object_type ?? subField.type,
+        }));
+        const mappings = _generateMappings(
+          subFields,
+          {
+            ...ctx,
+            groupFieldName: ctx.groupFieldName ? `${ctx.groupFieldName}.${field.name}` : field.name,
+          },
+          isIndexModeTimeSeries
+        );
+        if (mappings.hasDynamicTemplateMappings) {
+          hasDynamicTemplateMappings = true;
+        }
+        break;
+      case 'flattened':
+        dynProperties.type = field.object_type;
+        matchingType = field.object_type_mapping_type ?? 'object';
+        break;
+      default:
+        throw new PackageInvalidArchiveError(
+          `No dynamic mapping generated for field ${path} of type ${field.object_type}`
+        );
+    }
+
+    if (field.dimension && isIndexModeTimeSeries) {
+      dynProperties.time_series_dimension = field.dimension;
+    }
+
+    // When a wildcard field specifies the subobjects setting,
+    // the parent intermediate object should set the subobjects
+    // setting.
+    //
+    // For example, if a wildcard field `foo.*` has subobjects,
+    // we should set subobjects on the intermediate object `foo`.
+    //
+    if (field.subobjects !== undefined && path.includes('*')) {
+      subobjects = field.subobjects;
+    }
+
+    if (dynProperties && matchingType) {
+      addDynamicMappingWithIntermediateObjects(path, pathMatch, matchingType, dynProperties);
+
+      // Add the parent object as static property, this is needed for
+      // index templates not using `"dynamic": true`.
+      addParentObjectAsStaticProperty(field);
+    }
+  }
+
   // TODO: this can happen when the fields property in fields.yml is present but empty
   // Maybe validation should be moved to fields/field.ts
   if (fields) {
@@ -371,123 +489,7 @@ function _generateMappings(
       }
 
       if (type === 'object' && field.object_type) {
-        const path = ctx.groupFieldName ? `${ctx.groupFieldName}.${field.name}` : field.name;
-        const pathMatch = path.includes('*') ? path : `${path}.*`;
-
-        let dynProperties: Properties = getDefaultProperties(field);
-        let matchingType: string | undefined;
-        switch (field.object_type) {
-          case 'histogram':
-            dynProperties = histogram(field);
-            matchingType = field.object_type_mapping_type ?? '*';
-            break;
-          case 'ip':
-          case 'keyword':
-          case 'match_only_text':
-          case 'text':
-          case 'wildcard':
-            dynProperties.type = field.object_type;
-            matchingType = field.object_type_mapping_type ?? 'string';
-            break;
-          case 'scaled_float':
-            dynProperties = scaledFloat(field);
-            matchingType = field.object_type_mapping_type ?? '*';
-            break;
-          case 'aggregate_metric_double':
-            dynProperties.type = field.object_type;
-            dynProperties.metrics = field.metrics;
-            dynProperties.default_metric = field.default_metric;
-            matchingType = field.object_type_mapping_type ?? '*';
-            break;
-          case 'double':
-          case 'float':
-          case 'half_float':
-            dynProperties.type = field.object_type;
-            if (isIndexModeTimeSeries) {
-              dynProperties.time_series_metric = field.metric_type;
-            }
-            matchingType = field.object_type_mapping_type ?? 'double';
-            break;
-          case 'byte':
-          case 'long':
-          case 'short':
-          case 'unsigned_long':
-            dynProperties.type = field.object_type;
-            if (isIndexModeTimeSeries) {
-              dynProperties.time_series_metric = field.metric_type;
-            }
-            matchingType = field.object_type_mapping_type ?? 'long';
-            break;
-          case 'integer':
-            // Map integers as long, as in other cases.
-            dynProperties.type = 'long';
-            if (isIndexModeTimeSeries) {
-              dynProperties.time_series_metric = field.metric_type;
-            }
-            matchingType = field.object_type_mapping_type ?? 'long';
-            break;
-          case 'boolean':
-            dynProperties.type = field.object_type;
-            if (isIndexModeTimeSeries) {
-              dynProperties.time_series_metric = field.metric_type;
-            }
-            matchingType = field.object_type_mapping_type ?? field.object_type;
-            break;
-          case 'group':
-            if (!field?.fields) {
-              break;
-            }
-            const subFields = field.fields.map((subField) => ({
-              ...subField,
-              type: 'object',
-              object_type: subField.object_type ?? subField.type,
-            }));
-            const mappings = _generateMappings(
-              subFields,
-              {
-                ...ctx,
-                groupFieldName: ctx.groupFieldName
-                  ? `${ctx.groupFieldName}.${field.name}`
-                  : field.name,
-              },
-              isIndexModeTimeSeries
-            );
-            if (mappings.hasDynamicTemplateMappings) {
-              hasDynamicTemplateMappings = true;
-            }
-            break;
-          case 'flattened':
-            dynProperties.type = field.object_type;
-            matchingType = field.object_type_mapping_type ?? 'object';
-            break;
-          default:
-            throw new PackageInvalidArchiveError(
-              `No dynamic mapping generated for field ${path} of type ${field.object_type}`
-            );
-        }
-
-        if (field.dimension && isIndexModeTimeSeries) {
-          dynProperties.time_series_dimension = field.dimension;
-        }
-
-        // When a wildcard field specifies the subobjects setting,
-        // the parent intermediate object should set the subobjects
-        // setting.
-        //
-        // For example, if a wildcard field `foo.*` has subobjects,
-        // we should set subobjects on the intermediate object `foo`.
-        //
-        if (field.subobjects !== undefined && path.includes('*')) {
-          subobjects = field.subobjects;
-        }
-
-        if (dynProperties && matchingType) {
-          addDynamicMappingWithIntermediateObjects(path, pathMatch, matchingType, dynProperties);
-
-          // Add the parent object as static property, this is needed for
-          // index templates not using `"dynamic": true`.
-          addParentObjectAsStaticProperty(field);
-        }
+        addObjectAsDynamicMapping(field);
       } else {
         let fieldProps = getDefaultProperties(field);
 
@@ -503,6 +505,12 @@ function _generateMappings(
               },
               isIndexModeTimeSeries
             );
+            if (field.object_type) {
+              // A group can have an object_type if it has been merged with an object during deduplication,
+              // generate also the dynamic mapping for the object.
+              addObjectAsDynamicMapping(field);
+              mappings.hasDynamicTemplateMappings = true;
+            }
             if (mappings.hasNonDynamicTemplateMappings) {
               fieldProps = {
                 properties:
