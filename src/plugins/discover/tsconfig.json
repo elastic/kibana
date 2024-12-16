@@ -8,7 +8,8 @@
     "public/**/*",
     "server/**/*",
     "../../../typings/**/*",
-    ".storybook/**/*"
+    ".storybook/**/*",
+    "../../typings/emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -50,7 +51,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/shared-ux-page-analytics-no-data",
     "@kbn/alerting-plugin",
-    "@kbn/ui-theme",
     "@kbn/config-schema",
     "@kbn/storybook",
     "@kbn/shared-ux-router",
@@ -101,7 +101,5 @@
     "@kbn/esql-ast",
     "@kbn/discover-shared-plugin"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }
