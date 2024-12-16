@@ -113,9 +113,9 @@ actions:
                     # SLO burn rate (slo.rules.burnRate)
                     - $ref:  '../../x-pack/plugins/observability_solution/slo/server/lib/rules/slo_burn_rate/docs/params_property_slo_burn_rate.yaml'
                     # Synthetics uptime TLS rule (xpack.uptime.alerts.tls)
-                    - $ref: '../../x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/docs/params_property_synthetics_uptime_tls.yaml'
+                    - $ref: '../../x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/lib/alerts/docs/params_property_synthetics_uptime_tls.yaml'
                     # Uptime monitor status rule (xpack.uptime.alerts.monitorStatus)
-                    - $ref: '../../x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/docs/params_property_synthetics_monitor_status.yaml'
+                    - $ref: '../../x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/lib/alerts/docs/params_property_synthetics_monitor_status.yaml'
                   # TBD
                     # Anomaly detection alert rule (xpack.ml.anomaly_detection_alert)
                     # Anomaly detection jobs health rule (xpack.ml.anomaly_detection_jobs_health)

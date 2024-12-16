@@ -81,7 +81,7 @@ export interface DataStreamIndex {
   name: string;
   uuid: string;
   preferILM: boolean;
-  managedBy: string;
+  managedBy?: string;
 }
 
 export interface DataRetention {
