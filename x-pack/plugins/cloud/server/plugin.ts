@@ -175,6 +175,7 @@ export interface CloudStart {
 export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   private readonly config: CloudConfigType;
   private readonly logger: Logger;
+  private hasHandlePersistingTokenCloud: boolean = false;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.config = this.context.config.get<CloudConfigType>();
@@ -202,21 +203,27 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       orchestratorTarget,
     });
 
-    core.http.registerOnPreAuth((request, response, toolkit) => {
-      const queryOnboardingToken = request.url.searchParams.get('onboarding_token');
-      if (queryOnboardingToken) {
-        core.getStartServices().then(([coreStart]) => {
-          const soClient = coreStart.savedObjects.getScopedClient(request, {
-            includedHiddenTypes: [CLOUD_DATA_SAVED_OBJECT_TYPE],
+    core.http.registerOnPostAuth((request, response, toolkit) => {
+      // packages/core/apps/core-apps-server-internal/src/core_app.ts L175
+      const isCommonDefaultRoute = request.route.routePath === '/app/{id}/{any*}';
+      if (isCommonDefaultRoute && !this.hasHandlePersistingTokenCloud) {
+        const queryOnboardingToken = request.url.searchParams.get('onboarding_token');
+        if (queryOnboardingToken) {
+          core.getStartServices().then(async ([coreStart]) => {
+            const soClient = coreStart.savedObjects.createInternalRepository([
+              CLOUD_DATA_SAVED_OBJECT_TYPE,
+            ]);
+            const solutionType = this.config.onboarding?.default_solution;
+            await persistTokenCloudData(soClient, {
+              logger: this.logger,
+              onboardingToken: queryOnboardingToken,
+              solutionType,
+            });
+            this.setHandlePersistingTokenCloud(true);
           });
-          const solutionType = this.config.onboarding?.default_solution;
-          persistTokenCloudData(soClient, {
-            logger: this.logger,
-            onboardingToken: queryOnboardingToken,
-            solutionType,
-          });
-        });
+        }
       }
+
       return toolkit.next();
     });
 
@@ -278,5 +285,9 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       baseUrl,
       projectsUrl,
     };
+  }
+
+  private setHandlePersistingTokenCloud(val: boolean) {
+    this.hasHandlePersistingTokenCloud = val;
   }
 }

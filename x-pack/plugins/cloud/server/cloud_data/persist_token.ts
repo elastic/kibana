@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  KibanaResponseFactory,
-  Logger,
-  SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import { Logger, SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { CloudDataAttributes, SolutionType } from '../routes/types';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { CLOUD_DATA_SAVED_OBJECT_ID } from '../routes/constants';
@@ -19,16 +14,16 @@ export const persistTokenCloudData = async (
   savedObjectsClient: SavedObjectsClientContract,
   {
     logger,
-    response,
+    returnError,
     onboardingToken,
     solutionType,
   }: {
     logger?: Logger;
-    response?: KibanaResponseFactory;
+    returnError?: boolean;
     onboardingToken?: string;
     solutionType?: string;
   }
-) => {
+): Promise<void> => {
   let cloudDataSo = null;
   try {
     cloudDataSo = await savedObjectsClient.get<CloudDataAttributes>(
@@ -39,13 +34,14 @@ export const persistTokenCloudData = async (
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       cloudDataSo = null;
     } else {
-      if (response) {
-        return response?.customError(error);
+      if (returnError) {
+        throw error;
       } else if (logger) {
         logger.error(error);
       }
     }
   }
+
   try {
     if (onboardingToken && cloudDataSo === null) {
       await savedObjectsClient.create<CloudDataAttributes>(
@@ -75,8 +71,8 @@ export const persistTokenCloudData = async (
       );
     }
   } catch (error) {
-    if (response) {
-      return response?.customError(error);
+    if (returnError) {
+      throw error;
     } else if (logger) {
       logger.error(error);
     }

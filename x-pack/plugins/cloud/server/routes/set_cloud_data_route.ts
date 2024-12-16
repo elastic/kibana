@@ -50,11 +50,15 @@ export const setPostCloudSolutionDataRoute = ({ router }: RouteOptions) => {
           includedHiddenTypes: [CLOUD_DATA_SAVED_OBJECT_TYPE],
         });
 
-        persistTokenCloudData(savedObjectsClient, {
-          response,
-          solutionType: request.body.onboardingData.solutionType,
-          onboardingToken: request.body.onboardingData.token,
-        });
+        try {
+          persistTokenCloudData(savedObjectsClient, {
+            returnError: true,
+            solutionType: request.body.onboardingData.solutionType,
+            onboardingToken: request.body.onboardingData.token,
+          });
+        } catch (error) {
+          return response.customError(error);
+        }
 
         return response.ok();
       }
