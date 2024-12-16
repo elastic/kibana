@@ -60,7 +60,6 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
         {
           requiredClusterPrivileges: ['manage_watcher'],
           requiredIndexPrivileges: {
-            [INDEX_NAMES.WATCHES]: ['read'],
             [INDEX_NAMES.WATCHER_HISTORY]: ['read'],
           },
           ui: [],
@@ -68,7 +67,6 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
         {
           requiredClusterPrivileges: ['monitor_watcher'],
           requiredIndexPrivileges: {
-            [INDEX_NAMES.WATCHES]: ['read'],
             [INDEX_NAMES.WATCHER_HISTORY]: ['read'],
           },
           ui: [],
