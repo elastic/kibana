@@ -62,7 +62,12 @@ export function RowHeightSettings({
 
   return (
     <>
-      <EuiFormRow label={label} display="columnCompressed" data-test-subj={dataTestSubj}>
+      <EuiFormRow
+        label={label}
+        aria-label={label}
+        display="columnCompressed"
+        data-test-subj={dataTestSubj}
+      >
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiButtonGroup
             isFullWidth
