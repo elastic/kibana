@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { KibanaPageTemplateSolutionNavAvatar, KibanaPageTemplateSolutionNav } from './solution_nav';
+export { KibanaPageTemplateSolutionNavAvatar } from './solution_nav';
 export * from './no_data_page';
