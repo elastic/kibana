@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { FtrProviderContext } from '../ftr_provider_context';
+import { testHasEmbeddedConsole } from './embedded_console';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const {
@@ -14,7 +15,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     searchNavigation,
     indexManagement,
     embeddedConsole,
-    header,
   } = getPageObjects([
     'searchIndexDetail',
     'common',
@@ -23,7 +23,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'common',
     'indexManagement',
     'embeddedConsole',
-    'header',
   ]);
   const es = getService('es');
   const security = getService('security');
@@ -46,9 +45,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         // Create a space with the search solution and navigate to its home page
-        ({ cleanUp, space: spaceCreated } = await spaces.create({ solution: 'classic' }));
+        ({ cleanUp, space: spaceCreated } = await spaces.create({
+          name: 'search-ftr',
+          solution: 'es',
+        }));
         await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
-        await common.navigateToApp('enterpriseSearch');
       });
 
       after(async () => {
@@ -56,6 +57,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cleanUp();
         await deleteAllIndices(indexName);
       });
+
       describe('search index details page', () => {
         before(async () => {
           await es.indices.create({ index: indexName });
@@ -70,6 +72,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await searchIndexDetail.expectAPIReferenceDocLinkExists();
           await searchIndexDetail.expectAPIReferenceDocLinkMissingInMoreOptions();
         });
+
         it('should have connection details', async () => {
           await searchIndexDetail.expectConnectionDetails();
         });
@@ -83,6 +86,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           after(async () => {
             await deleteAllIndices(indexNameCodeExample);
+          });
+
+          it('should have embedded dev console', async () => {
+            await testHasEmbeddedConsole({ embeddedConsole });
           });
 
           it('should have basic example texts', async () => {
@@ -270,9 +277,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         beforeEach(async () => {
           await searchNavigation.navigateToIndexManagementPage();
-          // // Navigate to the indices tab
-          // await indexManagement.changeTabs('indicesTab');
-          // await header.waitUntilLoadingHasFinished();
         });
         after(async () => {
           await deleteAllIndices(indexName);

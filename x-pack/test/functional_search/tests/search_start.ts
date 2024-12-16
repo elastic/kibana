@@ -7,13 +7,15 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
+import { testHasEmbeddedConsole } from './embedded_console';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { common, searchApiKeys, searchStart, searchNavigation } = getPageObjects([
+  const { common, searchApiKeys, searchStart, searchNavigation, embeddedConsole } = getPageObjects([
     'searchStart',
     'common',
     'searchApiKeys',
     'searchNavigation',
+    'embeddedConsole',
   ]);
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const es = getService('es');
@@ -36,9 +38,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // Create a space with the search solution and navigate to its home page
-      ({ cleanUp, space: spaceCreated } = await spaces.create({ solution: 'classic' }));
+      ({ cleanUp, space: spaceCreated } = await spaces.create({
+        name: 'search-ftr',
+        solution: 'es',
+      }));
       await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
-      await common.navigateToApp('enterpriseSearch');
     });
 
     after(async () => {
@@ -52,6 +56,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await deleteAllTestIndices();
         await searchApiKeys.deleteAPIKeys();
         await searchNavigation.navigateToElasticsearchStartPage();
+      });
+
+      it('should have embedded dev console', async () => {
+        await searchStart.expectToBeOnStartPage();
+        await testHasEmbeddedConsole({ embeddedConsole });
       });
 
       it('should support index creation flow with UI', async () => {

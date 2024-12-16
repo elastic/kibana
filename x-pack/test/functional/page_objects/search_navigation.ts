@@ -12,23 +12,14 @@ export function SearchNavigationServiceProvider({
   getPageObjects,
 }: FtrProviderContext) {
   const retry = getService('retry');
-  const { common, indexManagement } = getPageObjects(['common', 'indexManagement']);
+  const { common, indexManagement, solutionNavigation } = getPageObjects([
+    'common',
+    'indexManagement',
+    'solutionNavigation',
+  ]);
   const testSubjects = getService('testSubjects');
 
   return {
-    async navigateToLandingPage() {
-      await retry.tryForTime(60 * 1000, async () => {
-        await common.navigateToApp('landingPage');
-        // Wait for the side nav, since the landing page will sometimes redirect to index management now
-        await testSubjects.existOrFail('svlSearchSideNav', { timeout: 2000 });
-      });
-    },
-    async navigateToGettingStartedPage() {
-      await retry.tryForTime(60 * 1000, async () => {
-        await common.navigateToApp('serverlessElasticsearch');
-        await testSubjects.existOrFail('svlSearchOverviewPage', { timeout: 2000 });
-      });
-    },
     async navigateToElasticsearchStartPage(expectRedirect: boolean = false) {
       await retry.tryForTime(60 * 1000, async () => {
         await common.navigateToApp('elasticsearch/start', {
@@ -55,7 +46,9 @@ export function SearchNavigationServiceProvider({
 
     async navigateToIndexManagementPage() {
       await retry.tryForTime(60 * 1000, async () => {
-        await common.navigateToApp('management/data/index_management');
+        await solutionNavigation.sidenav.clickLink({
+          deepLinkId: 'enterpriseSearchContent:searchIndices',
+        });
         await indexManagement.expectToBeOnIndicesManagement();
       });
     },

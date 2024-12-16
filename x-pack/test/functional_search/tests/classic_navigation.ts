@@ -44,7 +44,7 @@ export default function searchSolutionNavigation({
       await searchClassicNavigation.expectAllNavItems([
         { id: 'Home', label: 'Home' },
         { id: 'Content', label: 'Content' },
-        { id: 'Indices', label: 'Indices' },
+        { id: 'Indices', label: 'Index Management' },
         { id: 'Connectors', label: 'Connectors' },
         { id: 'Crawlers', label: 'Web Crawlers' },
         { id: 'Build', label: 'Build' },
