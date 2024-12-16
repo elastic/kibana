@@ -193,7 +193,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
                         values={{
                           number: (
                             <EuiBadge
-                              color={data.apiKeys.length > 0 ? 'accentSecondary' : 'warning'}
+                              color={data.apiKeys.length > 0 ? 'success' : 'warning'}
                               data-test-subj="api-keys-count-badge"
                             >
                               {data.apiKeys.length}

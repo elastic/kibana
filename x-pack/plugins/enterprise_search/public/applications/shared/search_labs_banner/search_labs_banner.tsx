@@ -73,7 +73,7 @@ export const SearchLabsBanner: React.FC = () => {
           <span>
             <EuiButton
               href="https://www.elastic.co/search-labs/tutorials"
-              color="accentSecondary"
+              color="success"
               fill
               target="_blank"
             >
@@ -87,7 +87,7 @@ export const SearchLabsBanner: React.FC = () => {
           <span>
             <EuiButton
               href="https://www.elastic.co/search-labs/tutorials/examples"
-              color="accentSecondary"
+              color="success"
               target="_blank"
             >
               {i18n.translate('xpack.enterpriseSearch.shared.searchLabsBanner.notebooksLabel', {
