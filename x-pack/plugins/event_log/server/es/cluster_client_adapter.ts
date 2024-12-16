@@ -110,7 +110,6 @@ export class ClusterClientAdapter<
   TDoc extends {
     body: AliasAny;
     index: string;
-    id?: string;
     meta?: DocMeta;
   } = Doc
 > {
