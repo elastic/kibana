@@ -25,6 +25,7 @@ import { useLicense } from '../../hooks/use_license';
 import { eventsDefaultModel } from '../events_viewer/default_model';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { SecurityCellActionsTrigger } from '../cell_actions';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 export const TEST_ID = 'security_solution:sessions_viewer:sessions_view';
 
@@ -120,8 +121,13 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   }, [dispatch, tableId]);
 
   const isEnterprisePlus = useLicense().isEnterprise();
-  const ACTION_BUTTON_COUNT =
-    isEnterprisePlus || tableId === TableId.kubernetesPageSessions ? 5 : 4;
+  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesDisabled'
+  );
+  let ACTION_BUTTON_COUNT = isEnterprisePlus || tableId === TableId.kubernetesPageSessions ? 6 : 5;
+  if (securitySolutionNotesDisabled) {
+    ACTION_BUTTON_COUNT--;
+  }
   const leadingControlColumns = useMemo(
     () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
     [ACTION_BUTTON_COUNT]
