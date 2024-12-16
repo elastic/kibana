@@ -29,21 +29,21 @@ type RouterElementChildren = Array<
 
 export const Routes = ({
   legacySwitch = true,
-  disableExecutionContextTracking = false,
+  enableExecutionContextTracking = false,
   children,
 }: {
   legacySwitch?: boolean;
-  disableExecutionContextTracking?: boolean;
+  enableExecutionContextTracking?: boolean;
   children: React.ReactNode;
 }) => {
   const match = useRouteMatch();
 
   return legacySwitch ? (
-    <SharedUXRoutesContext.Provider value={{ disableExecutionContextTracking }}>
+    <SharedUXRoutesContext.Provider value={{ enableExecutionContextTracking }}>
       <Switch>{children}</Switch>
     </SharedUXRoutesContext.Provider>
   ) : (
-    <SharedUXRoutesContext.Provider value={{ disableExecutionContextTracking }}>
+    <SharedUXRoutesContext.Provider value={{ enableExecutionContextTracking }}>
       <ReactRouterRoutes>
         {Children.map(children as RouterElementChildren, (child) => {
           if (React.isValidElement(child) && child.type === LegacyRoute) {
@@ -57,7 +57,7 @@ export const Routes = ({
                 path={path}
                 element={
                   <>
-                    {!disableExecutionContextTracking && <MatchPropagator />}
+                    {enableExecutionContextTracking && <MatchPropagator />}
                     {(child?.props?.component && <child.props.component />) ||
                       (renderFunction && renderFunction()) ||
                       children}

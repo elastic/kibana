@@ -39,5 +39,5 @@ export declare interface SharedUXRoutesContextType {
    * This flag is used to disable the default execution context tracking for a specific router.
    * Disable this flag in case you have a custom implementation for execution context tracking.
    * */
-  readonly disableExecutionContextTracking?: boolean;
+  readonly enableExecutionContextTracking?: boolean;
 }

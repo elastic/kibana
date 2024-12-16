@@ -53,7 +53,7 @@ const AppWithExecutionContext = ({
     <KbnUrlStateStorageFromRouterProvider>
       <Router history={params.history}>
         <PerformanceContextProvider>
-          <Routes disableExecutionContextTracking={true}>
+          <Routes>
             <Route path="/" exact={true} render={() => <DatasetQualityRoute />} />
             <Route path="/details" exact={true} render={() => <DatasetQualityDetailsRoute />} />
           </Routes>

@@ -31,19 +31,18 @@ export const Route = <T extends {}>({
   render,
   ...rest
 }: RouteProps<string, { [K: string]: string } & T>) => {
-  const { disableExecutionContextTracking } = useSharedUXRoutesContext();
-  const enableDefaultTracking = !disableExecutionContextTracking;
+  const { enableExecutionContextTracking } = useSharedUXRoutesContext();
   const component = useMemo(() => {
     if (!Component) {
       return undefined;
     }
     return (props: RouteComponentProps) => (
       <>
-        {enableDefaultTracking && <MatchPropagator />}
+        {enableExecutionContextTracking && <MatchPropagator />}
         <Component {...props} />
       </>
     );
-  }, [Component, enableDefaultTracking]);
+  }, [Component, enableExecutionContextTracking]);
 
   if (component) {
     return <ReactRouterRoute {...rest} component={component} />;
@@ -55,7 +54,7 @@ export const Route = <T extends {}>({
         {...rest}
         render={(props) => (
           <>
-            {enableDefaultTracking && <MatchPropagator />}
+            {enableExecutionContextTracking && <MatchPropagator />}
             {/* @ts-ignore  else condition exists if renderFunction is undefined*/}
             {renderFunction(props)}
           </>
@@ -65,7 +64,7 @@ export const Route = <T extends {}>({
   }
   return (
     <ReactRouterRoute {...rest}>
-      {enableDefaultTracking && <MatchPropagator />}
+      {enableExecutionContextTracking && <MatchPropagator />}
       {children}
     </ReactRouterRoute>
   );
