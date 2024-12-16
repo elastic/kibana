@@ -19,9 +19,7 @@ export function plugin(context: PluginInitializerContext) {
   return new EmbeddableEnhancedPlugin(context);
 }
 
-export type { EnhancedEmbeddable, EnhancedEmbeddableContext } from './types';
 export {
   type HasDynamicActions,
   apiHasDynamicActions,
 } from './embeddables/interfaces/has_dynamic_actions';
-export { drilldownGrouping as embeddableEnhancedDrilldownGrouping } from './actions';
