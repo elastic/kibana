@@ -242,7 +242,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                   {onTestConnector && (
                     <EuiFlexItem grow={false}>
                       <EuiButton
-                        color="success"
+                        color="primary"
                         data-test-subj="create-connector-flyout-save-test-btn"
                         type="submit"
                         isLoading={isSaving}
@@ -259,7 +259,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       fill
-                      color="success"
+                      color="primary"
                       data-test-subj="create-connector-flyout-save-btn"
                       type="submit"
                       isLoading={isSaving}
