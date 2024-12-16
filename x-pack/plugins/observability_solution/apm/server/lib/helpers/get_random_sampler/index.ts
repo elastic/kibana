@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import seedrandom from 'seedrandom';
-import { APMRouteHandlerResources } from '../../../routes/apm_routes/register_apm_server_routes';
+import type { APMRouteHandlerResources } from '../../../routes/apm_routes/register_apm_server_routes';
 
 export type RandomSampler = Awaited<ReturnType<typeof getRandomSampler>>;
 

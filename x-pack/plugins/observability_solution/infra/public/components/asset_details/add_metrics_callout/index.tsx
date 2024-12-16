@@ -7,12 +7,11 @@
 
 import React from 'react';
 import { AddDataPanel } from '@kbn/observability-shared-plugin/public';
-import {
-  OBSERVABILITY_ONBOARDING_LOCATOR,
-  ObservabilityOnboardingLocatorParams,
-} from '@kbn/deeplinks-observability';
-import { AddMetricsCalloutEventParams } from '../../../services/telemetry';
-import { addMetricsCalloutDefinitions, AddMetricsCalloutKey } from './constants';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
+import type { AddMetricsCalloutEventParams } from '../../../services/telemetry';
+import type { AddMetricsCalloutKey } from './constants';
+import { addMetricsCalloutDefinitions } from './constants';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export interface AddMetricsCalloutProps {

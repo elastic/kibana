@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
-  ControlGroupRenderer,
+import type {
   ControlGroupRendererApi,
   ControlGroupRuntimeState,
   DataControlApi,
 } from '@kbn/controls-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import styled from '@emotion/styled';
 import { useControlPanels } from '@kbn/observability-shared-plugin/public';

@@ -5,26 +5,28 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import {
+import type {
   CreateInventoryViewAttributesRequestPayload,
-  createInventoryViewRequestPayloadRT,
   CreateInventoryViewResponsePayload,
   FindInventoryViewResponsePayload,
-  findInventoryViewResponsePayloadRT,
   GetInventoryViewResposePayload,
-  getInventoryViewUrl,
-  inventoryViewResponsePayloadRT,
   UpdateInventoryViewAttributesRequestPayload,
   UpdateInventoryViewResponsePayload,
+} from '../../../common/http_api/latest';
+import {
+  createInventoryViewRequestPayloadRT,
+  findInventoryViewResponsePayloadRT,
+  getInventoryViewUrl,
+  inventoryViewResponsePayloadRT,
 } from '../../../common/http_api/latest';
 import {
   DeleteInventoryViewError,
   FetchInventoryViewError,
   UpsertInventoryViewError,
 } from '../../../common/inventory_views';
-import { IInventoryViewsClient } from './types';
+import type { IInventoryViewsClient } from './types';
 
 export class InventoryViewsClient implements IInventoryViewsClient {
   constructor(private readonly http: HttpStart) {}

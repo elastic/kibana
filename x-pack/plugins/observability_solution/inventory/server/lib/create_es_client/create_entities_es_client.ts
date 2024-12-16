@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { entitiesAliasPattern, ENTITY_LATEST } from '@kbn/entities-schema';
 import { unwrapEsResponse } from '@kbn/observability-shared-plugin/common/utils/unwrap_es_response';
 // import { withApmSpan } from '../../utils/with_apm_span';

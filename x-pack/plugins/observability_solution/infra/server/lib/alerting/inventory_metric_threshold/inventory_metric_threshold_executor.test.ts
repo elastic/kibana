@@ -6,19 +6,21 @@
  */
 
 import rison from '@kbn/rison';
-import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { Aggregators, InventoryMetricConditions } from '../../../../common/alerting/metrics';
+import type { InventoryMetricConditions } from '../../../../common/alerting/metrics';
+import { Aggregators } from '../../../../common/alerting/metrics';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { createInventoryMetricThresholdExecutor } from './inventory_metric_threshold_executor';
-import { ConditionResult } from './evaluate_condition';
-import { InfraBackendLibs, InfraLocators } from '../../infra_types';
+import type { ConditionResult } from './evaluate_condition';
+import type { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import { infraPluginMock } from '../../../mocks';
 import { logsSharedPluginMock } from '@kbn/logs-shared-plugin/server/mocks';
 import { createLogSourcesServiceMock } from '@kbn/logs-data-access-plugin/common/services/log_sources_service/log_sources_service.mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import {
+import type {
   AssetDetailsLocator,
   AssetDetailsLocatorParams,
   InventoryLocator,

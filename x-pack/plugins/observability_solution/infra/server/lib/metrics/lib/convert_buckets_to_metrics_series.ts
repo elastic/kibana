@@ -13,8 +13,8 @@ import type {
   MetricsAPIColumn,
   MetricsAPIRow,
 } from '@kbn/metrics-data-access-plugin/common';
+import type { Bucket } from '../types';
 import {
-  Bucket,
   BasicMetricValueRT,
   NormalizedMetricValueRT,
   PercentilesTypeRT,

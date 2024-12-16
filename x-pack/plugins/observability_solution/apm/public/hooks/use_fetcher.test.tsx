@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { waitFor, act, renderHook, type RenderHookResult } from '@testing-library/react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { delay } from '../utils/test_helpers';
 import { useFetcher, isPending, FETCH_STATUS } from './use_fetcher';

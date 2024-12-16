@@ -13,14 +13,14 @@ import {
 } from '@elastic/eui';
 import React, { Fragment } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { NodeDataDefinition } from 'cytoscape';
-import { ContentsProps } from '.';
+import type { NodeDataDefinition } from 'cytoscape';
+import type { ContentsProps } from '.';
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_TYPE,
   SPAN_SUBTYPE,
 } from '../../../../../common/es_fields/apm';
-import { ExternalConnectionNode } from '../../../../../common/service_map';
+import type { ExternalConnectionNode } from '../../../../../common/service_map';
 
 const ExternalResourcesList = euiStyled.section`
   max-height: 360px;

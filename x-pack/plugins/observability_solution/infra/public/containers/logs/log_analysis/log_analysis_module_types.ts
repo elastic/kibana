@@ -7,16 +7,16 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IdFormat, JobType } from '../../../../common/http_api/latest';
-import {
+import type { IdFormat, JobType } from '../../../../common/http_api/latest';
+import type {
   ValidateLogEntryDatasetsResponsePayload,
   ValidationIndicesResponsePayload,
 } from '../../../../common/http_api';
-import { DatasetFilter } from '../../../../common/log_analysis';
-import { DeleteJobsResponsePayload } from './api/ml_cleanup';
-import { FetchJobStatusResponsePayload } from './api/ml_get_jobs_summary_api';
-import { GetMlModuleResponsePayload } from './api/ml_get_module';
-import { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
+import type { DatasetFilter } from '../../../../common/log_analysis';
+import type { DeleteJobsResponsePayload } from './api/ml_cleanup';
+import type { FetchJobStatusResponsePayload } from './api/ml_get_jobs_summary_api';
+import type { GetMlModuleResponsePayload } from './api/ml_get_module';
+import type { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
 
 export type { JobModelSizeStats, JobSummary } from './api/ml_get_jobs_summary_api';
 

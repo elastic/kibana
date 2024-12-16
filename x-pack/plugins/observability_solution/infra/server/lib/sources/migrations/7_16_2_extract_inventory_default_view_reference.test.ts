@@ -6,7 +6,7 @@
  */
 
 import { migrationMocks } from '@kbn/core/server/mocks';
-import { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 import {
   inventoryDefaultViewReferenceName,
   logIndexPatternReferenceName,

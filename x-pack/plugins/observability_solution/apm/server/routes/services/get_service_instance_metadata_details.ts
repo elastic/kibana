@@ -8,7 +8,7 @@ import { merge } from 'lodash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
+import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
 import {
   AGENT_NAME,
   AT_TIMESTAMP,
@@ -22,13 +22,13 @@ import {
   getBackwardCompatibleDocumentTypeFilter,
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { Agent } from '../../../typings/es_schemas/ui/fields/agent';
-import { Service } from '../../../typings/es_schemas/raw/fields/service';
-import { Container } from '../../../typings/es_schemas/raw/fields/container';
-import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
-import { Host } from '../../../typings/es_schemas/raw/fields/host';
-import { Cloud } from '../../../typings/es_schemas/raw/fields/cloud';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { Agent } from '../../../typings/es_schemas/ui/fields/agent';
+import type { Service } from '../../../typings/es_schemas/raw/fields/service';
+import type { Container } from '../../../typings/es_schemas/raw/fields/container';
+import type { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
+import type { Host } from '../../../typings/es_schemas/raw/fields/host';
+import type { Cloud } from '../../../typings/es_schemas/raw/fields/cloud';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   SERVICE_METADATA_CLOUD_KEYS,

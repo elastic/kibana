@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TopAlert } from '@kbn/observability-plugin/public';
-import { Rule } from '@kbn/alerting-plugin/common';
-import { ApmEmbeddableContextProps } from '../../embeddable_context';
+import type { TopAlert } from '@kbn/observability-plugin/public';
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type { ApmEmbeddableContextProps } from '../../embeddable_context';
 import { mockApmPluginContextValue } from '../../../context/apm_plugin/mock_apm_plugin_context';
 
 export const MOCK_DEPS: ApmEmbeddableContextProps['deps'] = {

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { FleetStartContract } from '@kbn/fleet-plugin/server';
-import { ArtifactsClientInterface } from '@kbn/fleet-plugin/server/services';
-import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { CoreStart, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
+import type { ArtifactsClientInterface } from '@kbn/fleet-plugin/server/services';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
 import { getApmArtifactClient } from '../fleet/source_maps';
 import { bulkCreateApmSourceMaps } from './bulk_create_apm_source_maps';
 import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/apm_system_index_constants';
-import { ApmSourceMap } from './create_apm_source_map_index_template';
-import { APMPluginStartDependencies } from '../../types';
+import type { ApmSourceMap } from './create_apm_source_map_index_template';
+import type { APMPluginStartDependencies } from '../../types';
 import { createApmSourceMapIndexTemplate } from './create_apm_source_map_index_template';
 
 const PER_PAGE = 10;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 
 export interface UrlParams {
   detailTab?: string;

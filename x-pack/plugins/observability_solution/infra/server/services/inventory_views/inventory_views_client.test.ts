@@ -6,16 +6,16 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { InventoryViewAttributes } from '../../../common/inventory_views';
+import type { InventoryViewAttributes } from '../../../common/inventory_views';
 
-import { InfraSource } from '../../lib/sources';
+import type { InfraSource } from '../../lib/sources';
 import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import { inventoryViewSavedObjectName } from '../../saved_objects/inventory_view';
 import { InventoryViewsClient } from './inventory_views_client';
 import { createInventoryViewMock } from '../../../common/inventory_views/inventory_view.mock';
-import { UpdateInventoryViewAttributesRequestPayload } from '../../../common/http_api/latest';
+import type { UpdateInventoryViewAttributesRequestPayload } from '../../../common/http_api/latest';
 
 describe('InventoryViewsClient class', () => {
   const mockFindInventoryList = (savedObjectsClient: jest.Mocked<SavedObjectsClientContract>) => {

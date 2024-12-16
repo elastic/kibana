@@ -11,7 +11,7 @@ import { AssetDetailsRenderPropsProvider } from './hooks/use_asset_details_rende
 import { DatePickerProvider } from './hooks/use_date_picker';
 import { LoadingStateProvider } from './hooks/use_loading_state';
 import { MetadataStateProvider } from './hooks/use_metadata_state';
-import { AssetDetailsProps, RenderMode } from './types';
+import type { AssetDetailsProps, RenderMode } from './types';
 
 const RenderWithOptionalSearchSessionProvider = ({
   renderMode,

@@ -16,7 +16,7 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useErrorGroupDistributionFetcher } from '../../../../hooks/use_error_group_distribution_fetcher';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { HttpErrorRateChart } from '../charts/mobile_http_error_rate';
 import { ErrorDistribution } from '../errors_and_crashes_group_details/shared/distribution';

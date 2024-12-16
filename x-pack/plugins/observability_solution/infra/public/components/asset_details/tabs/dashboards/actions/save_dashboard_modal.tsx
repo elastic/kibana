@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiModal,
@@ -15,7 +16,6 @@ import {
   EuiSwitch,
   EuiModalBody,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiToolTip,
   EuiIcon,

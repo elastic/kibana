@@ -12,7 +12,7 @@ import {
   KUBERNETES_NAMESPACE,
   KUBERNETES_REPLICASET_NAME,
 } from '../../../common/es_fields/infra_metrics';
-import { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
+import type { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
 export const getServiceOverviewContainerMetadata = async ({
   infraMetricsClient,

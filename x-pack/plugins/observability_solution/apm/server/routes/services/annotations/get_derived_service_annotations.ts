@@ -11,14 +11,15 @@ import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server
 import { maybe } from '../../../../common/utils/maybe';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
-import { Annotation, AnnotationType } from '../../../../common/annotations';
+import type { Annotation } from '../../../../common/annotations';
+import { AnnotationType } from '../../../../common/annotations';
 import { AT_TIMESTAMP, SERVICE_NAME, SERVICE_VERSION } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getBackwardCompatibleDocumentTypeFilter,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getDerivedServiceAnnotations({
   apmEventClient,

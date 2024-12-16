@@ -20,7 +20,7 @@ import { ResettingHeightRetainer } from '../../shared/height_retainer/resetting_
 import { push, replace } from '../../shared/links/url_helpers';
 import { useWaterfallFetcher } from '../transaction_details/use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../transaction_details/waterfall_with_summary';
-import { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
+import type { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
 import { DependencyOperationDistributionChart } from './dependency_operation_distribution_chart';
 import { DetailViewHeader } from './detail_view_header';
 import { maybeRedirectToAvailableSpanSample } from './maybe_redirect_to_available_span_sample';

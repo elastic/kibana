@@ -14,7 +14,7 @@ import {
   ERROR_TYPE,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';

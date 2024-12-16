@@ -6,10 +6,10 @@
  */
 import { registerAnomalyRuleType } from './register_anomaly_rule_type';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
-import { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import * as GetServiceAnomalies from '../../../service_map/get_service_anomalies';
 import { createRuleTypeMocks } from '../../test_utils';
-import { ApmMlJob } from '../../../../../common/anomaly_detection/apm_ml_job';
+import type { ApmMlJob } from '../../../../../common/anomaly_detection/apm_ml_job';
 import {
   AnomalyDetectorType,
   getAnomalyDetectorIndex,

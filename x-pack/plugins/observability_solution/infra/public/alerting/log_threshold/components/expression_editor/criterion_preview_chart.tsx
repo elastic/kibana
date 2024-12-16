@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactElement, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import React, { useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import {
@@ -22,10 +23,10 @@ import {
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import type { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { useTimelineChartTheme } from '../../../../hooks/use_timeline_chart_theme';
-import { ExecutionTimeRange } from '../../../../types';
+import type { ExecutionTimeRange } from '../../../../types';
 import {
   ChartContainer,
   LoadingState,
@@ -38,17 +39,15 @@ import {
   yAxisFormatter,
   NUM_BUCKETS,
 } from '../../../common/criterion_preview_chart/criterion_preview_chart';
-import {
+import type {
   PartialRuleParams,
   Threshold,
   Criterion,
-  Comparator,
 } from '../../../../../common/alerting/logs/log_threshold/types';
+import { Comparator } from '../../../../../common/alerting/logs/log_threshold/types';
 import { Color, colorTransformer } from '../../../../../common/color_palette';
-import {
-  GetLogAlertsChartPreviewDataAlertParamsSubset,
-  getLogAlertsChartPreviewDataAlertParamsSubsetRT,
-} from '../../../../../common/http_api';
+import type { GetLogAlertsChartPreviewDataAlertParamsSubset } from '../../../../../common/http_api';
+import { getLogAlertsChartPreviewDataAlertParamsSubsetRT } from '../../../../../common/http_api';
 import { useChartPreviewData } from './hooks/use_chart_preview_data';
 import { useKibanaTimeZoneSetting } from '../../../../hooks/use_kibana_time_zone_setting';
 

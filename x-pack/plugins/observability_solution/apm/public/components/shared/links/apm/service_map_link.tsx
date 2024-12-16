@@ -7,7 +7,8 @@
 
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { APMLinkExtendProps, useAPMHref } from './apm_link';
+import type { APMLinkExtendProps } from './apm_link';
+import { useAPMHref } from './apm_link';
 
 export function useServiceMapHref(serviceName?: string) {
   const path = serviceName ? `/services/${serviceName}/service-map` : '/service-map';

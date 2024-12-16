@@ -6,40 +6,40 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Lifecycle } from '@hapi/hapi';
-import { SharePluginSetup } from '@kbn/share-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { JsonArray, JsonValue } from '@kbn/utility-types';
-import { RouteConfig, RouteMethod } from '@kbn/core/server';
-import {
+import type { Lifecycle } from '@hapi/hapi';
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { JsonArray, JsonValue } from '@kbn/utility-types';
+import type { RouteConfig, RouteMethod } from '@kbn/core/server';
+import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
-import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
-import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import { VisTypeTimeseriesSetup } from '@kbn/vis-type-timeseries-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import type { VisTypeTimeseriesSetup } from '@kbn/vis-type-timeseries-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import { MlPluginSetup } from '@kbn/ml-plugin/server';
-import {
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
-import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
-import { LogsSharedPluginSetup, LogsSharedPluginStart } from '@kbn/logs-shared-plugin/server';
-import { VersionedRouteConfig } from '@kbn/core-http-server';
-import { MetricsDataPluginSetup } from '@kbn/metrics-data-access-plugin/server';
-import {
+import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
+import type { LogsSharedPluginSetup, LogsSharedPluginStart } from '@kbn/logs-shared-plugin/server';
+import type { VersionedRouteConfig } from '@kbn/core-http-server';
+import type { MetricsDataPluginSetup } from '@kbn/metrics-data-access-plugin/server';
+import type {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
-import {
+import type {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,
 } from '@kbn/apm-data-access-plugin/server';
-import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
-import { ServerlessPluginStart } from '@kbn/serverless/server';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
+import type { ServerlessPluginStart } from '@kbn/serverless/server';
 import type {
   EntityManagerServerPluginStart,
   EntityManagerServerPluginSetup,

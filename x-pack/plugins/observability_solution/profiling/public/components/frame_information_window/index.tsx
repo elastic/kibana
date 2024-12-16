@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EuiAccordionProps } from '@elastic/eui';
 import {
   EuiAccordion,
-  EuiAccordionProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,

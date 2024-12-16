@@ -6,7 +6,7 @@
  */
 
 import { METRICS_INDEX_PATTERN } from '../constants';
-import { InfraSourceConfiguration } from './source_configuration';
+import type { InfraSourceConfiguration } from './source_configuration';
 
 export const defaultSourceConfiguration: InfraSourceConfiguration = {
   name: 'Default',

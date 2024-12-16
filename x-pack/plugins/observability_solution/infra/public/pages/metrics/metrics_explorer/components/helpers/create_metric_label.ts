@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsExplorerOptionsMetric } from '../../hooks/use_metrics_explorer_options';
+import type { MetricsExplorerOptionsMetric } from '../../hooks/use_metrics_explorer_options';
 
 export const createMetricLabel = (metric: MetricsExplorerOptionsMetric) => {
   if (metric.label) {

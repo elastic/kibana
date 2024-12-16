@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { BoolQuery } from '@kbn/es-query';
+import type { BoolQuery } from '@kbn/es-query';
 import { getFailedTransactionRate } from '../../lib/transaction_groups/get_failed_transaction_rate';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { Coordinate } from '../../../typings/timeseries';
-import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
-import { RollupInterval } from '../../../common/rollup';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { Coordinate } from '../../../typings/timeseries';
+import type { ApmServiceTransactionDocumentType } from '../../../common/document_type';
+import type { RollupInterval } from '../../../common/rollup';
 
 export interface FailedTransactionRateResponse {
   currentPeriod: {

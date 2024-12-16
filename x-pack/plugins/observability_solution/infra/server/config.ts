@@ -7,9 +7,9 @@
 import { i18n } from '@kbn/i18n';
 
 import { offeringBasedSchema, schema } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
-import { ConfigDeprecation } from '@kbn/config';
-import { InfraConfig } from './types';
+import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
+import type { ConfigDeprecation } from '@kbn/config';
+import type { InfraConfig } from './types';
 import { publicConfigKeys } from '../common/plugin_config_types';
 
 export type { InfraConfig };

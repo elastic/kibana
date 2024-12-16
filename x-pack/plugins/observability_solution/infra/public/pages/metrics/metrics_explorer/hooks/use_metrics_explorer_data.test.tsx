@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { waitFor, act, renderHook } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
@@ -20,11 +21,14 @@ import {
   resp,
   createSeries,
 } from '../../../../utils/fixtures/metrics_explorer';
-import { MetricsExplorerOptions, MetricsExplorerTimestamp } from './use_metrics_explorer_options';
-import { DataViewBase } from '@kbn/es-query';
-import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
+import type {
+  MetricsExplorerOptions,
+  MetricsExplorerTimestamp,
+} from './use_metrics_explorer_options';
+import type { DataViewBase } from '@kbn/es-query';
+import type { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
-import { ResolvedDataView } from '../../../../utils/data_view';
+import type { ResolvedDataView } from '../../../../utils/data_view';
 
 const mockedFetch = jest.fn();
 

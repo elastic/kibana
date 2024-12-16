@@ -6,8 +6,8 @@
  */
 
 import { ALERT_REASON, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import { ObservabilityRuleTypeFormatter } from '@kbn/observability-plugin/public';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { ObservabilityRuleTypeFormatter } from '@kbn/observability-plugin/public';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type {
   AssetDetailsLocatorParams,
   MetricsExplorerLocatorParams,

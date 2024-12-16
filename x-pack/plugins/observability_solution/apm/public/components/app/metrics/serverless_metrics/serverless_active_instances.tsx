@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EuiBasicTableColumn, PropertySort } from '@elastic/eui';
 import {
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
   euiPaletteColorBlind,
   EuiPanel,
   EuiTitle,
-  PropertySort,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -21,12 +20,12 @@ import {
   asInteger,
   asMillisecondDuration,
 } from '../../../../../common/utils/formatters';
-import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
+import type { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { TimeseriesChartWithContext } from '../../../shared/charts/timeseries_chart_with_context';
 import { ListMetric } from '../../../shared/list_metric';
 import { ServerlessFunctionNameLink } from './serverless_function_name_link';

@@ -6,9 +6,10 @@
  */
 
 import { merge } from 'lodash';
-import { Logger } from '@kbn/core/server';
-import { tasks, TelemetryTaskExecutorParams } from './tasks';
-import { APMDataTelemetry } from '../types';
+import type { Logger } from '@kbn/core/server';
+import type { TelemetryTaskExecutorParams } from './tasks';
+import { tasks } from './tasks';
+import type { APMDataTelemetry } from '../types';
 
 type CollectTelemetryParams = TelemetryTaskExecutorParams & {
   isProd: boolean;

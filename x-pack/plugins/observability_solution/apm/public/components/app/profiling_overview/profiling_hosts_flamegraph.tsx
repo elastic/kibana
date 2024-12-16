@@ -7,8 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { ApmDataSourceWithSummary } from '../../../../common/data_source';
-import { ApmDocumentType } from '../../../../common/document_type';
+import type { ApmDataSourceWithSummary } from '../../../../common/data_source';
+import type { ApmDocumentType } from '../../../../common/document_type';
 import { CONTAINER_ID, HOST_NAME } from '../../../../common/es_fields/apm';
 import { mergeKueries, toKueryFilterFormat } from '../../../../common/utils/kuery_utils';
 import { useFetcher } from '../../../hooks/use_fetcher';

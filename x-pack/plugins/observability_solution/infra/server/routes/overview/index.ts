@@ -6,7 +6,7 @@
  */
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { TopNodesRequestRT } from '../../../common/http_api/overview_api';
-import { InfraBackendLibs } from '../../lib/infra_types';
+import type { InfraBackendLibs } from '../../lib/infra_types';
 import { createSearchClient } from '../../lib/create_search_client';
 import { queryTopNodes } from './lib/get_top_nodes';
 

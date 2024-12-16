@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { IndicesSimulateTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { IndicesSimulateTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
 import { orderBy } from 'lodash';
 import { errors } from '@elastic/elasticsearch';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';

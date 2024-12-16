@@ -6,7 +6,10 @@
  */
 
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import { IRuleDataClient, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import type {
+  IRuleDataClient,
+  RuleRegistryPluginSetupContract,
+} from '@kbn/rule-registry-plugin/server';
 export interface RulesServiceSetupDeps {
   alerting: AlertingServerSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;

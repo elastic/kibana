@@ -7,9 +7,9 @@
 
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 // import { KibanaFramework } from '../lib/adapters/framework/kibana_framework_adapter';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { TIMESTAMP_FIELD } from '../../common/constants';
-import { ESSearchClient } from '../lib/metrics/types';
+import type { ESSearchClient } from '../lib/metrics/types';
 
 interface Options {
   indexPattern: string;

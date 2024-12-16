@@ -7,8 +7,8 @@
 
 import React from 'react';
 import styled from '@emotion/styled';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import {
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type {
   InfraWaffleMapBounds,
   InfraWaffleMapGroupOfGroups,
   InfraWaffleMapOptions,

@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import styled from '@emotion/styled';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import {
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type {
   InfraWaffleMapBounds,
   InfraWaffleMapGroupOfNodes,
   InfraWaffleMapOptions,

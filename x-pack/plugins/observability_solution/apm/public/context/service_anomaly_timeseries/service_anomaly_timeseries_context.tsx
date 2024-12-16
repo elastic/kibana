@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useEnvironmentsContext } from '../environments_context/use_environments_context';
-import { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/service_anomaly_timeseries';
+import type { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/service_anomaly_timeseries';
 import { useAnyOfApmParams } from '../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { useTimeRange } from '../../hooks/use_time_range';

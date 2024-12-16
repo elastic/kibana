@@ -10,8 +10,8 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import React, { useCallback, useMemo } from 'react';
 import { useCurrentEuiBreakpoint } from '@elastic/eui';
 import styled from '@emotion/styled';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import {
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type {
   InfraWaffleMapBounds,
   InfraWaffleMapOptions,
   InfraFormatter,
@@ -20,7 +20,7 @@ import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
 import { Map } from './waffle/map';
 import { TableView } from './table_view';
-import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
+import type { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 import { Legend } from './waffle/legend';
 import { useAssetDetailsFlyoutState } from '../hooks/use_asset_details_flyout_url_state';

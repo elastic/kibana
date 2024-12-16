@@ -7,7 +7,8 @@
 import * as t from 'io-ts';
 import { isRight } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { Environment, environmentRt } from '../../common/environment_rt';
+import type { Environment } from '../../common/environment_rt';
+import { environmentRt } from '../../common/environment_rt';
 import { apmRouter } from '../components/routing/apm_route_config';
 import type { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 

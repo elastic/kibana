@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useEffect, useState } from 'react';
 import { useKibana } from './use_kibana';

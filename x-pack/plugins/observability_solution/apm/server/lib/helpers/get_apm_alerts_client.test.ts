@@ -12,7 +12,10 @@ import type {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { AlertsClient, RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
+import type {
+  AlertsClient,
+  RuleRegistryPluginStartContract,
+} from '@kbn/rule-registry-plugin/server';
 
 describe('get_apm_alerts_client', () => {
   let ruleRegistryMock: jest.Mocked<RuleRegistryPluginStartContract>;

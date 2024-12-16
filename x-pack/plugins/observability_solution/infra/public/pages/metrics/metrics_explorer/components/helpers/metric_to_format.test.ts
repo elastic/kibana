@@ -6,7 +6,7 @@
  */
 
 import { metricToFormat } from './metric_to_format';
-import { MetricsExplorerMetric } from '../../../../../../common/http_api/metrics_explorer';
+import type { MetricsExplorerMetric } from '../../../../../../common/http_api/metrics_explorer';
 import { InfraFormatterType } from '../../../../../common/inventory/types';
 describe('metricToFormat()', () => {
   it('should just work for numeric metrics', () => {

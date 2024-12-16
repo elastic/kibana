@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
-import { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Logger } from '@kbn/logging';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { last, omit } from 'lodash';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { APMConfig } from '../..';
+import type { APMConfig } from '../..';
 import {
   AGENT_NAME,
   CHILD_ID,
@@ -50,12 +50,12 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
-import {
+import type {
   WaterfallError,
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../../common/waterfall/typings';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';

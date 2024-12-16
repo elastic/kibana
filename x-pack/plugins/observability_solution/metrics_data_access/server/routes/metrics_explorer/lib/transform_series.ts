@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsAPISeries, MetricsExplorerSeries } from '../../../../common/http_api';
+import type { MetricsAPISeries, MetricsExplorerSeries } from '../../../../common/http_api';
 
 export const transformSeries =
   (hasGroupBy: boolean) =>

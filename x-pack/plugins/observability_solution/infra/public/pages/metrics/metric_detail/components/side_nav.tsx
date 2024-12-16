@@ -7,7 +7,7 @@
 
 import { EuiHideFor, EuiPageSidebar, EuiShowFor, EuiSideNav } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
-import { NavItem } from '../lib/side_nav_context';
+import type { NavItem } from '../lib/side_nav_context';
 interface Props {
   loading: boolean;
   name: string;

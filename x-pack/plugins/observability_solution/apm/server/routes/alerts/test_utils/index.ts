@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { IBasePath, Logger } from '@kbn/core/server';
+import type { IBasePath, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
-import { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
-import { APMConfig, APM_SERVER_FEATURE_ID } from '../../..';
-import { RegisterRuleDependencies } from '../register_apm_rule_types';
+import type { APMConfig } from '../../..';
+import { APM_SERVER_FEATURE_ID } from '../../..';
+import type { RegisterRuleDependencies } from '../register_apm_rule_types';
 
 export const createRuleTypeMocks = () => {
   let alertExecutor: (...args: any[]) => Promise<any>;

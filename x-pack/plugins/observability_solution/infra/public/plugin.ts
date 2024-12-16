@@ -5,20 +5,19 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext, AppDeepLinkLocations } from '@kbn/core/public';
 import {
   type AppMountParameters,
   type AppUpdater,
   type CoreStart,
   type AppDeepLink,
   DEFAULT_APP_CATEGORIES,
-  PluginInitializerContext,
-  AppDeepLinkLocations,
   AppStatus,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { MetricsExplorerLocatorParams } from '@kbn/observability-shared-plugin/common';
 import {
   METRICS_EXPLORER_LOCATOR_ID,
-  MetricsExplorerLocatorParams,
   ObservabilityTriggerId,
 } from '@kbn/observability-shared-plugin/common';
 import {
@@ -42,7 +41,7 @@ import {
   type InventoryLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
 import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
-import { NavigationEntry } from '@kbn/observability-shared-plugin/public';
+import type { NavigationEntry } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability/constants';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
@@ -71,7 +70,8 @@ import {
   metricsExplorerTitle,
   metricsTitle,
 } from './translations';
-import { LogsAppRoutes, LogsRoute, getLogsAppRoutes } from './pages/logs/routes';
+import type { LogsAppRoutes, LogsRoute } from './pages/logs/routes';
+import { getLogsAppRoutes } from './pages/logs/routes';
 
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;

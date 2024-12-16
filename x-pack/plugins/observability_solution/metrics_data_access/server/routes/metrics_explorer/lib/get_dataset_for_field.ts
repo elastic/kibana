@@ -6,7 +6,7 @@
  */
 
 const TIMESTAMP_FIELD = '@timestamp';
-import { ESSearchClient } from '../../../lib/metrics/types';
+import type { ESSearchClient } from '../../../lib/metrics/types';
 
 interface EventDatasetHit {
   _source: {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import cytoscape from 'cytoscape';
-import { CSSProperties } from 'react';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
+import type cytoscape from 'cytoscape';
+import type { CSSProperties } from 'react';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import type { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
 import { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
 import {
   getServiceHealthStatusColor,

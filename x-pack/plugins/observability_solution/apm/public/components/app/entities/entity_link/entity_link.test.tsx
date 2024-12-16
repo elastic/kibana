@@ -14,9 +14,9 @@ import * as useServiceEntitySummary from '../../../../context/apm_service/use_se
 import * as useFetcher from '../../../../hooks/use_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { fromQuery } from '../../../shared/links/url_helpers';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { Redirect } from 'react-router-dom';
-import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
+import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import { ApmThemeProvider } from '../../../routing/app_root';
 import * as useEntityCentricExperienceSetting from '../../../../hooks/use_entity_centric_experience_setting';
 

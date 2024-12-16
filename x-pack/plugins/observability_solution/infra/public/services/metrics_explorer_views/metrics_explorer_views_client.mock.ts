@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IMetricsExplorerViewsClient } from './types';
+import type { IMetricsExplorerViewsClient } from './types';
 
 export const createMetricsExplorerViewsClientMock =
   (): jest.Mocked<IMetricsExplorerViewsClient> => ({

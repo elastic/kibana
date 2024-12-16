@@ -8,7 +8,7 @@
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AgentName } from '../../../../../../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../../../../../../typings/es_schemas/ui/fields/agent';
 
 export interface SyncBadgeProps {
   /**

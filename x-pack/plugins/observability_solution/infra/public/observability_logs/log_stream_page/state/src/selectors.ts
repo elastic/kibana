@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MatchedStateFromActor } from '@kbn/xstate-utils';
-import { LogStreamQueryActorRef } from '../../../log_stream_query_state';
-import { LogStreamPageActorRef } from './state_machine';
+import type { MatchedStateFromActor } from '@kbn/xstate-utils';
+import type { LogStreamQueryActorRef } from '../../../log_stream_query_state';
+import type { LogStreamPageActorRef } from './state_machine';
 
 type LogStreamPageStateWithLogViewIndices =
   | MatchedStateFromActor<LogStreamPageActorRef, 'hasLogViewIndices'>

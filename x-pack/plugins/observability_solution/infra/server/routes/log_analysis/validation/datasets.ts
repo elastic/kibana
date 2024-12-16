@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
-import { InfraBackendLibs } from '../../../lib/infra_types';
+import type { InfraBackendLibs } from '../../../lib/infra_types';
 
 import { logAnalysisValidationV1 } from '../../../../common/http_api';
 

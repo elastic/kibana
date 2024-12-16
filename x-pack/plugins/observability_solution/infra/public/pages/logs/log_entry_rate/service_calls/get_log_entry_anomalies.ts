@@ -6,15 +6,15 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
-import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import type { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { IdFormatByJobType } from '../../../../../common/http_api/latest';
+import type { IdFormatByJobType } from '../../../../../common/http_api/latest';
 import {
   getLogEntryAnomaliesRequestPayloadRT,
   getLogEntryAnomaliesSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_PATH,
 } from '../../../../../common/http_api';
-import { AnomaliesSort, Pagination } from '../../../../../common/log_analysis';
+import type { AnomaliesSort, Pagination } from '../../../../../common/log_analysis';
 
 interface RequestArgs {
   logViewReference: PersistedLogViewReference;

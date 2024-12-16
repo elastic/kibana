@@ -6,16 +6,16 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
-import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import type { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { IdFormat } from '../../../../../common/http_api/latest';
+import type { IdFormat } from '../../../../../common/http_api/latest';
 
 import {
   getLogEntryCategoriesRequestPayloadRT,
   getLogEntryCategoriesSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH,
 } from '../../../../../common/http_api';
-import { CategoriesSort } from '../../../../../common/log_analysis';
+import type { CategoriesSort } from '../../../../../common/log_analysis';
 
 interface RequestArgs {
   logViewReference: PersistedLogViewReference;

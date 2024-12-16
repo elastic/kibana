@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { first, last, sumBy } from 'lodash';
-import { MetricsExplorerResponse } from '../../../../../common/http_api/metrics_explorer';
-import {
+import type { MetricsExplorerResponse } from '../../../../../common/http_api/metrics_explorer';
+import type {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
   MetricsExplorerChartOptions,

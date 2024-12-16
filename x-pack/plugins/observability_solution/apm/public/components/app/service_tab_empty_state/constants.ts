@@ -8,10 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { AddDataPanelProps } from '@kbn/observability-shared-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import {
-  ApmOnboardingLocatorCategory,
-  ApmOnboardingLocatorParams,
-} from '../../../locator/onboarding_locator';
+import type { ApmOnboardingLocatorParams } from '../../../locator/onboarding_locator';
+import { ApmOnboardingLocatorCategory } from '../../../locator/onboarding_locator';
 
 export type AddAPMCalloutKeys =
   | 'serviceOverview'

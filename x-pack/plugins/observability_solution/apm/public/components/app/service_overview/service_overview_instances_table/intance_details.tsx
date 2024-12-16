@@ -6,7 +6,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
-import { CloudProvider, getAgentIcon, getCloudProviderIcon } from '@kbn/custom-icons';
+import type { CloudProvider } from '@kbn/custom-icons';
+import { getAgentIcon, getCloudProviderIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React from 'react';
@@ -36,7 +37,7 @@ import {
 
 import { isPending } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { KeyValueFilterList } from '../../../shared/key_value_filter_list';
 import { pushNewItemToKueryBar } from '../../../shared/kuery_bar/utils';
 import { getContainerIcon } from '../../../shared/service_icons';

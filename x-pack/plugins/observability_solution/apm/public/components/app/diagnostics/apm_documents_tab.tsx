@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { orderBy } from 'lodash';
@@ -21,7 +15,7 @@ import { asBigNumber, asInteger } from '../../../../common/utils/formatters';
 import type { ApmEvent } from '../../../../server/routes/diagnostics/bundle/get_apm_events';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { ApmPluginStartDeps } from '../../../plugin';
+import type { ApmPluginStartDeps } from '../../../plugin';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { useDiagnosticsContext } from './context/use_diagnostics';
 

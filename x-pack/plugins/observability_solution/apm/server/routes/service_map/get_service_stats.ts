@@ -11,7 +11,7 @@ import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/e
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
-import { IEnvOptions } from './get_service_map';
+import type { IEnvOptions } from './get_service_map';
 
 export async function getServiceStats({
   environment,

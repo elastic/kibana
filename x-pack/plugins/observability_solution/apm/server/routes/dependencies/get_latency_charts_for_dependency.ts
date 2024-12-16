@@ -16,7 +16,7 @@ import {
   getLatencyFieldForServiceDestinationStatistics,
   getProcessorEventForServiceDestinationStatistics,
 } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface Options {
   dependencyName: string;

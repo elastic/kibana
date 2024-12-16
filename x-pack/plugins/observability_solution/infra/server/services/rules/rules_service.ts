@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger } from '@kbn/core/server';
-import { InfraFeatureId } from '../../../common/constants';
+import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { InfraFeatureId } from '../../../common/constants';
 import { createRuleDataClient } from './rule_data_client';
-import {
+import type {
   RuleRegistrationContext,
   RulesServiceSetup,
   RulesServiceSetupDeps,

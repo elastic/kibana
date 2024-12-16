@@ -9,15 +9,10 @@ import React from 'react';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FramesSummary } from '../../../components/frames_summary';
-import {
-  DifferentialTopNFunctionsGrid,
-  OnChangeSortParams,
-} from '../../../components/differential_topn_functions_grid';
-import {
-  NormalizationMenu,
-  NormalizationMode,
-  NormalizationOptions,
-} from '../../../components/normalization_menu';
+import type { OnChangeSortParams } from '../../../components/differential_topn_functions_grid';
+import { DifferentialTopNFunctionsGrid } from '../../../components/differential_topn_functions_grid';
+import type { NormalizationOptions } from '../../../components/normalization_menu';
+import { NormalizationMenu, NormalizationMode } from '../../../components/normalization_menu';
 import { PrimaryAndComparisonSearchBar } from '../../../components/primary_and_comparison_search_bar';
 import { AsyncStatus } from '../../../hooks/use_async';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';

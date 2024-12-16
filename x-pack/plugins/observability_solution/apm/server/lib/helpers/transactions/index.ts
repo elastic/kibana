@@ -7,7 +7,7 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
 import {
   TRANSACTION_DURATION,
@@ -16,8 +16,8 @@ import {
   PARENT_ID,
   TRANSACTION_DURATION_SUMMARY,
 } from '../../../../common/es_fields/apm';
-import { APMConfig } from '../../..';
-import { APMEventClient } from '../create_es_client/create_apm_event_client';
+import type { APMConfig } from '../../..';
+import type { APMEventClient } from '../create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
 
 export { getBackwardCompatibleDocumentTypeFilter } from '@kbn/apm-data-access-plugin/server/utils';

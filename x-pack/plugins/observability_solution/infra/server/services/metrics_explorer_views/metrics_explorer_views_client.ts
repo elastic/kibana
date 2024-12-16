@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
-  SavedObjectsUtils,
 } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {

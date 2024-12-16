@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { useEffect, useReducer, useCallback } from 'react';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from '@kbn/ml-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';

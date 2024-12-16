@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import styled from '@emotion/styled';
-import {
+import type {
   InfraWaffleMapBounds,
   InfraFormatter,
   InfraWaffleMapSteppedGradientLegend,

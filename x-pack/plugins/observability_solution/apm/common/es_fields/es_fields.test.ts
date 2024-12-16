@@ -6,10 +6,10 @@
  */
 
 import { get } from 'lodash';
-import { AllowUnknownProperties } from '../../typings/common';
-import { APMError } from '../../typings/es_schemas/ui/apm_error';
-import { Span } from '../../typings/es_schemas/ui/span';
-import { Transaction } from '../../typings/es_schemas/ui/transaction';
+import type { AllowUnknownProperties } from '../../typings/common';
+import type { APMError } from '../../typings/es_schemas/ui/apm_error';
+import type { Span } from '../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../typings/es_schemas/ui/transaction';
 import * as allApmFieldNames from './apm';
 import * as infraMetricsFieldNames from './infra_metrics';
 

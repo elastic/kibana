@@ -6,8 +6,8 @@
  */
 
 import { mergeEntities } from './merge_entities';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { EntityLatestServiceRaw } from '../types';
+import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import type { EntityLatestServiceRaw } from '../types';
 
 describe('mergeEntities', () => {
   it('modifies one service', () => {

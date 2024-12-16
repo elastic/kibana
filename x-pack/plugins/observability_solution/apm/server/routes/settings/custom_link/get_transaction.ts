@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import { compact } from 'lodash';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
-import { filterOptionsRt } from './custom_link_types';
+import type { filterOptionsRt } from './custom_link_types';
 import { splitFilterValueByComma } from './helper';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getTransaction({
   apmEventClient,

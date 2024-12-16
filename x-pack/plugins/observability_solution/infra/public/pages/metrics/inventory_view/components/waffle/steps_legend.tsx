@@ -8,12 +8,12 @@
 import { darken } from 'polished';
 import React from 'react';
 import styled from '@emotion/styled';
-import {
+import type {
   InfraFormatter,
-  InfraWaffleMapRuleOperator,
   InfraWaffleMapStepLegend,
   InfraWaffleMapStepRule,
 } from '../../../../../common/inventory/types';
+import { InfraWaffleMapRuleOperator } from '../../../../../common/inventory/types';
 
 const OPERATORS = {
   [InfraWaffleMapRuleOperator.gte]: '>=',

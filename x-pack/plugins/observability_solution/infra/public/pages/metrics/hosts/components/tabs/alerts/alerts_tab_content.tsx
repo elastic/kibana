@@ -7,7 +7,8 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AlertConsumers, OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
-import { BrushEndListener, type XYBrushEvent } from '@elastic/charts';
+import type { BrushEndListener } from '@elastic/charts';
+import { type XYBrushEvent } from '@elastic/charts';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import { useBoolean } from '@kbn/react-hooks';
 import type { TimeRange } from '@kbn/es-query';
@@ -17,7 +18,7 @@ import { HeightRetainer } from '../../../../../../components/height_retainer';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useAlertsQuery } from '../../../hooks/use_alerts_query';
 import type { HostsState } from '../../../hooks/use_unified_search_url_state';
-import { AlertsEsQuery } from '../../../../../../utils/filters/create_alerts_es_query';
+import type { AlertsEsQuery } from '../../../../../../utils/filters/create_alerts_es_query';
 import {
   ALERTS_PER_PAGE,
   ALERTS_TABLE_ID,

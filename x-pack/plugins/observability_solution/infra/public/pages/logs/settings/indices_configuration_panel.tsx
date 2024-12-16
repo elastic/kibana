@@ -9,11 +9,10 @@ import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiTitle } from '@elastic
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import type { LogDataViewReference, LogIndexReference } from '@kbn/logs-shared-plugin/common';
 import {
   logIndexNameReferenceRT,
-  LogDataViewReference,
   logDataViewReferenceRT,
-  LogIndexReference,
   logSourcesKibanaAdvancedSettingRT,
 } from '@kbn/logs-shared-plugin/common';
 import { EuiCallOut } from '@elastic/eui';
@@ -21,13 +20,15 @@ import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers, LOG_THRESHOLD_ALERT_TYPE_ID } from '@kbn/rule-data-utils';
 
-import { rulesLocatorID, RulesParams } from '@kbn/observability-plugin/public';
+import type { RulesParams } from '@kbn/observability-plugin/public';
+import { rulesLocatorID } from '@kbn/observability-plugin/public';
 import { EuiLink } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { FormElement, isFormElementForType } from './form_elements';
+import type { FormElement } from './form_elements';
+import { isFormElementForType } from './form_elements';
 import { IndexNamesConfigurationPanel } from './index_names_configuration_panel';
 import { IndexPatternConfigurationPanel } from './index_pattern_configuration_panel';
-import { FormValidationError } from './validation_errors';
+import type { FormValidationError } from './validation_errors';
 import { KibanaAdvancedSettingConfigurationPanel } from './kibana_advanced_setting_configuration_panel';
 
 export const IndicesConfigurationPanel = React.memo<{

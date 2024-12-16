@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
-import { APMPluginStartDependencies } from '../../types';
+import type { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
+import type { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 
 export async function getApmPackagePolicies({

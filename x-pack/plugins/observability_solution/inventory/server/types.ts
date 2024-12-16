@@ -13,8 +13,8 @@ import type {
   DataViewsServerPluginSetup,
   DataViewsServerPluginStart,
 } from '@kbn/data-views-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import {
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type {
   RuleRegistryPluginStartContract,
   RuleRegistryPluginSetupContract,
 } from '@kbn/rule-registry-plugin/server';

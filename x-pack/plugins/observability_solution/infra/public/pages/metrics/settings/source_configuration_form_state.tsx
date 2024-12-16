@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
+import type { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
 import { useIndicesConfigurationFormState } from './indices_configuration_form_state';
 
 export const useSourceConfigurationFormState = (

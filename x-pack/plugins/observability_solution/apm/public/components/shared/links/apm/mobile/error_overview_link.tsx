@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { TypeOf } from '@kbn/typed-react-router-config';
+import type { TypeOf } from '@kbn/typed-react-router-config';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
-import { mobileServiceDetailRoute } from '../../../../routing/mobile_service_detail';
+import type { mobileServiceDetailRoute } from '../../../../routing/mobile_service_detail';
 
 interface Props {
   children: React.ReactNode;

@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { getLogsLocatorsFromUrlService, LogViewReference } from '@kbn/logs-shared-plugin/common';
+import type { LogViewReference } from '@kbn/logs-shared-plugin/common';
+import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 

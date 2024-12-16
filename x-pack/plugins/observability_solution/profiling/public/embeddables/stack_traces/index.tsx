@@ -8,7 +8,7 @@
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { EmbeddableStackTracesSharedComponent } from './embeddable_stack_traces';
-import { ProfilingEmbeddablesDependencies } from '../profiling_embeddable_provider';
+import type { ProfilingEmbeddablesDependencies } from '../profiling_embeddable_provider';
 import type { StackTracesProps } from './stack_traces';
 
 const LazyEmbeddableStackTraces = dynamic(async () => {

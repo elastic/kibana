@@ -6,14 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LatencyAggregationType } from '../../common/latency_aggregation_types';
+import type { LatencyAggregationType } from '../../common/latency_aggregation_types';
 import { asDuration } from '../../common/utils/formatters';
-import { APMChartSpec, Coordinate } from '../../typings/timeseries';
+import type { APMChartSpec, Coordinate } from '../../typings/timeseries';
 import {
   ChartType,
   getTimeSeriesColor,
 } from '../components/shared/charts/helper/get_timeseries_color';
-import { APIReturnType } from '../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../services/rest/create_call_apm_api';
 
 export type LatencyChartsResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;

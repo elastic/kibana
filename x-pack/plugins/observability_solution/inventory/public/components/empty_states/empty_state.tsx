@@ -24,7 +24,7 @@ import { dashboardsLight, dashboardsDark } from '@kbn/shared-svg';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { AddData, AssociateServiceLogs } from '../shared/add_data_buttons/buttons';
 import { useKibana } from '../../hooks/use_kibana';
-import { InventoryAddDataParams } from '../../services/telemetry/types';
+import type { InventoryAddDataParams } from '../../services/telemetry/types';
 
 export function EmptyState() {
   const { services } = useKibana();

@@ -9,10 +9,10 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { getNextEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
-import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
+import type { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
-import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
-import { Environment } from '../../../../../common/environment_rt';
+import type { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+import type { Environment } from '../../../../../common/environment_rt';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { TimeUnit, timeUnitLabels } from './time_unit';
+import type { TimeUnit } from './time_unit';
+import { timeUnitLabels } from './time_unit';
 
 export interface TimeScale {
   unit: TimeUnit;

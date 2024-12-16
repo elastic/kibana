@@ -6,13 +6,14 @@
  */
 
 import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { IBasePath, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { IBasePath, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { AlertingServerSetup, IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
-import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { legacyExperimentalFieldMap, ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
+import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
+import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   AGENT_NAME,
@@ -30,7 +31,7 @@ import {
 import { registerTransactionDurationRuleType } from './rule_types/transaction_duration/register_transaction_duration_rule_type';
 import { registerAnomalyRuleType } from './rule_types/anomaly/register_anomaly_rule_type';
 import { registerErrorCountRuleType } from './rule_types/error_count/register_error_count_rule_type';
-import { APMConfig } from '../..';
+import type { APMConfig } from '../..';
 import { registerTransactionErrorRateRuleType } from './rule_types/transaction_error_rate/register_transaction_error_rate_rule_type';
 
 export const APM_RULE_TYPE_ALERT_CONTEXT = 'observability.apm';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
-import { getServiceTransactionStats } from './get_service_transaction_stats';
+import type { getServiceTransactionStats } from './get_service_transaction_stats';
 import { mergeServiceStats } from './merge_service_stats';
 
 type ServiceTransactionStat = Awaited<

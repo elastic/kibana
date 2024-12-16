@@ -6,21 +6,21 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import {
+import type {
   GetViewInAppRelativeUrlFnOpts,
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
   RuleTypeState,
   RuleExecutorOptions,
-  AlertsClientError,
 } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import type { TimeUnitChar } from '@kbn/observability-plugin/common';
 import {
   formatDurationFromTimeUnitChar,
   getAlertDetailsUrl,
   observabilityPaths,
   ProcessorEvent,
-  TimeUnitChar,
 } from '@kbn/observability-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -28,7 +28,7 @@ import {
   ALERT_REASON,
   ApmRuleType,
 } from '@kbn/rule-data-utils';
-import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
+import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
@@ -39,21 +39,20 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../../../common/es_fields/apm';
+import type { THRESHOLD_MET_GROUP } from '../../../../../common/rules/apm_rule_types';
 import {
   APM_SERVER_FEATURE_ID,
   formatErrorCountReason,
   RULE_TYPES_CONFIG,
-  THRESHOLD_MET_GROUP,
 } from '../../../../../common/rules/apm_rule_types';
-import { errorCountParamsSchema, ApmRuleParamsType } from '../../../../../common/rules/schema';
+import type { ApmRuleParamsType } from '../../../../../common/rules/schema';
+import { errorCountParamsSchema } from '../../../../../common/rules/schema';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { getAlertUrlErrorCount } from '../../../../../common/utils/formatters';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
-import {
-  ApmRuleTypeAlertDefinition,
-  RegisterRuleDependencies,
-} from '../../register_apm_rule_types';
+import type { RegisterRuleDependencies } from '../../register_apm_rule_types';
+import { ApmRuleTypeAlertDefinition } from '../../register_apm_rule_types';
 import {
   getApmAlertSourceFields,
   getApmAlertSourceFieldsAgg,

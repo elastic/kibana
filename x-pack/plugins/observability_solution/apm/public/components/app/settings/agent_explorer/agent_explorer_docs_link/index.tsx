@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { isOpenTelemetryAgentName } from '../../../../../../common/agent_name';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
-import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
 
 interface AgentExplorerDocsLinkProps {
   agentName: AgentName;

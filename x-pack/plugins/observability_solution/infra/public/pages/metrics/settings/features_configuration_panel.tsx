@@ -14,10 +14,10 @@ import {
   enableInfrastructureProfilingIntegration,
   enableInfrastructureAssetCustomDashboards,
 } from '@kbn/observability-plugin/common';
-import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
+import type { useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
-import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
+import type { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { usePluginConfig } from '../../../containers/plugin_config_context';
 

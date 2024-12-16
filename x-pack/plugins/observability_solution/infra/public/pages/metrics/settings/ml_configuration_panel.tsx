@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { InputRangeFieldProps } from './input_fields';
+import type { InputRangeFieldProps } from './input_fields';
 
 interface MLConfigurationPanelProps {
   isLoading: boolean;

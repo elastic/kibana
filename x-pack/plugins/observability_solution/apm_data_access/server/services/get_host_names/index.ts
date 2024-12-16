@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { HOST_NAME } from '@kbn/apm-types/es_fields';
 import { castArray } from 'lodash';

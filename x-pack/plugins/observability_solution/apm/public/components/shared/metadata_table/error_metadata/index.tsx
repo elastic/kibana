@@ -7,7 +7,8 @@
 
 import React, { useMemo } from 'react';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { APMError, AT_TIMESTAMP } from '@kbn/apm-types';
+import type { APMError } from '@kbn/apm-types';
+import { AT_TIMESTAMP } from '@kbn/apm-types';
 import { getSectionsFromFields } from '../helper';
 import { MetadataTable } from '..';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';

@@ -6,7 +6,7 @@
  */
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import { TimeRangeMetadata } from '../../../common/time_range_metadata';
+import type { TimeRangeMetadata } from '../../../common/time_range_metadata';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getIsUsingServiceDestinationMetrics } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';

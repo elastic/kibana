@@ -6,14 +6,8 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import {
-  BehaviorSubject,
-  Observable,
-  OperatorFunction,
-  PartialObserver,
-  ReplaySubject,
-  Subscription,
-} from 'rxjs';
+import type { OperatorFunction, PartialObserver, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { switchMap } from 'rxjs';
 
 export const useLatest = <Value>(value: Value) => {

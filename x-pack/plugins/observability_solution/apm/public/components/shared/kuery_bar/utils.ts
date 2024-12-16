@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { History } from 'history';
+import type { History } from 'history';
 import { isEmpty } from 'lodash';
 import { push } from '../links/url_helpers';
 

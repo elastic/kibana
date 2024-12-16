@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { LogEntriesSummaryHighlightsBucket, LogEntryTime } from '@kbn/logs-shared-plugin/common';
+import type {
+  LogEntriesSummaryHighlightsBucket,
+  LogEntryTime,
+} from '@kbn/logs-shared-plugin/common';
 import classNames from 'classnames';
 import { scaleTime } from 'd3-scale';
 import * as React from 'react';

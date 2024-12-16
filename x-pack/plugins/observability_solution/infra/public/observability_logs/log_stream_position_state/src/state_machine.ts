@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { IToasts } from '@kbn/core-notifications-browser';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { IToasts } from '@kbn/core-notifications-browser';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { convertISODateToNanoPrecision } from '@kbn/logs-shared-plugin/common';
 import moment from 'moment';
-import { actions, ActorRefFrom, createMachine, EmittedFrom, SpecialTargets } from 'xstate';
-import { OmitDeprecatedState, sendIfDefined } from '@kbn/xstate-utils';
+import type { ActorRefFrom, EmittedFrom } from 'xstate';
+import { actions, createMachine, SpecialTargets } from 'xstate';
+import type { OmitDeprecatedState } from '@kbn/xstate-utils';
+import { sendIfDefined } from '@kbn/xstate-utils';
 import { isSameTimeKey } from '../../../../common/time';
 import { DESIRED_BUFFER_PAGES, RELATIVE_END_UPDATE_DELAY } from './defaults';
 import { LogStreamPositionNotificationEventSelectors } from './notifications';

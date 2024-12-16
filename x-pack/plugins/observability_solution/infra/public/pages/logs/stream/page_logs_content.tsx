@@ -8,27 +8,30 @@
 import { EuiSpacer } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 import styled from '@emotion/styled';
-import { LogEntry, convertISODateToNanoPrecision } from '@kbn/logs-shared-plugin/common';
+import type { LogEntry } from '@kbn/logs-shared-plugin/common';
+import { convertISODateToNanoPrecision } from '@kbn/logs-shared-plugin/common';
+import type {
+  LogEntryStreamItem,
+  UpdatedDateRange,
+  VisibleInterval,
+  WithSummaryProps,
+} from '@kbn/logs-shared-plugin/public';
 import {
   LogEntryFlyout,
-  LogEntryStreamItem,
   ScrollableLogTextStreamView,
-  UpdatedDateRange,
   useLogHighlightsStateContext,
   useLogPositionStateContext,
   useLogStreamContext,
   useLogViewContext,
-  VisibleInterval,
   WithSummary,
-  WithSummaryProps,
 } from '@kbn/logs-shared-plugin/public';
 import { useSelector } from '@xstate/react';
 import stringify from 'json-stable-stringify';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { MatchedStateFromActor } from '@kbn/xstate-utils';
+import type { MatchedStateFromActor } from '@kbn/xstate-utils';
 import { LogsDeprecationCallout } from '../../../components/logs_deprecation_callout';
-import { TimeKey } from '../../../../common/time';
+import type { TimeKey } from '../../../../common/time';
 import { AutoSizer } from '../../../components/auto_sizer';
 import { LogMinimap } from '../../../components/logging/log_minimap';
 import { PageContent } from '../../../components/page';
@@ -40,11 +43,11 @@ import { useLogViewConfigurationContext } from '../../../containers/logs/log_vie
 import { useViewLogInProviderContext } from '../../../containers/logs/view_log_in_context';
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import {
+import type {
   LogStreamPageActorRef,
   LogStreamPageCallbacks,
-  useLogStreamPageStateContext,
 } from '../../../observability_logs/log_stream_page/state';
+import { useLogStreamPageStateContext } from '../../../observability_logs/log_stream_page/state';
 import { type ParsedQuery } from '../../../observability_logs/log_stream_query_state';
 import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
 import { LogsToolbar } from './page_toolbar';

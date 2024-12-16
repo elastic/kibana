@@ -6,19 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IBasePath } from '@kbn/core/public';
+import type { IBasePath } from '@kbn/core/public';
 import moment from 'moment';
-import { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability/locators';
+import type { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability/locators';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
-import { NodeLogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import type { NodeLogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { type AssetDetailsLocator } from '@kbn/observability-shared-plugin/common';
-import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
-import {
+import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import type {
   Action,
-  getNonEmptySections,
   SectionRecord,
 } from '../../../../shared/transaction_action_menu/sections_helper';
+import { getNonEmptySections } from '../../../../shared/transaction_action_menu/sections_helper';
 
 type InstaceDetails =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;

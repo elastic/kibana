@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { InventoryViewAttributes } from '../../../../../common/inventory_views';
+import type { InventoryViewAttributes } from '../../../../../common/inventory_views';
 import { useWaffleOptionsContext, DEFAULT_WAFFLE_OPTIONS_STATE } from './use_waffle_options';
 import { useWaffleTimeContext, DEFAULT_WAFFLE_TIME_STATE } from './use_waffle_time';
 import { useWaffleFiltersContext, DEFAULT_WAFFLE_FILTERS_STATE } from './use_waffle_filters';

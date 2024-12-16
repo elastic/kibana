@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TimeRange } from '@kbn/es-query';
-import { Search } from 'history';
+import type { TimeRange } from '@kbn/es-query';
+import type { Search } from 'history';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraWaffleMapOptions } from '../../common/inventory/types';
 

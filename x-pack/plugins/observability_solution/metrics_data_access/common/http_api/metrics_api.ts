@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 import { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';
 import { afterKeyObjectRT, timeRangeRT } from './metrics_explorer';
-import { MetricsUIAggregation } from '../inventory_models/types';
+import type { MetricsUIAggregation } from '../inventory_models/types';
 
 export interface MetricsAPIMetric {
   id: string;

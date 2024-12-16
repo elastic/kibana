@@ -7,7 +7,7 @@
 
 import React from 'react';
 import styled from '@emotion/styled';
-import {
+import type {
   InfraFormatter,
   InfraWaffleMapBounds,
   InfraWaffleMapGradientLegend,

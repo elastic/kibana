@@ -9,7 +9,7 @@ import React from 'react';
 import { useDocumentTitle } from '../../../../hooks/use_document_title';
 import { InvalidNodeError } from './invalid_node';
 import { ErrorPageBody } from '../../../error';
-import { InfraHttpError } from '../../../../types';
+import type { InfraHttpError } from '../../../../types';
 import { errorTitle } from '../../../../translations';
 
 interface Props {

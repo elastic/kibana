@@ -8,7 +8,8 @@ import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { debounce } from 'lodash';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import {
   getEnvironmentLabel,
   ENVIRONMENT_NOT_DEFINED,
@@ -17,7 +18,7 @@ import {
 import { SERVICE_ENVIRONMENT } from '../../../../common/es_fields/apm';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { Environment } from '../../../../common/environment_rt';
+import type { Environment } from '../../../../common/environment_rt';
 
 function getEnvironmentOptions(environments: Environment[]) {
   const environmentOptions = environments

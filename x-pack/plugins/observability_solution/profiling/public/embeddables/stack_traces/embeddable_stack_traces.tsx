@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import {
-  ProfilingEmbeddableProvider,
-  ProfilingEmbeddablesDependencies,
-} from '../profiling_embeddable_provider';
-import { StackTraces, StackTracesProps } from './stack_traces';
+import type { ProfilingEmbeddablesDependencies } from '../profiling_embeddable_provider';
+import { ProfilingEmbeddableProvider } from '../profiling_embeddable_provider';
+import type { StackTracesProps } from './stack_traces';
+import { StackTraces } from './stack_traces';
 
 export type EmbeddableStackTracesProps = StackTracesProps & ProfilingEmbeddablesDependencies;
 

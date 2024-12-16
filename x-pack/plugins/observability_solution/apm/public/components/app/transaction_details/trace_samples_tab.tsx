@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { TransactionDistribution } from './distribution';
-import { TabContentProps } from './transaction_details_tabs';
+import type { TabContentProps } from './transaction_details_tabs';
 
 function TraceSamplesTab({
   selectSampleFromChartSelection,

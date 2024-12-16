@@ -12,7 +12,7 @@ import React, { useMemo } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { asInteger } from '../../../../../../common/utils/formatters';
 import { useApmParams } from '../../../../../hooks/use_apm_params';
-import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { truncate, unit } from '../../../../../utils/style';
 import {
   ChartType,
@@ -21,7 +21,8 @@ import {
 import { SparkPlot } from '../../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../../shared/links/apm/mobile/error_detail_link';
 import { ErrorOverviewLink } from '../../../../shared/links/apm/mobile/error_overview_link';
-import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
+import type { ITableColumn } from '../../../../shared/managed_table';
+import { ManagedTable } from '../../../../shared/managed_table';
 import { TimestampTooltip } from '../../../../shared/timestamp_tooltip';
 import { isTimeComparison } from '../../../../shared/time_comparison/get_comparison_options';
 

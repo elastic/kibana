@@ -9,10 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexItem, EuiFormRow, EuiLink, EuiComboBox } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { RuntimeAttachmentSettings } from '.';
+import type { RuntimeAttachmentSettings } from '.';
 
 interface Props {
   isValid: boolean;

@@ -12,12 +12,12 @@ import {
   getEstimatedSizeForDocumentsInIndex,
   getApmDiskSpacedUsedPct,
 } from './indices_stats_helpers';
-import { ApmPluginRequestHandlerContext } from '../typings';
+import type { ApmPluginRequestHandlerContext } from '../typings';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
 } from '../../../common/storage_explorer_types';
-import { RandomSampler } from '../../lib/helpers/get_random_sampler';
+import type { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import { SERVICE_NAME, TIER, INDEX } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
@@ -27,7 +27,7 @@ import {
   isRootTransaction,
 } from '../../lib/helpers/transactions';
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface SharedOptions {
   apmEventClient: APMEventClient;

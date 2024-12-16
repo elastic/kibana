@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TopNodesResponse } from '../../common/http_api/overview_api';
+import type { TopNodesResponse } from '../../common/http_api/overview_api';
 
 export const FAKE_SNAPSHOT_RESPONSE = {
   nodes: [

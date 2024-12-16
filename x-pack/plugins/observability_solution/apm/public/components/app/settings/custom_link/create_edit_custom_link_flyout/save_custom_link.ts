@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart } from '@kbn/core/public';
-import { Filter, CustomLink } from '../../../../../../common/custom_link/custom_link_types';
+import type { NotificationsStart } from '@kbn/core/public';
+import type { Filter, CustomLink } from '../../../../../../common/custom_link/custom_link_types';
 import { callApmApi } from '../../../../../services/rest/create_call_apm_api';
 
 export async function saveCustomLink({

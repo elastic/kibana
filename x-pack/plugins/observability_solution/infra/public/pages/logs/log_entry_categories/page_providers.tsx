@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { useLogSourcesContext } from '@kbn/logs-data-access-plugin/public';
 import { logEntryCategoriesJobType } from '../../../../common/log_analysis';
 import { LogAnalysisSetupFlyoutStateProvider } from '../../../components/logging/log_analysis_setup/setup_flyout';

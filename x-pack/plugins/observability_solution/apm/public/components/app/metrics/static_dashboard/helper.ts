@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DashboardPanelMap } from '@kbn/dashboard-plugin/common';
 import {
   AGENT_NAME_DASHBOARD_FILE_MAPPING,

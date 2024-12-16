@@ -12,7 +12,8 @@ import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiBadge, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { fullHeightContentStyles } from '../../../../page_template.styles';
-import { LogsPageTemplate, LogsPageTemplateProps } from '../../shared/page_template';
+import type { LogsPageTemplateProps } from '../../shared/page_template';
+import { LogsPageTemplate } from '../../shared/page_template';
 
 export const LogStreamPageTemplate: React.FC<LogsPageTemplateProps> = (props) => {
   const { logView, isInlineLogView, revertToDefaultLogView } = useLogViewContext();

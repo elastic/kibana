@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  mergePartialSetupStates,
-  PartialSetupState,
-  areResourcesSetup,
-  createDefaultSetupState,
-} from './setup';
+import type { PartialSetupState } from './setup';
+import { mergePartialSetupStates, areResourcesSetup, createDefaultSetupState } from './setup';
 
 const createDataState = (available: boolean): PartialSetupState => ({ data: { available } });
 

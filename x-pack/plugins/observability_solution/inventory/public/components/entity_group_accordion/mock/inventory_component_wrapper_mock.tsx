@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { createMemoryHistory } from 'history';
 import { RouterProvider } from '@kbn/typed-react-router-config';

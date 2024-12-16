@@ -9,29 +9,20 @@ import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { notFound } from '@hapi/boom';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { ErrorDistributionResponse, getErrorDistribution } from './distribution/get_distribution';
+import type { ErrorDistributionResponse } from './distribution/get_distribution';
+import { getErrorDistribution } from './distribution/get_distribution';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
-import {
-  ErrorGroupMainStatisticsResponse,
-  getErrorGroupMainStatistics,
-} from './get_error_groups/get_error_group_main_statistics';
-import {
-  ErrorGroupPeriodsResponse,
-  getErrorGroupPeriods,
-} from './get_error_groups/get_error_group_detailed_statistics';
-import {
-  ErrorGroupSampleIdsResponse,
-  getErrorGroupSampleIds,
-} from './get_error_groups/get_error_group_sample_ids';
-import {
-  ErrorSampleDetailsResponse,
-  getErrorSampleDetails,
-} from './get_error_groups/get_error_sample_details';
+import type { ErrorGroupMainStatisticsResponse } from './get_error_groups/get_error_group_main_statistics';
+import { getErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
+import type { ErrorGroupPeriodsResponse } from './get_error_groups/get_error_group_detailed_statistics';
+import { getErrorGroupPeriods } from './get_error_groups/get_error_group_detailed_statistics';
+import type { ErrorGroupSampleIdsResponse } from './get_error_groups/get_error_group_sample_ids';
+import { getErrorGroupSampleIds } from './get_error_groups/get_error_group_sample_ids';
+import type { ErrorSampleDetailsResponse } from './get_error_groups/get_error_sample_details';
+import { getErrorSampleDetails } from './get_error_groups/get_error_sample_details';
 import { offsetRt } from '../../../common/comparison_rt';
-import {
-  getTopErroneousTransactionsPeriods,
-  TopErroneousTransactionsResponse,
-} from './erroneous_transactions/get_top_erroneous_transactions';
+import type { TopErroneousTransactionsResponse } from './erroneous_transactions/get_top_erroneous_transactions';
+import { getTopErroneousTransactionsPeriods } from './erroneous_transactions/get_top_erroneous_transactions';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const errorsMainStatisticsRoute = createApmServerRoute({

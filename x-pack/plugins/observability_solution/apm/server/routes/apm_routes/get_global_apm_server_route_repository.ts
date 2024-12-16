@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { EndpointOf, ReturnOf, ServerRouteRepository } from '@kbn/server-route-repository';
-import { PickByValue } from 'utility-types';
+import type { PickByValue } from 'utility-types';
 import { agentExplorerRouteRepository } from '../agent_explorer/route';
 import { agentKeysRouteRepository } from '../agent_keys/route';
 import { alertsChartPreviewRouteRepository } from '../alerts/route';

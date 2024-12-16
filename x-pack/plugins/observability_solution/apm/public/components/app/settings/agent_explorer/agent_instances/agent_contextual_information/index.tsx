@@ -7,13 +7,13 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TypeOf } from '@kbn/typed-react-router-config';
+import type { TypeOf } from '@kbn/typed-react-router-config';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useDefaultTimeRange } from '../../../../../../hooks/use_default_time_range';
-import { ApmRoutes } from '../../../../../routing/apm_route_config';
+import type { ApmRoutes } from '../../../../../routing/apm_route_config';
 import { ServiceLink } from '../../../../../shared/links/apm/service_link';
 import { StickyProperties } from '../../../../../shared/sticky_properties';
 import { getComparisonEnabled } from '../../../../../shared/time_comparison/get_comparison_enabled';

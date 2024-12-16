@@ -9,7 +9,8 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import { logViewReferenceRT } from '@kbn/logs-shared-plugin/common';
 import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { RuleParams, ruleParamsRT } from '../../../../common/alerting/logs/log_threshold';
+import type { RuleParams } from '../../../../common/alerting/logs/log_threshold';
+import { ruleParamsRT } from '../../../../common/alerting/logs/log_threshold';
 
 export const LOG_VIEW_REFERENCE_NAME = 'log-view-reference-0';
 

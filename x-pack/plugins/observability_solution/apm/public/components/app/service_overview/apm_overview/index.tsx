@@ -4,18 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiFlexGroup,
-  EuiFlexGroupProps,
-  EuiFlexItem,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import type { EuiFlexGroupProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { chartHeight } from '..';
-import { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import {
   isOpenTelemetryAgentName,
   isRumAgentName,

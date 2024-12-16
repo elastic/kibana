@@ -7,14 +7,16 @@
 
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
-import { InfraBackendLibs } from '../../../lib/infra_types';
+import type { InfraBackendLibs } from '../../../lib/infra_types';
+import type {
+  GetMetricsHostsAnomaliesRequestPayload,
+  Sort,
+  Pagination,
+} from '../../../../common/http_api/infra_ml';
 import {
   INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,
   getMetricsHostsAnomaliesSuccessReponsePayloadRT,
   getMetricsHostsAnomaliesRequestPayloadRT,
-  GetMetricsHostsAnomaliesRequestPayload,
-  Sort,
-  Pagination,
 } from '../../../../common/http_api/infra_ml';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 

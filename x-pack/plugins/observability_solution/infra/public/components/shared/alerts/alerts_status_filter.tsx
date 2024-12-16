@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { AlertStatus } from '@kbn/observability-plugin/common/typings';

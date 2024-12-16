@@ -11,7 +11,7 @@ import React from 'react';
 import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { ProfilingPluginPublicStartDeps } from '../types';
+import type { ProfilingPluginPublicStartDeps } from '../types';
 
 export function RouterErrorBoundary({ children }: { children?: React.ReactNode }) {
   const location = useLocation();

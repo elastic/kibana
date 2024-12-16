@@ -19,11 +19,9 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
-import {
-  ObservabilityOnboardingLocatorParams,
-  OBSERVABILITY_ONBOARDING_LOCATOR,
-} from '@kbn/deeplinks-observability';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';

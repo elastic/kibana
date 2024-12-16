@@ -5,26 +5,25 @@
  * 2.0.
  */
 
-import { schema, Type } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { GetViewInAppRelativeUrlFnOpts, AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import type {
+  GetViewInAppRelativeUrlFnOpts,
+  AlertingServerSetup,
+} from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
-import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
-import {
-  InventoryItemType,
-  SnapshotMetricType,
-  SnapshotMetricTypeKeys,
-} from '@kbn/metrics-data-access-plugin/common';
+import type { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import { SnapshotMetricTypeKeys } from '@kbn/metrics-data-access-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { LEGACY_COMPARATORS } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
-import {
-  SnapshotCustomAggregation,
-  SNAPSHOT_CUSTOM_AGGREGATIONS,
-} from '../../../../common/http_api';
+import type { SnapshotCustomAggregation } from '../../../../common/http_api';
+import { SNAPSHOT_CUSTOM_AGGREGATIONS } from '../../../../common/http_api';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
-import { InfraBackendLibs, InfraLocators } from '../../infra_types';
+import type { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import {
   alertDetailUrlActionVariableDescription,
   alertStateActionVariableDescription,

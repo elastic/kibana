@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
-import { Connection, ConnectionNode } from '../../../common/service_map';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { Logger } from '@kbn/logging';
+import type { Connection, ConnectionNode } from '../../../common/service_map';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { fetchServicePathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
 import { getConnectionId } from './transform_service_map_responses';
 

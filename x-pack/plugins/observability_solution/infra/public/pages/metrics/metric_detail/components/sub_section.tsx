@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { isValidElement, cloneElement, FunctionComponent, Children, useMemo } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { isValidElement, cloneElement, Children, useMemo } from 'react';
 import { EuiTitle } from '@elastic/eui';
-import { InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
-import { LayoutProps } from '../types';
+import type { InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
+import type { LayoutProps } from '../types';
 
 type SubSectionProps = LayoutProps & {
   id: InventoryMetric;

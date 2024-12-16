@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
-import { Meta, Story } from '@storybook/react';
+import type { Meta, Story } from '@storybook/react';
 import React, { useEffect, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { Cytoscape } from '../cytoscape';

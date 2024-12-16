@@ -7,20 +7,20 @@
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
-import { Logger } from '@kbn/logging';
-import {
+import type { Logger } from '@kbn/logging';
+import type {
   AGENT_NAME,
   PROCESSOR_EVENT,
   SERVICE_NAME,
   SPAN_NAME,
   SPAN_SUBTYPE,
   SPAN_TYPE,
-  TRACE_ID,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { TRACE_ID } from '../../../common/es_fields/apm';
+import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 type OperationMetadata = {
   [SERVICE_NAME]: string;

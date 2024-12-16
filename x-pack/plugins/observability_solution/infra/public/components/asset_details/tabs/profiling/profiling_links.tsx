@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import {
+import type {
   TopNFunctionsLocator,
   StacktracesLocator,
   FlamegraphLocator,

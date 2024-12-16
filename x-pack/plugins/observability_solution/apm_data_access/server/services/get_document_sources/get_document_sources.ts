@@ -7,10 +7,10 @@
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RollupInterval } from '../../../common/rollup';
-import { TimeRangeMetadata } from '../../../common/time_range_metadata';
+import type { TimeRangeMetadata } from '../../../common/time_range_metadata';
 import { isDurationSummaryNotSupportedFilter } from '../../lib/helpers/transactions';
 import { ApmDocumentType } from '../../../common/document_type';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getConfigForDocumentType } from '../../lib/helpers/create_es_client/document_type';
 
 const QUERY_INDEX = {

@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 import { useInfraMLModule } from '../../infra_ml_module';
 import { useInfraMLModuleConfiguration } from '../../infra_ml_module_configuration';
 import { useInfraMLModuleDefinition } from '../../infra_ml_module_definition';
-import { ModuleSourceConfiguration } from '../../infra_ml_module_types';
+import type { ModuleSourceConfiguration } from '../../infra_ml_module_types';
 import { metricHostsModule } from './module_descriptor';
 
 export const useMetricHostsModule = ({

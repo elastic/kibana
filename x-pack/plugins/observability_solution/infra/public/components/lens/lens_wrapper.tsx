@@ -6,10 +6,10 @@
  */
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { LensAttributes } from '@kbn/lens-embeddable-utils';
+import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { ChartLoadingProgress, ChartPlaceholder } from './chart_placeholder';
 import type { LensWrapperProps } from './types';

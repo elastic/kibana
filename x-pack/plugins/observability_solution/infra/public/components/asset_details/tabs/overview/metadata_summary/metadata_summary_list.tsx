@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,

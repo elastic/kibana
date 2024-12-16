@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react';
-import React, { ComponentProps } from 'react';
+import type { Meta, Story } from '@storybook/react';
+import type { ComponentProps } from 'react';
+import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { MockUrlParamsContextProvider } from '../../../../../context/url_params_context/mock_url_params_context_provider';

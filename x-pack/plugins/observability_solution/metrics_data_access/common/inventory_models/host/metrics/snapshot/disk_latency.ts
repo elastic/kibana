@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import type { MetricsUIAggregation } from '../../../types';
 export const diskLatency: MetricsUIAggregation = {
   diskio_read_time: {
     avg: {

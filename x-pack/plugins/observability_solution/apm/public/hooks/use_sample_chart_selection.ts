@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { XYBrushEvent } from '@elastic/charts';
+import type { XYBrushEvent } from '@elastic/charts';
 import { useHistory } from 'react-router-dom';
 import { push } from '../components/shared/links/url_helpers';
 

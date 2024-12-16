@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Server } from '@hapi/hapi';
-import { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { Server } from '@hapi/hapi';
+import type { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { i18n } from '@kbn/i18n';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { GetMetricIndicesOptions } from '@kbn/metrics-data-access-plugin/server';
+import type { GetMetricIndicesOptions } from '@kbn/metrics-data-access-plugin/server';
 import {
   AssetDetailsLocatorDefinition,
   InventoryLocatorDefinition,
@@ -22,7 +22,10 @@ import { mapValues } from 'lodash';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
 import { registerRoutes } from './infra_server';
-import { InfraServerPluginSetupDeps, InfraServerPluginStartDeps } from './lib/adapters/framework';
+import type {
+  InfraServerPluginSetupDeps,
+  InfraServerPluginStartDeps,
+} from './lib/adapters/framework';
 import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
 import { KibanaMetricsAdapter } from './lib/adapters/metrics/kibana_metrics_adapter';
 import { InfraElasticsearchSourceStatusAdapter } from './lib/adapters/source_status';
@@ -32,7 +35,7 @@ import {
   METRICS_RULES_ALERT_CONTEXT,
 } from './lib/alerting/register_rule_types';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
-import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
+import type { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
 import {
@@ -43,7 +46,7 @@ import {
 import { InventoryViewsService } from './services/inventory_views';
 import { MetricsExplorerViewsService } from './services/metrics_explorer_views';
 import { RulesService } from './services/rules';
-import {
+import type {
   InfraConfig,
   InfraPluginCoreSetup,
   InfraPluginRequestHandlerContext,

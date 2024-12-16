@@ -15,11 +15,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { LogEntryCategoriesSetupView } from './log_entry_categories_setup_view';
 import { LogEntryRateSetupView } from './log_entry_rate_setup_view';
 import { LogAnalysisModuleList } from './module_list';
-import { ModuleId, moduleIds, useLogAnalysisSetupFlyoutStateContext } from './setup_flyout_state';
+import type { ModuleId } from './setup_flyout_state';
+import { moduleIds, useLogAnalysisSetupFlyoutStateContext } from './setup_flyout_state';
 
 const FLYOUT_HEADING_ID = 'logAnalysisSetupFlyoutHeading';
 

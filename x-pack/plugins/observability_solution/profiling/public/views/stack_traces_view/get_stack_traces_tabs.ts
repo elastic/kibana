@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TypeOf } from '@kbn/typed-react-router-config';
+import type { TypeOf } from '@kbn/typed-react-router-config';
 import { TopNType } from '@kbn/profiling-utils';
-import { StatefulProfilingRouter } from '../../hooks/use_profiling_router';
-import { ProfilingRoutes } from '../../routing';
+import type { StatefulProfilingRouter } from '../../hooks/use_profiling_router';
+import type { ProfilingRoutes } from '../../routing';
 
 export function getStackTracesTabs({
   path,

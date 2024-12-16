@@ -12,10 +12,10 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ProfilingConfig } from '.';
+import type { ProfilingConfig } from '.';
 import { registerServices } from './services/register_services';
 import { createProfilingEsClient } from './utils/create_profiling_es_client';
-import { ProfilingPluginStartDeps } from './types';
+import type { ProfilingPluginStartDeps } from './types';
 
 export type ProfilingDataAccessPluginSetup = ReturnType<ProfilingDataAccessPlugin['setup']>;
 export type ProfilingDataAccessPluginStart = ReturnType<ProfilingDataAccessPlugin['start']>;

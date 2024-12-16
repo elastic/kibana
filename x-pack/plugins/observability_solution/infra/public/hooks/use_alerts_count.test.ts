@@ -9,10 +9,11 @@ import { waitFor, renderHook } from '@testing-library/react';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
 
 import { useAlertsCount } from './use_alerts_count';
-import { KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
-import { InfraClientStartDeps } from '../types';
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { InfraClientStartDeps } from '../types';
 import { coreMock } from '@kbn/core/public/mocks';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 
 const mockedAlertsCountResponse = {
   aggregations: {

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDataGridColumn, EuiDataGridColumnCellAction } from '@elastic/eui';
+import type { EuiDataGridColumn, EuiDataGridColumnCellAction } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TopNComparisonFunctionSortField, TopNFunctionSortField } from '@kbn/profiling-utils';
 import React from 'react';

@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { getESCapabilities } from '../../../lib/helpers/get_es_capabilities';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { ML_ERRORS } from '../../../../common/anomaly_detection';
@@ -22,7 +22,7 @@ import { updateToV3 } from './update_to_v3';
 import { environmentStringRt } from '../../../../common/environment_rt';
 import { getMlJobsWithAPMGroup } from '../../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
-import { ApmMlJob } from '../../../../common/anomaly_detection/apm_ml_job';
+import type { ApmMlJob } from '../../../../common/anomaly_detection/apm_ml_job';
 // get ML anomaly detection jobs for each environment
 const anomalyDetectionJobsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/anomaly-detection/jobs',

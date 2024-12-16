@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getApmIndexTemplateNames } from '../helpers/get_apm_index_template_names';
 import { getIndexTemplate } from './get_index_template';
 

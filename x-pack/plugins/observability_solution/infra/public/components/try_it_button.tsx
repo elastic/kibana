@@ -8,9 +8,10 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LinkDescriptor, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import type { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { css } from '@emotion/react';
-import { EuiLinkColor } from '@elastic/eui';
+import type { EuiLinkColor } from '@elastic/eui';
 import { BetaBadge } from './beta_badge';
 
 type OnClickEvent = React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>;

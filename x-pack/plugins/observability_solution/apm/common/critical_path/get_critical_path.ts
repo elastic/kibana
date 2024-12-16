@@ -9,7 +9,7 @@ import type {
   IWaterfall,
   IWaterfallSpanOrTransaction,
 } from '../../public/components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
-import { CriticalPath, CriticalPathSegment } from './types';
+import type { CriticalPath, CriticalPathSegment } from './types';
 
 export function getCriticalPath(waterfall: IWaterfall): CriticalPath {
   const segments: CriticalPathSegment[] = [];

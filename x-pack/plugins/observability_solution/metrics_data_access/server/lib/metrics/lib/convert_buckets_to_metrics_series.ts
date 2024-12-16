@@ -7,14 +7,14 @@
 
 import { get, values, first } from 'lodash';
 import * as rt from 'io-ts';
-import {
+import type {
   MetricsAPIRequest,
   MetricsAPISeries,
   MetricsAPIColumn,
   MetricsAPIRow,
 } from '../../../../common/http_api/metrics_api';
+import type { Bucket } from '../types';
 import {
-  Bucket,
   BasicMetricValueRT,
   NormalizedMetricValueRT,
   PercentilesTypeRT,

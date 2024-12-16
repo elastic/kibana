@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { TabContentProps } from '.';
+import type { TabContentProps } from '.';
 import { TransactionsTable } from '../../../../shared/transactions_table';
 
 function TransactionsTab({ environment, kuery, start, end }: TabContentProps) {

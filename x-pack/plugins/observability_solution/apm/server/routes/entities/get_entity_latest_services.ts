@@ -13,9 +13,10 @@ import {
 } from '@kbn/observability-shared-plugin/common/field_names/elasticsearch';
 import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
+import type { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { entitiesRangeQuery } from './get_entities';
-import { EntityLatestServiceRaw, EntityType } from './types';
+import type { EntityLatestServiceRaw } from './types';
+import { EntityType } from './types';
 
 export async function getEntityLatestServices({
   entitiesESClient,

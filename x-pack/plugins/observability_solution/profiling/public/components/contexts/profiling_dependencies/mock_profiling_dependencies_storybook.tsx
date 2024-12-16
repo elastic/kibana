@@ -4,20 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
 import { createMemoryHistory } from 'history';
 import { merge } from 'lodash';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { Observable } from 'rxjs';
 import { RouterProvider } from '@kbn/typed-react-router-config';
-import {
-  ProfilingDependencies,
-  ProfilingDependenciesContextProvider,
-} from './profiling_dependencies_context';
+import type { ProfilingDependencies } from './profiling_dependencies_context';
+import { ProfilingDependenciesContextProvider } from './profiling_dependencies_context';
 import { profilingRouter } from '../../../routing';
 import { TimeRangeContextProvider } from '../time_range_context';
 import { getServices } from '../../../services';

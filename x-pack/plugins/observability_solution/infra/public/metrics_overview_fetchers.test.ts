@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import moment from 'moment';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { createInfraPluginStartMock } from './mocks';
 import { FAKE_OVERVIEW_RESPONSE } from './test_utils';
-import { InfraClientStartDeps, InfraClientStartExports } from './types';
+import type { InfraClientStartDeps, InfraClientStartExports } from './types';
 
 function setup() {
   const core = coreMock.createStart();

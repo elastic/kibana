@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { ProfilingSetupStatus } from '../../../services';
+import type { ProfilingSetupStatus } from '../../../services';
 
 export const ProfilingSetupStatusContext = React.createContext<
   | {

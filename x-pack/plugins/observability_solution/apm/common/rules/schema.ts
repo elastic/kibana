@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
-import { ApmRuleType } from '@kbn/rule-data-utils';
+import type { ApmRuleType } from '@kbn/rule-data-utils';
 import { AnomalyDetectorType } from '../anomaly_detection/apm_ml_detectors';
 import { AggregationType } from './apm_rule_types';
 

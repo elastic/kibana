@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -19,10 +20,9 @@ import {
   EuiFieldText,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiText,
 } from '@elastic/eui';
-import { NonEmptyString } from '@kbn/io-ts-utils';
+import type { NonEmptyString } from '@kbn/io-ts-utils';
 
 interface Props {
   onClose(): void;

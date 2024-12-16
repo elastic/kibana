@@ -8,14 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
 import { isNumber, isFinite } from 'lodash';
-import { IErrorObject, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
-import {
+import type { IErrorObject, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
   PartialCountCriteria,
+  PartialRequiredRuleParams,
+  PartialCriteria,
+} from '../../../common/alerting/logs/log_threshold/types';
+import {
   isRatioRule,
   getNumerator,
   getDenominator,
-  PartialRequiredRuleParams,
-  PartialCriteria,
 } from '../../../common/alerting/logs/log_threshold/types';
 
 export const criterionErrorRT = rt.type({

@@ -5,21 +5,15 @@
  * 2.0.
  */
 
-import {
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiIcon,
-  EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState, useMemo } from 'react';
 import { METRICS_EXPLORER_API_MAX_METRICS } from '@kbn/metrics-data-access-plugin/common';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { colorTransformer, Color } from '../../../../../common/color_palette';
-import { MetricsExplorerMetric } from '../../../../../common/http_api/metrics_explorer';
-import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
+import type { MetricsExplorerMetric } from '../../../../../common/http_api/metrics_explorer';
+import type { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
 
 interface Props {
   autoFocus?: boolean;

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import { AddDataPanelProps } from '@kbn/observability-shared-plugin/public';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { AddDataPanelProps } from '@kbn/observability-shared-plugin/public';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { OnboardingFlow } from '../../shared/templates/no_data_config';
 
 export type AddMetricsCalloutKey =

@@ -6,16 +6,10 @@
  */
 
 import React from 'react';
-import { Theme } from '@elastic/charts';
-import { BoolQuery } from '@kbn/es-query';
-import {
-  RecursivePartial,
-  EuiFlexItem,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiTitle,
-  EuiIconTip,
-} from '@elastic/eui';
+import type { Theme } from '@elastic/charts';
+import type { BoolQuery } from '@kbn/es-query';
+import type { RecursivePartial } from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CHART_SETTINGS } from './constants';
 

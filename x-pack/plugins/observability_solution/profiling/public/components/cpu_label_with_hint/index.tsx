@@ -5,15 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiIconProps,
-  EuiText,
-  EuiTextProps,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiIconProps, EuiTextProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 type CPUType = 'self' | 'total';

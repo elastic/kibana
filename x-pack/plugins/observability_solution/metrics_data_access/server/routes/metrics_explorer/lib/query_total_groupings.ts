@@ -7,8 +7,8 @@
 
 const TIMESTAMP_FIELD = '@timestamp';
 import { isArray } from 'lodash';
-import { MetricsAPIRequest } from '../../../../common/http_api';
-import { ESSearchClient } from '../../../lib/metrics/types';
+import type { MetricsAPIRequest } from '../../../../common/http_api';
+import type { ESSearchClient } from '../../../lib/metrics/types';
 
 interface GroupingResponse {
   count: {

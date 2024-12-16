@@ -24,7 +24,7 @@ import { CpuProfilingPrompt } from './kpis/cpu_profiling_prompt';
 import { ServicesContent } from './services';
 import { MetricsContent } from './metrics/metrics';
 import { AddMetricsCallout } from '../../add_metrics_callout';
-import { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
+import type { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
 import { useEntitySummary } from '../../hooks/use_entity_summary';
 import { isMetricsSignal, isLogsSignal } from '../../utils/get_data_stream_types';
 import { LogsContent } from './logs';

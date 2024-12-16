@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import type { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { renderWithTheme } from '../../../utils/test_helpers';
 import { FrameHeading } from './frame_heading';
 

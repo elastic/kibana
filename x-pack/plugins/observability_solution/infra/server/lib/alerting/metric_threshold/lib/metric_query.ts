@@ -7,7 +7,8 @@
 
 import moment from 'moment';
 import { isCustom, isNotCountOrCustom } from './metric_expression_params';
-import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import type { MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import { Aggregators } from '../../../../../common/alerting/metrics';
 import { createCustomMetricsAggregations } from '../../../create_custom_metrics_aggregations';
 import {
   hasAdditionalContext,

@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   callAsyncWithDebug,
   getDebugBody,

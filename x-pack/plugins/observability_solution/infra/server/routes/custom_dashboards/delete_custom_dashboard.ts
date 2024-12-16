@@ -7,7 +7,7 @@
 
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { InfraDeleteCustomDashboardsRequestParamsRT } from '../../../common/http_api/custom_dashboards_api';
-import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
+import type { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
 import { handleRouteErrors } from '../../utils/handle_route_errors';
 import { checkCustomDashboardsEnabled } from './lib/check_custom_dashboards_enabled';
 import { deleteCustomDashboard } from './lib/delete_custom_dashboard';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationOptionsByType } from '@kbn/es-types';
+import type { AggregationOptionsByType } from '@kbn/es-types';
 
 import Boom from '@hapi/boom';
 import { type MetricsAPIRequest } from '@kbn/metrics-data-access-plugin/common';

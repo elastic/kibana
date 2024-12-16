@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CloudStart } from '@kbn/cloud-plugin/server';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { FleetStartContract } from '@kbn/fleet-plugin/server';
+import type { CloudStart } from '@kbn/cloud-plugin/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { createFetchFlamechart } from './fetch_flamechart';
 import { createGetStatusService } from './status';
-import { ProfilingESClient } from '../../common/profiling_es_client';
+import type { ProfilingESClient } from '../../common/profiling_es_client';
 import { createFetchFunctions } from './functions';
 import { createSetupState } from './setup_state';
 import { createFetchESFunctions } from './functions/es_functions';

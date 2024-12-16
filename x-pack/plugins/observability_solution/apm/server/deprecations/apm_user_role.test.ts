@@ -8,7 +8,7 @@
 import type { GetDeprecationsContext, IScopedClusterClient, CoreSetup } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getDeprecationsInfo } from './apm_user_role';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 let context: GetDeprecationsContext;
 let esClient: jest.Mocked<IScopedClusterClient>;

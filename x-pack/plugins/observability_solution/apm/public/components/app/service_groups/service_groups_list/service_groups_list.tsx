@@ -6,11 +6,11 @@
  */
 import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
-import { SavedServiceGroup } from '../../../../../common/service_groups';
+import type { SavedServiceGroup } from '../../../../../common/service_groups';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useDefaultEnvironment } from '../../../../hooks/use_default_environment';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ServiceGroupsCard } from './service_group_card';
 
 interface Props {

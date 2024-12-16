@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import moment, { isDuration, Duration } from 'moment';
+import type { Duration } from 'moment';
+import moment, { isDuration } from 'moment';
 const d = moment.duration;
 
 const roundingRules = [

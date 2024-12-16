@@ -8,7 +8,7 @@
 import { EuiCallOut, EuiHorizontalRule, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../../../../../context/apm_plugin/use_apm_plugin_context';
 
 export function DroppedSpansWarning({ transactionDoc }: { transactionDoc: Transaction }) {

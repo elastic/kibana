@@ -5,29 +5,32 @@
  * 2.0.
  */
 
+import type {
+  LineAnnotation,
+  RectAnnotationStyle,
+  SeriesIdentifier,
+  XYBrushEvent,
+  XYChartSeriesIdentifier,
+  SettingsSpec,
+} from '@elastic/charts';
 import {
   AreaSeries,
   Axis,
   BarSeries,
   Chart,
   CurveType,
-  LineAnnotation,
   LineSeries,
   niceTimeFormatter,
   Position,
   RectAnnotation,
-  RectAnnotationStyle,
   ScaleType,
-  SeriesIdentifier,
   Settings,
-  XYBrushEvent,
-  XYChartSeriesIdentifier,
   Tooltip,
-  SettingsSpec,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_options';
@@ -41,7 +44,7 @@ import {
   getChartAnomalyTimeseries,
 } from './helper/get_chart_anomaly_timeseries';
 import { isTimeseriesEmpty, onBrushEnd } from './helper/helper';
-import { TimeseriesChartWithContextProps } from './timeseries_chart_with_context';
+import type { TimeseriesChartWithContextProps } from './timeseries_chart_with_context';
 
 const END_ZONE_LABEL = i18n.translate('xpack.apm.timeseries.endzone', {
   defaultMessage:

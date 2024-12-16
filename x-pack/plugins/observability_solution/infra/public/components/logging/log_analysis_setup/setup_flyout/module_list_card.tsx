@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiCard, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
-import { SetupStatus } from '../../../../../common/log_analysis';
+import type { SetupStatus } from '../../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { CreateJobButton, RecreateJobButton } from '../create_job_button';
 

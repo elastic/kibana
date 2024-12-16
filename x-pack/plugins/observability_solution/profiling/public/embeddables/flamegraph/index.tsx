@@ -8,7 +8,7 @@
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { EmbeddableFlamegraphSharedComponent, FlamegraphProps } from './embeddable_flamegraph';
-import { ProfilingEmbeddablesDependencies } from '../profiling_embeddable_provider';
+import type { ProfilingEmbeddablesDependencies } from '../profiling_embeddable_provider';
 
 const LazyEmbeddableFlamegraph = dynamic(async () => {
   const Component = await import('./embeddable_flamegraph');

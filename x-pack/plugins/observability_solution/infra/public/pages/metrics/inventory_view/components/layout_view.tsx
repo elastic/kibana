@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useInventoryViews } from '../../../../hooks/use_inventory_views';
-import { SnapshotNode } from '../../../../../common/http_api';
+import type { SnapshotNode } from '../../../../../common/http_api';
 import { Layout } from './layout';
 
 interface Props {

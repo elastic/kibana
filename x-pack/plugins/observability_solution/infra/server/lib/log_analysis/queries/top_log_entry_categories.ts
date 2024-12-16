@@ -15,7 +15,7 @@ import {
   createDatasetsFilters,
 } from './common';
 
-import { CategoriesSort } from '../../../../common/log_analysis';
+import type { CategoriesSort } from '../../../../common/log_analysis';
 
 type CategoryAggregationOrder =
   | 'filter_record>maximum_record_score'

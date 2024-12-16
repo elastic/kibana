@@ -19,16 +19,14 @@ import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, probabilityRt, rangeRt } from '../default_api_types';
 import { getServiceNamesFromTermsEnum } from '../services/get_services/get_service_names_from_terms_enum';
-import {
-  getServiceStatistics,
-  StorageExplorerServiceStatisticsResponse,
-} from './get_service_statistics';
-import { getSizeTimeseries, SizeTimeseriesResponse } from './get_size_timeseries';
-import { getStorageDetails, StorageDetailsResponse } from './get_storage_details';
-import {
-  getSummaryStatistics,
-  StorageExplorerSummaryStatisticsResponse,
-} from './get_summary_statistics';
+import type { StorageExplorerServiceStatisticsResponse } from './get_service_statistics';
+import { getServiceStatistics } from './get_service_statistics';
+import type { SizeTimeseriesResponse } from './get_size_timeseries';
+import { getSizeTimeseries } from './get_size_timeseries';
+import type { StorageDetailsResponse } from './get_storage_details';
+import { getStorageDetails } from './get_storage_details';
+import type { StorageExplorerSummaryStatisticsResponse } from './get_summary_statistics';
+import { getSummaryStatistics } from './get_summary_statistics';
 import { hasStorageExplorerPrivileges } from './has_storage_explorer_privileges';
 import { isCrossClusterSearch } from './is_cross_cluster_search';
 

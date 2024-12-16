@@ -8,11 +8,11 @@
 import { useMemo } from 'react';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
-import {
+import type {
   InfraTimerangeInput,
-  SnapshotNodeResponseRT,
   SnapshotRequest,
 } from '../../../../../common/http_api/snapshot_api';
+import { SnapshotNodeResponseRT } from '../../../../../common/http_api/snapshot_api';
 
 export interface UseSnapshotRequest
   extends Omit<SnapshotRequest, 'filterQuery' | 'timerange' | 'includeTimeseries'> {

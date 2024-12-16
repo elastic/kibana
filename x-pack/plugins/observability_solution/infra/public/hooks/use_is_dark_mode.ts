@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreTheme } from '@kbn/core/public';
+import type { CoreTheme } from '@kbn/core/public';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import { useKibanaContextForPlugin } from './use_kibana';

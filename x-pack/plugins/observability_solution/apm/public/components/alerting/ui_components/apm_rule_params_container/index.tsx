@@ -9,7 +9,8 @@ import { EuiCallOut, EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { getTimeUnitLabel, TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
+import type { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
+import { getTimeUnitLabel } from '@kbn/triggers-actions-ui-plugin/public';
 
 interface MinimumWindowSize {
   value: number;

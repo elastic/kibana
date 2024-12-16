@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IInventoryViewsClient } from './types';
+import type { IInventoryViewsClient } from './types';
 
 export const createInventoryViewsClientMock = (): jest.Mocked<IInventoryViewsClient> => ({
   findInventoryViews: jest.fn(),

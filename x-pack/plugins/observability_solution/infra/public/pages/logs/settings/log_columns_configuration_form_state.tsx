@@ -6,9 +6,10 @@
  */
 
 import { useMemo } from 'react';
-import { LogColumnConfiguration } from '../../../utils/source_configuration';
+import type { LogColumnConfiguration } from '../../../utils/source_configuration';
 import { useFormElement } from './form_elements';
-import { FormValidationError, validateColumnListNotEmpty } from './validation_errors';
+import type { FormValidationError } from './validation_errors';
+import { validateColumnListNotEmpty } from './validation_errors';
 
 export const useLogColumnsFormElement = (initialValue: LogColumnConfiguration[]) => {
   const logColumnsFormElement = useFormElement<LogColumnConfiguration[], FormValidationError>({

@@ -24,11 +24,11 @@ import { LatencyDistributionChartType } from '../../../../common/latency_distrib
 
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
+import type { CorrelationsProgress } from './utils/analysis_hook_utils';
 import {
   getInitialResponse,
   getFailedTransactionsCorrelationsSortedByScore,
   getReducer,
-  CorrelationsProgress,
 } from './utils/analysis_hook_utils';
 import { useFetchParams } from './use_fetch_params';
 

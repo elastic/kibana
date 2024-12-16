@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InventoryMetrics } from '../../types';
+import type { InventoryMetrics } from '../../types';
 
 import { awsS3BucketSize } from './tsvb/aws_s3_bucket_size';
 import { awsS3TotalRequests } from './tsvb/aws_s3_total_requests';

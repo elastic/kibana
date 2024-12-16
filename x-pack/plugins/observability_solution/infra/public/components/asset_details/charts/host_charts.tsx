@@ -16,7 +16,7 @@ import { ChartsGrid } from '../charts_grid/charts_grid';
 import { Chart } from './chart';
 import { useHostCharts } from '../hooks/use_host_metrics_charts';
 import { TitleWithTooltip } from '../components/section_title';
-import { MetricsChartsFields, HostMetricTypes } from './types';
+import type { MetricsChartsFields, HostMetricTypes } from './types';
 
 interface Props extends MetricsChartsFields {
   metric: Exclude<HostMetricTypes, 'kpi'>;

@@ -7,8 +7,9 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiInMemoryTableProps } from '@elastic/eui';
-import { ApiKey } from '@kbn/security-plugin-types-common';
+import type { EuiBasicTableColumn, EuiInMemoryTableProps } from '@elastic/eui';
+import { EuiInMemoryTable } from '@elastic/eui';
+import type { ApiKey } from '@kbn/security-plugin-types-common';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 

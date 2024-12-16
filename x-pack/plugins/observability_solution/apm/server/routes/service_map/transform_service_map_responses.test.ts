@@ -15,10 +15,8 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../common/es_fields/apm';
-import {
-  transformServiceMapResponses,
-  ServiceMapResponse,
-} from './transform_service_map_responses';
+import type { ServiceMapResponse } from './transform_service_map_responses';
+import { transformServiceMapResponses } from './transform_service_map_responses';
 
 const nodejsService = {
   [SERVICE_NAME]: 'opbeans-node',

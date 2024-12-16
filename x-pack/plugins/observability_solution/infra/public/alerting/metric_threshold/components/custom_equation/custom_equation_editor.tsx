@@ -15,17 +15,17 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { omit, range, first, xor, debounce } from 'lodash';
-import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import { OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS } from '../../../../../common/http_api';
-import {
-  Aggregators,
+import type {
   CustomMetricAggTypes,
   MetricExpressionCustomMetric,
 } from '../../../../../common/alerting/metrics';
-import { MetricExpression } from '../../types';
-import { CustomMetrics, AggregationTypes, NormalizedFields } from './types';
+import { Aggregators } from '../../../../../common/alerting/metrics';
+import type { MetricExpression } from '../../types';
+import type { CustomMetrics, AggregationTypes, NormalizedFields } from './types';
 import { MetricRowWithAgg } from './metric_row_with_agg';
 import { MetricRowWithCount } from './metric_row_with_count';
 import {

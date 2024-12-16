@@ -13,11 +13,12 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { InstancesLatencyDistributionChart } from '../../../shared/charts/instances_latency_distribution_chart';
-import { ServiceOverviewInstancesTable, TableOptions } from '../service_overview_instances_table';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { InstancesSortField } from '../../../../../common/instances';
+import type { TableOptions } from '../service_overview_instances_table';
+import { ServiceOverviewInstancesTable } from '../service_overview_instances_table';
+import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import type { InstancesSortField } from '../../../../../common/instances';
 
 interface ServiceOverviewInstancesChartAndTableProps {
   chartHeight: number;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
-import { APMPluginStartDependencies } from '../../types';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { APMPluginStartDependencies } from '../../types';
 
 export function isSuperuser({
   securityPluginStart,

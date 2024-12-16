@@ -6,10 +6,10 @@
  */
 
 import { isEmpty } from 'lodash';
-import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
-import { InventoryRouteHandlerResources } from '../../routes/types';
+import type { InventoryRouteHandlerResources } from '../../routes/types';
 
 export type AlertsClient = Awaited<ReturnType<typeof createAlertsClient>>;
 

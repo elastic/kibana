@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import React, {
-  createContext,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-  PropsWithChildren,
-} from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import type { PropsWithChildren } from 'react';
+import React, { createContext, useCallback, useMemo, useRef, useState } from 'react';
+import type { RouteComponentProps } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import { getDateRange } from './helpers';
 import { resolveUrlParams } from './resolve_url_params';
-import { UrlParams } from './types';
+import type { UrlParams } from './types';
 
 export interface TimeRange {
   rangeFrom: string;

@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import React, { ReactElement, useRef } from 'react';
-import {
-  Axis,
-  Chart,
-  LineAnnotation,
-  niceTimeFormatter,
-  Position,
-  RectAnnotation,
-  Settings,
-  Tooltip,
-} from '@elastic/charts';
+import type { ReactElement } from 'react';
+import React, { useRef } from 'react';
+import type { LineAnnotation, RectAnnotation } from '@elastic/charts';
+import { Axis, Chart, niceTimeFormatter, Position, Settings, Tooltip } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
@@ -25,13 +18,11 @@ import { i18n } from '@kbn/i18n';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import { useTimelineChartTheme } from '../../../hooks/use_timeline_chart_theme';
 import { Color } from '../../../../common/color_palette';
-import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
+import type { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
-import { MetricExpression, TimeRange } from '../types';
-import {
-  MetricsExplorerChartType,
-  MetricsExplorerOptionsMetric,
-} from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import type { MetricExpression, TimeRange } from '../types';
+import type { MetricsExplorerOptionsMetric } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { createFormatterForMetric } from '../../../pages/metrics/metrics_explorer/components/helpers/create_formatter_for_metric';
 import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart_data';

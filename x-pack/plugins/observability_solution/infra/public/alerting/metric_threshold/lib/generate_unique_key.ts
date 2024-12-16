@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricExpression } from '../types';
+import type { MetricExpression } from '../types';
 
 export const generateUniqueKey = (criterion: MetricExpression) => {
   const metric = criterion.metric ? `(${criterion.metric})` : '';

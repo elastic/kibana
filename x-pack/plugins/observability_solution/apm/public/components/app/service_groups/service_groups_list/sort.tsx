@@ -7,7 +7,7 @@
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ServiceGroupsSortType } from '.';
+import type { ServiceGroupsSortType } from '.';
 
 interface Props {
   type: ServiceGroupsSortType;

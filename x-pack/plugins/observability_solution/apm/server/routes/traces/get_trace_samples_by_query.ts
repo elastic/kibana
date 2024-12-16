@@ -6,7 +6,7 @@
  */
 import { rangeQuery, kqlQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Environment } from '../../../common/environment_rt';
+import type { Environment } from '../../../common/environment_rt';
 import { TraceSearchType } from '../../../common/trace_explorer';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
@@ -17,7 +17,7 @@ import {
   TRANSACTION_SAMPLED,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export type TraceSamplesResponse = Array<{
   traceId: string;

@@ -4,15 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInMemoryTable,
-  EuiPanel,
-  EuiTitle,
-  PropertySort,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn, PropertySort } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { asDynamicBytes, asMillisecondDuration } from '../../../../../common/utils/formatters';
@@ -20,7 +13,7 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ServerlessFunctionNameLink } from './serverless_function_name_link';
 
 type ServerlessFunctionOverview =

@@ -18,10 +18,10 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import { Maybe } from '../../../typings/common';
+import type { Maybe } from '../../../typings/common';
 
-import { Coordinate } from '../../../typings/timeseries';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { Coordinate } from '../../../typings/timeseries';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export interface HttpRequestsTimeseries {
   currentPeriod: { timeseries: Coordinate[]; value: Maybe<number> };

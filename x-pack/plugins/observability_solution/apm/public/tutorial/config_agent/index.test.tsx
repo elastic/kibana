@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import React from 'react';
 import { expectTextsInDocument, expectTextsNotInDocument } from '../../utils/test_helpers';
 import TutorialConfigAgent from '.';

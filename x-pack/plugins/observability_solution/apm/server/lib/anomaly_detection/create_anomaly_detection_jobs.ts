@@ -6,19 +6,19 @@
  */
 
 import Boom from '@hapi/boom';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { snakeCase } from 'lodash';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { METRICSET_NAME, PROCESSOR_EVENT } from '../../../common/es_fields/apm';
-import { Environment } from '../../../common/environment_rt';
+import type { Environment } from '../../../common/environment_rt';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { MlClient } from '../helpers/get_ml_client';
+import type { MlClient } from '../helpers/get_ml_client';
 import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
 import { getAnomalyDetectionJobs } from './get_anomaly_detection_jobs';
 

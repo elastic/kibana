@@ -25,7 +25,7 @@ import { ErrorDistribution } from './distribution';
 import { TopErroneousTransactions } from './top_erroneous_transactions';
 import { maybe } from '../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 type ErrorSamplesAPIResponse =

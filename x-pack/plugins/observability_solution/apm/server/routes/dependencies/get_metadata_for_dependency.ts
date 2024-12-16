@@ -15,7 +15,7 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../common/es_fields/apm';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export interface MetadataForDependencyResponse {
   spanType: string | undefined;

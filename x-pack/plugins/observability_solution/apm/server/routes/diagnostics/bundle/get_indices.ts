@@ -6,7 +6,7 @@
  */
 
 import { compact, uniq } from 'lodash';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 
 export function getApmIndexPatterns(indices: string[]) {

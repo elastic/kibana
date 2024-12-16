@@ -9,11 +9,12 @@ import {
   apmEnableServiceMetrics,
   apmEnableContinuousRollups,
 } from '@kbn/observability-plugin/common';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { TimeRangeMetadata } from '../../../common/time_range_metadata';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { TimeRangeMetadata } from '../../../common/time_range_metadata';
 import { useApmParams } from '../../hooks/use_apm_params';
 import { useApmRoutePath } from '../../hooks/use_apm_route_path';
-import { FetcherResult, useFetcher } from '../../hooks/use_fetcher';
+import type { FetcherResult } from '../../hooks/use_fetcher';
+import { useFetcher } from '../../hooks/use_fetcher';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 
