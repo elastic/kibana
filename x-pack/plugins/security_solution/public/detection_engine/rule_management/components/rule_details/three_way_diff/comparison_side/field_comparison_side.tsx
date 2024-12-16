@@ -5,34 +5,55 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { VersionsPicker } from './versions_picker/versions_picker';
-import type { Version } from './versions_picker/constants';
-import { SelectedVersions } from './versions_picker/constants';
+import { isEqual } from 'lodash';
+import usePrevious from 'react-use/lib/usePrevious';
+import { VersionsPicker, VersionsPickerOptionEnum } from './versions_picker/versions_picker';
 import { FieldUpgradeSideHeader } from '../field_upgrade_side_header';
 import { useFieldUpgradeContext } from '../rule_upgrade/field_upgrade_context';
-import { pickFieldValueForVersion } from './utils';
+import {
+  getComparisonOptionsForDiffOutcome,
+  getVersionsForComparison,
+  pickFieldValueForVersion,
+} from './utils';
 import { getSubfieldChanges } from './get_subfield_changes';
 import { SubfieldChanges } from './subfield_changes';
 import { ComparisonSideHelpInfo } from './comparison_side_help_info';
 import * as i18n from './translations';
 
 export function FieldComparisonSide(): JSX.Element {
-  const { fieldName, fieldDiff, finalDiffableRule } = useFieldUpgradeContext();
+  const { fieldName, fieldDiff, finalDiffableRule, hasResolvedValueDifferentFromSuggested } =
+    useFieldUpgradeContext();
   const resolvedValue = finalDiffableRule[fieldName];
 
-  const [selectedVersions, setSelectedVersions] = useState<SelectedVersions>(
-    SelectedVersions.CurrentFinal
+  const options = getComparisonOptionsForDiffOutcome(
+    fieldDiff.diff_outcome,
+    fieldDiff.conflict,
+    hasResolvedValueDifferentFromSuggested
+  );
+  const [selectedOption, setSelectedOption] = useState<VersionsPickerOptionEnum>(options[0]);
+
+  const [oldVersionType, newVersionType] = getVersionsForComparison(
+    selectedOption,
+    fieldDiff.has_base_version
   );
 
-  const [oldVersionType, newVersionType] = selectedVersions.split('_') as [Version, Version];
-
   const oldFieldValue = pickFieldValueForVersion(oldVersionType, fieldDiff, resolvedValue);
-
   const newFieldValue = pickFieldValueForVersion(newVersionType, fieldDiff, resolvedValue);
 
   const subfieldChanges = getSubfieldChanges(fieldName, oldFieldValue, newFieldValue);
+
+  /* Change selected option to "My changes" if user has modified resolved value */
+  const prevResolvedValue = usePrevious(resolvedValue);
+  useEffect(() => {
+    if (
+      selectedOption !== VersionsPickerOptionEnum.MyChanges &&
+      !isEqual(prevResolvedValue, resolvedValue)
+    ) {
+      setSelectedOption(VersionsPickerOptionEnum.MyChanges);
+    }
+  }, [hasResolvedValueDifferentFromSuggested, selectedOption, prevResolvedValue, resolvedValue]);
 
   return (
     <>
@@ -42,15 +63,16 @@ export function FieldComparisonSide(): JSX.Element {
             <EuiTitle size="xxs">
               <h3>
                 {i18n.TITLE}
-                <ComparisonSideHelpInfo />
+                <ComparisonSideHelpInfo options={options} />
               </h3>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
             <VersionsPicker
-              hasBaseVersion={fieldDiff.has_base_version}
-              selectedVersions={selectedVersions}
-              onChange={setSelectedVersions}
+              options={options}
+              selectedOption={selectedOption}
+              onChange={setSelectedOption}
+              hasResolvedValueDifferentFromSuggested={hasResolvedValueDifferentFromSuggested}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
