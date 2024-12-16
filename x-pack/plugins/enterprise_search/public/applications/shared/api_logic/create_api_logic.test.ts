@@ -91,7 +91,10 @@ describe('CreateApiLogic', () => {
         const { mount: messageMount } = messageLogic;
         messageMount();
         messageLogic.actions.apiSuccess({});
-        expect(flashSuccessToast).toHaveBeenCalledWith('test message');
+        expect(flashSuccessToast).toHaveBeenCalledWith('test message', {
+          'aria-live': 'assertive',
+          role: 'alert',
+        });
       });
     });
     describe('apiError', () => {

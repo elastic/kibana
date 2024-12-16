@@ -46,7 +46,7 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
     isDeleteModalVisible,
   } = useValues(ConnectorsLogic);
 
-  const connectorName = isCrawler ? deleteModalIndexName : deleteModalConnectorName;
+  const connectorName = (isCrawler ? deleteModalIndexName : deleteModalConnectorName) || '';
 
   const [inputConnectorName, setInputConnectorName] = useState('');
   const [shouldDeleteIndex, setShouldDeleteIndex] = useState(false);
@@ -80,6 +80,7 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
         } else {
           deleteConnector({
             connectorId,
+            connectorName,
             shouldDeleteIndex,
           });
           setConnectorUiOptions(omit(connectorUiOptions, connectorId));

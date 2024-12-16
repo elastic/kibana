@@ -59,7 +59,10 @@ export const createApiLogic = <Result, Args>(
       },
       apiSuccess: (result) => {
         if (options.showSuccessFlashFn) {
-          flashSuccessToast(options.showSuccessFlashFn(result));
+          flashSuccessToast(options.showSuccessFlashFn(result), {
+            'aria-live': 'assertive',
+            role: 'alert',
+          });
         }
       },
       makeRequest: async (args, breakpoint) => {

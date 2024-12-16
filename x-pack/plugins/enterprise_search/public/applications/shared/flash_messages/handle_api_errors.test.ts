@@ -103,9 +103,18 @@ describe('toastAPIErrors', () => {
   it('converts API errors into flash messages', () => {
     toastAPIErrors(mockHttpError);
 
-    expect(flashErrorToast).toHaveBeenNthCalledWith(1, 'Could not find X');
-    expect(flashErrorToast).toHaveBeenNthCalledWith(2, 'Could not find Y');
-    expect(flashErrorToast).toHaveBeenNthCalledWith(3, 'Something else bad happened');
+    expect(flashErrorToast).toHaveBeenNthCalledWith(1, 'Could not find X', {
+      'aria-live': 'assertive',
+      role: 'alert',
+    });
+    expect(flashErrorToast).toHaveBeenNthCalledWith(2, 'Could not find Y', {
+      'aria-live': 'assertive',
+      role: 'alert',
+    });
+    expect(flashErrorToast).toHaveBeenNthCalledWith(3, 'Something else bad happened', {
+      'aria-live': 'assertive',
+      role: 'alert',
+    });
   });
 
   it('falls back to the basic message for http responses without an errors array', () => {
@@ -117,7 +126,10 @@ describe('toastAPIErrors', () => {
       },
     } as any);
 
-    expect(flashErrorToast).toHaveBeenCalledWith('Not Found');
+    expect(flashErrorToast).toHaveBeenCalledWith('Not Found', {
+      'aria-live': 'assertive',
+      role: 'alert',
+    });
   });
 
   it('displays a generic error message and re-throws non-API errors', () => {
@@ -127,7 +139,10 @@ describe('toastAPIErrors', () => {
       toastAPIErrors(error as any);
     }).toThrowError(error);
 
-    expect(flashErrorToast).toHaveBeenCalledWith(expect.any(String));
+    expect(flashErrorToast).toHaveBeenCalledWith(expect.any(String), {
+      'aria-live': 'assertive',
+      role: 'alert',
+    });
   });
 });
 
