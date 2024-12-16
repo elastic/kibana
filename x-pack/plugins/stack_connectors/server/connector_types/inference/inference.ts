@@ -155,7 +155,17 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
         const events: UnifiedChatCompleteResponse[] = [];
         events.push({
           choices: chunk.choices.map((c) => ({
-            message: c.delta,
+            message: {
+              tool_calls: c.delta.tool_calls?.map((t) => ({
+                index: t.index,
+                id: t.id,
+                function: t.function,
+                type: t.type,
+              })),
+              content: c.delta.content,
+              refusal: c.delta.refusal,
+              role: c.delta.role,
+            },
             finish_reason: c.finish_reason,
             index: c.index,
           })),
@@ -163,7 +173,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
           model: chunk.model,
           object: chunk.object,
           usage: chunk.usage,
-        } as UnifiedChatCompleteResponse);
+        });
         return from(events);
       }),
       identity
@@ -181,17 +191,26 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
                 prev.choices[0].message.content += chunk.choices[0].message.content ?? '';
 
                 chunk.choices[0].message.tool_calls?.forEach((toolCall) => {
-                  const toolCallLength = prev.choices[0].message.tool_calls?.length ?? 0;
-                  const toolCalls = toolCallLength === 0 ? [] : prev.choices[0].message.tool_calls;
+                  if (toolCall.index !== undefined && toolCall.id) {
+                    const prevToolCallLength = prev.choices[0].message.tool_calls?.length ?? 0;
+                    if (prevToolCallLength - 1 !== toolCall.index) {
+                      if (!prev.choices[0].message.tool_calls) {
+                        prev.choices[0].message.tool_calls = [];
+                      }
+                      prev.choices[0].message.tool_calls.push({
+                        function: {
+                          name: '',
+                          arguments: '',
+                        },
+                        id: '',
+                      });
+                    }
+                    const prevToolCall = prev.choices[0].message.tool_calls[toolCall.index];
 
-                  toolCalls.push({
-                    function: {
-                      name: toolCall.function?.name,
-                      arguments: toolCall.function?.arguments,
-                    },
-                    id: toolCall.id,
-                  });
-                  prev.choices[0].message.tool_calls = toolCalls;
+                    prevToolCall.function.name += toolCall.function?.name;
+                    prevToolCall.function.arguments += toolCall.function?.arguments;
+                    prevToolCall.id += toolCall.id;
+                  }
                 });
               } else if (chunk.usage) {
                 prev.usage = chunk.usage;
@@ -203,6 +222,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
                 {
                   message: {
                     content: '',
+                    role: 'assistant',
                   },
                 },
               ],
@@ -213,7 +233,10 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
           last(),
           map((concatenatedChunk): UnifiedChatCompleteResponse => {
             // TODO: const validatedToolCalls = validateToolCalls(concatenatedChunk.choices[0].message.tool_calls);
-            return concatenatedChunk as unknown as UnifiedChatCompleteResponse;
+            if (concatenatedChunk.choices[0].message.content === '') {
+              concatenatedChunk.choices[0].message.content = null;
+            }
+            return concatenatedChunk;
           })
         )
       )
