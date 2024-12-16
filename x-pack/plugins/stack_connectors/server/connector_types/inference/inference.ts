@@ -52,7 +52,7 @@ import {
 } from '../../../common/inference/types';
 import { SUB_ACTION } from '../../../common/inference/constants';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
-import { eventSourceStreamIntoObservable } from './helper';
+import { eventSourceStreamIntoObservable } from './helpers';
 
 export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   // Not using Axios
