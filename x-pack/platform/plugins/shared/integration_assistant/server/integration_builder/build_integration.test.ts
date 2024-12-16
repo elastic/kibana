@@ -178,19 +178,19 @@ describe('buildPackage', () => {
   it('Should call createReadme once with sorted fields', async () => {
     jest.clearAllMocks();
 
-    const firstDSFieldsMapping = [{ name: 'name a', description: 'description 1', type: 'type 1' }];
+    const firstDSFieldsMapping = [{ name: 'name_a', description: 'description 1', type: 'type 1' }];
 
     const firstDataStreamFields = [
-      { name: 'name b', description: 'description 1', type: 'type 1' },
+      { name: 'name_b', description: 'description 1', type: 'type 1' },
     ];
 
     const secondDSFieldsMapping = [
-      { name: 'name c', description: 'description 2', type: 'type 2' },
-      { name: 'name e', description: 'description 3', type: 'type 3' },
+      { name: 'name_c', description: 'description 2', type: 'type 2' },
+      { name: 'name_e', description: 'description 3', type: 'type 3' },
     ];
 
     const secondDataStreamFields = [
-      { name: 'name d', description: 'description 2', type: 'type 2' },
+      { name: 'name_d', description: 'description 2', type: 'type 2' },
     ];
 
     (createFieldMapping as jest.Mock).mockReturnValueOnce(firstDSFieldsMapping);
@@ -209,17 +209,17 @@ describe('buildPackage', () => {
         {
           datastream: firstDatastreamName,
           fields: [
-            { name: 'name a', description: 'description 1', type: 'type 1' },
+            { name: 'name_a', description: 'description 1', type: 'type 1' },
 
-            { name: 'name b', description: 'description 1', type: 'type 1' },
+            { name: 'name_b', description: 'description 1', type: 'type 1' },
           ],
         },
         {
           datastream: secondDatastreamName,
           fields: [
-            { name: 'name c', description: 'description 2', type: 'type 2' },
-            { name: 'name d', description: 'description 2', type: 'type 2' },
-            { name: 'name e', description: 'description 3', type: 'type 3' },
+            { name: 'name_c', description: 'description 2', type: 'type 2' },
+            { name: 'name_d', description: 'description 2', type: 'type 2' },
+            { name: 'name_e', description: 'description 3', type: 'type 3' },
           ],
         },
       ]
@@ -231,13 +231,13 @@ describe('renderPackageManifestYAML', () => {
   test('generates the package manifest correctly', () => {
     const integration: Integration = {
       title: 'Sample Integration',
-      name: 'sample-integration',
+      name: 'sample_integration',
       description:
         '  This is a sample integration\n\nWith multiple lines   and    weird  spacing. \n\n  And more lines  ',
       logo: 'some-logo.png',
       dataStreams: [
         {
-          name: 'data-stream-one',
+          name: 'data_stream_one',
           title: 'Data Stream 1',
           description: 'This is data stream 1',
           inputTypes: ['filestream'],
@@ -249,7 +249,7 @@ describe('renderPackageManifestYAML', () => {
           samplesFormat: { name: 'ndjson', multiline: false },
         },
         {
-          name: 'data-stream-two',
+          name: 'data_stream_two',
           title: 'Data Stream 2',
           description:
             'This is data stream 2\nWith multiple lines of description\nBut otherwise, nothing special',
@@ -284,6 +284,7 @@ describe('renderPackageManifestYAML', () => {
     });
   });
 });
+
 describe('isValidName', () => {
   it('should return true for valid names', () => {
     expect(isValidName('validName')).toBe(true);
@@ -318,5 +319,24 @@ describe('isValidName', () => {
     expect(isValidName('invalid*name')).toBe(false);
     expect(isValidName('invalid(name')).toBe(false);
     expect(isValidName('invalid/name')).toBe(false);
+  });
+
+  it('should return false for names with dashes', () => {
+    expect(isValidName('invalid-name')).toBe(false);
+    expect(isValidName('invalid-name-with-dashes')).toBe(false);
+  });
+
+  it('should return false for names with periods', () => {
+    expect(isValidName('invalid.name')).toBe(false);
+    expect(isValidName('invalid.name.with.periods')).toBe(false);
+  });
+
+  it('should return false for names with mixed invalid characters', () => {
+    expect(isValidName('invalid@name#with$special%characters')).toBe(false);
+    expect(isValidName('invalid name with spaces and 123')).toBe(false);
+  });
+
+  it('should return false for names with empty string', () => {
+    expect(isValidName('')).toBe(false);
   });
 });
