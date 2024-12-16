@@ -122,9 +122,5 @@ Array [
     "cost": 10,
     "taskType": "alerting:siem.indicatorRule",
   },
-  Object {
-    "cost": 1,
-    "taskType": "actions:.observability-ai-assistant",
-  },
 ]
 `;
