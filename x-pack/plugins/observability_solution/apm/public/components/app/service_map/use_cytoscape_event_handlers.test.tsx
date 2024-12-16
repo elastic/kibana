@@ -8,24 +8,24 @@
 import { renderHook } from '@testing-library/react';
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
 import lodash from 'lodash';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 
 cytoscape.use(dagre);
 
-const theme = {
-  eui: { avatarSizing: { l: { size: 10 } } },
-} as unknown as EuiTheme;
+const euiTheme = {
+  size: { avatarSizing: { l: { size: 10 } } },
+} as unknown as EuiThemeComputed;
 
 describe('useCytoscapeEventHandlers', () => {
   describe('when cytoscape is undefined', () => {
     it('runs', () => {
       expect(() => {
-        renderHook(() => useCytoscapeEventHandlers({ cy: undefined, theme }));
+        renderHook(() => useCytoscapeEventHandlers({ cy: undefined, euiTheme }));
       }).not.toThrowError();
     });
   });
@@ -45,7 +45,7 @@ describe('useCytoscapeEventHandlers', () => {
             } as unknown as cytoscape.CollectionReturnValue),
         } as unknown as cytoscape.CollectionReturnValue);
 
-        renderHook(() => useCytoscapeEventHandlers({ serviceName: 'test', cy, theme }));
+        renderHook(() => useCytoscapeEventHandlers({ serviceName: 'test', cy, euiTheme }));
         cy.trigger('custom:data');
 
         expect(cy.getElementById('test').hasClass('primary')).toEqual(true);
@@ -66,7 +66,7 @@ describe('useCytoscapeEventHandlers', () => {
           } as unknown as cytoscape.CollectionReturnValue),
       } as unknown as cytoscape.CollectionReturnValue);
 
-      renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+      renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
       cy.trigger('custom:data');
 
       expect(run).toHaveBeenCalled();
@@ -85,7 +85,7 @@ describe('useCytoscapeEventHandlers', () => {
       const edge = cy.getElementById('test');
       const style = jest.spyOn(edge, 'style');
 
-      renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+      renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
       cy.trigger('layoutstop');
 
       expect(style).toHaveBeenCalledWith('control-point-distances', [-0, 0]);
@@ -97,7 +97,7 @@ describe('useCytoscapeEventHandlers', () => {
       const cy = cytoscape({ elements: [{ data: { id: 'test' } }] });
       const node = cy.getElementById('test');
 
-      renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+      renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
       node.trigger('drag');
 
       expect(node.data('hasBeenDragged')).toEqual(true);
@@ -110,7 +110,7 @@ describe('useCytoscapeEventHandlers', () => {
         });
         const node = cy.getElementById('test');
 
-        renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+        renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
         node.trigger('drag');
 
         expect(node.data('hasBeenDragged')).toEqual(true);
@@ -126,7 +126,7 @@ describe('useCytoscapeEventHandlers', () => {
       } as unknown as HTMLElement;
       jest.spyOn(cy, 'container').mockReturnValueOnce(container);
 
-      renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+      renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
       cy.getElementById('test').trigger('dragfree');
 
       expect(container.style.cursor).toEqual('pointer');
@@ -140,7 +140,7 @@ describe('useCytoscapeEventHandlers', () => {
       });
       const node = cy.getElementById('test');
 
-      renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+      renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
       node.trigger('mouseover');
 
       expect(node.hasClass('hover')).toEqual(true);
@@ -153,7 +153,7 @@ describe('useCytoscapeEventHandlers', () => {
       } as unknown as HTMLElement;
       jest.spyOn(cy, 'container').mockReturnValueOnce(container);
 
-      renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+      renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
       cy.getElementById('test').trigger('mouseover');
 
       expect(container.style.cursor).toEqual('pointer');
@@ -168,7 +168,7 @@ describe('useCytoscapeEventHandlers', () => {
         return fn;
       });
 
-      renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+      renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
       cy.getElementById('test').trigger('mouseover');
 
       expect(trackApmEvent).toHaveBeenCalledWith({
@@ -184,7 +184,7 @@ describe('useCytoscapeEventHandlers', () => {
       });
       const node = cy.getElementById('test');
 
-      renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+      renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
       node.trigger('mouseout');
 
       expect(node.hasClass('hover')).toEqual(false);
@@ -197,7 +197,7 @@ describe('useCytoscapeEventHandlers', () => {
       } as unknown as HTMLElement;
       jest.spyOn(cy, 'container').mockReturnValueOnce(container);
 
-      renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+      renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
       cy.getElementById('test').trigger('mouseout');
 
       expect(container.style.cursor).toEqual('grab');
@@ -218,7 +218,7 @@ describe('useCytoscapeEventHandlers', () => {
       } as unknown as HTMLElement;
       jest.spyOn(cy, 'container').mockReturnValueOnce(container);
 
-      renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+      renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
       cy.getElementById('test').trigger('mouseover');
 
       expect(container.style.cursor).toEqual('default');
@@ -235,7 +235,7 @@ describe('useCytoscapeEventHandlers', () => {
         return fn;
       });
 
-      renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+      renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
       cy.getElementById('test').trigger('select');
 
       expect(trackApmEvent).toHaveBeenCalledWith({
@@ -258,7 +258,7 @@ describe('useCytoscapeEventHandlers', () => {
         useCytoscapeEventHandlers({
           serviceName: 'test',
           cy,
-          theme,
+          euiTheme,
         })
       );
       cy.getElementById('test').trigger('unselect');
@@ -275,7 +275,7 @@ describe('useCytoscapeEventHandlers', () => {
       } as unknown as HTMLElement;
       jest.spyOn(cy, 'container').mockReturnValueOnce(container);
 
-      renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+      renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
       cy.trigger('tapstart');
 
       expect(container.style.cursor).toEqual('grabbing');
@@ -289,7 +289,7 @@ describe('useCytoscapeEventHandlers', () => {
         } as unknown as HTMLElement;
         jest.spyOn(cy, 'container').mockReturnValueOnce(container);
 
-        renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+        renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
         cy.getElementById('test').trigger('tapstart');
 
         expect(container.style.cursor).toEqual('grab');
@@ -305,7 +305,7 @@ describe('useCytoscapeEventHandlers', () => {
       } as unknown as HTMLElement;
       jest.spyOn(cy, 'container').mockReturnValueOnce(container);
 
-      renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+      renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
       cy.trigger('tapend');
 
       expect(container.style.cursor).toEqual('grab');
@@ -319,7 +319,7 @@ describe('useCytoscapeEventHandlers', () => {
         } as unknown as HTMLElement;
         jest.spyOn(cy, 'container').mockReturnValueOnce(container);
 
-        renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+        renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
         cy.getElementById('test').trigger('tapend');
 
         expect(container.style.cursor).toEqual('pointer');
@@ -334,7 +334,7 @@ describe('useCytoscapeEventHandlers', () => {
       jest.spyOn(Storage.prototype, 'getItem').mockReturnValueOnce('true');
       const debug = jest.spyOn(window.console, 'debug').mockReturnValueOnce(undefined);
 
-      renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
+      renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
       cy.getElementById('test').trigger('select');
 
       expect(debug).toHaveBeenCalled();

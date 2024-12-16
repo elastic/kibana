@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import styled from '@emotion/styled';
 import { asDuration } from '../../../../../../common/utils/formatters';
-import { useTheme } from '../../../../../hooks/use_theme';
 import { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 import { Legend } from '../legend';
 
@@ -28,7 +27,7 @@ interface Props {
 }
 
 export function AgentMarker({ mark }: Props) {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   return (
     <>
@@ -42,7 +41,7 @@ export function AgentMarker({ mark }: Props) {
           </div>
         }
       >
-        <Legend clickable color={theme.eui.euiColorMediumShade} />
+        <Legend clickable color={euiTheme.colors.mediumShade} />
       </EuiToolTip>
     </>
   );

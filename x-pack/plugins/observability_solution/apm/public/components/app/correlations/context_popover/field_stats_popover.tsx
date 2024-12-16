@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -40,7 +40,6 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { useFetchParams } from '../use_fetch_params';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
-import { useTheme } from '../../../../hooks/use_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
 const HIGHLIGHTED_BUCKET_PROPS = {
@@ -205,7 +204,7 @@ export function FieldStatsPopover({
   const field = dataView?.getFieldByName(fieldName);
 
   const closePopover = useCallback(() => setInfoOpen(false), []);
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const params = useFetchParams();
 
@@ -280,7 +279,7 @@ export function FieldStatsPopover({
           }
         )}
         data-test-subj={'apmCorrelationsContextPopoverButton'}
-        style={{ marginLeft: theme.eui.euiSizeXS }}
+        style={{ marginLeft: euiTheme.size.xs }}
       />
     </EuiToolTip>
   );

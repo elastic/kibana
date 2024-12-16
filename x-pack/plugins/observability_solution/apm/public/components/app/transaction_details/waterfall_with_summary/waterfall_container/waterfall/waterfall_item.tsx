@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useRef, useEffect, useState } from 'react';
 import styled from '@emotion/styled';
-import { useTheme } from '../../../../../../hooks/use_theme';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
 import { TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../../common/utils/formatters';
@@ -311,7 +310,7 @@ function RelatedErrors({
   errorCount: number;
 }) {
   const apmRouter = useApmRouter();
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
@@ -348,7 +347,7 @@ function RelatedErrors({
       <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
         <EuiBadge
           href={isMobileAgentName(item.doc.agent.name) ? mobileHref : href}
-          color={theme.eui.euiColorDanger}
+          color={euiTheme.colors.danger}
           iconType="arrowRight"
         >
           {i18n.translate('xpack.apm.waterfall.errorCount', {
