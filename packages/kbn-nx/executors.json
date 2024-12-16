@@ -16,7 +16,7 @@
       "schema": "./src/executors/typecheck_spalger/schema.json",
       "description": "typecheck executor"
     },
-    "kbn-jest": {
+    "jest": {
       "implementation": "./src/executors/jest/executor",
       "schema": "./src/executors/jest/schema.json",
       "description": "Jest Unit test executor"

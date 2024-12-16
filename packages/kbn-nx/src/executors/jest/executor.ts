@@ -8,11 +8,27 @@
  */
 
 import type { ExecutorContext } from '@nx/devkit';
+import { jestExecutor } from '@nx/jest/src/executors/jest/jest.impl';
+import { JestExecutorOptions } from '@nx/jest/src/executors/jest/schema';
 
 // eslint-disable-next-line import/no-default-export
-export default async function noopExecutor(
-  options: {},
+export default async function nxJestExecutor(
+  options: JestExecutorOptions,
   context: ExecutorContext
 ): Promise<{ success: boolean }> {
-  return { success: true };
+  const projectName = context.projectName;
+  if (!projectName) {
+    // console.log('No project name found in context');
+  } else {
+    const project = context.projectGraph.nodes[projectName];
+    const projectRoot = project.data.sourceRoot;
+
+    const jestConfigPath =
+      options.jestConfig ||
+      project.data.targets?.jest?.options?.jestConfig ||
+      `${projectRoot}/jest.config.js`;
+
+    process.env.NX_JEST_CONFIG_PATH = jestConfigPath;
+  }
+  return await jestExecutor(options, context);
 }
