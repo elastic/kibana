@@ -668,6 +668,12 @@ export const transformTemplateCustomFields = ({
 };
 
 export const buildObservablesFieldsFilter = (observables: Record<string, string[]>) => {
+  // NOTE: empty observables mean that we should not construct the filter and it should lead
+  // to early return in the calling context (it is required).
+  if (!Object.keys(observables).length) {
+    return;
+  }
+
   const filterExpressions = Object.keys(observables).flatMap((typeKey) => {
     return Object.values(observables[typeKey]).map((observableValue) => {
       return fromKueryExpression(

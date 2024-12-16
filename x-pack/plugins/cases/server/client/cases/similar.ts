@@ -83,15 +83,6 @@ export const similar = async (
       retrievedCase.attributes.owner
     );
 
-    if (!retrievedCase.attributes.observables.length) {
-      return {
-        cases: [],
-        page: 1,
-        per_page: paramArgs.perPage ?? 0,
-        total: 0,
-      };
-    }
-
     const ownerFilter = buildFilter({
       filters: retrievedCase.attributes.owner,
       field: OWNER_FIELD,
@@ -117,6 +108,17 @@ export const similar = async (
         return observableMap;
       }, {} as Record<string, string[]>)
     );
+
+    // NOTE: empty similar cases filter means that we are unable to show similar cases
+    // and should not combine it with general filters below.
+    if (!similarCasesFilter) {
+      return {
+        cases: [],
+        page: 1,
+        per_page: paramArgs.perPage ?? 0,
+        total: 0,
+      };
+    }
 
     const filters = combineFilters([similarCasesFilter, ownerFilter]);
 

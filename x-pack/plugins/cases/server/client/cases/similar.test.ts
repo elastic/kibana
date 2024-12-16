@@ -49,7 +49,7 @@ describe('similar', () => {
       saved_objects: [],
       page: 1,
       per_page: 10,
-      total: mockCases.length,
+      total: 0,
     });
   });
 
@@ -181,6 +181,44 @@ describe('similar', () => {
       attributes: {
         ...mockCases[0].attributes,
         observables: [],
+      },
+    });
+
+    await similar(
+      mockCase.id,
+      {
+        page: 1,
+        perPage: 10,
+      },
+      mockClientArgs,
+      mockCasesClient
+    );
+    expect(mockClientArgs.services.caseService.findCases).not.toHaveBeenCalled();
+  });
+
+  it('should not call findCases when unknown typeKey is specified for an observable', async () => {
+    jest.mocked(mockClientArgs.services.caseService.getCase).mockResolvedValue({
+      ...mockCases[0],
+      attributes: {
+        ...mockCases[0].attributes,
+        observables: [
+          {
+            id: '4491eedc-2336-41e3-bf98-29147c133b95',
+            typeKey: 'unknown',
+            value: 'some value',
+            createdAt: '2024-12-16',
+            updatedAt: '2024-12-16',
+            description: null,
+          },
+          {
+            id: 'e7d3f99d-c8be-41df-ada0-640021571bd4',
+            typeKey: 'unknown',
+            value: 'some value',
+            createdAt: '2024-12-16',
+            updatedAt: '2024-12-16',
+            description: null,
+          },
+        ],
       },
     });
 
