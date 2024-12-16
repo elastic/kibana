@@ -21,6 +21,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { getDisplayedFeaturePrivileges } from './__fixtures__';
 import type { PrivilegeSummaryTableProps } from './privilege_summary_table';
 import { PrivilegeSummaryTable } from './privilege_summary_table';
+import { ALL_SPACES_ID } from '../../../../../../../common/constants';
 
 const createRole = (roleKibanaPrivileges: RoleKibanaPrivilege[]) => ({
   name: 'some-role',
@@ -1017,6 +1018,138 @@ describe('PrivilegeSummaryTable', () => {
               primaryFeaturePrivilege: 'None',
               ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
                 'Require all spaces Sub Feature': [],
+              }),
+            },
+          },
+        });
+      });
+
+      it('renders effective privileges when all spaces option is selected', async () => {
+        const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures, {
+          allowSubFeaturePrivileges,
+        });
+
+        const role = createRole([
+          {
+            base: ['all'],
+            feature: {
+              with_sub_features: ['minimal_read', 'cool_all'],
+            },
+            spaces: ['*'],
+          },
+          {
+            base: [],
+            feature: {
+              with_sub_features: ['all'],
+            },
+            spaces: ['default', 'space-1'],
+          },
+        ]);
+
+        const wrapper = await setup({
+          spaces: [
+            {
+              id: ALL_SPACES_ID,
+              name: '*All Spaces',
+              disabledFeatures: [],
+            },
+          ],
+          kibanaPrivileges,
+          role,
+          canCustomizeSubFeaturePrivileges: allowSubFeaturePrivileges,
+          spacesApiUi,
+        });
+
+        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+
+        expect(displayedPrivileges).toEqual({
+          excluded_from_base: {
+            '*': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'None',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Cool Sub Feature': [],
+              }),
+            },
+            'default, space-1': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'None',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Cool Sub Feature': [],
+              }),
+            },
+          },
+          no_sub_features: {
+            '*': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'All',
+            },
+            'default, space-1': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'All',
+            },
+          },
+          with_excluded_sub_features: {
+            '*': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'All',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Excluded Sub Feature': [],
+              }),
+            },
+            'default, space-1': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'All',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Excluded Sub Feature': [],
+              }),
+            },
+          },
+          with_sub_features: {
+            '*': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'All',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Cool Sub Feature': ['Cool toggle 1', 'Cool toggle 2', 'All'],
+              }),
+            },
+            'default, space-1': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'All',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Cool Sub Feature': ['Cool toggle 1', 'Cool toggle 2', 'All'],
+              }),
+            },
+          },
+          with_require_all_spaces_sub_features: {
+            '*': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'All',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Require all spaces Sub Feature': ['Cool toggle 1'],
+              }),
+            },
+            'default, space-1': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'All',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Require all spaces Sub Feature': ['Cool toggle 1'],
+              }),
+            },
+          },
+          with_require_all_spaces_for_feature_and_sub_features: {
+            '*': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'All',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Require all spaces Sub Feature': ['Cool toggle 1'],
+              }),
+            },
+            'default, space-1': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'All',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Require all spaces Sub Feature': ['Cool toggle 1'],
               }),
             },
           },
