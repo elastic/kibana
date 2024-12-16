@@ -103,6 +103,9 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       agentCount: enrolledAgentIds.length,
       showLoading: true,
       poll: commandCopied,
+      onClickViewAgents: () => {
+        onNext(); // Fixme: Wording does not match what it does.
+      },
     })
   );
 

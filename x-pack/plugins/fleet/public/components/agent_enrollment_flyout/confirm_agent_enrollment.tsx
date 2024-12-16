@@ -23,6 +23,7 @@ interface Props {
   policyId?: string;
   troubleshootLink: string;
   onClickViewAgents?: () => void;
+  onClickViewIncomingData?: () => void;
   agentCount: number;
   showLoading?: boolean;
   isLongEnrollment?: boolean;
@@ -99,6 +100,7 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   policyId,
   troubleshootLink,
   onClickViewAgents,
+  onClickViewIncomingData,
   agentCount,
   showLoading = false,
   isLongEnrollment = false,
@@ -116,9 +118,12 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   );
 
   const onButtonClick = () => {
-    if (onClickViewAgents) onClickViewAgents();
-    const href = getHref('agent_list');
-    application.navigateToUrl(href);
+    if (onClickViewAgents) {
+      onClickViewAgents();
+    } else {
+      const href = getHref('agent_list');
+      application.navigateToUrl(href);
+    }
   };
 
   if (!policyId || (agentCount === 0 && !showLoading)) {
@@ -192,6 +197,17 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
         >
           {i18n.translate('xpack.fleet.agentEnrollment.confirmation.button', {
             defaultMessage: 'View enrolled agents',
+          })}
+        </EuiButton>
+      )}
+      {onClickViewIncomingData && (
+        <EuiButton
+          onClick={onClickViewIncomingData}
+          color="success"
+          data-test-subj="ViewIncomingDataButton"
+        >
+          {i18n.translate('xpack.fleet.agentEnrollment.confirmation.button', {
+            defaultMessage: 'View incoming data',
           })}
         </EuiButton>
       )}

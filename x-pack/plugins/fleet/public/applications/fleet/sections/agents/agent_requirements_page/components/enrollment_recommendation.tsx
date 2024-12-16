@@ -21,7 +21,8 @@ import { useFlyoutContext, useStartServices } from '../../../../hooks';
 
 export const EnrollmentRecommendation: React.FunctionComponent<{
   showStandaloneTab: () => void;
-}> = ({ showStandaloneTab }) => {
+  handleAddFleetServer?: () => void;
+}> = ({ showStandaloneTab, handleAddFleetServer }) => {
   const flyoutContext = useFlyoutContext();
 
   const { docLinks } = useStartServices();
@@ -80,7 +81,7 @@ export const EnrollmentRecommendation: React.FunctionComponent<{
 
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={flyoutContext?.openFleetServerFlyout}>
+          <EuiButton onClick={handleAddFleetServer ?? flyoutContext?.openFleetServerFlyout}>
             <FormattedMessage
               id="xpack.fleet.enrollment.addFleetServerButton"
               defaultMessage="Add Fleet Server"

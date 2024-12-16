@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EditPackagePolicyFrom } from '../../applications/fleet/sections/agent_policy/create_package_policy_page/types';
 import type { AgentPolicy, DownloadSource, FleetProxy } from '../../types';
 
 import type { InstalledIntegrationPolicy } from './use_get_agent_incoming_data';
@@ -67,13 +68,21 @@ export interface FlyOutProps extends BaseProps {
   selectedAgentPolicies?: AgentPolicy[];
 }
 
+export interface AgentPolicySelectionProps extends BaseProps {
+  onCancel?: () => void;
+  defaultMode?: FlyoutMode;
+  selectedAgentPolicies?: AgentPolicy[];
+  onNext: () => void;
+  setEnrolledAgentIds: (ids: string[]) => void;
+}
 export interface InstructionProps extends BaseProps {
   agentPolicies: AgentPolicy[];
   selectedPolicy: AgentPolicy | undefined;
   setSelectedPolicyId: (policyId?: string) => void;
   refreshAgentPolicies: () => void;
   isLoadingAgentPolicies?: boolean;
-  onClickViewAgents: () => void;
+  onClickViewAgents?: () => void;
+  onClickViewIncomingData?: () => void;
   mode: FlyoutMode;
   setMode: (v: FlyoutMode) => void;
   selectionType: SelectionType;
@@ -84,4 +93,7 @@ export interface InstructionProps extends BaseProps {
   fleetProxy?: FleetProxy;
   downloadSource?: DownloadSource;
   downloadSourceProxy?: FleetProxy;
+  hasIncomingDataStep?: boolean;
+  handleAddFleetServer?: () => void;
+  from?: EditPackagePolicyFrom;
 }

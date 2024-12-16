@@ -22,11 +22,13 @@ import {
 interface AdvancedTabProps {
   onClose: () => void;
   selectedPolicyId?: string;
+  handleContinueAddingAgentClick?: () => void;
 }
 
 export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({
   selectedPolicyId,
   onClose,
+  handleContinueAddingAgentClick,
 }) => {
   const {
     isSelectFleetServerPolicyLoading,
@@ -81,6 +83,7 @@ export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({
     getConfirmFleetServerConnectionStep({
       hasRecentlyEnrolledFleetServers,
       disabled: !Boolean(serviceToken),
+      handleContinueAddingAgentClick,
     }),
   ];
 

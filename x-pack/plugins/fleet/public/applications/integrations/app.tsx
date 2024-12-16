@@ -38,7 +38,11 @@ import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
 import type { UIExtensionsStorage } from './types';
 
 import { EPMApp } from './sections/epm';
-import { PackageInstallProvider, UIExtensionsContext, FlyoutContextProvider } from './hooks';
+import {
+  PackageInstallProvider,
+  UIExtensionsContextProvider,
+  FlyoutContextProvider,
+} from './hooks';
 import { IntegrationsHeader } from './components/header';
 import { AgentEnrollmentFlyout } from './components';
 import { ReadOnlyContextProvider } from './hooks/use_read_only_context';
@@ -103,7 +107,7 @@ export const IntegrationsAppContext: React.FC<{
                 <EuiThemeProvider darkMode={isDarkMode}>
                   <QueryClientProvider client={queryClient}>
                     <ReactQueryDevtools initialIsOpen={false} />
-                    <UIExtensionsContext.Provider value={extensions}>
+                    <UIExtensionsContextProvider values={extensions}>
                       <FleetStatusProvider defaultFleetStatus={fleetStatus}>
                         <SpaceSettingsContextProvider>
                           <startServices.customIntegrations.ContextProvider>
@@ -126,7 +130,7 @@ export const IntegrationsAppContext: React.FC<{
                           </startServices.customIntegrations.ContextProvider>
                         </SpaceSettingsContextProvider>
                       </FleetStatusProvider>
-                    </UIExtensionsContext.Provider>
+                    </UIExtensionsContextProvider>
                   </QueryClientProvider>
                 </EuiThemeProvider>
               </KibanaVersionContext.Provider>
