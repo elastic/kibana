@@ -26,6 +26,8 @@
     "@kbn/cloud",
     "@kbn/react-kibana-mount",
     "@kbn/core-mount-utils-browser",
+    "@kbn/core-plugins-browser",
+    "@kbn/config",
   ],
   "exclude": [
     "target/**/*",
