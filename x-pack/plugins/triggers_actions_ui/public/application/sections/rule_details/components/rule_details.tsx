@@ -108,6 +108,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     http,
     i18n: i18nStart,
     theme,
+    userProfile,
     notifications: { toasts },
   } = useKibana().services;
 
@@ -223,7 +224,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 </EuiFlexGroup>
               )}
             </>,
-            { i18n: i18nStart, theme }
+            { i18n: i18nStart, theme, userProfile }
           ),
         });
       }
@@ -232,6 +233,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   }, [
     i18nStart,
     theme,
+    userProfile,
     rule.schedule.interval,
     config.minimumScheduleInterval,
     toasts,

@@ -55,7 +55,7 @@ export const RULE_NAME_COLUMN: TableColumn = {
   field: 'name',
   name: i18n.COLUMN_RULE,
   render: (value: RuleResponse['name'], rule: RuleResponse) => (
-    <RuleName name={value} ruleId={rule.id} />
+    <RuleName name={value} ruleId={rule.rule_id} />
   ),
   sortable: true,
   truncateText: true,

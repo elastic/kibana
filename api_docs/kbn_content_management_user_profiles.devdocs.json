@@ -58,7 +58,7 @@
         "signature": [
           "(props: { iconType?: ",
           "IconType",
-          " | undefined; }) => React.JSX.Element"
+          " | undefined; includeVersionTip?: boolean | undefined; entityNamePlural?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
         "deprecated": false,
@@ -89,6 +89,34 @@
                 "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-public.NoCreatorTip.$1.includeVersionTip",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "includeVersionTip",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-public.NoCreatorTip.$1.entityNamePlural",
+                "type": "string",
+                "tags": [],
+                "label": "entityNamePlural",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -104,7 +132,7 @@
         "label": "NoUpdaterTip",
         "description": [],
         "signature": [
-          "(props: { iconType?: string | undefined; }) => React.JSX.Element"
+          "(props: { iconType?: string | undefined; includeVersionTip?: boolean | undefined; entityNamePlural?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
         "deprecated": false,
@@ -127,6 +155,34 @@
                 "type": "string",
                 "tags": [],
                 "label": "iconType",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-public.NoUpdaterTip.$1.includeVersionTip",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "includeVersionTip",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-public.NoUpdaterTip.$1.entityNamePlural",
+                "type": "string",
+                "tags": [],
+                "label": "entityNamePlural",
                 "description": [],
                 "signature": [
                   "string | undefined"
