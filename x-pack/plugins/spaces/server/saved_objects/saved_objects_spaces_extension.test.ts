@@ -141,3 +141,13 @@ describe('#getSearchableNamespaces', () => {
     ]);
   });
 });
+
+describe('#asScopedToNamespace', () => {
+  test('returns a extension scoped to the provided namespace', () => {
+    const { spacesExtension } = setup();
+    const rescopedExtension = spacesExtension.asScopedToNamespace('space-a');
+    expect(rescopedExtension).toBeInstanceOf(SavedObjectsSpacesExtension);
+    expect(rescopedExtension).not.toStrictEqual(spacesExtension);
+    expect(rescopedExtension.getCurrentNamespace(undefined)).toStrictEqual('namespace-for-space-a');
+  });
+});

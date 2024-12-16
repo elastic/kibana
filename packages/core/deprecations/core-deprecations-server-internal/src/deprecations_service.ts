@@ -20,6 +20,7 @@ import type {
   DeprecationsClient,
 } from '@kbn/core-deprecations-server';
 import { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { DeprecationsFactory } from './deprecations_factory';
 import { registerRoutes } from './routes';
 import { config as deprecationConfig, DeprecationConfigType } from './deprecation_config';
@@ -36,7 +37,8 @@ export interface InternalDeprecationsServiceStart {
    */
   asScopedToClient(
     esClient: IScopedClusterClient,
-    savedObjectsClient: SavedObjectsClientContract
+    savedObjectsClient: SavedObjectsClientContract,
+    request: KibanaRequest
   ): DeprecationsClient;
 }
 
@@ -117,13 +119,19 @@ export class DeprecationsService
 
   private createScopedDeprecations(): (
     esClient: IScopedClusterClient,
-    savedObjectsClient: SavedObjectsClientContract
+    savedObjectsClient: SavedObjectsClientContract,
+    request: KibanaRequest
   ) => DeprecationsClient {
-    return (esClient: IScopedClusterClient, savedObjectsClient: SavedObjectsClientContract) => {
+    return (
+      esClient: IScopedClusterClient,
+      savedObjectsClient: SavedObjectsClientContract,
+      request: KibanaRequest
+    ) => {
       return {
         getAllDeprecations: this.deprecationsFactory!.getAllDeprecations.bind(null, {
           savedObjectsClient,
           esClient,
+          request,
         }),
       };
     };

@@ -12,6 +12,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import type { GetDeprecationsContext } from '@kbn/core-deprecations-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { DeprecationsRegistry } from '../deprecations_registry';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 type DeprecationsRegistryContract = PublicMethodsOf<DeprecationsRegistry>;
 
@@ -28,6 +29,7 @@ const createGetDeprecationsContextMock = () => {
   const mocked: jest.Mocked<GetDeprecationsContext> = {
     esClient: elasticsearchClientMock.createScopedClusterClient(),
     savedObjectsClient: savedObjectsClientMock.create(),
+    request: httpServerMock.createKibanaRequest(),
   };
 
   return mocked;
