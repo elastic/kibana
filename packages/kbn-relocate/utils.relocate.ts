@@ -119,6 +119,7 @@ const replaceReferencesInternal = async (
   );
 
   const matchingFiles = result.stdout.split('\n').filter(Boolean);
+  matchingFiles.push('.github/CODEOWNERS'); // to update references in the manual section, thanks pgayvallet!
 
   for (let i = 0; i < matchingFiles.length; ++i) {
     const file = matchingFiles[i];
