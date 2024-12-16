@@ -7,13 +7,13 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/plugins/observability_solution/slo'],
-  setupFiles: ['<rootDir>/x-pack/plugins/observability_solution/slo/.storybook/jest_setup.js'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/observability/plugins/slo'],
+  setupFiles: ['<rootDir>/x-pack/solutions/observability/plugins/slo/.storybook/jest_setup.js'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/observability_solution/slo',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/observability/plugins/slo',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/observability_solution/slo/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/solutions/observability/plugins/slo/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };

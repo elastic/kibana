@@ -917,7 +917,7 @@ module.exports = {
         'x-pack/solutions/observability/plugins/observability/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/observability/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/observability/plugins/ux/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/observability_solution/slo/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/slo/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/observability/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
@@ -937,7 +937,7 @@ module.exports = {
         'x-pack/plugins/observability_solution/apm/**/*.stories.*',
         'x-pack/solutions/observability/plugins/observability/**/*.stories.*',
         'x-pack/solutions/observability/plugins/exploratory_view/**/*.stories.*',
-        'x-pack/plugins/observability_solution/slo/**/*.stories.*',
+        'x-pack/solutions/observability/plugins/slo/**/*.stories.*',
         'x-pack/packages/observability/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {

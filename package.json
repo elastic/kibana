@@ -929,7 +929,7 @@
     "@kbn/shared-ux-tabbed-modal": "link:packages/shared-ux/modal/tabbed",
     "@kbn/shared-ux-table-persist": "link:packages/shared-ux/table_persist",
     "@kbn/shared-ux-utility": "link:packages/kbn-shared-ux-utility",
-    "@kbn/slo-plugin": "link:x-pack/plugins/observability_solution/slo",
+    "@kbn/slo-plugin": "link:x-pack/solutions/observability/plugins/slo",
     "@kbn/slo-schema": "link:x-pack/platform/packages/shared/kbn-slo-schema",
     "@kbn/snapshot-restore-plugin": "link:x-pack/platform/plugins/private/snapshot_restore",
     "@kbn/sort-predicates": "link:packages/kbn-sort-predicates",
