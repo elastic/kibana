@@ -21,6 +21,7 @@ import {
   SearchDashboardsResponse,
 } from './lib/find_dashboards';
 import { DashboardState } from '../../dashboard_api/types';
+import { UpdateDashboardMetaProps } from './lib/update_dashboard_meta';
 
 export interface DashboardContentManagementService {
   findDashboards: FindDashboardsService;
@@ -28,9 +29,7 @@ export interface DashboardContentManagementService {
   loadDashboardState: (props: { id?: string }) => Promise<LoadDashboardReturn>;
   saveDashboardState: (props: SaveDashboardProps) => Promise<SaveDashboardReturn>;
   checkForDuplicateDashboardTitle: (meta: DashboardDuplicateTitleCheckProps) => Promise<boolean>;
-  updateDashboardMeta: (
-    props: Pick<DashboardContainerInput, 'id' | 'title' | 'description' | 'tags'>
-  ) => Promise<void>;
+  updateDashboardMeta: (props: UpdateDashboardMetaProps) => Promise<void>;
 }
 
 /**
