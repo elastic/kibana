@@ -719,14 +719,7 @@ export class TaskRunner<
           const errorSource = isUserError(err) ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
           const errorSourceTag = `${errorSource}-error`;
 
-          if (isAlertSavedObjectNotFoundError(err, ruleId)) {
-            const message = `Executing Rule ${spaceId}:${
-              this.ruleType.id
-            }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
-            this.logger.debug(message, {
-              tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSourceTag],
-            });
-          } else if (isClusterBlockError(err)) {
+          if (isAlertSavedObjectNotFoundError(err, ruleId) || isClusterBlockError(err)) {
             const message = `Executing Rule ${spaceId}:${
               this.ruleType.id
             }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
