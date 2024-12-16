@@ -10,7 +10,7 @@
 import { join } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { orderBy } from 'lodash';
-import type { Package } from './types';
+import type { Package } from '../types';
 import { applyTransforms } from './transforms';
 import {
   BASE_FOLDER,
@@ -22,8 +22,8 @@ import {
   TARGET_FOLDERS,
   UPDATED_REFERENCES,
   UPDATED_RELATIVE_PATHS,
-} from './constants';
-import { quietExec, safeExec } from './utils.exec';
+} from '../constants';
+import { quietExec, safeExec } from './exec';
 
 export const belongsTo = (module: Package, owner: string): boolean => {
   return Array.from(module.manifest.owner)[0] === owner;
@@ -40,11 +40,18 @@ export const calculateModuleTargetFolder = (module: Package): string => {
   const isPlugin = module.manifest.type === 'plugin';
   const fullPath = join(BASE_FOLDER, module.directory);
   let moduleDelimiter = isPlugin ? '/plugins/' : '/packages/';
-  if (TARGET_FOLDERS.some((folder) => module.directory.includes(folder)) && group === 'platform') {
-    // if a platform module has already been relocated, strip the /private/ or /shared/ part too
-    moduleDelimiter += `${module.visibility}/`;
+
+  // for platform modules that are in a sustainable folder, strip the /private/ or /shared/ part too
+  if (module.directory.includes(`${moduleDelimiter}private/`)) {
+    moduleDelimiter += 'private/';
+  } else if (module.directory.includes(`${moduleDelimiter}shared/`)) {
+    moduleDelimiter += 'shared/';
   }
-  const moduleFolder = fullPath.split(moduleDelimiter).pop()!;
+
+  const chunks = fullPath.split(moduleDelimiter);
+  chunks.shift(); // remove the base path up to '/packages/' or '/plugins/'
+  const moduleFolder = chunks.join(moduleDelimiter); // in case there's an extra /packages/ or /plugins/ folder
+
   let path: string;
 
   if (group === 'platform') {
@@ -77,6 +84,26 @@ export const calculateModuleTargetFolder = (module: Package): string => {
 
   // after-creation transforms
   return applyTransforms(module, path);
+};
+
+export const isInTargetFolder = (module: Package, log: ToolingLog): boolean => {
+  if (!module.group || !module.visibility) {
+    log.warning(`The module '${module.id}' is missing the group/visibility information`);
+    return true;
+  }
+
+  const baseTargetFolders = TARGET_FOLDERS[`${module.group}:${module.visibility}`];
+  const baseTargetFolder = baseTargetFolders.find((candidate) => {
+    return module.directory.includes(candidate);
+  });
+  if (baseTargetFolder) {
+    log.info(
+      `The module ${module.id} is already in the correct folder: '${baseTargetFolder}'. Skipping`
+    );
+    return true;
+  }
+
+  return false;
 };
 
 export const replaceReferences = async (module: Package, destination: string, log: ToolingLog) => {
