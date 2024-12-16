@@ -11975,7 +11975,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@14 || 16 || 17", "@types/node@20.10.5", "@types/node@>= 8", "@types/node@>=12.12.47", "@types/node@>=13.7.0", "@types/node@>=18.0.0", "@types/node@^14.0.10 || ^16.0.0", "@types/node@^14.14.20 || ^16.0.0", "@types/node@^18.0.0", "@types/node@^18.11.18", "@types/node@^20.12.12", "@types/node@^20.13.0:
+"@types/node@*", "@types/node@14 || 16 || 17", "@types/node@20.10.5", "@types/node@>= 8", "@types/node@>=12.12.47", "@types/node@>=13.7.0", "@types/node@>=18.0.0", "@types/node@^14.0.10 || ^16.0.0", "@types/node@^14.14.20 || ^16.0.0", "@types/node@^18.0.0", "@types/node@^18.11.18", "@types/node@^20.12.12", "@types/node@^20.13.0":
   version "20.10.5"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-20.10.5.tgz#47ad460b514096b7ed63a1dae26fad0914ed3ab2"
   integrity sha512-nNPsNE65wjMxEKI93yOP+NPGGBJz/PoN3kZsVLee0XMiJolxSekEVD8wRwBUBqkwc7UWop0edW50yrCQW4CyRw==
