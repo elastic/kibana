@@ -98,7 +98,7 @@ export const isInTargetFolder = (module: Package, log: ToolingLog): boolean => {
   });
   if (baseTargetFolder) {
     log.info(
-      `The module ${module.id} is already in the right folder: '${baseTargetFolder}'. Skipping`
+      `The module ${module.id} is already in the correct folder: '${baseTargetFolder}'. Skipping`
     );
     return true;
   }
