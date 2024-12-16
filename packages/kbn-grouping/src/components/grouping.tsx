@@ -13,6 +13,7 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiTablePagination,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
@@ -78,6 +79,8 @@ const GroupingComponent = <T,>({
   unit = defaultUnit,
   groupsUnit = GROUPS_UNIT,
 }: GroupingProps<T>) => {
+  const { euiTheme } = useEuiTheme();
+
   const [trigger, setTrigger] = useState<Record<string, { state: 'open' | 'closed' | undefined }>>(
     {}
   );
@@ -198,12 +201,16 @@ const GroupingComponent = <T,>({
             {groupCount > 0 && unitCount > 0 ? (
               <EuiFlexGroup gutterSize="none">
                 <EuiFlexItem grow={false}>
-                  <span css={countCss} data-test-subj="unit-count">
+                  <span css={countCss(euiTheme)} data-test-subj="unit-count">
                     {unitCountText}
                   </span>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <span css={countCss} data-test-subj="group-count" style={{ borderRight: 'none' }}>
+                  <span
+                    css={countCss(euiTheme)}
+                    data-test-subj="group-count"
+                    style={{ borderRight: 'none' }}
+                  >
                     {groupCountText}
                   </span>
                 </EuiFlexItem>
@@ -219,7 +226,9 @@ const GroupingComponent = <T,>({
         </EuiFlexGroup>
       )}
       <div
-        css={groupingLevel > 0 ? groupingContainerCssLevel : groupingContainerCss}
+        css={
+          groupingLevel > 0 ? groupingContainerCssLevel(euiTheme) : groupingContainerCss(euiTheme)
+        }
         className="eui-xScroll"
       >
         {isLoading ? (
