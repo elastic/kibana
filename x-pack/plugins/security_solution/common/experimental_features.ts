@@ -267,8 +267,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables CrowdStrike's RunScript RTR command
    */
 
-  // TODO set to false before merging
-  crowdstrikeRunScriptEnabled: true,
+  crowdstrikeRunScriptEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -27,8 +27,8 @@ export interface ExecuteActionHostResponseProps {
   canAccessFileDownloadLink: boolean;
   'data-test-subj'?: string;
   textSize?: 'xs' | 's';
-  showFile?: boolean;
-  showContext?: boolean;
+  hideFile?: boolean;
+  hideContext?: boolean;
 }
 
 export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
@@ -38,8 +38,8 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
     canAccessFileDownloadLink,
     textSize = 's',
     'data-test-subj': dataTestSubj,
-    showFile = true,
-    showContext = true,
+    hideFile,
+    hideContext,
   }) => {
     const outputContent = useMemo(
       () =>
@@ -51,7 +51,7 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
 
     return (
       <>
-        {showFile && (
+        {!hideFile && (
           <EuiFlexItem>
             <ResponseActionFileDownloadLink
               action={action}
@@ -68,7 +68,7 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
             outputContent={outputContent}
             data-test-subj={`${dataTestSubj}-executeResponseOutput`}
             textSize={textSize}
-            showContext={showContext}
+            hideContext={hideContext}
           />
         )}
       </>

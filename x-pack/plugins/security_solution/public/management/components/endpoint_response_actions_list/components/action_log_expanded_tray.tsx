@@ -224,8 +224,8 @@ const OutputContent = memo<{
               }
               textSize="xs"
               data-test-subj={getTestId('actionsLogTray')}
-              showFile={false}
-              showContext={false}
+              hideFile={true}
+              hideContext={true}
             />
           </div>
         ))}

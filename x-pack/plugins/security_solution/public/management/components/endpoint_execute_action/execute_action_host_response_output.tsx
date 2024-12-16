@@ -179,11 +179,11 @@ export interface ExecuteActionHostResponseOutputProps {
   outputContent: ResponseActionExecuteOutputContent;
   'data-test-subj'?: string;
   textSize?: 's' | 'xs';
-  showContext?: boolean;
+  hideContext?: boolean;
 }
 
 export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOutputProps>(
-  ({ outputContent, 'data-test-subj': dataTestSubj, textSize = 'xs', showContext = true }) => {
+  ({ outputContent, 'data-test-subj': dataTestSubj, textSize = 'xs', hideContext }) => {
     const contextContent = useMemo(
       () => (
         <>
@@ -218,7 +218,7 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
 
     return (
       <>
-        {showContext && (
+        {!hideContext && (
           <EuiFlexItem>
             <ExecutionActionOutputAccordion
               content={contextContent}

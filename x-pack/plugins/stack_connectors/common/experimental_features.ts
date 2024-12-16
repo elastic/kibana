@@ -16,8 +16,7 @@ export const allowedExperimentalValues = Object.freeze({
   sentinelOneConnectorOn: true,
   crowdstrikeConnectorOn: true,
   inferenceConnectorOn: false,
-  // TODO set to false before merging
-  crowdstrikeConnectorRTROn: true,
+  crowdstrikeConnectorRTROn: false,
 });
 
 export type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
