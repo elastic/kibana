@@ -120,7 +120,7 @@ export const XJsonToggle: FunctionComponent<Props> = ({
         'data-test-subj': 'jsonValueField',
         height: disabled ? EDITOR_PX_HEIGHT.extraSmall : EDITOR_PX_HEIGHT.medium,
         'aria-label': i18n.translate(
-          'xpack.ingestPipelines.pipelineEditor.appendForm.valueAriaLabel',
+          'xpack.ingestPipelines.pipelineEditor.toggleJson.valueAriaLabel',
           {
             defaultMessage: 'Value editor',
           }
@@ -130,7 +130,7 @@ export const XJsonToggle: FunctionComponent<Props> = ({
           <EuiText size="xs">
             <EuiLink onClick={toggleJson} data-test-subj="toggleJsonField" disabled={disabled}>
               <FormattedMessage
-                id="xpack.ingestPipelines.pipelineEditor.appendForm.useTextFormat"
+                id="xpack.ingestPipelines.pipelineEditor.toggleJson.useTextFormat"
                 defaultMessage="Define as text"
               />
             </EuiLink>

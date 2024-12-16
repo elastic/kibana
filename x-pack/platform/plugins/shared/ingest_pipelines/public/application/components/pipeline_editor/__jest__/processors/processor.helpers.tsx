@@ -160,6 +160,7 @@ type TestSubject =
   | 'textValueField.input'
   | 'mediaTypeSelectorField'
   | 'networkDirectionField.input'
+  | 'toggleCustomField'
   | 'toggleCustomField.input'
   | 'ignoreEmptyField.input'
   | 'overrideField.input'
