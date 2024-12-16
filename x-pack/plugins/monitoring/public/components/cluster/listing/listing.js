@@ -38,7 +38,6 @@ const clusterCellExpired = (theme) => css`
 `;
 
 const clusterCellLicense = (theme) => css`
-  // euiFontSize
   font-size: ${theme.euiTheme.font.scale.m};
 `;
 
