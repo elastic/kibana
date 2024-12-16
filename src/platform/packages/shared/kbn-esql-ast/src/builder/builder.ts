@@ -368,26 +368,6 @@ export namespace Builder {
         ) as ESQLDecimalLiteral;
       };
 
-      export const string = (
-        value: string,
-        template?: Omit<AstNodeTemplate<ESQLStringLiteral>, 'name' | 'literalType'>,
-        fromParser?: Partial<AstNodeParserFields>
-      ): ESQLStringLiteral => {
-        // TODO: Once (https://github.com/elastic/kibana/issues/203445) do not use
-        //    triple quotes and escape the string.
-        const quotedValue = '"""' + value + '"""';
-        const node: ESQLStringLiteral = {
-          ...template,
-          ...Builder.parserFields(fromParser),
-          type: 'literal',
-          literalType: 'keyword',
-          name: quotedValue,
-          value: quotedValue,
-        };
-
-        return node;
-      };
-
       /**
        * Constructs "time interval" literal node.
        *
