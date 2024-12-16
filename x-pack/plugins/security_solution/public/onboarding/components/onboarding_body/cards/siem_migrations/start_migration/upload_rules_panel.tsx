@@ -15,10 +15,11 @@ import {
   EuiButtonEmpty,
   EuiPanel,
 } from '@elastic/eui';
-import { SiemMigrationsIcon } from '../../../common/icon';
-import * as i18n from '../../../../onboarding/components/onboarding_body/cards/siem_migrations/start_migration/translations';
-import { TITLE_CLASS_NAME } from '../../../../onboarding/components/onboarding_body/cards/siem_migrations/start_migration/start_migration_card.styles';
-import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
+import { RuleMigrationsReadMore } from '../../../../../../siem_migrations/rules/components/migration_status_panels/read_more';
+import { SiemMigrationsIcon } from '../../../../../../siem_migrations/common/icon';
+import * as i18n from './translations';
+import { TITLE_CLASS_NAME } from './start_migration_card.styles';
+import { useRuleMigrationDataInputContext } from '../../../../../../siem_migrations/rules/components/data_input_flyout/context';
 import { useStyles } from './upload_rules_panel.styles';
 
 export interface UploadRulesPanelProps {
@@ -55,9 +56,7 @@ export const UploadRulesPanel = React.memo<UploadRulesPanelProps>(({ isUploadMor
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  <p>{i18n.START_MIGRATION_CARD_UPLOAD_READ_MORE}</p>
-                </EuiText>
+                <RuleMigrationsReadMore />
               </EuiFlexItem>
             </EuiFlexGroup>
           )}

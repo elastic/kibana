@@ -45,6 +45,6 @@ export const convertTranslationResultIntoText = (status?: RuleMigrationTranslati
       return i18n.SIEM_TRANSLATION_RESULT_UNTRANSLATABLE_LABEL;
 
     default:
-      throw new Error(i18n.SIEM_TRANSLATION_RESULT_UNKNOWN_ERROR(status));
+      return i18n.SIEM_TRANSLATION_RESULT_UNKNOWN_LABEL;
   }
 };

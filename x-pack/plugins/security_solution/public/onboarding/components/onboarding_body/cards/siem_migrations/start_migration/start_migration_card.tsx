@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { PanelText } from '../../../../../../common/components/panel_text';
 import { RuleMigrationDataInputWrapper } from '../../../../../../siem_migrations/rules/components/data_input_flyout/data_input_wrapper';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { OnboardingCardId } from '../../../../../constants';
@@ -14,10 +15,9 @@ import { useLatestStats } from '../../../../../../siem_migrations/rules/service/
 import { CenteredLoadingSpinner } from '../../../../../../common/components/centered_loading_spinner';
 import type { OnboardingCardComponent } from '../../../../../types';
 import { OnboardingCardContentPanel } from '../../common/card_content_panel';
-import { UploadRulesPanels } from './upload_rules_panels';
+import { RuleMigrationsPanels } from './rule_migrations_panels';
 import { useStyles } from './start_migration_card.styles';
 import * as i18n from './translations';
-import { MissingAIConnectorCallout } from './missing_ai_connector_callout';
 
 export const StartMigrationCard: OnboardingCardComponent = React.memo(
   ({ setComplete, isCardComplete, setExpandedCardId }) => {
@@ -33,15 +33,14 @@ export const StartMigrationCard: OnboardingCardComponent = React.memo(
       }
     }, [isCardComplete, migrationsStats, setComplete]);
 
-    if (!isCardComplete(OnboardingCardId.siemMigrationsAiConnectors)) {
-      return (
-        <MissingAIConnectorCallout
-          onExpandAiConnectorsCard={() =>
-            setExpandedCardId(OnboardingCardId.siemMigrationsAiConnectors)
-          }
-        />
-      );
-    }
+    const isConnectorsCardComplete = useMemo(
+      () => isCardComplete(OnboardingCardId.siemMigrationsAiConnectors),
+      [isCardComplete]
+    );
+
+    const expandConnectorsCard = useCallback(() => {
+      setExpandedCardId(OnboardingCardId.siemMigrationsAiConnectors);
+    }, [setExpandedCardId]);
 
     return (
       <RuleMigrationDataInputWrapper onFlyoutClosed={refreshStats}>
@@ -49,12 +48,16 @@ export const StartMigrationCard: OnboardingCardComponent = React.memo(
           {isLoading ? (
             <CenteredLoadingSpinner />
           ) : (
-            <UploadRulesPanels migrationsStats={migrationsStats} />
+            <RuleMigrationsPanels
+              migrationsStats={migrationsStats}
+              isConnectorsCardComplete={isConnectorsCardComplete}
+              expandConnectorsCard={expandConnectorsCard}
+            />
           )}
           <EuiSpacer size="m" />
-          <EuiText size="xs" color="subdued">
+          <PanelText size="xs" subdued>
             <p>{i18n.START_MIGRATION_CARD_FOOTER_NOTE}</p>
-          </EuiText>
+          </PanelText>
         </OnboardingCardContentPanel>
       </RuleMigrationDataInputWrapper>
     );

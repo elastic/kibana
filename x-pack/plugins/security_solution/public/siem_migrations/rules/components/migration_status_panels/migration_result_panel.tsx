@@ -10,7 +10,6 @@ import moment from 'moment';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiPanel,
   EuiHorizontalRule,
   EuiIcon,
@@ -19,7 +18,8 @@ import {
 } from '@elastic/eui';
 import { Chart, BarSeries, Settings, ScaleType } from '@elastic/charts';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { AssistantAvatar } from '@kbn/elastic-assistant/impl/assistant/assistant_avatar/assistant_avatar';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { PanelText } from '../../../../common/components/panel_text';
 import {
   convertTranslationResultIntoText,
   statusToColorMap,
@@ -29,10 +29,8 @@ import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_t
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import type { RuleMigrationStats } from '../../types';
-import * as i18n from '../../../../onboarding/components/onboarding_body/cards/siem_migrations/start_migration/translations';
-// import '@elastic/charts/dist/theme_light.css';
-import { TITLE_CLASS_NAME } from '../../../../onboarding/components/onboarding_body/cards/siem_migrations/start_migration/start_migration_card.styles';
 import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
+import * as i18n from './translations';
 
 export interface MigrationResultPanelProps {
   migrationStats: RuleMigrationStats;
@@ -45,19 +43,19 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(({ mig
       <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
         <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiText size="s" className={TITLE_CLASS_NAME}>
-              <p>{i18n.START_MIGRATION_CARD_RESULT_TITLE(migrationStats.number)}</p>
-            </EuiText>
+            <PanelText size="s" semiBold>
+              <p>{i18n.RULE_MIGRATION_COMPLETE_TITLE(migrationStats.number)}</p>
+            </PanelText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
+            <PanelText size="s" subdued>
               <p>
-                {i18n.START_MIGRATION_CARD_RESULT_DESCRIPTION(
+                {i18n.RULE_MIGRATION_COMPLETE_DESCRIPTION(
                   moment(migrationStats.created_at).format('MMMM Do YYYY, h:mm:ss a'),
                   moment(migrationStats.last_updated_at).fromNow()
                 )}
               </p>
-            </EuiText>
+            </PanelText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
@@ -67,12 +65,12 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(({ mig
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type={AssistantAvatar} size="m" />
+                <EuiIcon type={AssistantIcon} size="m" />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiText size="s" className={TITLE_CLASS_NAME}>
-                  <p>{i18n.VIEW_TRANSLATED_RULES_TITLE}</p>
-                </EuiText>
+                <PanelText size="s" semiBold>
+                  <p>{i18n.RULE_MIGRATION_SUMMARY_TITLE}</p>
+                </PanelText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -98,7 +96,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(({ mig
                         deepLinkId={SecurityPageName.siemMigrationsRules}
                         path={migrationStats.id}
                       >
-                        {i18n.VIEW_TRANSLATED_RULES_BUTTON}
+                        {i18n.RULE_MIGRATION_VIEW_TRANSLATED_RULES_BUTTON}
                       </SecuritySolutionLinkButton>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -117,14 +115,26 @@ const TranslationResultsChart = React.memo<{
   translationStats: RuleMigrationTranslationStats;
 }>(({ translationStats }) => {
   const data = [
-    { category: 'Results', type: 'Full', value: translationStats.rules.success.result.full },
-    { category: 'Results', type: 'Partial', value: translationStats.rules.success.result.partial },
     {
       category: 'Results',
-      type: 'Untranslatable',
+      type: convertTranslationResultIntoText(RuleTranslationResult.FULL),
+      value: translationStats.rules.success.result.full,
+    },
+    {
+      category: 'Results',
+      type: convertTranslationResultIntoText(RuleTranslationResult.PARTIAL),
+      value: translationStats.rules.success.result.partial,
+    },
+    {
+      category: 'Results',
+      type: convertTranslationResultIntoText(RuleTranslationResult.UNTRANSLATABLE),
       value: translationStats.rules.success.result.untranslatable,
     },
-    { category: 'Results', type: 'Failed', value: translationStats.rules.failed },
+    {
+      category: 'Results',
+      type: i18n.RULE_MIGRATION_TRANSLATION_FAILED,
+      value: translationStats.rules.failed,
+    },
   ];
 
   const colors = [
@@ -179,7 +189,7 @@ const TranslationResultsTable = React.memo<{
       },
       {
         id: 'failed',
-        title: 'Failed',
+        title: i18n.RULE_MIGRATION_TRANSLATION_FAILED,
         value: translationStats.rules.failed,
         color: 'danger',
       },
@@ -195,12 +205,12 @@ const TranslationResultsTable = React.memo<{
       columns={[
         {
           field: 'title',
-          name: 'Result',
+          name: i18n.RULE_MIGRATION_TABLE_COLUMN_RESULT,
           render: (value: string, { color }) => <EuiHealth color={color}>{value}</EuiHealth>,
         },
         {
           field: 'value',
-          name: 'Rules',
+          name: i18n.RULE_MIGRATION_TABLE_COLUMN_RULES,
           align: 'right',
         },
       ]}

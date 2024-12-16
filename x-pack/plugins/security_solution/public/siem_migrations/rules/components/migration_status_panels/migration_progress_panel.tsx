@@ -14,20 +14,21 @@ import {
   EuiProgress,
   EuiLoadingSpinner,
   EuiIcon,
+  EuiSpacer,
 } from '@elastic/eui';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { PanelText } from '../../../../common/components/panel_text';
 import type { RuleMigrationStats } from '../../types';
-import * as i18n from '../../../../onboarding/components/onboarding_body/cards/siem_migrations/start_migration/translations';
-import { TITLE_CLASS_NAME } from '../../../../onboarding/components/onboarding_body/cards/siem_migrations/start_migration/start_migration_card.styles';
-import { CardSubduedText } from '../../../../onboarding/components/onboarding_body/cards/common/card_subdued_text';
+import * as i18n from './translations';
+import { RuleMigrationsReadMore } from './read_more';
 
 export interface MigrationProgressPanelProps {
   migrationStats: RuleMigrationStats;
 }
 export const MigrationProgressPanel = React.memo<MigrationProgressPanelProps>(
   ({ migrationStats }) => {
-    const finished = migrationStats.rules.completed + migrationStats.rules.failed;
-    const progressValue = (finished / migrationStats.rules.total) * 100;
+    const finishedCount = migrationStats.rules.completed + migrationStats.rules.failed;
+    const progressValue = (finishedCount / migrationStats.rules.total) * 100;
 
     const preparing = migrationStats.rules.pending === migrationStats.rules.total;
 
@@ -35,16 +36,17 @@ export const MigrationProgressPanel = React.memo<MigrationProgressPanelProps>(
       <EuiPanel hasShadow={false} hasBorder paddingSize="m">
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem grow={false}>
-            <EuiText size="s" className={TITLE_CLASS_NAME}>
-              <p>{i18n.START_MIGRATION_CARD_MIGRATION_TITLE(migrationStats.number)}</p>
-            </EuiText>
+            <PanelText size="s" semiBold>
+              <p>{i18n.RULE_MIGRATION_TITLE(migrationStats.number)}</p>
+            </PanelText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              {i18n.START_MIGRATION_CARD_PROGRESS_DESCRIPTION(migrationStats.rules.total)}
+              {i18n.RULE_MIGRATION_PROGRESS_DESCRIPTION(migrationStats.rules.total)}
             </EuiText>
           </EuiFlexItem>
-          {preparing ? (
+
+          <EuiFlexItem grow={false}>
             <EuiFlexGroup
               direction="row"
               justifyContent="flexStart"
@@ -55,19 +57,27 @@ export const MigrationProgressPanel = React.memo<MigrationProgressPanelProps>(
                 <EuiIcon size="m" type={AssistantIcon} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <CardSubduedText size="s">
-                  {i18n.START_MIGRATION_CARD_PREPARING_DESCRIPTION}
-                </CardSubduedText>
+                <PanelText size="s" subdued>
+                  {preparing ? i18n.RULE_MIGRATION_PREPARING : i18n.RULE_MIGRATION_TRANSLATING}
+                </PanelText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiLoadingSpinner size="s" />
               </EuiFlexItem>
             </EuiFlexGroup>
-          ) : (
-            <EuiFlexItem grow={false}>
-              <EuiProgress value={progressValue} max={100} color="success" />
-            </EuiFlexItem>
-          )}
+            {!preparing && (
+              <>
+                <EuiProgress
+                  value={progressValue}
+                  valueText={`${Math.floor(progressValue)}%`}
+                  max={100}
+                  color="success"
+                />
+                <EuiSpacer size="xs" />
+                <RuleMigrationsReadMore />
+              </>
+            )}
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
     );

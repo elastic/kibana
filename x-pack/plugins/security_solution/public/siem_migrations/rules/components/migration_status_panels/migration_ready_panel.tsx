@@ -6,19 +6,12 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty, EuiPanel } from '@elastic/eui';
+import { PanelText } from '../../../../common/components/panel_text';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
 import type { RuleMigrationStats } from '../../types';
-import * as i18n from '../../../../onboarding/components/onboarding_body/cards/siem_migrations/start_migration/translations';
-import { TITLE_CLASS_NAME } from '../../../../onboarding/components/onboarding_body/cards/siem_migrations/start_migration/start_migration_card.styles';
 import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
+import * as i18n from './translations';
 
 export interface MigrationReadyPanelProps {
   migrationStats: RuleMigrationStats;
@@ -40,25 +33,25 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
         <EuiFlexItem>
           <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiText size="s" className={TITLE_CLASS_NAME}>
-                <p>{i18n.START_MIGRATION_CARD_MIGRATION_TITLE(migrationStats.number)}</p>
-              </EuiText>
+              <PanelText size="s" semiBold>
+                <p>{i18n.RULE_MIGRATION_TITLE(migrationStats.number)}</p>
+              </PanelText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                <p>{i18n.START_MIGRATION_CARD_MIGRATION_READY_DESCRIPTION}</p>
-              </EuiText>
+              <PanelText size="s" subdued>
+                <p>{i18n.RULE_MIGRATION_READY_DESCRIPTION}</p>
+              </PanelText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={onStartMigration} isLoading={isLoading}>
-            {i18n.START_MIGRATION_CARD_TRANSLATE_BUTTON}
+            {i18n.RULE_MIGRATION_START_TRANSLATION_BUTTON}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton iconType="download" iconSide="right" onClick={onOpenFlyout}>
-            {i18n.START_MIGRATION_CARD_UPLOAD_MACROS_BUTTON}
+            {i18n.RULE_MIGRATION_UPLOAD_MACROS_BUTTON}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
