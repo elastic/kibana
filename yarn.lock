@@ -7493,7 +7493,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/slo-plugin@link:x-pack/plugins/observability_solution/slo":
+"@kbn/slo-plugin@link:x-pack/solutions/observability/plugins/slo":
   version "0.0.0"
   uid ""
 
