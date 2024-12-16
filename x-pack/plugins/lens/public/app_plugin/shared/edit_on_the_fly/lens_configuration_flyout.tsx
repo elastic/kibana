@@ -31,7 +31,6 @@ import {
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { esqlVariablesService } from '@kbn/esql-variables/public';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { tracksOverlays } from '@kbn/presentation-containers';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
@@ -134,9 +133,8 @@ export function LensEditConfigurationFlyout({
   );
 
   const onCancelControlCallback = useCallback(() => {
-    const overlayTracker = tracksOverlays(dashboardApi) ? dashboardApi : undefined;
-    overlayTracker?.clearOverlays();
-  }, [dashboardApi]);
+    closeFlyout?.();
+  }, [closeFlyout]);
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);

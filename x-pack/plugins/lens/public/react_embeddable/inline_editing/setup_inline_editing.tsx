@@ -7,7 +7,6 @@
 
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import React from 'react';
-import type { PresentationContainer } from '@kbn/presentation-containers';
 import { EditLensConfigurationProps } from '../../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { EditConfigPanelProps } from '../../app_plugin/shared/edit_on_the_fly/types';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
@@ -19,6 +18,7 @@ import {
   LensInternalApi,
   LensRuntimeState,
   TypedLensSerializedState,
+  DashboardApi,
 } from '../types';
 import { PanelManagementApi } from './panel_management';
 import { getStateManagementForInlineEditing } from './state_management';
@@ -139,7 +139,7 @@ export function prepareInlineEditPanel(
           }
         }}
         hideTimeFilterInfo={hideTimeFilterInfo}
-        dashboardApi={parentApi as PresentationContainer}
+        dashboardApi={parentApi as DashboardApi}
       />
     );
   };
