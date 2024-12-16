@@ -12,7 +12,6 @@ import { config, HttpConfig } from './http_config';
 import { cspConfig } from './csp';
 import { permissionsPolicyConfig } from './permissions_policy';
 import { ExternalUrlConfig } from './external_url';
-import { protocols } from 'superagent';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost', '0.0.0.0'];
 const invalidHostnames = ['asdf$%^', '0'];
