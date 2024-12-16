@@ -12,6 +12,7 @@ import type { PackageInfo, RegisterDeprecationsConfig } from '@kbn/core/server';
 import {
   deprecationsServiceMock,
   elasticsearchServiceMock,
+  httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
@@ -39,6 +40,7 @@ function getContextMock() {
   return {
     esClient: elasticsearchServiceMock.createScopedClusterClient(),
     savedObjectsClient: savedObjectsClientMock.create(),
+    request: httpServerMock.createKibanaRequest(),
   };
 }
 

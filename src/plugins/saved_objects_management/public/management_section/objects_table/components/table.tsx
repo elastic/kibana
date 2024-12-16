@@ -386,8 +386,9 @@ export class Table extends PureComponent<TableProps, TableState> {
     const activeActionContents = this.state.activeAction?.render() ?? null;
     const exceededResultCount = totalItemCount > MAX_PAGINATED_ITEM;
 
-    const allHidden = selectedSavedObjects.every(({ meta: { hiddenType } }) => hiddenType);
-
+    const anySelected = selectedSavedObjects.length > 0;
+    const allHidden =
+      anySelected && selectedSavedObjects.every(({ meta: { hiddenType } }) => hiddenType);
     return (
       <Fragment>
         {activeActionContents}
@@ -403,6 +404,8 @@ export class Table extends PureComponent<TableProps, TableState> {
           defaultQuery={this.props.initialQuery}
           toolsRight={[
             <EuiToolTip
+              data-test-subj="deleteSOToolTip"
+              key="deleteSOToolTip"
               content={
                 allHidden ? (
                   <FormattedMessage
@@ -417,7 +420,9 @@ export class Table extends PureComponent<TableProps, TableState> {
                 iconType="trash"
                 color="danger"
                 onClick={onDelete}
-                isDisabled={allHidden || !capabilities.savedObjectsManagement.delete}
+                isDisabled={
+                  !anySelected || allHidden || !capabilities.savedObjectsManagement.delete
+                }
                 title={
                   capabilities.savedObjectsManagement.delete
                     ? undefined
