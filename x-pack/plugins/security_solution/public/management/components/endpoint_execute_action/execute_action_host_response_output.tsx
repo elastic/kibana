@@ -182,6 +182,7 @@ export interface ExecuteActionHostResponseOutputProps {
   hideContext?: boolean;
 }
 
+// Note: also used for RunScript command
 export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOutputProps>(
   ({ outputContent, 'data-test-subj': dataTestSubj, textSize = 'xs', hideContext }) => {
     const contextContent = useMemo(

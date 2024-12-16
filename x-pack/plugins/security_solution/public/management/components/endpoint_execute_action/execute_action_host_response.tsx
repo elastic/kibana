@@ -31,6 +31,7 @@ export interface ExecuteActionHostResponseProps {
   hideContext?: boolean;
 }
 
+// Note: also used for RunScript command
 export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
   ({
     action,
