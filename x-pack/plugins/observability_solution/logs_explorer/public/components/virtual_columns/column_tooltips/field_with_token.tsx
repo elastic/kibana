@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToken } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToken, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-
-const spacingXsCss = css`
-  margin-bottom: ${euiThemeVars.euiSizeXS};
-`;
 
 export const FieldWithToken = ({
   field,
@@ -21,8 +16,14 @@ export const FieldWithToken = ({
   field: string;
   iconType?: string;
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
-    <div css={spacingXsCss}>
+    <div
+      css={css`
+        margin-bottom: ${euiTheme.size.xs};
+      `}
+    >
       <EuiFlexGroup
         responsive={false}
         alignItems="center"

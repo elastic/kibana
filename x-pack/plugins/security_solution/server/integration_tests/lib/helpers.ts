@@ -10,6 +10,20 @@ import Util from 'util';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import deepmerge from 'deepmerge';
 import { createTestServers, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
+
+export const DEFAULT_GET_ROUTES: Array<[RegExp, unknown]> = [
+  [new RegExp('.*/ping$'), { status: 200 }],
+  [
+    /.*kibana\/manifest\/artifacts.*/,
+    {
+      status: 200,
+      data: 'x-pack/plugins/security_solution/server/lib/telemetry/__mocks__/kibana-artifacts.zip',
+    },
+  ],
+];
+
+export const DEFAULT_POST_ROUTES: Array<[RegExp, unknown]> = [[/.*/, { status: 200 }]];
+
 const asyncUnlink = Util.promisify(Fs.unlink);
 
 /**
@@ -126,4 +140,36 @@ export function updateTimestamps(data: object[]): object[] {
     // wait a couple of millisecs to not make timestamps overlap
     return { ...d, '@timestamp': new Date(currentTimeMillis + (i + 1) * 100) };
   });
+}
+
+export function mockAxiosPost(
+  postSpy: jest.SpyInstance,
+  routes: Array<[RegExp, unknown]> = DEFAULT_POST_ROUTES
+) {
+  postSpy.mockImplementation(async (url: string) => {
+    for (const [route, returnValue] of routes) {
+      if (route.test(url)) {
+        return returnValue;
+      }
+    }
+    return { status: 404 };
+  });
+}
+
+export function mockAxiosGet(
+  getSpy: jest.SpyInstance,
+  routes: Array<[RegExp, unknown]> = DEFAULT_GET_ROUTES
+) {
+  getSpy.mockImplementation(async (url: string) => {
+    for (const [route, returnValue] of routes) {
+      if (route.test(url)) {
+        return returnValue;
+      }
+    }
+    return { status: 404 };
+  });
+}
+
+export function getRandomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }

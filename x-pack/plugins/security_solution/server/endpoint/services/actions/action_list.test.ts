@@ -319,7 +319,7 @@ describe('When using `getActionList()', () => {
           outputs: {
             'agent-a': {
               content: {
-                code: 'ra_scan_success_done',
+                code: '200',
               },
               type: 'json',
             },

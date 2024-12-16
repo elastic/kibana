@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { EuiCode } from '@elastic/eui';
+import { EuiCode, type WithEuiThemeProps, withEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import React, { useMemo, useState } from 'react';
-import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
 import {
   Section,
   SectionLinkProps,
@@ -40,9 +39,10 @@ interface Props {
   node: InfraWaffleMapNode;
   nodeType: InventoryItemType;
 }
+type PropsWithTheme = Props & WithEuiThemeProps;
 
-export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme(
-  ({ options, currentTime, node, nodeType }) => {
+export const NodeContextMenu = withEuiTheme(
+  ({ options, currentTime, node, nodeType }: PropsWithTheme) => {
     const { getAssetDetailUrl } = useAssetDetailsRedirect();
     const [flyoutVisible, setFlyoutVisible] = useState(false);
     const inventoryModel = findInventoryModel(nodeType);

@@ -42,11 +42,14 @@ import {
 } from '../../../../common/lib/endpoint/endpoint_isolation/mocks';
 import { endpointPageHttpMock, failedTransformStateMock } from '../mocks';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
+import { INGEST_API_PACKAGE_POLICIES } from '../../../services/policies/ingest';
+import { canFetchPackageAndAgentPolicies } from '../../../../../common/endpoint/service/authz/authz';
 
+const mockSendBulkGetPackagePolicies = jest.fn();
 jest.mock('../../../services/policies/ingest', () => ({
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
   sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
-  sendBulkGetPackagePolicies: () => Promise.resolve({ items: [] }),
+  sendBulkGetPackagePolicies: () => mockSendBulkGetPackagePolicies(),
   sendGetEndpointSecurityPackage: () => Promise.resolve({ version: '1.1.1' }),
 }));
 
@@ -56,6 +59,12 @@ jest.mock('rxjs', () => ({
   ...jest.requireActual('rxjs'),
   firstValueFrom: () => mockFirstValueFrom(),
 }));
+
+jest.mock('../../../../../common/endpoint/service/authz/authz', () => ({
+  ...jest.requireActual('../../../../../common/endpoint/service/authz/authz'),
+  canFetchPackageAndAgentPolicies: jest.fn(),
+}));
+const canFetchAgentPoliciesMock = canFetchPackageAndAgentPolicies as jest.Mock;
 
 type EndpointListStore = Store<Immutable<EndpointState>, Immutable<AppAction>>;
 
@@ -71,8 +80,10 @@ describe('endpoint list middleware', () => {
   let actionSpyMiddleware;
   let history: History<never>;
 
-  const getEndpointListApiResponse = (): MetadataListResponse => {
-    return mockEndpointResultList({ pageSize: 1, page: 0, total: 10 });
+  const getEndpointListApiResponse = (
+    options: Partial<Parameters<typeof mockEndpointResultList>[0]> = {}
+  ): MetadataListResponse => {
+    return mockEndpointResultList({ pageSize: 1, page: 0, total: 10, ...options });
   };
 
   const dispatchUserChangedUrlToEndpointList = (locationOverrides: Partial<Location> = {}) => {
@@ -99,25 +110,112 @@ describe('endpoint list middleware', () => {
     dispatch = store.dispatch;
     history = createBrowserHistory();
     getKibanaServicesMock.mockReturnValue(fakeCoreStart);
+    canFetchAgentPoliciesMock.mockReturnValue(false);
+    mockSendBulkGetPackagePolicies.mockResolvedValue({ items: [] });
   });
 
-  it('handles `userChangedUrl`', async () => {
-    endpointPageHttpMock(fakeHttpServices);
-    const apiResponse = getEndpointListApiResponse();
-    fakeHttpServices.get.mockResolvedValue(apiResponse);
-    expect(fakeHttpServices.get).not.toHaveBeenCalled();
+  describe('handles `userChangedUrl`', () => {
+    describe('when there are hosts', () => {
+      let apiResponse: MetadataListResponse;
 
-    dispatchUserChangedUrlToEndpointList();
-    await waitForAction('serverReturnedEndpointList');
-    expect(fakeHttpServices.get).toHaveBeenNthCalledWith(1, HOST_METADATA_LIST_ROUTE, {
-      query: {
-        page: '0',
-        pageSize: '10',
-        kuery: '',
-      },
-      version: '2023-10-31',
+      beforeEach(() => {
+        endpointPageHttpMock(fakeHttpServices);
+        apiResponse = getEndpointListApiResponse();
+        fakeHttpServices.get.mockResolvedValue(apiResponse);
+      });
+
+      it('should not fetch agent policies if there are hosts', async () => {
+        dispatchUserChangedUrlToEndpointList();
+
+        await Promise.all([
+          waitForAction('serverReturnedEndpointList'),
+          waitForAction('serverReturnedEndpointExistValue', {
+            validate: ({ payload }) => payload === true,
+          }),
+          waitForAction('serverCancelledPolicyItemsLoading'),
+        ]);
+        expect(fakeHttpServices.get).toHaveBeenNthCalledWith(1, HOST_METADATA_LIST_ROUTE, {
+          query: {
+            page: '0',
+            pageSize: '10',
+            kuery: '',
+          },
+          version: '2023-10-31',
+        });
+        expect(listData(getState())).toEqual(apiResponse.data);
+        expect(fakeHttpServices.get).not.toHaveBeenCalledWith(
+          INGEST_API_PACKAGE_POLICIES,
+          expect.objectContaining({})
+        );
+      });
+
+      describe('fetching non-existing policies', () => {
+        it('should not fetch package policies without required privileges', async () => {
+          canFetchAgentPoliciesMock.mockReturnValue(false);
+
+          dispatchUserChangedUrlToEndpointList();
+
+          await waitForAction('serverFinishedInitialization');
+          expect(mockSendBulkGetPackagePolicies).not.toBeCalled();
+        });
+
+        it('should fetch package policies with required privileges', async () => {
+          canFetchAgentPoliciesMock.mockReturnValue(true);
+
+          dispatchUserChangedUrlToEndpointList();
+
+          await Promise.all([
+            waitForAction('serverFinishedInitialization'),
+            waitForAction('serverReturnedEndpointNonExistingPolicies'),
+          ]);
+          expect(mockSendBulkGetPackagePolicies).toBeCalled();
+        });
+      });
     });
-    expect(listData(getState())).toEqual(apiResponse.data);
+
+    describe('when there are no hosts', () => {
+      beforeEach(() => {
+        endpointPageHttpMock(fakeHttpServices);
+        const apiResponse = getEndpointListApiResponse({ total: 0 });
+        fakeHttpServices.get.mockResolvedValue(apiResponse);
+      });
+
+      it('should NOT fetch agent policies without required privileges', async () => {
+        canFetchAgentPoliciesMock.mockReturnValue(false);
+
+        dispatchUserChangedUrlToEndpointList();
+
+        await Promise.all([
+          waitForAction('serverReturnedEndpointList'),
+          waitForAction('serverReturnedEndpointExistValue', {
+            validate: ({ payload }) => payload === false,
+          }),
+          waitForAction('serverCancelledPolicyItemsLoading'),
+        ]);
+        expect(fakeHttpServices.get).not.toHaveBeenCalledWith(
+          INGEST_API_PACKAGE_POLICIES,
+          expect.objectContaining({})
+        );
+      });
+
+      it('should fetch agent policies with required privileges', async () => {
+        canFetchAgentPoliciesMock.mockReturnValue(true);
+
+        dispatchUserChangedUrlToEndpointList();
+
+        await Promise.all([
+          waitForAction('serverReturnedEndpointList'),
+          waitForAction('serverReturnedEndpointExistValue', {
+            validate: ({ payload }) => payload === false,
+          }),
+          waitForAction('serverReturnedPoliciesForOnboarding'),
+        ]);
+        expect(fakeHttpServices.get).toHaveBeenCalledWith(
+          INGEST_API_PACKAGE_POLICIES,
+          expect.objectContaining({})
+        );
+      });
+    });
   });
 
   it('handles `appRequestedEndpointList`', async () => {
