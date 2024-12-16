@@ -290,7 +290,7 @@ spec:
                     'xpack.observability_onboarding.otelKubernetesPanel.step3b.title',
                     {
                       defaultMessage:
-                        '3(b) - Restart deployment and check that annotations have been applied and auto-intrumentation library is injected:',
+                        '3(b) - Restart deployment and ensure the annotations are applied and the auto-instrumentation library is injected:',
                     }
                   )}
                 </p>
