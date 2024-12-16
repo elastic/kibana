@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiAvatar, EuiCommentList, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import moment from 'moment';
-import { AssistantAvatar } from '@kbn/elastic-assistant';
+import { AssistantAvatar } from '@kbn/ai-assistant-icon';
 import {
   RuleMigrationStatusEnum,
   type RuleMigration,
