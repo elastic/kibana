@@ -41,7 +41,7 @@ import {
   DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS,
   LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS,
 } from './constants';
-import { TranslationTab } from './translation_tab';
+import { SummaryTab, TranslationTab } from './tabs';
 import {
   convertMigrationCustomRuleToSecurityRulePayload,
   isMigrationCustomRule,
@@ -174,9 +174,22 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
       [ruleDetailsToOverview, size, expandedOverviewSections, toggleOverviewSection]
     );
 
+    const summaryTab: EuiTabbedContentTab = useMemo(
+      () => ({
+        id: 'summary',
+        name: i18n.SUMMARY_TAB_LABEL,
+        content: (
+          <TabContentPadding>
+            <SummaryTab ruleMigration={ruleMigration} />
+          </TabContentPadding>
+        ),
+      }),
+      [ruleMigration]
+    );
+
     const tabs = useMemo(() => {
-      return [...extraTabs, translationTab, overviewTab];
-    }, [extraTabs, translationTab, overviewTab]);
+      return [...extraTabs, translationTab, overviewTab, summaryTab];
+    }, [extraTabs, translationTab, overviewTab, summaryTab]);
 
     const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
     const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
