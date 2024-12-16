@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
+import { merge, cloneDeep } from 'lodash';
 import moment from 'moment';
 import { ReplaySubject } from 'rxjs';
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { DefendInsight, DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
+import type { SearchHit, UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
@@ -31,7 +32,7 @@ import {
   ActionType,
 } from '../../../../common/endpoint/types/workflow_insights';
 import { createMockEndpointAppContext } from '../../mocks';
-import { createDatastream, createPipeline } from './helpers';
+import { createDatastream, createPipeline, generateInsightId } from './helpers';
 import { securityWorkflowInsightsService } from '.';
 import { DATA_STREAM_NAME } from './constants';
 import { buildWorkflowInsights } from './builders';
@@ -108,6 +109,7 @@ describe('SecurityWorkflowInsightsService', () => {
   let logger: Logger;
   let esClient: ElasticsearchClient;
   let mockEndpointAppContextService: jest.Mocked<EndpointAppContextService>;
+  let isInitializedSpy: jest.SpyInstance<Promise<[void, void]>, [], boolean>;
 
   beforeEach(() => {
     logger = loggerMock.create();
@@ -115,6 +117,10 @@ describe('SecurityWorkflowInsightsService', () => {
 
     mockEndpointAppContextService = createMockEndpointAppContext()
       .service as jest.Mocked<EndpointAppContextService>;
+
+    isInitializedSpy = jest
+      .spyOn(securityWorkflowInsightsService, 'isInitialized', 'get')
+      .mockResolvedValueOnce([undefined, undefined]);
   });
 
   afterEach(() => {
@@ -217,10 +223,6 @@ describe('SecurityWorkflowInsightsService', () => {
 
   describe('createFromDefendInsights', () => {
     it('should create workflow insights from defend insights', async () => {
-      const isInitializedSpy = jest
-        .spyOn(securityWorkflowInsightsService, 'isInitialized', 'get')
-        .mockResolvedValueOnce([undefined, undefined]);
-
       const defendInsights: DefendInsight[] = [
         {
           group: 'AVGAntivirus',
@@ -258,8 +260,8 @@ describe('SecurityWorkflowInsightsService', () => {
         request
       );
 
-      // twice since it calls securityWorkflowInsightsService.create internally
-      expect(isInitializedSpy).toHaveBeenCalledTimes(2);
+      // three since it calls securityWorkflowInsightsService.create + fetch
+      expect(isInitializedSpy).toHaveBeenCalledTimes(3);
       expect(buildWorkflowInsightsMock).toHaveBeenCalledWith({
         defendInsights,
         request,
@@ -271,32 +273,55 @@ describe('SecurityWorkflowInsightsService', () => {
 
   describe('create', () => {
     it('should index the doc correctly', async () => {
-      const isInitializedSpy = jest
-        .spyOn(securityWorkflowInsightsService, 'isInitialized', 'get')
-        .mockResolvedValueOnce([undefined, undefined]);
-
       await securityWorkflowInsightsService.start({ esClient });
       const insight = getDefaultInsight();
       await securityWorkflowInsightsService.create(insight);
 
-      // ensure it waits for initialization first
-      expect(isInitializedSpy).toHaveBeenCalledTimes(1);
+      // two since it calls fetch as well
+      expect(isInitializedSpy).toHaveBeenCalledTimes(2);
       // indexes the doc
       expect(esClient.index).toHaveBeenCalledTimes(1);
       expect(esClient.index).toHaveBeenCalledWith({
         index: DATA_STREAM_NAME,
-        body: insight,
+        body: { ...insight, id: generateInsightId(insight) },
         refresh: 'wait_for',
       });
+    });
+
+    it('should call update instead if insight already exists', async () => {
+      const indexName = 'backing-index';
+      const fetchSpy = jest
+        .spyOn(securityWorkflowInsightsService, 'fetch')
+        .mockResolvedValueOnce([{ _index: indexName }] as Array<
+          SearchHit<SecurityWorkflowInsight>
+        >);
+      const updateSpy = jest
+        .spyOn(securityWorkflowInsightsService, 'update')
+        .mockResolvedValueOnce({} as UpdateResponse);
+      await securityWorkflowInsightsService.start({ esClient });
+      const insight = getDefaultInsight();
+      await securityWorkflowInsightsService.create(insight);
+
+      const expectedInsight = cloneDeep(insight);
+      expectedInsight['@timestamp'] = expect.any(moment);
+      expectedInsight.action.timestamp = expect.any(moment);
+      expectedInsight.source.data_range_start = expect.any(moment);
+      expectedInsight.source.data_range_end = expect.any(moment);
+
+      // ensure it waits for initialization first
+      expect(isInitializedSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(updateSpy).toHaveBeenCalledTimes(1);
+      expect(updateSpy).toHaveBeenCalledWith(
+        generateInsightId(insight),
+        expect.objectContaining(insight),
+        indexName
+      );
     });
   });
 
   describe('update', () => {
     it('should update the doc correctly', async () => {
-      const isInitializedSpy = jest
-        .spyOn(securityWorkflowInsightsService, 'isInitialized', 'get')
-        .mockResolvedValueOnce([undefined, undefined]);
-
       await securityWorkflowInsightsService.start({ esClient });
       const insightId = 'some-insight-id';
       const insight = getDefaultInsight();
@@ -318,10 +343,6 @@ describe('SecurityWorkflowInsightsService', () => {
 
   describe('fetch', () => {
     it('should fetch the docs with the correct params', async () => {
-      const isInitializedSpy = jest
-        .spyOn(securityWorkflowInsightsService, 'isInitialized', 'get')
-        .mockResolvedValueOnce([undefined, undefined]);
-
       await securityWorkflowInsightsService.start({ esClient });
       const searchParams: SearchParams = {
         size: 50,
