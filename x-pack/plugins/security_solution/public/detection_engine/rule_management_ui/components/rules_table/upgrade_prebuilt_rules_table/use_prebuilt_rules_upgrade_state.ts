@@ -20,6 +20,7 @@ import {
   ThreeWayDiffConflict,
   type RuleSignatureId,
   NON_UPGRADEABLE_DIFFABLE_FIELDS,
+  ThreeWayDiffOutcome,
 } from '../../../../../../common/api/detection_engine';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 
@@ -104,11 +105,18 @@ function calcFieldsState(
 
     switch (fieldDiff.conflict) {
       case ThreeWayDiffConflict.NONE:
-        fieldsState[fieldName] = {
-          state: fieldDiff.has_update
-            ? FieldUpgradeStateEnum.NoConflict
-            : FieldUpgradeStateEnum.NoUpdate,
-        };
+        if (fieldDiff.has_update) {
+          fieldsState[fieldName] = {
+            state: FieldUpgradeStateEnum.NoConflict,
+          };
+        } else {
+          fieldsState[fieldName] = {
+            state:
+              fieldDiff.diff_outcome === ThreeWayDiffOutcome.CustomizedValueSameUpdate
+                ? FieldUpgradeStateEnum.SameUpdate
+                : FieldUpgradeStateEnum.NoUpdate,
+          };
+        }
         break;
 
       case ThreeWayDiffConflict.SOLVABLE:
