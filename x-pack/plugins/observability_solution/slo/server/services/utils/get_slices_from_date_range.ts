@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { DateRange, Duration, toMomentUnitOfTime } from '../../domain/models';
 
-export function computeTotalSlicesFromDateRange(dateRange: DateRange, timesliceWindow: Duration) {
+export function getSlicesFromDateRange(dateRange: DateRange, timesliceWindow: Duration) {
   const dateRangeDurationInUnit = moment(dateRange.to).diff(
     dateRange.from,
     toMomentUnitOfTime(timesliceWindow.unit)

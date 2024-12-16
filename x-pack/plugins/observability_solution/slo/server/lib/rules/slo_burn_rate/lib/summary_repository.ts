@@ -22,12 +22,9 @@ export async function getSloSummary(
         query: {
           bool: {
             filter: [
-              {
-                term: { 'slo.id': slo.id },
-              },
-              {
-                term: { 'slo.instanceId': instanceId },
-              },
+              { term: { 'slo.id': slo.id } },
+              { term: { 'slo.revision': slo.revision } },
+              { term: { 'slo.instanceId': instanceId } },
             ],
           },
         },

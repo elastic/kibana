@@ -506,8 +506,9 @@ Object {
             "script": Object {
               "params": Object {
                 "target": 0.98,
+                "totalSlices": 30,
               },
-              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+              "source": "params.total != null && params.total > 0 && params.totalSlices > 0 ? ((params.total - params.good) / params.totalSlices) / (1 - params.target) : 0",
             },
           },
         },
@@ -555,8 +556,9 @@ Object {
             "script": Object {
               "params": Object {
                 "target": 0.98,
+                "totalSlices": 3,
               },
-              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+              "source": "params.total != null && params.total > 0 && params.totalSlices > 0 ? ((params.total - params.good) / params.totalSlices) / (1 - params.target) : 0",
             },
           },
         },
@@ -604,8 +606,9 @@ Object {
             "script": Object {
               "params": Object {
                 "target": 0.98,
+                "totalSlices": 180,
               },
-              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+              "source": "params.total != null && params.total > 0 && params.totalSlices > 0 ? ((params.total - params.good) / params.totalSlices) / (1 - params.target) : 0",
             },
           },
         },
@@ -653,8 +656,9 @@ Object {
             "script": Object {
               "params": Object {
                 "target": 0.98,
+                "totalSlices": 15,
               },
-              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+              "source": "params.total != null && params.total > 0 && params.totalSlices > 0 ? ((params.total - params.good) / params.totalSlices) / (1 - params.target) : 0",
             },
           },
         },
@@ -702,8 +706,9 @@ Object {
             "script": Object {
               "params": Object {
                 "target": 0.98,
+                "totalSlices": 720,
               },
-              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+              "source": "params.total != null && params.total > 0 && params.totalSlices > 0 ? ((params.total - params.good) / params.totalSlices) / (1 - params.target) : 0",
             },
           },
         },
@@ -751,8 +756,9 @@ Object {
             "script": Object {
               "params": Object {
                 "target": 0.98,
+                "totalSlices": 60,
               },
-              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+              "source": "params.total != null && params.total > 0 && params.totalSlices > 0 ? ((params.total - params.good) / params.totalSlices) / (1 - params.target) : 0",
             },
           },
         },
@@ -800,8 +806,9 @@ Object {
             "script": Object {
               "params": Object {
                 "target": 0.98,
+                "totalSlices": 2160,
               },
-              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+              "source": "params.total != null && params.total > 0 && params.totalSlices > 0 ? ((params.total - params.good) / params.totalSlices) / (1 - params.target) : 0",
             },
           },
         },
@@ -849,8 +856,9 @@ Object {
             "script": Object {
               "params": Object {
                 "target": 0.98,
+                "totalSlices": 180,
               },
-              "source": "params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0",
+              "source": "params.total != null && params.total > 0 && params.totalSlices > 0 ? ((params.total - params.good) / params.totalSlices) / (1 - params.target) : 0",
             },
           },
         },
