@@ -7,6 +7,26 @@
 
 import { schema } from '@kbn/config-schema';
 
+const SECONDS_REGEX = /^[1-9][0-9]*s$/;
+const MINUTES_REGEX = /^[1-9][0-9]*m$/;
+const HOURS_REGEX = /^[1-9][0-9]*h$/;
+const DAYS_REGEX = /^[1-9][0-9]*d$/;
+export function validateDuration(duration: string) {
+  if (duration.match(SECONDS_REGEX)) {
+    return;
+  }
+  if (duration.match(MINUTES_REGEX)) {
+    return;
+  }
+  if (duration.match(HOURS_REGEX)) {
+    return;
+  }
+  if (duration.match(DAYS_REGEX)) {
+    return;
+  }
+  return 'string is not a valid duration: ' + duration;
+}
+
 export const taskSchemaV1 = schema.object({
   taskType: schema.string(),
   scheduledAt: schema.string(),
@@ -15,7 +35,7 @@ export const taskSchemaV1 = schema.object({
   runAt: schema.string(),
   schedule: schema.maybe(
     schema.object({
-      interval: schema.duration(),
+      interval: schema.string({ validate: validateDuration }),
     })
   ),
   params: schema.string(),
