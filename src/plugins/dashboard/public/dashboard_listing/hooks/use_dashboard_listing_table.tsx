@@ -14,8 +14,8 @@ import { ContentInsightsClient } from '@kbn/content-management-content-insights-
 import { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
 import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 
+import { ViewMode } from '@kbn/presentation-publishing';
 import { DashboardContainerInput } from '../../../common';
 import type { DashboardSearchOut } from '../../../server/content_management';
 import {
@@ -270,7 +270,7 @@ export const useDashboardListingTable = ({
   );
 
   const editItem = useCallback(
-    ({ id }: { id: string | undefined }) => goToDashboard(id, ViewMode.EDIT),
+    ({ id }: { id: string | undefined }) => goToDashboard(id, 'edit'),
     [goToDashboard]
   );
 

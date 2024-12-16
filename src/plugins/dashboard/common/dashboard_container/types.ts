@@ -8,7 +8,6 @@
  */
 
 import {
-  ViewMode,
   PanelState,
   EmbeddableInput,
   SavedObjectEmbeddableInput,
@@ -44,7 +43,7 @@ export interface DashboardPanelState<
 
 export type DashboardContainerByReferenceInput = SavedObjectEmbeddableInput;
 
-export interface DashboardContainerInput extends EmbeddableInput {
+export interface DashboardContainerInput extends Omit<EmbeddableInput, 'viewMode'> {
   // filter context to be passed to children
   query: Query;
   filters: Filter[];
@@ -56,7 +55,9 @@ export interface DashboardContainerInput extends EmbeddableInput {
   // dashboard meta info
   title: string;
   tags: string[];
-  viewMode: ViewMode;
+  // can not import presentation ViewMode into common code
+  // DashboardContainerInput is planned for removal and will be replaced by DashboardState
+  viewMode: 'view' | 'edit' | 'print' | 'preview';
   description?: string;
   executionContext: KibanaExecutionContext;
 
