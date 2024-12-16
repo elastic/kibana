@@ -96,7 +96,7 @@ export function SLOsOverview() {
               tooltip={i18n.translate('xpack.slo.sLOsOverview.euiStat.degradingLabel.tooltip', {
                 defaultMessage: 'Click to filter SLOs by Degrading status.',
               })}
-              titleColor={theme.colors.warningText}
+              titleColor={theme.colors.textWarning}
             />
             <OverviewItem
               title={data?.stale}
