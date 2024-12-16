@@ -15,7 +15,6 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { EsqlControlType } from '@kbn/esql-validation-autocomplete';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { monaco } from '@kbn/monaco';
 import { ESQLControlsFlyout } from './control_flyout';
 import { untilPluginStartServicesReady } from '../../kibana_services';
@@ -28,9 +27,8 @@ interface Context {
   core: CoreStart;
   search: ISearchGeneric;
   controlType: EsqlControlType;
-  dashboardApi: DashboardApi;
-  controlId?: string;
-  panelId?: string;
+  onSaveControlCallback?: (controlState: ESQLControlState) => Promise<void>;
+  onCancelControlCallback?: () => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
 }
@@ -45,9 +43,8 @@ export async function executeAction({
   core,
   search,
   controlType,
-  dashboardApi,
-  controlId,
-  panelId,
+  onSaveControlCallback,
+  onCancelControlCallback,
   cursorPosition,
   initialState,
 }: Context) {
@@ -73,9 +70,8 @@ export async function executeAction({
               closeFlyout={() => {
                 handle.close();
               }}
-              dashboardApi={dashboardApi}
-              panelId={panelId}
-              controlId={controlId}
+              onSaveControlCallback={onSaveControlCallback}
+              onCancelControlCallback={onCancelControlCallback}
               cursorPosition={cursorPosition}
               initialState={initialState}
             />

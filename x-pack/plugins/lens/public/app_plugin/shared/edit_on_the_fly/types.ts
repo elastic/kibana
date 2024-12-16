@@ -31,6 +31,10 @@ export interface FlyoutWrapperProps {
   navigateToLensEditor?: () => void;
 }
 
+interface ControlGroupApi {
+  addNewPanel: (panelState: Record<string, unknown>) => void;
+}
+
 export interface EditConfigPanelProps {
   coreStart: CoreStart;
   startDependencies: LensPluginStartDependencies;
@@ -88,7 +92,9 @@ export interface EditConfigPanelProps {
   // (e.g. through unified search) set this property to true
   hideTimeFilterInfo?: boolean;
 
-  dashboardApi?: PresentationContainer;
+  dashboardApi?: PresentationContainer & {
+    controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
+  };
 }
 
 export interface LayerConfigurationProps {

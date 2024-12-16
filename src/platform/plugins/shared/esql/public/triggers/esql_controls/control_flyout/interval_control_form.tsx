@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiFieldText, EuiFormRow, EuiFlyoutBody, type EuiSwitchEvent } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
-import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { esqlVariablesService } from '../../../../common';
 import { areValuesIntervalsValid } from './helpers';
 import type { ESQLControlState } from '../types';
@@ -29,12 +28,12 @@ import { EsqlControlFlyoutType } from '../types';
 
 interface IntervalControlFormProps {
   controlType: EsqlControlType;
-  dashboardApi: DashboardApi;
   queryString: string;
   closeFlyout: () => void;
   onCreateControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
   onEditControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
   initialState?: ESQLControlState;
+  onCancelControlCallback?: () => void;
 }
 
 const SUGGESTED_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
@@ -42,11 +41,11 @@ const SUGGESTED_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
 export function IntervalControlForm({
   controlType,
   initialState,
-  dashboardApi,
   queryString,
   closeFlyout,
   onCreateControl,
   onEditControl,
+  onCancelControlCallback,
 }: IntervalControlFormProps) {
   const suggestedStaticValues = useMemo(
     () => (initialState ? initialState.availableOptions : SUGGESTED_VALUES),
@@ -222,7 +221,7 @@ export function IntervalControlForm({
       <Footer
         isControlInEditMode={isControlInEditMode}
         variableName={variableName}
-        dashboardApi={dashboardApi}
+        onCancelControlCallback={onCancelControlCallback}
         isSaveDisabled={formIsInvalid}
         closeFlyout={closeFlyout}
         onCreateControl={onCreateIntervalControl}

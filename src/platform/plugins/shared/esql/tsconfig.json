@@ -30,9 +30,6 @@
     "@kbn/monaco",
     "@kbn/esql-ast",
     "@kbn/search-types",
-    "@kbn/dashboard-plugin",
-    "@kbn/presentation-publishing",
-    "@kbn/presentation-containers",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount"
   ],

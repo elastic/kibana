@@ -9,6 +9,7 @@ import React, { useMemo, useCallback, useRef, useEffect, useState } from 'react'
 import { isEqual } from 'lodash';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { v4 as uuidv4 } from 'uuid';
 import {
   EuiTitle,
   EuiAccordion,
@@ -29,6 +30,8 @@ import {
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { esqlVariablesService } from '@kbn/esql/common';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { tracksOverlays } from '@kbn/presentation-containers';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
@@ -102,6 +105,38 @@ export function LensEditConfigurationFlyout({
   const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeDatasource = datasourceMap[datasourceId];
+
+  const dashboardPanels = useStateFromPublishingSubject(dashboardApi?.children$);
+  const controlGroupApi = useStateFromPublishingSubject(dashboardApi?.controlGroupApi$);
+
+  const onSaveControlCallback = useCallback(
+    async (controlState: Record<string, unknown>) => {
+      if (!panelId) {
+        return;
+      }
+
+      // add a new control
+      controlGroupApi?.addNewPanel({
+        panelType: 'esqlControl',
+        initialState: {
+          ...controlState,
+          id: uuidv4(),
+        },
+      });
+
+      const panel = dashboardPanels?.[panelId];
+      if (panel) {
+        // open the edit flyout to continue editing
+        await (panel as { onEdit: () => Promise<void> }).onEdit();
+      }
+    },
+    [controlGroupApi, dashboardPanels, panelId]
+  );
+
+  const onCancelControlCallback = useCallback(() => {
+    const overlayTracker = tracksOverlays(dashboardApi) ? dashboardApi : undefined;
+    overlayTracker?.clearOverlays();
+  }, [dashboardApi]);
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
@@ -548,8 +583,8 @@ export function LensEditConfigurationFlyout({
                 isDisabled={false}
                 allowQueryCancellation
                 isLoading={isVisualizationLoading}
-                dashboardApi={dashboardApi}
-                panelId={panelId}
+                onSaveControlCallback={onSaveControlCallback}
+                onCancelControlCallback={onCancelControlCallback}
               />
             </EuiFlexItem>
           )}

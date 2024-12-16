@@ -23,7 +23,6 @@ import { getQueryForFields } from '@kbn/esql-validation-autocomplete/src/autocom
 import { buildQueryUntilPreviousCommand } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
 import { parse } from '@kbn/esql-ast';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
-import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { esqlVariablesService } from '../../../../common';
 import type { ESQLControlState } from '../types';
 import {
@@ -40,21 +39,21 @@ import { EsqlControlFlyoutType } from '../types';
 interface FieldControlFormProps {
   search: ISearchGeneric;
   controlType: EsqlControlType;
-  dashboardApi: DashboardApi;
   queryString: string;
   closeFlyout: () => void;
   onCreateControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
   onEditControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
   initialState?: ESQLControlState;
+  onCancelControlCallback?: () => void;
 }
 
 export function FieldControlForm({
   controlType,
   initialState,
-  dashboardApi,
   queryString,
   onCreateControl,
   onEditControl,
+  onCancelControlCallback,
   search,
   closeFlyout,
 }: FieldControlFormProps) {
@@ -282,7 +281,7 @@ export function FieldControlForm({
       <Footer
         isControlInEditMode={isControlInEditMode}
         variableName={variableName}
-        dashboardApi={dashboardApi}
+        onCancelControlCallback={onCancelControlCallback}
         isSaveDisabled={formIsInvalid}
         closeFlyout={closeFlyout}
         onCreateControl={onCreateIntervalControl}

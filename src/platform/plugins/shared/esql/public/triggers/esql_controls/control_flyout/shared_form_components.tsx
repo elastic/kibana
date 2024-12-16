@@ -29,8 +29,6 @@ import {
   EuiBetaBadge,
   EuiToolTip,
 } from '@elastic/eui';
-import { tracksOverlays } from '@kbn/presentation-containers';
-import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { esqlVariablesService } from '../../../../common';
 import { EsqlControlFlyoutType } from '../types';
 
@@ -284,17 +282,17 @@ export function Header() {
 export function Footer({
   isControlInEditMode,
   variableName,
-  dashboardApi,
+  onCancelControlCallback,
   isSaveDisabled,
   closeFlyout,
   onCreateControl,
 }: {
   isControlInEditMode: boolean;
   variableName: string;
-  dashboardApi: DashboardApi;
   isSaveDisabled: boolean;
   closeFlyout: () => void;
   onCreateControl: () => void;
+  onCancelControlCallback?: () => void;
 }) {
   const onCancel = useCallback(() => {
     closeFlyout();
@@ -303,9 +301,8 @@ export function Footer({
       esqlVariablesService.removeVariable(variableName);
     }
 
-    const overlayTracker = tracksOverlays(dashboardApi) ? dashboardApi : undefined;
-    overlayTracker?.clearOverlays();
-  }, [closeFlyout, dashboardApi, isControlInEditMode, variableName]);
+    onCancelControlCallback?.();
+  }, [closeFlyout, isControlInEditMode, onCancelControlCallback, variableName]);
 
   return (
     <EuiFlyoutFooter>

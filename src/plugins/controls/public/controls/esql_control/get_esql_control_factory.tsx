@@ -50,6 +50,13 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
 
       const selections = initializeESQLControlSelections(initialState);
 
+      const onSaveControlCallback = (updatedState: ESQLControlState) => {
+        controlGroupApi?.replacePanel(uuid, {
+          panelType: 'esqlControl',
+          initialState: updatedState,
+        });
+      };
+
       const api = buildApi(
         {
           ...defaultControl.api,
@@ -64,8 +71,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
             await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
               queryString: initialState.esqlQuery,
               controlType: initialState.variableType,
-              dashboardApi: controlGroupApi.parentApi,
-              controlId: uuid,
+              onSaveControlCallback,
               initialState: state,
             });
           },

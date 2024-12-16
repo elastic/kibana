@@ -72,17 +72,14 @@ const triggerControl = async (
   controlType: EsqlControlType,
   position: monaco.Position | null | undefined,
   uiActions: ESQLEditorDeps['uiActions'],
-  panelId?: string,
-  dashboardApi?: ESQLEditorProps['dashboardApi']
+  onSaveControlCallback?: ESQLEditorProps['onSaveControlCallback'],
+  onCancelControlCallback?: ESQLEditorProps['onCancelControlCallback']
 ) => {
-  if (!dashboardApi) {
-    return;
-  }
   await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
     queryString,
     controlType,
-    dashboardApi,
-    panelId,
+    onSaveControlCallback,
+    onCancelControlCallback,
     cursorPosition: position,
   });
 };
@@ -105,8 +102,8 @@ export const ESQLEditor = memo(function ESQLEditor({
   hideQueryHistory,
   hasOutline,
   displayDocumentationAsFlyout,
-  dashboardApi,
-  panelId,
+  onSaveControlCallback,
+  onCancelControlCallback,
   disableAutoFocus,
   supportsVariables,
 }: ESQLEditorProps) {
@@ -289,8 +286,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       EsqlControlType.TIME_LITERAL,
       position,
       uiActions,
-      panelId,
-      dashboardApi
+      onSaveControlCallback,
+      onCancelControlCallback
     );
   });
 
@@ -301,8 +298,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       EsqlControlType.FIELDS,
       position,
       uiActions,
-      panelId,
-      dashboardApi
+      onSaveControlCallback,
+      onCancelControlCallback
     );
   });
 
@@ -313,8 +310,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       EsqlControlType.VALUES,
       position,
       uiActions,
-      panelId,
-      dashboardApi
+      onSaveControlCallback,
+      onCancelControlCallback
     );
   });
 

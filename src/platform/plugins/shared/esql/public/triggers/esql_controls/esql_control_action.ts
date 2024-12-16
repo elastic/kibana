@@ -10,7 +10,6 @@
 import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { EsqlControlType } from '@kbn/esql-validation-autocomplete';
 import { monaco } from '@kbn/monaco';
@@ -21,9 +20,8 @@ const ACTION_CREATE_ESQL_CONTROL = 'ACTION_CREATE_ESQL_CONTROL';
 interface Context {
   queryString: string;
   controlType: EsqlControlType;
-  dashboardApi: DashboardApi;
-  panelId?: string;
-  controlId?: string;
+  onSaveControlCallback?: (controlState: ESQLControlState) => Promise<void>;
+  onCancelControlCallback?: () => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
 }
@@ -55,9 +53,8 @@ export class CreateESQLControlAction implements Action<Context> {
   public async execute({
     queryString,
     controlType,
-    dashboardApi,
-    controlId,
-    panelId,
+    onSaveControlCallback,
+    onCancelControlCallback,
     cursorPosition,
     initialState,
   }: Context) {
@@ -67,9 +64,8 @@ export class CreateESQLControlAction implements Action<Context> {
       core: this.core,
       search: this.search,
       controlType,
-      dashboardApi,
-      controlId,
-      panelId,
+      onSaveControlCallback,
+      onCancelControlCallback,
       cursorPosition,
       initialState,
     });

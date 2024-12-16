@@ -34,7 +34,6 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/shared-ux-table-persist",
     "@kbn/ui-actions-plugin",
-    "@kbn/presentation-containers",
   ],
   "exclude": [
     "target/**/*",

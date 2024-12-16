@@ -11,9 +11,6 @@ import React, { useCallback } from 'react';
 import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { monaco } from '@kbn/monaco';
-import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { v4 as uuidv4 } from 'uuid';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { esqlVariablesService } from '../../../../common';
 import type { ESQLControlState } from '../types';
 import { IntervalControlForm } from './interval_control_form';
@@ -25,9 +22,8 @@ interface ESQLControlsFlyoutProps {
   search: ISearchGeneric;
   controlType: EsqlControlType;
   queryString: string;
-  dashboardApi: DashboardApi;
-  panelId?: string;
-  controlId?: string;
+  onSaveControlCallback?: (controlState: ESQLControlState) => Promise<void>;
+  onCancelControlCallback?: () => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
   closeFlyout: () => void;
@@ -37,16 +33,12 @@ export function ESQLControlsFlyout({
   search,
   controlType,
   queryString,
-  dashboardApi,
-  panelId,
-  controlId,
+  onSaveControlCallback,
+  onCancelControlCallback,
   cursorPosition,
   initialState,
   closeFlyout,
 }: ESQLControlsFlyoutProps) {
-  const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
-  const dashboardPanels = useStateFromPublishingSubject(dashboardApi.children$);
-
   const addToESQLVariablesService = useCallback(
     (varName: string, variableValue: string, variableType: EsqlControlType, query: string) => {
       if (esqlVariablesService.variableExists(varName)) {
@@ -64,48 +56,21 @@ export function ESQLControlsFlyout({
 
   const onCreateControl = useCallback(
     async (state: ESQLControlState, variableName: string, variableValue: string) => {
-      // create a new control
-      controlGroupApi?.addNewPanel({
-        panelType: 'esqlControl',
-        initialState: {
-          ...state,
-          id: uuidv4(),
-        },
-      });
-
       if (cursorPosition) {
         const query = updateQueryStringWithVariable(queryString, variableName, cursorPosition);
         addToESQLVariablesService(variableName, variableValue, controlType, query);
       }
-      if (panelId) {
-        // open the edit flyout to continue editing
-        const embeddable = dashboardPanels[panelId];
-        await (embeddable as { onEdit: () => Promise<void> }).onEdit();
-      }
+      await onSaveControlCallback?.(state);
     },
-    [
-      addToESQLVariablesService,
-      controlGroupApi,
-      controlType,
-      cursorPosition,
-      dashboardPanels,
-      panelId,
-      queryString,
-    ]
+    [addToESQLVariablesService, controlType, cursorPosition, onSaveControlCallback, queryString]
   );
 
   const onEditControl = useCallback(
-    (state: ESQLControlState, variableName: string, variableValue: string) => {
-      // edit an existing control
-      if (controlId) {
-        controlGroupApi?.replacePanel(controlId, {
-          panelType: 'esqlControl',
-          initialState: state,
-        });
-      }
+    async (state: ESQLControlState, variableName: string, variableValue: string) => {
+      await onSaveControlCallback?.(state);
       addToESQLVariablesService(variableName, variableValue, controlType, '');
     },
-    [addToESQLVariablesService, controlGroupApi, controlId, controlType]
+    [addToESQLVariablesService, controlType, onSaveControlCallback]
   );
 
   if (controlType === EsqlControlType.TIME_LITERAL) {
@@ -114,7 +79,7 @@ export function ESQLControlsFlyout({
         queryString={queryString}
         controlType={controlType}
         closeFlyout={closeFlyout}
-        dashboardApi={dashboardApi}
+        onCancelControlCallback={onCancelControlCallback}
         initialState={initialState}
         onCreateControl={onCreateControl}
         onEditControl={onEditControl}
@@ -126,7 +91,7 @@ export function ESQLControlsFlyout({
         queryString={queryString}
         controlType={controlType}
         closeFlyout={closeFlyout}
-        dashboardApi={dashboardApi}
+        onCancelControlCallback={onCancelControlCallback}
         initialState={initialState}
         onCreateControl={onCreateControl}
         onEditControl={onEditControl}
@@ -138,7 +103,7 @@ export function ESQLControlsFlyout({
       <FieldControlForm
         controlType={controlType}
         queryString={queryString}
-        dashboardApi={dashboardApi}
+        onCancelControlCallback={onCancelControlCallback}
         onCreateControl={onCreateControl}
         onEditControl={onEditControl}
         initialState={initialState}

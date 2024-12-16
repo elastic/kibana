@@ -20,7 +20,6 @@ import { css } from '@emotion/react';
 import type { ISearchGeneric } from '@kbn/search-types';
 import ESQLEditor from '@kbn/esql-editor';
 import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
-import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { getIndexPatternFromESQLQuery, getESQLResults } from '@kbn/esql-utils';
 import { esqlVariablesService } from '../../../../common';
 import type { ESQLControlState } from '../types';
@@ -38,18 +37,18 @@ import { EsqlControlFlyoutType } from '../types';
 interface ValueControlFormProps {
   search: ISearchGeneric;
   controlType: EsqlControlType;
-  dashboardApi: DashboardApi;
   queryString: string;
   closeFlyout: () => void;
   onCreateControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
   onEditControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
+  onCancelControlCallback?: () => void;
   initialState?: ESQLControlState;
 }
 
 export function ValueControlForm({
   controlType,
   initialState,
-  dashboardApi,
+  onCancelControlCallback,
   queryString,
   search,
   closeFlyout,
@@ -343,7 +342,7 @@ export function ValueControlForm({
       <Footer
         isControlInEditMode={isControlInEditMode}
         variableName={variableName}
-        dashboardApi={dashboardApi}
+        onCancelControlCallback={onCancelControlCallback}
         isSaveDisabled={formIsInvalid}
         closeFlyout={closeFlyout}
         onCreateControl={onCreateValueControl}

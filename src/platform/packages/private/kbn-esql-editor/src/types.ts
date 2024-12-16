@@ -16,7 +16,6 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 
 export interface ESQLEditorProps {
@@ -76,11 +75,10 @@ export interface ESQLEditorProps {
    * This flag should be set to true to display the "Create control" suggestion
    **/
   supportsVariables?: boolean;
-  /** very important for controls creation from the editor, controls creation api **/
-  dashboardApi?: PresentationContainer;
-  /** very important for controls creation from the editor.
-   * Pass the embedable id if the editor is part of an embeddable **/
-  panelId?: string;
+  /** Function to be called after the control creation **/
+  onSaveControlCallback?: (controlState: Record<string, unknown>) => Promise<void>;
+  /** Function to be called after cancelling the control creation **/
+  onCancelControlCallback?: () => void;
 }
 
 interface EsqlVariablesService {
