@@ -445,7 +445,7 @@ export const scheduleManualRuleRunForSelectedRules = (
   if (disabledCount > 0) {
     cy.get(BULK_MANUAL_RULE_RUN_WARNING_MODAL).should(
       'have.text',
-      `This action can only be applied to ${enabledCount} rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot schedule manual rule run for disabled rules)CancelSchedule ${enabledCount} custom rules`
+      `This action can only be applied to ${enabledCount} rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot schedule manual rule run for disabled rules)CancelSchedule ${enabledCount} rules`
     );
     cy.get(CONFIRM_MANUAL_RULE_RUN_WARNING_BTN).click();
   }
