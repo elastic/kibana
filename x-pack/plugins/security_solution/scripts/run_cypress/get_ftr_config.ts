@@ -20,7 +20,6 @@ export const getFTRConfig = ({
   ftrConfigFilePath,
   specFilePath,
   specFileFTRConfig,
-  isOpen,
 }: {
   log: ToolingLog;
   esPort: number;
@@ -28,8 +27,7 @@ export const getFTRConfig = ({
   fleetServerPort: number;
   ftrConfigFilePath: string;
   specFilePath: string;
-  specFileFTRConfig: ReturnType<typeof parseTestFileConfig>;
-  isOpen: boolean;
+  specFileFTRConfig: ReturnType<typeof parseTestFileConfig>['ftrConfig'];
 }) =>
   readConfigFile(
     log,
@@ -82,7 +80,9 @@ export const getFTRConfig = ({
       // like key and certificate
       vars.kbnTestServer.serverArgs.push(
         `--server.port=${kibanaPort}`,
-        `--elasticsearch.hosts=http://localhost:${esPort}`
+        `--elasticsearch.hosts=http://localhost:${esPort}`,
+        '--csp.strict=false',
+        '--csp.warnLegacyBrowsers=false'
       );
 
       // apply right protocol on hosts
