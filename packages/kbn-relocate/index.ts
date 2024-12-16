@@ -46,15 +46,17 @@ export const runKbnRelocateCli = () => {
         await findAndMoveModule(flags.moveOnly, log);
       } else {
         const { pr, team, path, include, exclude, baseBranch } = flags;
-        await findAndRelocateModules({
-          prNumber: toOptString('prNumber', pr),
-          baseBranch: toOptString('baseBranch', baseBranch, 'main')!,
-          teams: toStringArray(team),
-          paths: toStringArray(path),
-          included: toStringArray(include),
-          excluded: toStringArray(exclude),
-          log,
-        });
+        await findAndRelocateModules(
+          {
+            prNumber: toOptString('prNumber', pr),
+            baseBranch: toOptString('baseBranch', baseBranch, 'main')!,
+            teams: toStringArray(team),
+            paths: toStringArray(path),
+            included: toStringArray(include),
+            excluded: toStringArray(exclude),
+          },
+          log
+        );
       }
     },
     {

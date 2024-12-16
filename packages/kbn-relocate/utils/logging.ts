@@ -10,8 +10,8 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import { appendFileSync, writeFileSync } from 'fs';
 import dedent from 'dedent';
-import type { Package } from './types';
-import { calculateModuleTargetFolder } from './utils.relocate';
+import type { Package } from '../types';
+import { calculateModuleTargetFolder } from './relocate';
 import {
   BASE_FOLDER,
   DESCRIPTION,
@@ -19,7 +19,7 @@ import {
   SCRIPT_ERRORS,
   UPDATED_REFERENCES,
   UPDATED_RELATIVE_PATHS,
-} from './constants';
+} from '../constants';
 
 export const relocatePlan = (modules: Package[], log: ToolingLog) => {
   const plugins = modules.filter((module) => module.manifest.type === 'plugin');
