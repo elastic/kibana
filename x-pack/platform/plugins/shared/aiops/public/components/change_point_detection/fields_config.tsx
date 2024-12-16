@@ -56,6 +56,7 @@ import {
 import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
 import { ViewTypeSelector } from './view_type_selector';
+import { TITLES } from '../../cases/constants';
 
 const selectControlCss = { width: '350px' };
 
@@ -215,7 +216,10 @@ const FieldPanel: FC<FieldPanelProps> = ({
     progress,
   } = useChangePointResults(fieldConfig, requestParams, combinedQuery, splitFieldCardinality);
 
-  const openCasesModalCallback = useCasesModal(EMBEDDABLE_CHANGE_POINT_CHART_TYPE);
+  const openCasesModalCallback = useCasesModal(
+    EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+    TITLES.CHANGE_POINT_DETECTION
+  );
 
   const selectedPartitions = useMemo(() => {
     return (selectedChangePoints[panelIndex] ?? []).map((v) => v.group?.value as string);

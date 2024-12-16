@@ -28,6 +28,7 @@ import {
 } from '@elastic/eui';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis/window_parameters';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
+import { TITLES } from '../../../cases/constants';
 import { useCasesModal } from '../../../hooks/use_cases_modal';
 import { useDataSource } from '../../../hooks/use_data_source';
 import type { LogRateAnalysisEmbeddableState } from '../../../embeddables/log_rate_analysis/types';
@@ -60,7 +61,10 @@ export const LogRateAnalysisAttachmentsMenu = ({
   const timeRange = useTimeRangeUpdates();
   const absoluteTimeRange = useTimeRangeUpdates(true);
 
-  const openCasesModalCallback = useCasesModal(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE);
+  const openCasesModalCallback = useCasesModal(
+    EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
+    TITLES.LOG_RATE_ANALYSIS
+  );
 
   const canEditDashboards = capabilities.dashboard.createNew;
 

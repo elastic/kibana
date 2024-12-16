@@ -27,6 +27,7 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import type { MlJobState } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TITLES } from '../../../../cases/constants';
 import type { CombinedJobWithStats } from '../../../../../server/shared';
 import type { JobId } from '../../../../../common/types/anomaly_detection_jobs/job';
 import { useMlKibana } from '../../../contexts/kibana';
@@ -125,7 +126,10 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
     [setIsMenuOpen]
   );
 
-  const openCasesModalCallback = useCasesModal(ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE);
+  const openCasesModalCallback = useCasesModal(
+    ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
+    TITLES.SINGLE_METRIC_VIEWER
+  );
 
   const showControls =
     (fullRefresh === false || loading === false) && hasResults === true && jobs.length > 0;

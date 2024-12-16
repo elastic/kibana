@@ -52,6 +52,7 @@ import { useMlKibana } from '../contexts/kibana';
 import type { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
 import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
 import { getDefaultExplorerChartsPanelTitle } from '../../embeddables/anomaly_charts/utils';
+import { TITLES } from '../../cases/constants';
 
 interface AnomalyContextMenuProps {
   selectedJobs: ExplorerJob[];
@@ -97,7 +98,10 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     [setIsMenuOpen]
   );
 
-  const openCasesModal = useCasesModal(ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE);
+  const openCasesModal = useCasesModal(
+    ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+    TITLES.ANOMALY_CHARTS
+  );
 
   const canEditDashboards = capabilities.dashboard?.createNew ?? false;
   const casesPrivileges = cases?.helpers.canUseCases();

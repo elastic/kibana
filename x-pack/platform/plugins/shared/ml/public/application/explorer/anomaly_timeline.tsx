@@ -67,6 +67,7 @@ import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { getTimeBoundsFromSelection } from './hooks/use_selected_cells';
 import { SwimLaneWrapper } from './alerts';
 import { Y_AXIS_LABEL_WIDTH } from './constants';
+import { TITLES } from '../../cases/constants';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -189,7 +190,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       [severityUpdate, swimLaneSeverity]
     );
 
-    const openCasesModalCallback = useCasesModal(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE);
+    const openCasesModalCallback = useCasesModal(
+      ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+      TITLES.ANOMALY_TIMELINE
+    );
 
     const openCasesModal = useCallback(
       (swimLaneType: SwimlaneType) => {

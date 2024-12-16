@@ -34,6 +34,7 @@ import type { PatternAnalysisEmbeddableState } from '../../embeddables/pattern_a
 import type { RandomSamplerOption, RandomSamplerProbability } from './sampling_menu/random_sampler';
 import { useCasesModal } from '../../hooks/use_cases_modal';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { TITLES } from '../../cases/constants';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
@@ -66,7 +67,10 @@ export const AttachmentsMenu = ({
     update: false,
   };
 
-  const openCasesModalCallback = useCasesModal(EMBEDDABLE_PATTERN_ANALYSIS_TYPE);
+  const openCasesModalCallback = useCasesModal(
+    EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
+    TITLES.PATTERN_ANALYSIS
+  );
 
   const timeRange = useTimeRangeUpdates();
 
