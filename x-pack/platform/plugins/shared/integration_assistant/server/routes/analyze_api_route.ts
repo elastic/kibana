@@ -10,7 +10,12 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { ANALYZE_API_PATH, AnalyzeApiRequestBody, AnalyzeApiResponse } from '../../common';
-import { ROUTE_HANDLER_TIMEOUT } from '../constants';
+import {
+  ACTIONS_AND_CONNECTORS_ALL_ROLE,
+  FLEET_ALL_ROLE,
+  INTEGRATIONS_ALL_ROLE,
+  ROUTE_HANDLER_TIMEOUT,
+} from '../constants';
 import { getApiAnalysisGraph } from '../graphs/api_analysis';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { getLLMClass, getLLMType } from '../util/llm';
@@ -34,6 +39,15 @@ export function registerApiAnalysisRoutes(
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            requiredPrivileges: [
+              FLEET_ALL_ROLE,
+              INTEGRATIONS_ALL_ROLE,
+              ACTIONS_AND_CONNECTORS_ALL_ROLE,
+            ],
+          },
+        },
         validate: {
           request: {
             body: buildRouteValidationWithZod(AnalyzeApiRequestBody),
