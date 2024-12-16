@@ -27,7 +27,7 @@ import {
   hasFieldsForAad,
   parseDuration,
 } from '../utils';
-import { DEFAULT_FREQUENCY, DEFAULT_VALID_CONSUMERS } from '../constants';
+import { DEFAULT_VALID_CONSUMERS } from '../constants';
 
 import { RuleActionsNotifyWhen } from './rule_actions_notify_when';
 import { RuleActionsAlertsFilter } from './rule_actions_alerts_filter';
