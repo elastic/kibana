@@ -33,7 +33,7 @@ export interface QueryParams {
   to: string | null;
 }
 
-const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
+const BASE_ALERTING_API_PATH = '/api/alerting';
 
 const buildTimeRangeFilter = (
   dataView: DataView,
@@ -77,7 +77,7 @@ export const getAlertUtils = (
   const fetchAlert = async (id: string) => {
     try {
       return await core.http.get<Rule<SearchThresholdAlertParams>>(
-        `${LEGACY_BASE_ALERT_API_PATH}/alert/${id}`
+        `${BASE_ALERTING_API_PATH}/rule/${id}`
       );
     } catch (error) {
       const errorTitle = i18n.translate('discover.viewAlert.alertRuleFetchErrorTitle', {
