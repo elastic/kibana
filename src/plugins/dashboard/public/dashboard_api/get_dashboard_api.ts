@@ -87,18 +87,15 @@ export function getDashboardApi({
     controlGroupApi$,
     panelsManager.api.children$
   );
+  const settingsManager = initializeSettingsManager(initialState);
   const unifiedSearchManager = initializeUnifiedSearchManager(
     initialState,
     controlGroupApi$,
+    settingsManager.api.timeRestore$,
     dataLoadingManager.internalApi.waitForPanelsToLoad$,
     () => unsavedChangesManager.internalApi.getLastSavedState(),
     creationOptions
   );
-  const settingsManager = initializeSettingsManager({
-    initialState,
-    setTimeRestore: unifiedSearchManager.internalApi.setTimeRestore,
-    timeRestore$: unifiedSearchManager.internalApi.timeRestore$,
-  });
   const unsavedChangesManager = initializeUnsavedChangesManager({
     creationOptions,
     controlGroupApi$,
