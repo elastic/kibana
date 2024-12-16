@@ -4062,106 +4062,6 @@
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/vulnerabilities_dashboard/vulnerabilities_dashboard.ts"
               },
               {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_get_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_get_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_privileges_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_datastream_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_datastream_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_get_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_get_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_list_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_privileges_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_list_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_get_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/inference_models/register_get_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/mapping/register_mapping_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/nodes/register_nodes_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/settings/register_load_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/stats/register_stats_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_get_routes.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_get_routes.ts"
-              },
-              {
-                "plugin": "remoteClusters",
-                "path": "x-pack/plugins/remote_clusters/server/routes/api/get_route.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_fetch_route.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_get_route.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_fetch_route.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_get_route.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/cross_cluster_replication/register_permissions_route.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/cross_cluster_replication/register_stats_route.ts"
-              },
-              {
                 "plugin": "guidedOnboarding",
                 "path": "src/plugins/guided_onboarding/server/routes/guide_state_routes.ts"
               },
@@ -4192,10 +4092,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/server/routes/config.ts"
-              },
-              {
-                "plugin": "productDocBase",
-                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -4618,28 +4514,76 @@
                 "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
               },
               {
-                "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/nodes/register_list_route.ts"
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_get_route.ts"
               },
               {
-                "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/nodes/register_details_route.ts"
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_get_route.ts"
               },
               {
-                "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/policies/register_fetch_route.ts"
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_privileges_route.ts"
               },
               {
-                "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/templates/register_fetch_route.ts"
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_datastream_route.ts"
               },
               {
-                "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/snapshot_policies/register_fetch_route.ts"
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_datastream_route.ts"
               },
               {
-                "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/snapshot_repositories/register_fetch_route.ts"
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_get_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_get_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_list_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_privileges_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_list_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_get_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/inference_models/register_get_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/mapping/register_mapping_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/nodes/register_nodes_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/settings/register_load_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/stats/register_stats_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_get_routes.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_get_routes.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -4662,10 +4606,6 @@
                 "path": "x-pack/plugins/ingest_pipelines/server/routes/api/database/list.ts"
               },
               {
-                "plugin": "licenseManagement",
-                "path": "x-pack/plugins/license_management/server/routes/api/license/register_start_trial_routes.ts"
-              },
-              {
                 "plugin": "logstash",
                 "path": "x-pack/plugins/logstash/server/routes/cluster/load.ts"
               },
@@ -4680,38 +4620,6 @@
               {
                 "plugin": "monitoring",
                 "path": "x-pack/plugins/monitoring/server/plugin.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/resolver.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack",
-                "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack",
-                "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack",
-                "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/resilient_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack",
-                "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack",
-                "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
-              },
-              {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/routes/metric_indices/index.ts"
               },
               {
                 "plugin": "reporting",
@@ -4750,18 +4658,6 @@
                 "path": "x-pack/plugins/reporting/server/test_helpers/create_mock_reportingplugin.ts"
               },
               {
-                "plugin": "rollup",
-                "path": "x-pack/plugins/rollup/server/routes/api/indices/register_get_route.ts"
-              },
-              {
-                "plugin": "rollup",
-                "path": "x-pack/plugins/rollup/server/routes/api/indices/register_validate_index_pattern_route.ts"
-              },
-              {
-                "plugin": "rollup",
-                "path": "x-pack/plugins/rollup/server/routes/api/jobs/register_get_route.ts"
-              },
-              {
                 "plugin": "searchIndices",
                 "path": "x-pack/plugins/search_indices/server/routes/status.ts"
               },
@@ -4786,8 +4682,12 @@
                 "path": "x-pack/plugins/search_playground/server/routes.ts"
               },
               {
-                "plugin": "searchprofiler",
-                "path": "x-pack/plugins/searchprofiler/server/routes/profile.ts"
+                "plugin": "productDocBase",
+                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/resolver.ts"
               },
               {
                 "plugin": "serverlessSearch",
@@ -4824,62 +4724,6 @@
               {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/ingest_pipeline_routes.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/app.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/repositories.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/repositories.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/repositories.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/repositories.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/snapshots.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/snapshots.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/restore.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
               },
               {
                 "plugin": "stackConnectors",
@@ -4946,40 +4790,16 @@
                 "path": "x-pack/plugins/upgrade_assistant/server/routes/node_disk_space.ts"
               },
               {
-                "plugin": "watcher",
-                "path": "x-pack/plugins/watcher/server/routes/api/settings/register_load_route.ts"
-              },
-              {
-                "plugin": "watcher",
-                "path": "x-pack/plugins/watcher/server/routes/api/indices/register_get_index_patterns_route.ts"
-              },
-              {
-                "plugin": "watcher",
-                "path": "x-pack/plugins/watcher/server/routes/api/license/register_refresh_route.ts"
-              },
-              {
-                "plugin": "watcher",
-                "path": "x-pack/plugins/watcher/server/routes/api/watches/register_list_route.ts"
-              },
-              {
-                "plugin": "watcher",
-                "path": "x-pack/plugins/watcher/server/routes/api/watch/register_load_route.ts"
-              },
-              {
-                "plugin": "watcher",
-                "path": "x-pack/plugins/watcher/server/routes/api/watch/register_history_route.ts"
-              },
-              {
-                "plugin": "watcher",
-                "path": "x-pack/plugins/watcher/server/routes/api/register_load_history_route.ts"
-              },
-              {
                 "plugin": "customBranding",
                 "path": "x-pack/plugins/custom_branding/server/routes/info.ts"
               },
               {
-                "plugin": "grokdebugger",
-                "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/routes/metric_indices/index.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -5046,24 +4866,192 @@
                 "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.test.ts"
               },
               {
+                "plugin": "remoteClusters",
+                "path": "x-pack/platform/plugins/private/remote_clusters/server/routes/api/get_route.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_fetch_route.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_get_route.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_fetch_route.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_get_route.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/cross_cluster_replication/register_permissions_route.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/cross_cluster_replication/register_stats_route.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/nodes/register_list_route.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/nodes/register_details_route.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/policies/register_fetch_route.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/templates/register_fetch_route.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/snapshot_policies/register_fetch_route.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/snapshot_repositories/register_fetch_route.ts"
+              },
+              {
+                "plugin": "rollup",
+                "path": "x-pack/platform/plugins/private/rollup/server/routes/api/indices/register_get_route.ts"
+              },
+              {
+                "plugin": "rollup",
+                "path": "x-pack/platform/plugins/private/rollup/server/routes/api/indices/register_validate_index_pattern_route.ts"
+              },
+              {
+                "plugin": "rollup",
+                "path": "x-pack/platform/plugins/private/rollup/server/routes/api/jobs/register_get_route.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/app.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/repositories.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/repositories.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/repositories.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/repositories.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/snapshots.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/snapshots.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/restore.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/policy.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/policy.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/policy.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/policy.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/policy.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/policy.ts"
+              },
+              {
+                "plugin": "watcher",
+                "path": "x-pack/platform/plugins/private/watcher/server/routes/api/settings/register_load_route.ts"
+              },
+              {
+                "plugin": "watcher",
+                "path": "x-pack/platform/plugins/private/watcher/server/routes/api/indices/register_get_index_patterns_route.ts"
+              },
+              {
+                "plugin": "watcher",
+                "path": "x-pack/platform/plugins/private/watcher/server/routes/api/license/register_refresh_route.ts"
+              },
+              {
+                "plugin": "watcher",
+                "path": "x-pack/platform/plugins/private/watcher/server/routes/api/watches/register_list_route.ts"
+              },
+              {
+                "plugin": "watcher",
+                "path": "x-pack/platform/plugins/private/watcher/server/routes/api/watch/register_load_route.ts"
+              },
+              {
+                "plugin": "watcher",
+                "path": "x-pack/platform/plugins/private/watcher/server/routes/api/watch/register_history_route.ts"
+              },
+              {
+                "plugin": "watcher",
+                "path": "x-pack/platform/plugins/private/watcher/server/routes/api/register_load_history_route.ts"
+              },
+              {
+                "plugin": "licenseManagement",
+                "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_start_trial_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack",
+                "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack",
+                "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack",
+                "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/resilient_simulation.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack",
+                "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack",
+                "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
+              },
+              {
+                "plugin": "searchprofiler",
+                "path": "x-pack/platform/plugins/shared/searchprofiler/server/routes/profile.ts"
+              },
+              {
+                "plugin": "grokdebugger",
+                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/server.ts"
               },
               {
                 "plugin": "uptime",
                 "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
-              },
-              {
-                "plugin": "console",
-                "path": "src/plugins/console/server/routes/api/console/es_config/index.ts"
-              },
-              {
-                "plugin": "console",
-                "path": "src/plugins/console/server/routes/api/console/spec_definitions/index.ts"
-              },
-              {
-                "plugin": "console",
-                "path": "src/plugins/console/server/routes/api/console/autocomplete_entities/index.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -5096,6 +5084,18 @@
               {
                 "plugin": "visTypeTimelion",
                 "path": "src/plugins/vis_types/timelion/server/routes/functions.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/es_config/index.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/spec_definitions/index.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/autocomplete_entities/index.ts"
               },
               {
                 "plugin": "mockIdpPlugin",
@@ -5602,10 +5602,6 @@
                 "path": "x-pack/plugins/alerting/server/routes/legacy/list_alert_types.test.ts"
               },
               {
-                "plugin": "remoteClusters",
-                "path": "x-pack/plugins/remote_clusters/server/routes/api/get_route.test.ts"
-              },
-              {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/connector/get/get.test.ts"
               },
@@ -5672,22 +5668,6 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/connector/list_types_system/list_types_system.test.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_fetch_route.test.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_get_route.test.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_fetch_route.test.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_get_route.test.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -5922,6 +5902,26 @@
                 "path": "x-pack/plugins/monitoring_collection/server/routes/api/v1/prometheus/get_metrics.test.ts"
               },
               {
+                "plugin": "remoteClusters",
+                "path": "x-pack/platform/plugins/private/remote_clusters/server/routes/api/get_route.test.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_fetch_route.test.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_get_route.test.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_fetch_route.test.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_get_route.test.ts"
+              },
+              {
                 "plugin": "savedObjectsManagement",
                 "path": "src/plugins/saved_objects_management/server/routes/index.test.ts"
               },
@@ -6151,7 +6151,7 @@
               },
               {
                 "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/test/helpers/router_mock.ts"
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/test/helpers/router_mock.ts"
               },
               {
                 "plugin": "interactiveSetup",
@@ -6776,106 +6776,6 @@
                 "path": "x-pack/plugins/saved_objects_tagging/server/routes/internal/bulk_delete.ts"
               },
               {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_create_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_delete_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_post_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_post_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_clear_cache_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_close_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_flush_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_forcemerge_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_open_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_refresh_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_reload_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_delete_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_unfreeze_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_delete_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_create_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_simulate_route.ts"
-              },
-              {
-                "plugin": "remoteClusters",
-                "path": "x-pack/plugins/remote_clusters/server/routes/api/add_route.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_create_route.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_pause_route.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_resume_route.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_create_route.ts"
-              },
-              {
                 "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
@@ -6890,14 +6790,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/server/data/routes/indices.ts"
-              },
-              {
-                "plugin": "productDocBase",
-                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
-              },
-              {
-                "plugin": "productDocBase",
-                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -7252,24 +7144,84 @@
                 "path": "x-pack/plugins/graph/server/routes/explore.ts"
               },
               {
-                "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/index/register_retry_route.ts"
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_create_route.ts"
               },
               {
-                "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/index/register_remove_route.ts"
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_delete_route.ts"
               },
               {
-                "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/index/register_add_policy_route.ts"
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_post_route.ts"
               },
               {
-                "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/policies/register_create_route.ts"
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_post_route.ts"
               },
               {
-                "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/templates/register_add_policy_route.ts"
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_clear_cache_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_close_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_flush_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_forcemerge_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_open_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_refresh_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_reload_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_delete_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_unfreeze_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_delete_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_create_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_simulate_route.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -7286,18 +7238,6 @@
               {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/plugins/ingest_pipelines/server/routes/api/database/create.ts"
-              },
-              {
-                "plugin": "licenseManagement",
-                "path": "x-pack/plugins/license_management/server/routes/api/license/register_start_basic_route.ts"
-              },
-              {
-                "plugin": "licenseManagement",
-                "path": "x-pack/plugins/license_management/server/routes/api/license/register_start_trial_routes.ts"
-              },
-              {
-                "plugin": "licenseManagement",
-                "path": "x-pack/plugins/license_management/server/routes/api/license/register_permissions_route.ts"
               },
               {
                 "plugin": "logstash",
@@ -7320,12 +7260,264 @@
                 "path": "x-pack/plugins/monitoring/server/plugin.ts"
               },
               {
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/internal/generate/generate_from_jobparams.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/public/generate_from_jobparams.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/test_helpers/create_mock_reportingplugin.ts"
+              },
+              {
+                "plugin": "@kbn/search-api-keys-server",
+                "path": "packages/kbn-search-api-keys-server/src/routes/routes.ts"
+              },
+              {
+                "plugin": "@kbn/search-api-keys-server",
+                "path": "packages/kbn-search-api-keys-server/src/routes/routes.ts"
+              },
+              {
+                "plugin": "searchIndices",
+                "path": "x-pack/plugins/search_indices/server/routes/indices.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "productDocBase",
+                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
+              },
+              {
+                "plugin": "productDocBase",
+                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/resolver.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/resolver.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/indices_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "stackConnectors",
+                "path": "x-pack/plugins/stack_connectors/server/routes/valid_slack_api_channels.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/plugins/upgrade_assistant/server/routes/reindex_indices/reindex_indices.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/plugins/upgrade_assistant/server/routes/reindex_indices/reindex_indices.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/plugins/upgrade_assistant/server/routes/reindex_indices/batch_reindex_indices.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/plugins/upgrade_assistant/server/routes/system_indices_migration.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/plugins/upgrade_assistant/server/routes/update_index_settings.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/plugins/upgrade_assistant/server/routes/ml_snapshots.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/plugins/upgrade_assistant/server/routes/cluster_settings.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/routes/vis.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/setup/route.ts"
+              },
+              {
+                "plugin": "remoteClusters",
+                "path": "x-pack/platform/plugins/private/remote_clusters/server/routes/api/add_route.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_create_route.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_pause_route.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_resume_route.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_create_route.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/index/register_retry_route.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/index/register_remove_route.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/index/register_add_policy_route.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/policies/register_create_route.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/templates/register_add_policy_route.ts"
+              },
+              {
+                "plugin": "painlessLab",
+                "path": "x-pack/platform/plugins/private/painless_lab/server/routes/api/execute.ts"
+              },
+              {
+                "plugin": "rollup",
+                "path": "x-pack/platform/plugins/private/rollup/server/routes/api/jobs/register_delete_route.ts"
+              },
+              {
+                "plugin": "rollup",
+                "path": "x-pack/platform/plugins/private/rollup/server/routes/api/jobs/register_start_route.ts"
+              },
+              {
+                "plugin": "rollup",
+                "path": "x-pack/platform/plugins/private/rollup/server/routes/api/jobs/register_stop_route.ts"
+              },
+              {
+                "plugin": "rollup",
+                "path": "x-pack/platform/plugins/private/rollup/server/routes/api/search/register_search_route.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/repositories.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/snapshots.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/restore.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/policy.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/policy.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/policy.ts"
+              },
+              {
+                "plugin": "watcher",
+                "path": "x-pack/platform/plugins/private/watcher/server/routes/api/indices/register_get_route.ts"
+              },
+              {
+                "plugin": "watcher",
+                "path": "x-pack/platform/plugins/private/watcher/server/routes/api/watches/register_delete_route.ts"
+              },
+              {
+                "plugin": "watcher",
+                "path": "x-pack/platform/plugins/private/watcher/server/routes/api/watch/register_visualize_route.ts"
+              },
+              {
+                "plugin": "watcher",
+                "path": "x-pack/platform/plugins/private/watcher/server/routes/api/register_list_fields_route.ts"
+              },
+              {
+                "plugin": "licenseManagement",
+                "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_start_basic_route.ts"
+              },
+              {
+                "plugin": "licenseManagement",
+                "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_start_trial_routes.ts"
+              },
+              {
+                "plugin": "licenseManagement",
+                "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_permissions_route.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack",
@@ -7384,204 +7576,12 @@
                 "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
               },
               {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "painlessLab",
-                "path": "x-pack/plugins/painless_lab/server/routes/api/execute.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/internal/generate/generate_from_jobparams.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/public/generate_from_jobparams.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/test_helpers/create_mock_reportingplugin.ts"
-              },
-              {
-                "plugin": "rollup",
-                "path": "x-pack/plugins/rollup/server/routes/api/jobs/register_delete_route.ts"
-              },
-              {
-                "plugin": "rollup",
-                "path": "x-pack/plugins/rollup/server/routes/api/jobs/register_start_route.ts"
-              },
-              {
-                "plugin": "rollup",
-                "path": "x-pack/plugins/rollup/server/routes/api/jobs/register_stop_route.ts"
-              },
-              {
-                "plugin": "rollup",
-                "path": "x-pack/plugins/rollup/server/routes/api/search/register_search_route.ts"
-              },
-              {
-                "plugin": "@kbn/search-api-keys-server",
-                "path": "packages/kbn-search-api-keys-server/src/routes/routes.ts"
-              },
-              {
-                "plugin": "@kbn/search-api-keys-server",
-                "path": "packages/kbn-search-api-keys-server/src/routes/routes.ts"
-              },
-              {
-                "plugin": "searchIndices",
-                "path": "x-pack/plugins/search_indices/server/routes/indices.ts"
-              },
-              {
-                "plugin": "searchPlayground",
-                "path": "x-pack/plugins/search_playground/server/routes.ts"
-              },
-              {
-                "plugin": "searchPlayground",
-                "path": "x-pack/plugins/search_playground/server/routes.ts"
-              },
-              {
-                "plugin": "searchPlayground",
-                "path": "x-pack/plugins/search_playground/server/routes.ts"
-              },
-              {
-                "plugin": "searchPlayground",
-                "path": "x-pack/plugins/search_playground/server/routes.ts"
-              },
-              {
                 "plugin": "searchprofiler",
-                "path": "x-pack/plugins/searchprofiler/server/routes/profile.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/indices_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/repositories.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/snapshots.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/restore.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
-              },
-              {
-                "plugin": "stackConnectors",
-                "path": "x-pack/plugins/stack_connectors/server/routes/valid_slack_api_channels.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/server/routes/reindex_indices/reindex_indices.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/server/routes/reindex_indices/reindex_indices.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/server/routes/reindex_indices/batch_reindex_indices.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/server/routes/system_indices_migration.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/server/routes/update_index_settings.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/server/routes/ml_snapshots.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/server/routes/cluster_settings.ts"
-              },
-              {
-                "plugin": "watcher",
-                "path": "x-pack/plugins/watcher/server/routes/api/indices/register_get_route.ts"
-              },
-              {
-                "plugin": "watcher",
-                "path": "x-pack/plugins/watcher/server/routes/api/watches/register_delete_route.ts"
-              },
-              {
-                "plugin": "watcher",
-                "path": "x-pack/plugins/watcher/server/routes/api/watch/register_visualize_route.ts"
-              },
-              {
-                "plugin": "watcher",
-                "path": "x-pack/plugins/watcher/server/routes/api/register_list_fields_route.ts"
+                "path": "x-pack/platform/plugins/shared/searchprofiler/server/routes/profile.ts"
               },
               {
                 "plugin": "grokdebugger",
-                "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/routes/vis.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/observability_solution/profiling/server/routes/setup/route.ts"
+                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
                 "plugin": "synthetics",
@@ -7590,14 +7590,6 @@
               {
                 "plugin": "uptime",
                 "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
-              },
-              {
-                "plugin": "console",
-                "path": "src/plugins/console/server/routes/api/console/proxy/index.ts"
-              },
-              {
-                "plugin": "console",
-                "path": "src/plugins/console/server/routes/api/console/convert_request_to_language/index.ts"
               },
               {
                 "plugin": "contentManagement",
@@ -7674,6 +7666,14 @@
               {
                 "plugin": "visTypeTimelion",
                 "path": "src/plugins/vis_types/timelion/server/routes/run.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/proxy/index.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/convert_request_to_language/index.ts"
               },
               {
                 "plugin": "mockIdpPlugin",
@@ -8080,10 +8080,6 @@
                 "path": "x-pack/plugins/alerting/server/routes/suggestions/values_suggestion_rules.test.ts"
               },
               {
-                "plugin": "remoteClusters",
-                "path": "x-pack/plugins/remote_clusters/server/routes/api/add_route.test.ts"
-              },
-              {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/connector/create/create.test.ts"
               },
@@ -8114,22 +8110,6 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/connector/execute/execute.test.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_create_route.test.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_pause_route.test.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_resume_route.test.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_create_route.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -8460,6 +8440,26 @@
                 "path": "x-pack/plugins/alerting/server/routes/rules_settings/apis/update/update_query_delay_settings.test.ts"
               },
               {
+                "plugin": "remoteClusters",
+                "path": "x-pack/platform/plugins/private/remote_clusters/server/routes/api/add_route.test.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_create_route.test.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_pause_route.test.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_resume_route.test.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_create_route.test.ts"
+              },
+              {
                 "plugin": "home",
                 "path": "src/plugins/home/server/plugin.test.ts"
               },
@@ -8609,7 +8609,7 @@
               },
               {
                 "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/test/helpers/router_mock.ts"
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/test/helpers/router_mock.ts"
               }
             ],
             "returnComment": [],
@@ -8810,58 +8810,6 @@
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/update/update_rule_route.ts"
               },
               {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_update_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_put_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_execute_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_create_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/mapping/register_update_mapping_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/settings/register_update_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_update_route.ts"
-              },
-              {
-                "plugin": "remoteClusters",
-                "path": "x-pack/plugins/remote_clusters/server/routes/api/update_route.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_update_route.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_pause_route.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_resume_route.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_unfollow_route.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_update_route.ts"
-              },
-              {
                 "plugin": "guidedOnboarding",
                 "path": "src/plugins/guided_onboarding/server/routes/plugin_state_routes.ts"
               },
@@ -9050,12 +8998,36 @@
                 "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
               },
               {
-                "plugin": "ingestPipelines",
-                "path": "x-pack/plugins/ingest_pipelines/server/routes/api/update.ts"
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_update_route.ts"
               },
               {
-                "plugin": "licenseManagement",
-                "path": "x-pack/plugins/license_management/server/routes/api/license/register_license_route.ts"
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_put_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_execute_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_create_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/mapping/register_update_mapping_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/settings/register_update_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_update_route.ts"
+              },
+              {
+                "plugin": "ingestPipelines",
+                "path": "x-pack/plugins/ingest_pipelines/server/routes/api/update.ts"
               },
               {
                 "plugin": "logstash",
@@ -9066,14 +9038,6 @@
                 "path": "x-pack/plugins/monitoring/server/plugin.ts"
               },
               {
-                "plugin": "@kbn/test-suites-xpack",
-                "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
-              },
-              {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/routes/internal/deprecations/deprecations.ts"
               },
@@ -9082,56 +9046,92 @@
                 "path": "x-pack/plugins/reporting/server/test_helpers/create_mock_reportingplugin.ts"
               },
               {
-                "plugin": "rollup",
-                "path": "x-pack/plugins/rollup/server/routes/api/jobs/register_create_route.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/repositories.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/repositories.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
-              },
-              {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/server/routes/deprecation_logging.ts"
               },
               {
-                "plugin": "watcher",
-                "path": "x-pack/plugins/watcher/server/routes/api/watch/register_execute_route.ts"
-              },
-              {
-                "plugin": "watcher",
-                "path": "x-pack/plugins/watcher/server/routes/api/watch/register_save_route.ts"
-              },
-              {
-                "plugin": "watcher",
-                "path": "x-pack/plugins/watcher/server/routes/api/watch/register_activate_route.ts"
-              },
-              {
-                "plugin": "watcher",
-                "path": "x-pack/plugins/watcher/server/routes/api/watch/register_deactivate_route.ts"
-              },
-              {
-                "plugin": "watcher",
-                "path": "x-pack/plugins/watcher/server/routes/api/watch/action/register_acknowledge_route.ts"
-              },
-              {
-                "plugin": "grokdebugger",
-                "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "infra",
                 "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "remoteClusters",
+                "path": "x-pack/platform/plugins/private/remote_clusters/server/routes/api/update_route.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_update_route.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_pause_route.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_resume_route.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_unfollow_route.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_update_route.ts"
+              },
+              {
+                "plugin": "rollup",
+                "path": "x-pack/platform/plugins/private/rollup/server/routes/api/jobs/register_create_route.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/repositories.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/repositories.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/policy.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/policy.ts"
+              },
+              {
+                "plugin": "watcher",
+                "path": "x-pack/platform/plugins/private/watcher/server/routes/api/watch/register_execute_route.ts"
+              },
+              {
+                "plugin": "watcher",
+                "path": "x-pack/platform/plugins/private/watcher/server/routes/api/watch/register_save_route.ts"
+              },
+              {
+                "plugin": "watcher",
+                "path": "x-pack/platform/plugins/private/watcher/server/routes/api/watch/register_activate_route.ts"
+              },
+              {
+                "plugin": "watcher",
+                "path": "x-pack/platform/plugins/private/watcher/server/routes/api/watch/register_deactivate_route.ts"
+              },
+              {
+                "plugin": "watcher",
+                "path": "x-pack/platform/plugins/private/watcher/server/routes/api/watch/action/register_acknowledge_route.ts"
+              },
+              {
+                "plugin": "licenseManagement",
+                "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_license_route.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack",
+                "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
+              },
+              {
+                "plugin": "grokdebugger",
+                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
                 "plugin": "synthetics",
@@ -9214,10 +9214,6 @@
                 "path": "x-pack/plugins/alerting/server/routes/legacy/update.test.ts"
               },
               {
-                "plugin": "remoteClusters",
-                "path": "x-pack/plugins/remote_clusters/server/routes/api/update_route.test.ts"
-              },
-              {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/connector/update/update.test.ts"
               },
@@ -9228,26 +9224,6 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/connector/update/update.test.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_update_route.test.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_pause_route.test.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_resume_route.test.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_unfollow_route.test.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/follower_index/register_update_route.test.ts"
               },
               {
                 "plugin": "spaces",
@@ -9274,6 +9250,30 @@
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/update/update_rule_route.test.ts"
               },
               {
+                "plugin": "remoteClusters",
+                "path": "x-pack/platform/plugins/private/remote_clusters/server/routes/api/update_route.test.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_update_route.test.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_pause_route.test.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_resume_route.test.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_unfollow_route.test.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_update_route.test.ts"
+              },
+              {
                 "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/test/helpers/router_mock.ts"
               },
@@ -9291,7 +9291,7 @@
               },
               {
                 "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/test/helpers/router_mock.ts"
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/test/helpers/router_mock.ts"
               }
             ],
             "returnComment": [],
@@ -9488,16 +9488,16 @@
                 "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
               },
               {
-                "plugin": "@kbn/test-suites-xpack",
-                "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/resilient_simulation.ts"
-              },
-              {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "infra",
                 "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack",
+                "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/resilient_simulation.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -9585,7 +9585,7 @@
               },
               {
                 "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/test/helpers/router_mock.ts"
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/test/helpers/router_mock.ts"
               }
             ],
             "returnComment": [],
@@ -9818,22 +9818,6 @@
                 "path": "x-pack/plugins/saved_objects_tagging/server/routes/tags/delete_tag.ts"
               },
               {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_delete_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_delete_route.ts"
-              },
-              {
-                "plugin": "remoteClusters",
-                "path": "x-pack/plugins/remote_clusters/server/routes/api/delete_route.ts"
-              },
-              {
-                "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_delete_route.ts"
-              },
-              {
                 "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
@@ -9966,8 +9950,12 @@
                 "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/sources.ts"
               },
               {
-                "plugin": "indexLifecycleManagement",
-                "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/policies/register_delete_route.ts"
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_delete_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_delete_route.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -9980,10 +9968,6 @@
               {
                 "plugin": "logstash",
                 "path": "x-pack/plugins/logstash/server/routes/pipeline/delete.ts"
-              },
-              {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "reporting",
@@ -10010,14 +9994,6 @@
                 "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
               {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/repositories.ts"
-              },
-              {
-                "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
-              },
-              {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/server/routes/deprecation_logging.ts"
               },
@@ -10026,16 +10002,40 @@
                 "path": "x-pack/plugins/upgrade_assistant/server/routes/ml_snapshots.ts"
               },
               {
-                "plugin": "watcher",
-                "path": "x-pack/plugins/watcher/server/routes/api/watch/register_delete_route.ts"
-              },
-              {
-                "plugin": "grokdebugger",
-                "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "infra",
                 "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "remoteClusters",
+                "path": "x-pack/platform/plugins/private/remote_clusters/server/routes/api/delete_route.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_delete_route.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/policies/register_delete_route.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/repositories.ts"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/policy.ts"
+              },
+              {
+                "plugin": "watcher",
+                "path": "x-pack/platform/plugins/private/watcher/server/routes/api/watch/register_delete_route.ts"
+              },
+              {
+                "plugin": "grokdebugger",
+                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
                 "plugin": "synthetics",
@@ -10102,64 +10102,64 @@
                 "path": "x-pack/plugins/alerting/server/routes/legacy/delete.test.ts"
               },
               {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/delete/delete.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/delete/delete.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/delete/delete.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/delete/delete_backfill_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/delete/delete_backfill_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/delete/delete_backfill_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
+              },
+              {
                 "plugin": "remoteClusters",
-                "path": "x-pack/plugins/remote_clusters/server/routes/api/delete_route.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/delete/delete.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/delete/delete.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/delete/delete.test.ts"
+                "path": "x-pack/platform/plugins/private/remote_clusters/server/routes/api/delete_route.test.ts"
               },
               {
                 "plugin": "crossClusterReplication",
-                "path": "x-pack/plugins/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_delete_route.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/delete/delete_backfill_route.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/delete/delete_backfill_route.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/delete/delete_backfill_route.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_delete_route.test.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -10179,7 +10179,7 @@
               },
               {
                 "plugin": "snapshotRestore",
-                "path": "x-pack/plugins/snapshot_restore/server/test/helpers/router_mock.ts"
+                "path": "x-pack/platform/plugins/private/snapshot_restore/server/test/helpers/router_mock.ts"
               }
             ],
             "returnComment": [],
@@ -13590,6 +13590,34 @@
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/protection_updates_note/index.ts"
               },
               {
+                "plugin": "cloudFullStory",
+                "path": "x-pack/plugins/cloud_integrations/cloud_full_story/server/routes/fullstory.ts"
+              },
+              {
+                "plugin": "customBranding",
+                "path": "x-pack/plugins/custom_branding/server/routes/info.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/lib/route_config_helpers.test.ts"
+              },
+              {
+                "plugin": "taskManager",
+                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.test.ts"
+              },
+              {
+                "plugin": "taskManager",
+                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.test.ts"
+              },
+              {
+                "plugin": "taskManager",
+                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.test.ts"
+              },
+              {
+                "plugin": "taskManager",
+                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.test.ts"
+              },
+              {
                 "plugin": "@kbn/test-suites-xpack",
                 "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/pagerduty_simulation.ts"
               },
@@ -13660,34 +13688,6 @@
               {
                 "plugin": "@kbn/test-suites-xpack",
                 "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
-              },
-              {
-                "plugin": "cloudFullStory",
-                "path": "x-pack/plugins/cloud_integrations/cloud_full_story/server/routes/fullstory.ts"
-              },
-              {
-                "plugin": "customBranding",
-                "path": "x-pack/plugins/custom_branding/server/routes/info.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/lib/route_config_helpers.test.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.test.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.test.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.test.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.test.ts"
               },
               {
                 "plugin": "interactiveSetup",
@@ -15942,24 +15942,8 @@
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmark_rules/get_states/get_states.ts"
               },
               {
-                "plugin": "ecsDataQualityDashboard",
-                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/get_index_mappings.ts"
-              },
-              {
-                "plugin": "ecsDataQualityDashboard",
-                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/get_index_stats.ts"
-              },
-              {
-                "plugin": "ecsDataQualityDashboard",
-                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/get_ilm_explain.ts"
-              },
-              {
-                "plugin": "ecsDataQualityDashboard",
-                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/results/get_index_results_latest.ts"
-              },
-              {
-                "plugin": "ecsDataQualityDashboard",
-                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/results/get_index_results.ts"
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "ml",
@@ -16202,58 +16186,6 @@
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/inference_models.ts"
               },
               {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/get/get_attack_discovery.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/user_conversations/read_route.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/user_conversations/find_route.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/get_knowledge_base_indices.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/get_knowledge_base_status.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/evaluate/get_evaluate.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/capabilities/get_capabilities_route.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/prompts/find_route.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/anonymization_fields/find_route.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/entries/find_route.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/defend_insights/get_defend_insight.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/defend_insights/get_defend_insights.ts"
-              },
-              {
-                "plugin": "logsShared",
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
                 "plugin": "fileUpload",
                 "path": "x-pack/plugins/file_upload/server/routes.ts"
               },
@@ -16350,84 +16282,116 @@
                 "path": "x-pack/plugins/maps/server/routes.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.ts"
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/live_query/get_live_query_details_route.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/live_query/get_live_query_details_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/live_query/get_live_query_results_route.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/live_query/get_live_query_results_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/live_query/find_live_query_route.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/live_query/find_live_query_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/saved_query/find_saved_query_route.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/saved_query/find_saved_query_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/saved_query/read_saved_query_route.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/saved_query/read_saved_query_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/status/create_status_route.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/status/create_status_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_agent_policies.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/fleet_wrapper/get_agent_policies.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_agent_policy.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/fleet_wrapper/get_agent_policy.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_agent_status_for_agent_policy.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/fleet_wrapper/get_agent_status_for_agent_policy.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_package_policies.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/fleet_wrapper/get_package_policies.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_agents.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/fleet_wrapper/get_agents.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_agent_details.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/fleet_wrapper/get_agent_details.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/find_pack_route.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/find_pack_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/read_pack_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/privileges_check/privileges_check_route.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/privileges_check/privileges_check_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/asset/get_assets_status_route.ts"
               },
               {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/asset/get_assets_status_route.ts"
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/get/get_attack_discovery.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/user_conversations/read_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/user_conversations/find_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/knowledge_base/get_knowledge_base_indices.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/knowledge_base/get_knowledge_base_status.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/evaluate/get_evaluate.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/capabilities/get_capabilities_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/prompts/find_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/anonymization_fields/find_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/knowledge_base/entries/find_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/get_defend_insight.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/get_defend_insights.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16662,8 +16626,20 @@
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/protection_updates_note/index.ts"
               },
               {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.ts"
               },
               {
                 "plugin": "sessionView",
@@ -16684,6 +16660,10 @@
               {
                 "plugin": "sessionView",
                 "path": "x-pack/plugins/session_view/server/routes/get_total_io_bytes_route.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "infra",
@@ -16736,6 +16716,26 @@
               {
                 "plugin": "uptime",
                 "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
+              },
+              {
+                "plugin": "ecsDataQualityDashboard",
+                "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/routes/get_index_mappings.ts"
+              },
+              {
+                "plugin": "ecsDataQualityDashboard",
+                "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/routes/get_index_stats.ts"
+              },
+              {
+                "plugin": "ecsDataQualityDashboard",
+                "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/routes/get_ilm_explain.ts"
+              },
+              {
+                "plugin": "ecsDataQualityDashboard",
+                "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/routes/results/get_index_results_latest.ts"
+              },
+              {
+                "plugin": "ecsDataQualityDashboard",
+                "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/routes/results/get_index_results.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -16822,14 +16822,6 @@
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
-                "plugin": "ecsDataQualityDashboard",
-                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
-              },
-              {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/plugins/integration_assistant/server/__mocks__/mock_server.ts"
-              },
-              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/custom_elements/find.test.ts"
               },
@@ -16872,6 +16864,14 @@
               {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmarks/benchmarks.test.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/platform/plugins/shared/integration_assistant/server/__mocks__/mock_server.ts"
+              },
+              {
+                "plugin": "ecsDataQualityDashboard",
+                "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
@@ -17033,6 +17033,10 @@
                 "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
               },
               {
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
@@ -17077,14 +17081,6 @@
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/inference_models.ts"
               },
               {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/user_conversations/update_route.ts"
-              },
-              {
-                "plugin": "logsShared",
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
                 "plugin": "lists",
                 "path": "x-pack/plugins/lists/server/routes/update_endpoint_list_item_route.ts"
               },
@@ -17106,11 +17102,15 @@
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/saved_query/update_saved_query_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/saved_query/update_saved_query_route.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/update_pack_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/update_pack_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/user_conversations/update_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17139,6 +17139,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/tags/routes/create_tag.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/configure_saved_object.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17189,14 +17193,6 @@
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
-                "plugin": "ecsDataQualityDashboard",
-                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
-              },
-              {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/plugins/integration_assistant/server/__mocks__/mock_server.ts"
-              },
-              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/custom_elements/update.test.ts"
               },
@@ -17207,6 +17203,14 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/workpad/update.test.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/platform/plugins/shared/integration_assistant/server/__mocks__/mock_server.ts"
+              },
+              {
+                "plugin": "ecsDataQualityDashboard",
+                "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
               },
               {
                 "plugin": "@kbn/core-apps-server-internal",
@@ -17448,12 +17452,8 @@
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/graph/route.ts"
               },
               {
-                "plugin": "ecsDataQualityDashboard",
-                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/get_unallowed_field_values.ts"
-              },
-              {
-                "plugin": "ecsDataQualityDashboard",
-                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/results/post_index_results.ts"
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "ml",
@@ -17752,66 +17752,6 @@
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/alerting.ts"
               },
               {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/post/cancel/cancel_attack_discovery.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/post/post_attack_discovery.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/user_conversations/create_route.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/user_conversations/bulk_actions_route.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/user_conversations/append_conversation_messages_route.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/post_knowledge_base.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/evaluate/post_evaluate.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/prompts/bulk_actions_route.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/anonymization_fields/bulk_actions_route.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/chat/chat_complete_route.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/post_actions_connector_execute.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/entries/bulk_actions_route.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/entries/create_route.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/defend_insights/post_defend_insights.ts"
-              },
-              {
-                "plugin": "logsShared",
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
                 "plugin": "fileUpload",
                 "path": "x-pack/plugins/file_upload/server/routes.ts"
               },
@@ -17834,34 +17774,6 @@
               {
                 "plugin": "fileUpload",
                 "path": "x-pack/plugins/file_upload/server/routes.ts"
-              },
-              {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/plugins/integration_assistant/server/routes/ecs_routes.ts"
-              },
-              {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/plugins/integration_assistant/server/routes/build_integration_routes.ts"
-              },
-              {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/plugins/integration_assistant/server/routes/categorization_routes.ts"
-              },
-              {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/plugins/integration_assistant/server/routes/related_routes.ts"
-              },
-              {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/plugins/integration_assistant/server/routes/pipeline_routes.ts"
-              },
-              {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/plugins/integration_assistant/server/routes/analyze_logs_routes.ts"
-              },
-              {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/plugins/integration_assistant/server/routes/cel_routes.ts"
               },
               {
                 "plugin": "lists",
@@ -17928,36 +17840,76 @@
                 "path": "x-pack/plugins/maps/server/data_indexing/indexing_routes.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_rule_health/get_rule_health_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/setup/setup_health_route.ts"
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/live_query/create_live_query_route.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/live_query/create_live_query_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/saved_query/create_saved_query_route.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/saved_query/create_saved_query_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/create_pack_route.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/create_pack_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/asset/update_assets_route.ts"
               },
               {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/asset/update_assets_route.ts"
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/post/cancel/cancel_attack_discovery.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/post/post_attack_discovery.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/user_conversations/create_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/user_conversations/bulk_actions_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/user_conversations/append_conversation_messages_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/knowledge_base/post_knowledge_base.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/evaluate/post_evaluate.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/prompts/bulk_actions_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/anonymization_fields/bulk_actions_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/chat/chat_complete_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/post_actions_connector_execute.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/knowledge_base/entries/bulk_actions_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/knowledge_base/entries/create_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/post_defend_insights.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -18010,10 +17962,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/api/create_legacy_notification/route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -18216,6 +18164,54 @@
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/protection_updates_note/index.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_rule_health/get_rule_health_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/setup/setup_health_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/api/create_legacy_notification/route.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/platform/plugins/shared/integration_assistant/server/routes/ecs_routes.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/platform/plugins/shared/integration_assistant/server/routes/build_integration_routes.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/platform/plugins/shared/integration_assistant/server/routes/categorization_routes.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/platform/plugins/shared/integration_assistant/server/routes/related_routes.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/platform/plugins/shared/integration_assistant/server/routes/pipeline_routes.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/platform/plugins/shared/integration_assistant/server/routes/analyze_logs_routes.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/platform/plugins/shared/integration_assistant/server/routes/cel_routes.ts"
+              },
+              {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
@@ -18304,6 +18300,14 @@
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/server.ts"
               },
               {
+                "plugin": "ecsDataQualityDashboard",
+                "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/routes/get_unallowed_field_values.ts"
+              },
+              {
+                "plugin": "ecsDataQualityDashboard",
+                "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/routes/results/post_index_results.ts"
+              },
+              {
                 "plugin": "dataViewFieldEditor",
                 "path": "src/plugins/data_view_field_editor/server/routes/field_preview.ts"
               },
@@ -18372,14 +18376,6 @@
                 "path": "x-pack/plugins/cloud/server/routes/set_cloud_data_route.test.ts"
               },
               {
-                "plugin": "ecsDataQualityDashboard",
-                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
-              },
-              {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/plugins/integration_assistant/server/__mocks__/mock_server.ts"
-              },
-              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/custom_elements/create.test.ts"
               },
@@ -18390,6 +18386,14 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/workpad/create.test.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/platform/plugins/shared/integration_assistant/server/__mocks__/mock_server.ts"
+              },
+              {
+                "plugin": "ecsDataQualityDashboard",
+                "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
               }
             ],
             "returnComment": [],
@@ -18531,12 +18535,12 @@
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts"
               },
               {
-                "plugin": "ecsDataQualityDashboard",
-                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
+                "plugin": "integrationAssistant",
+                "path": "x-pack/platform/plugins/shared/integration_assistant/server/__mocks__/mock_server.ts"
               },
               {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/plugins/integration_assistant/server/__mocks__/mock_server.ts"
+                "plugin": "ecsDataQualityDashboard",
+                "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
               }
             ],
             "returnComment": [],
@@ -18674,6 +18678,10 @@
                 "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
               },
               {
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
@@ -18710,14 +18718,6 @@
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/user_conversations/delete_route.ts"
-              },
-              {
-                "plugin": "logsShared",
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
                 "plugin": "lists",
                 "path": "x-pack/plugins/lists/server/routes/delete_endpoint_list_item_route.ts"
               },
@@ -18747,11 +18747,15 @@
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/saved_query/delete_saved_query_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/saved_query/delete_saved_query_route.ts"
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/delete_pack_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/delete_pack_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/user_conversations/delete_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -18822,20 +18826,20 @@
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
-                "plugin": "ecsDataQualityDashboard",
-                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
-              },
-              {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/plugins/integration_assistant/server/__mocks__/mock_server.ts"
-              },
-              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/custom_elements/delete.test.ts"
               },
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/workpad/delete.test.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/platform/plugins/shared/integration_assistant/server/__mocks__/mock_server.ts"
+              },
+              {
+                "plugin": "ecsDataQualityDashboard",
+                "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
               }
             ],
             "returnComment": [],
