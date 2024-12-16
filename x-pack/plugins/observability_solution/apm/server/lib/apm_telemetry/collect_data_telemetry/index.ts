@@ -46,7 +46,7 @@ export function collectDataTelemetry({
       } catch (err) {
         // catch error and log as debug in production env and warn in dev env
         const logLevel = isProd ? logger.debug : logger.warn;
-        logLevel(`Failed executing the APM telemetry task: "${task.name}"`);
+        logLevel.call(logger, `Failed executing the APM telemetry task: "${task.name}"`);
         logLevel(err);
         return data;
       }
