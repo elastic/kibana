@@ -43,7 +43,7 @@ export const usePersistConfiguration = () => {
           customFields: customFields ?? [],
           templates: templates ?? [],
           owner: owner[0],
-          observableTypes: observableTypes ?? [],
+          observableTypes,
         });
       }
 
@@ -53,7 +53,7 @@ export const usePersistConfiguration = () => {
         connector,
         customFields: customFields ?? [],
         templates: templates ?? [],
-        observableTypes: observableTypes ?? [],
+        observableTypes,
       });
     },
     {

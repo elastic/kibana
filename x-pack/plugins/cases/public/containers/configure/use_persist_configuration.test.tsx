@@ -192,6 +192,36 @@ describe('usePersistConfiguration', () => {
     });
   });
 
+  it('calls patchCaseConfigure without observableTypes if it is not specified', async () => {
+    const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
+
+    const { result } = renderHook(() => usePersistConfiguration(), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    const { observableTypes, ...rest } = request;
+
+    const newRequest = {
+      ...rest,
+      customFields: customFieldsConfigurationMock,
+      templates: templatesConfigurationMock,
+    };
+
+    act(() => {
+      result.current.mutate({ ...newRequest, id: 'test-id', version: 'test-version' });
+    });
+
+    await waitFor(() => {
+      expect(spyPatch).toHaveBeenCalledWith('test-id', {
+        closure_type: 'close-by-user',
+        connector: { fields: null, id: 'none', name: 'none', type: '.none' },
+        customFields: customFieldsConfigurationMock,
+        templates: templatesConfigurationMock,
+        version: 'test-version',
+      });
+    });
+  });
+
   it('invalidates the queries correctly', async () => {
     const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
     const { result } = renderHook(() => usePersistConfiguration(), {
