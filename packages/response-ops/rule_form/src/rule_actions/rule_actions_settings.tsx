@@ -142,8 +142,6 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
     formData: {
       consumer,
       schedule: { interval },
-      notifyWhen: ruleNotifyWhen,
-      throttle: ruleThrottle,
     },
     actionsErrors = {},
     validConsumers = DEFAULT_VALID_CONSUMERS,
@@ -169,23 +167,13 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
   const intervalNumber = getDurationNumberInItsUnit(interval ?? 1);
 
   const intervalUnit = getDurationUnitValue(interval);
+  const actionThrottle = action.frequency?.throttle
+    ? getDurationNumberInItsUnit(action.frequency.throttle)
+    : null;
 
-  const actionNotifyWhen =
-    ruleNotifyWhen && !action?.frequency ? ruleNotifyWhen : action?.frequency?.notifyWhen;
-
-  const actionThrottle =
-    ruleThrottle && !action.frequency?.throttle
-      ? getDurationNumberInItsUnit(ruleThrottle)
-      : action.frequency?.throttle
-      ? getDurationNumberInItsUnit(action.frequency.throttle)
-      : null;
-
-  const actionThrottleUnit =
-    ruleThrottle && !action.frequency?.throttle
-      ? getDurationUnitValue(ruleThrottle)
-      : action.frequency?.throttle
-      ? getDurationUnitValue(action.frequency?.throttle)
-      : 'h';
+  const actionThrottleUnit = action.frequency?.throttle
+    ? getDurationUnitValue(action.frequency?.throttle)
+    : 'h';
 
   const [minimumActionThrottle = -1, minimumActionThrottleUnit] = [
     intervalNumber,
@@ -214,15 +202,7 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
         <EuiFlexGroup alignItems="flexEnd">
           <EuiFlexItem>
             <RuleActionsNotifyWhen
-              frequency={{
-                ...(action.frequency ?? {
-                  notifyWhen: actionNotifyWhen ?? DEFAULT_FREQUENCY.notifyWhen,
-                  throttle: actionThrottle
-                    ? `${actionThrottle}${actionThrottleUnit}`
-                    : DEFAULT_FREQUENCY.throttle,
-                  summary: false,
-                }),
-              }}
+              frequency={action.frequency}
               throttle={actionThrottle}
               throttleUnit={actionThrottleUnit}
               hasAlertsMappings={selectedRuleType.hasAlertsMappings}

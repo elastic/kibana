@@ -101,6 +101,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
 
   const {
     plugins: { actionTypeRegistry, http },
+    formData: { notifyWhen: ruleNotifyWhen, throttle: ruleThrottle },
     actionsParamsErrors = {},
     selectedRuleType,
     selectedRuleTypeModel,
@@ -463,6 +464,21 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
   const accordionContent = useMemo(() => {
     if (!connector || !checkEnabledResult) {
       return null;
+    }
+
+    if (!action.frequency && ruleNotifyWhen) {
+      dispatch({
+        type: 'setActionProperty',
+        payload: {
+          uuid: action.uuid!,
+          key: 'frequency',
+          value: {
+            notifyWhen: ruleNotifyWhen,
+            throttle: ruleThrottle,
+            summary: false,
+          },
+        },
+      });
     }
 
     if (!checkEnabledResult.isEnabled) {
