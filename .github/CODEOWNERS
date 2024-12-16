@@ -5,7 +5,6 @@
 ## `node scripts/generate codeowners`.
 ####
 
-examples/bfetch_explorer @elastic/appex-sharedux
 examples/content_management_examples @elastic/appex-sharedux
 examples/controls_example @elastic/kibana-presentation
 examples/data_view_field_editor_example @elastic/kibana-data-discovery
@@ -337,6 +336,7 @@ packages/kbn-es-errors @elastic/kibana-core
 packages/kbn-es-query @elastic/kibana-data-discovery
 packages/kbn-es-types @elastic/kibana-core @elastic/obs-knowledge-team
 packages/kbn-eslint-config @elastic/kibana-operations
+packages/kbn-eslint-plugin-css @elastic/appex-sharedux
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
 packages/kbn-eslint-plugin-i18n @elastic/obs-knowledge-team @elastic/kibana-operations
@@ -938,7 +938,6 @@ x-pack/plugins/observability_solution/observability_onboarding/e2e @elastic/obs-
 x-pack/plugins/observability_solution/observability_shared @elastic/observability-ui
 x-pack/plugins/observability_solution/profiling @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/profiling_data_access @elastic/obs-ux-infra_services-team
-x-pack/plugins/observability_solution/slo @elastic/obs-ux-management-team
 x-pack/plugins/reporting @elastic/appex-sharedux
 x-pack/plugins/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 x-pack/plugins/saved_objects_tagging @elastic/appex-sharedux
@@ -981,6 +980,7 @@ x-pack/solutions/observability/plugins/observability_ai_assistant_management @el
 x-pack/solutions/observability/plugins/observability_solution/entities_data_access @elastic/obs-entities
 x-pack/solutions/observability/plugins/observability_solution/entity_manager_app @elastic/obs-entities
 x-pack/solutions/observability/plugins/serverless_observability @elastic/obs-ux-management-team
+x-pack/solutions/observability/plugins/slo @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/streams @elastic/streams-program-team
 x-pack/solutions/observability/plugins/streams_app @elastic/streams-program-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-team
@@ -2616,7 +2616,6 @@ x-pack/plugins/observability_solution/observability_shared/public/components/pro
 /test/examples/state_sync/*.ts @elastic/appex-sharedux
 /test/examples/error_boundary/index.ts @elastic/appex-sharedux
 /test/examples/content_management/*.ts @elastic/appex-sharedux
-/test/examples/bfetch_explorer/*.ts @elastic/appex-sharedux
 /test/api_integration/apis/guided_onboarding @elastic/appex-sharedux
 /x-pack/test/banners_functional @elastic/appex-sharedux
 /x-pack/test/custom_branding @elastic/appex-sharedux
@@ -2873,6 +2872,7 @@ src/platform/packages/private/shared-ux/page/kibana_no_data/types @elastic/appex
 src/platform/packages/private/shared-ux/prompt/no_data_views/impl @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/prompt/no_data_views/mocks @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/table_persist @elastic/appex-sharedux
+src/platform/packages/shared/chart_expressions/common @elastic/kibana-visualizations
 src/platform/packages/shared/cloud @elastic/kibana-core
 src/platform/packages/shared/content-management/content_editor @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_insights/content_insights_public @elastic/appex-sharedux
@@ -3055,8 +3055,6 @@ src/platform/packages/shared/shared-ux/prompt/no_data_views/types @elastic/appex
 src/platform/packages/shared/shared-ux/prompt/not_found @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/router/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/storybook/mock @elastic/appex-sharedux
-src/platform/packages/shared/Users/gsoldevila/Work/kibana-secondary/Users/gsoldevila/Work/kibana-secondary/src/core @elastic/kibana-core
-src/platform/packages/shared/Users/gsoldevila/Work/kibana-secondary/Users/gsoldevila/Work/kibana-secondary/src/plugins/chart_expressions/common @elastic/kibana-visualizations
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
