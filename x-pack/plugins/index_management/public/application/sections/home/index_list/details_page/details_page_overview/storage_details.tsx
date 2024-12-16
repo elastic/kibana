@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiTextColor,
   useEuiTheme,
+  euiFontSize,
 } from '@elastic/eui';
 
 import { useAppContext } from '../../../../../app_context';
@@ -27,7 +28,7 @@ export const StorageDetails: FunctionComponent<{
   primary: Index['primary'];
   replica: Index['replica'];
 }> = ({ primarySize, size, primary, replica }) => {
-  const { euiTheme } = useEuiTheme();
+  const themeContext = useEuiTheme();
   const { config } = useAppContext();
   if (!config.enableIndexStats) {
     return null;
@@ -44,7 +45,7 @@ export const StorageDetails: FunctionComponent<{
             <EuiFlexItem grow={false}>
               <EuiText
                 css={css`
-                  font-size: ${euiTheme.font.scale.l};
+                  font-size: ${euiFontSize(themeContext, 'l')};
                 `}
               >
                 {primarySize}
@@ -64,7 +65,7 @@ export const StorageDetails: FunctionComponent<{
             <EuiFlexItem grow={false}>
               <EuiText
                 css={css`
-                  font-size: ${euiTheme.font.scale.l};
+                  font-size: ${euiFontSize(themeContext, 'l')};
                 `}
               >
                 {size}
