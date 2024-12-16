@@ -145,7 +145,7 @@ const IntegrationPostureDashboard = ({
     return (
       // height is calculated for the screen height minus the kibana header, page title, and tabs
       <div
-        style={{
+        css={{
           height: `calc(100vh - ${KIBANA_HEADERS_HEIGHT}px)`,
           display: 'flex',
           justifyContent: 'center',
