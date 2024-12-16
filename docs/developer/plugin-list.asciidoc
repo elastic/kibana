@@ -653,7 +653,7 @@ external LLM APIs. Its goals are:
 the infrastructure monitoring use-case within Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ingest_pipelines/README.md[ingestPipelines]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/ingest_pipelines/README.md[ingestPipelines]
 |The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines.
 
 
