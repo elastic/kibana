@@ -302,7 +302,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/cross_cluster_replication/**/*.{js,mjs,ts,tsx}'],
+      files: ['x-pack/platform/plugins/private/cross_cluster_replication/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'jsx-a11y/click-events-have-key-events': 'off',
       },
@@ -764,7 +764,6 @@ module.exports = {
         ],
       },
     },
-
     /**
      * Jest specific rules
      */
@@ -918,7 +917,7 @@ module.exports = {
         'x-pack/solutions/observability/plugins/observability/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/observability/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/observability/plugins/ux/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/observability_solution/slo/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/slo/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/observability/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
@@ -938,7 +937,7 @@ module.exports = {
         'x-pack/plugins/observability_solution/apm/**/*.stories.*',
         'x-pack/solutions/observability/plugins/observability/**/*.stories.*',
         'x-pack/solutions/observability/plugins/exploratory_view/**/*.stories.*',
-        'x-pack/plugins/observability_solution/slo/**/*.stories.*',
+        'x-pack/solutions/observability/plugins/slo/**/*.stories.*',
         'x-pack/packages/observability/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
@@ -1098,7 +1097,7 @@ module.exports = {
     {
       // front end and common typescript and javascript files only
       files: [
-        'x-pack/plugins/ecs_data_quality_dashboard/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/elastic_assistant/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
@@ -1113,7 +1112,7 @@ module.exports = {
         'x-pack/solutions/security/plugins/timelines/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/common/**/*.{js,mjs,ts,tsx}',
-        'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
@@ -1134,7 +1133,7 @@ module.exports = {
       // We use this section to add rules in which we do not want to apply to test files.
       // This should be a very small set as most linter rules are useful for tests as well.
       files: [
-        'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/elastic_assistant/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/integration_assistant/**/*.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{ts,tsx}',
@@ -1146,10 +1145,10 @@ module.exports = {
         'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
-        'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
       excludedFiles: [
-        'x-pack/plugins/ecs_data_quality_dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/solutions/security/plugins/elastic_assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/platform/plugins/shared/integration_assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -1161,7 +1160,7 @@ module.exports = {
         'x-pack/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/solutions/security/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'packages/kbn-cell-actions/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'src/platform/packages/shared/kbn-cell-actions/**/*.{test,mock,test_helper}.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-non-null-assertion': 'error',
@@ -1170,7 +1169,7 @@ module.exports = {
     {
       // typescript only for front and back end
       files: [
-        'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/elastic_assistant/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/integration_assistant/**/*.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{ts,tsx}',
@@ -1182,7 +1181,7 @@ module.exports = {
         'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
-        'packages/kbn-cell-actions/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-cell-actions/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-this-alias': 'error',
@@ -1204,7 +1203,7 @@ module.exports = {
     {
       // typescript and javascript for front and back end
       files: [
-        'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/elastic_assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/plugins/shared/integration_assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
@@ -1217,7 +1216,7 @@ module.exports = {
         'x-pack/solutions/security/plugins/timelines/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
-        'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
@@ -1310,14 +1309,14 @@ module.exports = {
         {
           files: [
             'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
-            'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
+            'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
             'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
             'x-pack/solutions/security/packages/features/**/*.{js,mjs,ts,tsx}',
             'x-pack/solutions/security/packages/navigation/**/*.{js,mjs,ts,tsx}',
-            'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
+            'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
           ],
           rules: {
             '@typescript-eslint/consistent-type-imports': 'error',
@@ -1966,7 +1965,7 @@ module.exports = {
      * Cloud Security Team overrides
      */
     {
-      files: ['x-pack/plugins/cloud_security_posture/**/*.{js,mjs,ts,tsx}'],
+      files: ['x-pack/solutions/security/plugins/cloud_security_posture/**/*.{js,mjs,ts,tsx}'],
       plugins: ['testing-library'],
       rules: {
         'testing-library/await-async-utils': 'error',
