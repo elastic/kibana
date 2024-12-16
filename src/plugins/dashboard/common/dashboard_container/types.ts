@@ -16,6 +16,7 @@ import { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Reference } from '@kbn/content-management-utils';
 import { RefreshInterval } from '@kbn/data-plugin/common';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type { ViewMode } from '@kbn/presentation-publishing';
 
 import type { DashboardOptions, GridData } from '../../server/content_management';
 
@@ -55,9 +56,7 @@ export interface DashboardContainerInput extends Omit<EmbeddableInput, 'viewMode
   // dashboard meta info
   title: string;
   tags: string[];
-  // can not import presentation ViewMode into common code
-  // DashboardContainerInput is planned for removal and will be replaced by DashboardState
-  viewMode: 'view' | 'edit' | 'print' | 'preview';
+  viewMode: ViewMode;
   description?: string;
   executionContext: KibanaExecutionContext;
 
