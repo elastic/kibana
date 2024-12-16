@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -18,10 +18,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { useDocumentDetailsContext } from '../../shared/context';
 import {
@@ -44,6 +42,7 @@ import {
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { AlertHeaderBlock } from './alert_header_block';
 import { LeftPanelNotesTab } from '../../left';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
 export const FETCH_NOTES_ERROR = i18n.translate(
   'xpack.securitySolution.flyout.right.notes.fetchNotesErrorLabel',
@@ -70,31 +69,23 @@ export const VIEW_NOTES_BUTTON_ARIA_LABEL = i18n.translate(
 export const Notes = memo(() => {
   const { euiTheme } = useEuiTheme();
   const dispatch = useDispatch();
-  const { eventId, indexName, scopeId, isPreview, isPreviewMode } = useDocumentDetailsContext();
+  const { eventId, isPreview } = useDocumentDetailsContext();
   const { addError: addErrorToast } = useAppToasts();
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
 
-  const { openLeftPanel } = useExpandableFlyoutApi();
-  const openExpandedFlyoutNotesTab = useCallback(
-    () =>
-      openLeftPanel({
-        id: DocumentDetailsLeftPanelKey,
-        path: { tab: LeftPanelNotesTab },
-        params: {
-          id: eventId,
-          indexName,
-          scopeId,
-        },
-      }),
-    [eventId, indexName, openLeftPanel, scopeId]
-  );
+  const { navigateToLeftPanel: openExpandedFlyoutNotesTab, isEnabled: isLinkEnabled } =
+    useNavigateToLeftPanel({
+      tab: LeftPanelNotesTab,
+    });
+
+  const isNotesDisabled = !isLinkEnabled || isPreview;
 
   useEffect(() => {
     // only fetch notes if we are not in a preview panel, or not in a rule preview workflow
-    if (!isPreviewMode && !isPreview) {
+    if (!isNotesDisabled) {
       dispatch(fetchNotesByDocumentIds({ documentIds: [eventId] }));
     }
-  }, [dispatch, eventId, isPreview, isPreviewMode]);
+  }, [dispatch, eventId, isNotesDisabled]);
 
   const fetchStatus = useSelector((state: State) => selectFetchNotesByDocumentIdsStatus(state));
   const fetchError = useSelector((state: State) => selectFetchNotesByDocumentIdsError(state));
@@ -115,7 +106,7 @@ export const Notes = memo(() => {
       <EuiButtonEmpty
         onClick={openExpandedFlyoutNotesTab}
         size="s"
-        disabled={isPreviewMode || isPreview}
+        disabled={isNotesDisabled}
         aria-label={VIEW_NOTES_BUTTON_ARIA_LABEL}
         data-test-subj={NOTES_VIEW_NOTES_BUTTON_TEST_ID}
       >
@@ -126,7 +117,7 @@ export const Notes = memo(() => {
         />
       </EuiButtonEmpty>
     ),
-    [isPreview, isPreviewMode, notes.length, openExpandedFlyoutNotesTab]
+    [isNotesDisabled, notes.length, openExpandedFlyoutNotesTab]
   );
   const addNoteButton = useMemo(
     () => (
@@ -134,21 +125,21 @@ export const Notes = memo(() => {
         iconType="plusInCircle"
         onClick={openExpandedFlyoutNotesTab}
         size="s"
-        disabled={isPreviewMode || isPreview}
+        disabled={isNotesDisabled}
         aria-label={ADD_NOTE_BUTTON}
         data-test-subj={NOTES_ADD_NOTE_BUTTON_TEST_ID}
       >
         {ADD_NOTE_BUTTON}
       </EuiButtonEmpty>
     ),
-    [isPreview, isPreviewMode, openExpandedFlyoutNotesTab]
+    [isNotesDisabled, openExpandedFlyoutNotesTab]
   );
   const addNoteButtonIcon = useMemo(
     () => (
       <EuiButtonIcon
         onClick={openExpandedFlyoutNotesTab}
         iconType="plusInCircle"
-        disabled={isPreviewMode || isPreview || !kibanaSecuritySolutionsPrivileges.crud}
+        disabled={isNotesDisabled || !kibanaSecuritySolutionsPrivileges.crud}
         css={css`
           margin-left: ${euiTheme.size.xs};
         `}
@@ -158,8 +149,7 @@ export const Notes = memo(() => {
     ),
     [
       euiTheme.size.xs,
-      isPreview,
-      isPreviewMode,
+      isNotesDisabled,
       kibanaSecuritySolutionsPrivileges.crud,
       openExpandedFlyoutNotesTab,
     ]
