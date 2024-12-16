@@ -37,7 +37,7 @@ describe('getMutedAlerts', () => {
       Array [
         "/internal/alerting/rules/_find",
         Object {
-          "body": "{\\"rule_type_ids\\":[\\"foo\\"],\\"fields\\":[\\"id\\",\\"mutedInstanceIds\\"],\\"page\\":1,\\"per_page\\":1}",
+          "body": "{\\"filter\\":\\"{\\\\\\"type\\\\\\":\\\\\\"function\\\\\\",\\\\\\"function\\\\\\":\\\\\\"is\\\\\\",\\\\\\"arguments\\\\\\":[{\\\\\\"type\\\\\\":\\\\\\"literal\\\\\\",\\\\\\"value\\\\\\":\\\\\\"alert.id\\\\\\",\\\\\\"isQuoted\\\\\\":false},{\\\\\\"type\\\\\\":\\\\\\"literal\\\\\\",\\\\\\"value\\\\\\":\\\\\\"alert:foo\\\\\\",\\\\\\"isQuoted\\\\\\":false}]}\\",\\"fields\\":[\\"id\\",\\"mutedInstanceIds\\"],\\"page\\":1,\\"per_page\\":1}",
           "signal": undefined,
         },
       ]

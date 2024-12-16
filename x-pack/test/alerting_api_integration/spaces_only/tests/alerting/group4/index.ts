@@ -31,6 +31,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./alert_delay'));
     loadTestFile(require.resolve('./alert_severity'));
     loadTestFile(require.resolve('./generate_alert_schemas'));
+    loadTestFile(require.resolve('./muted_alerts'));
     // Do not place test files here, due to https://github.com/elastic/kibana/issues/123059
 
     // note that this test will destroy existing spaces
