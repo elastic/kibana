@@ -26,10 +26,6 @@ import {
   CrowdstrikeGetAgentsParamsSchema,
   CrowdstrikeHostActionsResponseSchema,
   RelaxedCrowdstrikeBaseApiResponseSchema,
-  CrowdstrikeRTRCommandParamsSchema,
-  CrowdstrikeExecuteRTRResponseSchema,
-  CrowdstrikeGetScriptsParamsSchema,
-  CrowdStrikeExecuteRTRResponse,
   CrowdstrikeApiDoNotValidateResponsesSchema,
   CrowdstrikeGetTokenResponseSchema,
 } from '../../../common/crowdstrike/schema';
