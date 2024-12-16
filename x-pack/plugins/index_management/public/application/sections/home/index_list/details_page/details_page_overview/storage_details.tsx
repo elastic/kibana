@@ -8,14 +8,8 @@
 import React, { FunctionComponent } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  EuiTextColor,
-  useEuiTheme,
-} from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTextColor } from '@elastic/eui';
 
 import { useAppContext } from '../../../../../app_context';
 import { Index } from '../../../../../../../common';
@@ -27,7 +21,6 @@ export const StorageDetails: FunctionComponent<{
   primary: Index['primary'];
   replica: Index['replica'];
 }> = ({ primarySize, size, primary, replica }) => {
-  const { euiTheme } = useEuiTheme();
   const { config } = useAppContext();
   if (!config.enableIndexStats) {
     return null;
@@ -44,7 +37,7 @@ export const StorageDetails: FunctionComponent<{
             <EuiFlexItem grow={false}>
               <EuiText
                 css={css`
-                  font-size: ${euiTheme.font.scale.l};
+                  font-size: ${euiThemeVars.euiFontSizeL};
                 `}
               >
                 {primarySize}
@@ -64,7 +57,7 @@ export const StorageDetails: FunctionComponent<{
             <EuiFlexItem grow={false}>
               <EuiText
                 css={css`
-                  font-size: ${euiTheme.font.scale.l};
+                  font-size: ${euiThemeVars.euiFontSizeL};
                 `}
               >
                 {size}
