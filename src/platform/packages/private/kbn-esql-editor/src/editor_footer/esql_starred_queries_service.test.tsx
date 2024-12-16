@@ -9,6 +9,7 @@
 
 import { EsqlStarredQueriesService } from './esql_starred_queries_service';
 import { coreMock } from '@kbn/core/public/mocks';
+import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 class LocalStorageMock {
@@ -34,20 +35,37 @@ describe('EsqlStarredQueriesService', () => {
   const core = coreMock.createStart();
   const storage = new LocalStorageMock({}) as unknown as Storage;
 
-  it('should initialize', async () => {
+  beforeEach(() => {
+    core.security.authc.getCurrentUser.mockResolvedValue(
+      securityServiceMock.createMockAuthenticatedUser()
+    );
+  });
+
+  const initialize = async () => {
     const service = await EsqlStarredQueriesService.initialize({
       http: core.http,
+      security: core.security,
       storage,
     });
+    return service!;
+  };
+
+  it('should return null if favorites service not available', async () => {
+    core.security.authc.getCurrentUser.mockResolvedValue(
+      securityServiceMock.createMockAuthenticatedUser({ profile_uid: undefined })
+    );
+    const service = await initialize();
+    expect(service).toBeNull();
+  });
+
+  it('should initialize', async () => {
+    const service = await initialize();
     expect(service).toBeDefined();
     expect(service.queries$.value).toEqual([]);
   });
 
   it('should add a new starred query', async () => {
-    const service = await EsqlStarredQueriesService.initialize({
-      http: core.http,
-      storage,
-    });
+    const service = await initialize();
     const query = {
       queryString: 'SELECT * FROM test',
       timeRan: '2021-09-01T00:00:00Z',
@@ -66,10 +84,7 @@ describe('EsqlStarredQueriesService', () => {
   });
 
   it('should not add the same query twice', async () => {
-    const service = await EsqlStarredQueriesService.initialize({
-      http: core.http,
-      storage,
-    });
+    const service = await initialize();
     const query = {
       queryString: 'SELECT * FROM   test',
       timeRan: '2021-09-01T00:00:00Z',
@@ -94,10 +109,7 @@ describe('EsqlStarredQueriesService', () => {
   });
 
   it('should add the query trimmed', async () => {
-    const service = await EsqlStarredQueriesService.initialize({
-      http: core.http,
-      storage,
-    });
+    const service = await initialize();
     const query = {
       queryString: `SELECT * FROM test |
         WHERE field != 'value'`,
@@ -118,10 +130,7 @@ describe('EsqlStarredQueriesService', () => {
   });
 
   it('should remove a query', async () => {
-    const service = await EsqlStarredQueriesService.initialize({
-      http: core.http,
-      storage,
-    });
+    const service = await initialize();
     const query = {
       queryString: `SELECT * FROM test | WHERE field != 'value'`,
       timeRan: '2021-09-01T00:00:00Z',
@@ -144,10 +153,7 @@ describe('EsqlStarredQueriesService', () => {
   });
 
   it('should return the button correctly', async () => {
-    const service = await EsqlStarredQueriesService.initialize({
-      http: core.http,
-      storage,
-    });
+    const service = await initialize();
     const query = {
       queryString: 'SELECT * FROM test',
       timeRan: '2021-09-01T00:00:00Z',
@@ -162,10 +168,7 @@ describe('EsqlStarredQueriesService', () => {
   });
 
   it('should display the modal when the Remove button is clicked', async () => {
-    const service = await EsqlStarredQueriesService.initialize({
-      http: core.http,
-      storage,
-    });
+    const service = await initialize();
     const query = {
       queryString: 'SELECT * FROM test',
       timeRan: '2021-09-01T00:00:00Z',
@@ -183,10 +186,7 @@ describe('EsqlStarredQueriesService', () => {
 
   it('should NOT display the modal when Remove the button is clicked but the user has dismissed the modal permanently', async () => {
     storage.set('esqlEditor.starredQueriesDiscard', true);
-    const service = await EsqlStarredQueriesService.initialize({
-      http: core.http,
-      storage,
-    });
+    const service = await initialize();
     const query = {
       queryString: 'SELECT * FROM test',
       timeRan: '2021-09-01T00:00:00Z',
