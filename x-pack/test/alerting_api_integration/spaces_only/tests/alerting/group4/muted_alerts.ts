@@ -73,7 +73,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const createdRule1 = await createRule();
       const createdRule2 = await createRule();
 
-      let alerts: any[];
+      let alerts: any[] = [];
 
       await retry.try(async () => {
         alerts = await getAlerts();
