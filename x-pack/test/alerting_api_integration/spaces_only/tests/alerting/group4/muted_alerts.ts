@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { nodeBuilder } from '@kbn/es-query';
-import { FindRulesResponse } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/hooks/apis/get_rules_muted_alerts';
 import { Spaces } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
@@ -74,7 +73,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const createdRule1 = await createRule();
       const createdRule2 = await createRule();
 
-      let alerts;
+      let alerts: any[];
 
       await retry.try(async () => {
         alerts = await getAlerts();
@@ -106,7 +105,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         ruleUuids.map((id) => nodeBuilder.is('alert.id', `alert:${id}`))
       );
       const { body: rules } = await supertest
-        .post<FindRulesResponse>(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
         .set('kbn-xsrf', 'foo')
         .send({
           filter: JSON.stringify(filterNode),
@@ -116,7 +115,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         });
 
       expect(rules.data.length).to.be(2);
-      const mutedRule = rules.data.find((rule) => rule.id === createdRule1);
+      const mutedRule = rules.data.find((rule: { id: string }) => rule.id === createdRule1);
       expect(mutedRule.muted_alert_ids).to.contain(alertFromRule1._source[ALERT_INSTANCE_ID]);
     });
   });
