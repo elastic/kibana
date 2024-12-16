@@ -43,10 +43,11 @@ const TOOLTIP = (
 export const ThreatIntelligenceOverview: FC = () => {
   const { dataFormattedForFieldBrowser, isPreviewMode } = useDocumentDetailsContext();
 
-  const { navigateToLeftPanel: goToThreatIntelligenceTab, isEnabled } = useNavigateToLeftPanel({
-    tab: LeftPanelInsightsTab,
-    subTab: THREAT_INTELLIGENCE_TAB_ID,
-  });
+  const { navigateToLeftPanel: goToThreatIntelligenceTab, isEnabled: isLinkEnabled } =
+    useNavigateToLeftPanel({
+      tab: LeftPanelInsightsTab,
+      subTab: THREAT_INTELLIGENCE_TAB_ID,
+    });
 
   const { loading, threatMatchesCount, threatEnrichmentsCount } = useFetchThreatIntelligence({
     dataFormattedForFieldBrowser,
@@ -54,13 +55,13 @@ export const ThreatIntelligenceOverview: FC = () => {
 
   const link = useMemo(
     () =>
-      isEnabled
+      isLinkEnabled
         ? {
             callback: goToThreatIntelligenceTab,
             tooltip: TOOLTIP,
           }
         : undefined,
-    [goToThreatIntelligenceTab, isEnabled]
+    [goToThreatIntelligenceTab, isLinkEnabled]
   );
 
   const threatMatchCountText = useMemo(

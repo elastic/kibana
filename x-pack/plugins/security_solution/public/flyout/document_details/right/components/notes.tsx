@@ -73,11 +73,12 @@ export const Notes = memo(() => {
   const { addError: addErrorToast } = useAppToasts();
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
 
-  const { navigateToLeftPanel: openExpandedFlyoutNotesTab, isEnabled } = useNavigateToLeftPanel({
-    tab: LeftPanelNotesTab,
-  });
+  const { navigateToLeftPanel: openExpandedFlyoutNotesTab, isEnabled: isLinkEnabled } =
+    useNavigateToLeftPanel({
+      tab: LeftPanelNotesTab,
+    });
 
-  const isNotesDisabled = !isEnabled || isPreview;
+  const isNotesDisabled = !isLinkEnabled || isPreview;
 
   useEffect(() => {
     // only fetch notes if we are not in a preview panel, or not in a rule preview workflow

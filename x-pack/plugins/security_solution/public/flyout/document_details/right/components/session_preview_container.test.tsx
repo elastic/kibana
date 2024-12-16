@@ -45,6 +45,15 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => jest.fn(),
+  };
+});
+
 const NO_DATA_MESSAGE =
   'You can only view Linux session details if you’ve enabled the Include session data setting in your Elastic Defend integration policy. Refer to Enable Session View data(external, opens in a new tab or window) for more information.';
 
@@ -240,15 +249,13 @@ describe('SessionPreviewContainer', () => {
   });
 
   describe('when new navigation is enabled', () => {
-    beforeEach(() => {
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    });
-
     describe('when visualization in flyout flag is enabled', () => {
       beforeEach(() => {
+        jest.clearAllMocks();
         mockUseUiSetting.mockReturnValue([true]);
         (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
         (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
+        (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
       });
 
       it('should open left panel vizualization tab when visualization in flyout flag is on', () => {
@@ -280,7 +287,7 @@ describe('SessionPreviewContainer', () => {
       it('should render link to session viewer if flyout is open in preview mode', () => {
         const { getByTestId } = renderSessionPreview({
           ...mockContextValue,
-          isPreview: true,
+          isPreviewMode: true,
         });
 
         expect(getByTestId(SESSION_PREVIEW_TEST_ID)).toBeInTheDocument();
@@ -295,19 +302,22 @@ describe('SessionPreviewContainer', () => {
 
     describe('when visualization in flyout flag is not enabled', () => {
       beforeEach(() => {
+        jest.clearAllMocks();
         mockUseUiSetting.mockReturnValue([false]);
         (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
         (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
+        (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
       });
 
-      it('should open left panel vizualization tab when visualization in flyout flag is on', () => {
+      it('should open session viewer in timeline', () => {
         const { getByTestId } = renderSessionPreview();
+        const { investigateInTimelineAlertClick } = useInvestigateInTimeline({});
         expect(
           getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID))
         ).toBeInTheDocument();
         getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID)).click();
 
-        expect(mockNavigateToSessionView).toHaveBeenCalled();
+        expect(investigateInTimelineAlertClick).toHaveBeenCalled();
       });
 
       it('should not render link to session viewer if flyout is open in rule preview', () => {
@@ -328,7 +338,7 @@ describe('SessionPreviewContainer', () => {
       it('should render link to open session viewer in timeline if flyout is open in preview mode', () => {
         const { getByTestId } = renderSessionPreview({
           ...mockContextValue,
-          isPreview: true,
+          isPreviewMode: true,
         });
         const { investigateInTimelineAlertClick } = useInvestigateInTimeline({});
         getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID)).click();

@@ -29,9 +29,10 @@ export const InvestigationGuide: React.FC = () => {
     dataFormattedForFieldBrowser,
   });
 
-  const { navigateToLeftPanel: goToInvestigationsTab, isEnabled } = useNavigateToLeftPanel({
-    tab: LeftPanelInvestigationTab,
-  });
+  const { navigateToLeftPanel: goToInvestigationsTab, isEnabled: isLinkEnabled } =
+    useNavigateToLeftPanel({
+      tab: LeftPanelInvestigationTab,
+    });
 
   const hasInvestigationGuide = useMemo(
     () => !error && basicAlertData && basicAlertData.ruleId && ruleNote,
@@ -75,7 +76,7 @@ export const InvestigationGuide: React.FC = () => {
       );
     }
 
-    if (hasInvestigationGuide && !isEnabled) {
+    if (hasInvestigationGuide && !isLinkEnabled) {
       return (
         <EuiCallOut
           iconType="documentation"
@@ -141,7 +142,7 @@ export const InvestigationGuide: React.FC = () => {
         />
       </EuiCallOut>
     );
-  }, [isPreview, loading, hasInvestigationGuide, isEnabled, goToInvestigationsTab]);
+  }, [isPreview, loading, hasInvestigationGuide, isLinkEnabled, goToInvestigationsTab]);
 
   return <div data-test-subj={INVESTIGATION_GUIDE_TEST_ID}>{content}</div>;
 };

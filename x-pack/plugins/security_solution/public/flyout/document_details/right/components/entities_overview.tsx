@@ -26,14 +26,14 @@ export const EntitiesOverview: React.FC = () => {
   const hostName = getField(getFieldsData('host.name'));
   const userName = getField(getFieldsData('user.name'));
 
-  const { navigateToLeftPanel, isEnabled } = useNavigateToLeftPanel({
+  const { navigateToLeftPanel, isEnabled: isLinkEnabled } = useNavigateToLeftPanel({
     tab: LeftPanelInsightsTab,
     subTab: ENTITIES_TAB_ID,
   });
 
   const link = useMemo(
     () =>
-      isEnabled
+      isLinkEnabled
         ? {
             callback: navigateToLeftPanel,
             tooltip: (
@@ -44,7 +44,7 @@ export const EntitiesOverview: React.FC = () => {
             ),
           }
         : undefined,
-    [navigateToLeftPanel, isEnabled]
+    [navigateToLeftPanel, isLinkEnabled]
   );
 
   return (

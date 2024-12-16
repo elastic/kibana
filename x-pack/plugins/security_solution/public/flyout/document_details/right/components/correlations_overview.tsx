@@ -47,10 +47,11 @@ export const CorrelationsOverview: React.FC = () => {
 
   const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
 
-  const { navigateToLeftPanel: goToCorrelationsTab, isEnabled } = useNavigateToLeftPanel({
-    tab: LeftPanelInsightsTab,
-    subTab: CORRELATIONS_TAB_ID,
-  });
+  const { navigateToLeftPanel: goToCorrelationsTab, isEnabled: isLinkEnabled } =
+    useNavigateToLeftPanel({
+      tab: LeftPanelInsightsTab,
+      subTab: CORRELATIONS_TAB_ID,
+    });
 
   useEffect(() => {
     if (isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.createCase) {
@@ -85,7 +86,7 @@ export const CorrelationsOverview: React.FC = () => {
 
   const link = useMemo(
     () =>
-      isEnabled
+      isLinkEnabled
         ? {
             callback: goToCorrelationsTab,
             tooltip: (
@@ -96,7 +97,7 @@ export const CorrelationsOverview: React.FC = () => {
             ),
           }
         : undefined,
-    [goToCorrelationsTab, isEnabled]
+    [goToCorrelationsTab, isLinkEnabled]
   );
 
   return (
