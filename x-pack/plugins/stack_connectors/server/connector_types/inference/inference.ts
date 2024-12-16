@@ -191,7 +191,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
                 prev.choices[0].message.content += chunk.choices[0].message.content ?? '';
 
                 chunk.choices[0].message.tool_calls?.forEach((toolCall) => {
-                  if (toolCall.index !== undefined && toolCall.id) {
+                  if (toolCall.index !== undefined) {
                     const prevToolCallLength = prev.choices[0].message.tool_calls?.length ?? 0;
                     if (prevToolCallLength - 1 !== toolCall.index) {
                       if (!prev.choices[0].message.tool_calls) {
@@ -207,9 +207,18 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
                     }
                     const prevToolCall = prev.choices[0].message.tool_calls[toolCall.index];
 
-                    prevToolCall.function.name += toolCall.function?.name;
-                    prevToolCall.function.arguments += toolCall.function?.arguments;
-                    prevToolCall.id += toolCall.id;
+                    if (toolCall.function?.name) {
+                      prevToolCall.function.name += toolCall.function?.name;
+                    }
+                    if (toolCall.function?.arguments) {
+                      prevToolCall.function.arguments += toolCall.function?.arguments;
+                    }
+                    if (toolCall.id) {
+                      prevToolCall.id += toolCall.id;
+                    }
+                    if (toolCall.type) {
+                      prevToolCall.type = toolCall.type;
+                    }
                   }
                 });
               } else if (chunk.usage) {
