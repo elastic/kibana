@@ -16,10 +16,8 @@ export { EmbeddablePanel } from './embeddable_panel';
 export {
   cellValueTrigger,
   CELL_VALUE_TRIGGER,
-  Container,
   contextMenuTrigger,
   CONTEXT_MENU_TRIGGER,
-  defaultEmbeddableFactoryProvider,
   Embeddable,
   EmbeddableFactoryNotFoundError,
   EmbeddableStateTransfer,
@@ -28,7 +26,6 @@ export {
   isContextMenuTriggerContext,
   isEmbeddable,
   isErrorEmbeddable,
-  isExplicitInputWithAttributes,
   isFilterableEmbeddable,
   isMultiValueClickTriggerContext,
   isRangeSelectTriggerContext,
@@ -37,7 +34,6 @@ export {
   isSavedObjectEmbeddableInput,
   isValueClickTriggerContext,
   MULTI_VALUE_CLICK_TRIGGER,
-  omitGenericEmbeddableInput,
   panelBadgeTrigger,
   panelHoverTrigger,
   PanelNotFoundError,
@@ -46,35 +42,24 @@ export {
   PANEL_BADGE_TRIGGER,
   PANEL_HOVER_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
-  runEmbeddableFactoryMigrations,
   SELECT_RANGE_TRIGGER,
   shouldFetch$,
   shouldRefreshFilterCompareOptions,
   VALUE_CLICK_TRIGGER,
   ViewMode,
-  withEmbeddableSubscription,
 } from './lib';
 export type {
   Adapters,
   CellValueContext,
   ChartActionContext,
-  ContainerInput,
-  ContainerOutput,
-  EmbeddableContainerSettings,
   EmbeddableContext,
   EmbeddableEditorState,
-  EmbeddableFactory,
-  EmbeddableFactoryDefinition,
   EmbeddableInput,
-  EmbeddableInstanceConfiguration,
   EmbeddableOutput,
   EmbeddablePackageState,
   FilterableEmbeddable,
-  IContainer,
   IEmbeddable,
   MultiValueClickContext,
-  OutputSpec,
-  PanelState,
   PropertySpec,
   RangeSelectContext,
   ReferenceOrValueEmbeddable,
@@ -87,8 +72,7 @@ export type {
   EmbeddableSetupDependencies,
   EmbeddableStart,
   EmbeddableStartDependencies,
-} from './plugin';
-export type { EnhancementRegistryDefinition } from './types';
+} from './types';
 
 export {
   ReactEmbeddableRenderer,
@@ -99,10 +83,5 @@ export {
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
-
-export {
-  embeddableInputToSubject,
-  embeddableOutputToSubject,
-} from './lib/embeddables/compatibility/embeddable_compatibility_utils';
 
 export { COMMON_EMBEDDABLE_GROUPING } from './lib/embeddables/common/constants';

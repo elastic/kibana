@@ -97,20 +97,12 @@ const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerAddFromLibraryType: jest.fn().mockImplementation(registerAddFromLibraryType),
     registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
-    registerEmbeddableFactory: jest.fn(),
-    registerEnhancement: jest.fn(),
   };
   return setupContract;
 };
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    getEmbeddableFactories: jest.fn(),
-    getEmbeddableFactory: jest.fn(),
-    telemetry: jest.fn(),
-    extract: jest.fn(),
-    inject: jest.fn(),
-    getAllMigrations: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
   };
   return startContract;
