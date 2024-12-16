@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import { v4 as uuidv4 } from 'uuid';
 
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
 
