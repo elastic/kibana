@@ -10,6 +10,7 @@ import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
 import type { InvestigationFields } from '../../../../../../../../../common/api/detection_engine';
 import { InvestigationFields as InvestigationFieldsComponent } from '../../../../rule_about_section';
+import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 
 interface InvestigationFieldsReadOnlyProps {
   investigationFields?: InvestigationFields;
@@ -18,18 +19,17 @@ interface InvestigationFieldsReadOnlyProps {
 export function InvestigationFieldsReadOnly({
   investigationFields,
 }: InvestigationFieldsReadOnlyProps) {
-  if (!investigationFields || !investigationFields.field_names.length) {
-    return null;
-  }
-
   return (
     <EuiDescriptionList
       listItems={[
         {
           title: ruleDetailsI18n.INVESTIGATION_FIELDS_FIELD_LABEL,
-          description: (
-            <InvestigationFieldsComponent investigationFields={investigationFields.field_names} />
-          ),
+          description:
+            investigationFields && investigationFields.field_names.length ? (
+              <InvestigationFieldsComponent investigationFields={investigationFields.field_names} />
+            ) : (
+              <EmptyFieldValuePlaceholder />
+            ),
         },
       ]}
     />
