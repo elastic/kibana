@@ -36,7 +36,6 @@ import {
   ESQLBinaryExpression,
   ESQLUnaryExpression,
   ESQLTimeInterval,
-  ESQLStringLiteral,
   ESQLBooleanLiteral,
   ESQLNullLiteral,
 } from '../types';
