@@ -5905,7 +5905,7 @@
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/read_pack_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
               },
               {
                 "plugin": "securitySolution",
