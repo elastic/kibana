@@ -8,8 +8,26 @@
  */
 
 import inquirer from 'inquirer';
-import type { Commit, PullRequest } from './types';
-import { safeExec } from './utils.exec';
+import type { Commit, PullRequest } from '../types';
+import { safeExec } from './exec';
+
+export const findRemoteName = async (repo: string) => {
+  const res = await safeExec('git remote -v');
+  const remotes = res.stdout.split('\n').map((line) => line.split(/\t| /).filter(Boolean));
+  return remotes.find(([_, url]) => url.includes(`github.com/${repo}`))?.[0];
+};
+
+export const findGithubLogin = async () => {
+  const res = await safeExec('gh auth status');
+  // e.g. ✓ Logged in to github.com account gsoldevila (/Users/gsoldevila/.config/gh/hosts.yml)
+  const loginLine = res.stdout
+    .split('\n')
+    .find((line) => line.includes('Logged in'))
+    ?.split(/\t| /)
+    .filter(Boolean);
+
+  return loginLine?.[loginLine?.findIndex((fragment) => fragment === 'account') + 1];
+};
 
 export const findPr = async (number: string): Promise<PullRequest> => {
   const res = await safeExec(`gh pr view ${number} --json commits,headRefName`);
