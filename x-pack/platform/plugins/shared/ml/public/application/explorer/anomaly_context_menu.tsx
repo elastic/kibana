@@ -50,13 +50,8 @@ import type { AnomalyChartsEmbeddableState } from '../../embeddables';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../embeddables';
 import { useMlKibana } from '../contexts/kibana';
 import type { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
-import {
-  getMergedGroupsAndJobsIds,
-  getSelectionInfluencers,
-  getSelectionTimeRange,
-} from './explorer_utils';
+import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
 import { getDefaultExplorerChartsPanelTitle } from '../../embeddables/anomaly_charts/utils';
-import type { GroupObj } from '../components/job_selector/job_selector';
 
 interface AnomalyContextMenuProps {
   selectedJobs: ExplorerJob[];
@@ -64,7 +59,7 @@ interface AnomalyContextMenuProps {
   bounds?: TimeRangeBounds;
   interval?: number;
   chartsCount: number;
-  selectedGroups: GroupObj[];
+  mergedGroupsAndJobsIds: string[];
 }
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -78,11 +73,11 @@ function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) 
 
 export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
   selectedJobs,
-  selectedGroups,
   selectedCells,
   bounds,
   interval,
   chartsCount,
+  mergedGroupsAndJobsIds,
 }) => {
   const {
     services: {
@@ -104,7 +99,6 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     [setIsMenuOpen]
   );
 
-  const mergedGroupsAndJobsIds = getMergedGroupsAndJobsIds(selectedGroups, selectedJobs);
   const openCasesModal = useCasesModal(ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE);
 
   const canEditDashboards = capabilities.dashboard?.createNew ?? false;

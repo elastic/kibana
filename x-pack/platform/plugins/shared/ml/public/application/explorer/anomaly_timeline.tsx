@@ -52,7 +52,6 @@ import { useMlKibana } from '../contexts/kibana';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found';
 import { SwimlaneContainer } from './swimlane_container';
 import {
-  getMergedGroupsAndJobsIds,
   type AppStateSelectedCells,
   type OverallSwimlaneData,
   type ViewBySwimLaneData,
@@ -68,6 +67,7 @@ import { getTimeBoundsFromSelection } from './hooks/use_selected_cells';
 import { SwimLaneWrapper } from './alerts';
 import { Y_AXIS_LABEL_WIDTH } from './constants';
 import type { ExplorerState } from './explorer_data';
+import { useJobSelection } from './hooks/use_job_selection';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -127,20 +127,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const swimlaneLimit = useObservable(anomalyTimelineStateService.getSwimLaneCardinality$());
 
-    const selectedJobs = useObservable(
-      anomalyExplorerCommonStateService.selectedJobs$,
-      anomalyExplorerCommonStateService.selectedJobs
-    );
-
-    const selectedGroups = useObservable(
-      anomalyExplorerCommonStateService.selectedGroups$,
-      anomalyExplorerCommonStateService.selectedGroups
-    );
-
-    const mergedGroupsAndJobsIds = useMemo(
-      () => getMergedGroupsAndJobsIds(selectedGroups, selectedJobs),
-      [selectedGroups, selectedJobs]
-    );
+    const { selectedJobs, mergedGroupsAndJobsIds } = useJobSelection();
 
     const loading = useObservable(anomalyTimelineStateService.isOverallSwimLaneLoading$(), true);
 

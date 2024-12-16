@@ -78,6 +78,7 @@ import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
 import { AlertsPanel } from './alerts';
 import { useMlIndexUtils } from '../util/index_service';
 import type { ExplorerState } from './explorer_data';
+import { useJobSelection } from './hooks/use_job_selection';
 
 const AnnotationFlyout = dynamic(async () => ({
   default: (await import('../components/annotations/annotation_flyout')).AnnotationFlyout,
@@ -290,15 +291,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     anomalyExplorerCommonStateService.filterSettings
   );
 
-  const selectedJobs = useObservable(
-    anomalyExplorerCommonStateService.selectedJobs$,
-    anomalyExplorerCommonStateService.selectedJobs
-  );
-
-  const selectedGroups = useObservable(
-    anomalyExplorerCommonStateService.selectedGroups$,
-    anomalyExplorerCommonStateService.selectedGroups
-  );
+  const { selectedJobs, selectedGroups, mergedGroupsAndJobsIds } = useJobSelection();
 
   const alertsData = useObservable(anomalyDetectionAlertsStateService.anomalyDetectionAlerts$, []);
 
@@ -582,7 +575,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
             <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
               <AnomalyContextMenu
                 selectedJobs={selectedJobs!}
-                selectedGroups={selectedGroups}
+                mergedGroupsAndJobsIds={mergedGroupsAndJobsIds}
                 selectedCells={selectedCells}
                 bounds={bounds}
                 interval={swimLaneBucketInterval ? swimLaneBucketInterval.asSeconds() : undefined}
