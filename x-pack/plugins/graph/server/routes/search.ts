@@ -23,8 +23,7 @@ export function registerSearchRoute({
       security: {
         authz: {
           enabled: false,
-          reason:
-            'This route is opted out from authorization because uses the current user authorizations.',
+          reason: 'This route delegates authorization to the scoped ES client.',
         },
       },
       validate: {
