@@ -369,6 +369,7 @@ export interface ESQLStringLiteral extends ESQLAstBaseItem {
   literalType: 'keyword';
 
   value: string;
+  valueUnquoted: string;
 }
 
 // @internal

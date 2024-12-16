@@ -50,8 +50,6 @@ import {
   visitByOption,
   collectAllColumnIdentifiers,
   visitRenameClauses,
-  visitDissect,
-  visitGrok,
   collectBooleanExpression,
   visitOrderExpressions,
   getPolicyName,
@@ -60,6 +58,8 @@ import {
 } from './walkers';
 import type { ESQLAst, ESQLAstMetricsCommand } from '../types';
 import { createJoinCommand } from './factories/join';
+import { createDissectCommand } from './factories/dissect';
+import { createGrokCommand } from './factories/grok';
 
 export class ESQLAstBuilderListener implements ESQLParserListener {
   private ast: ESQLAst = [];
@@ -262,9 +262,9 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitDissectCommand(ctx: DissectCommandContext) {
-    const command = createCommand('dissect', ctx);
+    const command = createDissectCommand(ctx);
+
     this.ast.push(command);
-    command.args.push(...visitDissect(ctx));
   }
 
   /**
@@ -272,9 +272,9 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitGrokCommand(ctx: GrokCommandContext) {
-    const command = createCommand('grok', ctx);
+    const command = createGrokCommand(ctx);
+
     this.ast.push(command);
-    command.args.push(...visitGrok(ctx));
   }
 
   /**
