@@ -8,6 +8,7 @@
  */
 
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { SecurityServiceStart } from '@kbn/core-security-browser';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type {
   GetFavoritesResponse as GetFavoritesResponseServer,
@@ -29,6 +30,7 @@ export interface FavoritesClientPublic<Metadata extends object | void = void> {
   addFavorite(params: AddFavoriteRequest<Metadata>): Promise<AddFavoriteResponse>;
   removeFavorite(params: { id: string }): Promise<RemoveFavoriteResponse>;
 
+  isAvailable(): Promise<boolean>;
   getFavoriteType(): string;
   reportAddFavoriteClick(): void;
   reportRemoveFavoriteClick(): void;
@@ -40,14 +42,37 @@ export class FavoritesClient<Metadata extends object | void = void>
   constructor(
     private readonly appName: string,
     private readonly favoriteObjectType: string,
-    private readonly deps: { http: HttpStart; usageCollection?: UsageCollectionStart }
+    private readonly deps: {
+      http: HttpStart;
+      security: SecurityServiceStart;
+      usageCollection?: UsageCollectionStart;
+    }
   ) {}
 
+  private isAvailableCached?: boolean;
+  public async isAvailable(): Promise<boolean> {
+    if (typeof this.isAvailableCached === 'boolean') return this.isAvailableCached;
+
+    try {
+      const user = await this.deps.security.authc.getCurrentUser();
+      return (this.isAvailableCached = Boolean(user.profile_uid));
+    } catch (e) {
+      return (this.isAvailableCached = false);
+    }
+  }
+
+  private async ifAvailablePreCheck() {
+    if (!(await this.isAvailable()))
+      throw new Error('Favorites service is not available for current user');
+  }
+
   public async getFavorites(): Promise<GetFavoritesResponse<Metadata>> {
+    await this.ifAvailablePreCheck();
     return this.deps.http.get(`/internal/content_management/favorites/${this.favoriteObjectType}`);
   }
 
   public async addFavorite(params: AddFavoriteRequest<Metadata>): Promise<AddFavoriteResponse> {
+    await this.ifAvailablePreCheck();
     return this.deps.http.post(
       `/internal/content_management/favorites/${this.favoriteObjectType}/${params.id}/favorite`,
       { body: 'metadata' in params ? JSON.stringify({ metadata: params.metadata }) : undefined }
@@ -55,6 +80,7 @@ export class FavoritesClient<Metadata extends object | void = void>
   }
 
   public async removeFavorite({ id }: { id: string }): Promise<RemoveFavoriteResponse> {
+    await this.ifAvailablePreCheck();
     return this.deps.http.post(
       `/internal/content_management/favorites/${this.favoriteObjectType}/${id}/unfavorite`
     );

@@ -477,15 +477,18 @@ export function HistoryAndStarredQueriesTabs({
     const initializeService = async () => {
       const starredService = await EsqlStarredQueriesService.initialize({
         http: core.http,
+        security: core.security,
         usageCollection,
         storage,
       });
-      setStarredQueriesService(starredService);
+      if (starredService) {
+        setStarredQueriesService(starredService);
+      }
     };
     if (!starredQueriesService) {
       initializeService();
     }
-  }, [core.http, starredQueriesService, storage, usageCollection]);
+  }, [core.http, core.security, starredQueriesService, storage, usageCollection]);
 
   starredQueriesService?.queries$.subscribe((nextQueries) => {
     if (nextQueries.length !== starredQueries.length) {
@@ -495,7 +498,11 @@ export function HistoryAndStarredQueriesTabs({
 
   const { euiTheme } = useEuiTheme();
   const tabs = useMemo(() => {
-    return [
+    // use typed helper instead of .filter directly to remove undefined from result type
+    function filterUndefined<T>(array: Array<T | undefined>): T[] {
+      return array.filter((item): item is T => item !== undefined);
+    }
+    return filterUndefined([
       {
         id: 'history-queries-tab',
         name: i18n.translate('esqlEditor.query.historyQueriesTabLabel', {
@@ -517,7 +524,7 @@ export function HistoryAndStarredQueriesTabs({
           />
         ),
       },
-      {
+      starredQueriesService && {
         id: 'starred-queries-tab',
         dataTestSubj: 'starred-queries-tab',
         name: i18n.translate('esqlEditor.query.starredQueriesTabLabel', {
@@ -544,7 +551,7 @@ export function HistoryAndStarredQueriesTabs({
           />
         ),
       },
-    ];
+    ]);
   }, [
     containerCSS,
     containerWidth,
