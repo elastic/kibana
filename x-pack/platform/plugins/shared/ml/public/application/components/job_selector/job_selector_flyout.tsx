@@ -29,7 +29,10 @@ import {
   getTimeRangeFromSelection,
   normalizeTimes,
 } from './job_select_service_utils';
-import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import type {
+  MlJobTimeRange,
+  MlJobWithTimeRange,
+} from '../../../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../../contexts/kibana';
 import type { JobSelectionMaps } from './job_selector';
 
@@ -39,7 +42,6 @@ export const DEFAULT_GANTT_BAR_WIDTH = 299; // pixels
 export interface JobSelectionResult {
   newSelection: string[];
   jobIds: string[];
-  groups: Array<{ groupId: string; jobIds: string[] }>;
   time: { from: string; to: string } | undefined;
 }
 
@@ -52,10 +54,15 @@ export interface JobSelectorFlyoutProps {
   onSelectionConfirmed: (payload: JobSelectionResult) => void;
   singleSelection: boolean;
   timeseriesOnly: boolean;
-  maps: JobSelectionMaps;
   withTimeRangeSelector?: boolean;
   applyTimeRangeConfig?: boolean;
   onTimeRangeConfigChange?: (v: boolean) => void;
+}
+
+export interface MlJobGroupWithTimeRange {
+  id: string;
+  jobIds: string[];
+  timeRange: MlJobTimeRange;
 }
 
 export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
@@ -66,7 +73,6 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   onJobsFetched,
   onSelectionConfirmed,
   onFlyoutClose,
-  maps,
   applyTimeRangeConfig,
   onTimeRangeConfigChange,
   withTimeRangeSelector = true,
@@ -83,42 +89,37 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [showAllBadges, setShowAllBadges] = useState(false);
   const [jobs, setJobs] = useState<MlJobWithTimeRange[]>([]);
-  const [groups, setGroups] = useState<any[]>([]);
+  const [groups, setGroups] = useState<MlJobGroupWithTimeRange[]>([]);
+
   const [ganttBarWidth, setGanttBarWidth] = useState(DEFAULT_GANTT_BAR_WIDTH);
-  const [jobGroupsMaps, setJobGroupsMaps] = useState(maps);
 
   const flyoutEl = useRef<HTMLElement | null>(null);
 
   const applySelection = useCallback(() => {
-    // allNewSelection will be a list of all job ids (including those from groups) selected from the table
-    const allNewSelection: string[] = [];
-    const groupSelection: Array<{ groupId: string; jobIds: string[] }> = [];
+    const selectedGroupIds = newSelection.filter((id) => groups.some((group) => group.id === id));
 
-    newSelection.forEach((id) => {
-      if (jobGroupsMaps.groupsMap[id] !== undefined) {
-        // Push all jobs from selected groups into the newSelection list
-        allNewSelection.push(...jobGroupsMaps.groupsMap[id]);
-        // if it's a group - push group obj to set in global state
-        groupSelection.push({ groupId: id, jobIds: jobGroupsMaps.groupsMap[id] });
-      } else {
-        allNewSelection.push(id);
-      }
-    });
-    // create a Set to remove duplicate values
-    const allNewSelectionUnique = Array.from(new Set(allNewSelection));
+    const jobsInSelectedGroups = [
+      ...new Set(
+        groups
+          .filter((group) => selectedGroupIds.includes(group.id))
+          .flatMap((group) => group.jobIds)
+      ),
+    ];
 
-    const time = applyTimeRangeConfig
-      ? getTimeRangeFromSelection(jobs, allNewSelectionUnique)
-      : undefined;
+    const standaloneJobs = newSelection.filter(
+      (id) => !selectedGroupIds.includes(id) && !jobsInSelectedGroups.includes(id)
+    );
+
+    const finalSelection = [...selectedGroupIds, ...standaloneJobs];
+    const time = applyTimeRangeConfig ? getTimeRangeFromSelection(jobs, finalSelection) : undefined;
 
     onSelectionConfirmed({
-      newSelection: allNewSelectionUnique,
-      jobIds: allNewSelectionUnique,
-      groups: groupSelection,
+      newSelection: finalSelection,
+      jobIds: finalSelection,
       time,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onSelectionConfirmed, newSelection, jobGroupsMaps, applyTimeRangeConfig]);
+  }, [onSelectionConfirmed, newSelection, applyTimeRangeConfig]);
 
   function removeId(id: string) {
     setNewSelection(newSelection.filter((item) => item !== id));
@@ -168,7 +169,6 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
       const { groups: groupsWithTimerange, groupsMap } = getGroupsFromJobs(normalizedJobs);
       setJobs(normalizedJobs);
       setGroups(groupsWithTimerange);
-      setJobGroupsMaps({ groupsMap, jobsMap: resp.jobsMap });
 
       if (onJobsFetched) {
         onJobsFetched({ groupsMap, jobsMap: resp.jobsMap });
@@ -215,7 +215,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
                       <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
                         <NewSelectionIdBadges
                           limit={BADGE_LIMIT}
-                          maps={jobGroupsMaps}
+                          groups={groups}
                           newSelection={newSelection}
                           onDeleteClick={removeId}
                           onLinkClick={() => setShowAllBadges(!showAllBadges)}
