@@ -22,7 +22,7 @@ const esClientMock = elasticsearchServiceMock.createClusterClient();
 const logger = loggerMock.create();
 
 describe('instanceAsFilter', () => {
-  it('throws if no sources are found for the type', () => {
+  it('throws if no sources are found for the type', async () => {
     const instance: EntityV2 = {
       'entity.type': 'my_type',
       'entity.id': 'whatever',
@@ -32,12 +32,12 @@ describe('instanceAsFilter', () => {
     const sources: EntitySourceDefinition[] = [];
     readSourceDefinitionsMock.mockResolvedValue(sources);
 
-    expect(instanceAsFilter(instance, esClientMock, logger)).rejects.toThrowError(
+    await expect(instanceAsFilter(instance, esClientMock, logger)).rejects.toThrowError(
       UnknownEntityType
     );
   });
 
-  it('throws if the instance cannot match any sources due to missing identity fields', () => {
+  it('throws if the instance cannot match any sources due to missing identity fields', async () => {
     const instance: EntityV2 = {
       'entity.type': 'my_type',
       'entity.id': 'whatever',
@@ -56,12 +56,12 @@ describe('instanceAsFilter', () => {
     ];
     readSourceDefinitionsMock.mockResolvedValue(sources);
 
-    expect(instanceAsFilter(instance, esClientMock, logger)).rejects.toThrowError(
+    await expect(instanceAsFilter(instance, esClientMock, logger)).rejects.toThrowError(
       InvalidEntityInstance
     );
   });
 
-  it('creates a single source filter for a single identity field', () => {
+  it('creates a single source filter for a single identity field', async () => {
     const instance: EntityV2 = {
       'entity.type': 'my_type',
       'entity.id': 'whatever',
@@ -81,12 +81,12 @@ describe('instanceAsFilter', () => {
     ];
     readSourceDefinitionsMock.mockResolvedValue(sources);
 
-    expect(instanceAsFilter(instance, esClientMock, logger)).resolves.toBe(
+    await expect(instanceAsFilter(instance, esClientMock, logger)).resolves.toBe(
       '(host.name: "my_host")'
     );
   });
 
-  it('creates a single source filter for multiple identity field', () => {
+  it('creates a single source filter for multiple identity field', async () => {
     const instance: EntityV2 = {
       'entity.type': 'my_type',
       'entity.id': 'whatever',
@@ -107,12 +107,12 @@ describe('instanceAsFilter', () => {
     ];
     readSourceDefinitionsMock.mockResolvedValue(sources);
 
-    expect(instanceAsFilter(instance, esClientMock, logger)).resolves.toBe(
+    await expect(instanceAsFilter(instance, esClientMock, logger)).resolves.toBe(
       '(host.name: "my_host" AND host.os: "my_os")'
     );
   });
 
-  it('creates multiple source filters for a single identity field', () => {
+  it('creates multiple source filters for a single identity field', async () => {
     const instance: EntityV2 = {
       'entity.type': 'my_type',
       'entity.id': 'whatever',
@@ -141,12 +141,12 @@ describe('instanceAsFilter', () => {
     ];
     readSourceDefinitionsMock.mockResolvedValue(sources);
 
-    expect(instanceAsFilter(instance, esClientMock, logger)).resolves.toBe(
+    await expect(instanceAsFilter(instance, esClientMock, logger)).resolves.toBe(
       '(host.name: "my_host") OR (host.os: "my_os")'
     );
   });
 
-  it('creates multiple source filters for multiple identity field', () => {
+  it('creates multiple source filters for multiple identity field', async () => {
     const instance: EntityV2 = {
       'entity.type': 'my_type',
       'entity.id': 'whatever',
@@ -176,7 +176,7 @@ describe('instanceAsFilter', () => {
     ];
     readSourceDefinitionsMock.mockResolvedValue(sources);
 
-    expect(instanceAsFilter(instance, esClientMock, logger)).resolves.toBe(
+    await expect(instanceAsFilter(instance, esClientMock, logger)).resolves.toBe(
       '(host.name: "my_host" AND host.arch: "my_arch") OR (host.os: "my_os" AND host.arch: "my_arch")'
     );
   });
