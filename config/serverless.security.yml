@@ -63,6 +63,7 @@ xpack.securitySolutionServerless.productTypes:
 
 xpack.securitySolution.offeringSettings: {
   ILMEnabled: false, # Index Lifecycle Management (ILM) functionalities disabled, not supported by serverless Elasticsearch
+  defendForContainersEnabled: false # D4C disabled, not supported in serverless
 }
 
 newsfeed.enabled: true

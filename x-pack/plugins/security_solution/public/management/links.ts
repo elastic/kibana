@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { StartServices } from '../types';
 
 import { checkArtifactHasData } from './services/exceptions_list/check_artifact_has_data';
 import {
@@ -41,7 +41,6 @@ import {
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
-import type { StartPlugins } from '../types';
 import { cloudDefendLink } from '../cloud_defend/links';
 import { links as notesLink } from '../notes/links';
 import { IconConsole } from '../common/icons/console';
@@ -226,12 +225,9 @@ const excludeLinks = (linkIds: SecurityPageName[]) => ({
   links: links.links?.filter((link) => !linkIds.includes(link.id)),
 });
 
-export const getManagementFilteredLinks = async (
-  core: CoreStart,
-  plugins: StartPlugins
-): Promise<LinkItem> => {
-  const fleetAuthz = plugins.fleet?.authz;
-  const currentUser = await plugins.security.authc.getCurrentUser();
+export const getManagementFilteredLinks = async (services: StartServices): Promise<LinkItem> => {
+  const fleetAuthz = services.fleet?.authz;
+  const currentUser = await services.security.authc.getCurrentUser();
   const {
     canReadActionsLogManagement,
     canAccessHostIsolationExceptions,
@@ -251,7 +247,7 @@ export const getManagementFilteredLinks = async (
     // read host isolation exceptions is not a paid feature, to allow deleting exceptions after a downgrade scenario.
     // however, in this situation we allow to access only when there is data, otherwise the link won't be accessible.
     (canReadHostIsolationExceptions &&
-      (await checkArtifactHasData(HostIsolationExceptionsApiClient.getInstance(core.http))));
+      (await checkArtifactHasData(HostIsolationExceptionsApiClient.getInstance(services.http))));
 
   const linksToExclude: SecurityPageName[] = [];
 

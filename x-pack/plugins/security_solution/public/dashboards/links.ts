@@ -17,6 +17,7 @@ import {
   overviewLinks,
 } from '../overview/links';
 import { IconDashboards } from '../common/icons/dashboards';
+import type { StartServices } from '../types';
 
 const subLinks: LinkItem[] = [
   overviewLinks,
@@ -41,4 +42,14 @@ export const dashboardsLinks: LinkItem = {
   ],
   links: subLinks,
   skipUrlState: false,
+};
+
+export const getDashboardsFilteredLinks = (services: StartServices): LinkItem => {
+  if (services.configSettings.defendForContainersEnabled) {
+    return dashboardsLinks;
+  }
+  return {
+    ...dashboardsLinks,
+    links: subLinks.filter((link) => link.id !== SecurityPageName.kubernetes),
+  };
 };

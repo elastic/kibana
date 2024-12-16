@@ -213,7 +213,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return this.contract.getSetupContract();
   }
 
-  public start(core: CoreStart, plugins: StartPlugins): PluginStart {
+  public start(core: CoreStart, plugins: StartPluginsDependencies): PluginStart {
     this.services.start(core, plugins);
     this.registerFleetExtensions(core, plugins);
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
@@ -430,7 +430,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   /**
    * Registers the plugin updates including status, visibleIn, and deepLinks via the plugin updater$.
    */
-  private async registerPluginUpdates(core: CoreStart, plugins: StartPlugins) {
+  private async registerPluginUpdates(core: CoreStart, plugins: StartPluginsDependencies) {
     const { license$ } = plugins.licensing;
     const { capabilities } = core.application;
     const { upsellingService, isSolutionNavigationEnabled$ } = this.contract;
@@ -471,7 +471,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         updateAppLinks(links, linksPermissions);
       });
 
-    const filteredLinks = await getFilteredLinks(core, plugins);
+    const services = await this.services.generateServices(core, plugins);
+    const filteredLinks = await getFilteredLinks(services);
     appLinksToUpdate$.next(filteredLinks);
   }
 

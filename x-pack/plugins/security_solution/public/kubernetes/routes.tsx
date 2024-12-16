@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { allowedExperimentalValues } from '../../common';
 import { KubernetesContainer } from './pages';
 
@@ -14,12 +13,13 @@ import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
 import { KUBERNETES_PATH } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
 export const KubernetesRoutes = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.kubernetes}>
+    <SecurityRoutePageWrapper pageName={SecurityPageName.kubernetes} redirectOnMissing>
       <KubernetesContainer />
-    </TrackApplicationView>
+    </SecurityRoutePageWrapper>
   </PluginTemplateWrapper>
 );
 

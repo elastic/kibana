@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreStart } from '@kbn/core/public';
-
-import { links as attackDiscoveryLinks } from './attack_discovery/links';
+import type { StartServices } from './types';
 import type { AppLinkItems } from './common/links/types';
+import { links as attackDiscoveryLinks } from './attack_discovery/links';
 import { indicatorsLinks } from './threat_intelligence/links';
 import { links as alertsLinks } from './detections/links';
 import { links as rulesLinks } from './rules/links';
@@ -17,8 +16,7 @@ import { links as managementLinks, getManagementFilteredLinks } from './manageme
 import { exploreLinks } from './explore/links';
 import { onboardingLinks } from './onboarding/links';
 import { findingsLinks } from './cloud_security_posture/links';
-import type { StartPlugins } from './types';
-import { dashboardsLinks } from './dashboards/links';
+import { dashboardsLinks, getDashboardsFilteredLinks } from './dashboards/links';
 
 // TODO: remove after rollout https://github.com/elastic/kibana/issues/179572
 export { solutionAppLinksSwitcher } from './app/solution_navigation/links/app_links';
@@ -37,14 +35,12 @@ export const appLinks: AppLinkItems = Object.freeze([
   managementLinks,
 ]);
 
-export const getFilteredLinks = async (
-  core: CoreStart,
-  plugins: StartPlugins
-): Promise<AppLinkItems> => {
-  const managementFilteredLinks = await getManagementFilteredLinks(core, plugins);
+export const getFilteredLinks = async (services: StartServices): Promise<AppLinkItems> => {
+  const managementFilteredLinks = await getManagementFilteredLinks(services);
+  const dashboardsFilteredLinks = getDashboardsFilteredLinks(services);
 
   return Object.freeze([
-    dashboardsLinks,
+    dashboardsFilteredLinks,
     alertsLinks,
     attackDiscoveryLinks,
     findingsLinks,

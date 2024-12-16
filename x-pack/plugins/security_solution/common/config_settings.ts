@@ -10,6 +10,10 @@ export interface ConfigSettings {
    * Index Lifecycle Management (ILM) feature enabled.
    */
   ILMEnabled: boolean;
+  /**
+   * Defend for Containers feature enabled.
+   */
+  defendForContainersEnabled: boolean;
 }
 
 /**
@@ -18,6 +22,7 @@ export interface ConfigSettings {
  */
 export const defaultSettings: ConfigSettings = Object.freeze({
   ILMEnabled: true,
+  defendForContainersEnabled: true,
 });
 
 type ConfigSettingsKey = keyof ConfigSettings;
