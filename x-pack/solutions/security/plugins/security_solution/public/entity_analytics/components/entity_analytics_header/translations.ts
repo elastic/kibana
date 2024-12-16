@@ -14,13 +14,6 @@ export const CRITICAL_HOSTS = i18n.translate(
   }
 );
 
-export const CRITICAL_USERS = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.header.criticalUsers',
-  {
-    defaultMessage: 'Critical Users',
-  }
-);
-
 export const ANOMALIES = i18n.translate('xpack.securitySolution.entityAnalytics.header.anomalies', {
   defaultMessage: 'Anomalies',
 });

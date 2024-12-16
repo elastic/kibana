@@ -10,7 +10,6 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
-import { RISKY_HOSTS_DASHBOARD_TITLE, RISKY_USERS_DASHBOARD_TITLE } from '../risk_score/constants';
 import { EnableRiskScore } from '../enable_risk_score';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import type { State } from '../../../common/store';
@@ -24,8 +23,12 @@ import { RiskScoreOverTime } from '../risk_score_over_time';
 import { TopRiskScoreContributors } from '../top_risk_score_contributors';
 import { TopRiskScoreContributorsAlerts } from '../top_risk_score_contributors_alerts';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
-import { buildEntityNameFilter, RiskScoreEntity } from '../../../../common/search_strategy';
+import {
+  buildEntityNameFilter,
+  type HostRiskScore,
+  type UserRiskScore,
+} from '../../../../common/search_strategy';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import type { UsersComponentsQueryProps } from '../../../explore/users/pages/navigation/types';
 import type { HostsComponentsQueryProps } from '../../../explore/hosts/pages/navigation/types';
 import { useDashboardHref } from '../../../common/hooks/use_dashboard_href';
@@ -36,6 +39,7 @@ import { HostRiskScoreQueryId, UserRiskScoreQueryId } from '../../common/utils';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
 import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
 import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
+import { getRiskyEntityDashboardTitle } from '../risk_score/constants';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeL};
@@ -43,30 +47,34 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 
 type ComponentsQueryProps = HostsComponentsQueryProps | UsersComponentsQueryProps;
 
-const getDashboardTitle = (riskEntity: RiskScoreEntity) =>
-  riskEntity === RiskScoreEntity.host ? RISKY_HOSTS_DASHBOARD_TITLE : RISKY_USERS_DASHBOARD_TITLE;
-
-const RiskDetailsTabBodyComponent: React.FC<
-  Pick<ComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
-    entityName: string;
-    riskEntity: RiskScoreEntity;
-  }
-> = ({ entityName, startDate, endDate, setQuery, deleteQuery, riskEntity }) => {
+const RiskDetailsTabBodyComponent = <T extends EntityType>({
+  entityName,
+  startDate,
+  endDate,
+  setQuery,
+  deleteQuery,
+  riskEntity,
+}: Pick<ComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
+  entityName: string;
+  riskEntity: T;
+}) => {
   const queryId = useMemo(
     () =>
-      riskEntity === RiskScoreEntity.host
+      // TODO support services
+      riskEntity === EntityType.host
         ? HostRiskScoreQueryId.HOST_DETAILS_RISK_SCORE
         : UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE,
     [riskEntity]
   );
 
   const severitySelectionRedux = useDeepEqualSelector((state: State) =>
-    riskEntity === RiskScoreEntity.host
+    // TODO support services
+    riskEntity === EntityType.host
       ? hostsSelectors.hostRiskScoreSeverityFilterSelector()(state, hostsModel.HostsType.details)
       : usersSelectors.userRiskScoreSeverityFilterSelector()(state)
   );
 
-  const buttonHref = useDashboardHref({ title: getDashboardTitle(riskEntity) });
+  const buttonHref = useDashboardHref({ title: getRiskyEntityDashboardTitle(riskEntity) });
 
   const timerange = useMemo(
     () => ({
@@ -82,11 +90,11 @@ const RiskDetailsTabBodyComponent: React.FC<
     useQueryToggle(`${queryId} contributors`);
 
   const filterQuery = useMemo(
-    () => (entityName ? buildEntityNameFilter([entityName], riskEntity) : {}),
+    () => (entityName ? buildEntityNameFilter(riskEntity, [entityName]) : {}),
     [entityName, riskEntity]
   );
 
-  const { data, loading, refetch, inspect, isDeprecated, isModuleEnabled } = useRiskScore({
+  const { data, loading, refetch, inspect, isDeprecated, isModuleEnabled } = useRiskScore<T>({
     filterQuery,
     onlyLatest: false,
     riskEntity,
@@ -99,7 +107,8 @@ const RiskDetailsTabBodyComponent: React.FC<
   const rules = useMemo(() => {
     const lastRiskItem = data && data.length > 0 ? data[data.length - 1] : null;
     if (lastRiskItem) {
-      return riskEntity === RiskScoreEntity.host
+      // TODO support services
+      return riskEntity === EntityType.host
         ? (lastRiskItem as HostRiskScore).host.risk.rule_risks
         : (lastRiskItem as UserRiskScore).user.risk.rule_risks;
     }
@@ -187,10 +196,8 @@ const RiskDetailsTabBodyComponent: React.FC<
             <EuiFlexItem grow={2}>
               <RiskScoreOverTime
                 from={startDate}
-                loading={loading}
                 queryId={queryId}
                 riskEntity={riskEntity}
-                riskScore={data}
                 title={i18n.RISK_SCORE_OVER_TIME(riskEntity)}
                 to={endDate}
                 toggleQuery={toggleOverTimeQuery}

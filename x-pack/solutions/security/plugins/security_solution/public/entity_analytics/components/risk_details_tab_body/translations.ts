@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { RiskScoreEntity } from '../../../../common/search_strategy';
+import type { EntityType } from '../../../../common/entity_analytics/types';
 import { getRiskEntityTranslation } from '../risk_score/translations';
 
-export const RISK_SCORE_OVER_TIME = (riskEntity: RiskScoreEntity) =>
+export const RISK_SCORE_OVER_TIME = (riskEntity: EntityType) =>
   i18n.translate('xpack.securitySolution.riskTabBody.scoreOverTimeTitle', {
     defaultMessage: '{riskEntity} risk score over time',
     values: {

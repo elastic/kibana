@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { EntityType, IdField } from '../../api/entity_analytics';
-import { EntityTypeEnum } from '../../api/entity_analytics';
+import { EntityType } from '../types';
 
 /**
  * Entity Store routes
@@ -27,11 +26,4 @@ export const ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
 // The index pattern for the entity store has to support '.entities.v1.latest.noop' index
 export const ENTITY_STORE_INDEX_PATTERN = '.entities.v1.latest.*';
 
-export const IDENTITY_FIELD_MAP: Record<EntityType, IdField> = {
-  [EntityTypeEnum.host]: 'host.name',
-  [EntityTypeEnum.user]: 'user.name',
-  [EntityTypeEnum.service]: 'service.name',
-};
-
-export const getAvailableEntityTypes = (): EntityType[] =>
-  Object.keys(EntityTypeEnum) as EntityType[];
+export const getAvailableEntityTypes = (): EntityType[] => Object.keys(EntityType) as EntityType[];

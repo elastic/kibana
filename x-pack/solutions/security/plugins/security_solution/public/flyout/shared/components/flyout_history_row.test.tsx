@@ -20,8 +20,6 @@ import { useRuleDetails } from '../../rule_details/hooks/use_rule_details';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
 import { DocumentDetailsRightPanelKey } from '../../document_details/shared/constants/panel_keys';
 import { RulePanelKey } from '../../rule_details/right';
-import { UserPanelKey } from '../../entity_details/user_right';
-import { HostPanelKey } from '../../entity_details/host_right';
 import { NetworkPanelKey } from '../../network_details';
 import {
   DOCUMENT_DETAILS_HISTORY_ROW_TEST_ID,
@@ -31,6 +29,7 @@ import {
   NETWORK_HISTORY_ROW_TEST_ID,
   GENERIC_HISTORY_ROW_TEST_ID,
 } from './test_ids';
+import { HostPanelKey, UserPanelKey } from '../../entity_details/shared/constants';
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),

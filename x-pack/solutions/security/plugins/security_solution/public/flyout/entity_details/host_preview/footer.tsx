@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FlyoutFooter } from '../../shared/components/flyout_footer';
-import { HostPanelKey } from '../host_right';
+import { HostPanelKey } from '../shared/constants';
 
 export interface HostPreviewPanelFooterProps {
   contextID: string;

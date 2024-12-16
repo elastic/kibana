@@ -69,7 +69,7 @@ export const EntitiesList: React.FC = () => {
 
   const searchParams = useMemo(
     () => ({
-      entitiesTypes: [EntityType.Enum.user, EntityType.Enum.host],
+      entitiesTypes: [EntityType.Enum.user, EntityType.Enum.host, EntityType.Enum.service],
       page: activePage + 1,
       perPage: limit,
       sortField: sorting.field,

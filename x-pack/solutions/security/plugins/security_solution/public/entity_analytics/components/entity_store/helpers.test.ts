@@ -5,46 +5,43 @@
  * 2.0.
  */
 
-import { isUserEntity, sourceFieldToText } from './helpers';
-import type {
-  Entity,
-  UserEntity,
-} from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
+import { sourceFieldToText } from './helpers';
 import { render } from '@testing-library/react';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 
 describe('helpers', () => {
-  describe('isUserEntity', () => {
-    it('should return true if the record is a UserEntity', () => {
-      const userEntity: UserEntity = {
-        '@timestamp': '2021-08-02T14:00:00.000Z',
-        user: {
-          name: 'test_user',
-        },
-        entity: {
-          name: 'test_user',
-          source: 'logs-test',
-        },
-      };
+  // TODO write tests for getEntityType
+  // describe('getEntityType', () => {
+  //   it('should return true if the record is a UserEntity', () => {
+  //     const userEntity: UserEntity = {
+  //       '@timestamp': '2021-08-02T14:00:00.000Z',
+  //       user: {
+  //         name: 'test_user',
+  //       },
+  //       entity: {
+  //         name: 'test_user',
+  //         source: 'logs-test',
+  //       },
+  //     };
 
-      expect(isUserEntity(userEntity)).toBe(true);
-    });
+  //     expect(getEntityType(userEntity)).toBe(true);
+  //   });
 
-    it('should return false if the record is not a UserEntity', () => {
-      const nonUserEntity: Entity = {
-        '@timestamp': '2021-08-02T14:00:00.000Z',
-        host: {
-          name: 'test_host',
-        },
-        entity: {
-          name: 'test_host',
-          source: 'logs-test',
-        },
-      };
+  //   it('should return false if the record is not a UserEntity', () => {
+  //     const nonUserEntity: Entity = {
+  //       '@timestamp': '2021-08-02T14:00:00.000Z',
+  //       host: {
+  //         name: 'test_host',
+  //       },
+  //       entity: {
+  //         name: 'test_host',
+  //         source: 'logs-test',
+  //       },
+  //     };
 
-      expect(isUserEntity(nonUserEntity)).toBe(false);
-    });
-  });
+  //     expect(getEntityType(nonUserEntity)).toBe(false);
+  //   });
+  // });
 
   describe('sourceFieldToText', () => {
     it("should return 'Events' if the value isn't risk or asset", () => {

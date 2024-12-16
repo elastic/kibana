@@ -8,14 +8,14 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { EntityRiskQueries } from '../../../../common/api/search_strategy';
 import { useRiskScoreFeatureStatus } from './use_risk_score_feature_status';
 import { createFilter } from '../../../common/containers/helpers';
-import type { RiskScoreSortField, StrategyResponseType } from '../../../../common/search_strategy';
-import {
-  RiskQueries,
-  getUserRiskIndex,
-  RiskScoreEntity,
-  getHostRiskIndex,
+import type {
+  RiskScoreSortField,
+  StrategyResponseType,
+  EntityType,
+  RiskScoreStrategyResponse,
 } from '../../../../common/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
 
@@ -23,16 +23,12 @@ import type { InspectResponse } from '../../../types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import type { inputsModel } from '../../../common/store';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
-import { useIsNewRiskScoreModuleInstalled } from './use_risk_engine_status';
+import { useEntityRiskIndex } from './use_risk_score_index';
 
-export interface RiskScoreState<T extends RiskScoreEntity.host | RiskScoreEntity.user> {
-  data:
-    | undefined
-    | StrategyResponseType<
-        T extends RiskScoreEntity.host ? RiskQueries.hostsRiskScore : RiskQueries.usersRiskScore
-      >['data'];
+export interface RiskScoreState<T extends EntityType> {
+  // data: undefined | StrategyResponseType<EntityRiskQueries.list>['data'];
+  data: RiskScoreStrategyResponse<T>['data'];
   inspect: InspectResponse;
   isInspected: boolean;
   refetch: inputsModel.Refetch;
@@ -63,15 +59,12 @@ interface UseRiskScore<T> extends UseRiskScoreParams {
   riskEntity: T;
 }
 
-export const initialResult: Omit<
-  StrategyResponseType<RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore>,
-  'rawResponse'
-> = {
+export const initialResult: Omit<StrategyResponseType<EntityRiskQueries.list>, 'rawResponse'> = {
   totalCount: 0,
   data: undefined,
 };
 
-export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.user>({
+export const useRiskScore = <T extends EntityType>({
   timerange,
   onlyLatest = true,
   filterQuery,
@@ -81,17 +74,9 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
   riskEntity,
   includeAlertsCount = false,
 }: UseRiskScore<T>): RiskScoreState<T> => {
-  const spaceId = useSpaceId();
-  const { installed: isNewRiskScoreModuleInstalled, isLoading: riskScoreStatusLoading } =
-    useIsNewRiskScoreModuleInstalled();
-  const defaultIndex =
-    spaceId && !riskScoreStatusLoading && isNewRiskScoreModuleInstalled !== undefined
-      ? riskEntity === RiskScoreEntity.host
-        ? getHostRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleInstalled)
-        : getUserRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleInstalled)
-      : undefined;
-  const factoryQueryType =
-    riskEntity === RiskScoreEntity.host ? RiskQueries.hostsRiskScore : RiskQueries.usersRiskScore;
+  const defaultIndex = useEntityRiskIndex(riskEntity, onlyLatest);
+
+  const factoryQueryType = EntityRiskQueries.list;
 
   const { querySize, cursorStart } = pagination || {};
 
@@ -112,7 +97,7 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
     refetch,
     inspect,
     error,
-  } = useSearchStrategy<RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore>({
+  } = useSearchStrategy<EntityRiskQueries.list>({
     factoryQueryType,
     initialResult,
     abort: skip,

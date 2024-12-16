@@ -33,7 +33,7 @@ export enum ML_JOB_TELEMETRY_STATUS {
   installationError = 'installationError',
 }
 interface EntityParam {
-  entity: 'host' | 'user';
+  entity: 'host' | 'user' | 'service';
 }
 
 type ReportEntityDetailsClickedParams = EntityParam;

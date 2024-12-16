@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
-import { RiskScoreEntity } from '../../../common/search_strategy';
+import { EntityType } from '../../../common/entity_analytics/types';
 import { ENTITY_ANALYTICS } from '../../app/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
@@ -70,11 +70,15 @@ const EntityAnalyticsComponent = () => {
                 ) : (
                   <>
                     <EuiFlexItem>
-                      <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
+                      <EntityAnalyticsRiskScores riskEntity={EntityType.host} />
                     </EuiFlexItem>
 
                     <EuiFlexItem>
-                      <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.user} />
+                      <EntityAnalyticsRiskScores riskEntity={EntityType.user} />
+                    </EuiFlexItem>
+
+                    <EuiFlexItem>
+                      <EntityAnalyticsRiskScores riskEntity={EntityType.service} />
                     </EuiFlexItem>
                   </>
                 )}

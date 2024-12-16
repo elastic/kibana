@@ -6,7 +6,7 @@
  */
 
 import { TestProviders } from '../../../common/mock';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import { useCalculateEntityRiskScore } from './use_calculate_entity_risk_score';
 import { waitFor, renderHook, act } from '@testing-library/react';
 import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
@@ -37,7 +37,7 @@ jest.mock('../../../common/hooks/use_app_toasts', () => ({
   }),
 }));
 
-const identifierType = RiskScoreEntity.user;
+const identifierType = EntityType.user;
 const identifier = 'test-user';
 const options = {
   onSuccess: jest.fn(),

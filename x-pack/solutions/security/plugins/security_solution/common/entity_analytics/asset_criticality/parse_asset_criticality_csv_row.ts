@@ -8,8 +8,8 @@ import { i18n } from '@kbn/i18n';
 import type { CriticalityLevels } from './constants';
 import { ValidCriticalityLevels } from './constants';
 import { type AssetCriticalityUpsert, type CriticalityLevel } from './types';
-import { IDENTITY_FIELD_MAP, getAvailableEntityTypes } from '../entity_store/constants';
-import type { EntityType } from '../../api/entity_analytics';
+import { getAvailableEntityTypes } from '../entity_store/constants';
+import { EntityTypeToIdentifierField, type EntityType } from '../types';
 
 const MAX_COLUMN_CHARS = 1000;
 
@@ -112,7 +112,7 @@ export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
     );
   }
 
-  const idField = IDENTITY_FIELD_MAP[entityType as EntityType];
+  const idField = EntityTypeToIdentifierField[entityType as EntityType];
 
   return {
     valid: true,

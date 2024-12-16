@@ -23,7 +23,6 @@ import { getCriteriaFromUsersType } from '../../../common/components/ml/criteria
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelContent } from './content';
@@ -33,6 +32,7 @@ import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_
 import { UserPreviewPanelFooter } from '../user_preview/footer';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
+import { EntityType } from '../../../../common/entity_analytics/types';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -47,7 +47,6 @@ export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
   params: UserPanelProps;
 }
 
-export const UserPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-panel';
 export const UserPreviewPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-preview-panel';
 export const USER_PANEL_RISK_SCORE_QUERY_ID = 'userPanelRiskScoreQuery';
 const FIRST_RECORD_PAGINATION = {
@@ -68,7 +67,7 @@ export const UserPanel = ({
   );
 
   const riskScoreState = useRiskScore({
-    riskEntity: RiskScoreEntity.user,
+    riskEntity: EntityType.user,
     filterQuery: userNameFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
@@ -92,7 +91,7 @@ export const UserPanel = ({
   }, [refetch, refetchRiskInputsTab]);
 
   const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    RiskScoreEntity.user,
+    EntityType.user,
     userName,
     { onSuccess: refetchRiskScore }
   );

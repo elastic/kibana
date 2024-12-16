@@ -178,7 +178,7 @@ const getResourcePath = (id: string, resource: EngineComponentResource) => {
   }
 
   if (resource === EngineComponentResourceEnum.transform) {
-    return `data/transform/enrich_policies?_a=(transform:(queryText:'${id}'))`;
+    return `data/transform?_a=(transform:(queryText:'${id}'))`;
   }
   return null;
 };

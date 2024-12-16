@@ -5,18 +5,13 @@
  * 2.0.
  */
 
+import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics';
 import type { AfterKeys, EntityAfterKey } from '../../../../common/api/entity_analytics/common';
 import type { IdentifierType } from '../../../../common/entity_analytics/risk_engine';
 
-const identifierByEntityType = {
-  host: 'host.name',
-  user: 'user.name',
-  service: 'service.name',
-};
-
 export const getFieldForIdentifier = (identifierType: IdentifierType): string =>
-  identifierByEntityType[identifierType];
+  EntityTypeToIdentifierField[identifierType];
 
 export const getAfterKeyForIdentifierType = ({
   afterKeys,

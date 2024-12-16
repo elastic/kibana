@@ -12,7 +12,7 @@ import { times } from 'lodash/fp';
 import { EXPAND_ALERT_TEST_ID, RiskInputsTab } from './risk_inputs_tab';
 import { alertInputDataMock } from '../../mocks';
 import { RiskSeverity } from '../../../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
+import { EntityType } from '../../../../../../common/entity_analytics/types';
 
 const mockUseRiskContributingAlerts = jest.fn().mockReturnValue({ loading: false, data: [] });
 
@@ -74,7 +74,7 @@ describe('RiskInputsTab', () => {
 
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
+        <RiskInputsTab entityType={EntityType.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
 
@@ -87,7 +87,7 @@ describe('RiskInputsTab', () => {
 
     const { queryByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
+        <RiskInputsTab entityType={EntityType.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
 
@@ -116,7 +116,7 @@ describe('RiskInputsTab', () => {
 
     const { queryByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
+        <RiskInputsTab entityType={EntityType.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
 
@@ -137,7 +137,7 @@ describe('RiskInputsTab', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
+        <RiskInputsTab entityType={EntityType.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
 
@@ -155,7 +155,7 @@ describe('RiskInputsTab', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
+        <RiskInputsTab entityType={EntityType.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
     const contextsTable = getByTestId('risk-input-contexts-table');
@@ -174,7 +174,7 @@ describe('RiskInputsTab', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
+        <RiskInputsTab entityType={EntityType.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
     const contextsTable = getByTestId('risk-input-contexts-table');
@@ -193,7 +193,7 @@ describe('RiskInputsTab', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
+        <RiskInputsTab entityType={EntityType.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
 
@@ -222,7 +222,7 @@ describe('RiskInputsTab', () => {
 
     const { queryByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
+        <RiskInputsTab entityType={EntityType.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
 

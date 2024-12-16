@@ -23,6 +23,7 @@ import moment from 'moment';
 import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { estypes } from '@elastic/elasticsearch';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import type { ExperimentalFeatures } from '../../../../common';
 import type {
   GetEntityStoreStatusRequestQuery,
@@ -33,10 +34,7 @@ import type {
   InitEntityStoreResponse,
 } from '../../../../common/api/entity_analytics/entity_store/enable.gen';
 import type { AppClient } from '../../..';
-import {
-  EngineComponentResourceEnum,
-  EntityTypeEnum,
-} from '../../../../common/api/entity_analytics';
+import { EngineComponentResourceEnum } from '../../../../common/api/entity_analytics';
 import type {
   Entity,
   EngineDataviewUpdateResult,
@@ -46,7 +44,6 @@ import type {
   ListEntityEnginesResponse,
   EngineComponentStatus,
   EngineComponentResource,
-  EntityType,
 } from '../../../../common/api/entity_analytics';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { ENGINE_STATUS, ENTITY_STORE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
@@ -213,8 +210,8 @@ export class EntityStoreDataClient {
 
     const { experimentalFeatures } = this.options;
     const enginesTypes = experimentalFeatures.serviceEntityStoreEnabled
-      ? [EntityTypeEnum.host, EntityTypeEnum.user, EntityTypeEnum.service]
-      : [EntityTypeEnum.host, EntityTypeEnum.user];
+      ? [EntityType.host, EntityType.user, EntityType.service]
+      : [EntityType.host, EntityType.user];
 
     const promises = enginesTypes.map((entity) =>
       run(() =>
@@ -260,7 +257,7 @@ export class EntityStoreDataClient {
           );
 
           const entityStoreComponents = await this.getEngineComponentsState(
-            engine.type,
+            EntityType[engine.type],
             definition
           );
 
@@ -754,7 +751,7 @@ export class EntityStoreDataClient {
       async (engine) => {
         const originalStatus = engine.status;
         const id = buildEntityDefinitionId(engine.type, this.options.namespace);
-        const definition = await this.getExistingEntityDefinition(engine.type);
+        const definition = await this.getExistingEntityDefinition(EntityType[engine.type]);
 
         if (
           originalStatus === ENGINE_STATUS.INSTALLING ||

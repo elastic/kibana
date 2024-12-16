@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { sumBy } from 'lodash/fp';
 
-import type { HostRiskScore, RiskStats, UserRiskScore } from '../../../../common/search_strategy';
+import type { EntityRiskScore, EntityType, RiskStats } from '../../../../common/search_strategy';
 import { formatRiskScore } from '../../common';
 
 interface TableItem {
@@ -107,24 +107,11 @@ export const getItems: (entityData: EntityData | undefined) => TableItem[] = (en
   ];
 };
 
-export function isUserRiskData(
-  riskData: UserRiskScore | HostRiskScore | undefined
-): riskData is UserRiskScore {
-  return !!riskData && (riskData as UserRiskScore).user !== undefined;
-}
-
-export const getEntityData = (
-  riskData: UserRiskScore | HostRiskScore | undefined
+export const getEntityData = <T extends EntityType>(
+  entityType: T,
+  riskData: EntityRiskScore<T> | undefined
 ): EntityData | undefined => {
-  if (!riskData) {
-    return;
-  }
-
-  if (isUserRiskData(riskData)) {
-    return riskData.user;
-  }
-
-  return riskData.host;
+  return riskData?.[entityType];
 };
 
 export const LENS_VISUALIZATION_HEIGHT = 126; //  Static height in pixels specified by design
