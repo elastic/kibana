@@ -18,7 +18,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('../../common/data_usage'),
     ],
     junit: {
-      reportName: 'Serverless Security Functional Tests - Common Group 1',
+      reportName: 'Serverless Security Functional Tests - Common Group 9',
     },
   };
 }
