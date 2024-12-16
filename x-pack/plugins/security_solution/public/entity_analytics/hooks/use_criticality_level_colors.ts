@@ -10,10 +10,19 @@ import type { CriticalityLevelWithUnassigned } from '../../../common/entity_anal
 export const useCriticalityLevelColors = (): Record<CriticalityLevelWithUnassigned, string> => {
   const { euiTheme } = useEuiTheme();
   return {
-    extreme_impact: '#F66D64', // TODO change to euiTheme.colors.vis.euiColorVis6 when borealis is available,
-    high_impact: euiTheme.colors.vis.euiColorVisWarm1,
-    medium_impact: euiTheme.colors.vis.euiColorVis9,
-    low_impact: euiTheme.colors.vis.euiColorVisSuccess0,
+    extreme_impact: euiTheme.flags.hasVisColorAdjustment
+      ? '#F66D64'
+      : euiTheme.colors.vis.euiColorVis6, // TODO change to euiTheme.colors.vis.euiColorVis6 when borealis is available,
+    high_impact: euiTheme.flags.hasVisColorAdjustment
+      ? '#DA8B45'
+      : euiTheme.colors.vis.euiColorVisWarm1,
+    medium_impact: euiTheme.flags.hasVisColorAdjustment
+      ? 'D6BF57'
+      : euiTheme.colors.vis.euiColorVis9,
+    low_impact: euiTheme.flags.hasVisColorAdjustment
+      ? '#54B399'
+      : euiTheme.colors.vis.euiColorVisSuccess0,
+    // low_impact: euiTheme.colors.vis.euiColorVisSuccess0,
     unassigned: euiTheme.colors.vis.euiColorVisNeutral0, // TODO: this is a closest guess based on severity colors, change to grey20 when available
   };
 };
