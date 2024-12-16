@@ -25,6 +25,7 @@ SHARED_DEPS = [
   "@npm//@elastic/apm-rum-core",
   "@npm//react",
   "@npm//react-router-dom",
+  "//packages/kbn-timerange"
 ]
 
 js_library(
