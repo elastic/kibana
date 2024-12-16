@@ -8,6 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core/server';
 import { KueryNode } from '@kbn/es-query';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export type { IEvent, IValidatedEvent } from '../generated/schemas';
 export { EventSchema, ECS_VERSION } from '../generated/schemas';
@@ -86,4 +87,5 @@ export interface IEventLogger {
   startTiming(event: IEvent, startTime?: Date): void;
   stopTiming(event: IEvent): void;
   updateEvent(meta: DocMeta, event: IEvent): Promise<void>;
+  deleteEventsDocsByQuery(query: estypes.QueryDslQueryContainer): Promise<void>;
 }

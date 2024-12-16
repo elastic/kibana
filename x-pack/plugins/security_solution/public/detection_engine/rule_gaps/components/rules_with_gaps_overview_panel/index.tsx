@@ -174,7 +174,7 @@ export const RulesWithGapsOverviewPanel = () => {
       <EuiFlexGroup
         alignItems="center"
         justifyContent="flexStart"
-        gutterSize="s"
+        gutterSize="m"
         data-test-subj="rule-with-gaps_overview-panel"
       >
         <EuiFlexItem grow={false}>

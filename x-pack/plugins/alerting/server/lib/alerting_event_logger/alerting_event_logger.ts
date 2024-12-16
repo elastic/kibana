@@ -437,6 +437,25 @@ export class AlertingEventLogger {
       },
     });
   }
+
+  public async deleteGaps(ruleIds: string[]) {
+    return this.eventLogger.deleteEventsDocsByQuery({
+      bool: {
+        must: [
+          {
+            term: {
+              'event.action': EVENT_LOG_ACTIONS.gap,
+            },
+          },
+          {
+            terms: {
+              'rule.id': ruleIds,
+            },
+          },
+        ],
+      },
+    });
+  }
 }
 
 export function createAlertRecord(

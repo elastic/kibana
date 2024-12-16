@@ -18,6 +18,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { DeleteRuleParams } from './types';
 import { deleteRuleParamsSchema } from './schemas';
 import { deleteRuleSo, getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
+import { deleteGaps } from '../../../../lib/rule_gaps/delete_gaps';
 
 export async function deleteRule(context: RulesClientContext, params: DeleteRuleParams) {
   try {
@@ -117,6 +118,11 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
       ruleIds: [id],
       namespace: context.namespace,
       unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
+    }),
+    deleteGaps({
+      ruleIds: [id],
+      eventLogger: context.eventLogger,
+      logger: context.logger,
     }),
     apiKeyToInvalidate && !apiKeyCreatedByUser
       ? bulkMarkApiKeysForInvalidation(

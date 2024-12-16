@@ -188,9 +188,7 @@ export class ClusterClientAdapter<
 
     const bulkBody: Array<Record<string, unknown>> = [];
 
-    const docsToCreate = docs.filter((doc) => !doc.id);
-
-    for (const doc of docsToCreate) {
+    for (const doc of docs) {
       if (doc.body === undefined) continue;
 
       bulkBody.push({ create: {} });
@@ -214,6 +212,11 @@ export class ClusterClientAdapter<
         `error writing bulk events: "${err.message}"; docs: ${JSON.stringify(bulkBody)}`
       );
     }
+  }
+
+  public async deleteByQueryDocs(query: estypes.QueryDslQueryContainer): Promise<void> {
+    const esClient = await this.elasticsearchClientPromise;
+    await esClient.deleteByQuery({ index: this.esNames.dataStream, query });
   }
 
   public async doesIndexTemplateExist(name: string): Promise<boolean> {

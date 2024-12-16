@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { merge } from 'lodash';
 
 import { coerce } from 'semver';
@@ -125,6 +126,10 @@ export class EventLogger implements IEventLogger {
       return result;
     }
   }
+
+  async deleteEventsDocsByQuery(query: estypes.QueryDslQueryContainer): Promise<void> {
+    return deleteByQuery(this.esContext, query);
+  }
 }
 
 // return the epoch millis of the start date, or null; may be NaN if garbage
@@ -189,4 +194,11 @@ function indexEventDoc(esContext: EsContext, doc: Doc): void {
 
 async function updateEventDoc(esContext: EsContext, doc: Required<Doc>): Promise<void> {
   return esContext.esAdapter.updateDocument(doc);
+}
+
+async function deleteByQuery(
+  esContext: EsContext,
+  query: estypes.QueryDslQueryContainer
+): Promise<void> {
+  return esContext.esAdapter.deleteByQueryDocs(query);
 }
