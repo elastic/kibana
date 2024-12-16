@@ -33,7 +33,7 @@ export function mergeEntities({
     return map;
   }, new Map());
 
-  return [...mergedEntities.values()];
+  return [...new Set(mergedEntities.values())];
 }
 
 function mergeFunc(entity: EntityLatestServiceRaw, existingEntity?: MergedServiceEntity) {
@@ -49,8 +49,14 @@ function mergeFunc(entity: EntityLatestServiceRaw, existingEntity?: MergedServic
   if (!existingEntity) {
     return {
       ...commonEntityFields,
-      dataStreamTypes: entity['data_stream.type'],
-      environments: compact([entity['service.environment']]),
+      dataStreamTypes: uniq(entity['data_stream.type']),
+      environments: uniq(
+        compact(
+          Array.isArray(entity['service.environment'])
+            ? entity['service.environment']
+            : [entity['service.environment']]
+        )
+      ),
     };
   }
   return {

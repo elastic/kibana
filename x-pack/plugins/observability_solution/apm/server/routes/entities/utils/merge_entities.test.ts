@@ -278,4 +278,28 @@ describe('mergeEntities', () => {
       },
     ]);
   });
+  it('has multiple duplicate environments and data stream types', () => {
+    const entities: EntityLatestServiceRaw[] = [
+      {
+        'data_stream.type': ['metrics', 'metrics', 'logs', 'logs'],
+        'agent.name': ['nodejs', 'nodejs'],
+        'entity.last_seen_timestamp': '2024-12-13T14:52:35.461Z',
+        'service.name': 'service-1',
+        'service.environment': ['test', 'test', 'test'],
+        'entity.type': 'built_in_services_from_ecs_data',
+        'entity.id': 'service-1:test',
+        'entity.display_name': 'service-1',
+      },
+    ];
+    const result = mergeEntities({ entities });
+    expect(result).toEqual([
+      {
+        agentName: 'nodejs' as AgentName,
+        dataStreamTypes: ['metrics', 'logs'],
+        environments: ['test'],
+        lastSeenTimestamp: '2024-12-13T14:52:35.461Z',
+        serviceName: 'service-1',
+      },
+    ]);
+  });
 });
