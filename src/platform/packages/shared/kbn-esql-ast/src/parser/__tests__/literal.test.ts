@@ -11,6 +11,19 @@ import { parse } from '..';
 import { ESQLLiteral } from '../../types';
 
 describe('literal expression', () => {
+  it('NULL', () => {
+    const text = 'ROW NULL';
+    const { ast } = parse(text);
+    const literal = ast[0].args[0] as ESQLLiteral;
+
+    expect(literal).toMatchObject({
+      type: 'literal',
+      literalType: 'null',
+      name: 'NULL',
+      value: 'NULL',
+    });
+  });
+
   it('numeric expression captures "value", and "name" fields', () => {
     const text = 'ROW 1';
     const { root } = parse(text);
