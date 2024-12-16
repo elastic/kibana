@@ -39,7 +39,7 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
     }, {} as Record<string, ChromeNavLink | undefined>);
 
     return generateSideNavItems(baseNavItems, deepLinks);
-  }, [productAccess]);
+  }, []);
 
   if (!isSidebarEnabled && !alwaysReturn) return undefined;
 
