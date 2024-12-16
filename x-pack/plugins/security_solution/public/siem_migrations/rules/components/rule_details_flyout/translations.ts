@@ -21,6 +21,13 @@ export const OVERVIEW_TAB_LABEL = i18n.translate(
   }
 );
 
+export const SUMMARY_TAB_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.summaryTabLabel',
+  {
+    defaultMessage: 'Summary',
+  }
+);
+
 export const TRANSLATION_TAB_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTabLabel',
   {

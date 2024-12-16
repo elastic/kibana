@@ -32,7 +32,6 @@ export const getProcessQueryNode = ({
       const response = await replaceQueryResourcePrompt.invoke({
         query: state.original_rule.query,
         macros: resourceContext.macros,
-        lookup_tables: resourceContext.lists,
       });
       const splQuery = response.match(/```spl\n([\s\S]*?)\n```/)?.[1] ?? '';
       if (splQuery) {

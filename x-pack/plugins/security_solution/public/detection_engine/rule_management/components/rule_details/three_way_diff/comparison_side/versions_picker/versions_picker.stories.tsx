@@ -6,42 +6,23 @@
  */
 
 import React, { useState } from 'react';
-import type { Story } from '@storybook/react';
-import { VersionsPicker } from './versions_picker';
-import { SelectedVersions } from './constants';
+import { VersionsPicker, VersionsPickerOptionEnum } from './versions_picker';
 
 export default {
   component: VersionsPicker,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/VersionsPicker',
-  argTypes: {
-    hasBaseVersion: {
-      control: 'boolean',
-      description: 'Indicates whether the base version of a field is available',
-      defaultValue: true,
-    },
-  },
 };
 
-const Template: Story<{ hasBaseVersion: boolean }> = (args) => {
-  const [selectedVersions, setSelectedVersions] = useState<SelectedVersions>(
-    SelectedVersions.CurrentFinal
-  );
+export const Default = () => {
+  const options = [VersionsPickerOptionEnum.MyChanges, VersionsPickerOptionEnum.UpdateFromElastic];
+  const [selectedOption, setSelectedOption] = useState<VersionsPickerOptionEnum>(options[0]);
 
   return (
     <VersionsPicker
-      hasBaseVersion={args.hasBaseVersion}
-      selectedVersions={selectedVersions}
-      onChange={setSelectedVersions}
+      options={options}
+      selectedOption={selectedOption}
+      onChange={setSelectedOption}
+      hasResolvedValueDifferentFromSuggested={false}
     />
   );
-};
-
-export const Default = Template.bind({});
-Default.args = {
-  hasBaseVersion: true,
-};
-
-export const NoBaseVersion = Template.bind({});
-NoBaseVersion.args = {
-  hasBaseVersion: false,
 };

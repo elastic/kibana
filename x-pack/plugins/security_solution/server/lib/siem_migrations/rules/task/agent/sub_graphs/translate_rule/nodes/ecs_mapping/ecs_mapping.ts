@@ -59,7 +59,7 @@ export const getEcsMappingNode = ({
 };
 
 const getTranslationResult = (esqlQuery: string): SiemMigrationRuleTranslationResult => {
-  if (esqlQuery.match(/\[(macro|lookup):[\s\S]*\]/)) {
+  if (esqlQuery.match(/\[(macro):[\s\S]*\]/)) {
     return SiemMigrationRuleTranslationResult.PARTIAL;
   }
   return SiemMigrationRuleTranslationResult.FULL;
