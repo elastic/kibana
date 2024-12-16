@@ -32,7 +32,7 @@ export function esVersionCompatibleWithKibana(esVersion: string, kibanaVersion: 
   };
 
   // On 8.18: Accept the next major version of ES.
-  if (esVersionNumbers.major === kibanaVersionNumbers.major + 1) {
+  if (esVersionNumbers.major === 9 && kibanaVersionNumbers.major === 8) {
     return true;
   }
 

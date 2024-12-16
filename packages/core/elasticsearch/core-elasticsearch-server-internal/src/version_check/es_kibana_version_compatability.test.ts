@@ -47,10 +47,10 @@ describe('esVersionCompatibleWithKibana', () => {
       expect(esVersionCompatibleWithKibana('1.1.0', '1.1.1')).toBe(true);
     });
 
-    it('when ES major is Kibana major + 1', () => {
-      expect(esVersionCompatibleWithKibana('1.0.0', '0.0.0')).toBe(true);
-      expect(esVersionCompatibleWithKibana('1.0.0', '0.7.0')).toBe(true);
-      expect(esVersionCompatibleWithKibana('1.9.2', '0.7.12')).toBe(true);
+    it('when ES major is 9 and Kibana major 8 (8.18 forward compatibility)', () => {
+      expect(esVersionCompatibleWithKibana('9.0.0', '8.0.0')).toBe(true);
+      expect(esVersionCompatibleWithKibana('9.0.0', '8.7.0')).toBe(true);
+      expect(esVersionCompatibleWithKibana('9.9.2', '8.7.12')).toBe(true);
     });
   });
 });
