@@ -29,7 +29,7 @@ export default function (providerContext: FtrProviderContext) {
         },
         expectedHttpCode: 400,
         auth: {
-          user: { username: 'only_actions', password: 'only_actions' } as User,
+          user: { username: 'elastic', password: 'elastic' } as User,
         },
       });
       if (response instanceof BadRequestError) {
