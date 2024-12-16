@@ -26,9 +26,7 @@ export const timeRangeMetadataRoute = createApmServerRoute({
       rangeRt,
     ]),
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<TimeRangeMetadata> => {
     const apmEventClient = await getApmEventClient(resources);
     const apmDataAccessServices = await getApmDataAccessServices({ apmEventClient, ...resources });
