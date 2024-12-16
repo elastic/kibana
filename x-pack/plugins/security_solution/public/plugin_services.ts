@@ -39,8 +39,6 @@ export class PluginServices {
 
   private readonly configSettings: ConfigSettings;
 
-  private startServices?: StartServices;
-
   /**
    * For internal use. Specify which version of the Detection Rules fleet package to install
    * when upgrading rules. If not provided, the latest compatible package will be installed,
@@ -53,6 +51,8 @@ export class PluginServices {
    * the package is not already installed.
    */
   private readonly prebuiltRulesPackageVersion: string | undefined;
+
+  private startServices?: StartServices;
 
   constructor(
     private readonly config: SecuritySolutionUiConfigType,
