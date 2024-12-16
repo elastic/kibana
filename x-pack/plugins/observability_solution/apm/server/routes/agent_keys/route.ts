@@ -17,7 +17,7 @@ import { privilegesTypeRt } from '../../../common/privilege_type';
 
 const agentKeysRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/agent_keys',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
 
   handler: async (resources): Promise<AgentKeysResponse> => {
     const { context } = resources;
@@ -31,8 +31,7 @@ const agentKeysRoute = createApmServerRoute({
 
 const agentKeysPrivilegesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/agent_keys/privileges',
-  options: { tags: ['access:apm'] },
-
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<AgentKeysPrivilegesResponse> => {
     const {
       plugins: { security },
@@ -55,7 +54,11 @@ const agentKeysPrivilegesRoute = createApmServerRoute({
 
 const invalidateAgentKeyRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/api_key/invalidate',
-  options: { tags: ['access:apm', 'access:apm_settings_write'] },
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'apm_settings_write'],
+    },
+  },
   params: t.type({
     body: t.type({ id: t.string }),
   }),
@@ -91,7 +94,12 @@ const invalidateAgentKeyRoute = createApmServerRoute({
 
 const createAgentKeyRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/agent_keys 2023-10-31',
-  options: { tags: ['access:apm', 'access:apm_settings_write', 'oas-tag:APM agent keys'] },
+  options: { tags: ['oas-tag:APM agent keys'] },
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'apm_settings_write'],
+    },
+  },
   params: t.type({
     body: t.type({
       name: t.string,

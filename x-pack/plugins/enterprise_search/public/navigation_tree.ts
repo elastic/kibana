@@ -127,7 +127,7 @@ export const getNavigationTreeDefinition = ({
 
                         return (
                           pathNameSerialized ===
-                          prepend(`/app/enterprise_search/content${SEARCH_INDICES_PATH}`)
+                          prepend(`/app/elasticsearch/content${SEARCH_INDICES_PATH}`)
                         );
                       },
                       link: 'enterpriseSearchContent:searchIndices',
