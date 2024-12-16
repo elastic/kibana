@@ -51,7 +51,7 @@ export class IndexActionsContextMenu extends Component {
     const {
       services: { extensionsService },
       core: { getUrlForApp, application, http, chrome },
-      plugins : { share },
+      plugins : { share, cloud },
       history,
       config: { enableIndexActions },
     } = this.context;
@@ -91,6 +91,7 @@ export class IndexActionsContextMenu extends Component {
             http,
             share,
             chrome,
+            cloud,
             IndexDetailsSection.Overview
           );
         },
@@ -108,6 +109,7 @@ export class IndexActionsContextMenu extends Component {
             http,
             share,
             chrome,
+            cloud,
             IndexDetailsSection.Settings
           );
         },
@@ -125,6 +127,7 @@ export class IndexActionsContextMenu extends Component {
             http,
             share,
             chrome,
+            cloud,
             IndexDetailsSection.Mappings
           );
         },

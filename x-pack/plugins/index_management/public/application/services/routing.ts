@@ -12,6 +12,7 @@ import type { IndexDetailsTabId } from '../../../common/constants';
 import { IndexDetailsSection } from '../../../common/constants';
 import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { firstValueFrom } from 'rxjs';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
 
 export const getTemplateListLink = () => `/templates`;
 
@@ -95,13 +96,15 @@ export const navigateToIndexDetailsPage = async (
   http: HttpSetup,
   share: SharePublicStart,
   chrome: ChromeStart,
+  cloud: CloudSetup,
   tabId?: IndexDetailsSection
 ) => {
-  const activeSolutionId = await firstValueFrom(
+  const isServerlessEnabled = cloud.isServerlessEnabled;
+  const serverlessActiveSolutionId = await firstValueFrom(
     chrome.getActiveSolutionNavId$()
   );
   const searchIndicesLocator = share.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID');
-  if(searchIndicesLocator && activeSolutionId === 'es') {
+  if(searchIndicesLocator && (!isServerlessEnabled  || serverlessActiveSolutionId === 'es')) {
     searchIndicesLocator.navigate({indexName, 'detailsTabId': tabId})
   }else{
     application.navigateToUrl(

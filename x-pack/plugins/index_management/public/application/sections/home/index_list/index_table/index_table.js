@@ -60,7 +60,8 @@ const getColumnConfigs = ({
   application,
   http,
   share,
-  chrome
+  chrome,
+  cloud
 }) => {
 
   const columns = [
@@ -82,7 +83,8 @@ const getColumnConfigs = ({
                   application,
                   http,
                   share,
-                  chrome
+                  chrome,
+                  cloud
                 );
               }}
             >
@@ -575,7 +577,7 @@ export class IndexTable extends Component {
         {({ services, config, core, plugins }) => {
           const { extensionsService } = services;
           const { application, http, chrome } = core;
-          const { share } = plugins;
+          const { share, cloud } = plugins;
           const columnConfigs = getColumnConfigs({
             showIndexStats: config.enableIndexStats,
             showSizeAndDocCount: config.enableSizeAndDocCount,
@@ -586,7 +588,8 @@ export class IndexTable extends Component {
             application,
             http,
             share,
-            chrome
+            chrome,
+            cloud
           });
           const columnsCount = columnConfigs.length + 1;
           return (

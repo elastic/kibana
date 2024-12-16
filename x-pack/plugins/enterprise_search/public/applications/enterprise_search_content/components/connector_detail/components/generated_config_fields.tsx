@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import {
   EuiButtonIcon,
@@ -32,7 +32,8 @@ import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 
 import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
 import { CONNECTOR_DETAIL_PATH, SEARCH_INDEX_PATH } from '../../../routes';
-
+import { useValues } from 'kea';
+import { KibanaLogic } from '../../../../shared/kibana';
 export interface GeneratedConfigFieldsProps {
   apiKey?: ApiKey;
   connector: Connector;
@@ -84,7 +85,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
   isGenerateLoading,
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-
+  const { navigateToUrl, share } = useValues(KibanaLogic);
   const refreshButtonClick = () => {
     setIsModalVisible(true);
   };
@@ -96,7 +97,11 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
     if (generateApiKey) generateApiKey();
     setIsModalVisible(false);
   };
+  const searchIndexDetailsUrl = share?.url.locators
+    .get('SEARCH_INDEX_DETAILS_LOCATOR_ID')
+    ?.useUrl({ indexName: connector?.index_name });
 
+  console.log('searchIndexDetailsUrl', searchIndexDetailsUrl);
   return (
     <>
       {isModalVisible && <ConfirmModal onCancel={onCancel} onConfirm={onConfirm} />}
@@ -180,17 +185,33 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            {connector.index_name && (
-              <EuiLinkTo
+            {connector.index_name &&
+              (searchIndexDetailsUrl ? (
+                <EuiLinkTo
+                  external
+                  target="_blank"
+                  to={generateEncodedPath(searchIndexDetailsUrl, {
+                    indexName: connector.index_name,
+                  })}
+                >
+                  {connector.index_name}
+                </EuiLinkTo>
+              ) : (
+                <>{connector.index_name}</>
+              ))}
+            {/* {connector.index_name ?
+              { searchIndexDetailsUrl ?
+                <EuiLinkTo
                 external
                 target="_blank"
-                to={generateEncodedPath(SEARCH_INDEX_PATH, {
+                to={generateEncodedPath(searchIndexDetailsUrl, {
                   indexName: connector.index_name,
                 })}
               >
                 {connector.index_name}
-              </EuiLinkTo>
-            )}
+              </EuiLinkTo> : {connector.index_name}}
+
+            )} */}
           </EuiFlexItem>
           <EuiFlexItem />
           <EuiFlexItem>

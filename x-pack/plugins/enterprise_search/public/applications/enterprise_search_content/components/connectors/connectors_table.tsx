@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { useValues } from 'kea';
 
@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiLink,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -57,7 +58,33 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
   isLoading,
   onDelete,
 }) => {
-  const { navigateToUrl } = useValues(KibanaLogic);
+  const { navigateToUrl, share } = useValues(KibanaLogic);
+  const searchIndicesLocator = useMemo(
+    () => share?.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID'),
+    [share]
+  );
+
+  const SearchIndicesLinkProps = useCallback(
+    (indexName: string) => {
+      if (searchIndicesLocator) {
+        return {
+          href: generateEncodedPath(searchIndicesLocator.getRedirectUrl({}), { indexName }),
+          onClick: async (event: React.MouseEvent<HTMLAnchorElement>) => {
+            event.preventDefault();
+            const url = await searchIndicesLocator.getUrl({ indexName });
+            navigateToUrl(url, {
+              shouldNotCreateHref: true,
+              shouldNotPrepend: true,
+            });
+          },
+        };
+      } else {
+        return null;
+      }
+    },
+    [navigateToUrl, searchIndicesLocator]
+  );
+
   const columns: Array<EuiBasicTableColumn<ConnectorViewItem>> = [
     ...(!isCrawler
       ? [
@@ -88,12 +115,10 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
       ),
       render: (connector: ConnectorViewItem) =>
         connector.index_name ? (
-          connector.indexExists ? (
-            <EuiLinkTo
-              to={generateEncodedPath(SEARCH_INDEX_PATH, { indexName: connector.index_name })}
-            >
+          connector.indexExists && searchIndicesLocator ? (
+            <EuiLink {...SearchIndicesLinkProps(connector.index_name)}>
               {connector.index_name}
-            </EuiLinkTo>
+            </EuiLink>
           ) : (
             connector.index_name
           )
