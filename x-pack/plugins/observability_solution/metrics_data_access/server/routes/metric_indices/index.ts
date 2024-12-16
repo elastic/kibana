@@ -50,6 +50,12 @@ export function initMetricIndicesRoute<T extends RequestHandlerContext>({
   router.get<unknown, unknown, MetricIndicesAPIResponse>(
     {
       path: `/api/metrics/indices`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     async (context, _req, res) => {
