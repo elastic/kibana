@@ -10,9 +10,7 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { ANALYZE_LOGS_PATH, AnalyzeLogsRequestBody, AnalyzeLogsResponse } from '../../common';
-import {
-  ROUTE_HANDLER_TIMEOUT,
-} from '../constants';
+import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getLogFormatDetectionGraph } from '../graphs/log_type_detection/graph';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { getLLMClass, getLLMType } from '../util/llm';

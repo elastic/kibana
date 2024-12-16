@@ -10,9 +10,7 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { CEL_INPUT_GRAPH_PATH, CelInputRequestBody, CelInputResponse } from '../../common';
-import {
-  ROUTE_HANDLER_TIMEOUT,
-} from '../constants';
+import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getCelGraph } from '../graphs/cel';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { getLLMClass, getLLMType } from '../util/llm';

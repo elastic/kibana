@@ -14,9 +14,7 @@ import {
   CategorizationRequestBody,
   CategorizationResponse,
 } from '../../common';
-import {
-  ROUTE_HANDLER_TIMEOUT,
-} from '../constants';
+import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getCategorizationGraph } from '../graphs/categorization';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { getLLMClass, getLLMType } from '../util/llm';
