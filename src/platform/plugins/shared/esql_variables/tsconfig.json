@@ -9,7 +9,8 @@
     "public/**/*",
   ],
   "kbn_references": [
-    "@kbn/esql-validation-autocomplete"
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/core"
   ],
   "exclude": [
     "target/**/*",
