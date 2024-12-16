@@ -17,7 +17,7 @@ export const RULE_MIGRATION_READY_DESCRIPTION = (
     values: { totalRules, missingResourcesText },
   });
 export const RULE_MIGRATION_READY_MISSING_RESOURCES = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.ready.description',
+  'xpack.securitySolution.siemMigrations.rules.panel.ready.missingResources',
   { defaultMessage: 'Upload macros & lookups and start the translation process' }
 );
 
