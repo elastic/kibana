@@ -197,6 +197,7 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
             docs_created: docsCreated,
             docs_updated: docsUpdated,
             docs_deleted: docsDeleted,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           } = await writer!.bulk({
             documentsToCreate: body.create?.map((f) =>
               transformToCreateScheme(authenticatedUser, changedAt, f)

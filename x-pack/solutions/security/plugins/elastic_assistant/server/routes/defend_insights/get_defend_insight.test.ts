@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';

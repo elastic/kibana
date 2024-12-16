@@ -96,6 +96,7 @@ export const transformBulkError = (
 };
 
 interface Schema {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   validate: (input: any) => { value: any; error?: Error };
 }
 

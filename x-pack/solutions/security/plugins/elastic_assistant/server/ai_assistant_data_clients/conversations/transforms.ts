@@ -19,6 +19,7 @@ export const transformESSearchToConversations = (
   return response.hits.hits
     .filter((hit) => hit._source !== undefined)
     .map((hit) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const conversationSchema = hit._source!;
       const conversation: ConversationResponse = {
         timestamp: conversationSchema['@timestamp'],
@@ -46,6 +47,7 @@ export const transformESSearchToConversations = (
           conversationSchema.exclude_from_last_conversation_storage,
         isDefault: conversationSchema.is_default,
         messages:
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           conversationSchema.messages?.map((message: Record<string, any>) => ({
             timestamp: message['@timestamp'],
             // always return anonymized data from the client
@@ -79,7 +81,7 @@ export const transformESSearchToConversations = (
           return acc;
         }, {}),
         namespace: conversationSchema.namespace,
-
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         id: hit._id!,
       };
 
@@ -123,6 +125,7 @@ export const transformESToConversations = (
       excludeFromLastConversationStorage: conversationSchema.exclude_from_last_conversation_storage,
       isDefault: conversationSchema.is_default,
       messages:
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         conversationSchema.messages?.map((message: Record<string, any>) => ({
           timestamp: message['@timestamp'],
           // always return anonymized data from the client

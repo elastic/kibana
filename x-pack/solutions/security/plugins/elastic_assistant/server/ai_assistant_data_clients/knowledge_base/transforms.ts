@@ -21,10 +21,11 @@ export const transformESSearchToKnowledgeBaseEntry = (
   return response.hits.hits
     .filter((hit) => hit._source !== undefined)
     .map((hit) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const kbEntrySchema = hit._source!;
       return {
         ...transformEsSchemaToEntry(kbEntrySchema),
-
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         id: hit._id!,
       };
     });
