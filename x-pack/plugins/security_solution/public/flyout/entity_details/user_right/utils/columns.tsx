@@ -13,9 +13,6 @@ import type { ManagedUsersTableColumns, ManagedUserTable } from '../types';
 import * as i18n from '../translations';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 
-
-
-
 const FieldColumn: React.FC<{ label: string; field: string }> = ({ label, field }) => {
   const { euiTheme } = useEuiTheme();
 
