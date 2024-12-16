@@ -64,10 +64,6 @@ export class EsqlPlugin implements Plugin<{}, void> {
       fieldsMetadata,
       usageCollection
     );
-
-    core.http.get('/internal/esql/autocomplete/join/indices').then((response) => {
-      console.log('res', response);
-    });
   }
 
   public stop() {}
