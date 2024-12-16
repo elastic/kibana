@@ -77,7 +77,7 @@ export class AutocompleteField extends React.Component<
             aria-label={ariaLabel}
           />
           {areSuggestionsVisible && !isLoadingSuggestions && suggestions.length > 0 ? (
-            <EuiPanel css={suggestionsPanelCss} paddingSize="none" hasShadow={true}>
+            <EuiPanel css={suggestionsPanelCss} paddingSize="none" hasShadow>
               {suggestions.map((suggestion, suggestionIndex) => (
                 <SuggestionItem
                   key={suggestion.text}
