@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { type FormData } from '../../../../../../../../shared_imports';
-import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
 import { HistoryWindowStartEditAdapter } from './history_window_start_edit_adapter';
 import type { HistoryWindowStart } from '../../../../../../../../../common/api/detection_engine';
 import {
@@ -15,6 +14,7 @@ import {
   convertDateMathToDuration,
 } from '../../../../../../../../common/utils/date_math';
 import { DEFAULT_HISTORY_WINDOW_SIZE } from '../../../../../../../../common/constants';
+import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 
 export function HistoryWindowStartEditForm(): JSX.Element {
   return (

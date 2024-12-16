@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
+import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import { NewTermsFieldsEditAdapter } from './new_terms_fields_edit_adapter';
 
 export function NewTermsFieldsEditForm(): JSX.Element {
