@@ -36,7 +36,7 @@ const InferenceServiceParamsFields: React.FunctionComponent<
     if (!subAction) {
       editAction(
         'subAction',
-        provider === 'openai' && taskType === SUB_ACTION.COMPLETION
+        provider === 'openai' && taskType === 'completion'
           ? SUB_ACTION.UNIFIED_COMPLETION
           : taskType,
         index
@@ -50,7 +50,7 @@ const InferenceServiceParamsFields: React.FunctionComponent<
         'subActionParams',
         {
           ...(DEFAULTS_BY_TASK_TYPE[
-            provider === 'openai' && taskType === SUB_ACTION.COMPLETION
+            provider === 'openai' && taskType === 'completion'
               ? SUB_ACTION.UNIFIED_COMPLETION
               : taskType
           ] ?? {}),
@@ -67,17 +67,18 @@ const InferenceServiceParamsFields: React.FunctionComponent<
     [editAction, index, subActionParams]
   );
 
-  if (subAction === SUB_ACTION.COMPLETION) {
+  if (subAction === SUB_ACTION.UNIFIED_COMPLETION) {
     return (
-      <CompletionParamsFields
+      <UnifiedCompletionParamsFields
         errors={errors}
+        messageVariables={messageVariables}
         editSubActionParams={editSubActionParams}
-        subActionParams={subActionParams as ChatCompleteParams}
+        subActionParams={subActionParams as UnifiedChatCompleteParams}
       />
     );
   }
 
-  if (subAction === SUB_ACTION.UNIFIED_COMPLETION) {
+  if (subAction === SUB_ACTION.UNIFIED_COMPLETION_ASYNC_ITERATOR) {
     return (
       <UnifiedCompletionParamsFields
         errors={errors}

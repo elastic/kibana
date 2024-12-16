@@ -11,8 +11,10 @@ import { getHasData } from './get_has_data';
 
 export const hasDataRoute = createInventoryServerRoute({
   endpoint: 'GET /internal/inventory/has_data',
-  options: {
-    tags: ['access:inventory'],
+  security: {
+    authz: {
+      requiredPrivileges: ['inventory'],
+    },
   },
   handler: async ({ context, logger }) => {
     const coreContext = await context.core;

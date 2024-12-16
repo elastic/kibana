@@ -32,13 +32,13 @@ export enum ServiceProviderKeys {
 
 export const INFERENCE_CONNECTOR_ID = '.inference';
 export enum SUB_ACTION {
-  COMPLETION = 'completion',
-  UNIFIED_COMPLETION = 'unified_completion',
+  UNIFIED_COMPLETION_ASYNC_ITERATOR = 'unified_completion_async_iterator',
+  UNIFIED_COMPLETION_STREAM = 'unified_completion_stream',
+  UNIFIED_COMPLETION = 'completion',
   RERANK = 'rerank',
   TEXT_EMBEDDING = 'text_embedding',
   SPARSE_EMBEDDING = 'sparse_embedding',
   COMPLETION_STREAM = 'completion_stream',
-  COMPLETION_ASYNC_ITERATOR = 'completion_async_iterator',
 }
 
 export const DEFAULT_PROVIDER = 'openai';
