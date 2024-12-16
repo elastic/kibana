@@ -23,7 +23,7 @@ import type {
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 import { SecurityWorkflowInsightsFailedInitialized } from './errors';
-import { buildEsQueryParams, createDatastream, createPipeline } from './helpers';
+import { buildEsQueryParams, createDatastream, createPipeline, generateInsightId } from './helpers';
 import { DATA_STREAM_NAME } from './constants';
 import { buildWorkflowInsights } from './builders';
 
@@ -135,9 +135,17 @@ class SecurityWorkflowInsightsService {
   public async create(insight: SecurityWorkflowInsight): Promise<WriteResponseBase> {
     await this.isInitialized;
 
+    const id = generateInsightId(insight);
+
+    // if insight already exists, update instead
+    const existingInsights = await this.fetch({ ids: [id] });
+    if (existingInsights.length) {
+      return this.update(id, insight, existingInsights[0]._index);
+    }
+
     const response = await this.esClient.index<SecurityWorkflowInsight>({
       index: DATA_STREAM_NAME,
-      body: insight,
+      body: { ...insight, id },
       refresh: 'wait_for',
     });
 

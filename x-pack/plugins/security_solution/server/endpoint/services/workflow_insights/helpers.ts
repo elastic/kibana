@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { get as _get } from 'lodash';
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -12,7 +13,10 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 
-import type { SearchParams } from '../../../../common/endpoint/types/workflow_insights';
+import type {
+  SearchParams,
+  SecurityWorkflowInsight,
+} from '../../../../common/endpoint/types/workflow_insights';
 import type { SupportedHostOsType } from '../../../../common/endpoint/constants';
 
 import type { EndpointMetadataService } from '../metadata';
@@ -129,4 +133,19 @@ export async function groupEndpointIdsByOS(
 
     return acc;
   }, {});
+}
+
+export function generateInsightId(insight: SecurityWorkflowInsight): string {
+  const { type, category, value, target } = insight;
+  const targetType = target.type;
+  const targetIds = target.ids.join(',');
+
+  const hash = createHash('sha256');
+  hash.update(type);
+  hash.update(category);
+  hash.update(value);
+  hash.update(targetType);
+  hash.update(targetIds);
+
+  return hash.digest('hex');
 }
