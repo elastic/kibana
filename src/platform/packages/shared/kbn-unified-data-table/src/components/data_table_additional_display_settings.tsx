@@ -20,11 +20,9 @@ export const RANGE_STEP_SAMPLE_SIZE = 10;
 
 export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   rowHeight: RowHeightSettingsProps['rowHeight'];
-  rowHeightLines: RowHeightSettingsProps['rowHeightLines'];
   onChangeRowHeight?: (rowHeight: RowHeightSettingsProps['rowHeight']) => void;
   onChangeRowHeightLines?: (rowHeightLines: number) => void;
   headerRowHeight: RowHeightSettingsProps['rowHeight'];
-  headerRowHeightLines: RowHeightSettingsProps['rowHeightLines'];
   onChangeHeaderRowHeight?: (headerRowHeight: RowHeightSettingsProps['rowHeight']) => void;
   onChangeHeaderRowHeightLines?: (headerRowHeightLines: number) => void;
   maxAllowedSampleSize?: number;
@@ -40,11 +38,9 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   UnifiedDataTableAdditionalDisplaySettingsProps
 > = ({
   rowHeight,
-  rowHeightLines,
   onChangeRowHeight,
   onChangeRowHeightLines,
   headerRowHeight,
-  headerRowHeightLines,
   onChangeHeaderRowHeight,
   onChangeHeaderRowHeightLines,
   maxAllowedSampleSize = DEFAULT_MAX_ALLOWED_SAMPLE_SIZE,
@@ -101,7 +97,6 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     settings.push(
       <RowHeightSettings
         rowHeight={headerRowHeight}
-        rowHeightLines={headerRowHeightLines}
         label={i18n.translate('unifiedDataTable.headerRowHeightLabel', {
           defaultMessage: 'Max header cell lines',
         })}
@@ -118,7 +113,6 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     settings.push(
       <RowHeightSettings
         rowHeight={rowHeight}
-        rowHeightLines={rowHeightLines}
         label={i18n.translate('unifiedDataTable.rowHeightLabel', {
           defaultMessage: 'Max body cell lines',
         })}

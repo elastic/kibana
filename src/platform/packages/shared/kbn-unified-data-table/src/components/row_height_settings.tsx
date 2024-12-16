@@ -24,7 +24,6 @@ export enum RowHeightMode {
 }
 export interface RowHeightSettingsProps {
   rowHeight?: RowHeightMode;
-  rowHeightLines?: number;
   maxRowHeight?: number;
   label: string;
   onChangeRowHeight: (newHeightMode: RowHeightMode | undefined) => void;
@@ -38,7 +37,6 @@ const idPrefix = htmlIdGenerator()();
 export function RowHeightSettings({
   label,
   rowHeight,
-  rowHeightLines,
   onChangeRowHeight,
   onChangeRowHeightLines,
   maxRowHeight,

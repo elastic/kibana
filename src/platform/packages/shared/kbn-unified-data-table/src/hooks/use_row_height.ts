@@ -107,7 +107,7 @@ export const useRowHeight = ({
       case ROWS_HEIGHT_OPTIONS.auto:
         return RowHeightMode.auto;
       case ROWS_HEIGHT_OPTIONS.single:
-        return RowHeightMode.single;
+        return RowHeightMode.custom;
       default:
         return RowHeightMode.custom;
     }
