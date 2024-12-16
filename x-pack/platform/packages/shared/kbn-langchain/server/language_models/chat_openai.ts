@@ -219,7 +219,9 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     };
     const subAction =
       llmType === 'inference'
-        ? 'unified_completion'
+        ? completionRequest.stream
+          ? 'unified_completion_async_iterator'
+          : 'completion'
         : // langchain expects stream to be of type AsyncIterator<OpenAI.ChatCompletionChunk>
         // for non-stream, use `run` instead of `invokeAI` in order to get the entire OpenAI.ChatCompletion response,
         // which may contain non-content messages like functions
