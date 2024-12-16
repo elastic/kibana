@@ -24,20 +24,19 @@ export function getColorForAgentStatus(
   agentStatus: SimplifiedAgentStatus,
   euiTheme: EuiThemeComputed<{}>
 ): string {
-  // using variables as mentioned here https://eui.elastic.co/#/theming/colors/values
   switch (agentStatus) {
     case 'healthy':
-      return euiTheme.colors.success;
+      return euiTheme.colors.backgroundFilledSuccess;
     case 'offline':
       return euiTheme.colors.lightShade;
     case 'inactive':
       return euiTheme.colors.darkShade;
     case 'unhealthy':
-      return euiTheme.colors.warning;
+      return euiTheme.colors.backgroundFilledWarning;
     case 'updating':
-      return euiTheme.colors.primary;
+      return euiTheme.colors.backgroundFilledPrimary;
     case 'unenrolled':
-      return euiTheme.colors.disabled;
+      return euiTheme.colors.backgroundBaseDisabled;
     default:
       throw new Error(`Unsupported Agent status ${agentStatus}`);
   }
