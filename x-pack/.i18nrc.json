@@ -20,11 +20,11 @@
     "xpack.canvas": "plugins/canvas",
     "xpack.cases": "plugins/cases",
     "xpack.cloud": "plugins/cloud",
-    "xpack.cloudDefend": "plugins/cloud_defend",
+    "xpack.cloudDefend": "solutions/security/plugins/cloud_defend",
     "xpack.cloudLinks": "plugins/cloud_integrations/cloud_links",
     "xpack.cloudDataMigration": "platform/plugins/private/cloud_integrations/cloud_data_migration",
     "xpack.csp": [
-      "plugins/cloud_security_posture",
+      "solutions/security/plugins/cloud_security_posture",
       "packages/kbn-cloud-security-posture-common",
       "packages/kbn-cloud-security-posture"
     ],
@@ -70,7 +70,7 @@
     "xpack.inventory": "plugins/observability_solution/inventory",
     "xpack.investigate": "solutions/observability/plugins/investigate",
     "xpack.investigateApp": "solutions/observability/plugins/investigate_app",
-    "xpack.kubernetesSecurity": "plugins/kubernetes_security",
+    "xpack.kubernetesSecurity": "solutions/security/plugins/kubernetes_security",
     "xpack.lens": "plugins/lens",
     "xpack.licenseApiGuard": "platform/plugins/private/license_api_guard",
     "xpack.licenseMgmt": "platform/plugins/shared/license_management",
@@ -149,7 +149,7 @@
     "xpack.securitySolution": "plugins/security_solution",
     "xpack.securitySolutionEss": "plugins/security_solution_ess",
     "xpack.securitySolutionServerless": "plugins/security_solution_serverless",
-    "xpack.sessionView": "plugins/session_view",
+    "xpack.sessionView": "solutions/security/plugins/session_view",
     "xpack.streams": [
       "solutions/observability/plugins/streams_app"
     ],
