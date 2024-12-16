@@ -55,7 +55,6 @@ export class SynthtraceEsClient<TFields extends Fields> {
           await this.client.indices.resolveIndex({
             name: this.indices.join(','),
             expand_wildcards: ['open', 'hidden'],
-            // @ts-expect-error ignore_unavailable is not in the type definition, but it is accepted by es
             ignore_unavailable: true,
           })
         ).indices.map((index: { name: string }) => index.name)
