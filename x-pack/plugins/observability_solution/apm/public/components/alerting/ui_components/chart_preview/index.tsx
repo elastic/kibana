@@ -10,6 +10,8 @@ import {
   Axis,
   BarSeries,
   Chart,
+  LIGHT_THEME,
+  DARK_THEME,
   LineAnnotation,
   Position,
   RectAnnotation,
@@ -51,15 +53,15 @@ export function ChartPreview({
   timeUnit = 'm',
   totalGroups,
 }: ChartPreviewProps) {
-  const { euiTheme } = useEuiTheme();
+  const theme = useEuiTheme();
   const thresholdOpacity = 0.3;
   const DEFAULT_DATE_FORMAT = 'Y-MM-DD HH:mm:ss';
 
   const style = {
-    fill: euiTheme.colors.vis.euiColorVis2,
+    fill: theme.euiTheme.colors.vis.euiColorVis2,
     line: {
       strokeWidth: 2,
-      stroke: euiTheme.colors.vis.euiColorVis2,
+      stroke: theme.euiTheme.colors.vis.euiColorVis2,
       opacity: 1,
     },
     opacity: thresholdOpacity,
@@ -120,6 +122,7 @@ export function ChartPreview({
           legendPosition={'bottom'}
           legendSize={legendSize}
           locale={i18n.getLocale()}
+          theme={theme.colorMode === 'DARK' ? DARK_THEME : LIGHT_THEME}
         />
         <LineAnnotation
           dataValues={[{ dataValue: threshold }]}

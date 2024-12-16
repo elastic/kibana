@@ -38,7 +38,7 @@ describe('Popover', () => {
       render(<Resource />);
 
       await waitFor(() => {
-        expect(screen.queryByRole('link')).not.toBeInTheDocument();
+        expect(screen.getByRole('link')).not.toBeInTheDocument();
       });
     });
   });
