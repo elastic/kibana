@@ -13,9 +13,9 @@ import * as Fsp from 'fs/promises';
 import * as Peggy from '@kbn/peggy';
 import { asyncForEach } from '@kbn/std';
 import { withFastAsyncTransform, TransformConfig } from '@kbn/babel-transform';
-import { makeMatcher } from '@kbn/picomatcher';
+import { makeMatcher } from '@kbn/picomatcher/make_matcher';
 import { PackageFileMap } from '@kbn/repo-file-maps';
-import { getRepoFiles } from '@kbn/get-repo-files';
+import { getRepoFiles } from '@kbn/get-repo-files/get_repo_files';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import path from 'path';
@@ -109,7 +109,11 @@ export const BuildPackages: Task = {
     const pkgFileMap = new PackageFileMap(packages, await getRepoFiles());
 
     log.info(`Building webpack artifacts which are necessary for the build`);
-    await buildWebpackBundles(log, { quiet: false, dist: true });
+    await buildWebpackBundles(log, {
+      quiet: false,
+      dist: true,
+      reactVersion: process.env.REACT_18 ? '18' : '17',
+    });
 
     const transformConfig: TransformConfig = {
       disableSourceMaps: true,
@@ -307,7 +311,7 @@ export const BuildPackages: Task = {
 
 export async function buildWebpackBundles(
   log: ToolingLog,
-  { quiet, dist }: { quiet: boolean; dist: boolean }
+  { quiet, dist, reactVersion }: { quiet: boolean; dist: boolean; reactVersion: string }
 ) {
   async function buildPackage(packageName: string) {
     const stdioOptions: Array<'ignore' | 'pipe' | 'inherit'> = quiet
@@ -316,6 +320,10 @@ export async function buildWebpackBundles(
 
     await execa('yarn', ['build', ...(dist ? ['--dist'] : [])], {
       cwd: path.resolve(REPO_ROOT, 'packages', packageName),
+      env: {
+        ...process.env,
+        REACT_VERSION: reactVersion,
+      },
       stdio: stdioOptions,
     });
   }

@@ -18,7 +18,7 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '@kbn/core/server';
-import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
+import type { CloudStart } from '@kbn/cloud-plugin/server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
@@ -29,14 +29,13 @@ import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects, BACKGROUND_TASK_NODE_SO_NAME, TASK_SO_NAME } from './saved_objects';
-import { TaskDefinitionRegistry, TaskTypeDictionary, REMOVED_TYPES } from './task_type_dictionary';
+import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
 import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
 import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
-import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
-import { EphemeralTask, ConcreteTaskInstance } from './task';
+import { ConcreteTaskInstance } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
@@ -45,7 +44,10 @@ import { metricsStream, Metrics } from './metrics';
 import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
 import { TaskPartitioner } from './lib/task_partitioner';
 import { getDefaultCapacity } from './lib/get_default_capacity';
-import { setClaimStrategy } from './lib/set_claim_strategy';
+import {
+  registerMarkRemovedTasksAsUnrecognizedDefinition,
+  scheduleMarkRemovedTasksAsUnrecognizedDefinition,
+} from './removed_tasks/mark_removed_tasks_as_unrecognized';
 
 export interface TaskManagerSetupContract {
   /**
@@ -64,7 +66,6 @@ export type TaskManagerStartContract = Pick<
   TaskScheduling,
   | 'schedule'
   | 'runSoon'
-  | 'ephemeralRunNow'
   | 'ensureScheduled'
   | 'bulkUpdateSchedules'
   | 'bulkEnable'
@@ -75,7 +76,6 @@ export type TaskManagerStartContract = Pick<
   Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'remove' | 'bulkRemove'> & {
     removeIfExists: TaskStore['remove'];
   } & {
-    supportsEphemeralTasks: () => boolean;
     getRegisteredTypes: () => string[];
   };
 
@@ -89,7 +89,6 @@ export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract>
 {
   private taskPollingLifecycle?: TaskPollingLifecycle;
-  private ephemeralTaskLifecycle?: EphemeralTaskLifecycle;
   private taskManagerId?: string;
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
@@ -127,17 +126,9 @@ export class TaskManagerPlugin
 
   public setup(
     core: CoreSetup<TaskManagerStartContract, unknown>,
-    plugins: { cloud?: CloudSetup; usageCollection?: UsageCollectionSetup }
+    plugins: { usageCollection?: UsageCollectionSetup }
   ): TaskManagerSetupContract {
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
-
-    this.config = setClaimStrategy({
-      config: this.config,
-      deploymentId: plugins.cloud?.deploymentId,
-      isServerless: this.initContext.env.packageInfo.buildFlavor === 'serverless',
-      isCloud: plugins.cloud?.isCloudEnabled ?? false,
-      logger: this.logger,
-    });
 
     core.metrics
       .getOpsMetrics$()
@@ -146,7 +137,7 @@ export class TaskManagerPlugin
         this.heapSizeLimit = metrics.process.memory.heap.size_limit;
       });
 
-    setupSavedObjects(core.savedObjects);
+    setupSavedObjects(core.savedObjects, this.config);
     this.taskManagerId = this.initContext.env.instanceUuid;
 
     if (!this.taskManagerId) {
@@ -223,13 +214,16 @@ export class TaskManagerPlugin
         usageCollection,
         monitoredHealth$,
         monitoredUtilization$,
-        this.config.ephemeral_tasks.enabled,
-        this.config.ephemeral_tasks.request_capacity,
         this.config.unsafe.exclude_task_types
       );
     }
 
     registerDeleteInactiveNodesTaskDefinition(this.logger, core.getStartServices, this.definitions);
+    registerMarkRemovedTasksAsUnrecognizedDefinition(
+      this.logger,
+      core.getStartServices,
+      this.definitions
+    );
 
     if (this.config.unsafe.exclude_task_types.length) {
       this.logger.warn(
@@ -310,9 +304,9 @@ export class TaskManagerPlugin
         this.config!.claim_strategy
       } isBackgroundTaskNodeOnly=${this.isNodeBackgroundTasksOnly()} heapSizeLimit=${
         this.heapSizeLimit
-      } defaultCapacity=${defaultCapacity} pollingInterval=${
-        this.config!.poll_interval
-      } autoCalculateDefaultEchCapacity=${this.config.auto_calculate_default_ech_capacity}`
+      } defaultCapacity=${defaultCapacity} autoCalculateDefaultEchCapacity=${
+        this.config.auto_calculate_default_ech_capacity
+      }`
     );
 
     const managedConfiguration = createManagedConfiguration({
@@ -341,7 +335,6 @@ export class TaskManagerPlugin
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
-        unusedTypes: REMOVED_TYPES,
         logger: this.logger,
         executionContext,
         taskStore,
@@ -350,17 +343,6 @@ export class TaskManagerPlugin
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
         ...managedConfiguration,
         taskPartitioner,
-      });
-
-      this.ephemeralTaskLifecycle = new EphemeralTaskLifecycle({
-        config: this.config!,
-        definitions: this.definitions,
-        logger: this.logger,
-        executionContext,
-        middleware: this.middleware,
-        elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
-        pool: this.taskPollingLifecycle.pool,
-        lifecycleEvent: this.taskPollingLifecycle.events,
       });
     }
 
@@ -373,7 +355,6 @@ export class TaskManagerPlugin
       adHocTaskCounter: this.adHocTaskCounter,
       taskDefinitions: this.definitions,
       taskPollingLifecycle: this.taskPollingLifecycle,
-      ephemeralTaskLifecycle: this.ephemeralTaskLifecycle,
     }).subscribe((stat) => this.monitoringStats$.next(stat));
 
     metricsStream({
@@ -388,11 +369,11 @@ export class TaskManagerPlugin
       logger: this.logger,
       taskStore,
       middleware: this.middleware,
-      ephemeralTaskLifecycle: this.ephemeralTaskLifecycle,
       taskManagerId: taskStore.taskManagerId,
     });
 
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
+    scheduleMarkRemovedTasksAsUnrecognizedDefinition(this.logger, taskScheduling).catch(() => {});
 
     return {
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
@@ -409,9 +390,6 @@ export class TaskManagerPlugin
       bulkEnable: (...args) => taskScheduling.bulkEnable(...args),
       bulkDisable: (...args) => taskScheduling.bulkDisable(...args),
       bulkUpdateSchedules: (...args) => taskScheduling.bulkUpdateSchedules(...args),
-      ephemeralRunNow: (task: EphemeralTask) => taskScheduling.ephemeralRunNow(task),
-      supportsEphemeralTasks: () =>
-        this.config.ephemeral_tasks.enabled && this.shouldRunBackgroundTasks,
       getRegisteredTypes: () => this.definitions.getAllTypes(),
       bulkUpdateState: (...args) => taskScheduling.bulkUpdateState(...args),
     };

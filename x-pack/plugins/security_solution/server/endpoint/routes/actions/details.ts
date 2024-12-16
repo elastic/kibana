@@ -32,7 +32,12 @@ export const registerActionDetailsRoutes = (
     .get({
       access: 'public',
       path: ACTION_DETAILS_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {

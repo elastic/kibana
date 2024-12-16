@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { useUserData } from '../../../../../detections/components/user_info';
@@ -20,8 +20,15 @@ export const UpgradePrebuiltRulesTableButtons = ({
   selectedRules,
 }: UpgradePrebuiltRulesTableButtonsProps) => {
   const {
-    state: { hasRulesToUpgrade, loadingRules, isRefetching, isUpgradingSecurityPackages },
-    actions: { upgradeAllRules, upgradeRules },
+    state: {
+      ruleUpgradeStates,
+      hasRulesToUpgrade,
+      loadingRules,
+      isRefetching,
+      isUpgradingSecurityPackages,
+      isPrebuiltRulesCustomizationEnabled,
+    },
+    actions: { upgradeRules, upgradeAllRules },
   } = useUpgradePrebuiltRulesTableContext();
   const [{ loading: isUserDataLoading, canUserCRUD }] = useUserData();
   const canUserEditRules = canUserCRUD && !isUserDataLoading;
@@ -31,6 +38,21 @@ export const UpgradePrebuiltRulesTableButtons = ({
 
   const isRuleUpgrading = loadingRules.length > 0;
   const isRequestInProgress = isRuleUpgrading || isRefetching || isUpgradingSecurityPackages;
+
+  const doAllSelectedRulesHaveConflicts =
+    isPrebuiltRulesCustomizationEnabled &&
+    selectedRules.every(({ hasUnresolvedConflicts }) => hasUnresolvedConflicts);
+  const doAllRulesHaveConflicts =
+    isPrebuiltRulesCustomizationEnabled &&
+    ruleUpgradeStates.every(({ hasUnresolvedConflicts }) => hasUnresolvedConflicts);
+
+  const { selectedRulesButtonTooltip, allRulesButtonTooltip } = useBulkUpdateButtonsTooltipContent({
+    canUserEditRules,
+    doAllSelectedRulesHaveConflicts,
+    doAllRulesHaveConflicts,
+    isPrebuiltRulesCustomizationEnabled,
+  });
+
   const upgradeSelectedRules = useCallback(
     () => upgradeRules(selectedRules.map((rule) => rule.rule_id)),
     [selectedRules, upgradeRules]
@@ -40,30 +62,84 @@ export const UpgradePrebuiltRulesTableButtons = ({
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
       {shouldDisplayUpgradeSelectedRulesButton ? (
         <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={upgradeSelectedRules}
-            disabled={!canUserEditRules || isRequestInProgress}
-            data-test-subj="upgradeSelectedRulesButton"
-          >
-            <>
-              {i18n.UPDATE_SELECTED_RULES(numberOfSelectedRules)}
-              {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : undefined}
-            </>
-          </EuiButton>
+          <EuiToolTip content={selectedRulesButtonTooltip}>
+            <EuiButton
+              onClick={upgradeSelectedRules}
+              disabled={!canUserEditRules || isRequestInProgress || doAllSelectedRulesHaveConflicts}
+              data-test-subj="upgradeSelectedRulesButton"
+            >
+              <>
+                {i18n.UPDATE_SELECTED_RULES(numberOfSelectedRules)}
+                {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : undefined}
+              </>
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>
-        <EuiButton
-          fill
-          iconType="plusInCircle"
-          onClick={upgradeAllRules}
-          disabled={!canUserEditRules || !hasRulesToUpgrade || isRequestInProgress}
-          data-test-subj="upgradeAllRulesButton"
-        >
-          {i18n.UPDATE_ALL}
-          {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : undefined}
-        </EuiButton>
+        <EuiToolTip content={allRulesButtonTooltip}>
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            onClick={upgradeAllRules}
+            disabled={
+              !canUserEditRules ||
+              !hasRulesToUpgrade ||
+              isRequestInProgress ||
+              doAllRulesHaveConflicts
+            }
+            data-test-subj="upgradeAllRulesButton"
+          >
+            {i18n.UPDATE_ALL}
+            {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : undefined}
+          </EuiButton>
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+};
+
+const useBulkUpdateButtonsTooltipContent = ({
+  canUserEditRules,
+  doAllSelectedRulesHaveConflicts,
+  doAllRulesHaveConflicts,
+  isPrebuiltRulesCustomizationEnabled,
+}: {
+  canUserEditRules: boolean | null;
+  doAllSelectedRulesHaveConflicts: boolean;
+  doAllRulesHaveConflicts: boolean;
+  isPrebuiltRulesCustomizationEnabled: boolean;
+}) => {
+  if (!canUserEditRules) {
+    return {
+      selectedRulesButtonTooltip: i18n.BULK_UPDATE_BUTTON_TOOLTIP_NO_PERMISSIONS,
+      allRulesButtonTooltip: i18n.BULK_UPDATE_BUTTON_TOOLTIP_NO_PERMISSIONS,
+    };
+  }
+
+  if (!isPrebuiltRulesCustomizationEnabled) {
+    return {
+      selectedRulesButtonTooltip: undefined,
+      allRulesButtonTooltip: undefined,
+    };
+  }
+
+  if (doAllRulesHaveConflicts) {
+    return {
+      selectedRulesButtonTooltip: i18n.BULK_UPDATE_SELECTED_RULES_BUTTON_TOOLTIP_CONFLICTS,
+      allRulesButtonTooltip: i18n.BULK_UPDATE_ALL_RULES_BUTTON_TOOLTIP_CONFLICTS,
+    };
+  }
+
+  if (doAllSelectedRulesHaveConflicts) {
+    return {
+      selectedRulesButtonTooltip: i18n.BULK_UPDATE_SELECTED_RULES_BUTTON_TOOLTIP_CONFLICTS,
+      allRulesButtonTooltip: undefined,
+    };
+  }
+
+  return {
+    selectedRulesButtonTooltip: undefined,
+    allRulesButtonTooltip: undefined,
+  };
 };

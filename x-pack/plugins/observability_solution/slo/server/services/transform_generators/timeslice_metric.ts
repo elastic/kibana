@@ -28,11 +28,11 @@ import { getFilterRange } from './common';
 const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
 export class TimesliceMetricTransformGenerator extends TransformGenerator {
-  public async getTransformParams(
-    slo: SLODefinition,
-    spaceId: string,
-    dataViewService: DataViewsService
-  ): Promise<TransformPutTransformRequest> {
+  constructor(spaceId: string, dataViewService: DataViewsService) {
+    super(spaceId, dataViewService);
+  }
+
+  public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
     if (!timesliceMetricIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -40,7 +40,7 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildDescription(slo),
-      await this.buildSource(slo, slo.indicator, dataViewService),
+      await this.buildSource(slo, slo.indicator),
       this.buildDestination(slo),
       this.buildCommonGroupBy(slo, slo.indicator.params.timestampField),
       this.buildAggregations(slo, slo.indicator),
@@ -53,18 +53,12 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
     return getSLOTransformId(slo.id, slo.revision);
   }
 
-  private async buildSource(
-    slo: SLODefinition,
-    indicator: TimesliceMetricIndicator,
-    dataViewService: DataViewsService
-  ) {
-    const dataView = await this.getIndicatorDataView({
-      dataViewService,
-      dataViewId: indicator.params.index,
-    });
+  private async buildSource(slo: SLODefinition, indicator: TimesliceMetricIndicator) {
+    const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
+
     return {
       index: parseIndex(indicator.params.index),
-      runtime_mappings: this.buildCommonRuntimeMappings(slo, dataView),
+      runtime_mappings: this.buildCommonRuntimeMappings(dataView),
       query: {
         bool: {
           filter: [

@@ -23,7 +23,7 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
   enterpriseSearch: {
     id: 'enterpriseSearch',
     label: i18n.translate('core.ui.searchNavList.label', {
-      defaultMessage: 'Search',
+      defaultMessage: 'Elasticsearch',
     }),
     order: 2000,
     euiIconType: 'logoEnterpriseSearch',

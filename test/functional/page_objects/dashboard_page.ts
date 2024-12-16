@@ -49,7 +49,6 @@ export class DashboardPageObject extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly visualize = this.ctx.getPageObject('visualize');
-  private readonly discover = this.ctx.getPageObject('discover');
   private readonly appsMenu = this.ctx.getService('appsMenu');
   private readonly toasts = this.ctx.getService('toasts');
 
@@ -271,22 +270,12 @@ export class DashboardPageObject extends FtrService {
 
    */
   public async expectToolbarPaginationDisplayed() {
-    const isLegacyDefault = await this.discover.useLegacyTable();
-    if (isLegacyDefault) {
-      const subjects = [
-        'pagination-button-previous',
-        'pagination-button-next',
-        'toolBarTotalDocsText',
-      ];
-      await Promise.all(subjects.map(async (subj) => await this.testSubjects.existOrFail(subj)));
-    } else {
-      const subjects = ['pagination-button-previous', 'pagination-button-next'];
+    const subjects = ['pagination-button-previous', 'pagination-button-next'];
 
-      await Promise.all(subjects.map(async (subj) => await this.testSubjects.existOrFail(subj)));
-      const paginationListExists = await this.find.existsByCssSelector('.euiPagination__list');
-      if (!paginationListExists) {
-        throw new Error(`expected discover data grid pagination list to exist`);
-      }
+    await Promise.all(subjects.map(async (subj) => await this.testSubjects.existOrFail(subj)));
+    const paginationListExists = await this.find.existsByCssSelector('.euiPagination__list');
+    if (!paginationListExists) {
+      throw new Error(`expected discover data grid pagination list to exist`);
     }
   }
 
@@ -296,11 +285,13 @@ export class DashboardPageObject extends FtrService {
       // if the dashboard is not already in edit mode
       await this.testSubjects.click('dashboardEditMode');
     }
-    // wait until the count of dashboard panels equals the count of toggle menu icons
+    // wait until the count of dashboard panels equals the count of drag handles
     await this.retry.waitFor('in edit mode', async () => {
-      const panels = await this.testSubjects.findAll('embeddablePanel', 2500);
-      const menuIcons = await this.testSubjects.findAll('embeddablePanelToggleMenuIcon', 2500);
-      return panels.length === menuIcons.length;
+      const panels = await this.find.allByCssSelector('.embPanel__hoverActionsWrapper');
+      const dragHandles = await this.find.allByCssSelector(
+        '[data-test-subj="embeddablePanelDragHandle"]'
+      );
+      return panels.length === dragHandles.length;
     });
   }
 

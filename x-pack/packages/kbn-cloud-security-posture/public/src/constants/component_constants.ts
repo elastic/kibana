@@ -9,4 +9,8 @@ import { euiThemeVars } from '@kbn/ui-theme';
 export const statusColors = {
   passed: euiThemeVars.euiColorSuccess,
   failed: euiThemeVars.euiColorVis9,
+  unknown: euiThemeVars.euiColorLightShade,
 };
+
+export const HOST_NAME = 'host.name';
+export const USER_NAME = 'user.name';

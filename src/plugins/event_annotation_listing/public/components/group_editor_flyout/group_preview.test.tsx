@@ -20,6 +20,7 @@ import {
   EmbeddableComponent,
   FieldBasedIndexPatternColumn,
   TypedLensByValueInput,
+  LensByValueInput,
 } from '@kbn/lens-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -27,7 +28,6 @@ import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { GroupPreview } from './group_preview';
-import { LensByValueInput } from '@kbn/lens-plugin/public/embeddable';
 import { DATA_LAYER_ID, DATE_HISTOGRAM_COLUMN_ID, getCurrentTimeField } from './lens_attributes';
 import { EuiSuperDatePickerTestHarness } from '@kbn/test-eui-helpers';
 

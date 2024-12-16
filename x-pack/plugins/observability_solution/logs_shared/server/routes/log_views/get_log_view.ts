@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { logViewsV1 } from '../../../common/http_api';
 import { LOG_VIEW_URL } from '../../../common/http_api/log_views';
 import { createValidationFunction } from '../../../common/runtime_types';
@@ -14,6 +15,7 @@ export const initGetLogViewRoute = ({
   config,
   framework,
   getStartServices,
+  isServerless,
 }: LogsSharedBackendLibs) => {
   framework
     .registerVersionedRoute({
@@ -29,6 +31,17 @@ export const initGetLogViewRoute = ({
             params: createValidationFunction(logViewsV1.getLogViewRequestParamsRT),
           },
         },
+        options: {
+          deprecated: {
+            documentationUrl: '',
+            severity: 'warning',
+            message: i18n.translate('xpack.logsShared.deprecations.getLogViewRoute.message', {
+              defaultMessage:
+                'Given the deprecation of the LogStream feature, this API will not have any effect configuring upcoming versions of Kibana.',
+            }),
+            reason: { type: 'deprecate' },
+          },
+        },
       },
       async (_requestContext, request, response) => {
         const { logViewId } = request.params;
@@ -41,7 +54,7 @@ export const initGetLogViewRoute = ({
            * - if the log view saved object is correctly registered, perform a lookup for retrieving it
            * - else, skip the saved object lookup and immediately get the internal log view if exists.
            */
-          const logView = config.savedObjects.logView.enabled
+          const logView = !isServerless
             ? await logViewsClient.getLogView(logViewId)
             : await logViewsClient.getInternalLogView(logViewId);
 

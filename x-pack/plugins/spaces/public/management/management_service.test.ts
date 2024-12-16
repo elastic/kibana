@@ -27,9 +27,6 @@ describe('ManagementService', () => {
     maxSpaces: 1000,
     allowFeatureVisibility: true,
     allowSolutionVisibility: true,
-    experimental: {
-      forceSolutionVisibility: false,
-    },
   };
 
   describe('#setup', () => {
@@ -48,6 +45,7 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
         config,
         logger,
+        getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
         getRolesAPIClient: getRolesAPIClientMock,
         getPrivilegesAPIClient: jest.fn(),
         getSecurityLicense: getSecurityLicenseMock,
@@ -73,6 +71,7 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
         config,
         logger,
+        getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
         getRolesAPIClient: getRolesAPIClientMock,
         getPrivilegesAPIClient: jest.fn(),
         getSecurityLicense: getSecurityLicenseMock,
@@ -99,6 +98,7 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
         config,
         logger,
+        getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
         getRolesAPIClient: jest.fn(),
         getPrivilegesAPIClient: jest.fn(),
         getSecurityLicense: getSecurityLicenseMock,

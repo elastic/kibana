@@ -135,7 +135,7 @@ export const AgentPolicyBaseSchema = {
   monitoring_pprof_enabled: schema.maybe(schema.boolean()),
   monitoring_http: schema.maybe(
     schema.object({
-      enabled: schema.boolean(),
+      enabled: schema.maybe(schema.boolean()),
       host: schema.maybe(schema.string({ defaultValue: 'localhost' })),
       port: schema.maybe(schema.number({ min: 0, max: 65353, defaultValue: 6791 })),
       buffer: schema.maybe(schema.object({ enabled: schema.boolean({ defaultValue: false }) })),
@@ -377,6 +377,24 @@ export const FullAgentPolicyResponseSchema = schema.object({
           signing_key: schema.string(),
         })
       ),
+      logging: schema.maybe(
+        schema.object({
+          level: schema.maybe(schema.string()),
+          to_files: schema.maybe(schema.boolean()),
+          files: schema.maybe(
+            schema.object({
+              rotateeverybytes: schema.maybe(schema.number()),
+              keepfiles: schema.maybe(schema.number()),
+              interval: schema.maybe(schema.string()),
+            })
+          ),
+        })
+      ),
+      limits: schema.maybe(
+        schema.object({
+          go_max_procs: schema.maybe(schema.number()),
+        })
+      ),
     })
   ),
   secret_references: schema.maybe(
@@ -392,4 +410,36 @@ export const FullAgentPolicyResponseSchema = schema.object({
       signature: schema.string(),
     })
   ),
+});
+const MinimalOutputSchema = schema.object({
+  id: schema.string(),
+  name: schema.string(),
+});
+
+const IntegrationsOutputSchema = schema.arrayOf(
+  schema.object({
+    pkgName: schema.maybe(schema.string()),
+    integrationPolicyName: schema.maybe(schema.string()),
+    id: schema.maybe(schema.string()),
+    name: schema.maybe(schema.string()),
+  })
+);
+
+const OutputsForAgentPolicySchema = schema.object({
+  agentPolicyId: schema.maybe(schema.string()),
+  monitoring: schema.object({
+    output: MinimalOutputSchema,
+  }),
+  data: schema.object({
+    output: MinimalOutputSchema,
+    integrations: schema.maybe(IntegrationsOutputSchema),
+  }),
+});
+
+export const GetAgentPolicyOutputsResponseSchema = schema.object({
+  item: OutputsForAgentPolicySchema,
+});
+
+export const GetListAgentPolicyOutputsResponseSchema = schema.object({
+  items: schema.arrayOf(OutputsForAgentPolicySchema),
 });

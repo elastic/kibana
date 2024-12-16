@@ -12,13 +12,17 @@ import { REPO_ROOT } from './paths.mjs';
 import path from 'path';
 
 /**
- * Builds a single package using it's npm build script
+ * Builds a single package using its npm build script
  * @param {string} packageName
- * @param {{quiet: boolean}} options
+ * @param {{quiet: boolean, reactVersion: string}} options
  * @returns {Promise<void>}
  */
-export async function buildPackage(packageName, { quiet }) {
+export async function buildPackage(packageName, { quiet, reactVersion }) {
   await run('yarn', ['build'], {
+    env: {
+      ...process.env,
+      REACT_VERSION: reactVersion,
+    },
     cwd: path.resolve(REPO_ROOT, 'packages', packageName),
     pipe: !quiet,
   });
@@ -27,11 +31,15 @@ export async function buildPackage(packageName, { quiet }) {
 /**
  * Runs the build script in watch mode for a single package
  * @param {string} packageName
- * @param {{quiet: boolean}} options
+ * @param {{quiet: boolean, reactVersion: string}} options
  * @returns {Promise<void>}
  */
-export async function watchPackage(packageName, { quiet }) {
+export async function watchPackage(packageName, { quiet, reactVersion }) {
   await run('yarn', ['build', '--watch'], {
+    env: {
+      ...process.env,
+      REACT_VERSION: reactVersion,
+    },
     cwd: path.resolve(REPO_ROOT, 'packages', packageName),
     pipe: !quiet,
   });

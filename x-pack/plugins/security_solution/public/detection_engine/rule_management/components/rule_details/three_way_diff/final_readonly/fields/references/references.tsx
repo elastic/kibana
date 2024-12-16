@@ -10,6 +10,7 @@ import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
 import type { RuleReferenceArray } from '../../../../../../../../../common/api/detection_engine';
 import { References } from '../../../../rule_about_section';
+import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 
 interface ReferencesReadOnlyProps {
   references: RuleReferenceArray;
@@ -21,7 +22,11 @@ export function ReferencesReadOnly({ references }: ReferencesReadOnlyProps) {
       listItems={[
         {
           title: ruleDetailsI18n.REFERENCES_FIELD_LABEL,
-          description: <References references={references} />,
+          description: references.length ? (
+            <References references={references} />
+          ) : (
+            <EmptyFieldValuePlaceholder />
+          ),
         },
       ]}
     />

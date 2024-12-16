@@ -26,8 +26,12 @@ export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter
     .post({
       access: 'internal',
       path: REVIEW_RULE_INSTALLATION_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },
@@ -44,7 +48,7 @@ export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter
         try {
           const ctx = await context.resolve(['core', 'alerting']);
           const soClient = ctx.core.savedObjects.client;
-          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesClient = await ctx.alerting.getRulesClient();
           const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 

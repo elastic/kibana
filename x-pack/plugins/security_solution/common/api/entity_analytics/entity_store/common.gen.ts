@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod';
 
 export type EntityType = z.infer<typeof EntityType>;
-export const EntityType = z.enum(['user', 'host']);
+export const EntityType = z.enum(['user', 'host', 'service']);
 export type EntityTypeEnum = typeof EntityType.enum;
 export const EntityTypeEnum = EntityType.enum;
 
@@ -36,7 +36,44 @@ export const EngineDescriptor = z.object({
   status: EngineStatus,
   filter: z.string().optional(),
   fieldHistoryLength: z.number().int(),
+  error: z.object({}).optional(),
 });
+
+export type EngineComponentResource = z.infer<typeof EngineComponentResource>;
+export const EngineComponentResource = z.enum([
+  'entity_engine',
+  'entity_definition',
+  'index',
+  'component_template',
+  'index_template',
+  'ingest_pipeline',
+  'enrich_policy',
+  'task',
+  'transform',
+]);
+export type EngineComponentResourceEnum = typeof EngineComponentResource.enum;
+export const EngineComponentResourceEnum = EngineComponentResource.enum;
+
+export type EngineComponentStatus = z.infer<typeof EngineComponentStatus>;
+export const EngineComponentStatus = z.object({
+  id: z.string(),
+  installed: z.boolean(),
+  resource: EngineComponentResource,
+  health: z.enum(['green', 'yellow', 'red', 'unknown']).optional(),
+  errors: z
+    .array(
+      z.object({
+        title: z.string().optional(),
+        message: z.string().optional(),
+      })
+    )
+    .optional(),
+});
+
+export type StoreStatus = z.infer<typeof StoreStatus>;
+export const StoreStatus = z.enum(['not_installed', 'installing', 'running', 'stopped', 'error']);
+export type StoreStatusEnum = typeof StoreStatus.enum;
+export const StoreStatusEnum = StoreStatus.enum;
 
 export type InspectQuery = z.infer<typeof InspectQuery>;
 export const InspectQuery = z.object({

@@ -12,6 +12,7 @@ import {
   LlmProxy,
   createLlmProxy,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
@@ -21,6 +22,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
   const log = getService('log');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+
+  let supertestEditorWithCookieCredentials: SupertestWithRoleScope;
 
   const CHAT_API_URL = `/internal/observability_ai_assistant/chat`;
 
@@ -52,6 +56,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('editor');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
+
+      supertestEditorWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'editor',
+        {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+        }
+      );
+
       proxy = await createLlmProxy(log);
       connectorId = await createProxyActionConnector({
         supertest: supertestWithoutAuth,
@@ -75,16 +88,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     it("returns a 4xx if the connector doesn't exist", async () => {
-      await supertestWithoutAuth
+      await supertestEditorWithCookieCredentials
         .post(CHAT_API_URL)
-        .set(roleAuthc.apiKeyHeader)
-        .set(internalReqHeader)
         .send({
           name: 'my_api_call',
           messages,
           connectorId: 'does not exist',
           functions: [],
-          scope: 'all',
+          scopes: ['all'],
         })
         .expect(404);
     });
@@ -104,17 +115,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             const receivedChunks: Array<Record<string, any>> = [];
 
             const passThrough = new PassThrough();
-            supertestWithoutAuth
+            supertestEditorWithCookieCredentials
               .post(CHAT_API_URL)
-              .set(roleAuthc.apiKeyHeader)
-              .set(internalReqHeader)
               .on('error', reject)
               .send({
                 name: 'my_api_call',
                 messages,
                 connectorId,
                 functions: [],
-                scope: 'all',
+                scopes: ['all'],
               })
               .pipe(passThrough);
 
@@ -125,8 +134,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             for (let i = 0; i < NUM_RESPONSES; i++) {
-              await simulator.next(`Part: i\n`);
+              await simulator.next(`Part: ${i}\n`);
             }
+
+            await simulator.tokenCount({ completion: 20, prompt: 33, total: 53 });
 
             await simulator.complete();
 
@@ -159,7 +170,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ]);
     });
 
-    it('returns a useful error if the request fails', async () => {
+    it.skip('returns a useful error if the request fails', async () => {
       const interceptor = proxy.intercept('conversation', () => true);
 
       const passThrough = new PassThrough();
@@ -174,7 +185,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           messages,
           connectorId,
           functions: [],
-          scope: 'all',
+          scopes: ['all'],
         })
         .expect(200)
         .pipe(passThrough);

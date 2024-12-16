@@ -20,6 +20,7 @@ import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { getQuery, groupingSearchResponse } from './grouping_settings/mock';
+import { AlertsEventTypes } from '../../../common/lib/telemetry';
 
 jest.mock('../../containers/detection_engine/alerts/use_query');
 jest.mock('../../../sourcerer/containers');
@@ -159,6 +160,7 @@ describe('GroupedAlertsTable', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       ...sourcererDataView,
       selectedPatterns: ['myFakebeat-*'],
+      sourcererDataView: {},
     });
     mockUseQueryAlerts.mockImplementation((i) => {
       if (i.skip) {
@@ -552,17 +554,23 @@ describe('GroupedAlertsTable', () => {
     fireEvent.click(getByTestId('group-selector-dropdown'));
     fireEvent.click(getByTestId('panel-user.name'));
 
-    expect(mockedTelemetry.reportAlertsGroupingChanged).toHaveBeenCalledWith({
-      groupByField: 'user.name',
-      tableId: testProps.tableId,
-    });
+    expect(mockedTelemetry.reportEvent).toHaveBeenCalledWith(
+      AlertsEventTypes.AlertsGroupingChanged,
+      {
+        groupByField: 'user.name',
+        tableId: testProps.tableId,
+      }
+    );
 
     fireEvent.click(getByTestId('group-selector-dropdown'));
     fireEvent.click(getByTestId('panel-host.name'));
 
-    expect(mockedTelemetry.reportAlertsGroupingChanged).toHaveBeenCalledWith({
-      groupByField: 'host.name',
-      tableId: testProps.tableId,
-    });
+    expect(mockedTelemetry.reportEvent).toHaveBeenCalledWith(
+      AlertsEventTypes.AlertsGroupingChanged,
+      {
+        groupByField: 'host.name',
+        tableId: testProps.tableId,
+      }
+    );
   });
 });

@@ -1,0 +1,36 @@
+{
+  "type": "plugin",
+  "id": "@kbn/rollup-plugin",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "rollup",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "rollup"
+    ],
+    "requiredPlugins": [
+      "management",
+      "licensing",
+      "features",
+      "dataViews",
+      "data"
+    ],
+    "optionalPlugins": [
+      "home",
+      "indexManagement",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaUtils",
+      "kibanaReact",
+      "esUiShared",
+      "data"
+    ]
+  }
+}

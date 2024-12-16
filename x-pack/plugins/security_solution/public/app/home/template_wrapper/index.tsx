@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { type ReactNode, useMemo, useState, useCallback } from 'react';
+import React, { type ReactNode, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiThemeProvider, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
-import { AttackDiscoveryTour } from '../../../attack_discovery/tour';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { SecuritySolutionFlyout, TimelineFlyout } from '../../../flyout';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
@@ -56,11 +55,7 @@ export type SecuritySolutionTemplateWrapperProps = Omit<KibanaPageTemplateProps,
 
 export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateWrapperProps> =
   React.memo(({ children, ...rest }) => {
-    const [didMount, setDidMount] = useState(false);
-    const onMount = useCallback(() => {
-      setDidMount(true);
-    }, []);
-    const solutionNavProps = useSecuritySolutionNavigation(onMount);
+    const solutionNavProps = useSecuritySolutionNavigation();
     const [isTimelineBottomBarVisible] = useShowTimeline();
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
@@ -74,8 +69,8 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
     const { euiTheme, colorMode: globalColorMode } = useEuiTheme();
 
     // There is some logic in the StyledKibanaPageTemplate that checks for children presence, and we dont even need to render the children
-    // here if isEmptyState is set
-    const isNotEmpty = !rest.isEmptyState;
+    // solutionNavProps is momentarily initialized to undefined, this check prevents the children from being re-rendered in the initial load
+    const renderChildren = !rest.isEmptyState && solutionNavProps !== undefined;
 
     /*
      * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
@@ -88,11 +83,11 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
         theme={euiTheme}
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
         paddingSize="none"
-        solutionNav={solutionNavProps}
+        solutionNav={solutionNavProps ?? undefined}
         restrictWidth={false}
         {...rest}
       >
-        {isNotEmpty && (
+        {renderChildren && (
           <>
             <GlobalKQLHeader />
             <KibanaPageTemplate.Section
@@ -107,8 +102,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
                 {children}
                 <SecuritySolutionFlyout />
               </ExpandableFlyoutProvider>
-
-              {didMount && <AttackDiscoveryTour />}
             </KibanaPageTemplate.Section>
             {isTimelineBottomBarVisible && (
               <KibanaPageTemplate.BottomBar data-test-subj="timeline-bottom-bar-container">

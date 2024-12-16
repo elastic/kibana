@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { migrateAlertPageControlsTo816 } from '../timelines/containers/local_storage/migrate_alert_page_controls';
+import type { StartPlugins } from '../types';
 
-type LocalStorageMigrator = (storage: Storage) => void;
+/* Migrator could be sync or async */
+type LocalStorageMigrator = (storage: Storage, plugins: StartPlugins) => void | Promise<void>;
 
-const runLocalStorageMigration = (fn: LocalStorageMigrator) => {
-  const storage = new Storage(localStorage);
-  fn(storage);
+const getLocalStorageMigrationRunner = (storage: Storage, plugins: StartPlugins) => {
+  const runLocalStorageMigration = async (fn: LocalStorageMigrator) => {
+    await fn(storage, plugins);
+  };
+  return runLocalStorageMigration;
 };
 
-export const runDetectionMigrations = () => {
-  runLocalStorageMigration(migrateAlertPageControlsTo816);
+export const runDetectionMigrations = async (storage: Storage, plugins: StartPlugins) => {
+  const runLocalStorageMigration = getLocalStorageMigrationRunner(storage, plugins);
+  await runLocalStorageMigration(migrateAlertPageControlsTo816);
 };

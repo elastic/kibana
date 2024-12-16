@@ -10,51 +10,49 @@ import { modelVersion1 } from './model_versions';
 describe('Model versions', () => {
   describe('1', () => {
     it('returns the model version correctly', () => {
-      expect(modelVersion1).toMatchInlineSnapshot(`
-        Object {
-          "changes": Array [
-            Object {
-              "addedMappings": Object {
-                "customFields": Object {
-                  "properties": Object {
-                    "key": Object {
-                      "type": "keyword",
-                    },
-                    "type": Object {
-                      "type": "keyword",
-                    },
-                    "value": Object {
-                      "fields": Object {
-                        "boolean": Object {
-                          "ignore_malformed": true,
-                          "type": "boolean",
-                        },
-                        "date": Object {
-                          "ignore_malformed": true,
-                          "type": "date",
-                        },
-                        "ip": Object {
-                          "ignore_malformed": true,
-                          "type": "ip",
-                        },
-                        "number": Object {
-                          "ignore_malformed": true,
-                          "type": "long",
-                        },
-                        "string": Object {
-                          "type": "text",
-                        },
-                      },
-                      "type": "keyword",
-                    },
+      expect(modelVersion1.changes).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "addedMappings": Object {
+              "customFields": Object {
+                "properties": Object {
+                  "key": Object {
+                    "type": "keyword",
                   },
-                  "type": "nested",
+                  "type": Object {
+                    "type": "keyword",
+                  },
+                  "value": Object {
+                    "fields": Object {
+                      "boolean": Object {
+                        "ignore_malformed": true,
+                        "type": "boolean",
+                      },
+                      "date": Object {
+                        "ignore_malformed": true,
+                        "type": "date",
+                      },
+                      "ip": Object {
+                        "ignore_malformed": true,
+                        "type": "ip",
+                      },
+                      "number": Object {
+                        "ignore_malformed": true,
+                        "type": "long",
+                      },
+                      "string": Object {
+                        "type": "text",
+                      },
+                    },
+                    "type": "keyword",
+                  },
                 },
+                "type": "nested",
               },
-              "type": "mappings_addition",
             },
-          ],
-        }
+            "type": "mappings_addition",
+          },
+        ]
       `);
     });
   });

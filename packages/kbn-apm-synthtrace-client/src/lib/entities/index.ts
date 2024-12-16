@@ -11,8 +11,20 @@ import { Fields } from '../entity';
 import { serviceEntity } from './service_entity';
 import { hostEntity } from './host_entity';
 import { containerEntity } from './container_entity';
+import { k8sClusterJobEntity } from './kubernetes/cluster_entity';
+import { k8sCronJobEntity } from './kubernetes/cron_job_entity';
+import { k8sDaemonSetEntity } from './kubernetes/daemon_set_entity';
+import { k8sDeploymentEntity } from './kubernetes/deployment_entity';
+import { k8sJobEntity } from './kubernetes/job_entity';
+import { k8sNodeEntity } from './kubernetes/node_entity';
+import { k8sPodEntity } from './kubernetes/pod_entity';
+import { k8sReplicaSetEntity } from './kubernetes/replica_set';
+import { k8sStatefulSetEntity } from './kubernetes/stateful_set';
+import { k8sServiceEntity } from './kubernetes/service';
+import { k8sContainerEntity } from './kubernetes/container_entity';
 
 export type EntityDataStreamType = 'metrics' | 'logs' | 'traces';
+export type Schema = 'ecs' | 'otel';
 
 export type EntityFields = Fields &
   Partial<{
@@ -20,16 +32,33 @@ export type EntityFields = Fields &
     'source_data_stream.type': string | string[];
     'source_data_stream.dataset': string | string[];
     'event.ingested': string;
-    sourceIndex: string;
-    'entity.lastSeenTimestamp': string;
-    'entity.schemaVersion': string;
-    'entity.definitionVersion': string;
-    'entity.displayName': string;
-    'entity.identityFields': string | string[];
+    source_index: string;
+    'entity.last_seen_timestamp': string;
+    'entity.schema_version': string;
+    'entity.definition_version': string;
+    'entity.display_name': string;
+    'entity.identity_fields': string | string[];
     'entity.id': string;
     'entity.type': string;
-    'entity.definitionId': string;
+    'entity.definition_id': string;
     [key: string]: any;
   }>;
 
-export const entities = { serviceEntity, hostEntity, containerEntity };
+export const entities = {
+  serviceEntity,
+  hostEntity,
+  containerEntity,
+  k8s: {
+    k8sClusterJobEntity,
+    k8sCronJobEntity,
+    k8sDaemonSetEntity,
+    k8sDeploymentEntity,
+    k8sJobEntity,
+    k8sNodeEntity,
+    k8sPodEntity,
+    k8sReplicaSetEntity,
+    k8sStatefulSetEntity,
+    k8sServiceEntity,
+    k8sContainerEntity,
+  },
+};

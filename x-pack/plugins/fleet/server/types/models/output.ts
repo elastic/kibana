@@ -13,7 +13,6 @@ import {
   kafkaConnectionType,
   kafkaPartitionType,
   kafkaSaslMechanism,
-  kafkaTopicWhenType,
   kafkaVerificationModes,
   outputType,
 } from '../../../common/constants';
@@ -196,29 +195,6 @@ const LogstashUpdateSchema = {
   ),
 };
 
-/**
- * Kafka schemas
- */
-
-const KafkaTopicsSchema = schema.arrayOf(
-  schema.object({
-    topic: schema.string(),
-    when: schema.maybe(
-      schema.object({
-        type: schema.maybe(
-          schema.oneOf([
-            schema.literal(kafkaTopicWhenType.Equals),
-            schema.literal(kafkaTopicWhenType.Contains),
-            schema.literal(kafkaTopicWhenType.Regexp),
-          ])
-        ),
-        condition: schema.maybe(schema.string()),
-      })
-    ),
-  }),
-  { minSize: 1 }
-);
-
 export const KafkaSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Kafka),
@@ -303,7 +279,6 @@ export const KafkaSchema = {
     schema.object({ hash: schema.maybe(schema.string()), random: schema.maybe(schema.boolean()) })
   ),
   topic: schema.maybe(schema.string()),
-  topics: schema.maybe(KafkaTopicsSchema),
   headers: schema.maybe(
     schema.arrayOf(schema.object({ key: schema.string(), value: schema.string() }))
   ),
@@ -335,7 +310,6 @@ const KafkaUpdateSchema = {
       schema.literal(kafkaAuthType.Kerberos),
     ])
   ),
-  topics: schema.maybe(KafkaTopicsSchema),
 };
 
 export const OutputSchema = schema.oneOf([

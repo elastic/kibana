@@ -14,7 +14,16 @@ export function registerFeatureUsageRoute(
   getStartServices: StartServicesAccessor<{}, LicensingPluginStart>
 ) {
   router.get(
-    { path: '/api/licensing/feature_usage', validate: false },
+    {
+      path: '/api/licensing/feature_usage',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     async (context, request, response) => {
       const [, , { featureUsage }] = await getStartServices();
       return response.ok({

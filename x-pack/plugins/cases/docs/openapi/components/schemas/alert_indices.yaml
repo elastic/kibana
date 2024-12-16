@@ -11,4 +11,4 @@ oneOf:
     items:
       type: string
     maxItems: 1000
-x-technical-preview: true
+x-state: Technical preview

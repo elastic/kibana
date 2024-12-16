@@ -6,7 +6,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import {
   INTERNAL_TAGS_URL,
   SECURITY_TAG_DESCRIPTION,
@@ -15,7 +15,7 @@ import {
 import { useKibana } from '../../common/lib/kibana';
 import { useFetchSecurityTags } from './use_fetch_security_tags';
 import { DEFAULT_TAGS_RESPONSE } from '../../common/containers/tags/__mocks__/api';
-import type { ITagsClient } from '@kbn/saved-objects-tagging-plugin/common';
+import type { ITagsClient } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 jest.mock('../../common/lib/kibana');
@@ -27,14 +27,6 @@ const mockGet = jest.fn();
 const mockAbortSignal = {} as unknown as AbortSignal;
 const mockCreateTag = jest.fn();
 const renderUseCreateSecurityDashboardLink = () => renderHook(() => useFetchSecurityTags(), {});
-
-const asyncRenderUseCreateSecurityDashboardLink = async () => {
-  const renderedHook = renderUseCreateSecurityDashboardLink();
-  await act(async () => {
-    await renderedHook.waitForNextUpdate();
-  });
-  return renderedHook;
-};
 
 describe('useFetchSecurityTags', () => {
   beforeAll(() => {
@@ -54,25 +46,31 @@ describe('useFetchSecurityTags', () => {
 
   test('should fetch Security Solution tags', async () => {
     mockGet.mockResolvedValue([]);
-    await asyncRenderUseCreateSecurityDashboardLink();
 
-    expect(mockGet).toHaveBeenCalledWith(
-      INTERNAL_TAGS_URL,
-      expect.objectContaining({
-        query: { name: SECURITY_TAG_NAME },
-        signal: mockAbortSignal,
-      })
-    );
+    renderUseCreateSecurityDashboardLink();
+
+    await waitFor(() => {
+      expect(mockGet).toHaveBeenCalledWith(
+        INTERNAL_TAGS_URL,
+        expect.objectContaining({
+          query: { name: SECURITY_TAG_NAME },
+          signal: mockAbortSignal,
+        })
+      );
+    });
   });
 
   test('should create a Security Solution tag if no Security Solution tags were found', async () => {
     mockGet.mockResolvedValue([]);
-    await asyncRenderUseCreateSecurityDashboardLink();
 
-    expect(mockCreateTag).toHaveBeenCalledWith({
-      name: SECURITY_TAG_NAME,
-      description: SECURITY_TAG_DESCRIPTION,
-      color: '#FFFFFF',
+    renderUseCreateSecurityDashboardLink();
+
+    await waitFor(() => {
+      expect(mockCreateTag).toHaveBeenCalledWith({
+        name: SECURITY_TAG_NAME,
+        description: SECURITY_TAG_DESCRIPTION,
+        color: '#FFFFFF',
+      });
     });
   });
 
@@ -84,9 +82,11 @@ describe('useFetchSecurityTags', () => {
       type: 'tag',
       ...tag.attributes,
     }));
-    const { result } = await asyncRenderUseCreateSecurityDashboardLink();
+    const { result } = renderUseCreateSecurityDashboardLink();
 
-    expect(mockCreateTag).not.toHaveBeenCalled();
-    expect(result.current.tags).toEqual(expect.objectContaining(expected));
+    await waitFor(() => {
+      expect(mockCreateTag).not.toHaveBeenCalled();
+      expect(result.current.tags).toEqual(expect.objectContaining(expected));
+    });
   });
 });

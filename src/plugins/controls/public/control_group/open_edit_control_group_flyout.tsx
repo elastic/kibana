@@ -92,15 +92,15 @@ export const openEditControlGroupFlyout = (
         onDeleteAll={() => onDeleteAll(overlay)}
         onCancel={() => closeOverlay(overlay)}
       />,
-      {
-        theme: coreServices.theme,
-        i18n: coreServices.i18n,
-      }
+      coreServices
     ),
     {
       'aria-label': i18n.translate('controls.controlGroup.manageControl', {
         defaultMessage: 'Edit control settings',
       }),
+      size: 'm',
+      maxWidth: 500,
+      paddingSize: 'm',
       outsideClickCloses: false,
       onClose: () => closeOverlay(overlay),
     }

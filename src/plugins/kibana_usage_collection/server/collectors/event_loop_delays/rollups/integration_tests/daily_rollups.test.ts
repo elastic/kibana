@@ -8,7 +8,12 @@
  */
 
 import moment, { type MomentInput } from 'moment';
-import type { Logger, ISavedObjectsRepository, SavedObject } from '@kbn/core/server';
+import type {
+  Logger,
+  ISavedObjectsRepository,
+  SavedObject,
+  ElasticsearchClient,
+} from '@kbn/core/server';
 import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
@@ -76,6 +81,7 @@ describe(`daily rollups integration test`, () => {
   let esServer: TestElasticsearchUtils;
   let root: TestKibanaUtils['root'];
   let internalRepository: ISavedObjectsRepository;
+  let esClient: ElasticsearchClient;
   let logger: Logger;
   let rawEventLoopDelaysDaily: Array<SavedObject<EventLoopDelaysDaily>>;
   let outdatedRawEventLoopDelaysDaily: Array<SavedObject<EventLoopDelaysDaily>>;
@@ -93,6 +99,7 @@ describe(`daily rollups integration test`, () => {
     const start = await root.start();
     logger = root.logger.get('test daily rollups');
     internalRepository = start.savedObjects.createInternalRepository([SAVED_OBJECTS_DAILY_TYPE]);
+    esClient = start.elasticsearch.client.asInternalUser;
 
     // Create the docs now
     const rawDailyDocs = createRawEventLoopDelaysDailyDocs();
@@ -112,6 +119,7 @@ describe(`daily rollups integration test`, () => {
 
   it('deletes documents older that 3 days from the saved objects repository', async () => {
     await rollDailyData(logger, internalRepository);
+    await esClient.indices.refresh({ index: `.kibana` }); // Make sure that the changes are searchable
     const { total, saved_objects: savedObjects } =
       await internalRepository.find<EventLoopDelaysDaily>({ type: SAVED_OBJECTS_DAILY_TYPE });
     expect(total).toBe(rawEventLoopDelaysDaily.length);

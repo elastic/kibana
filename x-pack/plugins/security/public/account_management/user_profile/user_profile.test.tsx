@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { mount } from 'enzyme';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
@@ -318,7 +318,7 @@ describe('useUserProfileForm', () => {
       const data: UserProfileData = {};
 
       const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
-      coreStart.theme.getTheme.mockReturnValue({ darkMode: true });
+      coreStart.theme.getTheme.mockReturnValue({ darkMode: true, name: 'amsterdam' });
       coreStart.settings.client.isOverridden.mockReturnValue(true);
 
       const testWrapper = mount(
@@ -354,7 +354,7 @@ describe('useUserProfileForm', () => {
       const data: UserProfileData = {};
 
       const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
-      coreStart.theme.getTheme.mockReturnValue({ darkMode: false });
+      coreStart.theme.getTheme.mockReturnValue({ darkMode: false, name: 'amsterdam' });
       coreStart.settings.client.isOverridden.mockReturnValue(true);
 
       const testWrapper = mount(
@@ -414,14 +414,14 @@ describe('useUserProfileForm', () => {
       expect(testWrapper.exists('EuiBadgeGroup[data-test-subj="remainingRoles"]')).toBeFalsy();
     });
 
-    it('should display a popover for users with more than one role', () => {
+    it('should display a popover for users with more than three roles', () => {
       const data: UserProfileData = {};
 
       const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
       coreStart.settings.client.get.mockReturnValue(false);
       coreStart.settings.client.isOverridden.mockReturnValue(true);
 
-      nonCloudUser.roles = [...nonCloudUser.roles, 'user-role-1', 'user-role-2'];
+      nonCloudUser.roles = [...nonCloudUser.roles, 'user-role-1', 'user-role-2', 'user-role-3'];
       const testWrapper = mount(
         <Providers
           services={coreStart}
@@ -436,7 +436,7 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      const extraRoles = nonCloudUser.roles.splice(1);
+      const extraRoles = nonCloudUser.roles.splice(3);
 
       const userRolesExpandButton = testWrapper.find(
         'EuiButtonEmpty[data-test-subj="userRolesExpand"]'

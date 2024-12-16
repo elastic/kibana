@@ -34,6 +34,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const browser = getService('browser');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const queryBar = getService('queryBar');
+  const dataViews = getService('dataViews');
 
   const { common, header, timePicker, dashboard, timeToVisualize, unifiedSearch, share } =
     getPageObjects([
@@ -915,6 +916,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         }
       });
     },
+    async getChartTypeFromChartSwitcher() {
+      const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
+      return await chartSwitcher.getVisibleText();
+    },
 
     async openChartSwitchPopover(layerIndex = 0) {
       if (await testSubjects.exists('lnsChartSwitchList', { timeout: 50 })) {
@@ -1482,10 +1487,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       title,
       redirectToOrigin,
       ignoreTimeFilter,
+      useAdHocDataView,
     }: {
       title?: string;
       redirectToOrigin?: boolean;
       ignoreTimeFilter?: boolean;
+      useAdHocDataView?: boolean;
     }) {
       log.debug(`createAndAddLens${title}`);
       const inViewMode = await dashboard.getIsInViewMode();
@@ -1496,6 +1503,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       if (!ignoreTimeFilter) {
         await this.goToTimeRange();
+      }
+
+      if (useAdHocDataView) {
+        await dataViews.createFromSearchBar({ name: '*stash*', adHoc: true });
       }
 
       await this.configureDimension({
@@ -2039,6 +2050,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       ]);
 
       return { maxWidth, maxHeight, minWidth, minHeight, aspectRatio };
+    },
+
+    async toggleDebug(enable: boolean = true) {
+      await browser.execute(`window.ELASTIC_LENS_LOGGER = arguments[0];`, enable);
     },
   });
 }

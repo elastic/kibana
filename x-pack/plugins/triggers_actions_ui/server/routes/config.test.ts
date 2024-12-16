@@ -45,7 +45,7 @@ describe('createConfigRoute', () => {
     const logger = loggingSystemMock.create().get();
     const mockRulesClient = rulesClientMock.create();
 
-    mockRulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    mockRulesClient.listRuleTypes.mockResolvedValueOnce(ruleTypes);
     createConfigRoute({
       logger,
       router,
@@ -80,7 +80,7 @@ describe('createConfigRoute', () => {
     const logger = loggingSystemMock.create().get();
     const mockRulesClient = rulesClientMock.create();
 
-    mockRulesClient.listRuleTypes.mockResolvedValueOnce(new Set());
+    mockRulesClient.listRuleTypes.mockResolvedValueOnce([]);
     createConfigRoute({
       logger,
       router,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import * as useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useRulesListFilterStore } from './use_rules_list_filter_store';
 

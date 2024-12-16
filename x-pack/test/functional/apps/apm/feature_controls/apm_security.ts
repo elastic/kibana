@@ -64,7 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks.map((link) => link.text)).to.eql([
           'Overview',
           'Alerts',
-          'APM',
+          'Applications',
           'User Experience',
           'Stack Management',
         ]);
@@ -119,7 +119,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.eql([
           'Overview',
           'Alerts',
-          'APM',
+          'Applications',
           'User Experience',
           'Stack Management',
         ]);
@@ -175,7 +175,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`doesn't show APM navlink`, async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).not.to.contain('APM');
+        expect(navLinks).not.to.contain('Applications');
       });
 
       it(`renders no permission page`, async () => {

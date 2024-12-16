@@ -13,7 +13,6 @@ import {
   Logger,
   SavedObjectsServiceStart,
   IRouter,
-  KibanaRequest,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
@@ -23,6 +22,7 @@ import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
+import { i18n } from '@kbn/i18n';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -47,7 +47,6 @@ import {
   AI_SEARCH_PLUGIN,
   APPLICATIONS_PLUGIN,
   SEARCH_PRODUCT_NAME,
-  SEARCH_RELEVANCE_PLUGIN,
 } from '../common/constants';
 
 import {
@@ -65,7 +64,6 @@ import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } 
 import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
 import { registerEnterpriseSearchIntegrations } from './integrations';
 
-import { checkAccess } from './lib/check_access';
 import { entSearchHttpAgent } from './lib/enterprise_search_http_agent';
 import {
   EnterpriseSearchRequestHandler,
@@ -141,17 +139,9 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   public setup(
-    {
-      capabilities,
-      elasticsearch,
-      http,
-      savedObjects,
-      getStartServices,
-      uiSettings,
-    }: CoreSetup<PluginsStart>,
+    { elasticsearch, http, savedObjects, getStartServices, uiSettings }: CoreSetup<PluginsStart>,
     {
       usageCollection,
-      security,
       features,
       globalSearch,
       logsShared,
@@ -170,24 +160,16 @@ export class EnterpriseSearchPlugin implements Plugin {
       ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
       ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
       ELASTICSEARCH_PLUGIN.ID,
-      ANALYTICS_PLUGIN.ID,
       ...(config.canDeployEntSearch ? [APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID] : []),
       SEARCH_EXPERIENCES_PLUGIN.ID,
       VECTOR_SEARCH_PLUGIN.ID,
       SEMANTIC_SEARCH_PLUGIN.ID,
-      APPLICATIONS_PLUGIN.ID,
       AI_SEARCH_PLUGIN.ID,
-      SEARCH_RELEVANCE_PLUGIN.ID,
     ];
     const isCloud = !!cloud?.cloudId;
 
     if (customIntegrations) {
-      registerEnterpriseSearchIntegrations(
-        config,
-        customIntegrations,
-        isCloud,
-        searchConnectors?.getConnectorTypes() || []
-      );
+      registerEnterpriseSearchIntegrations(config, customIntegrations);
     }
 
     /*
@@ -227,45 +209,71 @@ export class EnterpriseSearchPlugin implements Plugin {
         },
       },
     });
+    features.registerKibanaFeature({
+      id: APPLICATIONS_PLUGIN.ID,
+      name: i18n.translate('xpack.enterpriseSearch.applications.featureName', {
+        defaultMessage: 'Search Applications',
+      }),
+      order: 3,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+      app: ['kibana', APPLICATIONS_PLUGIN.ID],
+      catalogue: [APPLICATIONS_PLUGIN.ID],
+      privileges: {
+        all: {
+          app: ['kibana', APPLICATIONS_PLUGIN.ID],
+          api: [],
+          catalogue: [APPLICATIONS_PLUGIN.ID],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+        read: {
+          disabled: true,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
+    });
+    features.registerKibanaFeature({
+      id: ANALYTICS_PLUGIN.ID,
+      name: ANALYTICS_PLUGIN.NAME,
+      order: 4,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+      app: ['kibana', ANALYTICS_PLUGIN.ID],
+      catalogue: [ANALYTICS_PLUGIN.ID],
+      privileges: {
+        all: {
+          app: ['kibana', ANALYTICS_PLUGIN.ID],
+          api: [],
+          catalogue: [ANALYTICS_PLUGIN.ID],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+        read: {
+          disabled: true,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
+    });
 
     /**
      * Register Enterprise Search UI Settings
      */
     uiSettings.register(enterpriseSearchUISettings);
-
-    /**
-     * Register user access to the Enterprise Search plugins
-     */
-    capabilities.registerSwitcher(
-      async (request: KibanaRequest) => {
-        const [, { spaces }] = await getStartServices();
-
-        const dependencies = {
-          config,
-          security,
-          spaces,
-          request,
-          log,
-          ml,
-        };
-
-        const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
-
-        return {
-          navLinks: {
-            appSearch: hasAppSearchAccess && config.canDeployEntSearch,
-            workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
-          },
-          catalogue: {
-            appSearch: hasAppSearchAccess && config.canDeployEntSearch,
-            workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
-          },
-        };
-      },
-      {
-        capabilityPath: ['navLinks.*', 'catalogue.*'],
-      }
-    );
 
     /**
      * Register routes

@@ -319,11 +319,23 @@ export async function updateTemplate(template: TemplateDeserialized) {
   return result;
 }
 
-export function simulateIndexTemplate(template: { [key: string]: any }) {
+export function simulateIndexTemplate({
+  template,
+  templateName,
+}: {
+  template?: { [key: string]: any };
+  templateName?: string;
+}) {
+  const path = templateName
+    ? `${API_BASE_PATH}/index_templates/simulate/${templateName}`
+    : `${API_BASE_PATH}/index_templates/simulate`;
+
+  const body = templateName ? undefined : JSON.stringify(template);
+
   return sendRequest({
-    path: `${API_BASE_PATH}/index_templates/simulate`,
+    path,
     method: 'post',
-    body: JSON.stringify(template),
+    body,
   }).then((result) => {
     uiMetricService.trackMetric(METRIC_TYPE.COUNT, UIM_TEMPLATE_SIMULATE);
     return result;
@@ -381,6 +393,16 @@ export async function createEnrichPolicy(
 export async function getMatchingIndices(pattern: string) {
   const result = sendRequest({
     path: `${INTERNAL_API_BASE_PATH}/enrich_policies/get_matching_indices`,
+    method: 'post',
+    body: JSON.stringify({ pattern }),
+  });
+
+  return result;
+}
+
+export async function getMatchingDataStreams(pattern: string) {
+  const result = sendRequest({
+    path: `${INTERNAL_API_BASE_PATH}/enrich_policies/get_matching_data_streams`,
     method: 'post',
     body: JSON.stringify({ pattern }),
   });

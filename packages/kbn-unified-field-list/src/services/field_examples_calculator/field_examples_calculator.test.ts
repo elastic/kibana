@@ -223,7 +223,7 @@ describe('fieldExamplesCalculator', function () {
         values: getFieldValues(hits, dataView.fields.getByName('extension')!, dataView),
         field: dataView.fields.getByName('extension')!,
         count: 3,
-        isTextBased: false,
+        isEsqlQuery: false,
       };
     });
 
@@ -286,33 +286,19 @@ describe('fieldExamplesCalculator', function () {
       expect(getFieldExampleBuckets(params).sampledValues).toBe(5);
     });
 
-    it('works for text-based', function () {
-      const result = getFieldExampleBuckets({
-        values: [['a'], ['b'], ['a'], ['a']],
-        field: { name: 'message', type: 'string', esTypes: ['text'] } as DataViewField,
-        isTextBased: true,
-      });
-      expect(result).toMatchInlineSnapshot(`
-        Object {
-          "buckets": Array [
-            Object {
-              "count": 3,
-              "key": "a",
-            },
-            Object {
-              "count": 1,
-              "key": "b",
-            },
-          ],
-          "sampledDocuments": 4,
-          "sampledValues": 4,
-        }
-      `);
+    it('should not work for ES|QL', function () {
+      expect(() =>
+        getFieldExampleBuckets({
+          values: [['a'], ['b'], ['a'], ['a']],
+          field: { name: 'message', type: 'string', esTypes: ['text'] } as DataViewField,
+          isEsqlQuery: true,
+        })
+      ).toThrowError();
       expect(() =>
         getFieldExampleBuckets({
           values: [['a'], ['b'], ['a'], ['a']],
           field: { name: 'message', type: 'string', esTypes: ['keyword'] } as DataViewField,
-          isTextBased: true,
+          isEsqlQuery: true,
         })
       ).toThrowError();
     });

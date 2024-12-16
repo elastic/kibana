@@ -19,7 +19,7 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../common/constants';
 import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
   const { http } = useKibana().services;

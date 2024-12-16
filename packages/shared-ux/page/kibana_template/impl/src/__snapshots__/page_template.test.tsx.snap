@@ -35,7 +35,7 @@ exports[`KibanaPageTemplate render basic template 1`] = `
             class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
           >
             <div
-              class="euiFlexItem emotion-euiFlexItem-growZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
             >
               test
             </div>

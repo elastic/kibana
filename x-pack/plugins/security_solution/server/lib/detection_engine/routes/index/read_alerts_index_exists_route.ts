@@ -18,8 +18,10 @@ export const readAlertsIndexExistsRoute = (router: SecuritySolutionPluginRouter)
     .get({
       path: DETECTION_ENGINE_ALERTS_INDEX_URL,
       access: 'internal',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

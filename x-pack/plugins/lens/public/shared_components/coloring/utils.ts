@@ -21,25 +21,28 @@ import {
   getColorsFromMapping,
   DEFAULT_FALLBACK_PALETTE,
 } from '@kbn/coloring';
+import { getOriginalId } from '@kbn/transpose-utils';
 import { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { KbnPalettes } from '@kbn/palettes';
 import { DataType } from '../../types';
 
 /**
  * Returns array of colors for provided palette or colorMapping
  */
-export function getColorStops(
+export function getPaletteDisplayColors(
   paletteService: PaletteRegistry,
+  palettes: KbnPalettes,
   isDarkMode: boolean,
   palette?: PaletteOutput<CustomPaletteParams>,
   colorMapping?: ColorMapping.Config
 ): string[] {
   return colorMapping
-    ? getColorsFromMapping(isDarkMode, colorMapping)
+    ? getColorsFromMapping(palettes, isDarkMode, colorMapping)
     : palette?.name === CUSTOM_PALETTE
     ? palette?.params?.stops?.map(({ color }) => color) ?? []
     : paletteService
         .get(palette?.name || DEFAULT_FALLBACK_PALETTE)
-        .getCategoricalColors(10, palette);
+        .getCategoricalColors(palette?.params?.steps || 10, palette);
 }
 
 /**
@@ -90,11 +93,7 @@ export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>
   return displayStops;
 }
 
-export const findMinMaxByColumnId = (
-  columnIds: string[],
-  table: Datatable | undefined,
-  getOriginalId: (id: string) => string = (id: string) => id
-) => {
+export const findMinMaxByColumnId = (columnIds: string[], table: Datatable | undefined) => {
   const minMaxMap = new Map<string, DataBounds>();
 
   if (table != null) {

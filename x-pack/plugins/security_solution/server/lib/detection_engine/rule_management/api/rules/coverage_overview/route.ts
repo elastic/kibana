@@ -22,8 +22,10 @@ export const getCoverageOverviewRoute = (router: SecuritySolutionPluginRouter) =
     .post({
       access: 'internal',
       path: RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -43,7 +45,7 @@ export const getCoverageOverviewRoute = (router: SecuritySolutionPluginRouter) =
 
           const responseData = await handleCoverageOverviewRequest({
             params: request.body,
-            deps: { rulesClient: ctx.alerting.getRulesClient() },
+            deps: { rulesClient: await ctx.alerting.getRulesClient() },
           });
 
           return response.ok({

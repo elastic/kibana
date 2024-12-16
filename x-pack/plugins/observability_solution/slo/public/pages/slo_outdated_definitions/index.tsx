@@ -15,7 +15,7 @@ import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '../../hooks/use_kibana';
 import { SloListEmpty } from '../slos/components/slo_list_empty';
 import { OutdatedSlo } from './outdated_slo';
 import { OutdatedSloSearchBar } from './outdated_slo_search_bar';
@@ -23,26 +23,30 @@ import { OutdatedSloSearchBar } from './outdated_slo_search_bar';
 export function SlosOutdatedDefinitions() {
   const {
     http: { basePath },
+    serverless,
   } = useKibana().services;
 
   const { data: permissions } = usePermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
 
-  useBreadcrumbs([
-    {
-      href: basePath.prepend(paths.slos),
-      text: i18n.translate('xpack.slo.breadcrumbs.slosLinkText', {
-        defaultMessage: 'SLOs',
-      }),
-      deepLinkId: 'slo',
-    },
-    {
-      text: i18n.translate('xpack.slo.breadcrumbs.slosOutdatedDefinitions', {
-        defaultMessage: 'Outdated SLO Definitions',
-      }),
-    },
-  ]);
+  useBreadcrumbs(
+    [
+      {
+        href: basePath.prepend(paths.slos),
+        text: i18n.translate('xpack.slo.breadcrumbs.slosLinkText', {
+          defaultMessage: 'SLOs',
+        }),
+        deepLinkId: 'slo',
+      },
+      {
+        text: i18n.translate('xpack.slo.breadcrumbs.slosOutdatedDefinitions', {
+          defaultMessage: 'Outdated SLO Definitions',
+        }),
+      },
+    ],
+    { serverless }
+  );
 
   const [search, setSearch] = useState<string>('');
   const [activePage, setActivePage] = useState<number>(0);

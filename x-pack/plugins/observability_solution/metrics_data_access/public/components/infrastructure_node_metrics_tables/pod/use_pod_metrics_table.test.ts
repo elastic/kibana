@@ -7,7 +7,7 @@
 
 import { usePodMetricsTable } from './use_pod_metrics_table';
 import { useInfrastructureNodeMetrics } from '../shared';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { createMetricsClientMock } from '../test_helpers';
 
 jest.mock('../shared', () => ({
@@ -32,6 +32,12 @@ describe('usePodMetricsTable hook', () => {
         filter: [{ term: { 'event.dataset': 'kubernetes.pod' } }, { ...filterClauseDsl }],
       },
     };
+
+    // include this to prevent rendering error in test
+    useInfrastructureNodeMetricsMock.mockReturnValue({
+      isLoading: true,
+      data: { state: 'empty-indices' },
+    });
 
     renderHook(() =>
       usePodMetricsTable({

@@ -14,8 +14,10 @@ export default function searchSolutionNavigation({
   const { common, solutionNavigation } = getPageObjects(['common', 'solutionNavigation']);
   const spaces = getService('spaces');
   const browser = getService('browser');
+  const kibanaServer = getService('kibanaServer');
 
-  describe('Search Solution Navigation', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/201037
+  describe.skip('Search Solution Navigation', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
@@ -28,9 +30,18 @@ export default function searchSolutionNavigation({
       // Create a space with the search solution and navigate to its home page
       ({ cleanUp, space: spaceCreated } = await spaces.create({ solution: 'es' }));
       await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+
+      // canvas application is only available when installation contains canvas workpads
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+      );
     });
 
     after(async () => {
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+      );
+
       // Clean up space created
       await cleanUp();
     });
@@ -43,10 +54,11 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Indices' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Web crawlers' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Web Crawlers' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Search applications' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Behavioral Analytics' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'App Search' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Workplace Search' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Other tools' });
@@ -135,7 +147,7 @@ export default function searchSolutionNavigation({
         deepLinkId: 'enterpriseSearchContent:webCrawlers',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Content' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Web crawlers' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Web Crawlers' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'enterpriseSearchContent:webCrawlers',
       });
@@ -143,15 +155,15 @@ export default function searchSolutionNavigation({
       // check Build
       // > Playground
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'enterpriseSearchApplications:playground',
+        deepLinkId: 'searchPlayground',
       });
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'enterpriseSearchApplications:playground',
+        deepLinkId: 'searchPlayground',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'enterpriseSearchApplications:playground',
+        deepLinkId: 'searchPlayground',
       });
       // > Search applications
       await solutionNavigation.sidenav.clickLink({
@@ -184,20 +196,19 @@ export default function searchSolutionNavigation({
 
       // check Relevance
       // > Inference Endpoints
-      // TODO: FTRs don't have enterprise license, so inference endpoints not shown
-      // await solutionNavigation.sidenav.clickLink({
-      //   deepLinkId: 'enterpriseSearchRelevance:inferenceEndpoints',
-      // });
-      // await solutionNavigation.sidenav.expectLinkActive({
-      //   deepLinkId: 'enterpriseSearchRelevance:inferenceEndpoints',
-      // });
-      // await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Relevance' });
-      // await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-      //   text: 'Inference Endpoints',
-      // });
-      // await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-      //   deepLinkId: 'enterpriseSearchRelevance:inferenceEndpoints',
-      // });
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'searchInferenceEndpoints:inferenceEndpoints',
+      });
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'searchInferenceEndpoints:inferenceEndpoints',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Relevance' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        text: 'Inference Endpoints',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        deepLinkId: 'searchInferenceEndpoints:inferenceEndpoints',
+      });
 
       // check Enterprise Search
       // > App Search
@@ -293,11 +304,11 @@ export default function searchSolutionNavigation({
         'enterpriseSearchContent:connectors',
         'enterpriseSearchContent:webCrawlers',
         'build',
-        'enterpriseSearchApplications:playground',
+        'searchPlayground',
         'enterpriseSearchApplications:searchApplications',
         'enterpriseSearchAnalytics',
-        // 'relevance',
-        // 'enterpriseSearchRelevance:inferenceEndpoints',
+        'relevance',
+        'searchInferenceEndpoints:inferenceEndpoints',
         'entsearch',
         'appSearch:engines',
         'workplaceSearch',

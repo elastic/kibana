@@ -28,6 +28,12 @@ exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
         "name": "search",
         "namespaceType": "single",
       },
+      Object {
+        "displayName": "tag",
+        "hidden": false,
+        "name": "tag",
+        "namespaceType": "single",
+      },
     ]
   }
   isDeleting={false}
@@ -53,7 +59,7 @@ exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
 
 exports[`SavedObjectsTable export should allow the user to choose when exporting all 1`] = `
 <ExportModal
-  filteredItemCount={4}
+  filteredItemCount={5}
   includeReferences={true}
   onCancel={[Function]}
   onExport={[Function]}
@@ -77,6 +83,10 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
         "id": "search",
         "label": "search (0)",
       },
+      Object {
+        "id": "tag",
+        "label": "tag (0)",
+      },
     ]
   }
   selectedOptions={
@@ -84,6 +94,7 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
       "dashboard": true,
       "index-pattern": true,
       "search": true,
+      "tag": true,
       "visualization": true,
     }
   }
@@ -93,7 +104,7 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
 exports[`SavedObjectsTable should render normally 1`] = `
 <div>
   <Header
-    filteredCount={4}
+    filteredCount={5}
     onExportAll={[Function]}
     onImport={[Function]}
     onRefresh={[Function]}
@@ -145,6 +156,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
             },
           },
           "getUrlForApp": [MockFunction],
+          "isAppRegistered": [MockFunction],
           "navigateToApp": [MockFunction],
           "navigateToUrl": [MockFunction],
         },
@@ -182,6 +194,12 @@ exports[`SavedObjectsTable should render normally 1`] = `
             "displayName": "search",
             "hidden": false,
             "name": "search",
+            "namespaceType": "single",
+          },
+          Object {
+            "displayName": "tag",
+            "hidden": false,
+            "name": "tag",
             "namespaceType": "single",
           },
         ]
@@ -316,7 +334,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "field": "updated_at",
         }
       }
-      totalItemCount={4}
+      totalItemCount={5}
     />
   </RedirectAppLinks>
 </div>

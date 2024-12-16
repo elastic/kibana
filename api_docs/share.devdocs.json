@@ -528,7 +528,7 @@
             ],
             "signature": [
               "(params: P, options?: ",
-              "FormatSearchParamsOptions",
+              "GetRedirectUrlOptions",
               " | undefined) => string"
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
@@ -562,7 +562,7 @@
                   "URL serialization options."
                 ],
                 "signature": [
-                  "FormatSearchParamsOptions",
+                  "GetRedirectUrlOptions",
                   " | undefined"
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
@@ -847,7 +847,9 @@
               "\nAllows for passing contextual information that each consumer can provide to customize the share menu"
             ],
             "signature": [
-              "{ title: string; }"
+              "{ title: string; config?: Partial<Record<\"link\" | \"embed\" | \"export\", ",
+              "ShareContextObjectTypeConfig",
+              ">> | undefined; }"
             ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
@@ -905,7 +907,7 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/top_nav/get_top_nav_links.tsx"
+                "path": "src/plugins/discover/public/application/main/components/top_nav/app_menu_actions/get_share.tsx"
               }
             ]
           },
@@ -1415,6 +1417,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/share/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.ShareMenuItemV2.warnings",
+            "type": "Array",
+            "tags": [],
+            "label": "warnings",
+            "description": [],
+            "signature": [
+              "{ title: string; message: string; }[] | undefined"
             ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
@@ -2304,7 +2320,7 @@
             ],
             "signature": [
               "(params: P, options?: ",
-              "FormatSearchParamsOptions",
+              "GetRedirectUrlOptions",
               " | undefined) => string"
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
@@ -2338,7 +2354,7 @@
                   "URL serialization options."
                 ],
                 "signature": [
-                  "FormatSearchParamsOptions",
+                  "GetRedirectUrlOptions",
                   " | undefined"
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",

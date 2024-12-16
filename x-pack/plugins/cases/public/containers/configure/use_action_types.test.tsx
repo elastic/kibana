@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import * as api from './api';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -43,10 +43,10 @@ describe('useActionTypes', () => {
 
     (useToasts as jest.Mock).mockReturnValue({ addError: addErrorMock });
 
-    const { waitForNextUpdate } = renderHook(() => useGetActionTypes(), {
+    renderHook(() => useGetActionTypes(), {
       wrapper: appMockRenderer.AppWrapper,
     });
-    await waitForNextUpdate({ timeout: 2000 });
-    expect(addErrorMock).toHaveBeenCalled();
+
+    await waitFor(() => expect(addErrorMock).toHaveBeenCalled());
   });
 });

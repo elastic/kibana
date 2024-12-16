@@ -18,6 +18,7 @@ import type {
   UpdatePackagePolicy,
   UpdateAgentPolicyRequest,
 } from '../../../types';
+import { canUseMultipleAgentPolicies } from '../../../hooks';
 
 function generateKibanaDevToolsRequest(method: string, path: string, body: any) {
   return `${method} kbn:${path}\n${JSON.stringify(body, null, 2)}\n`;
@@ -49,9 +50,13 @@ export function generateCreateAgentPolicyDevToolsRequest(
 export function generateCreatePackagePolicyDevToolsRequest(
   packagePolicy: NewPackagePolicy & { force?: boolean }
 ) {
+  const canHaveNoAgentPolicies = canUseMultipleAgentPolicies();
+
   return generateKibanaDevToolsRequest('POST', packagePolicyRouteService.getCreatePath(), {
     policy_ids:
-      packagePolicy.policy_ids.length > 0 ? packagePolicy.policy_ids : ['<agent_policy_id>'],
+      packagePolicy.policy_ids.length > 0 || canHaveNoAgentPolicies
+        ? packagePolicy.policy_ids
+        : ['<agent_policy_id>'],
     package: formatPackage(packagePolicy.package),
     ...omit(packagePolicy, 'policy_ids', 'package', 'enabled'),
     inputs: formatInputs(packagePolicy.inputs),

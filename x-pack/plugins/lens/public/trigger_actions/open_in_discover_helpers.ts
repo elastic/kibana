@@ -10,7 +10,7 @@ import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { isLensApi } from '../embeddable';
+import { isLensApi } from '../react_embeddable/type_guards';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {
   timeRange?: TimeRange;
@@ -31,10 +31,10 @@ type Context = EmbeddableApiContext & {
   timeFieldName?: string;
 };
 
-export async function isCompatible({ hasDiscoverAccess, embeddable }: Context) {
+export function isCompatible({ hasDiscoverAccess, embeddable }: Context) {
   if (!hasDiscoverAccess) return false;
   try {
-    return isLensApi(embeddable) && (await embeddable.canViewUnderlyingData());
+    return isLensApi(embeddable) && embeddable.canViewUnderlyingData$.getValue();
   } catch (e) {
     // Fetching underlying data failed, log the error and behave as if the action is not compatible
     // eslint-disable-next-line no-console

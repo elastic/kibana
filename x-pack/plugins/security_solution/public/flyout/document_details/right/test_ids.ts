@@ -12,6 +12,5 @@ export const FLYOUT_FOOTER_TEST_ID = `${PREFIX}Footer` as const;
 export const FLYOUT_FOOTER_DEOPDOEN_BUTTON_TEST_ID =
   `${FLYOUT_FOOTER_TEST_ID}DropdownButton` as const;
 export const OVERVIEW_TAB_TEST_ID = `${PREFIX}OverviewTab` as const;
-export const OVERVIEW_TAB_LABEL_TEST_ID = `${PREFIX}OverviewTabLabel` as const;
 export const TABLE_TAB_TEST_ID = `${PREFIX}TableTab` as const;
 export const JSON_TAB_TEST_ID = `${PREFIX}JsonTab` as const;

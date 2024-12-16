@@ -133,11 +133,12 @@ export async function openEditorFlyout({
           parentDashboardId={parentDashboardId}
           isByReference={Boolean(initialState?.savedObjectId)}
         />,
-        { theme: coreServices.theme, i18n: coreServices.i18n }
+        coreServices
       ),
       {
         id: flyoutId,
-        maxWidth: 720,
+        maxWidth: 500,
+        paddingSize: 'm',
         ownFocus: true,
         onClose: onCancel,
         outsideClickCloses: false,

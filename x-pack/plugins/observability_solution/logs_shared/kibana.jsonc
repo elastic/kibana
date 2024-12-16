@@ -11,12 +11,15 @@
     "requiredPlugins": [
       "charts",
       "data",
+      "fieldFormats",
       "dataViews",
       "discoverShared",
       "logsDataAccess",
       "observabilityShared",
       "share",
+      "spaces",
       "usageCollection",
+      "embeddable",
     ],
     "optionalPlugins": [
       "observabilityAIAssistant",

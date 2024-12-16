@@ -9,9 +9,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
 
-import { CoreSetup, CoreTheme } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
@@ -20,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
-import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { RevealImageRendererConfig } from '../../common/types';
 
 export const strings = {
@@ -35,8 +33,7 @@ export const strings = {
 };
 
 export const getRevealImageRenderer =
-  (theme$: Observable<CoreTheme> = defaultTheme$) =>
-  (): ExpressionRenderDefinition<RevealImageRendererConfig> => ({
+  (core: CoreStart) => (): ExpressionRenderDefinition<RevealImageRendererConfig> => ({
     name: 'revealImage',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
@@ -54,7 +51,7 @@ export const getRevealImageRenderer =
       render(
         <KibanaErrorBoundaryProvider analytics={undefined}>
           <KibanaErrorBoundary>
-            <KibanaThemeProvider theme={{ theme$ }}>
+            <KibanaThemeProvider {...core}>
               <I18nProvider>
                 <RevealImageComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
               </I18nProvider>
@@ -66,5 +63,4 @@ export const getRevealImageRenderer =
     },
   });
 
-export const revealImageRendererFactory = (core: CoreSetup) =>
-  getRevealImageRenderer(core.theme.theme$);
+export const revealImageRendererFactory = (core: CoreStart) => getRevealImageRenderer(core);

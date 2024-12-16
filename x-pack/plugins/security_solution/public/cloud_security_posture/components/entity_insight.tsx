@@ -10,74 +10,77 @@ import { EuiAccordion, EuiHorizontalRule, EuiSpacer, EuiTitle, useEuiTheme } fro
 import React from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
-import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
-import { hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
+import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
 import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
+import { AlertsPreview } from './alerts/alerts_preview';
+import { useGlobalTime } from '../../common/containers/use_global_time';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/components/detection_response/alerts_by_status/types';
+import { useNonClosedAlerts } from '../hooks/use_non_closed_alerts';
 
 export const EntityInsight = <T,>({
-  name,
-  fieldName,
+  value,
+  field,
   isPreviewMode,
 }: {
-  name: string;
-  fieldName: 'host.name' | 'user.name';
+  value: string;
+  field: 'host.name' | 'user.name';
   isPreviewMode?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
   const insightContent: React.ReactElement[] = [];
 
-  const { data: dataMisconfiguration } = useMisconfigurationPreview({
-    query: buildEntityFlyoutPreviewQuery(fieldName, name),
-    sort: [],
-    enabled: true,
-    pageSize: 1,
+  const { hasMisconfigurationFindings: showMisconfigurationsPreview } = useHasMisconfigurations(
+    field,
+    value
+  );
+
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(field, value);
+
+  const showVulnerabilitiesPreview = hasVulnerabilitiesFindings && field === 'host.name';
+
+  const { to, from } = useGlobalTime();
+
+  const { hasNonClosedAlerts: showAlertsPreview, filteredAlertsData } = useNonClosedAlerts({
+    field,
+    value,
+    to,
+    from,
+    queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
   });
 
-  const passedFindings = dataMisconfiguration?.count.passed || 0;
-  const failedFindings = dataMisconfiguration?.count.failed || 0;
-
-  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
-
-  const { data } = useVulnerabilitiesPreview({
-    query: buildEntityFlyoutPreviewQuery(fieldName, name),
-    sort: [],
-    enabled: true,
-    pageSize: 1,
-  });
-
-  const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
-
-  const hasVulnerabilitiesFindings = hasVulnerabilitiesData({
-    critical: CRITICAL,
-    high: HIGH,
-    medium: MEDIUM,
-    low: LOW,
-    none: NONE,
-  });
-
-  const isVulnerabilitiesFindingForHost = hasVulnerabilitiesFindings && fieldName === 'host.name';
-
-  if (hasMisconfigurationFindings)
+  if (showAlertsPreview) {
     insightContent.push(
       <>
-        <MisconfigurationsPreview name={name} fieldName={fieldName} isPreviewMode={isPreviewMode} />
+        <AlertsPreview
+          alertsData={filteredAlertsData}
+          field={field}
+          value={value}
+          isPreviewMode={isPreviewMode}
+        />
         <EuiSpacer size="s" />
       </>
     );
-  if (isVulnerabilitiesFindingForHost && hasVulnerabilitiesFindings)
+  }
+
+  if (showMisconfigurationsPreview)
     insightContent.push(
       <>
-        <VulnerabilitiesPreview name={name} isPreviewMode={isPreviewMode} />
+        <MisconfigurationsPreview value={value} field={field} isPreviewMode={isPreviewMode} />
+        <EuiSpacer size="s" />
+      </>
+    );
+  if (showVulnerabilitiesPreview)
+    insightContent.push(
+      <>
+        <VulnerabilitiesPreview value={value} field={field} isPreviewMode={isPreviewMode} />
         <EuiSpacer size="s" />
       </>
     );
   return (
     <>
-      {(hasMisconfigurationFindings ||
-        (isVulnerabilitiesFindingForHost && hasVulnerabilitiesFindings)) && (
+      {insightContent.length > 0 && (
         <>
           <EuiAccordion
             initialIsOpen={true}

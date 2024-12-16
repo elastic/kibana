@@ -6,17 +6,13 @@
  */
 import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { i18n } from '@kbn/i18n';
-import { ConnectorServerSideDefinition } from '@kbn/search-connectors-plugin/server';
 
 import { ConfigType } from '.';
 
 export const registerEnterpriseSearchIntegrations = (
   config: ConfigType,
-  customIntegrations: CustomIntegrationsPluginSetup,
-  isCloud: boolean,
-  connectors: ConnectorServerSideDefinition[]
+  customIntegrations: CustomIntegrationsPluginSetup
 ) => {
-  const nativeSearchTag = config.hasNativeConnectors && isCloud ? ['native_search'] : [];
   if (config.hasWebCrawler) {
     customIntegrations.registerCustomIntegration({
       id: 'web_crawler',
@@ -27,7 +23,7 @@ export const registerEnterpriseSearchIntegrations = (
         defaultMessage: 'Add search to your website with the web crawler.',
       }),
       categories: ['search', 'web', 'elastic_stack', 'crawler'],
-      uiInternalPath: '/app/enterprise_search/content/crawlers/new_crawler',
+      uiInternalPath: '/app/elasticsearch/content/crawlers/new_crawler',
       icons: [
         {
           type: 'eui',
@@ -48,7 +44,7 @@ export const registerEnterpriseSearchIntegrations = (
       defaultMessage: "Add search to your application with Elasticsearch's robust APIs.",
     }),
     categories: ['search', 'custom', 'elastic_stack', 'sdk_search', 'language_client'],
-    uiInternalPath: '/app/enterprise_search/content/search_indices/new_index/api',
+    uiInternalPath: '/app/elasticsearch/content/search_indices/new_index/api',
     icons: [
       {
         type: 'eui',
@@ -58,29 +54,4 @@ export const registerEnterpriseSearchIntegrations = (
     shipper: 'search',
     isBeta: false,
   });
-
-  if (config.hasConnectors) {
-    connectors.forEach((connector) => {
-      const connectorType = connector.isNative && isCloud ? 'native' : 'connector_client';
-      const categories = connector.isNative
-        ? [...(connector.categories || []), ...nativeSearchTag]
-        : connector.categories;
-
-      customIntegrations.registerCustomIntegration({
-        categories: categories || [],
-        description: connector.description || '',
-        icons: [
-          {
-            src: connector.iconPath,
-            type: 'svg',
-          },
-        ],
-        id: `${connector.serviceType}-${connector.name}`,
-        isBeta: connector.isBeta,
-        shipper: 'search',
-        title: connector.name,
-        uiInternalPath: `/app/enterprise_search/content/connectors/new_connector?connector_type=${connectorType}&service_type=${connector.serviceType}`,
-      });
-    });
-  }
 };

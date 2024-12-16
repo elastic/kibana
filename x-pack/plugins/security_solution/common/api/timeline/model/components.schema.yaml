@@ -225,12 +225,6 @@ components:
           type: string
         version:
           type: string
-        code:
-          type: number
-          nullable: true
-        message:
-          type: string
-          nullable: true
         templateTimelineId:
           type: string
           nullable: true
@@ -244,19 +238,7 @@ components:
           items:
             $ref: '#/components/schemas/FavoriteTimelineResult'
     PersistTimelineResponse:
-      type: object
-      required: [data]
-      properties:
-        data:
-          type: object
-          required: [persistTimeline]
-          properties:
-            persistTimeline:
-              type: object
-              required: [timeline]
-              properties:
-                timeline:
-                  $ref: '#/components/schemas/TimelineResponse'
+      $ref: '#/components/schemas/TimelineResponse'
     ColumnHeaderResult:
       type: object
       properties:

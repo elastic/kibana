@@ -35,7 +35,17 @@ export function defineAccessAgreementRoutes({
   );
 
   router.get(
-    { path: '/internal/security/access_agreement/state', validate: false },
+    {
+      path: '/internal/security/access_agreement/state',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because it requires only an active session in order to function',
+        },
+      },
+      validate: false,
+    },
     createLicensedRouteHandler(async (context, request, response) => {
       if (!canHandleRequest()) {
         return response.forbidden({

@@ -8,6 +8,7 @@
  */
 
 import { validRouteSecurity } from './security_route_config_validator';
+import { ReservedPrivilegesSet } from '@kbn/core-http-server';
 
 describe('RouteSecurity validation', () => {
   it('should pass validation for valid route security with authz enabled and valid required privileges', () => {
@@ -219,6 +220,16 @@ describe('RouteSecurity validation', () => {
     expect(() => validRouteSecurity(routeSecurity)).not.toThrow();
   });
 
+  it('should pass validation when operator privileges are combined with superuser', () => {
+    const routeSecurity = {
+      authz: {
+        requiredPrivileges: [ReservedPrivilegesSet.operator, ReservedPrivilegesSet.superuser],
+      },
+    };
+
+    expect(() => validRouteSecurity(routeSecurity)).not.toThrow();
+  });
+
   it('should fail validation when anyRequired and allRequired have the same values', () => {
     const invalidRouteSecurity = {
       authz: {
@@ -262,6 +273,20 @@ describe('RouteSecurity validation', () => {
     );
   });
 
+  it('should fail validation when allRequired has duplicate entries', () => {
+    const invalidRouteSecurity = {
+      authz: {
+        requiredPrivileges: [
+          { anyRequired: ['privilege4', 'privilege5'], allRequired: ['privilege1', 'privilege1'] },
+        ],
+      },
+    };
+
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: allRequired privileges must contain unique values"`
+    );
+  });
+
   it('should fail validation when anyRequired has duplicates in multiple privilege entries', () => {
     const invalidRouteSecurity = {
       authz: {
@@ -274,6 +299,70 @@ describe('RouteSecurity validation', () => {
 
     expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
       `"[authz.requiredPrivileges]: anyRequired privileges must contain unique values"`
+    );
+  });
+
+  it('should fail validation when anyRequired has superuser privileges set', () => {
+    const invalidRouteSecurity = {
+      authz: {
+        requiredPrivileges: [
+          { anyRequired: ['privilege1', 'privilege1'], allRequired: ['privilege4'] },
+          { anyRequired: ['privilege5', ReservedPrivilegesSet.superuser] },
+        ],
+      },
+    };
+
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: Using superuser privileges in anyRequired is not allowed"`
+    );
+  });
+
+  it('should fail validation when allRequired combines superuser privileges set with other privileges', () => {
+    const invalidRouteSecurity = {
+      authz: {
+        requiredPrivileges: [ReservedPrivilegesSet.superuser, 'privilege1'],
+      },
+    };
+
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: Combining superuser with other privileges is redundant, superuser privileges set can be only used as a standalone privilege."`
+    );
+  });
+
+  it('should fail validation when anyRequired has operator privileges set', () => {
+    const invalidRouteSecurity = {
+      authz: {
+        requiredPrivileges: [
+          { anyRequired: ['privilege1', 'privilege2'], allRequired: ['privilege4'] },
+          { anyRequired: ['privilege5', ReservedPrivilegesSet.operator] },
+        ],
+      },
+    };
+
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: Using operator privileges in anyRequired is not allowed"`
+    );
+  });
+
+  it('should fail validation when operator privileges set is used as standalone', () => {
+    expect(() =>
+      validRouteSecurity({
+        authz: {
+          requiredPrivileges: [{ allRequired: [ReservedPrivilegesSet.operator] }],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: Operator privilege requires at least one additional non-operator privilege to be defined"`
+    );
+
+    expect(() =>
+      validRouteSecurity({
+        authz: {
+          requiredPrivileges: [ReservedPrivilegesSet.operator],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: Operator privilege requires at least one additional non-operator privilege to be defined"`
     );
   });
 });

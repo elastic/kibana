@@ -1,0 +1,29 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@emotion/react/types/css-prop",
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/embeddable-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/discover-utils",
+    "@kbn/es-query",
+    "@kbn/data-plugin",
+    "@kbn/discover-plugin",
+    "@kbn/presentation-containers",
+    "@kbn/i18n",
+  ]
+}

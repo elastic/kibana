@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import type { Filter, Query } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getActiveDatasourceIdFromDoc } from './utils';
-import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
-import type { OperationDescriptor } from './types';
-import type { LensSavedObjectAttributes } from '.';
+import type { DatasourceMap, OperationDescriptor, VisualizationMap } from './types';
+import { LensDocument } from './persistence';
 
 export type ChartInfoApi = Promise<{
-  getChartInfo: (vis: LensSavedObjectAttributes) => Promise<ChartInfo | undefined>;
+  getChartInfo: (vis: LensDocument) => Promise<ChartInfo | undefined>;
 }>;
 
 export interface ChartInfo {
   layers: ChartLayerDescriptor[];
   visualizationType: string;
   filters: Filter[];
-  query: Query;
+  query: Query | AggregateQuery;
 }
 
 export interface ChartLayerDescriptor {
@@ -42,17 +41,14 @@ export interface ChartLayerDescriptor {
 
 export const createChartInfoApi = async (
   dataViews: DataViewsPublicPluginStart,
-  editorFrameService?: EditorFrameServiceType
+  visualizationMap: VisualizationMap,
+  datasourceMap: DatasourceMap
 ): ChartInfoApi => {
-  const [visualizationMap, datasourceMap] = await Promise.all([
-    editorFrameService!.loadVisualizations(),
-    editorFrameService!.loadDatasources(),
-  ]);
   return {
-    async getChartInfo(vis: LensSavedObjectAttributes): Promise<ChartInfo | undefined> {
+    async getChartInfo(vis: LensDocument): Promise<ChartInfo | undefined> {
       const lensVis = vis;
       const activeDatasourceId = getActiveDatasourceIdFromDoc(lensVis);
-      if (!activeDatasourceId || !lensVis?.visualizationType) {
+      if (!activeDatasourceId || lensVis?.visualizationType == null) {
         return undefined;
       }
 

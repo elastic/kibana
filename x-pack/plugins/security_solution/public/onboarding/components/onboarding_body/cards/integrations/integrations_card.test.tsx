@@ -15,6 +15,7 @@ const props = {
   checkComplete: jest.fn(),
   isCardComplete: jest.fn(),
   setExpandedCardId: jest.fn(),
+  isCardAvailable: jest.fn(),
 };
 
 describe('IntegrationsCard', () => {
@@ -27,5 +28,16 @@ describe('IntegrationsCard', () => {
       <IntegrationsCard {...props} checkCompleteMetadata={undefined} />
     );
     expect(getByTestId('loadingInstalledIntegrations')).toBeInTheDocument();
+  });
+
+  it('renders the content', () => {
+    const { queryByTestId } = render(
+      <IntegrationsCard
+        {...props}
+        checkCompleteMetadata={{ installedIntegrationsCount: 1, isAgentRequired: false }}
+      />
+    );
+    expect(queryByTestId('loadingInstalledIntegrations')).not.toBeInTheDocument();
+    expect(queryByTestId('integrationsCardGridTabs')).toBeInTheDocument();
   });
 });

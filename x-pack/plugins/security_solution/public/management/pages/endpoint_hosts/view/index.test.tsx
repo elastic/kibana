@@ -192,6 +192,11 @@ describe('when on the endpoint list page', () => {
     // to use services that we have in our test `mockedContext`
     (useToasts as jest.Mock).mockReturnValue(coreStart.notifications.toasts);
     (useKibana as jest.Mock).mockReturnValue({ services: mockedContext.startServices });
+
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      siem: { readPolicyManagement: true },
+    };
   });
 
   it('should NOT display timeline', async () => {
@@ -1306,7 +1311,7 @@ describe('when on the endpoint list page', () => {
     it('navigates to the Security Solution Host Details page', async () => {
       const hostLink = await renderResult.findByTestId('hostLink');
       expect(hostLink.getAttribute('href')).toEqual(
-        `${APP_PATH}/hosts/${hostInfo[0].metadata.host.hostname}`
+        `${APP_PATH}/hosts/${hostInfo[0].metadata.host.hostname.toLowerCase()}`
       );
     });
     it('navigates to the correct Ingest Agent Policy page', async () => {

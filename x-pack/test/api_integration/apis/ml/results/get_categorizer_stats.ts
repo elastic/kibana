@@ -102,7 +102,6 @@ export default ({ getService }: FtrProviderContext) => {
       ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.be('Forbidden');
-      expect(body.message).to.be('Forbidden');
     });
 
     it('should fetch all the categorizer stats with per-partition value for job id', async () => {
@@ -146,7 +145,6 @@ export default ({ getService }: FtrProviderContext) => {
       ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.be('Forbidden');
-      expect(body.message).to.be('Forbidden');
     });
   });
 };

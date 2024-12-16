@@ -13,16 +13,14 @@ export const VISUALIZE_TAB_SESSION_VIEW_BUTTON_TEST_ID =
   `${VISUALIZE_TAB_TEST_ID}SessionViewButton` as const;
 export const VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON_TEST_ID =
   `${VISUALIZE_TAB_TEST_ID}GraphAnalyzerButton` as const;
+export const VISUALIZE_TAB_GRAPH_VISUALIZATION_BUTTON_TEST_ID =
+  `${VISUALIZE_TAB_TEST_ID}GraphVisualizationButton` as const;
 const INSIGHTS_TAB_TEST_ID = `${PREFIX}InsightsTab` as const;
 export const INSIGHTS_TAB_BUTTON_GROUP_TEST_ID = `${INSIGHTS_TAB_TEST_ID}ButtonGroup` as const;
 export const INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID =
   `${INSIGHTS_TAB_TEST_ID}EntitiesButton` as const;
-export const INSIGHTS_TAB_ENTITIES_BUTTON_LABEL_TEST_ID =
-  `${INSIGHTS_TAB_TEST_ID}Entities` as const;
 export const INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON_TEST_ID =
   `${INSIGHTS_TAB_TEST_ID}ThreatIntelligenceButton` as const;
-export const INSIGHTS_TAB_PREVALENCE_BUTTON_LABEL_TEST_ID =
-  `${INSIGHTS_TAB_TEST_ID}Prevalence` as const;
 export const INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID =
   `${INSIGHTS_TAB_TEST_ID}PrevalenceButton` as const;
 export const INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID =

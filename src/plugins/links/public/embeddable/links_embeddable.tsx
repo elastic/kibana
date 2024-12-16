@@ -121,7 +121,7 @@ export const getLinksEmbeddableFactory = () => {
             delete snapshot.savedObjectId;
             return snapshot;
           },
-          serializeState: async (): Promise<SerializedPanelState<LinksSerializedState>> => {
+          serializeState: (): SerializedPanelState<LinksSerializedState> => {
             if (savedObjectId$.value !== undefined) {
               const linksByReferenceState: LinksByReferenceSerializedState = {
                 savedObjectId: savedObjectId$.value,
@@ -248,6 +248,7 @@ export const getLinksEmbeddableFactory = () => {
             data-shared-item
             data-rendering-count={1}
             data-test-subj="links--component"
+            borderRadius="none"
           >
             <EuiListGroup
               maxWidth={false}

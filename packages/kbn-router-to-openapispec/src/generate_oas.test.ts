@@ -25,7 +25,11 @@ describe('generateOpenApiDocument', () => {
   describe('@kbn/config-schema', () => {
     it('generates the expected OpenAPI document for the shared schema', () => {
       const [routers, versionedRouters] = createTestRouters({
-        routers: { testRouter: { routes: [{ method: 'get' }, { method: 'post' }] } },
+        routers: {
+          testRouter: {
+            routes: [{ method: 'get' }, { method: 'post' }],
+          },
+        },
         versionedRouters: { testVersionedRouter: { routes: [{}] } },
         bodySchema: createSharedConfigSchema(),
       });
@@ -118,7 +122,7 @@ describe('generateOpenApiDocument', () => {
                         },
                       },
                     },
-                    options: { tags: ['foo'] },
+                    options: { tags: ['foo'], access: 'public' },
                     handler: jest.fn(),
                   },
                 ],
@@ -164,7 +168,7 @@ describe('generateOpenApiDocument', () => {
                         },
                       },
                     },
-                    options: { tags: ['foo'] },
+                    options: { tags: ['foo'], access: 'public' },
                     handler: jest.fn(),
                   },
                 ],
@@ -189,6 +193,7 @@ describe('generateOpenApiDocument', () => {
         versionedRouters: { testVersionedRouter: { routes: [{}] } },
         bodySchema: createSharedZodSchema(),
       });
+
       expect(
         generateOpenApiDocument(
           {
@@ -228,7 +233,7 @@ describe('generateOpenApiDocument', () => {
                         },
                       },
                     },
-                    options: { tags: ['foo'] },
+                    options: { tags: ['foo'], access: 'public' },
                     handler: jest.fn(),
                   },
                 ],
@@ -240,6 +245,7 @@ describe('generateOpenApiDocument', () => {
                   {
                     method: 'get',
                     path: '/test',
+                    isVersioned: true,
                     options: { access: 'public' },
                     handlers: [
                       {
@@ -249,7 +255,7 @@ describe('generateOpenApiDocument', () => {
                             request: { body: () => ({ value: {} }) },
                             response: { 200: { body: (() => {}) as any } },
                           },
-                          version: '123',
+                          version: '2023-10-31',
                         },
                       },
                     ],
@@ -274,11 +280,19 @@ describe('generateOpenApiDocument', () => {
         routers: {
           testRouter1: {
             routes: [
-              { path: '/1-1/{id}/{path*}', options: { tags: ['oas-tag:1', 'oas-tag:2', 'foo'] } },
-              { path: '/1-2/{id}/{path*}', options: { tags: ['oas-tag:1', 'foo'] } },
+              {
+                path: '/1-1/{id}/{path*}',
+                options: { tags: ['oas-tag:1', 'oas-tag:2', 'foo'], access: 'public' },
+              },
+              {
+                path: '/1-2/{id}/{path*}',
+                options: { tags: ['oas-tag:1', 'foo'], access: 'public' },
+              },
             ],
           },
-          testRouter2: { routes: [{ path: '/2-1/{id}/{path*}', options: { tags: undefined } }] },
+          testRouter2: {
+            routes: [{ path: '/2-1/{id}/{path*}', options: { tags: undefined, access: 'public' } }],
+          },
         },
         versionedRouters: {
           testVersionedRouter1: {
@@ -312,13 +326,112 @@ describe('generateOpenApiDocument', () => {
         }
       );
       // router paths
-      expect(result.paths['/1-1/{id}/{path*}']!.get!.tags).toEqual(['1', '2']);
-      expect(result.paths['/1-2/{id}/{path*}']!.get!.tags).toEqual(['1']);
-      expect(result.paths['/2-1/{id}/{path*}']!.get!.tags).toEqual([]);
+      expect(result.paths['/1-1/{id}/{path}']!.get!.tags).toEqual(['1', '2']);
+      expect(result.paths['/1-2/{id}/{path}']!.get!.tags).toEqual(['1']);
+      expect(result.paths['/2-1/{id}/{path}']!.get!.tags).toEqual([]);
       // versioned router paths
       expect(result.paths['/v1-1']!.get!.tags).toEqual(['v1']);
       expect(result.paths['/v1-2']!.get!.tags).toEqual(['v2', 'v3']);
       expect(result.paths['/v2-1']!.get!.tags).toEqual([]);
+    });
+  });
+
+  describe('availability', () => {
+    it('creates the expected availability entries', () => {
+      const [routers, versionedRouters] = createTestRouters({
+        routers: {
+          testRouter1: {
+            routes: [
+              {
+                path: '/1-1/{id}/{path*}',
+                options: { availability: { stability: 'experimental' }, access: 'public' },
+              },
+              {
+                path: '/1-2/{id}/{path*}',
+                options: { availability: { stability: 'beta' }, access: 'public' },
+              },
+              {
+                path: '/1-3/{id}/{path*}',
+                options: { availability: { stability: 'stable' }, access: 'public' },
+              },
+            ],
+          },
+          testRouter2: {
+            routes: [{ path: '/2-1/{id}/{path*}' }],
+          },
+        },
+        versionedRouters: {
+          testVersionedRouter1: {
+            routes: [
+              {
+                path: '/v1-1',
+                options: {
+                  access: 'public',
+                  options: { availability: { stability: 'experimental' } },
+                },
+              },
+              {
+                path: '/v1-2',
+                options: {
+                  access: 'public',
+                  options: { availability: { stability: 'beta' } },
+                },
+              },
+              {
+                path: '/v1-3',
+                options: {
+                  access: 'public',
+                  options: { availability: { stability: 'stable' } },
+                },
+              },
+            ],
+          },
+          testVersionedRouter2: {
+            routes: [{ path: '/v2-1', options: { access: 'public' } }],
+          },
+        },
+      });
+      const result = generateOpenApiDocument(
+        {
+          routers,
+          versionedRouters,
+        },
+        {
+          title: 'test',
+          baseUrl: 'https://test.oas',
+          version: '99.99.99',
+        }
+      );
+
+      // router paths
+      expect(result.paths['/1-1/{id}/{path}']!.get).toMatchObject({
+        'x-state': 'Technical Preview',
+      });
+      expect(result.paths['/1-2/{id}/{path}']!.get).toMatchObject({
+        'x-state': 'Beta',
+      });
+
+      expect(result.paths['/1-3/{id}/{path}']!.get).not.toMatchObject({
+        'x-state': expect.any(String),
+      });
+      expect(result.paths['/2-1/{id}/{path}']!.get).not.toMatchObject({
+        'x-state': expect.any(String),
+      });
+
+      // versioned router paths
+      expect(result.paths['/v1-1']!.get).toMatchObject({
+        'x-state': 'Technical Preview',
+      });
+      expect(result.paths['/v1-2']!.get).toMatchObject({
+        'x-state': 'Beta',
+      });
+
+      expect(result.paths['/v1-3']!.get).not.toMatchObject({
+        'x-state': expect.any(String),
+      });
+      expect(result.paths['/v2-1']!.get).not.toMatchObject({
+        'x-state': expect.any(String),
+      });
     });
   });
 });

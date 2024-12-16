@@ -79,6 +79,12 @@ export interface AppDependencies {
   docLinks: DocLinksStart;
   kibanaVersion: SemVer;
   overlays: OverlayStart;
+  canUseSyntheticSource: boolean;
+  privs: {
+    monitor: boolean;
+    manageEnrich: boolean;
+    monitorEnrich: boolean;
+  };
 }
 
 export const AppContextProvider = ({

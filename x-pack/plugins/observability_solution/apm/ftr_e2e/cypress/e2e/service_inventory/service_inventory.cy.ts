@@ -23,10 +23,12 @@ const serviceInventoryHref = url.format({
 
 const mainApiRequestsToIntercept = [
   {
+    method: 'GET',
     endpoint: '/internal/apm/services?*',
     aliasName: 'servicesRequest',
   },
   {
+    method: 'POST',
     endpoint: '/internal/apm/services/detailed_statistics?*',
     aliasName: 'detailedStatisticsRequest',
   },
@@ -34,8 +36,7 @@ const mainApiRequestsToIntercept = [
 
 const mainAliasNames = mainApiRequestsToIntercept.map(({ aliasName }) => `@${aliasName}`);
 
-// See details: https://github.com/elastic/kibana/issues/191961
-describe.skip('Service inventory', () => {
+describe('Service inventory', () => {
   before(() => {
     const { rangeFrom, rangeTo } = timeRange;
     synthtrace.index(
@@ -51,8 +52,13 @@ describe.skip('Service inventory', () => {
 
   describe('When navigating to the service inventory', () => {
     beforeEach(() => {
+      mainApiRequestsToIntercept.forEach(({ aliasName, endpoint, method }) =>
+        cy.intercept(method, endpoint).as(aliasName)
+      );
       cy.loginAsViewerUser();
-      cy.visitKibana(serviceInventoryHref);
+      cy.visitKibana(serviceInventoryHref, {
+        localStorageOptions: [['apm.dismissedEntitiesInventoryCallout', 'false']],
+      });
     });
 
     it('has no detectable a11y violations on load', () => {
@@ -80,9 +86,8 @@ describe.skip('Service inventory', () => {
 
   describe('Calls APIs', () => {
     beforeEach(() => {
-      cy.intercept('GET', '/internal/apm/services?*').as('servicesRequest');
-      cy.intercept('POST', '/internal/apm/services/detailed_statistics?*').as(
-        'detailedStatisticsRequest'
+      mainApiRequestsToIntercept.forEach(({ aliasName, endpoint, method }) =>
+        cy.intercept(method, endpoint).as(aliasName)
       );
 
       cy.loginAsViewerUser();
@@ -92,9 +97,11 @@ describe.skip('Service inventory', () => {
     it('with the correct environment when changing the environment', () => {
       cy.wait(mainAliasNames);
 
-      cy.getByTestSubj('environmentFilter').type('{selectall}production');
-
-      cy.contains('button', 'production').click();
+      cy.getByTestSubj('environmentFilter').find('input').click();
+      cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList').should('be.visible');
+      cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList')
+        .contains('button', 'production')
+        .click();
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: mainAliasNames,

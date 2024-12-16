@@ -3659,7 +3659,7 @@
         "signature": [
           "Omit<",
           "Options",
-          ", \"dtstart\" | \"until\" | \"byweekday\" | \"wkst\"> & { dtstart: string; byweekday?: (string | number)[] | undefined; wkst?: ",
+          ", \"dtstart\" | \"until\" | \"byweekday\" | \"wkst\"> & { dtstart: string; byweekday?: (string | number)[] | null | undefined; wkst?: ",
           {
             "pluginId": "@kbn/rrule",
             "scope": "common",
@@ -3793,15 +3793,7 @@
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
           },
-          "> & { featureIds: ",
-          {
-            "pluginId": "@kbn/rule-data-utils",
-            "scope": "common",
-            "docId": "kibKbnRuleDataUtilsPluginApi",
-            "section": "def-common.AlertConsumers",
-            "text": "AlertConsumers"
-          },
-          "[]; fields?: ",
+          "> & { ruleTypeIds: string[]; consumers?: string[] | undefined; fields?: ",
           "QueryDslFieldAndFormat",
           "[] | undefined; query?: Pick<",
           "QueryDslQueryContainer",

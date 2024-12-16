@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { act } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { createIntegrationsTestRendererMock } from '../mock';
@@ -109,18 +109,19 @@ function createMockPackagePolicy(
     ...props,
   };
 }
+
 describe('PackagePolicyActionsMenu', () => {
   beforeAll(() => {
     useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
   });
 
-  it('Should disable upgrade button if package does not have upgrade', async () => {
+  it('Should not have upgrade button if package does not have upgrade', async () => {
     const agentPolicies = createMockAgentPolicies();
     const packagePolicy = createMockPackagePolicy({ hasUpgrade: false });
     const { utils } = renderMenu({ agentPolicies, packagePolicy });
-    await act(async () => {
-      const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
-      expect(upgradeButton).toBeDisabled();
+
+    await waitFor(() => {
+      expect(utils.queryByTestId('PackagePolicyActionsUpgradeItem')).toBeNull();
     });
   });
 
@@ -129,7 +130,7 @@ describe('PackagePolicyActionsMenu', () => {
     const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
     const { utils } = renderMenu({ agentPolicies, packagePolicy });
 
-    await act(async () => {
+    await waitFor(() => {
       const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
       expect(upgradeButton).not.toBeDisabled();
     });
@@ -140,7 +141,7 @@ describe('PackagePolicyActionsMenu', () => {
     const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
     const { utils } = renderMenu({ agentPolicies, packagePolicy });
 
-    await act(async () => {
+    await waitFor(() => {
       const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
       expect(upgradeButton).toBeDisabled();
     });
@@ -150,7 +151,7 @@ describe('PackagePolicyActionsMenu', () => {
     const agentPolicies = createMockAgentPolicies({ is_managed: true });
     const packagePolicy = createMockPackagePolicy();
     const { utils } = renderMenu({ agentPolicies, packagePolicy });
-    await act(async () => {
+    await waitFor(() => {
       expect(utils.queryByText('Delete integration')).toBeNull();
     });
   });
@@ -159,7 +160,7 @@ describe('PackagePolicyActionsMenu', () => {
     const agentPolicies = createMockAgentPolicies({ is_managed: false });
     const packagePolicy = createMockPackagePolicy();
     const { utils } = renderMenu({ agentPolicies, packagePolicy });
-    await act(async () => {
+    await waitFor(() => {
       expect(utils.queryByText('Delete integration')).not.toBeNull();
     });
   });
@@ -168,7 +169,7 @@ describe('PackagePolicyActionsMenu', () => {
     const agentPolicies = createMockAgentPolicies({ is_managed: false, supports_agentless: true });
     const packagePolicy = createMockPackagePolicy();
     const { utils } = renderMenu({ agentPolicies, packagePolicy });
-    await act(async () => {
+    await waitFor(() => {
       expect(utils.queryByText('Delete integration')).not.toBeNull();
     });
   });
@@ -177,7 +178,7 @@ describe('PackagePolicyActionsMenu', () => {
     const agentPolicies = createMockAgentPolicies();
     const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
     const { utils } = renderMenu({ agentPolicies, packagePolicy, showAddAgent: true });
-    await act(async () => {
+    await waitFor(() => {
       expect(utils.queryByText('Add agent')).not.toBeNull();
     });
   });
@@ -186,7 +187,7 @@ describe('PackagePolicyActionsMenu', () => {
     const agentPolicies = createMockAgentPolicies({ is_managed: true });
     const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
     const { utils } = renderMenu({ agentPolicies, packagePolicy, showAddAgent: true });
-    await act(async () => {
+    await waitFor(() => {
       expect(utils.queryByText('Add agent')).toBeNull();
     });
   });
@@ -195,7 +196,7 @@ describe('PackagePolicyActionsMenu', () => {
     const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
     const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
     const { utils } = renderMenu({ agentPolicies, packagePolicy, showAddAgent: true });
-    await act(async () => {
+    await waitFor(() => {
       expect(utils.queryByText('Add agent')).toBeNull();
     });
   });
@@ -204,7 +205,7 @@ describe('PackagePolicyActionsMenu', () => {
     const agentPolicies = createMockAgentPolicies();
     const packagePolicy = createMockPackagePolicy();
     const { utils } = renderMenu({ agentPolicies, packagePolicy });
-    await act(async () => {
+    await waitFor(() => {
       const editButton = utils.getByTestId('PackagePolicyActionsEditItem');
       expect(editButton).not.toHaveAttribute('disabled');
       expect(editButton).toHaveAttribute('href');
@@ -227,7 +228,7 @@ describe('PackagePolicyActionsMenu', () => {
       agentPolicies: [],
       packagePolicy,
     });
-    await act(async () => {
+    await waitFor(() => {
       const editButton = utils.getByTestId('PackagePolicyActionsEditItem');
       expect(editButton).not.toHaveAttribute('disabled');
       expect(editButton).toHaveAttribute('href');

@@ -88,6 +88,10 @@ export interface DiscoverSidebarResponsiveProps {
    */
   documents$: DataDocuments$;
   /**
+   * Callback to update breakdown field
+   */
+  onAddBreakdownField?: (breakdownField: DataViewField | undefined) => void;
+  /**
    * Callback function when selecting a field
    */
   onAddField: (fieldName: string) => void;
@@ -151,6 +155,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     selectedDataView,
     columns,
     trackUiMetric,
+    onAddBreakdownField,
     onAddFilter,
     onFieldEdited,
     onDataViewCreated,
@@ -373,23 +378,24 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       <EuiFlexItem>
         {selectedDataView ? (
           <UnifiedFieldListSidebarContainer
-            ref={initializeUnifiedFieldListSidebarContainerApi}
-            variant={fieldListVariant}
-            getCreationOptions={getCreationOptions}
-            services={services}
-            dataView={selectedDataView}
-            trackUiMetric={trackUiMetric}
-            allFields={sidebarState.allFields}
-            showFieldList={showFieldList}
-            workspaceSelectedFieldNames={columns}
-            fullWidth
-            onAddFieldToWorkspace={onAddFieldToWorkspace}
-            onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
-            onAddFilter={onAddFilter}
-            onFieldEdited={onFieldEdited}
-            prependInFlyout={prependDataViewPickerForMobile}
             additionalFieldGroups={additionalFieldGroups}
             additionalFilters={additionalFilters}
+            allFields={sidebarState.allFields}
+            dataView={selectedDataView}
+            fullWidth
+            getCreationOptions={getCreationOptions}
+            onAddBreakdownField={onAddBreakdownField}
+            onAddFieldToWorkspace={onAddFieldToWorkspace}
+            onAddFilter={onAddFilter}
+            onFieldEdited={onFieldEdited}
+            onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
+            prependInFlyout={prependDataViewPickerForMobile}
+            ref={initializeUnifiedFieldListSidebarContainerApi}
+            services={services}
+            showFieldList={showFieldList}
+            trackUiMetric={trackUiMetric}
+            variant={fieldListVariant}
+            workspaceSelectedFieldNames={columns}
           />
         ) : null}
       </EuiFlexItem>

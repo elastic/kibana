@@ -8,10 +8,7 @@
  */
 
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
-import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-import { AttributeService, type EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { SavedSearchByValueAttributes, byValueToSavedSearch } from '.';
 
@@ -19,16 +16,6 @@ const mockServices = {
   contentManagement: contentManagementMock.createStartContract().client,
   search: dataPluginMock.createStartContract().search,
   spaces: spacesPluginMock.createStartContract(),
-  embeddable: {
-    getAttributeService: jest.fn(
-      (_, opts) =>
-        new AttributeService(
-          SEARCH_EMBEDDABLE_TYPE,
-          coreMock.createStart().notifications.toasts,
-          opts
-        )
-    ),
-  } as unknown as EmbeddableStart,
 };
 
 describe('toSavedSearch', () => {

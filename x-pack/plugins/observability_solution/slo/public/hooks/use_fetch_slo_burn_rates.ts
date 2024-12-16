@@ -12,8 +12,8 @@ import {
   useQuery,
 } from '@tanstack/react-query';
 import { SLO_LONG_REFETCH_INTERVAL } from '../constants';
-import { useKibana } from '../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
+import { usePluginContext } from './use_plugin_context';
 
 export interface UseFetchSloBurnRatesResponse {
   isLoading: boolean;
@@ -34,19 +34,24 @@ export function useFetchSloBurnRates({
   windows,
   shouldRefetch,
 }: UseFetchSloBurnRatesParams): UseFetchSloBurnRatesResponse {
-  const { http } = useKibana().services;
+  const { sloClient } = usePluginContext();
   const { isLoading, data, refetch } = useQuery({
     queryKey: sloKeys.burnRates(slo.id, slo.instanceId, windows),
     queryFn: async ({ signal }) => {
       try {
-        const response = await http.post<GetSLOBurnRatesResponse>(
-          `/internal/observability/slos/${slo.id}/_burn_rates`,
+        const response = await sloClient.fetch(
+          'POST /internal/observability/slos/{id}/_burn_rates',
           {
-            body: JSON.stringify({
-              windows,
-              instanceId: slo.instanceId ?? ALL_VALUE,
-              remoteName: slo.remote?.remoteName,
-            }),
+            params: {
+              path: {
+                id: slo.id,
+              },
+              body: {
+                windows,
+                instanceId: slo.instanceId ?? ALL_VALUE,
+                remoteName: slo.remote?.remoteName,
+              },
+            },
             signal,
           }
         );

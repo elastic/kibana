@@ -18,7 +18,7 @@ import { noMetricIndicesPromptDescription, noMetricIndicesPromptTitle } from '..
 
 export enum OnboardingFlow {
   Infra = 'infra',
-  Hosts = 'logs',
+  Hosts = 'host',
 }
 
 interface NoDataConfigDetails {
@@ -108,11 +108,11 @@ export const getNoDataConfig = ({
 }: {
   hasData: boolean;
   loading: boolean;
-  onboardingFlow: OnboardingFlow;
+  onboardingFlow?: OnboardingFlow;
   locators: LocatorClient;
   docsLink?: string;
 }): NoDataConfig | undefined => {
-  if (hasData || loading) {
+  if (!onboardingFlow || hasData || loading) {
     return;
   }
 

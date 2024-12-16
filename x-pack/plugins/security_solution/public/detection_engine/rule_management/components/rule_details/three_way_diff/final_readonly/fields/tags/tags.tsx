@@ -10,6 +10,7 @@ import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
 import type { RuleTagArray } from '../../../../../../../../../common/api/detection_engine';
 import { Tags } from '../../../../rule_about_section';
+import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 
 interface TagsReadOnlyProps {
   tags: RuleTagArray;
@@ -21,7 +22,7 @@ export function TagsReadOnly({ tags }: TagsReadOnlyProps) {
       listItems={[
         {
           title: ruleDetailsI18n.TAGS_FIELD_LABEL,
-          description: <Tags tags={tags} />,
+          description: tags.length ? <Tags tags={tags} /> : <EmptyFieldValuePlaceholder />,
         },
       ]}
     />

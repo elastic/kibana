@@ -63,7 +63,7 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
       store.dispatch(startTimelineSaving({ id: localTimelineId }));
 
       try {
-        const result = await (action.payload.saveAsNew && timeline.id
+        const response = await (action.payload.saveAsNew && timeline.id
           ? copyTimeline({
               timelineId,
               timeline: {
@@ -84,8 +84,8 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
               savedSearch: timeline.savedSearch,
             }));
 
-        if (isTimelineErrorResponse(result)) {
-          const error = getErrorFromResponse(result);
+        if (isTimelineErrorResponse(response)) {
+          const error = getErrorFromResponse(response);
           switch (error?.errorCode) {
             case 403:
               store.dispatch(showCallOutUnauthorizedMsg());
@@ -106,7 +106,6 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
           return;
         }
 
-        const response = result?.data?.persistTimeline;
         if (response == null) {
           kibana.notifications.toasts.addDanger({
             title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
@@ -122,15 +121,15 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
             id: localTimelineId,
             timeline: {
               ...timeline,
-              id: response.timeline.savedObjectId,
-              updated: response.timeline.updated ?? undefined,
-              savedObjectId: response.timeline.savedObjectId,
-              version: response.timeline.version,
-              status: response.timeline.status ?? TimelineStatusEnum.active,
-              timelineType: response.timeline.timelineType ?? TimelineTypeEnum.default,
-              templateTimelineId: response.timeline.templateTimelineId ?? null,
-              templateTimelineVersion: response.timeline.templateTimelineVersion ?? null,
-              savedSearchId: response.timeline.savedSearchId ?? null,
+              id: response.savedObjectId,
+              updated: response.updated ?? undefined,
+              savedObjectId: response.savedObjectId,
+              version: response.version,
+              status: response.status ?? TimelineStatusEnum.active,
+              timelineType: response.timelineType ?? TimelineTypeEnum.default,
+              templateTimelineId: response.templateTimelineId ?? null,
+              templateTimelineVersion: response.templateTimelineVersion ?? null,
+              savedSearchId: response.savedSearchId ?? null,
               isSaving: false,
             },
           })

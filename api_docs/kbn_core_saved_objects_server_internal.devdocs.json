@@ -172,7 +172,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { config, coreUsageData, logger, access }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_create.ts",
         "deprecated": false,
@@ -198,7 +198,7 @@
             "id": "def-server.registerBulkCreateRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ config, coreUsageData, logger, access }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -222,7 +222,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { config, coreUsageData, logger, access }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_delete.ts",
         "deprecated": false,
@@ -248,7 +248,7 @@
             "id": "def-server.registerBulkDeleteRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ config, coreUsageData, logger, access }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -272,7 +272,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { config, coreUsageData, logger, access }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_get.ts",
         "deprecated": false,
@@ -298,7 +298,7 @@
             "id": "def-server.registerBulkGetRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ config, coreUsageData, logger, access }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -322,7 +322,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { config, coreUsageData, logger, access }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_resolve.ts",
         "deprecated": false,
@@ -348,7 +348,7 @@
             "id": "def-server.registerBulkResolveRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ config, coreUsageData, logger, access }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -372,7 +372,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { config, coreUsageData, logger, access }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_update.ts",
         "deprecated": false,
@@ -398,7 +398,7 @@
             "id": "def-server.registerBulkUpdateRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ config, coreUsageData, logger, access }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -422,7 +422,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { config, coreUsageData, logger, access }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/create.ts",
         "deprecated": false,
@@ -448,7 +448,7 @@
             "id": "def-server.registerCreateRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ config, coreUsageData, logger, access }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -472,7 +472,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { config, coreUsageData, logger, access }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/delete.ts",
         "deprecated": false,
@@ -498,7 +498,7 @@
             "id": "def-server.registerDeleteRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ config, coreUsageData, logger, access }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -622,7 +622,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { config, coreUsageData, logger, access }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/find.ts",
         "deprecated": false,
@@ -648,7 +648,7 @@
             "id": "def-server.registerFindRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ config, coreUsageData, logger, access }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -672,7 +672,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { config, coreUsageData, logger, access }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/get.ts",
         "deprecated": false,
@@ -698,7 +698,7 @@
             "id": "def-server.registerGetRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ config, coreUsageData, logger, access }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -772,7 +772,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { kibanaVersion, coreUsageData, logger, access, }: { kibanaVersion: string; coreUsageData: ",
+          ", { kibanaVersion, coreUsageData, logger, access, legacyDeprecationInfo, }: { kibanaVersion: string; coreUsageData: ",
           "InternalCoreUsageDataSetup",
           "; logger: ",
           {
@@ -789,6 +789,14 @@
             "docId": "kibKbnCoreHttpServerPluginApi",
             "section": "def-server.RouteAccess",
             "text": "RouteAccess"
+          },
+          "; legacyDeprecationInfo: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RouteDeprecationInfo",
+            "text": "RouteDeprecationInfo"
           },
           "; }) => void"
         ],
@@ -816,7 +824,7 @@
             "id": "def-server.registerLegacyExportRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{\n    kibanaVersion,\n    coreUsageData,\n    logger,\n    access,\n  }",
+            "label": "{\n    kibanaVersion,\n    coreUsageData,\n    logger,\n    access,\n    legacyDeprecationInfo,\n  }",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/export.ts",
             "deprecated": false,
@@ -880,6 +888,26 @@
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/export.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server-internal",
+                "id": "def-server.registerLegacyExportRoute.$2.legacyDeprecationInfo",
+                "type": "Object",
+                "tags": [],
+                "label": "legacyDeprecationInfo",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.RouteDeprecationInfo",
+                    "text": "RouteDeprecationInfo"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/export.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -897,7 +925,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { maxImportPayloadBytes, coreUsageData, logger, access, }: { maxImportPayloadBytes: number; coreUsageData: ",
+          ", { maxImportPayloadBytes, coreUsageData, logger, access, legacyDeprecationInfo, }: { maxImportPayloadBytes: number; coreUsageData: ",
           "InternalCoreUsageDataSetup",
           "; logger: ",
           {
@@ -914,6 +942,14 @@
             "docId": "kibKbnCoreHttpServerPluginApi",
             "section": "def-server.RouteAccess",
             "text": "RouteAccess"
+          },
+          "; legacyDeprecationInfo: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RouteDeprecationInfo",
+            "text": "RouteDeprecationInfo"
           },
           "; }) => void"
         ],
@@ -941,7 +977,7 @@
             "id": "def-server.registerLegacyImportRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{\n    maxImportPayloadBytes,\n    coreUsageData,\n    logger,\n    access,\n  }",
+            "label": "{\n    maxImportPayloadBytes,\n    coreUsageData,\n    logger,\n    access,\n    legacyDeprecationInfo,\n  }",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/import.ts",
             "deprecated": false,
@@ -1001,6 +1037,26 @@
                 "description": [],
                 "signature": [
                   "\"internal\" | \"public\""
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/import.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server-internal",
+                "id": "def-server.registerLegacyImportRoute.$2.legacyDeprecationInfo",
+                "type": "Object",
+                "tags": [],
+                "label": "legacyDeprecationInfo",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.RouteDeprecationInfo",
+                    "text": "RouteDeprecationInfo"
+                  }
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/import.ts",
                 "deprecated": false,
@@ -1126,7 +1182,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { config, coreUsageData, logger, access }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/resolve.ts",
         "deprecated": false,
@@ -1152,7 +1208,7 @@
             "id": "def-server.registerResolveRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ config, coreUsageData, logger, access }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -1176,7 +1232,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { config, coreUsageData, logger, access }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/update.ts",
         "deprecated": false,
@@ -1202,7 +1258,7 @@
             "id": "def-server.registerUpdateRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ config, coreUsageData, logger, access }",
+            "label": "{ config, coreUsageData, logger, access, deprecationInfo }",
             "description": [],
             "signature": [
               "RouteDependencies"

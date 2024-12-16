@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthz } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
-
+import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import { getRouteRequiredAuthz, type FleetAuthzRouter } from '../../services/security';
 
 import { AGENT_API_ROUTES } from '../../constants';
@@ -23,7 +23,6 @@ import {
   GetAgentStatusRequestSchema,
   GetAgentDataRequestSchema,
   PostNewAgentActionRequestSchema,
-  PutAgentReassignRequestSchemaDeprecated,
   PostAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
   PostAgentUpgradeRequestSchema,
@@ -68,7 +67,6 @@ import {
   updateAgentHandler,
   deleteAgentHandler,
   getAgentStatusForAgentPolicyHandler,
-  putAgentsReassignHandlerDeprecated,
   postBulkAgentReassignHandler,
   getAgentDataHandler,
   bulkUpdateAgentTagsHandler,
@@ -79,6 +77,7 @@ import {
   deleteAgentUploadFileHandler,
   postAgentReassignHandler,
   postRetrieveAgentsByActionsHandler,
+  getAgentStatusRuntimeFieldHandler,
 } from './handlers';
 import {
   postNewAgentActionHandlerBuilder,
@@ -99,7 +98,8 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
-      description: `Get agent by ID`,
+      summary: `Get an agent`,
+      description: `Get an agent by ID.`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -129,7 +129,8 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
-      description: `Update agent by ID`,
+      summary: `Update an agent`,
+      description: `Update an agent by ID.`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -159,7 +160,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
-      description: `Bulk update agent tags`,
+      summary: `Bulk update agent tags`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -189,7 +190,8 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
-      description: `Delete agent by ID`,
+      summary: `Delete an agent`,
+      description: `Delete an agent by ID.`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -220,7 +222,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
-      description: `List agents`,
+      summary: `Get agents`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -250,7 +252,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
-      description: `List agent tags`,
+      summary: `Get agent tags`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -280,7 +282,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
-      description: `Create agent action`,
+      summary: `Create an agent action`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -314,7 +316,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
-      description: `Cancel agent action`,
+      summary: `Cancel an agent action`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -349,7 +351,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
-      description: `List agents by action ids`,
+      summary: `Get agents by action ids`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -378,7 +380,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
-      description: `Unenroll agent`,
+      summary: `Unenroll an agent`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -392,28 +394,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     );
 
   router.versioned
-    .put({
-      path: AGENT_API_ROUTES.REASSIGN_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
-      },
-      deprecated: true,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: { request: PutAgentReassignRequestSchemaDeprecated },
-      },
-      putAgentsReassignHandlerDeprecated
-    );
-
-  router.versioned
     .post({
       path: AGENT_API_ROUTES.REASSIGN_PATTERN,
       fleetAuthz: {
         fleet: { allAgents: true },
       },
-      description: `Reassign agent`,
+      summary: `Reassign an agent`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -442,7 +428,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
-      description: `Request agent diagnostics`,
+      summary: `Request agent diagnostics`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -471,7 +457,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
-      description: `Bulk request diagnostics from agents`,
+      summary: `Bulk request diagnostics from agents`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -500,7 +486,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
-      description: `List agent uploads`,
+      summary: `Get agent uploads`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -529,7 +515,8 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
-      description: `Get file uploaded by agent`,
+      summary: `Get an uploaded file`,
+      description: `Get a file uploaded by an agent.`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -558,7 +545,8 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
-      description: `Delete file uploaded by agent`,
+      summary: `Delete an uploaded file`,
+      description: `Delete a file uploaded by an agent.`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -590,7 +578,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           fleetAuthz,
           getRouteRequiredAuthz('get', AGENT_API_ROUTES.STATUS_PATTERN)
         ).granted,
-      description: `Get agent status summary`,
+      summary: `Get an agent status summary`,
       options: {
         tags: ['oas-tag:Elastic Agent status'],
       },
@@ -612,21 +600,6 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
       getAgentStatusForAgentPolicyHandler
     );
-  router.versioned
-    .get({
-      path: AGENT_API_ROUTES.STATUS_PATTERN_DEPRECATED,
-      fleetAuthz: {
-        fleet: { readAgents: true },
-      },
-      deprecated: true,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: { request: GetAgentStatusRequestSchema },
-      },
-      getAgentStatusForAgentPolicyHandler
-    );
   // Agent data
   router.versioned
     .get({
@@ -634,7 +607,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
-      description: `Get incoming agent data`,
+      summary: `Get incoming agent data`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -664,7 +637,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
-      description: `Upgrade agent`,
+      summary: `Upgrade an agent`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -693,7 +666,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
-      description: `Bulk upgrade agents`,
+      summary: `Bulk upgrade agents`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -723,7 +696,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
-      description: `Get agent action status`,
+      summary: `Get an agent action status`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -753,7 +726,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
-      description: `Bulk reassign agents`,
+      summary: `Bulk reassign agents`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -783,7 +756,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
-      description: `Bulk unenroll agents`,
+      summary: `Bulk unenroll agents`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -813,7 +786,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
-      description: `Get available agent versions`,
+      summary: `Get available agent versions`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -835,4 +808,35 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
       getAvailableVersionsHandler
     );
+
+  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
+
+  // route used by export CSV feature on the UI to generate report
+  if (experimentalFeatures.enableExportCSV) {
+    router.versioned
+      .get({
+        path: '/internal/fleet/agents/status_runtime_field',
+        access: 'internal',
+        fleetAuthz: {
+          fleet: { readAgents: true },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.internal.v1,
+          validate: {
+            request: {},
+            response: {
+              200: {
+                body: () => schema.string(),
+              },
+              400: {
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        getAgentStatusRuntimeFieldHandler
+      );
+  }
 };

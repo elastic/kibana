@@ -7,6 +7,7 @@
 
 import { useSelector } from '@xstate/react';
 import { formatNumber } from '@elastic/eui';
+import { mapPercentageToQuality } from '../../common/utils';
 import { BYTE_NUMBER_FORMAT, MAX_HOSTS_METRIC_VALUE, NUMBER_FORMAT } from '../../common/constants';
 import { useDatasetQualityDetailsContext } from '../components/dataset_quality_details/context';
 
@@ -54,6 +55,13 @@ export const useOverviewSummaryPanel = () => {
     NUMBER_FORMAT
   );
 
+  const degradedPercentage =
+    Number(totalDocsCount) > 0
+      ? (Number(totalDegradedDocsCount) / Number(totalDocsCount)) * 100
+      : 0;
+
+  const quality = mapPercentageToQuality(degradedPercentage);
+
   return {
     totalDocsCount,
     sizeInBytes,
@@ -62,6 +70,7 @@ export const useOverviewSummaryPanel = () => {
     totalHostsCount,
     isSummaryPanelLoading,
     totalDegradedDocsCount,
+    quality,
   };
 };
 

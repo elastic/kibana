@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
+import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow, EuiToolTip } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
@@ -13,6 +13,7 @@ import styled from 'styled-components';
 import type { DataViewBase } from '@kbn/es-query';
 import type { Severity, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
+import type { RuleSource } from '../../../../../common/api/detection_engine';
 import { isThreatMatchRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
 import type {
   RuleStepProps,
@@ -24,7 +25,7 @@ import { AddMitreAttackThreat } from '../mitre';
 import type { FieldHook, FormHook } from '../../../../shared_imports';
 import { Field, Form, getUseField, UseField } from '../../../../shared_imports';
 
-import { defaultRiskScoreBySeverity, severityOptions } from './data';
+import { defaultRiskScoreBySeverity } from './data';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import { schema as defaultSchema } from './schema';
 import * as I18n from './translations';
@@ -32,7 +33,7 @@ import { StepContentWrapper } from '../../../rule_creation/components/step_conte
 import { MarkdownEditorForm } from '../../../../common/components/markdown_editor/eui_form';
 import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
-import { AutocompleteField } from '../autocomplete_field';
+import { EsFieldSelectorField } from '../es_field_selector_field';
 import { useFetchIndex } from '../../../../common/containers/source';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
@@ -55,6 +56,7 @@ interface StepAboutRuleProps extends RuleStepProps {
   timestampOverride: string;
   form: FormHook<AboutStepRule>;
   esqlQuery?: string | undefined;
+  ruleSource?: RuleSource;
 }
 
 interface StepAboutRuleReadOnlyProps {
@@ -85,6 +87,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   isLoading,
   form,
   esqlQuery,
+  ruleSource,
 }) => {
   const { data } = useKibana().services;
 
@@ -176,7 +179,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleSeverityField',
                 idAria: 'detectionEngineStepAboutRuleSeverityField',
                 isDisabled: isLoading || indexPatternLoading,
-                options: severityOptions,
                 indices: indexPattern,
                 setRiskScore,
               }}
@@ -281,31 +283,51 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               }}
             />
             <EuiSpacer size="l" />
-            <CommonUseField
-              path="author"
-              componentProps={{
-                idAria: 'detectionEngineStepAboutRuleAuthor',
-                'data-test-subj': 'detectionEngineStepAboutRuleAuthor',
-                euiFieldProps: {
-                  fullWidth: true,
-                  isDisabled: isLoading,
-                  placeholder: '',
-                },
-              }}
-            />
+            <EuiToolTip
+              content={
+                ruleSource?.type === 'external'
+                  ? I18n.AUTHOR_IMMUTABLE_FIELD_TOOLTIP_TEXT
+                  : undefined
+              }
+              display="block"
+              position="right"
+            >
+              <CommonUseField
+                path="author"
+                componentProps={{
+                  idAria: 'detectionEngineStepAboutRuleAuthor',
+                  'data-test-subj': 'detectionEngineStepAboutRuleAuthor',
+                  euiFieldProps: {
+                    fullWidth: true,
+                    isDisabled: isLoading || ruleSource?.type === 'external', // We don't allow "author" customization if this is a prebuilt rule
+                    placeholder: '',
+                  },
+                }}
+              />
+            </EuiToolTip>
             <EuiSpacer size="l" />
-            <CommonUseField
-              path="license"
-              componentProps={{
-                idAria: 'detectionEngineStepAboutRuleLicense',
-                'data-test-subj': 'detectionEngineStepAboutRuleLicense',
-                euiFieldProps: {
-                  fullWidth: true,
-                  disabled: isLoading,
-                  placeholder: '',
-                },
-              }}
-            />
+            <EuiToolTip
+              content={
+                ruleSource?.type === 'external'
+                  ? I18n.LICENSE_IMMUTABLE_FIELD_TOOLTIP_TEXT
+                  : undefined
+              }
+              display="block"
+              position="right"
+            >
+              <CommonUseField
+                path="license"
+                componentProps={{
+                  idAria: 'detectionEngineStepAboutRuleLicense',
+                  'data-test-subj': 'detectionEngineStepAboutRuleLicense',
+                  euiFieldProps: {
+                    fullWidth: true,
+                    disabled: isLoading || ruleSource?.type === 'external', // We don't allow "license" customization if this is a prebuilt rule
+                    placeholder: '',
+                  },
+                }}
+              />
+            </EuiToolTip>
             <EuiSpacer size="l" />
             <EuiFormRow label={I18n.GLOBAL_ENDPOINT_EXCEPTION_LIST} fullWidth>
               <CommonUseField
@@ -376,14 +398,13 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             ) : (
               <UseField
                 path="ruleNameOverride"
-                component={AutocompleteField}
+                component={EsFieldSelectorField}
                 componentProps={{
                   dataTestSubj: 'detectionEngineStepAboutRuleRuleNameOverride',
                   fieldType: 'string',
                   idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
                   indices: indexPattern,
                   isDisabled: isLoading || indexPatternLoading,
-                  placeholder: '',
                 }}
               />
             )}
@@ -391,14 +412,13 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             <EuiSpacer size="l" />
             <UseField
               path="timestampOverride"
-              component={AutocompleteField}
+              component={EsFieldSelectorField}
               componentProps={{
                 dataTestSubj: 'detectionEngineStepAboutRuleTimestampOverride',
                 fieldType: 'date',
                 idAria: 'detectionEngineStepAboutRuleTimestampOverride',
                 indices: indexPattern,
                 isDisabled: isLoading || indexPatternLoading,
-                placeholder: '',
               }}
             />
             {!!timestampOverride && timestampOverride !== '@timestamp' && (

@@ -18,10 +18,7 @@ import {
   ServiceStatusLevels,
 } from '@kbn/core/server';
 
-import type {
-  PluginSetupContract as AlertingSetup,
-  PluginStartContract as AlertingStart,
-} from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
@@ -29,7 +26,6 @@ import type {
   PluginSetup as DataPluginSetup,
 } from '@kbn/data-plugin/server';
 
-import { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
 import type { RuleRegistryPluginConfig } from './config';
 import { type IRuleDataService, RuleDataService, Dataset } from './rule_data_plugin_service';
 import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
@@ -41,24 +37,23 @@ import { ruleRegistrySearchStrategyProvider, RULE_SEARCH_STRATEGY_NAME } from '.
 export interface RuleRegistryPluginSetupDependencies {
   security?: SecurityPluginSetup;
   data: DataPluginSetup;
-  alerting: AlertingSetup;
+  alerting: AlertingServerSetup;
 }
 
 export interface RuleRegistryPluginStartDependencies {
-  alerting: AlertingStart;
+  alerting: AlertingServerStart;
   data: DataPluginStart;
   spaces?: SpacesPluginStart;
 }
 
 export interface RuleRegistryPluginSetupContract {
   ruleDataService: IRuleDataService;
-  createLifecycleRuleTypeFactory: typeof createLifecycleRuleTypeFactory;
   dataset: typeof Dataset;
 }
 
 export interface RuleRegistryPluginStartContract {
   getRacClientWithRequest: (req: KibanaRequest) => Promise<AlertsClient>;
-  alerting: AlertingStart;
+  alerting: AlertingServerStart;
 }
 
 export class RuleRegistryPlugin
@@ -153,7 +148,6 @@ export class RuleRegistryPlugin
 
     return {
       ruleDataService: this.ruleDataService,
-      createLifecycleRuleTypeFactory,
       dataset: Dataset,
     };
   }
@@ -168,7 +162,7 @@ export class RuleRegistryPlugin
       logger,
       esClient: core.elasticsearch.client.asInternalUser,
       // NOTE: Alerts share the authorization client with the alerting plugin
-      getAlertingAuthorization(request: KibanaRequest) {
+      async getAlertingAuthorization(request: KibanaRequest) {
         return plugins.alerting.getAlertingAuthorizationWithRequest(request);
       },
       securityPluginSetup: security,
@@ -178,7 +172,7 @@ export class RuleRegistryPlugin
       getAlertIndicesAlias: plugins.alerting.getAlertIndicesAlias,
     });
 
-    const getRacClientWithRequest = (request: KibanaRequest) => {
+    const getRacClientWithRequest = async (request: KibanaRequest) => {
       return alertsClientFactory.create(request);
     };
 
@@ -193,7 +187,7 @@ export class RuleRegistryPlugin
     return function alertsRouteHandlerContext(context, request): RacApiRequestHandlerContext {
       return {
         getAlertsClient: async () => {
-          const createdClient = alertsClientFactory.create(request);
+          const createdClient = await alertsClientFactory.create(request);
           return createdClient;
         },
       };

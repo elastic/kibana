@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { css } from '@emotion/react';
 
@@ -30,13 +30,14 @@ import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { APPLICATIONS_PLUGIN } from '../../../../../../common/constants';
+import { ELASTICSEARCH_PLUGIN } from '../../../../../../common/constants';
 
 import { KibanaDeps } from '../../../../../../common/types';
 
-import { PLAYGROUND_PATH } from '../../../../applications/routes';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
+import { HttpLogic } from '../../../../shared/http';
 import { KibanaLogic } from '../../../../shared/kibana';
+import { DEV_TOOLS_CONSOLE_PATH } from '../../../routes';
 
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
 import { ConnectorDetailTabId } from '../../connector_detail/connector_detail';
@@ -62,6 +63,16 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
   const { startSync } = useActions(SyncsLogic);
 
   const isSyncing = isWaitingForSync || isSyncingProp;
+
+  const { http } = useValues(HttpLogic);
+  const { application, share } = useValues(KibanaLogic);
+  const onStartPlaygroundClick = useCallback(() => {
+    if (!share) return;
+    const playgroundLocator = share.url.locators.get('PLAYGROUND_LOCATOR_ID');
+    if (playgroundLocator) {
+      playgroundLocator.navigate({ 'default-index': connector?.index_name });
+    }
+  }, [connector, share]);
   useEffect(() => {
     setTimeout(() => {
       window.scrollTo({
@@ -129,14 +140,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                             'xpack.enterpriseSearch.createConnector.finishUpStep.euiButton.startSearchPlaygroundLabel',
                             { defaultMessage: 'Start Search Playground' }
                           )}
-                          onClick={() => {
-                            if (connector) {
-                              KibanaLogic.values.navigateToUrl(
-                                `${APPLICATIONS_PLUGIN.URL}${PLAYGROUND_PATH}?default-index=${connector.index_name}`,
-                                { shouldNotCreateHref: true }
-                              );
-                            }
-                          }}
+                          onClick={onStartPlaygroundClick}
                         >
                           {i18n.translate(
                             'xpack.enterpriseSearch.createConnector.finishUpStep.startSearchPlaygroundButtonLabel',
@@ -307,7 +311,9 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                         'Use your favorite language client to query your data in your app',
                     }
                   )}
-                  onClick={() => {}}
+                  onClick={() => {
+                    application.navigateToUrl(http.basePath.prepend(ELASTICSEARCH_PLUGIN.URL));
+                  }}
                   display="subdued"
                 />
               </EuiFlexItem>
@@ -335,7 +341,9 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                         'Tools for interacting with your data, such as console, profiler, Grok debugger and more',
                     }
                   )}
-                  onClick={() => {}}
+                  onClick={() => {
+                    application.navigateToUrl(http.basePath.prepend(DEV_TOOLS_CONSOLE_PATH));
+                  }}
                   display="subdued"
                 />
               </EuiFlexItem>

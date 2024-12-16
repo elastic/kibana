@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 import type { Dispatch } from 'redux';
+import { render, screen } from '@testing-library/react';
 
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { defaultRowRenderers } from '../../body/renderers';
-import type { Sort } from '../../body/sort';
-import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import type { SortColumnTimeline as Sort } from '../../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
@@ -24,10 +23,11 @@ import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import type { Props as PinnedTabContentComponentProps } from '.';
 import { PinnedTabContentComponent } from '.';
 import { Direction } from '../../../../../../common/search_strategy';
-import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import { allowedExperimentalValues } from '../../../../../../common';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
 
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -37,9 +37,6 @@ jest.mock('../../../../containers/details', () => ({
 }));
 jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
-}));
-jest.mock('../../body/events', () => ({
-  Events: () => <></>,
 }));
 
 jest.mock('../../../../../sourcerer/containers');
@@ -51,47 +48,20 @@ const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
-const useAddToTimeline = () => ({
-  beginDrag: jest.fn(),
-  cancelDrag: jest.fn(),
-  dragToLocation: jest.fn(),
-  endDrag: jest.fn(),
-  hasDraggableLock: jest.fn(),
-  startDragToTimeline: jest.fn(),
-});
-
 jest.mock('../../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../../common/lib/kibana');
   return {
     ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        application: {
-          navigateToApp: jest.fn(),
-          getUrlForApp: jest.fn(),
-        },
-        cases: {
-          ui: {
-            getCasesContext: () => mockCasesContext,
-          },
-        },
-        uiSettings: {
-          get: jest.fn(),
-        },
-        savedObjects: {
-          client: {},
-        },
-        timelines: {
-          getLastUpdated: jest.fn(),
-          getFieldBrowser: jest.fn(),
-          getUseAddToTimeline: () => useAddToTimeline,
-        },
-        triggersActionsUi: { getFieldBrowser: jest.fn() },
-      },
-    }),
+    useKibana: jest.fn(),
     useGetUserSavedObjectPermissions: jest.fn(),
   };
 });
+
+const kibanaMockResult = {
+  services: createStartServicesMock(),
+};
+
+const useKibanaMock = useKibana as jest.Mock;
 
 describe('PinnedTabContent', () => {
   let props = {} as PinnedTabContentComponentProps;
@@ -104,16 +74,23 @@ describe('PinnedTabContent', () => {
     },
   ];
 
-  const mount = useMountAppended();
+  beforeAll(() => {
+    // https://github.com/atlassian/react-beautiful-dnd/blob/4721a518356f72f1dac45b5fd4ee9d466aa2996b/docs/guides/setup-problem-detection-and-error-recovery.md#disable-logging
+    Object.defineProperty(window, '__@hello-pangea/dnd-disable-dev-warnings', {
+      get() {
+        return true;
+      },
+    });
+  });
 
   beforeEach(() => {
     (useTimelineEvents as jest.Mock).mockReturnValue([
       false,
       {
-        events: mockTimelineData,
+        events: mockTimelineData.slice(0, 1),
         pageInfo: {
           activePage: 0,
-          totalPages: 10,
+          totalPages: 1,
         },
       },
     ]);
@@ -123,12 +100,11 @@ describe('PinnedTabContent', () => {
 
     (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
       (feature: keyof ExperimentalFeatures) => {
-        if (feature === 'unifiedComponentsInTimelineDisabled') {
-          return true;
-        }
         return allowedExperimentalValues[feature];
       }
     );
+
+    useKibanaMock.mockReturnValue(kibanaMockResult);
 
     props = {
       dispatch: {} as Dispatch,
@@ -145,36 +121,14 @@ describe('PinnedTabContent', () => {
   });
 
   describe('rendering', () => {
-    test('renders correctly against snapshot', () => {
-      const wrapper = shallow(
+    test('should render timeline table correctly', async () => {
+      render(
         <TestProviders>
           <PinnedTabContentComponent {...props} />
         </TestProviders>
       );
 
-      expect(wrapper.find('PinnedTabContentComponent')).toMatchSnapshot();
-    });
-
-    test('it renders the timeline table', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <PinnedTabContentComponent {...props} />
-        </TestProviders>
-      );
-
-      expect(
-        wrapper.find(`[data-test-subj="${TimelineTabs.pinned}-events-table"]`).exists()
-      ).toEqual(true);
-    });
-
-    it('it shows the timeline footer', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <PinnedTabContentComponent {...props} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="timeline-footer"]').exists()).toEqual(true);
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
     });
   });
 });

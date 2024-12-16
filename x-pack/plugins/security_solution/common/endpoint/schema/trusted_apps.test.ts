@@ -14,8 +14,8 @@ import {
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
 import type {
   TrustedAppConditionEntry,
-  NewTrustedApp,
   PutTrustedAppsRequestParams,
+  NewTrustedApp,
 } from '../types';
 
 describe('When invoking Trusted Apps Schema', () => {
@@ -105,14 +105,15 @@ describe('When invoking Trusted Apps Schema', () => {
       value: 'c:/programs files/Anti-Virus',
       ...(data || {}),
     });
-    const createNewTrustedApp = <T>(data?: T): NewTrustedApp => ({
-      name: 'Some Anti-Virus App',
-      description: 'this one is ok',
-      os: OperatingSystem.WINDOWS,
-      effectScope: { type: 'global' },
-      entries: [createConditionEntry()],
-      ...(data || {}),
-    });
+    const createNewTrustedApp = <T>(data?: T): NewTrustedApp =>
+      ({
+        name: 'Some Anti-Virus App',
+        description: 'this one is ok',
+        os: OperatingSystem.WINDOWS,
+        effectScope: { type: 'global' },
+        entries: [createConditionEntry()],
+        ...(data || {}),
+      } as NewTrustedApp);
     const body = PostTrustedAppCreateRequestSchema.body;
 
     it('should not error on a valid message', () => {
@@ -389,14 +390,15 @@ describe('When invoking Trusted Apps Schema', () => {
       value: 'c:/programs files/Anti-Virus',
       ...(data || {}),
     });
-    const createNewTrustedApp = <T>(data?: T): NewTrustedApp => ({
-      name: 'Some Anti-Virus App',
-      description: 'this one is ok',
-      os: OperatingSystem.WINDOWS,
-      effectScope: { type: 'global' },
-      entries: [createConditionEntry()],
-      ...(data || {}),
-    });
+    const createNewTrustedApp = <T>(data?: T): NewTrustedApp =>
+      ({
+        name: 'Some Anti-Virus App',
+        description: 'this one is ok',
+        os: OperatingSystem.WINDOWS,
+        effectScope: { type: 'global' },
+        entries: [createConditionEntry()],
+        ...(data || {}),
+      } as NewTrustedApp);
 
     const updateParams = <T>(data?: T): PutTrustedAppsRequestParams => ({
       id: 'validId',

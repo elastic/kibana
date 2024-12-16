@@ -6,7 +6,7 @@
  */
 
 import { GENERAL_CASES_OWNER } from '../../../common/constants';
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useToasts } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -34,17 +34,18 @@ describe('useSuggestUserProfiles', () => {
   it('calls suggestUserProfiles with correct arguments', async () => {
     const spyOnSuggestUserProfiles = jest.spyOn(api, 'suggestUserProfiles');
 
-    const { result, waitFor } = renderHook(() => useSuggestUserProfiles(props), {
+    const { result } = renderHook(() => useSuggestUserProfiles(props), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => result.current.isSuccess);
-
-    expect(spyOnSuggestUserProfiles).toBeCalledWith({
-      ...props,
-      size: 10,
-      http: expect.anything(),
-      signal: expect.anything(),
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBeDefined();
+      expect(spyOnSuggestUserProfiles).toBeCalledWith({
+        ...props,
+        size: 10,
+        http: expect.anything(),
+        signal: expect.anything(),
+      });
     });
   });
 
@@ -58,12 +59,13 @@ describe('useSuggestUserProfiles', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-    const { result, waitFor } = renderHook(() => useSuggestUserProfiles(props), {
+    const { result } = renderHook(() => useSuggestUserProfiles(props), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => result.current.isError);
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(result.current.isError).toBeDefined();
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });

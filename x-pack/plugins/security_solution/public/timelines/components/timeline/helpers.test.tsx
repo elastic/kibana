@@ -17,6 +17,7 @@ import {
   buildIsOneOfQueryMatch,
   buildIsQueryMatch,
   handleIsOperator,
+  isFullScreen,
   isPrimitiveArray,
   showGlobalFilters,
 } from './helpers';
@@ -389,6 +390,45 @@ describe('isStringOrNumberArray', () => {
           value: [],
         })
       ).toBe("kibana.alert.worflow_status : ''");
+    });
+  });
+});
+
+describe('isFullScreen', () => {
+  describe('globalFullScreen is false', () => {
+    it('should return false if isActiveTimelines is false', () => {
+      const result = isFullScreen({
+        globalFullScreen: false,
+        isActiveTimelines: false,
+        timelineFullScreen: true,
+      });
+      expect(result).toBe(false);
+    });
+    it('should return false if timelineFullScreen is false', () => {
+      const result = isFullScreen({
+        globalFullScreen: false,
+        isActiveTimelines: true,
+        timelineFullScreen: false,
+      });
+      expect(result).toBe(false);
+    });
+  });
+  describe('globalFullScreen is true', () => {
+    it('should return true if isActiveTimelines is true and timelineFullScreen is true', () => {
+      const result = isFullScreen({
+        globalFullScreen: true,
+        isActiveTimelines: true,
+        timelineFullScreen: true,
+      });
+      expect(result).toBe(true);
+    });
+    it('should return true if isActiveTimelines is false', () => {
+      const result = isFullScreen({
+        globalFullScreen: true,
+        isActiveTimelines: false,
+        timelineFullScreen: false,
+      });
+      expect(result).toBe(true);
     });
   });
 });

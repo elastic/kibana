@@ -18,8 +18,10 @@ export const readTagsRoute = (router: SecuritySolutionPluginRouter) => {
     .get({
       access: 'public',
       path: DETECTION_ENGINE_TAGS_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -30,7 +32,7 @@ export const readTagsRoute = (router: SecuritySolutionPluginRouter) => {
       async (context, request, response): Promise<IKibanaResponse<ReadTagsResponse>> => {
         const siemResponse = buildSiemResponse(response);
         const ctx = await context.resolve(['alerting']);
-        const rulesClient = ctx.alerting.getRulesClient();
+        const rulesClient = await ctx.alerting.getRulesClient();
 
         try {
           const tags = await readTags({

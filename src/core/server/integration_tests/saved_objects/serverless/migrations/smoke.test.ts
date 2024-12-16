@@ -13,28 +13,35 @@ import {
   TestServerlessKibanaUtils,
   createTestServerlessInstances,
 } from '@kbn/core-test-helpers-kbn-server';
+import { getFips } from 'crypto';
 
-describe('Basic smoke test', () => {
+describe('Basic smoke test', function () {
   let serverlessES: TestServerlessESUtils;
   let serverlessKibana: TestServerlessKibanaUtils;
   let root: TestServerlessKibanaUtils['root'];
 
-  beforeEach(async () => {
-    const { startES, startKibana } = createTestServerlessInstances({
-      adjustTimeout: jest.setTimeout,
+  if (getFips() === 0) {
+    beforeEach(async () => {
+      const { startES, startKibana } = createTestServerlessInstances({
+        adjustTimeout: jest.setTimeout,
+      });
+      serverlessES = await startES();
+      serverlessKibana = await startKibana();
+      root = serverlessKibana.root;
     });
-    serverlessES = await startES();
-    serverlessKibana = await startKibana();
-    root = serverlessKibana.root;
-  });
 
-  afterEach(async () => {
-    await serverlessES?.stop();
-    await serverlessKibana?.stop();
-  });
+    afterEach(async () => {
+      await serverlessES?.stop();
+      await serverlessKibana?.stop();
+    });
 
-  test('it can start Kibana running against serverless ES', async () => {
-    const { body } = await request.get(root, '/api/status').expect(200);
-    expect(body).toMatchObject({ status: { overall: { level: 'available' } } });
-  });
+    test('it can start Kibana running against serverless ES', async () => {
+      const { body } = await request.get(root, '/api/status').expect(200);
+      expect(body).toMatchObject({ status: { overall: { level: 'available' } } });
+    });
+  } else {
+    test('FIPS is enabled, serverless doesnt like the config overrides', () => {
+      expect(getFips()).toBe(1);
+    });
+  }
 });

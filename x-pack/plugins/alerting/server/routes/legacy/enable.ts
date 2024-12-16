@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { DocLinksServiceSetup } from '@kbn/core/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
@@ -14,6 +15,7 @@ import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import { handleDisabledApiKeysError } from '../lib/error_handler';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -22,6 +24,7 @@ const paramSchema = schema.object({
 export const enableAlertRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
+  docLinks: DocLinksServiceSetup,
   usageCounter?: UsageCounter,
   isServerless?: boolean
 ) => {
@@ -31,11 +34,20 @@ export const enableAlertRoute = (
       validate: {
         params: paramSchema,
       },
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: isServerless ? 'internal' : 'public',
         summary: 'Enable an alert',
         tags: ['oas-tag:alerting'],
-        deprecated: true,
+        deprecated: {
+          documentationUrl: docLinks.links.alerting.legacyRuleApiDeprecations,
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiMethod: 'POST',
+            newApiPath: '/api/alerting/rule/{id}/_enable',
+          },
+        },
       },
     },
     handleDisabledApiKeysError(
@@ -45,7 +57,8 @@ export const enableAlertRoute = (
           return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
         }
         trackLegacyRouteUsage('enable', usageCounter);
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const { id } = req.params;
         try {
           await rulesClient.enableRule({ id });

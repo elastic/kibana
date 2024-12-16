@@ -30,6 +30,7 @@ describe('DetectionRulesClient.deleteRule', () => {
       rulesClient,
       mlAuthz,
       savedObjectsClient,
+      isRuleCustomizationEnabled: true,
     });
   });
 

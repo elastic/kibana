@@ -2726,7 +2726,7 @@
                 "section": "def-public.DataPublicPluginStart",
                 "text": "DataPublicPluginStart"
               },
-              ">, { bfetch, expressions, uiActions, usageCollection, inspector, fieldFormats, management, }: ",
+              ">, { expressions, uiActions, usageCollection, inspector, fieldFormats, management, }: ",
               "DataSetupDependencies",
               ") => ",
               {
@@ -2778,7 +2778,7 @@
                 "id": "def-public.DataPublicPlugin.setup.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      bfetch,\n      expressions,\n      uiActions,\n      usageCollection,\n      inspector,\n      fieldFormats,\n      management,\n    }",
+                "label": "{\n      expressions,\n      uiActions,\n      usageCollection,\n      inspector,\n      fieldFormats,\n      management,\n    }",
                 "description": [],
                 "signature": [
                   "DataSetupDependencies"
@@ -8074,6 +8074,10 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+              },
+              {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
@@ -8084,10 +8088,6 @@
               {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -8119,7 +8119,7 @@
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/read_pack_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -10195,7 +10195,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues, columnsSorting }: CSVOptions) => string"
+              ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }: CSVOptions) => string"
             ],
             "path": "src/plugins/data/public/index.ts",
             "deprecated": false,
@@ -11790,31 +11790,31 @@
           "references": [
             {
               "plugin": "dataVisualizer",
-              "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_row/document_stats.tsx"
+              "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/stats_table/components/field_data_row/document_stats.tsx"
             },
             {
               "plugin": "dataVisualizer",
-              "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_row/distinct_values.tsx"
+              "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/stats_table/components/field_data_row/distinct_values.tsx"
             },
             {
               "plugin": "dataVisualizer",
-              "path": "x-pack/plugins/data_visualizer/public/application/common/components/top_values/top_values.tsx"
+              "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/top_values/top_values.tsx"
             },
             {
               "plugin": "dataVisualizer",
-              "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_expanded_row/choropleth_map.tsx"
+              "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/stats_table/components/field_data_expanded_row/choropleth_map.tsx"
             },
             {
               "plugin": "dataVisualizer",
-              "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/esql/use_data_visualizer_esql_data.tsx"
+              "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/hooks/esql/use_data_visualizer_esql_data.tsx"
             },
             {
               "plugin": "dataVisualizer",
-              "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/esql/use_data_visualizer_esql_data.tsx"
+              "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/hooks/esql/use_data_visualizer_esql_data.tsx"
             },
             {
               "plugin": "dataVisualizer",
-              "path": "x-pack/plugins/data_visualizer/public/application/data_drift/charts/default_value_formatter.ts"
+              "path": "x-pack/platform/plugins/private/data_visualizer/public/application/data_drift/charts/default_value_formatter.ts"
             },
             {
               "plugin": "stackAlerts",
@@ -12661,12 +12661,12 @@
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
               },
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "graph",
@@ -12733,6 +12733,10 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_views.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/tabs/utils.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -17526,7 +17530,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues, columnsSorting }: CSVOptions) => string"
+              ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }: CSVOptions) => string"
             ],
             "path": "src/plugins/data/server/index.ts",
             "deprecated": false,
@@ -19192,12 +19196,12 @@
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
               },
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "graph",
@@ -19264,6 +19268,10 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_views.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/tabs/utils.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -22972,7 +22980,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues, columnsSorting }: CSVOptions) => string"
+          ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }: CSVOptions) => string"
         ],
         "path": "src/plugins/data/common/exports/export_csv.tsx",
         "deprecated": false,
@@ -23004,7 +23012,7 @@
             "id": "def-common.datatableToCSV.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues, columnsSorting }",
+            "label": "{ csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }",
             "description": [],
             "signature": [
               "CSVOptions"
@@ -24603,6 +24611,10 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+              },
+              {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
@@ -24613,10 +24625,6 @@
               {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -24648,7 +24656,7 @@
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/read_pack_route.ts"
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
               },
               {
                 "plugin": "securitySolution",

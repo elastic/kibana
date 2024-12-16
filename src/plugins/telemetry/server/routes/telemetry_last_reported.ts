@@ -40,8 +40,32 @@ export function registerTelemetryLastReported(
   router.versioned
     .get({ access: 'internal', path: LastReportedRoute })
     // Just because it used to be /v2/, we are creating identical v1 and v2.
-    .addVersion({ version: '1', validate: v2GetValidations }, v2GetHandler)
-    .addVersion({ version: '2', validate: v2GetValidations }, v2GetHandler);
+    .addVersion(
+      {
+        version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: v2GetValidations,
+      },
+      v2GetHandler
+    )
+    .addVersion(
+      {
+        version: '2',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: v2GetValidations,
+      },
+      v2GetHandler
+    );
 
   // PUT to update
   const v2PutHandler: RequestHandler = async (context, req, res) => {
@@ -55,6 +79,30 @@ export function registerTelemetryLastReported(
   router.versioned
     .put({ access: 'internal', path: LastReportedRoute })
     // Just because it used to be /v2/, we are creating identical v1 and v2.
-    .addVersion({ version: '1', validate: false }, v2PutHandler)
-    .addVersion({ version: '2', validate: false }, v2PutHandler);
+    .addVersion(
+      {
+        version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
+      v2PutHandler
+    )
+    .addVersion(
+      {
+        version: '2',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
+      v2PutHandler
+    );
 }

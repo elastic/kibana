@@ -14,7 +14,17 @@ import type { SessionInfo } from '../../../common/types';
  */
 export function defineSessionInfoRoutes({ router, getSession }: RouteDefinitionParams) {
   router.get(
-    { path: '/internal/security/session', validate: false },
+    {
+      path: '/internal/security/session',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because a valid session is required, and it does not return sensative session information',
+        },
+      },
+      validate: false,
+    },
     async (_context, request, response) => {
       const { value: sessionValue } = await getSession().get(request);
       if (sessionValue) {

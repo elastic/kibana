@@ -19,6 +19,14 @@ describe('UrlFormat', () => {
     );
   });
 
+  test('outputs a mailto: link when URL starts with mailto:', () => {
+    const url = new UrlFormat({});
+
+    expect(url.convert('mailto:test@example.com', HTML_CONTEXT_TYPE)).toBe(
+      '<a href="mailto:test@example.com" target="_blank" rel="noopener noreferrer">mailto:test@example.com</a>'
+    );
+  });
+
   test('outputs an <audio> if type === "audio"', () => {
     const url = new UrlFormat({ type: 'audio' });
 
@@ -131,9 +139,17 @@ describe('UrlFormat', () => {
       expect(url.convert('url', TEXT_CONTEXT_TYPE)).toBe('external url');
     });
 
-    test('can use the raw value', () => {
+    test('can use the raw value with {{value}}', () => {
       const url = new UrlFormat({
         labelTemplate: 'external {{value}}',
+      });
+
+      expect(url.convert('url?', TEXT_CONTEXT_TYPE)).toBe('external url?');
+    });
+
+    test('can use the raw value with {{rawValue}}', () => {
+      const url = new UrlFormat({
+        labelTemplate: 'external {{rawValue}}',
       });
 
       expect(url.convert('url?', TEXT_CONTEXT_TYPE)).toBe('external url?');

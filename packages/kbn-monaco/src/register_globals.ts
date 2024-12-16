@@ -11,7 +11,7 @@ import { XJsonLang } from './xjson';
 import { PainlessLang } from './painless';
 import { SQLLang } from './sql';
 import { monaco } from './monaco_imports';
-import { ESQL_THEME_ID, ESQLLang, buildESQlTheme } from './esql';
+import { ESQL_DARK_THEME_ID, ESQL_LIGHT_THEME_ID, ESQLLang, buildESQLTheme } from './esql';
 import { YAML_LANG_ID } from './yaml';
 import { registerLanguage, registerTheme } from './helpers';
 import { ConsoleLang, ConsoleOutputLang, CONSOLE_THEME_ID, buildConsoleTheme } from './console';
@@ -50,7 +50,8 @@ registerLanguage(ConsoleOutputLang);
 /**
  * Register custom themes
  */
-registerTheme(ESQL_THEME_ID, buildESQlTheme());
+registerTheme(ESQL_LIGHT_THEME_ID, buildESQLTheme({ darkMode: false }));
+registerTheme(ESQL_DARK_THEME_ID, buildESQLTheme({ darkMode: true }));
 registerTheme(CONSOLE_THEME_ID, buildConsoleTheme());
 registerTheme(CODE_EDITOR_LIGHT_THEME_ID, buildLightTheme());
 registerTheme(CODE_EDITOR_DARK_THEME_ID, buildDarkTheme());

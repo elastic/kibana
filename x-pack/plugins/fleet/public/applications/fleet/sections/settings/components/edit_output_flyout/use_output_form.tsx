@@ -162,25 +162,20 @@ function extractKafkaOutputSecrets(
 }
 
 export function extractDefaultStaticKafkaTopic(o: KafkaOutput): string {
-  if (
-    !o?.topics ||
-    o.topics?.length === 0 ||
-    (o.topics && o?.topics.length > 0 && o.topics[0].topic?.includes('%{['))
-  ) {
+  if (o?.topic?.includes('%{[')) {
     return '';
   }
 
-  const lastTopic = o.topics[o.topics.length - 1].topic;
-  return lastTopic || '';
+  return o?.topic || '';
 }
 
 export function extractDefaultDynamicKafkaTopics(
   o: KafkaOutput
 ): Array<EuiComboBoxOptionOption<string>> {
-  if (!o?.topics || o.topics?.length === 0 || (o.topics && !o.topics[0]?.topic?.includes('%{['))) {
+  if (!o?.topic || (o?.topic && !o.topic?.includes('%{['))) {
     return [];
   }
-  const matched = o.topics[0].topic.match(/(%\{\[)(\S*)(\]\})/);
+  const matched = o.topic.match(/(%\{\[)(\S*)(\]\})/);
   const parsed = matched?.length ? matched[2] : '';
 
   return [
@@ -470,23 +465,23 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
   );
 
   const kafkaTopicsInput = useRadioInput(
-    kafkaOutput?.topics && kafkaOutput?.topics[0].topic?.includes('%{[')
+    kafkaOutput?.topic && kafkaOutput?.topic?.includes('%{[')
       ? kafkaTopicsType.Dynamic
       : kafkaTopicsType.Static,
-    isDisabled('topics')
+    isDisabled('topic')
   );
 
   const kafkaStaticTopicInput = useInput(
     extractDefaultStaticKafkaTopic(kafkaOutput),
     kafkaTopicsInput.value === kafkaTopicsType.Static ? validateKafkaStaticTopic : undefined,
-    isDisabled('topics')
+    isDisabled('topic')
   );
 
   const kafkaDynamicTopicInput = useComboBoxWithCustomInput(
     'kafkaDynamicTopicComboBox',
     extractDefaultDynamicKafkaTopics(kafkaOutput),
     kafkaTopicsInput.value === kafkaTopicsType.Dynamic ? validateDynamicKafkaTopics : undefined,
-    isDisabled('topics')
+    isDisabled('topic')
   );
 
   const kafkaHeadersInput = useKeyValueInput(
@@ -874,19 +869,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                 : {}),
               ...(kafkaTopicsInput.value === kafkaTopicsType.Static && kafkaStaticTopicInput.value
                 ? {
-                    topics: [
-                      {
-                        topic: kafkaStaticTopicInput.value,
-                      },
-                    ],
+                    topic: kafkaStaticTopicInput.value,
                   }
                 : kafkaTopicsInput.value === kafkaTopicsType.Dynamic && kafkaDynamicTopicInput.value
                 ? {
-                    topics: [
-                      {
-                        topic: `%{[${kafkaDynamicTopicInput.value}]}`,
-                      },
-                    ],
+                    topic: `%{[${kafkaDynamicTopicInput.value}]}`,
                   }
                 : {}),
               headers: kafkaHeadersInput.value,

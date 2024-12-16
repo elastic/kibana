@@ -16,7 +16,6 @@ export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
 export const MGET_DEFAULT_POLL_INTERVAL = 500;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
-export const DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY = MAX_WORKERS_LIMIT;
 
 // Monitoring Constants
 // ===================
@@ -36,6 +35,7 @@ export const CLAIM_STRATEGY_MGET = 'mget';
 export const DEFAULT_DISCOVERY_INTERVAL_MS = 1000 * 10; // 10 seconds
 const MIN_DISCOVERY_INTERVAL_MS = 1000; // 1 second
 const MAX_DISCOVERY_INTERVAL_MS = 1000 * 60 * 5; // 5 minutes
+export const DISCOVERY_INTERVAL_AFTER_BLOCK_EXCEPTION_MS = 6 * 1000 * 10; // 60 seconds
 
 export const DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION = '30s';
 const FIVE_MIN_IN_MS = 5 * 60 * 1000;
@@ -100,16 +100,8 @@ export const configSchema = schema.object(
         max: MAX_DISCOVERY_INTERVAL_MS,
       }),
     }),
-    ephemeral_tasks: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
-      /* How many requests can Task Manager buffer before it rejects new requests. */
-      request_capacity: schema.number({
-        // a nice round contrived number, feel free to change as we learn how it behaves
-        defaultValue: 10,
-        min: 1,
-        max: DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY,
-      }),
-    }),
+    /* Allows for old kibana config to start kibana without crashing since ephemeral tasks are deprecated*/
+    ephemeral_tasks: schema.maybe(schema.any()),
     event_loop_delay: eventLoopDelaySchema,
     kibanas_per_partition: schema.number({
       defaultValue: DEFAULT_KIBANAS_PER_PARTITION,
@@ -202,7 +194,7 @@ export const configSchema = schema.object(
       max: 100,
       min: 1,
     }),
-    claim_strategy: schema.maybe(schema.string()),
+    claim_strategy: schema.string({ defaultValue: CLAIM_STRATEGY_MGET }),
     request_timeouts: requestTimeoutsConfig,
     auto_calculate_default_ech_capacity: schema.boolean({ defaultValue: false }),
   },

@@ -17,6 +17,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import moment from 'moment';
+import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { LENS_APP_LOCATOR } from '../../common/locator/locator';
 import { LENS_APP_NAME } from '../../common/constants';
 import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
@@ -37,7 +39,6 @@ import {
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { changeIndexPattern } from '../state_management/lens_slice';
-import { LensByReferenceInput } from '../embeddable';
 import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getShareURL } from './share_action';
 import { getDatasourceLayers } from '../state_management/utils';
 
@@ -291,7 +292,6 @@ export const LensTopNavMenu = ({
     navigation,
     uiSettings,
     application,
-    attributeService,
     share,
     dataViewFieldEditor,
     dataViewEditor,
@@ -529,11 +529,9 @@ export const LensTopNavMenu = ({
 
   const topNavConfig = useMemo(() => {
     const showReplaceInDashboard =
-      initialContext?.originatingApp === 'dashboards' &&
-      !(initialInput as LensByReferenceInput)?.savedObjectId;
+      initialContext?.originatingApp === 'dashboards' && !initialInput?.savedObjectId;
     const showReplaceInCanvas =
-      initialContext?.originatingApp === 'canvas' &&
-      !(initialInput as LensByReferenceInput)?.savedObjectId;
+      initialContext?.originatingApp === 'canvas' && !initialInput?.savedObjectId;
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
 
@@ -576,6 +574,8 @@ export const LensTopNavMenu = ({
               return;
             }
 
+            const activeVisualization = visualizationMap[visualization.activeId];
+
             const {
               shareableUrl,
               savedObjectURL,
@@ -598,12 +598,22 @@ export const LensTopNavMenu = ({
               isCurrentStateDirty
             );
 
-            const sharingData = {
-              activeData,
-              columnsSorting: visualizationMap[visualization.activeId].getSortedColumns?.(
+            const datasourceLayers = getDatasourceLayers(
+              datasourceStates,
+              datasourceMap,
+              dataViews.indexPatterns
+            );
+
+            const exportDatatables =
+              activeVisualization.getExportDatatables?.(
                 visualization.state,
-                getDatasourceLayers(datasourceStates, datasourceMap, dataViews.indexPatterns)
-              ),
+                datasourceLayers,
+                activeData
+              ) ?? [];
+            const datatables =
+              exportDatatables.length > 0 ? exportDatatables : Object.values(activeData ?? {});
+            const sharingData = {
+              datatables,
               csvEnabled,
               reportingDisabled: !csvEnabled,
               title: title || defaultLensTitle,
@@ -613,9 +623,8 @@ export const LensTopNavMenu = ({
               },
               layout: {
                 dimensions:
-                  visualizationMap[visualization.activeId].getReportingLayout?.(
-                    visualization.state
-                  ) ?? DEFAULT_LENS_LAYOUT_DIMENSIONS,
+                  activeVisualization.getReportingLayout?.(visualization.state) ??
+                  DEFAULT_LENS_LAYOUT_DIMENSIONS,
               },
             };
 
@@ -634,6 +643,26 @@ export const LensTopNavMenu = ({
                 title: i18n.translate('xpack.lens.app.shareModal.title', {
                   defaultMessage: 'Share this Lens visualization',
                 }),
+                config: {
+                  link: {
+                    draftModeCallOut: (
+                      <EuiCallOut
+                        color="warning"
+                        title={
+                          <FormattedMessage
+                            id="xpack.lens.app.shareModal.draftModeCallout.title"
+                            defaultMessage="Unsaved changes"
+                          />
+                        }
+                      >
+                        <FormattedMessage
+                          id="xpack.lens.app.shareModal.draftModeCallout.link.warning"
+                          defaultMessage="The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first."
+                        />
+                      </EuiCallOut>
+                    ),
+                  },
+                },
               },
               sharingData,
               // only want to know about changes when savedObjectURL.href
@@ -679,8 +708,7 @@ export const LensTopNavMenu = ({
                   panelTimeRange: contextFromEmbeddable ? initialContext.panelTimeRange : undefined,
                 },
                 {
-                  saveToLibrary:
-                    (initialInput && attributeService.inputIsRefType(initialInput)) ?? false,
+                  saveToLibrary: Boolean(initialInput?.savedObjectId),
                 }
               );
             }
@@ -790,7 +818,6 @@ export const LensTopNavMenu = ({
     defaultLensTitle,
     onAppLeave,
     runSave,
-    attributeService,
     setIsSaveModalVisible,
     goBackToOriginatingApp,
     redirectToOrigin,
@@ -1071,6 +1098,7 @@ export const LensTopNavMenu = ({
   return (
     <AggregateQueryTopNavMenu
       setMenuMountPoint={setHeaderActionMenu}
+      popoverBreakpoints={['xs', 's', 'm']}
       config={topNavConfig}
       saveQueryMenuVisibility={
         application.capabilities.visualize.saveQuery

@@ -79,7 +79,7 @@ export const markdownRenderers = (
     },
     h5: ({ children }) => <h6>{children}</h6>,
     h6: ({ children }) => <h6>{children}</h6>,
-    link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
+    a: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
       <EuiLink
         href={href}
         target="_blank"

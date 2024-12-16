@@ -10,7 +10,7 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isEqual } from 'lodash';
-import { BehaviorSubject, combineLatest, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
 import { DataSourceType, isDataSourceType } from '../../common/data_sources';
 import { addLog } from '../utils/add_log';
 import type {
@@ -25,7 +25,8 @@ import type {
   DocumentContext,
 } from './profiles';
 import type { ContextWithProfileId } from './profile_service';
-import { DiscoverEBTManager } from '../services/discover_ebt_manager';
+import type { DiscoverEBTManager } from '../services/discover_ebt_manager';
+import type { AppliedProfile } from './composable_profile';
 
 interface SerializedRootProfileParams {
   solutionNavId: RootProfileProviderParams['solutionNavId'];
@@ -50,11 +51,18 @@ export interface GetProfilesOptions {
   record?: DataTableRecord;
 }
 
+export enum ContextualProfileLevel {
+  rootLevel = 'rootLevel',
+  dataSourceLevel = 'dataSourceLevel',
+  documentLevel = 'documentLevel',
+}
+
 export class ProfilesManager {
   private readonly rootContext$: BehaviorSubject<ContextWithProfileId<RootContext>>;
   private readonly dataSourceContext$: BehaviorSubject<ContextWithProfileId<DataSourceContext>>;
-  private readonly ebtManager: DiscoverEBTManager;
 
+  private rootProfile: AppliedProfile;
+  private dataSourceProfile: AppliedProfile;
   private prevRootProfileParams?: SerializedRootProfileParams;
   private prevDataSourceProfileParams?: SerializedDataSourceProfileParams;
   private rootProfileAbortController?: AbortController;
@@ -64,11 +72,22 @@ export class ProfilesManager {
     private readonly rootProfileService: RootProfileService,
     private readonly dataSourceProfileService: DataSourceProfileService,
     private readonly documentProfileService: DocumentProfileService,
-    ebtManager: DiscoverEBTManager
+    private readonly ebtManager: DiscoverEBTManager
   ) {
     this.rootContext$ = new BehaviorSubject(rootProfileService.defaultContext);
     this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
-    this.ebtManager = ebtManager;
+    this.rootProfile = rootProfileService.getProfile({ context: this.rootContext$.getValue() });
+    this.dataSourceProfile = dataSourceProfileService.getProfile({
+      context: this.dataSourceContext$.getValue(),
+    });
+
+    this.rootContext$.pipe(skip(1)).subscribe((context) => {
+      this.rootProfile = rootProfileService.getProfile({ context });
+    });
+
+    this.dataSourceContext$.pipe(skip(1)).subscribe((context) => {
+      this.dataSourceProfile = dataSourceProfileService.getProfile({ context });
+    });
   }
 
   /**
@@ -79,7 +98,7 @@ export class ProfilesManager {
     const serializedParams = serializeRootProfileParams(params);
 
     if (isEqual(this.prevRootProfileParams, serializedParams)) {
-      return;
+      return { getRenderAppWrapper: this.rootProfile.getRenderAppWrapper };
     }
 
     const abortController = new AbortController();
@@ -91,15 +110,17 @@ export class ProfilesManager {
     try {
       context = await this.rootProfileService.resolve(params);
     } catch (e) {
-      logResolutionError(ContextType.Root, serializedParams, e);
+      logResolutionError(ContextualProfileLevel.rootLevel, serializedParams, e);
     }
 
     if (abortController.signal.aborted) {
-      return;
+      return { getRenderAppWrapper: this.rootProfile.getRenderAppWrapper };
     }
 
     this.rootContext$.next(context);
     this.prevRootProfileParams = serializedParams;
+
+    return { getRenderAppWrapper: this.rootProfile.getRenderAppWrapper };
   }
 
   /**
@@ -127,7 +148,7 @@ export class ProfilesManager {
         rootContext: this.rootContext$.getValue(),
       });
     } catch (e) {
-      logResolutionError(ContextType.DataSource, serializedParams, e);
+      logResolutionError(ContextualProfileLevel.dataSourceLevel, serializedParams, e);
     }
 
     if (abortController.signal.aborted) {
@@ -164,10 +185,19 @@ export class ProfilesManager {
               dataSourceContext: this.dataSourceContext$.getValue(),
             });
           } catch (e) {
-            logResolutionError(ContextType.Document, { recordId: params.record.id }, e);
+            logResolutionError(
+              ContextualProfileLevel.documentLevel,
+              { recordId: params.record.id },
+              e
+            );
             context = this.documentProfileService.defaultContext;
           }
         }
+
+        this.ebtManager.trackContextualProfileResolvedEvent({
+          contextLevel: ContextualProfileLevel.documentLevel,
+          profileId: context.profileId,
+        });
 
         return context;
       },
@@ -181,11 +211,13 @@ export class ProfilesManager {
    */
   public getProfiles({ record }: GetProfilesOptions = {}) {
     return [
-      this.rootProfileService.getProfile(this.rootContext$.getValue()),
-      this.dataSourceProfileService.getProfile(this.dataSourceContext$.getValue()),
-      this.documentProfileService.getProfile(
-        recordHasContext(record) ? record.context : this.documentProfileService.defaultContext
-      ),
+      this.rootProfile,
+      this.dataSourceProfile,
+      this.documentProfileService.getProfile({
+        context: recordHasContext(record)
+          ? record.context
+          : this.documentProfileService.defaultContext,
+      }),
     ];
   }
 
@@ -205,6 +237,15 @@ export class ProfilesManager {
    */
   private trackActiveProfiles(rootContextProfileId: string, dataSourceContextProfileId: string) {
     const dscProfiles = [rootContextProfileId, dataSourceContextProfileId];
+
+    this.ebtManager.trackContextualProfileResolvedEvent({
+      contextLevel: ContextualProfileLevel.rootLevel,
+      profileId: rootContextProfileId,
+    });
+    this.ebtManager.trackContextualProfileResolvedEvent({
+      contextLevel: ContextualProfileLevel.dataSourceLevel,
+      profileId: dataSourceContextProfileId,
+    });
 
     this.ebtManager.updateProfilesContextWith(dscProfiles);
   }
@@ -239,19 +280,13 @@ const recordHasContext = (
   return Boolean(record && 'context' in record);
 };
 
-enum ContextType {
-  Root = 'root',
-  DataSource = 'data source',
-  Document = 'document',
-}
-
 const logResolutionError = <TParams, TError>(
-  profileType: ContextType,
+  profileLevel: ContextualProfileLevel,
   params: TParams,
   error: TError
 ) => {
   addLog(
-    `[ProfilesManager] ${profileType} context resolution failed with params: ${JSON.stringify(
+    `[ProfilesManager] ${profileLevel} context resolution failed with params: ${JSON.stringify(
       params,
       null,
       2

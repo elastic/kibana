@@ -18,7 +18,7 @@ import type { LocationDescriptor, History } from 'history';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 import { WithServices } from './__jest__';
-import { getTagList } from './mocks';
+import { getTagList, localStorageMock } from './mocks';
 import { TableListViewTable, type TableListViewTableProps } from './table_list_view_table';
 import { getActions } from './table_list_view.test.helpers';
 import type { Services } from './services';
@@ -242,8 +242,8 @@ describe('TableListView', () => {
       const updatedAtValues: Moment[] = [];
 
       const updatedHits = hits.map(({ id, attributes, references }, i) => {
-        const updatedAt = new Date(new Date().setDate(new Date().getDate() - (7 + i)));
-        updatedAtValues.push(moment(updatedAt));
+        const updatedAt = moment().subtract(7 + i, 'days');
+        updatedAtValues.push(updatedAt);
 
         return {
           id,
@@ -334,6 +334,12 @@ describe('TableListView', () => {
     const initialPageSize = 20;
     const totalItems = 30;
     const updatedAt = new Date().toISOString();
+
+    beforeEach(() => {
+      Object.defineProperty(window, 'localStorage', {
+        value: localStorageMock(),
+      });
+    });
 
     const hits: UserContentCommonSchema[] = [...Array(totalItems)].map((_, i) => ({
       id: `item${i}`,
@@ -428,6 +434,54 @@ describe('TableListView', () => {
 
       expect(firstRowTitle).toBe('Item 20');
       expect(lastRowTitle).toBe('Item 29');
+    });
+
+    test('should persist the number of rows in the table', async () => {
+      let testBed: TestBed;
+
+      const tableId = 'myTable';
+
+      await act(async () => {
+        testBed = await setup({
+          initialPageSize,
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+          id: tableId,
+        });
+      });
+
+      {
+        const { component, table, find } = testBed!;
+        component.update();
+
+        const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+        expect(tableCellsValues.length).toBe(20); // 20 by default
+
+        let storageValue = localStorage.getItem(`tablePersist:${tableId}`);
+        expect(storageValue).toBe(null);
+
+        find('tablePaginationPopoverButton').simulate('click');
+        find('tablePagination-10-rows').simulate('click');
+
+        storageValue = localStorage.getItem(`tablePersist:${tableId}`);
+        expect(storageValue).not.toBe(null);
+        expect(JSON.parse(storageValue!).pageSize).toBe(10);
+      }
+
+      // Mount a second table and verify that is shows only 10 rows
+      {
+        await act(async () => {
+          testBed = await setup({
+            initialPageSize,
+            findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+            id: tableId,
+          });
+        });
+
+        const { component, table } = testBed!;
+        component.update();
+        const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+        expect(tableCellsValues.length).toBe(10); // 10 items this time
+      }
     });
   });
 
@@ -1078,25 +1132,29 @@ describe('TableListView', () => {
 
     const findItems = jest.fn();
 
-    const setupSearch = (...args: Parameters<ReturnType<typeof registerTestBed>>) => {
-      const testBed = registerTestBed<string, TableListViewTableProps>(
-        WithServices<TableListViewTableProps>(TableListViewTable),
-        {
-          defaultProps: {
-            ...requiredProps,
-            findItems,
-            urlStateEnabled: false,
-            entityName: 'Foo',
-            entityNamePlural: 'Foos',
-          },
-          memoryRouter: { wrapComponent: true },
-        }
-      )(...args);
+    const setupSearch = async (...args: Parameters<ReturnType<typeof registerTestBed>>) => {
+      let testBed: TestBed;
 
-      const { updateSearchText, getSearchBoxValue } = getActions(testBed);
+      await act(async () => {
+        testBed = registerTestBed<string, TableListViewTableProps>(
+          WithServices<TableListViewTableProps>(TableListViewTable),
+          {
+            defaultProps: {
+              ...requiredProps,
+              findItems,
+              urlStateEnabled: false,
+              entityName: 'Foo',
+              entityNamePlural: 'Foos',
+            },
+            memoryRouter: { wrapComponent: true },
+          }
+        )(...args);
+      });
+
+      const { updateSearchText, getSearchBoxValue } = getActions(testBed!);
 
       return {
-        testBed,
+        testBed: testBed!,
         updateSearchText,
         getSearchBoxValue,
         getLastCallArgsFromFindItems: () => findItems.mock.calls[findItems.mock.calls.length - 1],
@@ -1108,15 +1166,8 @@ describe('TableListView', () => {
     });
 
     test('should search the table items', async () => {
-      let testBed: TestBed;
-      let updateSearchText: (value: string) => Promise<void>;
-      let getLastCallArgsFromFindItems: () => Parameters<typeof findItems>;
-      let getSearchBoxValue: () => string;
-
-      await act(async () => {
-        ({ testBed, getLastCallArgsFromFindItems, getSearchBoxValue, updateSearchText } =
-          await setupSearch());
-      });
+      const { testBed, getLastCallArgsFromFindItems, getSearchBoxValue, updateSearchText } =
+        await setupSearch();
 
       const { component, table } = testBed!;
       component.update();
@@ -1173,12 +1224,7 @@ describe('TableListView', () => {
     });
 
     test('should search and render empty list if no result', async () => {
-      let testBed: TestBed;
-      let updateSearchText: (value: string) => Promise<void>;
-
-      await act(async () => {
-        ({ testBed, updateSearchText } = await setupSearch());
-      });
+      const { testBed, updateSearchText } = await setupSearch();
 
       const { component, table, find } = testBed!;
       component.update();
@@ -1216,6 +1262,25 @@ describe('TableListView', () => {
           ],
         ]
       `);
+    });
+
+    test('should show error hint when inserting invalid chars', async () => {
+      const { testBed, getLastCallArgsFromFindItems, getSearchBoxValue, updateSearchText } =
+        await setupSearch();
+
+      const { component, exists } = testBed;
+      component.update();
+
+      expect(exists('forbiddenCharErrorMessage')).toBe(false);
+
+      const expected = '[foo';
+      await updateSearchText!(expected);
+      expect(getSearchBoxValue!()).toBe(expected);
+
+      expect(exists('forbiddenCharErrorMessage')).toBe(true); // hint is shown
+
+      const [searchTerm] = getLastCallArgsFromFindItems!();
+      expect(searchTerm).toBe(''); // no search has been made
     });
   });
 

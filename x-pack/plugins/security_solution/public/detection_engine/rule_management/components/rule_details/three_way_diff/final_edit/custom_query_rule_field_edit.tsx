@@ -6,14 +6,11 @@
  */
 
 import React from 'react';
-import { FieldFormWrapper } from './field_form_wrapper';
-import {
-  KqlQueryEdit,
-  kqlQuerySchema,
-  kqlQuerySerializer,
-  kqlQueryDeserializer,
-} from './fields/kql_query';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 import type { UpgradeableCustomQueryFields } from '../../../../model/prebuilt_rule_upgrade/fields';
+import { KqlQueryEditForm } from './fields/kql_query';
+import { DataSourceEditForm } from './fields/data_source';
+import { AlertSuppressionEditForm } from './fields/alert_suppression';
 
 interface CustomQueryRuleFieldEditProps {
   fieldName: UpgradeableCustomQueryFields;
@@ -22,15 +19,12 @@ interface CustomQueryRuleFieldEditProps {
 export function CustomQueryRuleFieldEdit({ fieldName }: CustomQueryRuleFieldEditProps) {
   switch (fieldName) {
     case 'kql_query':
-      return (
-        <FieldFormWrapper
-          component={KqlQueryEdit}
-          fieldFormSchema={kqlQuerySchema}
-          serializer={kqlQuerySerializer}
-          deserializer={kqlQueryDeserializer}
-        />
-      );
+      return <KqlQueryEditForm />;
+    case 'data_source':
+      return <DataSourceEditForm />;
+    case 'alert_suppression':
+      return <AlertSuppressionEditForm />;
     default:
-      return null; // Will be replaced with `assertUnreachable(fieldName)` once all fields are implemented
+      return assertUnreachable(fieldName);
   }
 }

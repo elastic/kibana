@@ -50,6 +50,7 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <SavedObjectFinder
+          id="discoverOpenSearch"
           services={{
             savedObjectsTagging,
             contentClient,

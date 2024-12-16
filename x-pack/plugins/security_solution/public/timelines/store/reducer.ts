@@ -45,7 +45,6 @@ import {
   removeColumn,
   upsertColumn,
   updateColumns,
-  updateIsLoading,
   updateSort,
   clearSelected,
   setSelected,
@@ -408,16 +407,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       columns,
       timelineById: state.timelineById,
     }),
-  }))
-  .case(updateIsLoading, (state, { id, isLoading }) => ({
-    ...state,
-    timelineById: {
-      ...state.timelineById,
-      [id]: {
-        ...state.timelineById[id],
-        isLoading,
-      },
-    },
   }))
   .case(updateSort, (state, { id, sort }) => ({
     ...state,

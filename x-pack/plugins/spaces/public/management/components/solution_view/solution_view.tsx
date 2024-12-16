@@ -8,7 +8,6 @@
 import type { EuiSuperSelectOption, EuiThemeComputed } from '@elastic/eui';
 import {
   EuiBetaBadge,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -43,7 +42,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
           <EuiIcon type="logoElasticsearch" css={iconCss} />
           {i18n.translate(
             'xpack.spaces.management.manageSpacePage.solutionViewSelect.searchOptionLabel',
-            { defaultMessage: 'Search' }
+            { defaultMessage: 'Elasticsearch' }
           )}
         </>
       ),
@@ -79,7 +78,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
       value: 'classic',
       inputDisplay: (
         <>
-          <EuiIcon type="logoKibana" css={iconCss} />
+          <EuiIcon type="logoElasticStack" css={iconCss} />
           {i18n.translate(
             'xpack.spaces.management.manageSpacePage.solutionViewSelect.classicOptionLabel',
             { defaultMessage: 'Classic' }
@@ -111,7 +110,7 @@ export const SolutionView: FunctionComponent<Props> = ({
 
   return (
     <SectionPanel title={sectionTitle} dataTestSubj="navigationPanel">
-      <EuiFlexGroup alignItems="flexStart">
+      <EuiFlexGroup alignItems="baseline">
         <EuiFlexItem>
           <EuiTitle size="xs">
             <EuiFlexGroup gutterSize="s">
@@ -151,6 +150,16 @@ export const SolutionView: FunctionComponent<Props> = ({
               defaultMessage: 'Solution view',
             })}
             fullWidth
+            helpText={
+              <React.Fragment>
+                {showClassicDefaultViewCallout ? (
+                  <FormattedMessage
+                    id="xpack.spaces.management.manageSpacePage.solutionViewSelect.classicDefaultViewCallout"
+                    defaultMessage="Affects all users of the space"
+                  />
+                ) : null}
+              </React.Fragment>
+            }
             {...validator.validateSolutionView(space, isEditing)}
           >
             <EuiSuperSelect
@@ -163,6 +172,7 @@ export const SolutionView: FunctionComponent<Props> = ({
               onChange={(solution) => {
                 onChange({ ...space, solution });
               }}
+              fullWidth={true}
               placeholder={i18n.translate(
                 'xpack.spaces.management.navigation.solutionViewDefaultValue',
                 { defaultMessage: 'Select solution view' }
@@ -170,28 +180,6 @@ export const SolutionView: FunctionComponent<Props> = ({
               isInvalid={validator.validateSolutionView(space, isEditing).isInvalid}
             />
           </EuiFormRow>
-
-          {showClassicDefaultViewCallout && (
-            <>
-              <EuiText size="s" color="subdued">
-                <FormattedMessage
-                  id="xpack.spaces.management.manageSpacePage.solutionViewSelect.classicDefaultViewCallout"
-                  defaultMessage="Affects all users of the space"
-                />
-              </EuiText>
-
-              <EuiSpacer />
-              <EuiCallOut
-                color="primary"
-                size="s"
-                iconType="iInCircle"
-                title={i18n.translate(
-                  'xpack.spaces.management.manageSpacePage.solutionViewSelect.classicDefaultViewCallout',
-                  { defaultMessage: 'By default your current view is Classic' }
-                )}
-              />
-            </>
-          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </SectionPanel>

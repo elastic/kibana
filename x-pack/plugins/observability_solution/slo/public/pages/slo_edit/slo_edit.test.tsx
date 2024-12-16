@@ -25,7 +25,7 @@ import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { usePermissions } from '../../hooks/use_permissions';
 import { useCreateRule } from '../../hooks/use_create_burn_rate_rule';
 import { useUpdateSlo } from '../../hooks/use_update_slo';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '../../hooks/use_kibana';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from './constants';
@@ -49,7 +49,7 @@ jest.mock('../../hooks/use_create_burn_rate_rule');
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
-jest.mock('../../utils/kibana_react', () => ({
+jest.mock('../../hooks/use_kibana', () => ({
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
 }));
 
@@ -423,11 +423,11 @@ describe('SLO Edit Page', () => {
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
 
         history.push(
-          '/slos/123/edit?_a=(name:%27updated-name%27,indicator:(params:(environment:prod,service:cartService),type:sli.apm.transactionDuration),objective:(target:0.92))'
+          '/slos/edit/123?_a=(name:%27updated-name%27,indicator:(params:(environment:prod,service:cartService),type:sli.apm.transactionDuration),objective:(target:0.92))'
         );
         jest
           .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: '/slos/123/edit', search: '', state: '', hash: '' });
+          .mockReturnValue({ pathname: '/slos/edit/123', search: '', state: '', hash: '' });
 
         useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
 
@@ -463,8 +463,7 @@ describe('SLO Edit Page', () => {
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
         jest
           .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: '/slos/123/edit', search: '', state: '', hash: '' });
-
+          .mockReturnValue({ pathname: '/slos/edit/123', search: '', state: '', hash: '' });
         useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
 
         const { getByTestId } = render(<SloEditPage />);

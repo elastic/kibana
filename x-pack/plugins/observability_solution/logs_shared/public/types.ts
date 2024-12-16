@@ -14,6 +14,9 @@ import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/pub
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { LogsSharedLocators } from '../common/locators';
 import type { LogAIAssistantProps } from './components/log_ai_assistant/log_ai_assistant';
 import type { SelfContainedLogsOverview } from './components/logs_overview';
@@ -44,6 +47,9 @@ export interface LogsSharedClientStartDeps {
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   share: SharePluginStart;
   uiActions: UiActionsStart;
+  fieldFormats: FieldFormatsStart;
+  embeddable: EmbeddableStart;
+  savedSearch: SavedSearchPublicPluginStart;
 }
 
 export type LogsSharedClientCoreSetup = CoreSetup<

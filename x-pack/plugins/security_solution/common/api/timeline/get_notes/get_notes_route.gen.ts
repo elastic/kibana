@@ -23,6 +23,7 @@ import { Note } from '../model/components.gen';
  */
 export type AssociatedFilterType = z.infer<typeof AssociatedFilterType>;
 export const AssociatedFilterType = z.enum([
+  'all',
   'document_only',
   'saved_object_only',
   'document_and_saved_object',
@@ -53,10 +54,10 @@ export const GetNotesRequestQuery = z.object({
   sortField: z.string().nullable().optional(),
   sortOrder: z.string().nullable().optional(),
   filter: z.string().nullable().optional(),
-  userFilter: z.string().nullable().optional(),
+  createdByFilter: z.string().nullable().optional(),
   associatedFilter: AssociatedFilterType.optional(),
 });
 export type GetNotesRequestQueryInput = z.input<typeof GetNotesRequestQuery>;
 
 export type GetNotesResponse = z.infer<typeof GetNotesResponse>;
-export const GetNotesResponse = z.union([GetNotesResult, z.object({})]);
+export const GetNotesResponse = GetNotesResult;

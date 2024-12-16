@@ -168,7 +168,7 @@ paths:
       operationId: getCasesByAlertDefaultSpace
       description: |
         You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
-      x-technical-preview: true
+      x-state: Technical preview
       tags:
         - cases
       parameters:
@@ -844,7 +844,7 @@ paths:
       summary: Get all alerts for a case
       description: |
         You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
-      x-technical-preview: true
+      x-state: Technical preview
       operationId: getCaseAlertsDefaultSpace
       tags:
         - cases
@@ -1202,6 +1202,41 @@ paths:
               examples:
                 findConnectorResponse:
                   $ref: '#/components/examples/find_connector_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
+  /api/cases/{caseId}/files:
+    post:
+      summary: Attach a file to a case
+      operationId: addCaseFileDefaultSpace
+      description: |
+        Attach a file to a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. The request must include:
+        - The `Content-Type: multipart/form-data` HTTP header.
+        - The location of the file that is being uploaded.
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/case_id'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/add_case_file_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/case_response_properties'
+              examples:
+                addCaseFileResponse:
+                  $ref: '#/components/examples/add_comment_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
@@ -2468,7 +2503,7 @@ components:
         maxLength: 256
     templates:
       type: array
-      x-technical-preview: true
+      x-state: Technical preview
       items:
         type: object
         properties:
@@ -2498,7 +2533,7 @@ components:
                     $ref: '#/components/schemas/connector_types'
               customFields:
                 type: array
-                x-technical-preview: true
+                x-state: Technical preview
                 description: Custom field values in the template.
                 items:
                   type: object
@@ -2765,7 +2800,7 @@ components:
           items:
             type: string
           maxItems: 1000
-      x-technical-preview: true
+      x-state: Technical preview
       example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
     alert_indices:
       title: Alert indices
@@ -2777,13 +2812,13 @@ components:
           items:
             type: string
           maxItems: 1000
-      x-technical-preview: true
+      x-state: Technical preview
     rule:
       title: Alerting rule
       description: |
         The rule that is associated with the alerts. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       type: object
-      x-technical-preview: true
+      x-state: Technical preview
       properties:
         id:
           description: The rule identifier.
@@ -3331,6 +3366,20 @@ components:
             - settings
             - severity
           example: create_case
+    add_case_file_request:
+      title: Add case file request properties
+      required:
+        - file
+      description: Defines the file that will be attached to the case. Optional parameters will be generated automatically from the file metadata if not defined.
+      type: object
+      properties:
+        file:
+          description: The file being attached to the case.
+          type: string
+          format: binary
+        filename:
+          description: The desired name of the file being attached to the case, it can be different than the name of the file in the filesystem. **This should not include the file extension.**
+          type: string
   examples:
     create_case_request:
       summary: Create a security case that uses a Jira connector.

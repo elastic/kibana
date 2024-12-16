@@ -11,7 +11,7 @@ import { parseCrossClusterPrefix } from '../../../common/ccs_utils';
 import { getClustersState } from './get_clusters_state';
 import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
-import { getIndexPatterns, getElasticsearchDataset } from './get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 
 /**

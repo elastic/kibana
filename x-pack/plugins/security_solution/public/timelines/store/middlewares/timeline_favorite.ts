@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
 import type { Action, Middleware } from 'redux';
 import type { CoreStart } from '@kbn/core/public';
 
@@ -17,12 +16,11 @@ import {
   startTimelineSaving,
   showCallOutUnauthorizedMsg,
 } from '../actions';
-import type { FavoriteTimelineResponse } from '../../../../common/api/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { persistFavorite } from '../../containers/api';
 import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';
-import { refreshTimelines } from './helpers';
+import { isHttpFetchError, refreshTimelines } from './helpers';
 
 type FavoriteTimelineAction = ReturnType<typeof updateIsFavorite>;
 
@@ -42,18 +40,12 @@ export const favoriteTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, S
       store.dispatch(startTimelineSaving({ id }));
 
       try {
-        const result = await persistFavorite({
+        const response = await persistFavorite({
           timelineId: timeline.id,
           templateTimelineId: timeline.templateTimelineId,
           templateTimelineVersion: timeline.templateTimelineVersion,
           timelineType: timeline.timelineType ?? TimelineTypeEnum.default,
         });
-
-        const response: FavoriteTimelineResponse = get('data.persistFavorite', result);
-
-        if (response.code === 403) {
-          store.dispatch(showCallOutUnauthorizedMsg());
-        }
 
         refreshTimelines(store.getState());
 
@@ -69,10 +61,14 @@ export const favoriteTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, S
           })
         );
       } catch (error) {
-        kibana.notifications.toasts.addDanger({
-          title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
-          text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
-        });
+        if (isHttpFetchError(error) && error.body?.status_code === 403) {
+          store.dispatch(showCallOutUnauthorizedMsg());
+        } else {
+          kibana.notifications.toasts.addDanger({
+            title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
+            text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
+          });
+        }
       } finally {
         store.dispatch(
           endTimelineSaving({

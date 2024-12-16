@@ -28,7 +28,12 @@ export const command = {
     const packageNames = ['kbn-ui-shared-deps-npm', 'kbn-ui-shared-deps-src', 'kbn-monaco'];
     const watchesFinished = [];
     for (const packageName of packageNames) {
-      watchesFinished.push(watchPackage(packageName, { quiet: false }));
+      watchesFinished.push(
+        watchPackage(packageName, {
+          quiet: false,
+          reactVersion: process.env.REACT_18 ? '18' : '17',
+        })
+      );
     }
     await Promise.all(watchesFinished);
   },

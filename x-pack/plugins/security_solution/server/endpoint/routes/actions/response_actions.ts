@@ -6,66 +6,63 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import type { TypeOf } from '@kbn/config-schema';
-
-import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
-import { stringify } from '../../utils/stringify';
-import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
-import type { ResponseActionsClient } from '../../services/actions/clients/lib/types';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type {
-  KillProcessRequestBody,
-  SuspendProcessRequestBody,
-} from '../../../../common/api/endpoint';
+  ResponseActionAgentType,
+  ResponseActionsApiCommandNames,
+} from '../../../../common/endpoint/service/response_actions/constants';
+import type { RunScriptActionRequestBody } from '../../../../common/api/endpoint';
 import {
   EndpointActionGetFileSchema,
   type ExecuteActionRequestBody,
   ExecuteActionRequestSchema,
   GetProcessesRouteRequestSchema,
   IsolateRouteRequestSchema,
+  type KillProcessRequestBody,
   KillProcessRouteRequestSchema,
-  type NoParametersRequestSchema,
   type ResponseActionGetFileRequestBody,
   type ResponseActionsRequestBody,
   type ScanActionRequestBody,
   ScanActionRequestSchema,
+  type SuspendProcessRequestBody,
   SuspendProcessRouteRequestSchema,
   UnisolateRouteRequestSchema,
   type UploadActionApiRequestBody,
   UploadActionRequestSchema,
+  RunScriptActionRequestSchema,
 } from '../../../../common/api/endpoint';
 
 import {
   EXECUTE_ROUTE,
   GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
-  ISOLATE_HOST_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
+  RUN_SCRIPT_ROUTE,
   SCAN_ROUTE,
   SUSPEND_PROCESS_ROUTE,
-  UNISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
-  ActionDetails,
-  EndpointActionDataParameterTypes,
   ResponseActionParametersWithProcessData,
   ResponseActionsExecuteParameters,
   ResponseActionScanParameters,
+  EndpointActionDataParameterTypes,
+  ActionDetails,
+  ResponseActionRunScriptParameters,
 } from '../../../../common/endpoint/types';
-import type {
-  ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
-} from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
+import { stringify } from '../../utils/stringify';
 import { errorHandler } from '../error_handler';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import type { ResponseActionsClient } from '../../services';
+import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
+import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
 
 export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,
@@ -73,53 +70,16 @@ export function registerResponseActionRoutes(
 ) {
   const logger = endpointContext.logFactory.get('hostIsolation');
 
-  /**
-   * @deprecated use ISOLATE_HOST_ROUTE_V2 instead
-   */
-  router.versioned
-    .post({
-      access: 'public',
-      path: ISOLATE_HOST_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: {
-          request: IsolateRouteRequestSchema,
-        },
-      },
-      withEndpointAuthz({ all: ['canIsolateHost'] }, logger, redirectHandler(ISOLATE_HOST_ROUTE_V2))
-    );
-
-  /**
-   * @deprecated use RELEASE_HOST_ROUTE instead
-   */
-  router.versioned
-    .post({
-      access: 'public',
-      path: UNISOLATE_HOST_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: {
-          request: UnisolateRouteRequestSchema,
-        },
-      },
-      withEndpointAuthz(
-        { all: ['canUnIsolateHost'] },
-        logger,
-        redirectHandler(UNISOLATE_HOST_ROUTE_V2)
-      )
-    );
-
   router.versioned
     .post({
       access: 'public',
       path: ISOLATE_HOST_ROUTE_V2,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -139,7 +99,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: UNISOLATE_HOST_ROUTE_V2,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -159,7 +124,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: KILL_PROCESS_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -182,7 +152,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: SUSPEND_PROCESS_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -205,7 +180,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: GET_PROCESSES_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -225,7 +205,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: GET_FILE_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -245,7 +230,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: EXECUTE_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -265,9 +255,14 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: UPLOAD_ROUTE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
         authRequired: true,
-        tags: ['access:securitySolution'],
+
         body: {
           accepts: ['multipart/form-data'],
           output: 'stream',
@@ -293,7 +288,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: SCAN_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -306,6 +306,33 @@ export function registerResponseActionRoutes(
         { all: ['canWriteScanOperations'] },
         logger,
         responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'scan')
+      )
+    );
+  router.versioned
+    .post({
+      access: 'public',
+      path: RUN_SCRIPT_ROUTE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: RunScriptActionRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteExecuteOperations'] },
+        logger,
+        responseActionRequestHandler<ResponseActionRunScriptParameters>(
+          endpointContext,
+          'runscript'
+        )
       )
     );
 }
@@ -413,27 +440,12 @@ async function handleActionCreation(
       return responseActionsClient.upload(body as UploadActionApiRequestBody);
     case 'scan':
       return responseActionsClient.scan(body as ScanActionRequestBody);
+    case 'runscript':
+      return responseActionsClient.runscript(body as RunScriptActionRequestBody);
     default:
       throw new CustomHttpRequestError(
         `No handler found for response action command: [${command}]`,
         501
       );
   }
-}
-
-function redirectHandler(
-  location: string
-): RequestHandler<
-  unknown,
-  unknown,
-  TypeOf<typeof NoParametersRequestSchema.body>,
-  SecuritySolutionRequestHandlerContext
-> {
-  return async (context, _req, res) => {
-    const basePath = (await context.securitySolution).getServerBasePath();
-    return res.custom({
-      statusCode: 308,
-      headers: { location: `${basePath}${location}` },
-    });
-  };
 }

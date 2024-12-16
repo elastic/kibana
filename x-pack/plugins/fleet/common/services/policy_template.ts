@@ -39,6 +39,7 @@ export function packageHasNoPolicyTemplates(packageInfo: PackageInfo): boolean {
     )
   );
 }
+
 export function isInputOnlyPolicyTemplate(
   policyTemplate: RegistryPolicyTemplate
 ): policyTemplate is RegistryPolicyInputOnlyTemplate {
@@ -142,3 +143,27 @@ const createDefaultDatasetName = (
   packageInfo: { name: string },
   policyTemplate: { name: string }
 ): string => packageInfo.name + '.' + policyTemplate.name;
+
+export function filterPolicyTemplatesTiles<T>(
+  templatesBehavior: string | undefined,
+  packagePolicy: T,
+  packagePolicyTemplates: T[]
+): T[] {
+  switch (templatesBehavior || 'all') {
+    case 'combined_policy':
+      return [packagePolicy];
+    case 'individual_policies':
+      return [
+        ...(packagePolicyTemplates && packagePolicyTemplates.length > 1
+          ? packagePolicyTemplates
+          : []),
+      ];
+    default:
+      return [
+        packagePolicy,
+        ...(packagePolicyTemplates && packagePolicyTemplates.length > 1
+          ? packagePolicyTemplates
+          : []),
+      ];
+  }
+}

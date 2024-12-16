@@ -86,8 +86,8 @@ export const AlertButton = ({
       {alertsCount > 1 ? ALERTS : ALERT}
       {alertsCount > 1 &&
         (alertsCount > MAX_ALERT_COUNT ? ` (${MAX_ALERT_COUNT}+)` : ` (${alertsCount})`)}
-      {alertIcons?.map((icon: string) => (
-        <EuiIcon className="alertIcon" key={icon} size="s" type={icon} />
+      {alertIcons?.map((icon: string, index: number) => (
+        <EuiIcon className="alertIcon" key={`${icon}-${index}`} size="s" type={icon} />
       ))}
       <EuiIcon css={buttonArrow} size="s" type="arrowDown" />
     </EuiButton>

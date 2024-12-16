@@ -487,7 +487,7 @@
         "tags": [],
         "label": "ESQLCallbacks",
         "description": [],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -503,16 +503,16 @@
               "ESQLSourceResult",
               "> | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.getFieldsFor",
+            "id": "def-common.ESQLCallbacks.getColumnsFor",
             "type": "Function",
             "tags": [],
-            "label": "getFieldsFor",
+            "label": "getColumnsFor",
             "description": [],
             "signature": [
               "CallbackFn<{ query: string; }, ",
@@ -525,7 +525,7 @@
               },
               "> | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -539,7 +539,7 @@
             "signature": [
               "CallbackFn<{}, { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[]; }> | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -553,7 +553,7 @@
             "signature": [
               "(() => Promise<{ histogramBarTarget: number; }>) | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -571,7 +571,7 @@
               "PartialFieldsMetadataClient",
               "> | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1387,6 +1387,21 @@
       },
       {
         "parentPluginId": "@kbn/monaco",
+        "id": "def-common.ESQL_DARK_THEME_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ESQL_DARK_THEME_ID",
+        "description": [],
+        "signature": [
+          "\"esqlThemeDark\""
+        ],
+        "path": "packages/kbn-monaco/src/esql/lib/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
         "id": "def-common.ESQL_LANG_ID",
         "type": "string",
         "tags": [],
@@ -1402,13 +1417,13 @@
       },
       {
         "parentPluginId": "@kbn/monaco",
-        "id": "def-common.ESQL_THEME_ID",
+        "id": "def-common.ESQL_LIGHT_THEME_ID",
         "type": "string",
         "tags": [],
-        "label": "ESQL_THEME_ID",
+        "label": "ESQL_LIGHT_THEME_ID",
         "description": [],
         "signature": [
-          "\"esqlTheme\""
+          "\"esqlThemeLight\""
         ],
         "path": "packages/kbn-monaco/src/esql/lib/constants.ts",
         "deprecated": false,

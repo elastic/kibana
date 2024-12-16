@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   FetchContext,
+  getUnchangingComparator,
   initializeTimeRange,
   initializeTitles,
   useBatchedPublishingSubjects,
@@ -37,11 +38,13 @@ import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import {
+  NonPersistedDisplayOptions,
   SearchEmbeddableApi,
   SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedState,
 } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
+import { BaseAppWrapper } from '../context_awareness';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -69,7 +72,10 @@ export const getSearchEmbeddableFactory = ({
       const solutionNavId = await firstValueFrom(
         discoverServices.core.chrome.getActiveSolutionNavId$()
       );
-      await discoverServices.profilesManager.resolveRootProfile({ solutionNavId });
+      const { getRenderAppWrapper } = await discoverServices.profilesManager.resolveRootProfile({
+        solutionNavId,
+      });
+      const AppWrapper = getRenderAppWrapper?.(BaseAppWrapper) ?? BaseAppWrapper;
 
       /** Specific by-reference state */
       const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectId);
@@ -79,6 +85,11 @@ export const getSearchEmbeddableFactory = ({
       const defaultPanelDescription$ = new BehaviorSubject<string | undefined>(
         initialState?.savedObjectDescription
       );
+
+      /** By-value SavedSearchComponent package (non-dashboard contexts) state, to adhere to the comparator contract of an embeddable. */
+      const nonPersistedDisplayOptions$ = new BehaviorSubject<
+        NonPersistedDisplayOptions | undefined
+      >(initialState?.nonPersistedDisplayOptions);
 
       /** All other state */
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -176,7 +187,7 @@ export const getSearchEmbeddableFactory = ({
             defaultPanelTitle$.next(undefined);
             defaultPanelDescription$.next(undefined);
           },
-          serializeState: async () =>
+          serializeState: () =>
             serializeState({
               uuid,
               initialState,
@@ -184,18 +195,23 @@ export const getSearchEmbeddableFactory = ({
               serializeTitles,
               serializeTimeRange: timeRange.serialize,
               savedObjectId: savedObjectId$.getValue(),
-              discoverServices,
             }),
+          getInspectorAdapters: () => searchEmbeddable.stateManager.inspectorAdapters.getValue(),
         },
         {
           ...titleComparators,
           ...timeRange.comparators,
           ...searchEmbeddable.comparators,
+          rawSavedObjectAttributes: getUnchangingComparator(),
           savedObjectId: [savedObjectId$, (value) => savedObjectId$.next(value)],
           savedObjectTitle: [defaultPanelTitle$, (value) => defaultPanelTitle$.next(value)],
           savedObjectDescription: [
             defaultPanelDescription$,
             (value) => defaultPanelDescription$.next(value),
+          ],
+          nonPersistedDisplayOptions: [
+            nonPersistedDisplayOptions$,
+            (value) => nonPersistedDisplayOptions$.next(value),
           ],
         }
       );
@@ -280,30 +296,43 @@ export const getSearchEmbeddableFactory = ({
           return (
             <KibanaRenderContextProvider {...discoverServices.core}>
               <KibanaContextProvider services={discoverServices}>
-                {renderAsFieldStatsTable ? (
-                  <SearchEmbeddablFieldStatsTableComponent
-                    api={{
-                      ...api,
-                      fetchContext$,
-                    }}
-                    dataView={dataView!}
-                    onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
-                    stateManager={searchEmbeddable.stateManager}
-                  />
-                ) : (
-                  <CellActionsProvider
-                    getTriggerCompatibleActions={
-                      discoverServices.uiActions.getTriggerCompatibleActions
-                    }
-                  >
-                    <SearchEmbeddableGridComponent
-                      api={{ ...api, fetchWarnings$, fetchContext$ }}
+                <AppWrapper>
+                  {renderAsFieldStatsTable ? (
+                    <SearchEmbeddablFieldStatsTableComponent
+                      api={{
+                        ...api,
+                        fetchContext$,
+                      }}
                       dataView={dataView!}
                       onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
                       stateManager={searchEmbeddable.stateManager}
                     />
-                  </CellActionsProvider>
-                )}
+                  ) : (
+                    <CellActionsProvider
+                      getTriggerCompatibleActions={
+                        discoverServices.uiActions.getTriggerCompatibleActions
+                      }
+                    >
+                      <SearchEmbeddableGridComponent
+                        api={{ ...api, fetchWarnings$, fetchContext$ }}
+                        dataView={dataView!}
+                        onAddFilter={
+                          isEsqlMode(savedSearch) ||
+                          initialState.nonPersistedDisplayOptions?.enableFilters === false
+                            ? undefined
+                            : onAddFilter
+                        }
+                        enableDocumentViewer={
+                          initialState.nonPersistedDisplayOptions?.enableDocumentViewer !==
+                          undefined
+                            ? initialState.nonPersistedDisplayOptions?.enableDocumentViewer
+                            : true
+                        }
+                        stateManager={searchEmbeddable.stateManager}
+                      />
+                    </CellActionsProvider>
+                  )}
+                </AppWrapper>
               </KibanaContextProvider>
             </KibanaRenderContextProvider>
           );

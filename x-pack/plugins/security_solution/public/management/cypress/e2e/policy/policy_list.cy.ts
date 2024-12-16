@@ -16,7 +16,7 @@ import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../task
 describe(
   'Policy List',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@serverlessQA'],
     env: {
       ftrConfig: {
         kbnServerArgs: [

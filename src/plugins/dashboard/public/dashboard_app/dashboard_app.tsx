@@ -9,7 +9,6 @@
 
 import { History } from 'history';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import useMount from 'react-use/lib/useMount';
 import useObservable from 'react-use/lib/useObservable';
 import { debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -70,10 +69,33 @@ export function DashboardApp({
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const [regenerateId, setRegenerateId] = useState(uuidv4());
+  const incomingEmbeddable = useMemo(() => {
+    return embeddableService
+      .getStateTransfer()
+      .getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true);
+  }, []);
 
-  useMount(() => {
-    (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
-  });
+  useEffect(() => {
+    let canceled = false;
+    // show dashboard when there is an incoming embeddable
+    if (incomingEmbeddable) {
+      return;
+    }
+
+    isDashboardAppInNoDataState()
+      .then((isInNotDataState) => {
+        if (!canceled && isInNotDataState) {
+          setShowNoDataPage(true);
+        }
+      })
+      .catch((error) => {
+        // show dashboard application if inNoDataState can not be determined
+      });
+
+    return () => {
+      canceled = true;
+    };
+  }, [incomingEmbeddable]);
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>(undefined);
 
   const showPlainSpinner = useObservable(coreServices.customBranding.hasCustomBranding$, false);
@@ -138,8 +160,7 @@ export function DashboardApp({
     };
 
     return Promise.resolve<DashboardCreationOptions>({
-      getIncomingEmbeddable: () =>
-        embeddableService.getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true),
+      getIncomingEmbeddable: () => incomingEmbeddable,
 
       // integrations
       useSessionStorageIntegration: true,
@@ -157,13 +178,23 @@ export function DashboardApp({
       },
       getInitialInput,
       validateLoadedSavedObject: validateOutcome,
+      fullScreenMode:
+        kbnUrlStateStorage.get<{ fullScreenMode?: boolean }>(DASHBOARD_STATE_STORAGE_KEY)
+          ?.fullScreenMode ?? false,
       isEmbeddedExternally: Boolean(embedSettings), // embed settings are only sent if the dashboard URL has `embed=true`
       getEmbeddableAppContext: (dashboardId) => ({
         currentAppId: DASHBOARD_APP_ID,
         getCurrentPath: () => `#${createDashboardEditUrl(dashboardId)}`,
       }),
     });
-  }, [history, embedSettings, validateOutcome, getScopedHistory, kbnUrlStateStorage]);
+  }, [
+    history,
+    embedSettings,
+    validateOutcome,
+    getScopedHistory,
+    kbnUrlStateStorage,
+    incomingEmbeddable,
+  ]);
 
   useEffect(() => {
     if (!dashboardApi) return;

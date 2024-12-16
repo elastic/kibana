@@ -6,33 +6,41 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import {
   AGENTS_INDEX,
+  AGENT_ACTIONS_INDEX,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../../../common/constants';
-
 import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { packagePolicyService } from '../package_policy';
-import { FleetError } from '../../errors';
+import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import type { UninstallTokenSOAttributes } from '../security/uninstall_token_service';
+import { closePointInTime, getAgentsByKuery, openPointInTime } from '../agents';
 
 import { isSpaceAwarenessEnabled } from './helpers';
+
+const UPDATE_AGENT_BATCH_SIZE = 1000;
 
 export async function updateAgentPolicySpaces({
   agentPolicyId,
   currentSpaceId,
   newSpaceIds,
   authorizedSpaces,
+  options,
 }: {
   agentPolicyId: string;
   currentSpaceId: string;
   newSpaceIds: string[];
   authorizedSpaces: string[];
+  options?: { force?: boolean };
 }) {
   const useSpaceAwareness = await isSpaceAwarenessEnabled();
   if (!useSpaceAwareness || !newSpaceIds || newSpaceIds.length === 0) {
@@ -43,6 +51,7 @@ export async function updateAgentPolicySpaces({
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
   const currentSpaceSoClient = appContextService.getInternalUserSOClientForSpaceId(currentSpaceId);
+  const newSpaceSoClient = appContextService.getInternalUserSOClientForSpaceId(newSpaceIds[0]);
   const existingPolicy = await agentPolicyService.get(currentSpaceSoClient, agentPolicyId);
 
   const existingPackagePolicies = await packagePolicyService.findAllForAgentPolicy(
@@ -50,10 +59,25 @@ export async function updateAgentPolicySpaces({
     agentPolicyId
   );
 
+  if (!existingPolicy) {
+    return;
+  }
+
+  if (existingPolicy.is_managed && !options?.force) {
+    throw new HostedAgentPolicyRestrictionRelatedError(
+      `Cannot update hosted agent policy ${existingPolicy.id} space `
+    );
+  }
+
   if (deepEqual(existingPolicy?.space_ids?.sort() ?? [DEFAULT_SPACE_ID], newSpaceIds.sort())) {
     return;
   }
 
+  if (existingPackagePolicies.some((packagePolicy) => packagePolicy.policy_ids.length > 1)) {
+    throw new FleetError(
+      'Agent policies using reusable integration policies cannot be moved to a different space.'
+    );
+  }
   const spacesToAdd = newSpaceIds.filter(
     (spaceId) => !existingPolicy?.space_ids?.includes(spaceId) ?? true
   );
@@ -63,13 +87,13 @@ export async function updateAgentPolicySpaces({
   // Privileges check
   for (const spaceId of spacesToAdd) {
     if (!authorizedSpaces.includes(spaceId)) {
-      throw new FleetError(`No enough permissions to create policies in space ${spaceId}`);
+      throw new FleetError(`Not enough permissions to create policies in space ${spaceId}`);
     }
   }
 
   for (const spaceId of spacesToRemove) {
     if (!authorizedSpaces.includes(spaceId)) {
-      throw new FleetError(`No enough permissions to remove policies from space ${spaceId}`);
+      throw new FleetError(`Not enough permissions to remove policies from space ${spaceId}`);
     }
   }
 
@@ -95,17 +119,105 @@ export async function updateAgentPolicySpaces({
     }
   }
 
+  // Update uninstall tokens
+  const uninstallTokensRes = await soClient.find<UninstallTokenSOAttributes>({
+    perPage: SO_SEARCH_LIMIT,
+    type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+    filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id:"${agentPolicyId}"`,
+  });
+
+  if (uninstallTokensRes.total > 0) {
+    await soClient.bulkUpdate(
+      uninstallTokensRes.saved_objects.map((so) => ({
+        id: so.id,
+        type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+        attributes: {
+          namespaces: newSpaceIds,
+        },
+      }))
+    );
+  }
+
   // Update fleet server index agents, enrollment api keys
   await esClient.updateByQuery({
     index: ENROLLMENT_API_KEYS_INDEX,
+    query: {
+      bool: {
+        must: {
+          terms: {
+            policy_id: [agentPolicyId],
+          },
+        },
+      },
+    },
     script: `ctx._source.namespaces = [${newSpaceIds.map((spaceId) => `"${spaceId}"`).join(',')}]`,
     ignore_unavailable: true,
     refresh: true,
   });
   await esClient.updateByQuery({
     index: AGENTS_INDEX,
+    query: {
+      bool: {
+        must: {
+          terms: {
+            policy_id: [agentPolicyId],
+          },
+        },
+      },
+    },
     script: `ctx._source.namespaces = [${newSpaceIds.map((spaceId) => `"${spaceId}"`).join(',')}]`,
     ignore_unavailable: true,
     refresh: true,
   });
+
+  const agentIndexExists = await esClient.indices.exists({
+    index: AGENTS_INDEX,
+  });
+
+  // Update agent actions
+  if (agentIndexExists) {
+    const pitId = await openPointInTime(esClient);
+
+    try {
+      let hasMore = true;
+      let searchAfter: SortResults | undefined;
+      while (hasMore) {
+        const { agents } = await getAgentsByKuery(esClient, newSpaceSoClient, {
+          kuery: `policy_id:"${agentPolicyId}"`,
+          showInactive: true,
+          perPage: UPDATE_AGENT_BATCH_SIZE,
+          pitId,
+          searchAfter,
+        });
+
+        if (agents.length === 0) {
+          hasMore = false;
+          break;
+        }
+
+        const lastAgent = agents[agents.length - 1];
+        searchAfter = lastAgent.sort;
+
+        await esClient.updateByQuery({
+          index: AGENT_ACTIONS_INDEX,
+          query: {
+            bool: {
+              must: {
+                terms: {
+                  agents: agents.map(({ id }) => id),
+                },
+              },
+            },
+          },
+          script: `ctx._source.namespaces = [${newSpaceIds
+            .map((spaceId) => `"${spaceId}"`)
+            .join(',')}]`,
+          ignore_unavailable: true,
+          refresh: true,
+        });
+      }
+    } finally {
+      await closePointInTime(esClient, pitId);
+    }
+  }
 }

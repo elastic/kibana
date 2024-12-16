@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const synthtrace = getService('logSynthtraceEsClient');
   const to = '2024-01-01T12:00:00.000Z';
 
-  const ingestDataForSummary = async () => {
+  const ingestDataForSummary = () => {
     // Ingest documents for 3 type of datasets
     return synthtrace.index([
       // Ingest good data to all 3 datasets
@@ -48,16 +48,14 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   };
 
   describe('Dataset quality summary', () => {
-    before(async () => {
-      await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
-      await PageObjects.datasetQuality.navigateTo();
-    });
-
     afterEach(async () => {
       await synthtrace.clean();
     });
 
     it('shows poor, degraded and good count as 0 and all dataset as healthy', async () => {
+      await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
+      await PageObjects.datasetQuality.navigateTo();
+
       const summary = await PageObjects.datasetQuality.parseSummaryPanel();
       expect(summary).to.eql({
         datasetHealthPoor: '0',
@@ -70,7 +68,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     it('shows updated count for poor, degraded and good datasets, estimated size and updates active datasets', async () => {
       await ingestDataForSummary();
-      await PageObjects.datasetQuality.refreshTable();
+      await PageObjects.datasetQuality.navigateTo();
 
       const summary = await PageObjects.datasetQuality.parseSummaryPanel();
       const { estimatedData, ...restOfSummary } = summary;

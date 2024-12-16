@@ -7,10 +7,10 @@
 
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiInMemoryTable } from '@elastic/eui';
+import { EuiIcon, EuiInMemoryTable } from '@elastic/eui';
 import type { RelatedCase } from '@kbn/cases-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ExpandablePanel } from '@kbn/security-solution-common';
+import { css } from '@emotion/react';
 import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper';
 import { CaseDetailsLink } from '../../../../common/components/links';
 import {
@@ -18,8 +18,13 @@ import {
   CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID,
 } from './test_ids';
 import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 
 const ICON = 'warning';
+const EXPAND_PROPERTIES = {
+  expandable: true,
+  expandedOnFirstRender: true,
+};
 
 const getColumns: (data: RelatedCase[]) => Array<EuiBasicTableColumn<RelatedCase>> = (data) => [
   {
@@ -30,16 +35,21 @@ const getColumns: (data: RelatedCase[]) => Array<EuiBasicTableColumn<RelatedCase
         defaultMessage="Name"
       />
     ),
-    render: (value: string, caseData: RelatedCase) => {
-      const index = data.findIndex((d) => d.id === caseData.id);
-      return (
-        <CellTooltipWrapper tooltip={caseData.title}>
-          <CaseDetailsLink detailName={caseData.id} title={caseData.title} index={index}>
-            {caseData.title}
-          </CaseDetailsLink>
-        </CellTooltipWrapper>
-      );
-    },
+    render: (_: string, caseData: RelatedCase) => (
+      <CellTooltipWrapper tooltip={caseData.title}>
+        <CaseDetailsLink detailName={caseData.id} title={caseData.title} openInNewTab={true}>
+          {caseData.title}
+          <EuiIcon
+            type={'popout'}
+            size="m"
+            color="primary"
+            css={css`
+              margin-left: 4px;
+            `}
+          />
+        </CaseDetailsLink>
+      </CellTooltipWrapper>
+    ),
   },
   {
     field: 'status',
@@ -62,11 +72,29 @@ export interface RelatedCasesProps {
 }
 
 /**
- *
+ * Show related cases in an expandable panel with a table
  */
 export const RelatedCases: React.FC<RelatedCasesProps> = ({ eventId }) => {
   const { loading, error, data, dataCount } = useFetchRelatedCases({ eventId });
   const columns = useMemo(() => getColumns(data), [data]);
+
+  const title = useMemo(
+    () => (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.insights.correlations.relatedCasesTitle"
+        defaultMessage="{count} related {count, plural, one {case} other {cases}}"
+        values={{ count: dataCount }}
+      />
+    ),
+    [dataCount]
+  );
+  const header = useMemo(
+    () => ({
+      title,
+      iconType: ICON,
+    }),
+    [title]
+  );
 
   if (error) {
     return null;
@@ -74,21 +102,8 @@ export const RelatedCases: React.FC<RelatedCasesProps> = ({ eventId }) => {
 
   return (
     <ExpandablePanel
-      header={{
-        title: (
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.left.insights.correlations.relatedCasesTitle"
-            defaultMessage="{count} related {count, plural, one {case} other {cases}}"
-            values={{ count: dataCount }}
-          />
-        ),
-        iconType: ICON,
-      }}
-      content={{ error }}
-      expand={{
-        expandable: true,
-        expandedOnFirstRender: true,
-      }}
+      header={header}
+      expand={EXPAND_PROPERTIES}
       data-test-subj={CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID}
     >
       <EuiInMemoryTable

@@ -121,4 +121,54 @@ describe('SavedObjectSaveModal', () => {
       expect(onSave.mock.calls[0][0].newCopyOnSave).toBe(true);
     });
   });
+
+  describe('handle title duplication logic', () => {
+    it('should append "[1]" to title if no number is present', async () => {
+      const onSave = jest.fn();
+
+      render(
+        <I18nProvider>
+          <SavedObjectSaveModal
+            onSave={onSave}
+            onClose={() => {}}
+            title="Saved Object"
+            objectType="visualization"
+            showDescription={true}
+            showCopyOnSave={true}
+          />
+        </I18nProvider>
+      );
+
+      const switchElement = screen.getByTestId('saveAsNewCheckbox');
+      await userEvent.click(switchElement);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('savedObjectTitle')).toHaveValue('Saved Object [1]');
+      });
+    });
+
+    it('should increment the number by one when a number is already present', async () => {
+      const onSave = jest.fn();
+
+      render(
+        <I18nProvider>
+          <SavedObjectSaveModal
+            onSave={onSave}
+            onClose={() => {}}
+            title="Saved Object [1]"
+            objectType="visualization"
+            showDescription={true}
+            showCopyOnSave={true}
+          />
+        </I18nProvider>
+      );
+
+      const switchElement = screen.getByTestId('saveAsNewCheckbox');
+      await userEvent.click(switchElement);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('savedObjectTitle')).toHaveValue('Saved Object [2]');
+      });
+    });
+  });
 });

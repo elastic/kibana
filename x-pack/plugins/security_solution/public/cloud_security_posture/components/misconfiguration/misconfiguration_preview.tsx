@@ -5,40 +5,23 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
-import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { i18n } from '@kbn/i18n';
-import { ExpandablePanel } from '@kbn/security-solution-common';
-import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
-import { hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
+import { statusColors } from '@kbn/cloud-security-posture';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
-import {
-  CspInsightLeftPanelSubTab,
-  EntityDetailsLeftPanelTab,
-} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { UserDetailsPanelKey } from '../../../flyout/entity_details/user_details_left';
-import { HostDetailsPanelKey } from '../../../flyout/entity_details/host_details_left';
-import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
-import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
-import { buildHostNamesFilter, buildUserNamesFilter } from '../../../../common/search_strategy';
-
-const FIRST_RECORD_PAGINATION = {
-  cursorStart: 0,
-  querySize: 1,
-};
+import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
+import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { useNavigateEntityInsight } from '../../hooks/use_entity_insight';
 
 export const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
@@ -51,7 +34,7 @@ export const getFindingsStats = (passedFindingsStats: number, failedFindingsStat
         }
       ),
       count: passedFindingsStats,
-      color: euiThemeVars.euiColorSuccess,
+      color: statusColors.passed,
     },
     {
       key: i18n.translate(
@@ -61,7 +44,7 @@ export const getFindingsStats = (passedFindingsStats: number, failedFindingsStat
         }
       ),
       count: failedFindingsStats,
-      color: euiThemeVars.euiColorVis9,
+      color: statusColors.failed,
     },
   ];
 };
@@ -70,14 +53,10 @@ const MisconfigurationPreviewScore = ({
   passedFindings,
   failedFindings,
   euiTheme,
-  numberOfPassedFindings,
-  numberOfFailedFindings,
 }: {
   passedFindings: number;
   failedFindings: number;
   euiTheme: EuiThemeComputed<{}>;
-  numberOfPassedFindings?: number;
-  numberOfFailedFindings?: number;
 }) => {
   return (
     <EuiFlexItem>
@@ -106,105 +85,30 @@ const MisconfigurationPreviewScore = ({
 };
 
 export const MisconfigurationsPreview = ({
-  name,
-  fieldName,
+  value,
+  field,
   isPreviewMode,
 }: {
-  name: string;
-  fieldName: 'host.name' | 'user.name';
+  value: string;
+  field: 'host.name' | 'user.name';
   isPreviewMode?: boolean;
 }) => {
-  const { data } = useMisconfigurationPreview({
-    query: buildEntityFlyoutPreviewQuery(fieldName, name),
-    sort: [],
-    enabled: true,
-    pageSize: 1,
-    ignore_unavailable: true,
-  });
-  const isUsingHostName = fieldName === 'host.name';
-  const passedFindings = data?.count.passed || 0;
-  const failedFindings = data?.count.failed || 0;
+  const { hasMisconfigurationFindings, passedFindings, failedFindings } = useHasMisconfigurations(
+    field,
+    value
+  );
 
   useEffect(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT);
   }, []);
   const { euiTheme } = useEuiTheme();
-  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
 
-  const { data: vulnerabilitiesData } = useVulnerabilitiesPreview({
-    query: buildEntityFlyoutPreviewQuery('host.name', name),
-    sort: [],
-    enabled: true,
-    pageSize: 1,
+  const { goToEntityInsightTab } = useNavigateEntityInsight({
+    field,
+    value,
+    queryIdExtension: 'MISCONFIGURATION_PREVIEW',
+    subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
   });
-
-  const {
-    CRITICAL = 0,
-    HIGH = 0,
-    MEDIUM = 0,
-    LOW = 0,
-    NONE = 0,
-  } = vulnerabilitiesData?.count || {};
-
-  const hasVulnerabilitiesFindings = hasVulnerabilitiesData({
-    critical: CRITICAL,
-    high: HIGH,
-    medium: MEDIUM,
-    low: LOW,
-    none: NONE,
-  });
-
-  const buildFilterQuery = useMemo(
-    () => (isUsingHostName ? buildHostNamesFilter([name]) : buildUserNamesFilter([name])),
-    [isUsingHostName, name]
-  );
-
-  const riskScoreState = useRiskScore({
-    riskEntity: isUsingHostName ? RiskScoreEntity.host : RiskScoreEntity.user,
-    filterQuery: buildFilterQuery,
-    onlyLatest: false,
-    pagination: FIRST_RECORD_PAGINATION,
-  });
-
-  const { data: hostRisk } = riskScoreState;
-
-  const riskData = hostRisk?.[0];
-
-  const isRiskScoreExist = isUsingHostName
-    ? !!(riskData as HostRiskScore)?.host.risk
-    : !!(riskData as UserRiskScore)?.user.risk;
-
-  const { openLeftPanel } = useExpandableFlyoutApi();
-
-  const goToEntityInsightTab = useCallback(() => {
-    openLeftPanel({
-      id: isUsingHostName ? HostDetailsPanelKey : UserDetailsPanelKey,
-      params: isUsingHostName
-        ? {
-            name,
-            isRiskScoreExist,
-            hasMisconfigurationFindings,
-            hasVulnerabilitiesFindings,
-            path: {
-              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-              subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
-            },
-          }
-        : {
-            user: { name },
-            isRiskScoreExist,
-            hasMisconfigurationFindings,
-            path: { tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS },
-          },
-    });
-  }, [
-    hasMisconfigurationFindings,
-    hasVulnerabilitiesFindings,
-    isRiskScoreExist,
-    isUsingHostName,
-    name,
-    openLeftPanel,
-  ]);
   const link = useMemo(
     () =>
       !isPreviewMode
@@ -229,6 +133,7 @@ export const MisconfigurationsPreview = ({
             css={css`
               font-weight: ${euiTheme.font.weight.semiBold};
             `}
+            data-test-subj={'securitySolutionFlyoutInsightsMisconfigurationsTitleText'}
           >
             <FormattedMessage
               id="xpack.securitySolution.flyout.right.insights.misconfigurations.misconfigurationsTitle"

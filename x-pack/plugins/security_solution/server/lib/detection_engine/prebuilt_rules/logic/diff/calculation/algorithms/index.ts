@@ -15,3 +15,4 @@ export { kqlQueryDiffAlgorithm } from './kql_query_diff_algorithm';
 export { eqlQueryDiffAlgorithm } from './eql_query_diff_algorithm';
 export { esqlQueryDiffAlgorithm } from './esql_query_diff_algorithm';
 export { ruleTypeDiffAlgorithm } from './rule_type_diff_algorithm';
+export { forceTargetVersionDiffAlgorithm } from './force_target_version_diff_algorithm';

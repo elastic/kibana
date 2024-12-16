@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { act } from 'react-dom/test-utils';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -20,9 +20,9 @@ import type { DatatableProps } from '../../../../common/expressions';
 import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
 import { DatatableRenderProps } from './types';
 import { PaletteOutput } from '@kbn/coloring';
+import { getTransposeId } from '@kbn/transpose-utils';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
-import { getTransposeId } from '../../../../common/expressions/datatable/transpose_helpers';
 
 jest.mock('../../../shared_components/coloring/get_cell_color_fn', () => {
   const mod = jest.requireActual('../../../shared_components/coloring/get_cell_color_fn');
@@ -504,7 +504,7 @@ describe('DatatableComponent', () => {
       data.rows = new Array(rowNumbers).fill({
         a: 'shoes',
         b: 1588024800000,
-        c: faker.random.number(),
+        c: faker.number.int(),
       });
 
       args.pageSize = pageSize;
@@ -537,7 +537,7 @@ describe('DatatableComponent', () => {
       data.rows = new Array(rowNumbers).fill({
         a: 'shoes',
         b: 1588024800000,
-        c: faker.random.number(),
+        c: faker.number.int(),
       });
 
       args.pageSize = pageSize;
@@ -558,7 +558,7 @@ describe('DatatableComponent', () => {
       data.rows = new Array(20).fill({
         a: 'shoes',
         b: 1588024800000,
-        c: faker.random.number(),
+        c: faker.number.int(),
       });
       renderDatatableComponent({
         args,
@@ -584,7 +584,7 @@ describe('DatatableComponent', () => {
       data.rows = new Array(rowNumbers).fill({
         a: 'shoes',
         b: 1588024800000,
-        c: faker.random.number(),
+        c: faker.number.int(),
       });
 
       args.pageSize = pageSize;
@@ -624,7 +624,7 @@ describe('DatatableComponent', () => {
       data.rows = new Array(rowNumbers).fill({
         a: 'shoes',
         b: 1588024800000,
-        c: faker.random.number(),
+        c: faker.number.int(),
       });
 
       args.pageSize = pageSize;

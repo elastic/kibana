@@ -10,6 +10,7 @@ import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
 import { RelatedIntegrationsDescription } from '../../../../../../../../detections/components/rules/related_integrations/integrations_description';
 import type { RelatedIntegrationArray } from '../../../../../../../../../common/api/detection_engine';
+import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 
 interface RelatedIntegrationsReadOnly {
   relatedIntegrations: RelatedIntegrationArray;
@@ -21,7 +22,11 @@ export function RelatedIntegrationsReadOnly({ relatedIntegrations }: RelatedInte
       listItems={[
         {
           title: ruleDetailsI18n.RELATED_INTEGRATIONS_FIELD_LABEL,
-          description: <RelatedIntegrationsDescription relatedIntegrations={relatedIntegrations} />,
+          description: relatedIntegrations.length ? (
+            <RelatedIntegrationsDescription relatedIntegrations={relatedIntegrations} />
+          ) : (
+            <EmptyFieldValuePlaceholder />
+          ),
         },
       ]}
     />

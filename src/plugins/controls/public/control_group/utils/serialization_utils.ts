@@ -16,37 +16,31 @@ import { parseReferenceName } from '../../controls/data_controls/reference_name_
 export const deserializeControlGroup = (
   state: SerializedPanelState<ControlGroupSerializedState>
 ): ControlGroupRuntimeState => {
-  const panels = JSON.parse(state.rawState.panelsJSON);
-  const ignoreParentSettings = JSON.parse(state.rawState.ignoreParentSettingsJSON);
+  const { controls } = state.rawState;
+  const controlsMap = Object.fromEntries(controls.map(({ id, ...rest }) => [id, rest]));
 
   /** Inject data view references into each individual control */
   const references = state.references ?? [];
   references.forEach((reference) => {
     const referenceName = reference.name;
     const { controlId } = parseReferenceName(referenceName);
-    if (panels[controlId]) {
-      panels[controlId].dataViewId = reference.id;
+    if (controlsMap[controlId]) {
+      controlsMap[controlId].dataViewId = reference.id;
     }
   });
 
-  /** Flatten the state of each panel by removing `explicitInput` */
-  const flattenedPanels = Object.keys(panels).reduce((prev, panelId) => {
-    const currentPanel = panels[panelId];
-    const currentPanelExplicitInput = panels[panelId].explicitInput;
+  /** Flatten the state of each control by removing `controlConfig` */
+  const flattenedControls = Object.keys(controlsMap).reduce((prev, controlId) => {
+    const currentControl = controlsMap[controlId];
+    const currentControlExplicitInput = controlsMap[controlId].controlConfig;
     return {
       ...prev,
-      [panelId]: { ...omit(currentPanel, 'explicitInput'), ...currentPanelExplicitInput },
+      [controlId]: { ...omit(currentControl, 'controlConfig'), ...currentControlExplicitInput },
     };
   }, {});
 
   return {
-    ...omit(state.rawState, ['panelsJSON', 'ignoreParentSettingsJSON']),
-    initialChildControlState: flattenedPanels,
-    ignoreParentSettings,
-    autoApplySelections:
-      typeof state.rawState.showApplySelections === 'boolean'
-        ? !state.rawState.showApplySelections
-        : true, // Rename "showApplySelections" to "autoApplySelections"
-    labelPosition: state.rawState.controlStyle, // Rename "controlStyle" to "labelPosition"
+    ...state.rawState,
+    initialChildControlState: flattenedControls,
   };
 };

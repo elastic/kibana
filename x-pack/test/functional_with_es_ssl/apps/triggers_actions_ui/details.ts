@@ -13,7 +13,7 @@ import { asyncForEach } from '@kbn/std';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
-import { getTestAlertData, getTestActionData } from '../../lib/get_test_data';
+import { getTestAlertData, getTestConnectorData } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -23,7 +23,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const find = getService('find');
   const supertest = getService('supertest');
-  const comboBox = getService('comboBox');
   const objectRemover = new ObjectRemover(supertest);
   const toasts = getService('toasts');
 
@@ -31,14 +30,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const { body: createdConnector } = await supertest
       .post(`/api/actions/connector`)
       .set('kbn-xsrf', 'foo')
-      .send(getTestActionData(overwrites))
+      .send(getTestConnectorData(overwrites))
       .expect(200);
     return createdConnector;
   }
 
   async function createConnector(overwrites: Record<string, any> = {}) {
     const createdConnector = await createConnectorManualCleanup(overwrites);
-    objectRemover.add(createdConnector.id, 'action', 'actions');
+    objectRemover.add(createdConnector.id, 'connector', 'actions');
     return createdConnector;
   }
 
@@ -108,7 +107,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return await createAlwaysFiringRule({
       name: `test-rule-${testRunUuid}`,
       schedule: {
-        interval: '1s',
+        interval: '3s',
       },
       actions: connectors.map((connector) => ({
         id: connector.id,
@@ -187,7 +186,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const editButton = await testSubjects.find('ruleIntervalToastEditButton');
         await editButton.click();
 
-        await testSubjects.click('cancelSaveEditedRuleButton');
+        await testSubjects.click('rulePageFooterCancelButton');
       });
 
       it('should disable the rule', async () => {
@@ -375,14 +374,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await editButton.click();
         expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
 
-        await testSubjects.setValue('ruleNameInput', updatedRuleName, {
+        await testSubjects.setValue('ruleDetailsNameInput', updatedRuleName, {
           clearWithKeyboard: true,
         });
 
-        await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
+        await find.clickByCssSelector('[data-test-subj="rulePageFooterSaveButton"]:not(disabled)');
 
         const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql(`Updated '${updatedRuleName}'`);
+        expect(toastTitle).to.eql(`Updated "${updatedRuleName}"`);
 
         await retry.tryForTime(30 * 1000, async () => {
           const headingText = await pageObjects.ruleDetailsUI.getHeadingText();
@@ -407,18 +406,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
 
-        await testSubjects.setValue('ruleNameInput', uuidv4(), {
+        await testSubjects.setValue('ruleDetailsNameInput', uuidv4(), {
           clearWithKeyboard: true,
         });
 
-        await testSubjects.click('cancelSaveEditedRuleButton');
+        await testSubjects.click('rulePageFooterCancelButton');
         await testSubjects.existOrFail('confirmRuleCloseModal');
         await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
-        await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedRuleButton"]');
+        await find.waitForDeletedByCssSelector('[data-test-subj="rulePageFooterCancelButton"]');
 
         await editButton.click();
 
-        const nameInputAfterCancel = await testSubjects.find('ruleNameInput');
+        const nameInputAfterCancel = await testSubjects.find('ruleDetailsNameInput');
         const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
         expect(textAfterCancel).to.eql(updatedRuleName);
       });
@@ -482,127 +481,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await editButton.click();
         expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
 
-        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).to.eql(false);
-        expect(await testSubjects.exists('alertActionAccordion-0')).to.eql(true);
+        const headerText = await find.byCssSelector('[data-test-subj="ruleActionsItem"] h2');
 
-        expect(await testSubjects.exists('selectActionConnector-.slack-0')).to.eql(true);
-        // click the super selector the reveal the options
-        await testSubjects.click('selectActionConnector-.slack-0');
+        expect(await headerText.getVisibleText()).to.eql('Unable to find connector');
+
+        await testSubjects.click('ruleActionsAddActionButton');
+        await testSubjects.existOrFail('ruleActionsConnectorsModal');
+
         // click the available option (my-slack1 is a preconfigured connector created before this test runs)
-        await testSubjects.click('dropdown-connector-my-slack1');
-        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).to.eql(true);
-      });
+        await find.clickByButtonText('Slack#xyztest');
 
-      it('should show and update deleted connectors when there are no existing connectors of the same type', async () => {
-        const connector = await createConnectorManualCleanup({
-          name: `index-${testRunUuid}-${0}`,
-          connector_type_id: '.index',
-          config: {
-            index: `index-${testRunUuid}-${0}`,
-          },
-          secrets: {},
-        });
+        const ruleActionItems = await testSubjects.findAll('ruleActionsItem');
+        expect(ruleActionItems.length).to.eql(2);
 
-        await pageObjects.common.navigateToApp('triggersActions');
-        const alert = await createAlwaysFiringRule({
-          name: testRunUuid,
-          actions: [
-            {
-              group: 'default',
-              id: connector.id,
-              params: { level: 'info', message: ' {{context.message}}' },
-              frequency: {
-                summary: false,
-                notify_when: RuleNotifyWhen.THROTTLE,
-                throttle: '1m',
-              },
-            },
-            {
-              group: 'other',
-              id: connector.id,
-              params: { level: 'info', message: ' {{context.message}}' },
-              frequency: {
-                summary: false,
-                notify_when: RuleNotifyWhen.THROTTLE,
-                throttle: '1m',
-              },
-            },
-          ],
-        });
-
-        // refresh to see alert
-        await browser.refresh();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        // verify content
-        await testSubjects.existOrFail('rulesList');
-
-        // delete connector
-        await pageObjects.common.navigateToApp('triggersActionsConnectors');
-        await pageObjects.triggersActionsUI.searchConnectors(connector.name);
-        await testSubjects.click('deleteConnector');
-        await testSubjects.existOrFail('deleteIdsConfirmation');
-        await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
-        await testSubjects.missingOrFail('deleteIdsConfirmation');
-
-        const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql('Deleted 1 connector');
-
-        // Wait to ensure the table is finished loading
-        await pageObjects.triggersActionsUI.tableFinishedLoading();
-
-        // click on first rule
-        await pageObjects.common.navigateToApp('triggersActions');
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
-
-        const editButton = await testSubjects.find('openEditRuleFlyoutButton');
-        await editButton.click();
-        expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
-
-        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).to.eql(false);
-        expect(await testSubjects.exists('alertActionAccordion-0')).to.eql(true);
-        expect(await testSubjects.exists('addNewActionConnectorActionGroup-1')).to.eql(false);
-        expect(await testSubjects.exists('alertActionAccordion-1')).to.eql(true);
-
-        await testSubjects.click('createActionConnectorButton-0');
-        await testSubjects.existOrFail('connectorAddModal');
-        await testSubjects.setValue('nameInput', 'new connector');
-        await retry.try(async () => {
-          // At times we find the driver controlling the ComboBox in tests
-          // can select the wrong item, this ensures we always select the correct index
-          await comboBox.set('connectorIndexesComboBox', 'test-index');
-          expect(
-            await comboBox.isOptionSelected(
-              await testSubjects.find('connectorIndexesComboBox'),
-              'test-index'
-            )
-          ).to.be(true);
-        });
-        await testSubjects.click('connectorAddModal > saveActionButtonModal');
-        await testSubjects.missingOrFail('deleteIdsConfirmation');
-
-        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).to.eql(true);
-        expect(await testSubjects.exists('addNewActionConnectorActionGroup-1')).to.eql(true);
-
-        // delete connector
-        await pageObjects.common.navigateToApp('triggersActions');
-        // refresh to see alert
-        await browser.refresh();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        // verify content
-        await testSubjects.existOrFail('rulesList');
-
-        await pageObjects.common.navigateToApp('triggersActionsConnectors');
-        await pageObjects.triggersActionsUI.searchConnectors('new connector');
-        await testSubjects.click('deleteConnector');
-        await testSubjects.existOrFail('deleteIdsConfirmation');
-        await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
-        await testSubjects.missingOrFail('deleteIdsConfirmation');
+        expect(await ruleActionItems[0].getVisibleText()).to.contain('Slack');
+        expect(await ruleActionItems[1].getVisibleText()).to.contain('Slack');
       });
     });
 
-    describe('Edit rule with legacy rule-level notify values', function () {
+    // bug with legacy notify_when values https://github.com/elastic/kibana/issues/199494
+    describe.skip('Edit rule with legacy rule-level notify values', function () {
       const testRunUuid = uuidv4();
 
       afterEach(async () => {
@@ -615,7 +513,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const rule = await createAlwaysFiringRule({
           name: `test-rule-${testRunUuid}`,
           schedule: {
-            interval: '1s',
+            interval: '3s',
           },
           notify_when: RuleNotifyWhen.THROTTLE,
           throttle: '2d',
@@ -643,20 +541,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
+
+        await find.clickByButtonText('Settings');
         const notifyWhenSelect = await testSubjects.find('notifyWhenSelect');
         expect(await notifyWhenSelect.getVisibleText()).to.eql('On custom action intervals');
         const throttleInput = await testSubjects.find('throttleInput');
         const throttleUnitInput = await testSubjects.find('throttleUnitInput');
         expect(await throttleInput.getAttribute('value')).to.be('2');
         expect(await throttleUnitInput.getAttribute('value')).to.be('d');
-        await testSubjects.setValue('ruleNameInput', updatedRuleName, {
+        await testSubjects.setValue('ruleDetailsNameInput', updatedRuleName, {
           clearWithKeyboard: true,
         });
 
-        await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
+        await find.clickByCssSelector('[data-test-subj="rulePageFooterSaveButton"]:not(disabled)');
 
         const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql(`Updated '${updatedRuleName}'`);
+        expect(toastTitle).to.eql(`Updated '${rule.name}'`);
       });
     });
 

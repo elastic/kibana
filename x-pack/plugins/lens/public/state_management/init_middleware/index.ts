@@ -12,6 +12,7 @@ import { loadInitial as loadInitialAction } from '..';
 import { loadInitial } from './load_initial';
 import { readFromStorage } from '../../settings_storage';
 import { AUTO_APPLY_DISABLED_STORAGE_KEY } from '../../editor_frame_service/editor_frame/workspace_panel/workspace_panel_wrapper';
+import { type InitialAppState } from '../lens_slice';
 
 const autoApplyDisabled = () => {
   return readFromStorage(new Storage(localStorage), AUTO_APPLY_DISABLED_STORAGE_KEY) === 'true';
@@ -20,7 +21,7 @@ const autoApplyDisabled = () => {
 export const initMiddleware = (storeDeps: LensStoreDeps) => (store: MiddlewareAPI) => {
   return (next: Dispatch) => (action: PayloadAction) => {
     if (loadInitialAction.match(action)) {
-      return loadInitial(store, storeDeps, action.payload, autoApplyDisabled());
+      return loadInitial(store, storeDeps, action.payload as InitialAppState, autoApplyDisabled());
     }
     next(action);
   };

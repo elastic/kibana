@@ -34,6 +34,7 @@ export interface CreateParams {
   spacesManager: SpacesManager;
   config: ConfigType;
   logger: Logger;
+  getIsRoleManagementEnabled: () => Promise<() => boolean | undefined>;
   getRolesAPIClient: () => Promise<RolesAPIClient>;
   eventTracker: EventTracker;
   getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
@@ -49,6 +50,7 @@ export const spacesManagementApp = Object.freeze({
     config,
     logger,
     eventTracker,
+    getIsRoleManagementEnabled,
     getRolesAPIClient,
     getPrivilegesAPIClient,
     isServerless,
@@ -80,7 +82,7 @@ export const spacesManagementApp = Object.freeze({
           text: title,
           href: `/`,
         };
-        const { notifications, application, chrome, http, overlays, theme } = coreStart;
+        const { notifications, application, chrome, http, overlays } = coreStart;
 
         chrome.docTitle.change(title);
 
@@ -158,7 +160,8 @@ export const spacesManagementApp = Object.freeze({
               http={http}
               overlays={overlays}
               notifications={notifications}
-              theme={theme}
+              userProfile={coreStart.userProfile}
+              theme={coreStart.theme}
               i18n={coreStart.i18n}
               logger={logger}
               spacesManager={spacesManager}
@@ -166,6 +169,7 @@ export const spacesManagementApp = Object.freeze({
               onLoadSpace={onLoadSpace}
               history={history}
               selectedTabId={selectedTabId}
+              getIsRoleManagementEnabled={getIsRoleManagementEnabled}
               getRolesAPIClient={getRolesAPIClient}
               allowFeatureVisibility={config.allowFeatureVisibility}
               allowSolutionVisibility={config.allowSolutionVisibility}

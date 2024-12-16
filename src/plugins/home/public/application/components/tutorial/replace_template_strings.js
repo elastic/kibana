@@ -38,7 +38,6 @@ export function replaceTemplateStrings(text, params = {}) {
           filebeat: docLinks.links.filebeat.base,
           metricbeat: docLinks.links.metricbeat.base,
           heartbeat: docLinks.links.heartbeat.base,
-          functionbeat: docLinks.links.functionbeat.base,
           winlogbeat: docLinks.links.winlogbeat.base,
           auditbeat: docLinks.links.auditbeat.base,
         },

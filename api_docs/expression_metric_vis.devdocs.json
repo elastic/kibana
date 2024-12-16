@@ -774,13 +774,21 @@
             "description": [],
             "signature": [
               {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
+              "<",
+              {
                 "pluginId": "charts",
                 "scope": "common",
                 "docId": "kibChartsPluginApi",
                 "section": "def-common.CustomPaletteState",
                 "text": "CustomPaletteState"
               },
-              " | undefined"
+              "> | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
@@ -1245,11 +1253,11 @@
           },
           "<",
           {
-            "pluginId": "inspector",
+            "pluginId": "expressions",
             "scope": "common",
-            "docId": "kibInspectorPluginApi",
-            "section": "def-common.Adapters",
-            "text": "Adapters"
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DefaultInspectorAdapters",
+            "text": "DefaultInspectorAdapters"
           },
           ">>"
         ],

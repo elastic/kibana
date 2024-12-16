@@ -54,6 +54,10 @@ export class DataRequest {
     return this._descriptor.dataRequestToken;
   }
 
+  getError(): Error | undefined {
+    return this._descriptor.error;
+  }
+
   renderError(): ReactNode {
     if (!this._descriptor.error) {
       return null;

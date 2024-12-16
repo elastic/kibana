@@ -34,8 +34,10 @@ export const legacyCreateLegacyNotificationRoute = (
     .post({
       path: UPDATE_OR_CREATE_LEGACY_ACTIONS,
       access: 'internal',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -62,7 +64,7 @@ export const legacyCreateLegacyNotificationRoute = (
         },
       },
       async (context, request, response) => {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const rulesClient = await (await context.alerting).getRulesClient();
         const savedObjectsClient = (await context.core).savedObjects.client;
         const { alert_id: ruleAlertId } = request.query;
         const { actions, interval, name } = request.body;

@@ -47,7 +47,6 @@ const configSchema = schema.object({
     schema.boolean({ defaultValue: false }),
     schema.never()
   ),
-
   dataTiersExcludedForFields: schema.conditional(
     schema.contextRef('serverless'),
     true,
@@ -60,6 +59,7 @@ const configSchema = schema.object({
     schema.boolean({ defaultValue: false }),
     schema.boolean({ defaultValue: true })
   ),
+  hasEsDataTimeout: schema.number({ defaultValue: 5000 }),
 });
 
 type ConfigType = TypeOf<typeof configSchema>;

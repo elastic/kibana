@@ -8,13 +8,12 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    ".storybook/**/*.tsx"
+    ".storybook/**/*.tsx",
+    "emotion.d.ts",
   ],
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core",
-    "@kbn/core-chrome-browser",
-    "@kbn/core-mount-utils-browser-internal",
     "@kbn/core-notifications-browser",
     "@kbn/data-plugin",
     "@kbn/deeplinks-observability",
@@ -33,7 +32,6 @@
     "@kbn/share-plugin",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-utility",
-    "@kbn/ui-theme",
     "@kbn/xstate-utils",
     "@kbn/router-utils",
     "@kbn/observability-ai-assistant-plugin",

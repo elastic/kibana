@@ -8,9 +8,12 @@
 import type {
   EqlQueryLanguage,
   EsqlQueryLanguage,
+  EventCategoryOverride,
   KqlQueryLanguage,
   RuleFilterArray,
   RuleQuery,
+  TiebreakerField,
+  TimestampField,
 } from '../../../api/detection_engine/model/rule_schema';
 import type {
   InlineKqlQuery,
@@ -43,21 +46,29 @@ export const extractInlineKqlQuery = (
 ): InlineKqlQuery => {
   return {
     type: KqlQueryType.inline_query,
-    query: query ?? '',
+    query: query?.trim() ?? '',
     language: language ?? 'kuery',
     filters: filters ?? [],
   };
 };
 
-export const extractRuleEqlQuery = (
-  query: RuleQuery,
-  language: EqlQueryLanguage,
-  filters: RuleFilterArray | undefined
-): RuleEqlQuery => {
+interface ExtractRuleEqlQueryParams {
+  query: RuleQuery;
+  language: EqlQueryLanguage;
+  filters: RuleFilterArray | undefined;
+  eventCategoryOverride: EventCategoryOverride | undefined;
+  timestampField: TimestampField | undefined;
+  tiebreakerField: TiebreakerField | undefined;
+}
+
+export const extractRuleEqlQuery = (params: ExtractRuleEqlQueryParams): RuleEqlQuery => {
   return {
-    query,
-    language,
-    filters: filters ?? [],
+    query: params.query.trim(),
+    language: params.language,
+    filters: params.filters ?? [],
+    event_category_override: params.eventCategoryOverride,
+    timestamp_field: params.timestampField,
+    tiebreaker_field: params.tiebreakerField,
   };
 };
 
@@ -66,7 +77,7 @@ export const extractRuleEsqlQuery = (
   language: EsqlQueryLanguage
 ): RuleEsqlQuery => {
   return {
-    query,
+    query: query.trim(),
     language,
   };
 };

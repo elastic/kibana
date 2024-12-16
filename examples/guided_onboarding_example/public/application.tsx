@@ -10,20 +10,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { AppPluginStartDependencies } from './types';
 import { GuidedOnboardingExampleApp } from './components/app';
 
 export const renderApp = (
-  { notifications }: CoreStart,
+  coreStart: CoreStart,
   { guidedOnboarding }: AppPluginStartDependencies,
   { element, history }: AppMountParameters
 ) => {
+  const { notifications } = coreStart;
   ReactDOM.render(
-    <GuidedOnboardingExampleApp
-      notifications={notifications}
-      guidedOnboarding={guidedOnboarding}
-      history={history}
-    />,
+    <KibanaRenderContextProvider {...coreStart}>
+      <GuidedOnboardingExampleApp
+        notifications={notifications}
+        guidedOnboarding={guidedOnboarding}
+        history={history}
+      />
+    </KibanaRenderContextProvider>,
     element
   );
 

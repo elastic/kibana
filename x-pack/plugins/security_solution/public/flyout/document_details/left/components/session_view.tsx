@@ -28,6 +28,7 @@ import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useSessionPreview } from '../../right/hooks/use_session_preview';
 import { SessionViewNoDataMessage } from '../../shared/components/session_view_no_data_message';
+import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 export const SESSION_VIEW_ID = 'session-view';
 
@@ -74,7 +75,7 @@ export const SessionView: FC = () => {
           isPreviewMode: true,
         },
       });
-      telemetry.reportDetailsFlyoutOpened({
+      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
         location: scopeId,
         panel: 'preview',
       });

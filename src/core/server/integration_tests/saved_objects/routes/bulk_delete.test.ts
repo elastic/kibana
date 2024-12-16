@@ -20,7 +20,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from './routes_test_utils';
+import { deprecationMock, setupConfig } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -36,6 +36,7 @@ describe('POST /api/saved_objects/_bulk_delete', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
   let loggerWarnSpy: jest.SpyInstance;
+  let registrationSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
@@ -59,11 +60,18 @@ describe('POST /api/saved_objects/_bulk_delete', () => {
 
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+    registrationSpy = jest.spyOn(router, 'post');
 
     const config = setupConfig();
     const access = 'public';
 
-    registerBulkDeleteRoute(router, { config, coreUsageData, logger, access });
+    registerBulkDeleteRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });
@@ -162,5 +170,22 @@ describe('POST /api/saved_objects/_bulk_delete', () => {
       ])
       .expect(400);
     expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes deprecation configuration to the router arguments', async () => {
+    await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_delete')
+      .set('x-elastic-internal-origin', 'kibana')
+      .send([
+        {
+          id: 'hiddenID',
+          type: 'hidden-from-http',
+        },
+      ])
+      .expect(400);
+
+    expect(registrationSpy.mock.calls[0][0]).toMatchObject({
+      options: { deprecated: deprecationMock },
+    });
   });
 });

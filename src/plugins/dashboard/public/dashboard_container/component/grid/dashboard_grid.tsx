@@ -18,23 +18,32 @@ import { Layout, Responsive as ResponsiveReactGridLayout } from 'react-grid-layo
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useDashboardGridSettings } from './use_dashboard_grid_settings';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import { getPanelLayoutsAreEqual } from '../../state/diffing/dashboard_diffing_utils';
+import { arePanelLayoutsEqual } from '../../../dashboard_api/are_panel_layouts_equal';
+import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
 import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 
-export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
+export const DashboardGrid = ({
+  dashboardContainer,
+  viewportWidth,
+}: {
+  dashboardContainer?: HTMLElement;
+  viewportWidth: number;
+}) => {
   const dashboardApi = useDashboardApi();
+  const dashboardInternalApi = useDashboardInternalApi();
 
   const [animatePanelTransforms, expandedPanelId, focusedPanelId, panels, useMargins, viewMode] =
     useBatchedPublishingSubjects(
-      dashboardApi.animatePanelTransforms$,
+      dashboardInternalApi.animatePanelTransforms$,
       dashboardApi.expandedPanelId,
       dashboardApi.focusedPanelId$,
       dashboardApi.panels$,
-      dashboardApi.useMargins$,
+      dashboardApi.settings.useMargins$,
       dashboardApi.viewMode
     );
 
@@ -50,6 +59,8 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
       setTimeout(() => setDelayedIsPanelMaximized(false), 0);
     }
   }, [expandedPanelId]);
+
+  const appFixedViewport = useAppFixedViewport();
 
   const panelsInOrder: string[] = useMemo(() => {
     return Object.keys(panels).sort((embeddableIdA, embeddableIdB) => {
@@ -72,6 +83,8 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
       const type = panels[embeddableId].type;
       return (
         <DashboardGridItem
+          appFixedViewport={appFixedViewport}
+          dashboardContainer={dashboardContainer}
           data-grid={panels[embeddableId].gridData}
           key={embeddableId}
           id={embeddableId}
@@ -82,7 +95,14 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
         />
       );
     });
-  }, [expandedPanelId, panels, panelsInOrder, focusedPanelId]);
+  }, [
+    appFixedViewport,
+    dashboardContainer,
+    expandedPanelId,
+    panels,
+    panelsInOrder,
+    focusedPanelId,
+  ]);
 
   const onLayoutChange = useCallback(
     (newLayout: Array<Layout & { i: string }>) => {
@@ -98,7 +118,7 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
         },
         {} as { [key: string]: DashboardPanelState }
       );
-      if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
+      if (!arePanelLayoutsEqual(panels, updatedPanels)) {
         dashboardApi.setPanels(updatedPanels);
       }
     },
@@ -133,6 +153,7 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
       rowHeight={DASHBOARD_GRID_HEIGHT}
       margin={useMargins ? [DASHBOARD_MARGIN_SIZE, DASHBOARD_MARGIN_SIZE] : [0, 0]}
       draggableHandle={'.embPanel--dragHandle'}
+      useCSSTransforms={false}
     >
       {panelComponents}
     </ResponsiveReactGridLayout>

@@ -57,6 +57,7 @@ export const command = {
     const offline = args.getBooleanValue('offline') ?? false;
     const validate = args.getBooleanValue('validate') ?? true;
     const quiet = args.getBooleanValue('quiet') ?? false;
+    const reactVersion = process.env.REACT_18 ? '18' : '17';
     const vscodeConfig =
       args.getBooleanValue('vscode') ?? (process.env.KBN_BOOTSTRAP_NO_VSCODE ? false : true);
 
@@ -95,7 +96,7 @@ export const command = {
     await time('pre-build webpack bundles for packages', async () => {
       const packageNames = ['kbn-ui-shared-deps-npm', 'kbn-ui-shared-deps-src', 'kbn-monaco'];
       for (const pkg of packageNames) {
-        await buildPackage(pkg, { quiet });
+        await buildPackage(pkg, { quiet, reactVersion });
       }
       log.success('build required webpack bundles for packages');
     });

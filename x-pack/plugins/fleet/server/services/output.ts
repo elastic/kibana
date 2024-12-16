@@ -44,6 +44,7 @@ import {
   DEFAULT_OUTPUT_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
   OUTPUT_HEALTH_DATA_STREAM,
+  MAX_CONCURRENT_BACKFILL_OUTPUTS_PRESETS,
 } from '../constants';
 import {
   SO_SEARCH_LIMIT,
@@ -705,11 +706,7 @@ class OutputService {
     return outputSavedObjectToOutput(newSo);
   }
 
-  public async bulkGet(
-    soClient: SavedObjectsClientContract,
-    ids: string[],
-    { ignoreNotFound = false } = { ignoreNotFound: true }
-  ) {
+  public async bulkGet(ids: string[], { ignoreNotFound = false } = { ignoreNotFound: true }) {
     const res = await this.encryptedSoClient.bulkGet<OutputSOAttributes>(
       ids.map((id) => ({ id: outputIdToUuid(id), type: SAVED_OBJECT_TYPE }))
     );
@@ -923,7 +920,6 @@ class OutputService {
       target.random = null;
       target.round_robin = null;
       target.hash = null;
-      target.topics = null;
       target.topic = null;
       target.headers = null;
       target.timeout = null;
@@ -1170,7 +1166,7 @@ class OutputService {
         await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id);
       },
       {
-        concurrency: 5,
+        concurrency: MAX_CONCURRENT_BACKFILL_OUTPUTS_PRESETS,
       }
     );
   }

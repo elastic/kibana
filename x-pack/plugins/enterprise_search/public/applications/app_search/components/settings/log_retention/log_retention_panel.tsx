@@ -17,10 +17,11 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { LOG_SETTINGS_DOCS_URL } from '../../../routes';
+import { docLinks } from '../../../../shared/doc_links';
 
 import { LogRetentionLogic, LogRetentionOptions, LogRetentionMessage } from '../../log_retention';
 
@@ -34,6 +35,7 @@ export const LogRetentionPanel: React.FC = () => {
   const apiLogRetentionSettings = logRetention?.[LogRetentionOptions.API];
   const auditLogRetentionSettings = logRetention?.[LogRetentionOptions.Audit];
   const crawlerLogRetentionSettings = logRetention?.[LogRetentionOptions.Crawler];
+  const switchPrefixId = useGeneratedHtmlId();
 
   useEffect(() => {
     fetchLogRetention();
@@ -51,9 +53,10 @@ export const LogRetentionPanel: React.FC = () => {
       <EuiSpacer size="m" />
       <EuiText>
         <EuiSwitch
+          aria-labelledby={`${switchPrefixId}analytics`}
           label={
             <>
-              <strong>
+              <strong id={`${switchPrefixId}analytics`}>
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.settings.logRetention.analytics.label',
                   {
@@ -61,11 +64,13 @@ export const LogRetentionPanel: React.FC = () => {
                   }
                 )}
               </strong>
-              {': '}
               {hasILM && (
-                <EuiTextColor color="subdued">
-                  <LogRetentionMessage type={LogRetentionOptions.Analytics} />
-                </EuiTextColor>
+                <>
+                  {': '}
+                  <EuiTextColor color="subdued">
+                    <LogRetentionMessage type={LogRetentionOptions.Analytics} />
+                  </EuiTextColor>
+                </>
               )}
             </>
           }
@@ -78,9 +83,10 @@ export const LogRetentionPanel: React.FC = () => {
       <EuiSpacer size="m" />
       <EuiText>
         <EuiSwitch
+          aria-labelledby={`${switchPrefixId}api`}
           label={
             <>
-              <strong>
+              <strong id={`${switchPrefixId}api`}>
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.settings.logRetention.api.label',
                   {
@@ -88,11 +94,13 @@ export const LogRetentionPanel: React.FC = () => {
                   }
                 )}
               </strong>
-              {': '}
               {hasILM && (
-                <EuiTextColor color="subdued">
-                  <LogRetentionMessage type={LogRetentionOptions.API} />
-                </EuiTextColor>
+                <>
+                  {': '}
+                  <EuiTextColor color="subdued">
+                    <LogRetentionMessage type={LogRetentionOptions.API} />
+                  </EuiTextColor>
+                </>
               )}
             </>
           }
@@ -105,9 +113,10 @@ export const LogRetentionPanel: React.FC = () => {
       <EuiSpacer size="m" />
       <EuiText>
         <EuiSwitch
+          aria-labelledby={`${switchPrefixId}crawler`}
           label={
             <>
-              <strong>
+              <strong id={`${switchPrefixId}crawler`}>
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.settings.logRetention.crawler.label',
                   {
@@ -115,11 +124,13 @@ export const LogRetentionPanel: React.FC = () => {
                   }
                 )}
               </strong>
-              {': '}
               {hasILM && (
-                <EuiTextColor color="subdued">
-                  <LogRetentionMessage type={LogRetentionOptions.Crawler} />
-                </EuiTextColor>
+                <>
+                  {': '}
+                  <EuiTextColor color="subdued">
+                    <LogRetentionMessage type={LogRetentionOptions.Crawler} />
+                  </EuiTextColor>
+                </>
               )}
             </>
           }
@@ -132,9 +143,10 @@ export const LogRetentionPanel: React.FC = () => {
       <EuiSpacer size="m" />
       <EuiText>
         <EuiSwitch
+          aria-labelledby={`${switchPrefixId}audit`}
           label={
             <>
-              <strong>
+              <strong id={`${switchPrefixId}audit`}>
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.settings.logRetention.audit.label',
                   {
@@ -142,11 +154,14 @@ export const LogRetentionPanel: React.FC = () => {
                   }
                 )}
               </strong>
-              {': '}
               {hasILM && (
-                <EuiTextColor color="subdued">
-                  <LogRetentionMessage type={LogRetentionOptions.Audit} />
-                </EuiTextColor>
+                <>
+                  {': '}
+                  <EuiTextColor color="subdued">
+                    <LogRetentionMessage type={LogRetentionOptions.Audit} />
+                  </EuiTextColor>
+                  {': '}
+                </>
               )}
             </>
           }
@@ -163,7 +178,11 @@ export const LogRetentionPanel: React.FC = () => {
             defaultMessage: 'Log retention is determined by the ILM policies for your deployment.',
           })}
           <br />
-          <EuiLink href={LOG_SETTINGS_DOCS_URL} target="_blank">
+          <EuiLink
+            data-test-subj="enterpriseSearchLogRetentionPanelLearnMoreAboutLogRetentionForEnterpriseSearchLink"
+            href={docLinks.appSearchLogSettings}
+            target="_blank"
+          >
             {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.learnMore', {
               defaultMessage: 'Learn more about log retention for Enterprise Search.',
             })}

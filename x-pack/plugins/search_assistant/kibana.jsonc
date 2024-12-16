@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/search-assistant",
   "owner": "@elastic/search-kibana",
+  "group": "search",
+  "visibility": "private",
   "description": "AI Assistant for Search",
   "plugin": {
     "id": "searchAssistant",
@@ -14,8 +16,8 @@
     "requiredPlugins": [
       "actions",
       "licensing",
+      "ml", // necessary for assistant's use of knowledge base in assistant package
       "observabilityAIAssistant",
-      "observabilityAIAssistantApp",
       "triggersActionsUi",
       "share"
     ],

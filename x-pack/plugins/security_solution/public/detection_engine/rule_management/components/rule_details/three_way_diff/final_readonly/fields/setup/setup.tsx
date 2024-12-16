@@ -10,6 +10,7 @@ import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
 import type { SetupGuide } from '../../../../../../../../../common/api/detection_engine';
 import { MarkdownRenderer } from '../../../../../../../../common/components/markdown_editor';
+import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 
 interface SetupReadOnlyProps {
   setup: SetupGuide;
@@ -21,7 +22,7 @@ export function SetupReadOnly({ setup }: SetupReadOnlyProps) {
       listItems={[
         {
           title: ruleDetailsI18n.SETUP_GUIDE_SECTION_LABEL,
-          description: <Setup setup={setup} />,
+          description: setup.trim() ? <Setup setup={setup} /> : <EmptyFieldValuePlaceholder />,
         },
       ]}
     />

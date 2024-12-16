@@ -27,7 +27,7 @@ import { FleetUnauthorizedError } from '../../errors';
 
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
-import { getAgentsByKuery, getAgentById } from './crud';
+import { getAgentsByKuery, getAgentById, getByIds } from './crud';
 import { getAgentStatusById, getAgentStatusForAgentPolicy } from './status';
 import { getLatestAvailableAgentVersion } from './versions';
 
@@ -41,6 +41,11 @@ export interface AgentService {
    * Should be used for end-user requests to Kibana. APIs will return errors if user does not have appropriate access.
    */
   asScoped(req: KibanaRequest): AgentClient;
+
+  /**
+   * Scoped services to a given space
+   */
+  asInternalScopedUser(spaceId: string): AgentClient;
 
   /**
    * Only use for server-side usages (eg. telemetry), should not be used for end users unless an explicit authz check is
@@ -59,6 +64,12 @@ export interface AgentClient {
    * Get an Agent by id
    */
   getAgent(agentId: string): Promise<Agent>;
+
+  /**
+   * Get multiple agents by id
+   * @param agentIds
+   */
+  getByIds(agentIds: string[], options?: { ignoreMissing?: boolean }): Promise<Agent[]>;
 
   /**
    * Return the status by the Agent's id
@@ -97,6 +108,14 @@ export interface AgentClient {
    * Return the latest agent available version
    */
   getLatestAgentAvailableVersion(includeCurrentVersion?: boolean): Promise<string>;
+  /**
+   * Return the latest agent available version, not taking into account IAR versions
+   */
+  getLatestAgentAvailableBaseVersion(includeCurrentVersion?: boolean): Promise<string>;
+  /**
+   * Return the latest agent available version formatted for the docker image
+   */
+  getLatestAgentAvailableDockerImageVersion(includeCurrentVersion?: boolean): Promise<string>;
 }
 
 /**
@@ -128,6 +147,14 @@ class AgentClientImpl implements AgentClient {
     return getAgentById(this.internalEsClient, this.soClient, agentId);
   }
 
+  public async getByIds(
+    agentIds: string[],
+    options?: Partial<{ ignoreMissing: boolean }>
+  ): Promise<Agent[]> {
+    await this.#runPreflight();
+    return getByIds(this.internalEsClient, this.soClient, agentIds, options);
+  }
+
   public async getAgentStatusById(agentId: string) {
     await this.#runPreflight();
     return getAgentStatusById(this.internalEsClient, this.soClient, agentId);
@@ -142,6 +169,16 @@ class AgentClientImpl implements AgentClient {
       filterKuery,
       this.spaceId
     );
+  }
+
+  public async getLatestAgentAvailableBaseVersion(includeCurrentVersion?: boolean) {
+    const fullVersion = await this.getLatestAgentAvailableVersion(includeCurrentVersion);
+    return fullVersion.split('+')[0];
+  }
+
+  public async getLatestAgentAvailableDockerImageVersion(includeCurrentVersion?: boolean) {
+    const fullVersion = await this.getLatestAgentAvailableVersion(includeCurrentVersion);
+    return fullVersion.replace('+', '.');
   }
 
   public async getLatestAgentAvailableVersion(includeCurrentVersion?: boolean) {
@@ -183,6 +220,21 @@ export class AgentServiceImpl implements AgentService {
       this.internalEsClient,
       soClient,
       preflightCheck,
+      getCurrentNamespace(soClient)
+    );
+  }
+
+  public asInternalScopedUser(spaceId: string): AgentClient {
+    if (!spaceId) {
+      throw new TypeError(`spaceId argument is required!`);
+    }
+
+    const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
+
+    return new AgentClientImpl(
+      this.internalEsClient,
+      soClient,
+      undefined,
       getCurrentNamespace(soClient)
     );
   }

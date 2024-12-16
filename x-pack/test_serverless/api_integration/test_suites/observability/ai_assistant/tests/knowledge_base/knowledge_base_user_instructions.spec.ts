@@ -13,13 +13,14 @@ import {
   clearConversations,
   clearKnowledgeBase,
   createKnowledgeBaseModel,
+  deleteInferenceEndpoint,
+  deleteKnowledgeBaseModel,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
 import { getConversationCreatedEvent } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/conversations/helpers';
 import {
   LlmProxy,
   createLlmProxy,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { deleteKnowledgeBaseModel } from './helpers';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
@@ -33,35 +34,28 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
 
-  // TODO: https://github.com/elastic/kibana/issues/192711 cannot create custom users in serverless
-  // trying using built in users by using cookie auth
-  // TODO: https://github.com/elastic/kibana/issues/192757
   describe.skip('Knowledge base user instructions', function () {
     this.tags(['skipMKI']);
     let editorRoleAuthc: RoleCredentials;
-    let johnRoleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
+
     before(async () => {
-      // Create API keys for 'editor' role, simulating different users
-      johnRoleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       editorRoleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('editor');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
       await createKnowledgeBaseModel(ml);
 
       await observabilityAIAssistantAPIClient
-        .slsUser({
+        .slsEditor({
           endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-          roleAuthc: editorRoleAuthc,
-          internalReqHeader,
         })
         .expect(200);
     });
 
     after(async () => {
       await deleteKnowledgeBaseModel(ml);
+      await deleteInferenceEndpoint({ es });
       await clearKnowledgeBase(es);
       await clearConversations(es);
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(johnRoleAuthc);
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(editorRoleAuthc);
     });
 
@@ -70,37 +64,34 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await clearKnowledgeBase(es);
 
         const promises = [
-          { roleAuthc: editorRoleAuthc, username: 'editor', isPublic: true },
-          { roleAuthc: editorRoleAuthc, username: 'editor', isPublic: false },
-          { roleAuthc: johnRoleAuthc, username: 'john', isPublic: true },
-          { roleAuthc: johnRoleAuthc, username: 'john', isPublic: false },
-        ].map(async ({ roleAuthc, username, isPublic }) => {
+          { username: 'editor', isPublic: true },
+          { username: 'editor', isPublic: false },
+          { username: 'john', isPublic: true },
+          { username: 'john', isPublic: false },
+        ].map(async ({ username, isPublic }) => {
           const visibility = isPublic ? 'Public' : 'Private';
-          await observabilityAIAssistantAPIClient
-            .slsUser({
-              endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
-              params: {
-                body: {
-                  id: `${visibility.toLowerCase()}-doc-from-${username}`,
-                  text: `${visibility} user instruction from "${username}"`,
-                  public: isPublic,
-                },
+          const user = username === 'editor' ? 'slsEditor' : 'slsAdmin';
+
+          await observabilityAIAssistantAPIClient[user]({
+            endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
+            params: {
+              body: {
+                id: `${visibility.toLowerCase()}-doc-from-${username}`,
+                text: `${visibility} user instruction from "${username}"`,
+                public: isPublic,
               },
-              roleAuthc,
-              internalReqHeader,
-            })
-            .expect(200);
+            },
+          }).expect(200);
         });
 
         await Promise.all(promises);
       });
 
       it('"editor" can retrieve their own private instructions and the public instruction', async () => {
-        const res = await observabilityAIAssistantAPIClient.slsUser({
+        const res = await observabilityAIAssistantAPIClient.slsEditor({
           endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
-          roleAuthc: editorRoleAuthc,
-          internalReqHeader,
         });
+
         const instructions = res.body.userInstructions;
 
         const sortByDocId = (data: any) => sortBy(data, 'doc_id');
@@ -126,11 +117,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('"john" can retrieve their own private instructions and the public instruction', async () => {
-        const res = await observabilityAIAssistantAPIClient.slsUser({
+        const res = await observabilityAIAssistantAPIClient.slsAdmin({
           endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
-          roleAuthc: johnRoleAuthc,
-          internalReqHeader,
         });
+
         const instructions = res.body.userInstructions;
 
         const sortByDocId = (data: any) => sortBy(data, 'doc_id');
@@ -161,7 +151,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await clearKnowledgeBase(es);
 
         await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
             params: {
               body: {
@@ -170,13 +160,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 public: true,
               },
             },
-            roleAuthc: editorRoleAuthc,
-            internalReqHeader,
           })
           .expect(200);
 
         await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
             params: {
               body: {
@@ -185,18 +173,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 public: false,
               },
             },
-            roleAuthc: editorRoleAuthc,
-            internalReqHeader,
           })
           .expect(200);
       });
 
       it('updates the user instruction', async () => {
-        const res = await observabilityAIAssistantAPIClient.slsUser({
+        const res = await observabilityAIAssistantAPIClient.slsEditor({
           endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
-          roleAuthc: editorRoleAuthc,
-          internalReqHeader,
         });
+
         const instructions = res.body.userInstructions;
 
         expect(instructions).to.eql([
@@ -216,10 +201,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const userInstructionText =
         'Be polite and use language that is easy to understand. Never disagree with the user.';
 
-      async function getConversationForUser(roleAuthc: RoleCredentials) {
+      async function getConversationForUser(username: string) {
+        const user = username === 'editor' ? 'slsEditor' : 'slsAdmin';
+
         // the user instruction is always created by "editor" user
         await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
             params: {
               body: {
@@ -228,8 +215,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 public: false,
               },
             },
-            roleAuthc: editorRoleAuthc,
-            internalReqHeader,
           })
           .expect(200);
 
@@ -257,36 +242,30 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         ];
 
-        const createResponse = await observabilityAIAssistantAPIClient
-          .slsUser({
-            endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
-            params: {
-              body: {
-                messages,
-                connectorId,
-                persist: true,
-                screenContexts: [],
-                scope: 'observability',
-              },
+        const createResponse = await observabilityAIAssistantAPIClient[user]({
+          endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+          params: {
+            body: {
+              messages,
+              connectorId,
+              persist: true,
+              screenContexts: [],
+              scopes: ['observability'],
             },
-            roleAuthc,
-            internalReqHeader,
-          })
-          .expect(200);
+          },
+        }).expect(200);
 
         await proxy.waitForAllInterceptorsSettled();
         const conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
         const conversationId = conversationCreatedEvent.conversation.id;
 
-        const res = await observabilityAIAssistantAPIClient.slsUser({
+        const res = await observabilityAIAssistantAPIClient[user]({
           endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
           params: {
             path: {
               conversationId,
             },
           },
-          roleAuthc,
-          internalReqHeader,
         });
 
         // wait for all interceptors to be settled
@@ -319,7 +298,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('adds the instruction to the system prompt', async () => {
-        const conversation = await getConversationForUser(editorRoleAuthc);
+        const conversation = await getConversationForUser('editor');
         const systemMessage = conversation.messages.find(
           (message) => message.message.role === MessageRole.System
         )!;
@@ -327,7 +306,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('does not add the instruction to the context', async () => {
-        const conversation = await getConversationForUser(editorRoleAuthc);
+        const conversation = await getConversationForUser('editor');
         const contextMessage = conversation.messages.find(
           (message) => message.message.name === CONTEXT_FUNCTION_NAME
         );
@@ -341,7 +320,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('does not add the instruction conversation for other users', async () => {
-        const conversation = await getConversationForUser(johnRoleAuthc);
+        const conversation = await getConversationForUser('john');
         const systemMessage = conversation.messages.find(
           (message) => message.message.role === MessageRole.System
         )!;

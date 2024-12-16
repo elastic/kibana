@@ -20,8 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const synthtrace = getService('svlLogsSynthtraceClient');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/193294
-  describe.skip('Onboarding Firehose Quickstart Flow', () => {
+  describe('Onboarding Firehose Quickstart Flow', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsAdmin(); // Onboarding requires admin role
       await PageObjects.common.navigateToUrlWithBrowserHistory(
@@ -80,6 +79,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             });
           })
       );
+
+      // Checking that an AWS service item is visible after data is detected
+      await testSubjects.isDisplayed(`observabilityOnboardingAWSService-${AWS_SERVICE_ID}`);
+    });
+
+    it('shows the existing data callout and detected AWS services when data was ingested previously', async () => {
+      const DATASET = 'aws.vpcflow';
+      const AWS_SERVICE_ID = 'vpc-flow';
+      await testSubjects.clickWhenNotDisabled('observabilityOnboardingCopyToClipboardButton');
+      const copiedCommand = await browser.getClipboardValue();
+      const [, _stackName, logsStreamName] = copiedCommand.match(CF_COMMAND_REGEXP) ?? [];
+
+      await testSubjects.missingOrFail('observabilityOnboardingFirehosePanelExistingDataCallout');
+
+      expect(logsStreamName).toBeDefined();
+
+      // Simulate Firehose stream ingesting log files
+      const to = new Date().toISOString();
+      const count = 1;
+      await synthtrace.index(
+        timerange(moment(to).subtract(count, 'minute'), moment(to))
+          .interval('1m')
+          .rate(1)
+          .generator((timestamp) => {
+            return log.create().dataset(DATASET).timestamp(timestamp).defaults({
+              'aws.kinesis.name': logsStreamName,
+            });
+          })
+      );
+
+      await browser.refresh();
+
+      // Checking that the existing data callout is visible after data is detected
+      await testSubjects.isDisplayed('observabilityOnboardingFirehosePanelExistingDataCallout');
 
       // Checking that an AWS service item is visible after data is detected
       await testSubjects.isDisplayed(`observabilityOnboardingAWSService-${AWS_SERVICE_ID}`);

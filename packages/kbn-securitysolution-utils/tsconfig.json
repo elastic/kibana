@@ -13,7 +13,8 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/esql-utils",
-    "@kbn/esql-ast"
+    "@kbn/esql-ast",
+    "@kbn/esql-validation-autocomplete"
   ],
   "exclude": [
     "target/**/*",

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, IBasePath, Logger, IScopedClusterClient } from '@kbn/core/server';
+import { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
 import { isEqual, pick } from 'lodash';
 import {
+  SLO_DESTINATION_INDEX_PATTERN,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+  SLO_SUMMARY_TEMP_INDEX_NAME,
   getSLOPipelineId,
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
-  SLO_DESTINATION_INDEX_PATTERN,
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-  SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
 import { getSLOPipelineTemplate } from '../assets/ingest_templates/slo_pipeline_template';
 import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
@@ -27,6 +27,7 @@ import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { TransformManager } from './transform_manager';
+import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 
 export class UpdateSLO {
   constructor(
@@ -42,9 +43,10 @@ export class UpdateSLO {
 
   public async execute(sloId: string, params: UpdateSLOParams): Promise<UpdateSLOResponse> {
     const originalSlo = await this.repository.findById(sloId);
-    let updatedSlo: SLODefinition = Object.assign({}, originalSlo, params, {
+    let updatedSlo: SLODefinition = Object.assign({}, originalSlo, {
+      ...params,
       groupBy: !!params.groupBy ? params.groupBy : originalSlo.groupBy,
-      settings: mergePartialSettings(originalSlo.settings, params.settings),
+      settings: Object.assign({}, originalSlo.settings, params.settings),
     });
 
     if (isEqual(originalSlo, updatedSlo)) {
@@ -68,8 +70,9 @@ export class UpdateSLO {
 
     validateSLO(updatedSlo);
 
-    const rollbackOperations = [];
+    await assertExpectedIndicatorSourceIndexPrivileges(updatedSlo, this.esClient);
 
+    const rollbackOperations = [];
     await this.repository.update(updatedSlo);
     rollbackOperations.push(() => this.repository.update(originalSlo));
 
@@ -260,14 +263,4 @@ export class UpdateSLO {
   private toResponse(slo: SLODefinition): UpdateSLOResponse {
     return updateSLOResponseSchema.encode(slo);
   }
-}
-
-/**
- * Settings are merged by overwriting the original settings with the optional new partial settings.
- */
-function mergePartialSettings(
-  originalSettings: SLODefinition['settings'],
-  newPartialSettings: UpdateSLOParams['settings']
-) {
-  return Object.assign({}, originalSettings, newPartialSettings);
 }

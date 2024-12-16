@@ -60,7 +60,7 @@ import {
   LogAlertsOpts,
 } from './types';
 import { legacyAlertsClientMock } from './legacy_alerts_client.mock';
-import { keys, range } from 'lodash';
+import { keys, omit, range } from 'lodash';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { expandFlattenedAlert } from './lib';
@@ -79,6 +79,7 @@ import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { KibanaRequest } from '@kbn/core/server';
+import { rule } from './lib/test_fixtures';
 
 const date = '2023-03-28T22:27:28.159Z';
 const startedAtDate = '2023-03-28T13:00:00.000Z';
@@ -346,6 +347,7 @@ describe('Alerts Client', () => {
           rule: alertRuleData,
           kibanaVersion: '8.9.0',
           spaceId: 'space1',
+          isServerless: false,
           dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
         };
         maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
@@ -542,10 +544,58 @@ describe('Alerts Client', () => {
       });
 
       describe('persistAlerts()', () => {
-        test('should index new alerts', async () => {
-          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
-            alertsClientParams
-          );
+        test('should index new alerts with refresh: wait_for in stateful', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            isServerless: false,
+          });
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          // Report 2 new alerts
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          alertExecutorService.create('2').scheduleActions('default');
+
+          await alertsClient.processAlerts(processAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          const { alertsToReturn } = alertsClient.getAlertsToSerialize();
+          const uuid1 = alertsToReturn['1'].meta?.uuid;
+          const uuid2 = alertsToReturn['2'].meta?.uuid;
+
+          expect(clusterClient.bulk).toHaveBeenCalledWith({
+            index: '.alerts-test.alerts-default',
+            refresh: 'wait_for',
+            require_alias: !useDataStreamForAlerts,
+            body: [
+              {
+                create: { _id: uuid1, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
+              },
+              // new alert doc
+              getNewIndexedAlertDoc({ [ALERT_UUID]: uuid1 }),
+              {
+                create: { _id: uuid2, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
+              },
+              // new alert doc
+              getNewIndexedAlertDoc({ [ALERT_UUID]: uuid2, [ALERT_INSTANCE_ID]: '2' }),
+            ],
+          });
+          expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
+            eventLogger: alertingEventLogger,
+            request: fakeRequest,
+            ruleTypeCategory: 'test',
+            spaceId: 'space1',
+          });
+        });
+
+        test('should index new alerts with refresh: true in stateless', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            isServerless: true,
+          });
 
           await alertsClient.initializeExecution(defaultExecutionOpts);
 
@@ -658,7 +708,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -731,7 +781,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -866,7 +916,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -939,7 +989,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -1038,7 +1088,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -1107,11 +1157,13 @@ describe('Alerts Client', () => {
                 kibana: {
                   alert: {
                     instance: { id: '1' },
+                    rule: omit(rule, 'execution'),
                     uuid: 'abc',
                   },
                 },
                 [TIMESTAMP]: date,
                 [ALERT_RULE_EXECUTION_TIMESTAMP]: date,
+                [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
                 [EVENT_ACTION]: 'close',
                 [ALERT_ACTION_GROUP]: 'recovered',
                 [ALERT_CONSECUTIVE_MATCHES]: 0,
@@ -1120,16 +1172,6 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING_HISTORY]: [true, true],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
-                [ALERT_RULE_CATEGORY]: 'My test rule',
-                [ALERT_RULE_CONSUMER]: 'bar',
-                [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-                [ALERT_RULE_NAME]: 'rule-name',
-                [ALERT_RULE_PARAMETERS]: { bar: true },
-                [ALERT_RULE_PRODUCER]: 'alerts',
-                [ALERT_RULE_REVISION]: 0,
-                [ALERT_RULE_TYPE_ID]: 'test.rule-type',
-                [ALERT_RULE_TAGS]: ['rule-', '-tags'],
-                [ALERT_RULE_UUID]: '1',
                 [ALERT_SEVERITY_IMPROVING]: true,
                 [ALERT_START]: '2023-03-28T12:27:28.159Z',
                 [ALERT_END]: date,
@@ -1203,7 +1245,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -1321,7 +1363,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -1525,7 +1567,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -1609,6 +1651,7 @@ describe('Alerts Client', () => {
                 shouldWrite: false,
               },
             },
+            isServerless: false,
             request: fakeRequest,
             namespace: 'default',
             rule: alertRuleData,
@@ -2458,7 +2501,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -2732,7 +2775,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -2833,7 +2876,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {
@@ -2930,7 +2973,7 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
-            refresh: true,
+            refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
             body: [
               {

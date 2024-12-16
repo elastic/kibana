@@ -220,7 +220,7 @@ export function InstallElasticAgent() {
       panelFooter={[
         <EuiButton
           data-test-subj="obltOnboardingExploreLogs"
-          color="success"
+          color="primary"
           fill
           iconType="magnifyWithPlus"
           onClick={onContinue}
@@ -312,7 +312,7 @@ export function InstallElasticAgent() {
           apiKeyEncoded,
           apiEndpoint: setup?.apiEndpoint,
           scriptDownloadUrl: setup?.scriptDownloadUrl,
-          elasticAgentVersion: setup?.elasticAgentVersion,
+          elasticAgentVersion: setup?.elasticAgentVersionInfo.agentVersion,
           autoDownloadConfig,
           onboardingId,
         })}

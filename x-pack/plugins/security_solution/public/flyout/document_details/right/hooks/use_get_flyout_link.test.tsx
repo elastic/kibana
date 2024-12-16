@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useGetFlyoutLink } from './use_get_flyout_link';
 import { useGetAppUrl } from '@kbn/security-solution-navigation';
 import { ALERT_DETAILS_REDIRECT_PATH } from '../../../../../common/constants';

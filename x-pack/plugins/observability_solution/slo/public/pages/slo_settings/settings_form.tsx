@@ -7,25 +7,25 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  EuiForm,
-  EuiFormRow,
-  EuiSwitch,
-  EuiDescribedFormGroup,
+  EuiButton,
+  EuiButtonEmpty,
   EuiComboBox,
+  EuiDescribedFormGroup,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
+  EuiForm,
+  EuiFormRow,
   EuiSpacer,
-  EuiFieldNumber,
+  EuiSwitch,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { isEqual } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { DEFAULT_STALE_SLO_THRESHOLD_HOURS } from '../../../common/constants';
-import { useGetSettings } from './use_get_settings';
-import { usePutSloSettings } from './use_put_slo_settings';
+import { useGetSettings } from './hooks/use_get_settings';
+import { usePutSloSettings } from './hooks/use_put_slo_settings';
 
 export function SettingsForm() {
   const [useAllRemoteClusters, setUseAllRemoteClusters] = useState(false);

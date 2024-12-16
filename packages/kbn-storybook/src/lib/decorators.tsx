@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import React, { useEffect } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { DecoratorFn } from '@storybook/react';
@@ -21,7 +21,8 @@ import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { i18n } from '@kbn/i18n';
 
-const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: false });
+const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: false, name: 'amsterdam' });
+const userProfile = { getUserProfile$: () => of(null) };
 
 const i18nStart: I18nStart = {
   Context: ({ children }) => <I18nProvider>{children}</I18nProvider>,
@@ -43,11 +44,11 @@ const KibanaContextDecorator: DecoratorFn = (storyFn, { globals }) => {
   const colorMode = globals.euiTheme === 'v8.dark' ? 'dark' : 'light';
 
   useEffect(() => {
-    theme$.next({ darkMode: colorMode === 'dark' });
+    theme$.next({ darkMode: colorMode === 'dark', name: 'amsterdam' });
   }, [colorMode]);
 
   return (
-    <KibanaRootContextProvider {...{ theme: { theme$ }, analytics, i18n: i18nStart }}>
+    <KibanaRootContextProvider {...{ theme: { theme$ }, userProfile, analytics, i18n: i18nStart }}>
       {storyFn()}
     </KibanaRootContextProvider>
   );

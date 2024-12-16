@@ -11,7 +11,7 @@ import { cloneDeep, forOwn } from 'lodash';
 import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../common';
-import { GridData } from '../../../common/content_management';
+import type { GridData } from '../../../server/content_management';
 import { PanelPlacementProps, PanelPlacementReturn } from './types';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../dashboard_constants';
 
@@ -109,9 +109,9 @@ export function placeClonePanel({
 
   for (let j = position + 1; j < grid.length; j++) {
     originalPositionInTheGrid = grid[j].i;
-    const movedPanel = cloneDeep(otherPanels[originalPositionInTheGrid]);
-    movedPanel.gridData.y = movedPanel.gridData.y + diff;
-    otherPanels[originalPositionInTheGrid] = movedPanel;
+    const { gridData, ...movedPanel } = cloneDeep(otherPanels[originalPositionInTheGrid]);
+    const newGridData = { ...gridData, y: gridData.y + diff };
+    otherPanels[originalPositionInTheGrid] = { ...movedPanel, gridData: newGridData };
   }
   return { newPanelPlacement: bottomPlacement.grid, otherPanels };
 }

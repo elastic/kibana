@@ -27,7 +27,7 @@ import {
   ExternalReferenceStorageType,
   CustomFieldTypes,
 } from '../../common/types/domain';
-import type { ActionLicense, CaseUI, CasesStatus, UserActionUI } from './types';
+import type { ActionLicense, CaseUI, UserActionUI } from './types';
 
 import type {
   ResolvedCase,
@@ -56,11 +56,7 @@ import type {
   AttachmentViewObject,
   PersistableStateAttachmentType,
 } from '../client/attachment_framework/types';
-import type {
-  CasesFindResponse,
-  CasesStatusResponse,
-  UserActionWithResponse,
-} from '../../common/types/api';
+import type { CasesFindResponse, UserActionWithResponse } from '../../common/types/api';
 
 export { connectorsMock } from '../common/mock/connectors';
 export const basicCaseId = 'basic-case-id';
@@ -398,14 +394,13 @@ export const basicCaseCommentPatch = {
   comments: [basicCommentPatch],
 };
 
-export const casesStatus: CasesStatus = {
-  countOpenCases: 20,
-  countInProgressCases: 40,
-  countClosedCases: 130,
-};
-
 export const casesMetrics: CasesMetrics = {
   mttr: 12,
+  status: {
+    open: 20,
+    inProgress: 40,
+    closed: 130,
+  },
 };
 
 export const basicPush = {
@@ -461,7 +456,9 @@ export const allCases: CasesFindResponseUI = {
   page: 1,
   perPage: 5,
   total: 10,
-  ...casesStatus,
+  countOpenCases: 20,
+  countInProgressCases: 40,
+  countClosedCases: 130,
 };
 
 export const actionLicenses: ActionLicense[] = [
@@ -572,12 +569,6 @@ export const caseWithRegisteredAttachmentsSnake = {
   comments: [externalReferenceAttachmentSnake, persistableStateAttachmentSnake],
 };
 
-export const casesStatusSnake: CasesStatusResponse = {
-  count_closed_cases: 130,
-  count_in_progress_cases: 40,
-  count_open_cases: 20,
-};
-
 export const pushSnake = {
   connector_id: pushConnectorId,
   connector_name: 'My SN connector',
@@ -626,7 +617,9 @@ export const allCasesSnake: CasesFindResponse = {
   page: 1,
   per_page: 5,
   total: 10,
-  ...casesStatusSnake,
+  count_closed_cases: 130,
+  count_in_progress_cases: 40,
+  count_open_cases: 20,
 };
 
 export const getUserAction = (
@@ -1158,6 +1151,8 @@ export const customFieldsMock: CaseUICustomField[] = [
   { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: true },
   { type: CustomFieldTypes.TEXT, key: 'test_key_3', value: null },
   { type: CustomFieldTypes.TOGGLE, key: 'test_key_4', value: null },
+  { type: CustomFieldTypes.NUMBER, key: 'test_key_5', value: 1234 },
+  { type: CustomFieldTypes.NUMBER, key: 'test_key_6', value: null },
 ];
 
 export const customFieldsConfigurationMock: CasesConfigurationUICustomField[] = [
@@ -1177,6 +1172,19 @@ export const customFieldsConfigurationMock: CasesConfigurationUICustomField[] = 
   },
   { type: CustomFieldTypes.TEXT, key: 'test_key_3', label: 'My test label 3', required: false },
   { type: CustomFieldTypes.TOGGLE, key: 'test_key_4', label: 'My test label 4', required: false },
+  {
+    type: CustomFieldTypes.NUMBER,
+    key: 'test_key_5',
+    label: 'My test label 5',
+    required: true,
+    defaultValue: 123,
+  },
+  {
+    type: CustomFieldTypes.NUMBER,
+    key: 'test_key_6',
+    label: 'My test label 6',
+    required: false,
+  },
 ];
 
 export const templatesConfigurationMock: CasesConfigurationUITemplate[] = [

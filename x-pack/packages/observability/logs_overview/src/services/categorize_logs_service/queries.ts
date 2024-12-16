@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import {
+  AggregationsCategorizeTextAnalyzer,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import moment from 'moment';
@@ -109,9 +112,7 @@ export const createCategorizationRequestParams = ({
         categorize_text: {
           field: messageField,
           size: maxCategoriesCount,
-          categorization_analyzer: {
-            tokenizer: 'standard',
-          },
+          categorization_analyzer: categorizationAnalyzerConfig,
           ...(minDocsPerCategory > 0 ? { min_doc_count: minDocsPerCategory } : {}),
         },
         aggs: {
@@ -149,3 +150,38 @@ export const createCategoryQuery =
       },
     },
   });
+
+// This emulates the behavior of the `ml_standard` tokenizer in the ML plugin in
+// regard to the hexadecimal and numeric tokens. The other parts pertaining to
+// infix punctuation and file paths are not easily emulated this way.
+// https://github.com/elastic/elasticsearch/blob/becd08da24df2af93eee28053d32929298cdccbd/x-pack/plugin/ml/src/main/java/org/elasticsearch/xpack/ml/job/categorization/MlStandardTokenizer.java#L35-L146
+// We don't use the `ml_standard` tokenizer directly because it produces tokens
+// that are different from the ones produced by the `standard` tokenizer upon
+// indexing.
+const categorizationAnalyzerConfig: AggregationsCategorizeTextAnalyzer = {
+  tokenizer: 'standard',
+  char_filter: [
+    'first_line_with_letters',
+    // This ignores tokens that are hexadecimal numbers
+    // @ts-expect-error the official types don't support inline char filters
+    {
+      type: 'pattern_replace',
+      pattern: '\\b[a-fA-F][a-fA-F0-9]+\\b',
+      replacement: '',
+    },
+    // This ignore tokens that start with a digit
+    // @ts-expect-error the official types don't support inline char filters
+    {
+      type: 'pattern_replace',
+      pattern: '\\b\\d\\w*\\b',
+      replacement: '',
+    },
+  ],
+  filter: [
+    // @ts-expect-error the official types don't support inline token filters
+    {
+      type: 'limit',
+      max_token_count: '100',
+    },
+  ],
+};

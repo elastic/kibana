@@ -248,7 +248,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const removeExpressionBuildErrorsRef = useRef<() => void>();
 
   const onData$ = useCallback(
-    (_data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
+    (_data: unknown, adapters?: DefaultInspectorAdapters) => {
       if (renderDeps.current) {
         dataReceivedTime.current = performance.now();
 
@@ -283,10 +283,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           dispatchLens(
             onActiveDataChange({
               activeData: Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
-                (acc, [key, value], _index, tables) => ({
-                  ...acc,
-                  [tables.length === 1 ? defaultLayerId : key]: value,
-                }),
+                (acc, [key, value], _index, tables) => {
+                  const id = tables.length === 1 ? defaultLayerId : key;
+                  acc[id] = value as Datatable;
+                  return acc;
+                },
                 {}
               ),
             })
@@ -488,7 +489,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [suggestionForDraggedField, dispatchLens]);
 
-  const IS_DARK_THEME: boolean = useObservable(core.theme.theme$, { darkMode: false }).darkMode;
+  const IS_DARK_THEME: boolean = useObservable(core.theme.theme$, {
+    darkMode: false,
+    name: 'amsterdam',
+  }).darkMode;
 
   const renderDragDropPrompt = () => {
     if (chartSizeSpec) {
@@ -676,13 +680,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
 function useReportingState(errors: UserMessage[]): {
   isRenderComplete: boolean;
-  hasDynamicError: boolean;
+  hasRequestError: boolean;
+  setHasRequestError: (state: boolean) => void;
   setIsRenderComplete: (state: boolean) => void;
-  setDynamicError: (state: boolean) => void;
   nodeRef: React.RefObject<HTMLDivElement>;
 } {
   const [isRenderComplete, setIsRenderComplete] = useState(Boolean(errors?.length));
-  const [hasDynamicError, setDynamicError] = useState(false);
+  const [hasRequestError, setHasRequestError] = useState(false);
   const nodeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -691,8 +695,12 @@ function useReportingState(errors: UserMessage[]): {
     }
   }, [isRenderComplete, errors]);
 
-  return { isRenderComplete, setIsRenderComplete, hasDynamicError, setDynamicError, nodeRef };
+  return { isRenderComplete, setIsRenderComplete, hasRequestError, setHasRequestError, nodeRef };
 }
+
+const dataLoadingErrorTitle = i18n.translate('xpack.lens.editorFrame.dataFailure', {
+  defaultMessage: `An error occurred when loading data`,
+});
 
 export const VisualizationWrapper = ({
   expression,
@@ -719,7 +727,7 @@ export const VisualizationWrapper = ({
   ExpressionRendererComponent: ReactExpressionRendererType;
   core: CoreStart;
   onRender$: () => void;
-  onData$: (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => void;
+  onData$: (data: unknown, adapters?: DefaultInspectorAdapters) => void;
   onComponentRendered: () => void;
   displayOptions: VisualizationDisplayOptions | undefined;
 }) => {
@@ -730,13 +738,14 @@ export const VisualizationWrapper = ({
 
   const searchContext = useLensSelector(selectExecutionContextSearch);
   // Used for reporting
-  const { isRenderComplete, hasDynamicError, setIsRenderComplete, setDynamicError, nodeRef } =
+  const { isRenderComplete, hasRequestError, setIsRenderComplete, setHasRequestError, nodeRef } =
     useReportingState(errors);
 
   const onRenderHandler = useCallback(() => {
+    setHasRequestError(false);
     setIsRenderComplete(true);
     onRender$();
-  }, [setIsRenderComplete, onRender$]);
+  }, [onRender$, setHasRequestError, setIsRenderComplete]);
 
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
@@ -759,17 +768,13 @@ export const VisualizationWrapper = ({
     );
   }
 
-  const dataLoadingErrorTitle = i18n.translate('xpack.lens.editorFrame.dataFailure', {
-    defaultMessage: `An error occurred when loading data`,
-  });
-
   return (
     <div
       className="lnsExpressionRenderer"
       data-shared-items-container
       data-render-complete={isRenderComplete}
       data-shared-item=""
-      data-render-error={hasDynamicError ? dataLoadingErrorTitle : undefined}
+      data-render-error={hasRequestError ? dataLoadingErrorTitle : undefined}
       ref={nodeRef}
     >
       <ExpressionRendererComponent
@@ -784,7 +789,7 @@ export const VisualizationWrapper = ({
         // @ts-expect-error upgrade typescript v4.9.5
         onData$={onData$}
         onRender$={onRenderHandler}
-        inspectorAdapters={lensInspector.adapters}
+        inspectorAdapters={lensInspector.getInspectorAdapters()}
         executionContext={executionContext}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
@@ -795,11 +800,13 @@ export const VisualizationWrapper = ({
             ? [errorMessage]
             : [];
 
-          if (!hasDynamicError) {
-            setDynamicError(true);
-          }
-
-          return <WorkspaceErrors errors={visibleErrorMessages} title={dataLoadingErrorTitle} />;
+          return (
+            <WorkspaceErrors
+              errors={visibleErrorMessages}
+              title={dataLoadingErrorTitle}
+              onRender={() => setHasRequestError(true)}
+            />
+          );
         }}
       />
     </div>

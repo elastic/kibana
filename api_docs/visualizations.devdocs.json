@@ -338,20 +338,6 @@
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-public.BaseVisType.suppressWarnings",
-            "type": "Function",
-            "tags": [],
-            "label": "suppressWarnings",
-            "description": [],
-            "signature": [
-              "(() => boolean) | undefined"
-            ],
-            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "visualizations",
             "id": "def-public.BaseVisType.hasPartialRows",
             "type": "CompoundType",
             "tags": [],
@@ -1477,13 +1463,7 @@
                 "label": "attributeService",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "embeddable",
-                    "scope": "public",
-                    "docId": "kibEmbeddablePluginApi",
-                    "section": "def-public.AttributeService",
-                    "text": "AttributeService"
-                  },
+                  "AttributeService",
                   "<",
                   "VisualizeSavedObjectAttributes",
                   ", ",
@@ -6848,7 +6828,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          ">; uuid: string; destroy: () => void; readonly parent?: ",
+          ">; uuid: string; readonly parent?: ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -6872,7 +6852,7 @@
             "section": "def-public.ContainerOutput",
             "text": "ContainerOutput"
           },
-          "> | undefined; dataViews: ",
+          "> | undefined; destroy: () => void; dataViews: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -6976,7 +6956,7 @@
             "section": "def-public.PublishesViewMode",
             "text": "PublishesViewMode"
           },
-          ">) | undefined; disableTriggers: boolean; timeRange$: ",
+          ">) | undefined; hasLockedHoverActions$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -6984,15 +6964,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined>; filters$: ",
+          "<boolean>; lockHoverActions: (lock: boolean) => void; disableTriggers: boolean; filters$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -7008,7 +6980,31 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined>; isCompatibleWithUnifiedSearch: (() => boolean) | undefined; query$: ",
+          "[] | undefined>; savedObjectId: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<string | undefined>; timeRange$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined>; isCompatibleWithUnifiedSearch: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -7048,7 +7044,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          " | undefined; getFilters: () => ",
+          " | undefined; canLinkToLibrary: (() => Promise<boolean>) | undefined; canUnlinkFromLibrary: (() => Promise<boolean>) | undefined; onEdit: () => Promise<void>; isEditingEnabled: () => boolean; getEditHref: () => Promise<string | undefined>; getTypeDisplayName: () => string; getFilters: () => ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -7056,7 +7052,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; canLinkToLibrary: (() => Promise<boolean>) | undefined; canUnlinkFromLibrary: (() => Promise<boolean>) | undefined; setTimeRange: (timeRange: ",
+          "[]; setTimeRange: (timeRange: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -7072,7 +7068,7 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          "; getDescription: () => string; onEdit: () => Promise<void>; phase$: ",
+          "; getDescription: () => string; phase$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -7088,15 +7084,15 @@
             "section": "def-public.PhaseEvent",
             "text": "PhaseEvent"
           },
-          " | undefined>; setPanelTitle: (newTitle: string | undefined) => void; isEditingEnabled: () => boolean; setHidePanelTitle: (hide: boolean | undefined) => void; getTypeDisplayName: () => string; setPanelDescription: (newTitle: string | undefined) => void; savedObjectId: ",
+          " | undefined>; setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; setPanelDescription: (newTitle: string | undefined) => void; render: (domNode: HTMLElement) => Promise<void>; supportedTriggers: () => string[]; getInspectorAdapters: () => ",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
           },
-          "<string | undefined>; render: (domNode: HTMLElement) => Promise<void>; getEditHref: () => Promise<string | undefined>; reload: () => Promise<void>; updateInput: (changes: Partial<",
+          " | undefined; reload: () => Promise<void>; updateInput: (changes: Partial<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -7130,15 +7126,7 @@
             "section": "def-common.VisParams",
             "text": "VisParams"
           },
-          ">; getInspectorAdapters: () => ",
-          {
-            "pluginId": "inspector",
-            "scope": "common",
-            "docId": "kibInspectorPluginApi",
-            "section": "def-common.Adapters",
-            "text": "Adapters"
-          },
-          " | undefined; openInspector: () => ",
+          ">; openInspector: () => ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
             "scope": "public",
@@ -7154,7 +7142,7 @@
             "section": "def-public.ExpressionRenderError",
             "text": "ExpressionRenderError"
           },
-          ") => void; supportedTriggers: () => string[]; getExpressionVariables$: () => ",
+          ") => void; getExpressionVariables$: () => ",
           "Observable",
           "<Record<string, unknown> | undefined>; getExpressionVariables: () => Record<string, unknown> | undefined; inputIsRefType: (input: ",
           {
@@ -9709,7 +9697,7 @@
             "label": "mode",
             "description": [],
             "signature": [
-              "\"custom\" | \"full\" | \"dataBounds\""
+              "\"full\" | \"custom\" | \"dataBounds\""
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -13862,7 +13850,7 @@
             "label": "fittingFunction",
             "description": [],
             "signature": [
-              "\"None\" | \"Average\" | \"Zero\" | \"Nearest\" | \"Linear\" | \"Carry\" | \"Lookahead\" | undefined"
+              "\"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -15622,7 +15610,7 @@
         "label": "GaugeCentralMajorMode",
         "description": [],
         "signature": [
-          "\"none\" | \"custom\" | \"auto\""
+          "\"none\" | \"auto\" | \"custom\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
@@ -15652,7 +15640,7 @@
         "label": "GaugeLabelMajorMode",
         "description": [],
         "signature": [
-          "\"none\" | \"custom\" | \"auto\""
+          "\"none\" | \"auto\" | \"custom\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,

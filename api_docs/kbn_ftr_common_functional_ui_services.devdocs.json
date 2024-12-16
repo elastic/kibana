@@ -2885,7 +2885,7 @@
               "\nMoves the remote environment’s mouse cursor to the current element with optional offset\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move"
             ],
             "signature": [
-              "(options?: { xOffset: number; yOffset: number; }) => Promise<void>"
+              "({ xOffset, yOffset, topOffset }?: { xOffset?: number | undefined; yOffset?: number | undefined; topOffset?: number | undefined; }) => Promise<void>"
             ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
@@ -2896,10 +2896,10 @@
                 "id": "def-common.WebElementWrapper.moveMouseTo.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "options",
+                "label": "{ xOffset = 0, yOffset = 0, topOffset = 0 }",
                 "description": [],
                 "signature": [
-                  "{ xOffset: number; yOffset: number; }"
+                  "{ xOffset?: number | undefined; yOffset?: number | undefined; topOffset?: number | undefined; }"
                 ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
@@ -11904,6 +11904,76 @@
                   "string"
                 ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+        "id": "def-common.InterceptResponseFactory",
+        "type": "Interface",
+        "tags": [],
+        "label": "InterceptResponseFactory",
+        "description": [],
+        "path": "packages/kbn-ftr-common-functional-ui-services/services/browser.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.InterceptResponseFactory.fail",
+            "type": "Function",
+            "tags": [],
+            "label": "fail",
+            "description": [],
+            "signature": [
+              "() => [\"Fetch.failRequest\", ",
+              "Protocol",
+              ".Fetch.FailRequestRequest]"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/browser.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.InterceptResponseFactory.fulfill",
+            "type": "Function",
+            "tags": [],
+            "label": "fulfill",
+            "description": [],
+            "signature": [
+              "(responseOptions: Omit<",
+              "Protocol",
+              ".Fetch.FulfillRequestRequest, \"requestId\">) => [\"Fetch.fulfillRequest\", ",
+              "Protocol",
+              ".Fetch.FulfillRequestRequest]"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/browser.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.InterceptResponseFactory.fulfill.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "responseOptions",
+                "description": [],
+                "signature": [
+                  "Omit<",
+                  "Protocol",
+                  ".Fetch.FulfillRequestRequest, \"requestId\">"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/browser.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

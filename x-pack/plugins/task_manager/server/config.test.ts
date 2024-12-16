@@ -14,13 +14,10 @@ describe('config validation', () => {
       Object {
         "allow_reading_invalid_state": true,
         "auto_calculate_default_ech_capacity": false,
+        "claim_strategy": "mget",
         "discovery": Object {
           "active_nodes_lookback": "30s",
           "interval": 10000,
-        },
-        "ephemeral_tasks": Object {
-          "enabled": false,
-          "request_capacity": 10,
         },
         "event_loop_delay": Object {
           "monitor": true,
@@ -44,7 +41,7 @@ describe('config validation', () => {
             "warn_threshold": 80,
           },
         },
-        "poll_interval": 3000,
+        "poll_interval": 500,
         "request_capacity": 1000,
         "request_timeouts": Object {
           "update_by_query": 30000,
@@ -66,7 +63,7 @@ describe('config validation', () => {
     expect(() => {
       configSchema.validate(config);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The specified monitored_stats_required_freshness (100) is invalid, as it is below the poll_interval (3000)"`
+      `"The specified monitored_stats_required_freshness (100) is invalid, as it is below the poll_interval (500)"`
     );
   });
 
@@ -76,13 +73,10 @@ describe('config validation', () => {
       Object {
         "allow_reading_invalid_state": true,
         "auto_calculate_default_ech_capacity": false,
+        "claim_strategy": "mget",
         "discovery": Object {
           "active_nodes_lookback": "30s",
           "interval": 10000,
-        },
-        "ephemeral_tasks": Object {
-          "enabled": false,
-          "request_capacity": 10,
         },
         "event_loop_delay": Object {
           "monitor": true,
@@ -106,7 +100,7 @@ describe('config validation', () => {
             "warn_threshold": 80,
           },
         },
-        "poll_interval": 3000,
+        "poll_interval": 500,
         "request_capacity": 1000,
         "request_timeouts": Object {
           "update_by_query": 30000,
@@ -136,13 +130,10 @@ describe('config validation', () => {
       Object {
         "allow_reading_invalid_state": true,
         "auto_calculate_default_ech_capacity": false,
+        "claim_strategy": "mget",
         "discovery": Object {
           "active_nodes_lookback": "30s",
           "interval": 10000,
-        },
-        "ephemeral_tasks": Object {
-          "enabled": false,
-          "request_capacity": 10,
         },
         "event_loop_delay": Object {
           "monitor": true,
@@ -171,7 +162,7 @@ describe('config validation', () => {
             "warn_threshold": 80,
           },
         },
-        "poll_interval": 3000,
+        "poll_interval": 500,
         "request_capacity": 1000,
         "request_timeouts": Object {
           "update_by_query": 30000,
@@ -292,5 +283,16 @@ describe('config validation', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"[discovery.active_nodes_lookback]: active node lookback duration cannot exceed five minutes"`
     );
+  });
+
+  test('should not throw if ephemeral_tasks is defined', () => {
+    const config: Record<string, unknown> = {
+      ephemeral_tasks: {
+        enabled: true,
+        request_capacity: 20,
+      },
+    };
+
+    expect(() => configSchema.validate(config)).not.toThrow();
   });
 });

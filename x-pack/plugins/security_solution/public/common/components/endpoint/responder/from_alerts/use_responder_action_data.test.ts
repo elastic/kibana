@@ -25,7 +25,8 @@ import type { AppContextTestRender } from '../../../../mock/endpoint';
 import { createAppRootMockRenderer, endpointAlertDataMock } from '../../../../mock/endpoint';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../../../common/endpoint/constants';
 import { endpointMetadataHttpMocks } from '../../../../../management/pages/endpoint_hosts/mocks';
-import type { RenderHookResult } from '@testing-library/react-hooks/src/types';
+import type { RenderHookResult } from '@testing-library/react';
+import { waitFor, act } from '@testing-library/react';
 import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 import {
@@ -61,17 +62,14 @@ describe('use responder action data hooks', () => {
 
   describe('useWithResponderActionDataFromAlert() hook', () => {
     let renderHook: () => RenderHookResult<
-      UseWithResponderActionDataFromAlertProps,
-      ResponderActionData
+      ResponderActionData,
+      UseWithResponderActionDataFromAlertProps
     >;
     let alertDetailItemData: TimelineEventsDetailsItem[];
 
     beforeEach(() => {
       renderHook = () => {
-        return appContextMock.renderHook<
-          UseWithResponderActionDataFromAlertProps,
-          ResponderActionData
-        >(() =>
+        return appContextMock.renderHook(() =>
           useWithResponderActionDataFromAlert({
             eventData: alertDetailItemData,
             onClick: onClickMock,
@@ -95,7 +93,9 @@ describe('use responder action data hooks', () => {
       it('should call `onClick()` function prop when is pass to the hook', () => {
         alertDetailItemData = endpointAlertDataMock.generateSentinelOneAlertDetailsItemData();
         const { result } = renderHook();
-        result.current.handleResponseActionsClick();
+        act(() => {
+          result.current.handleResponseActionsClick();
+        });
 
         expect(onClickMock).toHaveBeenCalled();
       });
@@ -103,7 +103,9 @@ describe('use responder action data hooks', () => {
       it('should NOT call `onClick` if the action is disabled', () => {
         alertDetailItemData = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType('foo');
         const { result } = renderHook();
-        result.current.handleResponseActionsClick();
+        act(() => {
+          result.current.handleResponseActionsClick();
+        });
 
         expect(onClickMock).not.toHaveBeenCalled();
       });
@@ -169,8 +171,8 @@ describe('use responder action data hooks', () => {
       });
 
       it('should show action enabled if host metadata was retrieved and host is enrolled', async () => {
-        const { result, waitForValueToChange } = renderHook();
-        await waitForValueToChange(() => result.current.isDisabled);
+        const { result } = renderHook();
+        await waitFor(() => expect(result.current.isDisabled).toBe(false));
 
         expect(result.current).toEqual(getExpectedResponderActionData());
       });
@@ -181,8 +183,10 @@ describe('use responder action data hooks', () => {
             statusCode: 404,
           });
         });
-        const { result, waitForValueToChange } = renderHook();
-        await waitForValueToChange(() => result.current.tooltip);
+
+        const { result } = renderHook();
+
+        await waitFor(() => expect(result.current.tooltip).not.toEqual('Loading'));
 
         expect(result.current).toEqual(
           getExpectedResponderActionData({
@@ -199,8 +203,8 @@ describe('use responder action data hooks', () => {
         };
         metadataApiMocks.responseProvider.metadataDetails.mockReturnValue(hostMetadata);
 
-        const { result, waitForValueToChange } = renderHook();
-        await waitForValueToChange(() => result.current.tooltip);
+        const { result } = renderHook();
+        await waitFor(() => expect(result.current.tooltip).not.toEqual('Loading'));
 
         expect(result.current).toEqual(
           getExpectedResponderActionData({
@@ -216,8 +220,8 @@ describe('use responder action data hooks', () => {
             statusCode: 500,
           });
         });
-        const { result, waitForValueToChange } = renderHook();
-        await waitForValueToChange(() => result.current.tooltip);
+        const { result } = renderHook();
+        await waitFor(() => expect(result.current.tooltip).not.toEqual('Loading'));
 
         expect(result.current).toEqual(
           getExpectedResponderActionData({
@@ -231,7 +235,7 @@ describe('use responder action data hooks', () => {
 
   describe('useResponderActionData() hook', () => {
     let hookProps: UseResponderActionDataProps;
-    let renderHook: () => RenderHookResult<UseResponderActionDataProps, ResponderActionData>;
+    let renderHook: () => RenderHookResult<ResponderActionData, UseResponderActionDataProps>;
 
     beforeEach(() => {
       endpointMetadataHttpMocks(appContextMock.coreStart.http);
@@ -241,15 +245,13 @@ describe('use responder action data hooks', () => {
         onClick: onClickMock,
       };
       renderHook = () => {
-        return appContextMock.renderHook<UseResponderActionDataProps, ResponderActionData>(() =>
-          useResponderActionData(hookProps)
-        );
+        return appContextMock.renderHook(() => useResponderActionData(hookProps));
       };
     });
 
     it('should show action enabled when agentType is Endpoint and host is enabled', async () => {
-      const { result, waitForValueToChange } = renderHook();
-      await waitForValueToChange(() => result.current.isDisabled);
+      const { result } = renderHook();
+      await waitFor(() => expect(result.current.isDisabled).toBe(false));
 
       expect(result.current).toEqual(getExpectedResponderActionData());
     });
@@ -266,9 +268,13 @@ describe('use responder action data hooks', () => {
     });
 
     it('should call `onClick` prop when action is enabled', async () => {
-      const { result, waitForValueToChange } = renderHook();
-      await waitForValueToChange(() => result.current.isDisabled);
-      result.current.handleResponseActionsClick();
+      const { result } = renderHook();
+
+      await waitFor(() => expect(result.current.isDisabled).toBe(false));
+
+      act(() => {
+        result.current.handleResponseActionsClick();
+      });
 
       expect(onClickMock).toHaveBeenCalled();
     });
@@ -276,7 +282,10 @@ describe('use responder action data hooks', () => {
     it('should not call `onCLick` prop when action is disabled', () => {
       hookProps.agentType = 'sentinel_one';
       const { result } = renderHook();
-      result.current.handleResponseActionsClick();
+
+      act(() => {
+        result.current.handleResponseActionsClick();
+      });
 
       expect(onClickMock).not.toHaveBeenCalled();
     });

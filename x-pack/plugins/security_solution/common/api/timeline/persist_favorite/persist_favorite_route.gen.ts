@@ -28,8 +28,4 @@ export const PersistFavoriteRouteRequestBody = z.object({
 export type PersistFavoriteRouteRequestBodyInput = z.input<typeof PersistFavoriteRouteRequestBody>;
 
 export type PersistFavoriteRouteResponse = z.infer<typeof PersistFavoriteRouteResponse>;
-export const PersistFavoriteRouteResponse = z.object({
-  data: z.object({
-    persistFavorite: FavoriteTimelineResponse,
-  }),
-});
+export const PersistFavoriteRouteResponse = FavoriteTimelineResponse;

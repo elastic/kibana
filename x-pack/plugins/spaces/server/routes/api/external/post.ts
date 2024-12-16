@@ -22,7 +22,7 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
     .post({
       path: '/api/spaces/space',
       access: 'public',
-      description: `Create a space`,
+      summary: `Create a space`,
       options: {
         tags: ['oas-tag:spaces'],
       },
@@ -30,9 +30,21 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route delegates authorization to the spaces service via a scoped spaces client',
+          },
+        },
         validate: {
           request: {
             body: getSpaceSchema(isServerless),
+          },
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+            },
           },
         },
       },

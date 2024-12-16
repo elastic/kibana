@@ -10,6 +10,10 @@ import { Logger } from '@kbn/logging';
 import { Stream } from 'openai/streaming';
 import { ChatCompletionChunk } from 'openai/resources/chat/completions';
 import {
+  getTokensFromBedrockConverseStream,
+  SmithyStream,
+} from './get_token_count_from_bedrock_converse';
+import {
   InvokeAsyncIteratorBody,
   getTokenCountFromInvokeAsyncIterator,
 } from './get_token_count_from_invoke_async_iterator';
@@ -264,6 +268,29 @@ export const getGenAiTokenTracking = async ({
       // silently fail and null is returned at bottom of function
     }
   }
+
+  // BedrockRuntimeClient.send response used by chat model ActionsClientChatBedrockConverse
+  if (actionTypeId === '.bedrock' && validatedParams.subAction === 'bedrockClientSend') {
+    const { tokenStream, usage } = result.data as unknown as {
+      tokenStream?: SmithyStream;
+      usage?: { inputTokens: number; outputTokens: number; totalTokens: number };
+    };
+    if (tokenStream) {
+      const res = await getTokensFromBedrockConverseStream(tokenStream, logger);
+      return res;
+    }
+    if (usage) {
+      return {
+        total_tokens: usage.totalTokens,
+        prompt_tokens: usage.inputTokens,
+        completion_tokens: usage.outputTokens,
+      };
+    } else {
+      logger.error('Response from Bedrock converse API did not contain usage object');
+      return null;
+    }
+  }
+
   return null;
 };
 

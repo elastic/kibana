@@ -42,7 +42,7 @@ const createPolicies = (
         const agentPolicyStatus = {
           id: agentPolicy.id,
           name: agentPolicy.name,
-          agents: agentStatusByAgentPolicyId[agentPolicy.id]?.total,
+          agents: agentStatusByAgentPolicyId[agentPolicy.id]?.active,
         };
         return {
           package_policy: cloudDefendPackage,
@@ -60,8 +60,10 @@ export const defineGetPoliciesRoute = (router: CloudDefendRouter) =>
     .get({
       access: 'internal',
       path: POLICIES_ROUTE_PATH,
-      options: {
-        tags: ['access:cloud-defend-read'],
+      security: {
+        authz: {
+          requiredPrivileges: ['cloud-defend-read'],
+        },
       },
     })
     .addVersion(

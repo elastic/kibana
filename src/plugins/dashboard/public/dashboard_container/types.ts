@@ -8,21 +8,15 @@
  */
 
 import type { ContainerOutput } from '@kbn/embeddable-plugin/public';
-import type { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 import { SerializableRecord } from '@kbn/utility-types';
 
 import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
-import type { DashboardContainerInput, DashboardOptions } from '../../common';
-import { SavedDashboardPanel } from '../../common/content_management';
+import type { DashboardContainerInput } from '../../common';
+import type { DashboardOptions, DashboardPanel } from '../../server/content_management';
 
 export interface UnsavedPanelState {
   [key: string]: object | undefined;
 }
-
-export type DashboardReduxState = ReduxEmbeddableState<
-  DashboardContainerInput,
-  DashboardContainerOutput
->;
 
 export type DashboardRedirect = (props: RedirectToProps) => void;
 export type RedirectToProps =
@@ -31,7 +25,7 @@ export type RedirectToProps =
 
 export type DashboardStateFromSaveModal = Pick<
   DashboardContainerInput,
-  'title' | 'description' | 'tags' | 'timeRestore' | 'timeRange' | 'refreshInterval'
+  'title' | 'description' | 'tags' | 'timeRestore'
 >;
 
 export type DashboardStateFromSettingsFlyout = DashboardStateFromSaveModal & DashboardOptions;
@@ -101,7 +95,7 @@ export type DashboardLocatorParams = Partial<
   /**
    * List of dashboard panels
    */
-  panels?: Array<SavedDashboardPanel & SerializableRecord>; // used SerializableRecord here to force the GridData type to be read as serializable
+  panels?: Array<DashboardPanel & SerializableRecord>; // used SerializableRecord here to force the GridData type to be read as serializable
 
   /**
    * Control group changes

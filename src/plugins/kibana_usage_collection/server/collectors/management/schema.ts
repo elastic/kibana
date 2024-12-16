@@ -62,10 +62,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'visualization:colorMapping': {
-    type: 'text',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'visualization:useLegacyTimeAxis': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -248,10 +244,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'truncate:maxHeight': {
-    type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'timepicker:timeDefaults': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -270,6 +262,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'theme:darkMode': {
     type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'theme:name': {
+    type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
   'state:storeInSessionStorage': {
@@ -424,15 +420,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'doc_table:legacy': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'discover:modifyColumnsOnSwitch': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'discover:searchFieldsFromSource': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -578,10 +566,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'metrics:allowCheckingForFailedShards': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmDefaultServiceEnvironment': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -639,14 +623,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmEnableCriticalPath': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:enableInfrastructureHostsView': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:enableInfrastructureContainerAssetView': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

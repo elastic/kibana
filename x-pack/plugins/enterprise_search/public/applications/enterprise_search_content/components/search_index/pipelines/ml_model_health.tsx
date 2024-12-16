@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiHealth, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiHealth, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -113,12 +113,14 @@ export interface TrainedModelHealthProps {
   modelState: TrainedModelState | MlModelDeploymentState;
   modelStateReason?: string;
   isDownloadable?: boolean;
+  onClickAction?: Function;
 }
 
 export const TrainedModelHealth: React.FC<TrainedModelHealthProps> = ({
   modelState,
   modelStateReason,
   isDownloadable,
+  onClickAction,
 }) => {
   let modelHealth: {
     healthColor: string;
@@ -207,7 +209,19 @@ export const TrainedModelHealth: React.FC<TrainedModelHealthProps> = ({
   }
   return (
     <EuiToolTip content={modelHealth.tooltipText}>
-      <EuiHealth color={modelHealth.healthColor}>{modelHealth.healthText}</EuiHealth>
+      {onClickAction ? (
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchTrainedModelHealthPopoverButton"
+          iconSide="right"
+          flush="both"
+          iconType="boxesHorizontal"
+          onClick={() => onClickAction()}
+        >
+          <EuiHealth color={modelHealth.healthColor}>{modelHealth.healthText}</EuiHealth>
+        </EuiButtonEmpty>
+      ) : (
+        <EuiHealth color={modelHealth.healthColor}>{modelHealth.healthText}</EuiHealth>
+      )}
     </EuiToolTip>
   );
 };

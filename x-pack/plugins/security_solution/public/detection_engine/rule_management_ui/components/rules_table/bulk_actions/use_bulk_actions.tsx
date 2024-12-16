@@ -45,6 +45,7 @@ import type { ExecuteBulkActionsDryRun } from './use_bulk_actions_dry_run';
 import { computeDryRunEditPayload } from './utils/compute_dry_run_edit_payload';
 import { transformExportDetailsToDryRunResult } from './utils/dry_run_result';
 import { prepareSearchParams } from './utils/prepare_search_params';
+import { ManualRuleRunEventTypes } from '../../../../../common/lib/telemetry';
 
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
@@ -234,7 +235,7 @@ export const useBulkActions = ({
         }
 
         const modalManualRuleRunConfirmationResult = await showManualRuleRunConfirmation();
-        startServices.telemetry.reportManualRuleRunOpenModal({
+        startServices.telemetry.reportEvent(ManualRuleRunEventTypes.ManualRuleRunOpenModal, {
           type: 'bulk',
         });
         if (modalManualRuleRunConfirmationResult === null) {
@@ -252,7 +253,7 @@ export const useBulkActions = ({
           },
         });
 
-        startServices.telemetry.reportManualRuleRunExecute({
+        startServices.telemetry.reportEvent(ManualRuleRunEventTypes.ManualRuleRunExecute, {
           rangeInMs: modalManualRuleRunConfirmationResult.endDate.diff(
             modalManualRuleRunConfirmationResult.startDate
           ),

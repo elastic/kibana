@@ -11,6 +11,7 @@ import { either } from 'fp-ts/lib/Either';
 import { MAX_DOCS_PER_PAGE } from '../constants';
 import type { PartialPaginationType } from './types';
 import { PaginationSchemaRt } from './types';
+import { ALLOWED_MIME_TYPES } from '../constants/mime_types';
 
 export interface LimitedSchemaType {
   fieldName: string;
@@ -154,6 +155,24 @@ export const limitedNumberSchema = ({ fieldName, min, max }: LimitedSchemaType) 
     rt.identity
   );
 
+export const limitedNumberAsIntegerSchema = ({ fieldName }: { fieldName: string }) =>
+  new rt.Type<number, number, unknown>(
+    'LimitedNumberAsInteger',
+    rt.number.is,
+    (input, context) =>
+      either.chain(rt.number.validate(input, context), (s) => {
+        if (!Number.isSafeInteger(s)) {
+          return rt.failure(
+            input,
+            context,
+            `The ${fieldName} field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.`
+          );
+        }
+        return rt.success(s);
+      }),
+    rt.identity
+  );
+
 export interface RegexStringSchemaType {
   codec: rt.Type<string, string, unknown>;
   pattern: string;
@@ -176,3 +195,17 @@ export const regexStringRt = ({ codec, pattern, message }: RegexStringSchemaType
       }),
     rt.identity
   );
+
+export const mimeTypeString = new rt.Type<string, string, unknown>(
+  'mimeTypeString',
+  rt.string.is,
+  (input, context) =>
+    either.chain(rt.string.validate(input, context), (s) => {
+      if (!ALLOWED_MIME_TYPES.includes(s)) {
+        return rt.failure(input, context, `The mime type field value ${s} is not allowed.`);
+      }
+
+      return rt.success(s);
+    }),
+  rt.identity
+);

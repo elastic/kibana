@@ -25,12 +25,13 @@ import {
   deleteExceptionListItem,
 } from '@kbn/lists-plugin/server/services/exception_lists';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 import { packagePolicyService } from '@kbn/fleet-plugin/server/services';
 
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { DETECTION_TYPE, NAMESPACE_TYPE } from '@kbn/lists-plugin/common/constants.mock';
-import { bulkInsert, updateTimestamps } from './helpers';
+import { bulkInsert, eventually, updateTimestamps } from './helpers';
 import { TelemetryEventsSender } from '../../lib/telemetry/sender';
 import type {
   SecuritySolutionPluginStart,
@@ -40,7 +41,7 @@ import type { SecurityTelemetryTask } from '../../lib/telemetry/task';
 import { Plugin as SecuritySolutionPlugin } from '../../plugin';
 import { AsyncTelemetryEventsSender } from '../../lib/telemetry/async_sender';
 import { type ITelemetryReceiver, TelemetryReceiver } from '../../lib/telemetry/receiver';
-import { DEFAULT_DIAGNOSTIC_INDEX } from '../../lib/telemetry/constants';
+import { DEFAULT_DIAGNOSTIC_INDEX_PATTERN } from '../../../common/endpoint/constants';
 import mockEndpointAlert from '../__mocks__/endpoint-alert.json';
 import mockedRule from '../__mocks__/rule.json';
 import fleetAgents from '../__mocks__/fleet-agents.json';
@@ -147,7 +148,7 @@ export function getTelemetryTask(
 }
 
 export async function createMockedEndpointAlert(esClient: ElasticsearchClient) {
-  const index = `${DEFAULT_DIAGNOSTIC_INDEX.replace('-*', '')}-001`;
+  const index = `${DEFAULT_DIAGNOSTIC_INDEX_PATTERN.replace('-*', '')}-001`;
 
   await esClient.indices.create({ index, body: { settings: { hidden: true } } });
 
@@ -223,7 +224,7 @@ export async function dropEndpointIndices(esClient: ElasticsearchClient) {
 }
 
 export async function cleanupMockedEndpointAlerts(esClient: ElasticsearchClient) {
-  const index = `${DEFAULT_DIAGNOSTIC_INDEX.replace('-*', '')}-001`;
+  const index = `${DEFAULT_DIAGNOSTIC_INDEX_PATTERN.replace('-*', '')}-001`;
 
   await esClient.indices.delete({ index }).catch(() => {
     // ignore errors
@@ -416,4 +417,25 @@ export function getTelemetryTaskType(task: SecurityTelemetryTask): string {
   } else {
     return '';
   }
+}
+
+export async function runSoonConfigTask(
+  tasks: SecurityTelemetryTask[],
+  taskManagerPlugin: TaskManagerStartContract
+) {
+  const configTaskType = 'security:telemetry-configuration';
+  const configTask = getTelemetryTask(tasks, configTaskType);
+  const runAfter = new Date();
+  await eventually(async () => {
+    await taskManagerPlugin.runSoon(configTask.getTaskId());
+  });
+
+  // wait until the task finishes
+  await eventually(async () => {
+    const hasRun = await taskManagerPlugin
+      .get(configTask.getTaskId())
+      .then((t) => new Date(t.state.lastExecutionTimestamp) > runAfter)
+      .catch(() => false);
+    expect(hasRun).toBe(true);
+  });
 }

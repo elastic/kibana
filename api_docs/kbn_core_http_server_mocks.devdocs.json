@@ -332,7 +332,15 @@
             "section": "def-server.OnPreResponseHandler",
             "text": "OnPreResponseHandler"
           },
-          "], unknown>; } & Omit<",
+          "], unknown>; getDeprecatedRoutes: jest.MockInstance<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RouterDeprecatedApiDetails",
+            "text": "RouterDeprecatedApiDetails"
+          },
+          "[], [], unknown>; } & Omit<",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -619,7 +627,25 @@
             "section": "def-server.OnPreResponseHandler",
             "text": "OnPreResponseHandler"
           },
-          "], unknown>; registerRouterAfterListening: jest.MockInstance<void, [router: ",
+          "], unknown>; getDeprecatedRoutes: jest.MockInstance<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RouterDeprecatedApiDetails",
+            "text": "RouterDeprecatedApiDetails"
+          },
+          "[], [], unknown>; registerOnPostValidation: jest.MockInstance<void, [cb: (req: ",
+          "CoreKibanaRequest",
+          "<unknown, unknown, unknown, any>, metadata: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.PostValidationMetadata",
+            "text": "PostValidationMetadata"
+          },
+          ") => void], unknown>; registerRouterAfterListening: jest.MockInstance<void, [router: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -635,7 +661,15 @@
             "section": "def-server.RequestHandlerContextBase",
             "text": "RequestHandlerContextBase"
           },
-          ">], unknown>; } & Omit<",
+          ">], unknown>; getRegisteredDeprecatedApis: jest.MockInstance<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RouterDeprecatedApiDetails",
+            "text": "RouterDeprecatedApiDetails"
+          },
+          "[], [], unknown>; } & Omit<",
           "InternalHttpServiceSetup",
           ", \"createRouter\" | \"basePath\" | \"auth\" | \"staticAssets\" | \"authRequestHeaders\"> & { auth: AuthMocked; basePath: BasePathMocked; staticAssets: InternalStaticAssetsMocked; createRouter: jest.MockedFunction<(path: string) => ",
           {
@@ -904,7 +938,7 @@
                   },
                   "<",
                   "RequestLog",
-                  "> | undefined; readonly method?: \"source\" | \"get\" | \"delete\" | \"options\" | \"search\" | \"link\" | \"head\" | \"post\" | \"put\" | \"patch\" | \"purge\" | \"unlink\" | \"copy\" | \"move\" | \"merge\" | \"subscribe\" | \"trace\" | \"lock\" | \"unsubscribe\" | \"report\" | \"acl\" | \"bind\" | \"checkout\" | \"connect\" | \"m-search\" | \"mkactivity\" | \"mkcalendar\" | \"mkcol\" | \"notify\" | \"propfind\" | \"proppatch\" | \"rebind\" | \"unbind\" | \"unlock\" | undefined; readonly mime?: string | undefined; readonly orig?: ",
+                  "> | undefined; readonly method?: \"source\" | \"get\" | \"delete\" | \"options\" | \"search\" | \"link\" | \"head\" | \"post\" | \"put\" | \"patch\" | \"purge\" | \"unlink\" | \"copy\" | \"move\" | \"merge\" | \"trace\" | \"subscribe\" | \"lock\" | \"unsubscribe\" | \"report\" | \"acl\" | \"bind\" | \"checkout\" | \"connect\" | \"m-search\" | \"mkactivity\" | \"mkcalendar\" | \"mkcol\" | \"notify\" | \"propfind\" | \"proppatch\" | \"rebind\" | \"unbind\" | \"unlock\" | undefined; readonly mime?: string | undefined; readonly orig?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -1104,7 +1138,7 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<(method: \"source\" | \"get\" | \"delete\" | \"options\" | \"search\" | \"link\" | \"head\" | \"post\" | \"put\" | \"patch\" | \"purge\" | \"unlink\" | \"copy\" | \"move\" | \"merge\" | \"subscribe\" | \"trace\" | \"lock\" | \"unsubscribe\" | \"report\" | ",
+                  "<(method: \"source\" | \"get\" | \"delete\" | \"options\" | \"search\" | \"link\" | \"head\" | \"post\" | \"put\" | \"patch\" | \"purge\" | \"unlink\" | \"copy\" | \"move\" | \"merge\" | \"trace\" | \"subscribe\" | \"lock\" | \"unsubscribe\" | \"report\" | ",
                   "HTTP_METHODS",
                   " | \"acl\" | \"bind\" | \"checkout\" | \"connect\" | \"m-search\" | \"mkactivity\" | \"mkcalendar\" | \"mkcol\" | \"notify\" | \"propfind\" | \"proppatch\" | \"rebind\" | \"unbind\" | \"unlock\") => void> | undefined; setUrl?: ",
                   {

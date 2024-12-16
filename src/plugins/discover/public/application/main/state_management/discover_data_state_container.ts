@@ -18,11 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import {
-  DEFAULT_COLUMNS_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
-  SEARCH_ON_PAGE_LOAD_SETTING,
-} from '@kbn/discover-utils';
+import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
@@ -44,13 +40,6 @@ export interface SavedSearchData {
 export type DataMain$ = BehaviorSubject<DataMainMsg>;
 export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
-export type DataFetch$ = Observable<{
-  options: {
-    reset: boolean;
-    fetchMore: boolean;
-  };
-  searchSessionId: string;
-}>;
 
 export type DataRefetch$ = Subject<DataRefetchMsg>;
 
@@ -95,10 +84,6 @@ export interface DiscoverDataStateContainer {
    */
   fetchMore: () => void;
   /**
-   * Observable emitting when a next fetch is triggered
-   */
-  fetch$: DataFetch$;
-  /**
    * Container of data observables (orchestration, data table, total hits, available fields)
    */
   data$: SavedSearchData;
@@ -106,6 +91,14 @@ export interface DiscoverDataStateContainer {
    * Observable triggering fetching data from ES
    */
   refetch$: DataRefetch$;
+  /**
+   * Emits when the chart should be fetched
+   */
+  fetchChart$: Observable<void>;
+  /**
+   * Used to disable the next fetch that would otherwise be triggered by a URL state change
+   */
+  disableNextFetchOnStateChange$: BehaviorSubject<boolean>;
   /**
    * Start subscribing to other observables that trigger data fetches
    */
@@ -159,6 +152,8 @@ export function getDataStateContainer({
   const { data, uiSettings, toastNotifications, profilesManager } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
+  const fetchChart$ = new Subject<void>();
+  const disableNextFetchOnStateChange$ = new BehaviorSubject(false);
 
   /**
    * The observable to trigger data fetching in UI
@@ -185,6 +180,12 @@ export function getDataStateContainer({
     documents$: new BehaviorSubject<DataDocumentsMsg>(initialState),
     totalHits$: new BehaviorSubject<DataTotalHitsMsg>(initialState),
   };
+  // This is debugging code, helping you to understand which messages are sent to the data observables
+  // Adding a debugger in the functions can be helpful to understand what triggers a message
+  // dataSubjects.main$.subscribe((msg) => addLog('dataSubjects.main$', msg));
+  // dataSubjects.documents$.subscribe((msg) => addLog('dataSubjects.documents$', msg));
+  // dataSubjects.totalHits$.subscribe((msg) => addLog('dataSubjects.totalHits$', msg););
+  // Add window.ELASTIC_DISCOVER_LOGGER = 'debug' to see messages in console
 
   let autoRefreshDone: AutoRefreshDoneFn | undefined | null = null;
   /**
@@ -230,7 +231,6 @@ export function getDataStateContainer({
             getAppState: appStateContainer.getState,
             getInternalState: internalStateContainer.getState,
             savedSearch: getSavedSearch(),
-            useNewFieldsApi: !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
           };
 
           abortController?.abort();
@@ -260,6 +260,22 @@ export function getDataStateContainer({
             query: appStateContainer.getState().query,
           });
 
+          const { resetDefaultProfileState, dataView } = internalStateContainer.getState();
+          const defaultProfileState = dataView
+            ? getDefaultProfileState({ profilesManager, resetDefaultProfileState, dataView })
+            : undefined;
+          const preFetchStateUpdate = defaultProfileState?.getPreFetchState();
+
+          if (preFetchStateUpdate) {
+            disableNextFetchOnStateChange$.next(true);
+            await appStateContainer.replaceUrlState(preFetchStateUpdate);
+            disableNextFetchOnStateChange$.next(false);
+          }
+
+          // Trigger chart fetching after the pre fetch state has been updated
+          // to ensure state values that would affect data fetching are set
+          fetchChart$.next();
+
           abortController = new AbortController();
           const prevAutoRefreshDone = autoRefreshDone;
           const fetchAllStartTime = window.performance.now();
@@ -272,36 +288,31 @@ export function getDataStateContainer({
               ...commonFetchDeps,
             },
             async () => {
-              const { resetDefaultProfileState, dataView } = internalStateContainer.getState();
-              const { esqlQueryColumns } = dataSubjects.documents$.getValue();
-              const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
-              const clearResetProfileState = () => {
-                internalStateContainer.transitions.setResetDefaultProfileState({
-                  columns: false,
-                  rowHeight: false,
-                });
-              };
+              const { resetDefaultProfileState: currentResetDefaultProfileState } =
+                internalStateContainer.getState();
 
-              if (!dataView) {
-                clearResetProfileState();
+              if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
                 return;
               }
 
-              const stateUpdate = getDefaultProfileState({
-                profilesManager,
-                resetDefaultProfileState,
+              const { esqlQueryColumns } = dataSubjects.documents$.getValue();
+              const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
+              const postFetchStateUpdate = defaultProfileState?.getPostFetchState({
                 defaultColumns,
-                dataView,
                 esqlQueryColumns,
               });
 
-              if (!stateUpdate) {
-                clearResetProfileState();
-                return;
+              if (postFetchStateUpdate) {
+                await appStateContainer.replaceUrlState(postFetchStateUpdate);
               }
 
-              await appStateContainer.replaceUrlState(stateUpdate);
-              clearResetProfileState();
+              // Clear the default profile state flags after the data fetching
+              // is done so refetches don't reset the state again
+              internalStateContainer.transitions.setResetDefaultProfileState({
+                columns: false,
+                rowHeight: false,
+                breakdownField: false,
+              });
             }
           );
 
@@ -371,9 +382,10 @@ export function getDataStateContainer({
   return {
     fetch: fetchQuery,
     fetchMore,
-    fetch$,
     data$: dataSubjects,
     refetch$,
+    fetchChart$,
+    disableNextFetchOnStateChange$,
     subscribe,
     reset,
     inspectorAdapters,

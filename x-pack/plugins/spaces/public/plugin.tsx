@@ -59,14 +59,11 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   }
 
   public setup(core: CoreSetup<PluginsStart, SpacesPluginStart>, plugins: PluginsSetup) {
-    const hasOnlyDefaultSpace = this.config.maxSpaces === 1;
-    const onCloud = plugins.cloud !== undefined && plugins.cloud.isCloudEnabled;
+    if (this.config.allowSolutionVisibility === undefined) {
+      throw new Error('allowSolutionVisibility has not been set in the Spaces plugin config.');
+    }
 
-    // We only allow "solution" to be set on cloud environments, not on prem
-    // unless the forceSolutionVisibility flag is set
-    const allowSolutionVisibility =
-      (onCloud && !this.isServerless && this.config.allowSolutionVisibility) ||
-      Boolean(this.config.experimental?.forceSolutionVisibility);
+    const hasOnlyDefaultSpace = this.config.maxSpaces === 1;
 
     this.spacesManager = new SpacesManager(core.http);
     this.spacesApi = {
@@ -77,12 +74,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       getActiveSpace$: () => this.spacesManager.onActiveSpaceChange$,
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
       hasOnlyDefaultSpace,
-      isSolutionViewEnabled: allowSolutionVisibility,
-    };
-
-    this.config = {
-      ...this.config,
-      allowSolutionVisibility,
+      isSolutionViewEnabled: this.config.allowSolutionVisibility,
     };
 
     registerSpacesEventTypes(core);
@@ -90,6 +82,17 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
 
     // Only skip setup of space selector and management service if serverless and only one space is allowed
     if (!(this.isServerless && hasOnlyDefaultSpace)) {
+      const getIsRoleManagementEnabled = async () => {
+        const { security } = await core.plugins.onSetup<{ security: SecurityPluginStart }>(
+          'security'
+        );
+        if (!security.found) {
+          throw new Error('Security plugin is not available as runtime dependency.');
+        }
+
+        return security.contract.authz.isRoleManagementEnabled;
+      };
+
       const getRolesAPIClient = async () => {
         const { security } = await core.plugins.onSetup<{ security: SecurityPluginStart }>(
           'security'
@@ -138,6 +141,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
           spacesManager: this.spacesManager,
           config: this.config,
           logger: this.initializerContext.logger.get(),
+          getIsRoleManagementEnabled,
           getRolesAPIClient,
           eventTracker: this.eventTracker,
           getPrivilegesAPIClient,
@@ -155,7 +159,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
 
     registerAnalyticsContext(core.analytics, this.spacesManager.onActiveSpaceChange$);
 
-    return { hasOnlyDefaultSpace, isSolutionViewEnabled: allowSolutionVisibility };
+    return { hasOnlyDefaultSpace, isSolutionViewEnabled: this.config.allowSolutionVisibility };
   }
 
   public start(core: CoreStart) {

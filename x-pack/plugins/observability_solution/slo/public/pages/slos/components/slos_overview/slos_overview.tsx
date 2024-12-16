@@ -17,10 +17,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_STALE_SLO_THRESHOLD_HOURS } from '../../../../../common/constants';
 import { SLOOverviewAlerts } from './slo_overview_alerts';
-import { useGetSettings } from '../../../slo_settings/use_get_settings';
+import { useGetSettings } from '../../../slo_settings/hooks/use_get_settings';
 import { useFetchSLOsOverview } from '../../hooks/use_fetch_slos_overview';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
-import { OverViewItem } from './overview_item';
+import { OverviewItem } from './overview_item';
 
 export function SLOsOverview() {
   const { state } = useUrlSearchState();
@@ -50,7 +50,7 @@ export function SLOsOverview() {
           </EuiTitle>
           <EuiSpacer size="xs" />
           <EuiFlexGroup gutterSize="xl" justifyContent="spaceBetween">
-            <OverViewItem
+            <OverviewItem
               title={data?.healthy}
               description={i18n.translate('xpack.slo.sLOsOverview.euiStat.healthyLabel', {
                 defaultMessage: 'Healthy',
@@ -62,7 +62,7 @@ export function SLOsOverview() {
                 defaultMessage: 'Click to filter SLOs by Healthy status.',
               })}
             />
-            <OverViewItem
+            <OverviewItem
               title={data?.violated}
               description={i18n.translate('xpack.slo.sLOsOverview.euiStat.violatedLabel', {
                 defaultMessage: 'Violated',
@@ -74,7 +74,7 @@ export function SLOsOverview() {
                 defaultMessage: 'Click to filter SLOs by Violated status.',
               })}
             />
-            <OverViewItem
+            <OverviewItem
               title={data?.noData}
               description={i18n.translate('xpack.slo.sLOsOverview.euiStat.noDataLabel', {
                 defaultMessage: 'No data',
@@ -86,7 +86,7 @@ export function SLOsOverview() {
                 defaultMessage: 'Click to filter SLOs by no data status.',
               })}
             />
-            <OverViewItem
+            <OverviewItem
               title={data?.degrading}
               description={i18n.translate('xpack.slo.sLOsOverview.euiStat.degradingLabel', {
                 defaultMessage: 'Degrading',
@@ -98,7 +98,7 @@ export function SLOsOverview() {
               })}
               titleColor={theme.colors.warningText}
             />
-            <OverViewItem
+            <OverviewItem
               title={data?.stale}
               description={i18n.translate('xpack.slo.sLOsOverview.euiStat.staleLabel', {
                 defaultMessage: 'Stale',

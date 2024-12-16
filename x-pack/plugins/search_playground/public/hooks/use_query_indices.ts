@@ -11,26 +11,41 @@ import { useKibana } from './use_kibana';
 import { APIRoutes } from '../types';
 
 export const useQueryIndices = (
-  query: string = ''
-): { indices: IndexName[]; isLoading: boolean } => {
+  {
+    query,
+    exact,
+  }: {
+    query?: string;
+    exact?: boolean;
+  } = { query: '', exact: false }
+): { indices: IndexName[]; isLoading: boolean; isFetched: boolean } => {
   const { services } = useKibana();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetched } = useQuery({
     queryKey: ['indices', query],
     queryFn: async () => {
-      const response = await services.http.get<{
-        indices: string[];
-      }>(APIRoutes.GET_INDICES, {
-        query: {
-          search_query: query,
-          size: 10,
-        },
-      });
+      try {
+        const response = await services.http.get<{
+          indices: string[];
+        }>(APIRoutes.GET_INDICES, {
+          query: {
+            search_query: query,
+            exact,
+            size: 50,
+          },
+        });
 
-      return response.indices;
+        return response.indices;
+      } catch (err) {
+        if (err?.response?.status === 404) {
+          return [];
+        }
+
+        throw err;
+      }
     },
     initialData: [],
   });
 
-  return { indices: data, isLoading };
+  return { indices: data, isLoading, isFetched };
 };

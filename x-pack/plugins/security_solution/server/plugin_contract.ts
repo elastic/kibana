@@ -12,10 +12,7 @@ import type {
 } from '@kbn/data-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { UsageCollectionSetup as UsageCollectionPluginSetup } from '@kbn/usage-collection-plugin/server';
-import type {
-  PluginSetupContract as AlertingPluginSetup,
-  PluginStartContract as AlertingPluginStart,
-} from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStartContract,
@@ -45,11 +42,12 @@ import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
 import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../common';
 
 export interface SecuritySolutionPluginSetupDependencies {
-  alerting: AlertingPluginSetup;
+  alerting: AlertingServerSetup;
   actions: ActionsPluginSetup;
   cases: CasesServerSetup;
   cloud: CloudSetup;
@@ -72,7 +70,7 @@ export interface SecuritySolutionPluginSetupDependencies {
 }
 
 export interface SecuritySolutionPluginStartDependencies {
-  alerting: AlertingPluginStart;
+  alerting: AlertingServerStart;
   cases?: CasesServerStart;
   cloud: CloudSetup;
   data: DataPluginStart;
@@ -88,6 +86,7 @@ export interface SecuritySolutionPluginStartDependencies {
   telemetry?: TelemetryPluginStart;
   share: SharePluginStart;
   actions: ActionsPluginStartContract;
+  inference: InferenceServerStart;
 }
 
 export interface SecuritySolutionPluginSetup {

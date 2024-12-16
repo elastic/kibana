@@ -303,8 +303,9 @@ export const ConfigSchema = schema.object({
     ),
   }),
 
+  // config/serverless.oblt.yml contains an override to false for OBLT projects
   roleManagementEnabled: offeringBasedSchema({
-    serverless: schema.boolean({ defaultValue: false }),
+    serverless: schema.boolean({ defaultValue: true }),
   }),
 
   // Setting only allowed in the Serverless offering
@@ -314,10 +315,8 @@ export const ConfigSchema = schema.object({
       roleMappingManagementEnabled: schema.boolean({ defaultValue: true }),
     }),
   }),
-  experimental: schema.object({
-    fipsMode: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
-    }),
+  fipsMode: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
   }),
 });
 

@@ -33,7 +33,6 @@ import {
   dashboardManagedBadge,
   getDashboardBreadcrumb,
   getDashboardTitle,
-  leaveConfirmStrings,
   unsavedChangesBadgeStrings,
 } from '../dashboard_app/_dashboard_app_strings';
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
@@ -48,7 +47,6 @@ import { getDashboardRecentlyAccessedService } from '../services/dashboard_recen
 import {
   coreServices,
   dataService,
-  embeddableService,
   navigationService,
   serverlessService,
 } from '../services/kibana_services';
@@ -89,10 +87,8 @@ export function InternalDashboardTopNav({
     allDataViews,
     focusedPanelId,
     fullScreenMode,
-    hasRunMigrations,
     hasUnsavedChanges,
     lastSavedId,
-    managed,
     query,
     title,
     viewMode,
@@ -100,10 +96,8 @@ export function InternalDashboardTopNav({
     dashboardApi.dataViews,
     dashboardApi.focusedPanelId$,
     dashboardApi.fullScreenMode$,
-    dashboardApi.hasRunMigrations$,
     dashboardApi.hasUnsavedChanges$,
     dashboardApi.savedObjectId,
-    dashboardApi.managed$,
     dashboardApi.query$,
     dashboardApi.panelTitle,
     dashboardApi.viewMode
@@ -122,13 +116,6 @@ export function InternalDashboardTopNav({
   useEffect(() => {
     dashboardTitleRef.current?.focus();
   }, [title, viewMode]);
-
-  /**
-   * Manage chrome visibility when dashboard is embedded.
-   */
-  useEffect(() => {
-    if (!embedSettings) coreServices.chrome.setIsVisible(viewMode !== 'print');
-  }, [embedSettings, viewMode]);
 
   /**
    * populate recently accessed, and set is chrome visible.
@@ -202,16 +189,6 @@ export function InternalDashboardTopNav({
    */
   useEffect(() => {
     onAppLeave((actions) => {
-      if (
-        viewMode === 'edit' &&
-        hasUnsavedChanges &&
-        !embeddableService.getStateTransfer().isTransferInProgress
-      ) {
-        return actions.confirm(
-          leaveConfirmStrings.getLeaveSubtitle(),
-          leaveConfirmStrings.getLeaveTitle()
-        );
-      }
       return actions.default();
     });
     return () => {
@@ -288,22 +265,9 @@ export function InternalDashboardTopNav({
         } as EuiToolTipProps,
       });
     }
-    if (hasRunMigrations && viewMode === 'edit') {
-      allBadges.push({
-        'data-test-subj': 'dashboardSaveRecommendedBadge',
-        badgeText: unsavedChangesBadgeStrings.getHasRunMigrationsText(),
-        title: '',
-        color: 'success',
-        iconType: 'save',
-        toolTipProps: {
-          content: unsavedChangesBadgeStrings.getHasRunMigrationsToolTipContent(),
-          position: 'bottom',
-        } as EuiToolTipProps,
-      });
-    }
 
     const { showWriteControls } = getDashboardCapabilities();
-    if (showWriteControls && managed) {
+    if (showWriteControls && dashboardApi.isManaged) {
       const badgeProps = {
         ...getManagedContentBadge(dashboardManagedBadge.getBadgeAriaLabel()),
         onClick: () => setIsPopoverOpen(!isPopoverOpen),
@@ -330,9 +294,7 @@ export function InternalDashboardTopNav({
                     <EuiLink
                       id="dashboardManagedContentPopoverButton"
                       onClick={() => {
-                        dashboardApi
-                          .runInteractiveSave(viewMode)
-                          .then((result) => maybeRedirect(result));
+                        dashboardApi.runInteractiveSave().then((result) => maybeRedirect(result));
                       }}
                       aria-label={dashboardManagedBadge.getDuplicateButtonAriaLabel()}
                     >
@@ -351,15 +313,7 @@ export function InternalDashboardTopNav({
       });
     }
     return allBadges;
-  }, [
-    hasUnsavedChanges,
-    viewMode,
-    hasRunMigrations,
-    managed,
-    isPopoverOpen,
-    dashboardApi,
-    maybeRedirect,
-  ]);
+  }, [hasUnsavedChanges, viewMode, isPopoverOpen, dashboardApi, maybeRedirect]);
 
   return (
     <div className="dashboardTopNav">

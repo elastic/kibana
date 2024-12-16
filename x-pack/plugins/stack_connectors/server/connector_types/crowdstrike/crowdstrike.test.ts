@@ -18,14 +18,18 @@ const onlineStatusPath = 'https://api.crowdstrike.com/devices/entities/online-st
 const actionsPath = 'https://api.crowdstrike.com/devices/entities/devices-actions/v2';
 describe('CrowdstrikeConnector', () => {
   const logger = loggingSystemMock.createLogger();
-  const connector = new CrowdstrikeConnector({
-    configurationUtilities: actionsConfigMock.create(),
-    connector: { id: '1', type: CROWDSTRIKE_CONNECTOR_ID },
-    config: { url: 'https://api.crowdstrike.com' },
-    secrets: { clientId: '123', clientSecret: 'secret' },
-    logger,
-    services: actionsMock.createServices(),
-  });
+  const connector = new CrowdstrikeConnector(
+    {
+      configurationUtilities: actionsConfigMock.create(),
+      connector: { id: '1', type: CROWDSTRIKE_CONNECTOR_ID },
+      config: { url: 'https://api.crowdstrike.com' },
+      secrets: { clientId: '123', clientSecret: 'secret' },
+      logger,
+      services: actionsMock.createServices(),
+    },
+    // @ts-expect-error passing a true value just for testing purposes
+    { crowdstrikeConnectorRTROn: true }
+  );
   let mockedRequest: jest.Mock;
   let connectorUsageCollector: ConnectorUsageCollector;
 
@@ -341,4 +345,185 @@ describe('CrowdstrikeConnector', () => {
       expect(mockedRequest).toHaveBeenCalledTimes(3);
     });
   });
+  describe('executeRTRCommand', () => {
+    it('should make a POST request to the correct URL with correct data', async () => {
+      const mockResponse = { data: obfuscatedRTRResponse };
+
+      mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
+      mockedRequest.mockResolvedValue(mockResponse);
+
+      const result = await connector.executeRTRCommand(
+        {
+          command: 'runscript -Raw',
+          endpoint_ids: ['id1', 'id2'],
+        },
+        connectorUsageCollector
+      );
+
+      expect(mockedRequest).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
+          url: 'https://api.crowdstrike.com/real-time-response/combined/batch-command/v1',
+          method: 'post',
+          data: expect.objectContaining({
+            command_string: 'runscript -Raw',
+            hosts: ['id1', 'id2'],
+          }),
+        }),
+        connectorUsageCollector
+      );
+
+      expect(result).toEqual(obfuscatedRTRResponse);
+    });
+  });
+
+  describe('batchActiveResponderExecuteRTR', () => {
+    it('should make a POST request to the correct URL with correct data', async () => {
+      const mockResponse = { data: obfuscatedRTRResponse };
+
+      mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
+      mockedRequest.mockResolvedValue(mockResponse);
+
+      const result = await connector.batchActiveResponderExecuteRTR(
+        {
+          command: 'runscript',
+          endpoint_ids: ['id1', 'id2'],
+        },
+        connectorUsageCollector
+      );
+
+      expect(mockedRequest).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          url: 'https://api.crowdstrike.com/oauth2/token',
+          method: 'post',
+        }),
+        connectorUsageCollector
+      );
+
+      expect(mockedRequest).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
+          url: 'https://api.crowdstrike.com/real-time-response/combined/batch-active-responder-command/v1',
+          method: 'post',
+        }),
+        connectorUsageCollector
+      );
+
+      expect(result).toEqual(obfuscatedRTRResponse);
+    });
+  });
+
+  describe('batchAdminExecuteRTR', () => {
+    it('should make a POST request to the correct URL with correct data', async () => {
+      const mockResponse = { data: obfuscatedRTRResponse };
+
+      mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
+      mockedRequest.mockResolvedValue(mockResponse);
+
+      const result = await connector.batchAdminExecuteRTR(
+        {
+          command: 'runscript',
+          endpoint_ids: ['id1', 'id2'],
+        },
+        connectorUsageCollector
+      );
+
+      expect(mockedRequest).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          url: 'https://api.crowdstrike.com/oauth2/token',
+          method: 'post',
+        }),
+        connectorUsageCollector
+      );
+
+      expect(mockedRequest).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
+          url: 'https://api.crowdstrike.com/real-time-response/combined/batch-admin-command/v1',
+          method: 'post',
+        }),
+        connectorUsageCollector
+      );
+
+      expect(result).toEqual(obfuscatedRTRResponse);
+    });
+  });
+
+  describe('getRTRCloudScripts', () => {
+    it('should make a GET request to the correct URL with correct params', async () => {
+      const mockResponse = { data: { scripts: [{}] } };
+
+      mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
+      mockedRequest.mockResolvedValueOnce(mockResponse);
+
+      const result = await connector.getRTRCloudScripts(
+        { ids: ['script1', 'script2'] },
+        connectorUsageCollector
+      );
+
+      expect(mockedRequest).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          url: 'https://api.crowdstrike.com/oauth2/token',
+          method: 'post',
+        }),
+        connectorUsageCollector
+      );
+
+      expect(mockedRequest).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          url: 'https://api.crowdstrike.com/real-time-response/entities/scripts/v1',
+          method: 'GET',
+        }),
+        connectorUsageCollector
+      );
+
+      expect(result).toEqual({ scripts: [{}] });
+    });
+  });
 });
+
+const obfuscatedRTRResponse = {
+  combined: {
+    resources: {
+      host1: {
+        session_id: 'abcdef123456',
+        task_id: 'task123',
+        complete: true,
+        stdout:
+          'bin \n boot \n dev \n etc \n home \n lib \n lib64 \n media \n mnt \n opt \n proc \n root \n run \n sbin \n srv \n sys \n tmp \n usr \n var \n',
+        stderr: '',
+        base_command: 'runscript',
+        aid: 'aid123',
+        errors: [{ message: 'Error example', code: 123 }],
+        query_time: 1234567890,
+        offline_queued: false,
+      },
+      host2: {
+        session_id: 'ghijkl789101',
+        task_id: 'task456',
+        complete: false,
+        stdout:
+          'bin \n boot \n dev \n etc \n home \n lib \n lib64 \n media \n mnt \n opt \n proc \n root \n run \n sbin \n srv \n sys \n tmp \n usr \n var \n',
+        stderr: '',
+        base_command: 'getscripts',
+        aid: 'aid456',
+        errors: null,
+        query_time: 9876543210,
+        offline_queued: true,
+      },
+    },
+  },
+  meta: {
+    query_time: 1234567890,
+    powered_by: 'CrowdStrike',
+    trace_id: 'trace-abcdef123456',
+  },
+  errors: [
+    { message: 'An example error', code: 500 },
+    { message: 'Another error example', code: 404 },
+  ],
+};

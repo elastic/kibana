@@ -11,17 +11,21 @@ import {
   EuiHeaderLinks,
   EuiHeaderSection,
   EuiHeaderSectionItem,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { LogsExplorerTabs } from '@kbn/discover-plugin/public';
 import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { filter, take } from 'rxjs';
-import { betaBadgeDescription, betaBadgeTitle } from '../../common/translations';
+import {
+  deprecationBadgeDescription,
+  deprecationBadgeGuideline,
+  deprecationBadgeTitle,
+} from '../../common/translations';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 import { ConnectedDiscoverLink } from './discover_link';
 import { FeedbackLink } from './feedback_link';
@@ -40,12 +44,13 @@ export const LogsExplorerTopNavMenu = () => {
 };
 
 const ProjectTopNav = () => {
+  const { euiTheme } = useEuiTheme();
   const { services } = useKibanaContextForPlugin();
 
   return (
     <EuiHeader
       data-test-subj="logsExplorerHeaderMenu"
-      css={{ boxShadow: 'none', backgroundColor: euiThemeVars.euiPageBackgroundColor }}
+      css={{ boxShadow: 'none', backgroundColor: euiTheme.colors.backgroundBasePlain }}
     >
       <EuiHeaderSection>
         <EuiHeaderSectionItem>
@@ -55,17 +60,11 @@ const ProjectTopNav = () => {
       <EuiHeaderSection
         side="right"
         css={css`
-          gap: ${euiThemeVars.euiSizeM};
+          gap: ${euiTheme.size.m};
         `}
       >
         <EuiHeaderSectionItem>
-          <EuiBetaBadge
-            size="s"
-            iconType="beta"
-            label={betaBadgeTitle}
-            tooltipContent={betaBadgeDescription}
-            alignment="middle"
-          />
+          <DeprecationNoticeBadge />
         </EuiHeaderSectionItem>
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
@@ -87,6 +86,7 @@ const ProjectTopNav = () => {
 };
 
 const ClassicTopNav = () => {
+  const { euiTheme } = useEuiTheme();
   const {
     services: {
       appParams: { setHeaderActionMenu },
@@ -112,18 +112,9 @@ const ClassicTopNav = () => {
           <EuiHeaderSection
             data-test-subj="logsExplorerHeaderMenu"
             css={css`
-              margin-left: ${euiThemeVars.euiSizeM};
+              margin-left: ${euiTheme.size.m};
             `}
           >
-            <EuiHeaderSectionItem>
-              <EuiBetaBadge
-                size="s"
-                iconType="beta"
-                label={betaBadgeTitle}
-                tooltipContent={betaBadgeDescription}
-                alignment="middle"
-              />
-            </EuiHeaderSectionItem>
             <EuiHeaderSectionItem>
               <FeedbackLink />
             </EuiHeaderSectionItem>
@@ -138,13 +129,16 @@ const ClassicTopNav = () => {
         chrome.setBreadcrumbsAppendExtension(previousAppendExtension);
       }
     };
-  }, [chrome, i18nStart, previousAppendExtension, theme]);
+  }, [chrome, i18nStart, previousAppendExtension, theme, euiTheme]);
 
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>
       <EuiHeaderSection data-test-subj="logsExplorerHeaderMenu">
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
+            <EuiHeaderSectionItem>
+              <DeprecationNoticeBadge />
+            </EuiHeaderSectionItem>
             <ConnectedDiscoverLink />
             <ConditionalVerticalRule Component={ConnectedDatasetQualityLink()} />
             <VerticalRule />
@@ -159,9 +153,9 @@ const ClassicTopNav = () => {
 };
 
 const VerticalRule = styled.span`
-  width: 1px;
+  width: ${(props) => props.theme.euiTheme.border.width.thin};
   height: 20px;
-  background-color: ${euiThemeVars.euiColorLightShade};
+  background-color: ${(props) => props.theme.euiTheme.colors.borderBaseSubdued};
 `;
 
 const ConditionalVerticalRule = ({ Component }: { Component: JSX.Element | null }) =>
@@ -171,3 +165,19 @@ const ConditionalVerticalRule = ({ Component }: { Component: JSX.Element | null 
       {Component}
     </>
   );
+
+const DeprecationNoticeBadge = () => (
+  <EuiBetaBadge
+    label={deprecationBadgeTitle}
+    color="subdued"
+    tooltipContent={
+      <>
+        {deprecationBadgeDescription}
+        <br />
+        <br />
+        {deprecationBadgeGuideline}
+      </>
+    }
+    alignment="middle"
+  />
+);

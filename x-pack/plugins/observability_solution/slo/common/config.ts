@@ -25,5 +25,5 @@ export const config = {
     experimental: true,
   },
 };
-export type SloConfig = TypeOf<typeof configSchema>;
-export type ExperimentalFeatures = SloConfig['experimental'];
+export type SLOConfig = TypeOf<typeof configSchema>;
+export type ExperimentalFeatures = SLOConfig['experimental'];

@@ -137,10 +137,8 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/stack-alerts-plugin",
     "@kbn/apm-data-access-plugin",
-    "@kbn/coloring",
     "@kbn/profiling-utils",
     "@kbn/profiling-data-access-plugin",
-    "@kbn/coloring",
     "@kbn/es",
     "@kbn/metrics-data-access-plugin",
     "@kbn/dataset-quality-plugin",
@@ -185,6 +183,13 @@
     "@kbn/cloud-security-posture-common",
     "@kbn/saved-objects-management-plugin",
     "@kbn/alerting-types",
-    "@kbn/ai-assistant-common"
+    "@kbn/ai-assistant-common",
+    "@kbn/core-deprecations-common",
+    "@kbn/usage-collection-plugin",
+    "@kbn/palettes",
+    "@kbn/sse-utils-server",
+    "@kbn/gen-ai-functional-testing",
+    "@kbn/integration-assistant-plugin",
+    "@kbn/core-elasticsearch-server"
   ]
 }

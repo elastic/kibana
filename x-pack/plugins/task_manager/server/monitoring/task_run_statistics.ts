@@ -45,6 +45,7 @@ interface FillPoolStat extends JsonObject {
   claim_duration: number[];
   claim_conflicts: number[];
   claim_mismatches: number[];
+  claim_stale_tasks: number[];
   result_frequency_percent_as_number: FillPoolResult[];
   persistence: TaskPersistence[];
 }
@@ -91,7 +92,6 @@ interface ResultFrequency extends JsonObject {
 export interface TaskPersistenceTypes<T extends JsonValue = number> extends JsonObject {
   [TaskPersistence.Recurring]: T;
   [TaskPersistence.NonRecurring]: T;
-  [TaskPersistence.Ephemeral]: T;
 }
 
 type ResultFrequencySummary = ResultFrequency & {
@@ -150,6 +150,7 @@ export function createTaskRunAggregator(
   const claimDurationQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const claimConflictsQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const claimMismatchesQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
+  const claimStaleTasksQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const polledTasksByPersistenceQueue =
     createRunningAveragedStat<TaskPersistence>(runningAverageWindowSize);
   const taskPollingEvents$: Observable<Pick<TaskRunStat, 'polling'>> = combineLatest([
@@ -161,9 +162,8 @@ export function createTaskRunAggregator(
           isOk<ClaimAndFillPoolResult, unknown>(taskEvent.event)
       ),
       map((taskEvent: TaskLifecycleEvent) => {
-        const { result, stats: { tasksClaimed, tasksUpdated, tasksConflicted } = {} } = (
-          taskEvent.event as unknown as Ok<ClaimAndFillPoolResult>
-        ).value;
+        const { result, stats: { tasksClaimed, tasksUpdated, tasksConflicted, staleTasks } = {} } =
+          (taskEvent.event as unknown as Ok<ClaimAndFillPoolResult>).value;
         const duration = (taskEvent?.timing?.stop ?? 0) - (taskEvent?.timing?.start ?? 0);
         return {
           polling: {
@@ -179,6 +179,9 @@ export function createTaskRunAggregator(
               isNumber(tasksClaimed) && isNumber(tasksUpdated)
                 ? claimMismatchesQueue(tasksUpdated - tasksClaimed)
                 : claimMismatchesQueue(),
+            claim_stale_tasks: isNumber(staleTasks)
+              ? claimStaleTasksQueue(staleTasks)
+              : claimStaleTasksQueue(),
             result_frequency_percent_as_number: resultFrequencyQueue(result),
           },
         };
@@ -243,7 +246,6 @@ export function createTaskRunAggregator(
           duration_by_persistence: {
             [TaskPersistence.Recurring]: [],
             [TaskPersistence.NonRecurring]: [],
-            [TaskPersistence.Ephemeral]: [],
           },
           result_frequency_percent_as_number: {},
           persistence: [],
@@ -258,6 +260,7 @@ export function createTaskRunAggregator(
           claim_duration: [],
           claim_conflicts: [],
           claim_mismatches: [],
+          claim_stale_tasks: [],
           result_frequency_percent_as_number: [],
           persistence: [],
         },
@@ -347,6 +350,7 @@ export function summarizeTaskRunStat(
       result_frequency_percent_as_number: pollingResultFrequency,
       claim_conflicts: claimConflicts,
       claim_mismatches: claimMismatches,
+      claim_stale_tasks: claimStaleTasks,
       persistence: pollingPersistence,
     },
     drift,
@@ -373,6 +377,7 @@ export function summarizeTaskRunStat(
         duration: calculateRunningAverage(pollingDuration as number[]),
         claim_conflicts: calculateRunningAverage(claimConflicts as number[]),
         claim_mismatches: calculateRunningAverage(claimMismatches as number[]),
+        claim_stale_tasks: calculateRunningAverage(claimStaleTasks as number[]),
         result_frequency_percent_as_number: {
           ...DEFAULT_POLLING_FREQUENCIES,
           ...calculateFrequency<FillPoolResult>(pollingResultFrequency as FillPoolResult[]),
@@ -394,7 +399,6 @@ export function summarizeTaskRunStat(
         persistence: {
           [TaskPersistence.Recurring]: 0,
           [TaskPersistence.NonRecurring]: 0,
-          [TaskPersistence.Ephemeral]: 0,
           ...calculateFrequency<TaskPersistence>(persistence),
         },
         result_frequency_percent_as_number: mapValues(

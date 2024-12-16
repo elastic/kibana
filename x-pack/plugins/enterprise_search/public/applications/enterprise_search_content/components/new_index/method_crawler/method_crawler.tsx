@@ -21,7 +21,6 @@ import {
   LICENSING_FEATURE,
 } from '../../../../shared/licensing_callout/licensing_callout';
 import { CreateCrawlerIndexApiLogic } from '../../../api/crawler/create_crawler_index_api_logic';
-import { CannotConnect } from '../../search_index/components/cannot_connect';
 import { NewSearchIndexTemplate } from '../new_search_index_template';
 
 import { MethodCrawlerLogic } from './method_crawler_logic';
@@ -42,11 +41,6 @@ export const MethodCrawler: React.FC = () => {
       {isGated && (
         <EuiFlexItem>
           <LicensingCallout feature={LICENSING_FEATURE.CRAWLER} />
-        </EuiFlexItem>
-      )}
-      {Boolean(errorConnectingMessage) && (
-        <EuiFlexItem>
-          <CannotConnect />
         </EuiFlexItem>
       )}
       <EuiFlexItem>

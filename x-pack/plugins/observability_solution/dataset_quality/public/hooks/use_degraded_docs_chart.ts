@@ -7,38 +7,21 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { fieldSupportsBreakdown } from '@kbn/unified-histogram-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { fieldSupportsBreakdown } from '@kbn/field-utils';
 import { DEFAULT_LOGS_DATA_VIEW } from '../../common/constants';
 import { useCreateDataView } from './use_create_dataview';
 import { useKibanaContextForPlugin } from '../utils';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
 import { getLensAttributes } from '../components/dataset_quality_details/overview/document_trends/degraded_docs/lens_attributes';
-import { useRedirectLink } from './use_redirect_link';
 import { useDatasetDetailsTelemetry } from './use_dataset_details_telemetry';
-import { useDatasetDetailsRedirectLinkTelemetry } from './use_redirect_link_telemetry';
-
-const exploreDataInLogsExplorerText = i18n.translate(
-  'xpack.datasetQuality.details.chartExploreDataInLogsExplorerText',
-  {
-    defaultMessage: 'Explore data in Logs Explorer',
-  }
-);
-
-const exploreDataInDiscoverText = i18n.translate(
-  'xpack.datasetQuality.details.chartExploreDataInDiscoverText',
-  {
-    defaultMessage: 'Explore data in Discover',
-  }
-);
 
 const openInLensText = i18n.translate('xpack.datasetQuality.details.chartOpenInLensText', {
   defaultMessage: 'Open in Lens',
 });
 
-const ACTION_EXPLORE_IN_LOGS_EXPLORER = 'ACTION_EXPLORE_IN_LOGS_EXPLORER';
 const ACTION_OPEN_IN_LENS = 'ACTION_OPEN_IN_LENS';
 
 export const useDegradedDocsChart = () => {
@@ -98,7 +81,8 @@ export const useDegradedDocsChart = () => {
   useEffect(() => {
     const dataStreamName = dataStream ?? DEFAULT_LOGS_DATA_VIEW;
     const datasetTitle =
-      integrationDetails?.integration?.datasets?.[datasetDetails.name] ?? datasetDetails.name;
+      integrationDetails?.integration?.integration?.datasets?.[datasetDetails.name] ??
+      datasetDetails.name;
 
     const lensAttributes = getLensAttributes({
       color: euiTheme.colors.danger,
@@ -112,7 +96,7 @@ export const useDegradedDocsChart = () => {
     euiTheme.colors.danger,
     setAttributes,
     dataStream,
-    integrationDetails?.integration?.datasets,
+    integrationDetails?.integration?.integration?.datasets,
     datasetDetails.name,
   ]);
 
@@ -154,56 +138,22 @@ export const useDegradedDocsChart = () => {
     };
   }, [openInLensCallback]);
 
-  const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
-    query: { language: 'kuery', query: '_ignored:*' },
-    navigationSource: navigationSources.Chart,
-  });
+  const extraActions: Action[] = [getOpenInLensAction];
 
-  const redirectLinkProps = useRedirectLink({
-    dataStreamStat: datasetDetails,
-    query: { language: 'kuery', query: '_ignored:*' },
-    timeRangeConfig: timeRange,
-    breakdownField: breakdownDataViewField?.name,
-    sendTelemetry,
-  });
-
-  const getOpenInLogsExplorerAction = useMemo(() => {
+  const breakdown = useMemo(() => {
     return {
-      id: ACTION_EXPLORE_IN_LOGS_EXPLORER,
-      type: 'link',
-      getDisplayName(): string {
-        return redirectLinkProps?.isLogsExplorerAvailable
-          ? exploreDataInLogsExplorerText
-          : exploreDataInDiscoverText;
-      },
-      getHref: async () => {
-        return redirectLinkProps.linkProps.href;
-      },
-      getIconType(): string | undefined {
-        return 'visTable';
-      },
-      async isCompatible(): Promise<boolean> {
-        return true;
-      },
-      async execute(): Promise<void> {
-        return redirectLinkProps.navigate();
-      },
-      order: 18,
-    };
-  }, [redirectLinkProps]);
-
-  const extraActions: Action[] = [getOpenInLensAction, getOpenInLogsExplorerAction];
-
-  return {
-    attributes,
-    dataView,
-    breakdown: {
       dataViewField: breakdownDataViewField,
       fieldSupportsBreakdown: breakdownDataViewField
         ? fieldSupportsBreakdown(breakdownDataViewField)
         : true,
       onChange: handleBreakdownFieldChange,
-    },
+    };
+  }, [breakdownDataViewField, handleBreakdownFieldChange]);
+
+  return {
+    attributes,
+    dataView,
+    breakdown,
     extraActions,
     isChartLoading,
     onChartLoading: handleChartLoading,
