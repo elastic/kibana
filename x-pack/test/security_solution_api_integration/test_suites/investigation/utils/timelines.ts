@@ -32,10 +32,7 @@ export const deleteTimelines = async (supertest: SuperTest.Agent): Promise<void>
     });
 };
 
-export const deleteTimeline = async (
-  supertest: SuperTest.Agent,
-  savedObjectId: string
-): Promise<void> =>
+export const deleteTimeline = async (supertest: SuperTest.Agent, savedObjectId: string) =>
   await supertest
     .delete(TIMELINE_URL)
     .set('kbn-xsrf', 'true')
