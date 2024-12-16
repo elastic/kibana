@@ -20,6 +20,13 @@ export const getInferenceServicesRoute = (router: IRouter) => {
   router.get(
     {
       path: `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/_inference/_services`,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out of authorization as it relies on ES authorization instead.',
+        },
+      },
       options: {
         access: 'internal',
       },

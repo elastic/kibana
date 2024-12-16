@@ -38,6 +38,13 @@ export function createConfigRoute({
   router.get(
     {
       path,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization as it uses the alerting client authorization.',
+        },
+      },
       validate: false,
       options: {
         access: 'internal',

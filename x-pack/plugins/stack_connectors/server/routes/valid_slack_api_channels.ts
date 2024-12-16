@@ -34,6 +34,13 @@ export const validSlackApiChannelsRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/_slack_api/channels/_valid`,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            "This route is opted out from authorization as it relies on Slack's own authorization.",
+        },
+      },
       validate: {
         body: bodySchema,
       },
