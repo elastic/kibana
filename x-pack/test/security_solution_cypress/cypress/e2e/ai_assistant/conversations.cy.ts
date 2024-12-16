@@ -48,8 +48,7 @@ import {
 } from '../../screens/ai_assistant';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
 
-// Failing: See https://github.com/elastic/kibana/issues/204167
-describe.skip('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => {
+describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteConnectors();
     deleteConversations();
@@ -147,7 +146,7 @@ describe.skip('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, (
       assertConnectorSelected(bedrockConnectorAPIPayload.name);
       assertMessageSent('goodbye');
     });
-    it.only('Correctly creates and titles new conversations, and allows title updates', () => {
+    it('Correctly creates and titles new conversations, and allows title updates', () => {
       visitGetStartedPage();
       openAssistant();
       createNewChat();
