@@ -775,7 +775,6 @@ x-pack/examples/triggers_actions_ui_example @elastic/response-ops
 x-pack/examples/ui_actions_enhanced_examples @elastic/appex-sharedux
 x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
 x-pack/packages/kbn-ai-assistant @elastic/search-kibana
-x-pack/packages/kbn-ai-assistant-common @elastic/search-kibana
 x-pack/packages/kbn-alerting-comparators @elastic/response-ops
 x-pack/packages/kbn-alerting-state-types @elastic/response-ops
 x-pack/packages/kbn-cloud-security-posture/common @elastic/kibana-cloud-security-posture
@@ -831,6 +830,8 @@ x-pack/platform/packages/private/ml/ui_actions @elastic/ml-ui
 x-pack/platform/packages/private/ml/url_state @elastic/ml-ui
 x-pack/platform/packages/private/ml/validators @elastic/ml-ui
 x-pack/platform/packages/private/rollup @elastic/kibana-management
+x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
+x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
@@ -2870,6 +2871,7 @@ src/platform/packages/private/shared-ux/page/kibana_no_data/types @elastic/appex
 src/platform/packages/private/shared-ux/prompt/no_data_views/impl @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/prompt/no_data_views/mocks @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/table_persist @elastic/appex-sharedux
+src/platform/packages/shared/chart_expressions/common @elastic/kibana-visualizations
 src/platform/packages/shared/cloud @elastic/kibana-core
 src/platform/packages/shared/content-management/content_editor @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_insights/content_insights_public @elastic/appex-sharedux
@@ -3052,8 +3054,6 @@ src/platform/packages/shared/shared-ux/prompt/no_data_views/types @elastic/appex
 src/platform/packages/shared/shared-ux/prompt/not_found @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/router/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/storybook/mock @elastic/appex-sharedux
-src/platform/packages/shared/Users/gsoldevila/Work/kibana-secondary/Users/gsoldevila/Work/kibana-secondary/src/core @elastic/kibana-core
-src/platform/packages/shared/Users/gsoldevila/Work/kibana-secondary/Users/gsoldevila/Work/kibana-secondary/src/plugins/chart_expressions/common @elastic/kibana-visualizations
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
