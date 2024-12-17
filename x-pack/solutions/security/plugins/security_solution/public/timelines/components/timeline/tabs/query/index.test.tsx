@@ -497,6 +497,53 @@ describe('query tab with unified timeline', () => {
     );
   });
 
+  const openDisplaySettings = async () => {
+    expect(screen.getByTestId('dataGridDisplaySelectorButton')).toBeVisible();
+
+    fireEvent.click(screen.getByTestId('dataGridDisplaySelectorButton'));
+
+    await waitFor(() => {
+      expect(
+        screen
+          .getAllByTestId('unifiedDataTableSampleSizeInput')
+          .find((el) => el.getAttribute('type') === 'number')
+      ).toBeVisible();
+    });
+  };
+
+  const updateSampleSize = async (sampleSize: number) => {
+    const sampleSizeInput = screen
+      .getAllByTestId('unifiedDataTableSampleSizeInput')
+      .find((el) => el.getAttribute('type') === 'number');
+
+    expect(sampleSizeInput).toBeVisible();
+
+    fireEvent.change((sampleSizeInput as HTMLElement), {
+      target: { value: sampleSize },
+    });
+  };
+
+  describe('controls', () => {
+    it(
+      'should reftech on sample size change',
+      async () => {
+        renderTestComponents();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+        });
+        expect(screen.queryByTestId('pagination-button-1')).not.toBeInTheDocument();
+
+        await openDisplaySettings();
+        await updateSampleSize(2);
+        await waitFor(() => {
+          expect(screen.getByTestId('pagination-button-1')).toBeVisible();
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+  });
+
   describe('columns', () => {
     it(
       'should move column left/right correctly ',
