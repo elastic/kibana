@@ -26,7 +26,7 @@ const DASHBOARD_PANELS_SESSION_KEY = 'dashboardPanels';
 const DASHBOARD_VIEWMODE_LOCAL_KEY = 'dashboardViewMode';
 
 // this key is named `panels` for BWC reasons, but actually contains the entire dashboard state
-const DASHBOARD_STATE_SESSION_KEY = 'dashboardStateManagerPanels';
+export const DASHBOARD_STATE_SESSION_KEY = 'dashboardStateManagerPanels';
 
 interface DashboardBackupServiceType {
   clearState: (id?: string) => void;
