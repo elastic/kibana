@@ -314,7 +314,7 @@ export const config: ServiceConfigDescriptor<HttpConfigType> = {
               `Set the protocol to 'http2' by updating ${fromPath}.protocol to 'http2' in your configuration.`,
             ],
           },
-          documentationUrl: docLinks.settings + '#server-protocol'
+          documentationUrl: docLinks.settings + '#server-protocol',
         });
       }
     },

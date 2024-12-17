@@ -34,7 +34,9 @@ describe('configuration deprecations', () => {
 
       const logs = loggingSystemMock.collect(mockLoggingSystem);
       expect(logs.warn.flat()).toHaveLength(1);
-      expect(logs.warn.flat()[0]).toEqual('TLS is not enabled, or the HTTP protocol is set to HTTP/1. Enabling TLS and using HTTP/2 improves security and performance.')
+      expect(logs.warn.flat()[0]).toEqual(
+        'TLS is not enabled, or the HTTP protocol is set to HTTP/1. Enabling TLS and using HTTP/2 improves security and performance.'
+      );
     });
   } else {
     it('fips is enabled and the default configuration has been overridden', () => {
