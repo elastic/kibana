@@ -69,8 +69,10 @@
     "xpack.licenseApiGuard": "platform/plugins/private/license_api_guard",
     "xpack.licenseMgmt": "platform/plugins/shared/license_management",
     "xpack.licensing": "plugins/licensing",
-    "xpack.lists": "plugins/lists",
-    "xpack.logstash": ["plugins/logstash"],
+    "xpack.lists": "solutions/security/plugins/lists",
+    "xpack.logstash": [
+      "plugins/logstash"
+    ],
     "xpack.main": "legacy/plugins/xpack_main",
     "xpack.maps": ["plugins/maps"],
     "xpack.metricsData": "plugins/observability_solution/metrics_data_access",
