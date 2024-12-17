@@ -7,7 +7,7 @@
 
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { InferenceConnector } from '../../../common/connectors';
+import type { InferenceConnector } from '@kbn/inference-common';
 
 export interface InferenceInvokeOptions {
   subAction: string;

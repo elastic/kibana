@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InferenceConnectorType } from '../../../common/connectors';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import { getInferenceAdapter } from './get_inference_adapter';
 import { openAIAdapter } from './openai';
 import { geminiAdapter } from './gemini';
