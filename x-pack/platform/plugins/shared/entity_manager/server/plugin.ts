@@ -163,6 +163,12 @@ export class EntityManagerServerPlugin
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
     }
 
+    // Setup v1 definitions index
+    installEntityManagerTemplates({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    }).catch((err) => this.logger.error(err));
+
     // Disable v1 built-in definitions
     disableBuiltInEntityDiscovery({ server: this.server! })
       .then(() => this.logger.info(`Disabled built-in entity discovery`))
@@ -171,9 +177,7 @@ export class EntityManagerServerPlugin
     // Setup v2 definitions index
     setupEntityDefinitionsIndex(core.elasticsearch.client, this.logger)
       .then(() => installBuiltInDefinitions(core.elasticsearch.client, this.logger))
-      .catch((error) => {
-        this.logger.error(error);
-      });
+      .catch((err) => this.logger.error(err));
 
     return {
       getScopedClient: async ({ request }: { request: KibanaRequest }) => {
