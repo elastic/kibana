@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Chart, DARK_THEME, Metric, MetricTrendShape, Settings } from '@elastic/charts';
+import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
 import { EuiPanel, EuiSpacer, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
 import {
@@ -30,6 +31,7 @@ import { MetricItemBody } from './metric_item/metric_item_body';
 import { MetricItemExtra } from './metric_item/metric_item_extra';
 import { MetricItemIcon } from './metric_item_icon';
 import { FlyoutParamProps } from './types';
+import { ClientPluginsStart } from '../../../../../../plugin';
 
 const METRIC_ITEM_HEIGHT = 160;
 
@@ -68,6 +70,7 @@ export const MetricItem = ({
     locationId: monitor.locationId,
   });
 
+  const { charts } = useKibana<ClientPluginsStart>().services;
   const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
 
   const dispatch = useDispatch();
@@ -125,8 +128,7 @@ export const MetricItem = ({
                 });
               }
             }}
-            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-            baseTheme={DARK_THEME}
+            baseTheme={charts.theme.useChartsBaseTheme()}
             locale={i18n.getLocale()}
           />
           <Metric
