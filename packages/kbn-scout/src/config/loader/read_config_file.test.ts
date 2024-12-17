@@ -8,7 +8,6 @@
  */
 
 import path from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
 import { Config } from '../config';
 import { readConfigFile } from './read_config_file';
 
@@ -25,12 +24,10 @@ describe('readConfigFile', () => {
   const resolvedPath = '/resolved/config/path';
   const mockPathResolve = path.resolve as jest.Mock;
   const mockConfigConstructor = Config as jest.Mock;
-  let mockLog: jest.Mocked<ToolingLog>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
-    mockLog = new ToolingLog() as jest.Mocked<ToolingLog>;
   });
 
   it(`should load and return a valid 'Config' instance when the config file exports 'servers'`, async () => {
