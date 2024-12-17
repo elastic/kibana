@@ -223,11 +223,11 @@ export function IntervalControlForm({
           }
         >
           <EuiComboBox
-            aria-label={i18n.translate('esql.flyout.values.placeholder', {
-              defaultMessage: 'Select the interval values or add a new one',
+            aria-label={i18n.translate('esql.flyout.intervalValues.placeholder', {
+              defaultMessage: 'Select the options or add a new one',
             })}
-            placeholder={i18n.translate('esql.flyout.values.placeholder', {
-              defaultMessage: 'Select the interval values or add a new one',
+            placeholder={i18n.translate('esql.flyout.intervalValues.placeholder', {
+              defaultMessage: 'Select the options or add a new one',
             })}
             options={availableIntervalOptions}
             selectedOptions={selectedIntervals}
