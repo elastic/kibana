@@ -15,7 +15,8 @@ import type { AgentPolicy } from '../types';
 
 import { MultipleAgentPoliciesSummaryLine } from './multiple_agent_policy_summary_line';
 
-describe('MultipleAgentPolicySummaryLine', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/200786
+describe.skip('MultipleAgentPolicySummaryLine', () => {
   let testRenderer: TestRenderer;
 
   const render = (agentPolicies: AgentPolicy[]) =>
