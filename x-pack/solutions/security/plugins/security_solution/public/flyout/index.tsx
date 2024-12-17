@@ -112,7 +112,7 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     key: DocumentDetailsSessionViewPanelKey,
     component: (props) => (
       <SessionViewPanelProvider {...(props as SessionViewPanelProps).params}>
-        <SessionViewPanel path={props.path as IsolateHostPanelProps['path']} />
+        <SessionViewPanel path={props.path as SessionViewPanelProps['path']} />
       </SessionViewPanelProvider>
     ),
   },

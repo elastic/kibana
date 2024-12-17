@@ -94,7 +94,7 @@ export const SessionView: FC = () => {
     [openPreviewPanel, eventDetailsIndex, scopeId, telemetry]
   );
 
-  const openDetails = useCallback(
+  const openDetailsInPreview = useCallback(
     (selectedProcess: Process | null) => {
       // We cannot pass the original Process object sent from the SessionView component
       // as it contains functions (that should not put into Redux)
@@ -143,7 +143,8 @@ export const SessionView: FC = () => {
         ...sessionViewConfig,
         isFullScreen: true,
         loadAlertDetails: openAlertDetailsPreview,
-        openDetails: (selectedProcess: Process | null) => openDetails(selectedProcess),
+        openDetailsInExpandableFlyout: (selectedProcess: Process | null) =>
+          openDetailsInPreview(selectedProcess),
         canReadPolicyManagement,
         resetJumpToEntityId: jumpToEntityId,
         resetJumpToCursor: jumpToCursor,

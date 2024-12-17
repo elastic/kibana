@@ -62,7 +62,7 @@ export const SessionView = ({
   loadAlertDetails,
   canReadPolicyManagement,
   trackEvent,
-  openDetails,
+  openDetailsInExpandableFlyout,
   resetJumpToEntityId,
   resetJumpToCursor,
 }: SessionViewDeps & { trackEvent: (name: SessionViewTelemetryKey) => void }) => {
@@ -123,11 +123,11 @@ export const SessionView = ({
 
       // used when SessionView is displayed in the expandable flyout
       // This refreshes the detailed panel rendered in the flyout preview panel
-      if (openDetails) {
-        openDetails(process);
+      if (openDetailsInExpandableFlyout) {
+        openDetailsInExpandableFlyout(process);
       }
     },
-    [openDetails]
+    [openDetailsInExpandableFlyout]
   );
 
   const onJumpToEvent = useCallback(
@@ -287,10 +287,10 @@ export const SessionView = ({
   }, [isDetailOpen, trackEvent]);
 
   const toggleDetailPanelInFlyout = useCallback(() => {
-    if (openDetails) {
-      openDetails(selectedProcess);
+    if (openDetailsInExpandableFlyout) {
+      openDetailsInExpandableFlyout(selectedProcess);
     }
-  }, [openDetails, selectedProcess]);
+  }, [openDetailsInExpandableFlyout, selectedProcess]);
 
   const onShowAlertDetails = useCallback(
     (alertUuid: string) => {
@@ -501,7 +501,7 @@ export const SessionView = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            {openDetails ? (
+            {openDetailsInExpandableFlyout ? (
               <EuiButtonIcon onClick={toggleDetailPanelInFlyout} iconType="expand" />
             ) : (
               <EuiButton
@@ -517,7 +517,7 @@ export const SessionView = ({
         </EuiFlexGroup>
       </EuiPanel>
       <EuiHorizontalRule margin="none" />
-      {openDetails ? (
+      {openDetailsInExpandableFlyout ? (
         <>
           {errorEmptyPrompt}
           {processTree}
