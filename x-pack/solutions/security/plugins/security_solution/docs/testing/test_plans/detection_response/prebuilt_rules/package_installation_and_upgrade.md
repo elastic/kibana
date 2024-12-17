@@ -227,6 +227,7 @@ When the Kibana upgrade is complete
 Then user should be able to install new prebuilt rules
 And delete installed prebuilt rules
 And upgrade installed prebuilt rules that have newer versions in Kibana version <B>
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 =======
 And the <A> instance contains already installed prebuilt rules
 When the upgrade is complete
@@ -238,6 +239,8 @@ Then user should be able to install new prebuilt rules
 And delete installed prebuilt rules
 And upgrade installed prebuilt rules that have newer versions in <B>
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
+=======
+>>>>>>> b19262ad8ea (fix):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 
 Examples:
   | A      | B     |
