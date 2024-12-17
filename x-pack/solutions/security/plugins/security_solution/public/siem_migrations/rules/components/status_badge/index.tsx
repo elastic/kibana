@@ -9,9 +9,10 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
 import {
   convertTranslationResultIntoText,
-  statusToColorMap,
+  useResultVisColors,
 } from '../../utils/translation_results';
 import {
   RuleMigrationStatusEnum,
@@ -31,13 +32,14 @@ interface StatusBadgeProps {
 
 export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
   ({ migrationRule, 'data-test-subj': dataTestSubj = 'translation-result' }) => {
+    const colors = useResultVisColors();
     // Installed
     if (migrationRule.elastic_rule?.id) {
       return (
         <EuiToolTip content={i18n.RULE_STATUS_INSTALLED}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="check" color={statusToColorMap.full} />
+              <EuiIcon type="check" color={colors[RuleTranslationResult.FULL]} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{i18n.RULE_STATUS_INSTALLED}</EuiFlexItem>
           </EuiFlexGroup>
@@ -61,7 +63,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
 
     const translationResult = migrationRule.translation_result ?? 'untranslatable';
     const displayValue = convertTranslationResultIntoText(translationResult);
-    const color = statusToColorMap[translationResult];
+    const color = colors[translationResult];
 
     return (
       <EuiToolTip content={displayValue}>

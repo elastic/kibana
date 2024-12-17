@@ -23,7 +23,7 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { PanelText } from '../../../../common/components/panel_text';
 import {
   convertTranslationResultIntoText,
-  statusToColorMap,
+  useResultVisColors,
 } from '../../utils/translation_results';
 import type { RuleMigrationTranslationStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
@@ -31,7 +31,6 @@ import { CenteredLoadingSpinner } from '../../../../common/components/centered_l
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import type { RuleMigrationStats } from '../../types';
 import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
-import { RuleMigrationsUploadMissingPanel } from './upload_missing_panel';
 import * as i18n from './translations';
 
 export interface MigrationResultPanelProps {
@@ -110,7 +109,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(({ mig
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <RuleMigrationsUploadMissingPanel migrationStats={migrationStats} spacerSizeTop="s" />
+        {/* TODO: uncomment when retry API is ready <RuleMigrationsUploadMissingPanel migrationStats={migrationStats} spacerSizeTop="s" /> */}
       </EuiPanel>
     </EuiPanel>
   );
@@ -120,6 +119,7 @@ MigrationResultPanel.displayName = 'MigrationResultPanel';
 const TranslationResultsChart = React.memo<{
   translationStats: RuleMigrationTranslationStats;
 }>(({ translationStats }) => {
+  const translationResultColors = useResultVisColors();
   const data = [
     {
       category: 'Results',
@@ -144,10 +144,10 @@ const TranslationResultsChart = React.memo<{
   ];
 
   const colors = [
-    statusToColorMap[RuleTranslationResult.FULL],
-    statusToColorMap[RuleTranslationResult.PARTIAL],
-    statusToColorMap[RuleTranslationResult.UNTRANSLATABLE],
-    'danger',
+    translationResultColors[RuleTranslationResult.FULL],
+    translationResultColors[RuleTranslationResult.PARTIAL],
+    translationResultColors[RuleTranslationResult.UNTRANSLATABLE],
+    translationResultColors.error,
   ];
 
   return (
@@ -173,30 +173,31 @@ TranslationResultsChart.displayName = 'TranslationResultsChart';
 const TranslationResultsTable = React.memo<{
   translationStats: RuleMigrationTranslationStats;
 }>(({ translationStats }) => {
+  const translationResultColors = useResultVisColors();
   const items = useMemo(() => {
     return [
       {
         title: convertTranslationResultIntoText(RuleTranslationResult.FULL),
         value: translationStats.rules.success.result.full,
-        color: statusToColorMap[RuleTranslationResult.FULL],
+        color: translationResultColors[RuleTranslationResult.FULL],
       },
       {
         title: convertTranslationResultIntoText(RuleTranslationResult.PARTIAL),
         value: translationStats.rules.success.result.partial,
-        color: statusToColorMap[RuleTranslationResult.PARTIAL],
+        color: translationResultColors[RuleTranslationResult.PARTIAL],
       },
       {
         title: convertTranslationResultIntoText(RuleTranslationResult.UNTRANSLATABLE),
         value: translationStats.rules.success.result.untranslatable,
-        color: statusToColorMap[RuleTranslationResult.UNTRANSLATABLE],
+        color: translationResultColors[RuleTranslationResult.UNTRANSLATABLE],
       },
       {
         title: i18n.RULE_MIGRATION_TRANSLATION_FAILED,
         value: translationStats.rules.failed,
-        color: 'danger',
+        color: translationResultColors.error,
       },
     ];
-  }, [translationStats]);
+  }, [translationStats, translationResultColors]);
 
   return (
     <EuiBasicTable
