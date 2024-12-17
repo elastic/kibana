@@ -50,6 +50,7 @@ export const getCasesFeatureV2 = (
         read: [observabilityFeatureId],
         update: [observabilityFeatureId],
         push: [observabilityFeatureId],
+        assignCase: [observabilityFeatureId],
       },
       savedObject: {
         all: [...filesSavedObjectTypes],
