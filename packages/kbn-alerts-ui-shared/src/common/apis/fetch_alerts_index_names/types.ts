@@ -8,7 +8,6 @@
  */
 
 import { HttpSetup } from '@kbn/core-http-browser';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
 
 export interface FetchAlertsIndexNamesParams {
   // Dependencies
@@ -16,7 +15,7 @@ export interface FetchAlertsIndexNamesParams {
 
   // Params
   /**
-   * Array of feature ids used for authorization and area-based filtering
+   * Array of rule type ids used for authorization and area-based filtering
    */
-  featureIds: ValidFeatureId[];
+  ruleTypeIds: string[];
 }

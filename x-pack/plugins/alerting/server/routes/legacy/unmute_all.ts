@@ -14,6 +14,7 @@ import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -32,6 +33,7 @@ export const unmuteAllAlertRoute = (
       validate: {
         params: paramSchema,
       },
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: isServerless ? 'internal' : 'public',
         summary: 'Unmute all alert instances',
@@ -53,7 +55,8 @@ export const unmuteAllAlertRoute = (
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
       trackLegacyRouteUsage('unmuteAll', usageCounter);
-      const rulesClient = (await context.alerting).getRulesClient();
+      const alertingContext = await context.alerting;
+      const rulesClient = await alertingContext.getRulesClient();
       const { id } = req.params;
       try {
         await rulesClient.unmuteAll({ id });

@@ -76,15 +76,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // check Build
       // > Dev Tools
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'dev_tools',
+        deepLinkId: 'dev_tools:console',
       });
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'dev_tools',
+        deepLinkId: 'dev_tools:console',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Dev Tools' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'dev_tools',
+        deepLinkId: 'dev_tools:console',
       });
       // > Playground
       await solutionNavigation.sidenav.clickLink({
@@ -261,6 +261,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Data' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Web crawlers' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Build' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dev Tools' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });

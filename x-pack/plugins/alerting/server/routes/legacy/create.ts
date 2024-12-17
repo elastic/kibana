@@ -20,6 +20,7 @@ import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { RouteOptions } from '..';
 import { countUsageOfPredefinedIds } from '../lib';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -62,6 +63,7 @@ export const createAlertRoute = ({
         ),
         body: bodySchema,
       },
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: isServerless ? 'internal' : 'public',
         summary: 'Create an alert',
@@ -84,7 +86,9 @@ export const createAlertRoute = ({
         if (!context.alerting) {
           return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
         }
-        const rulesClient = (await context.alerting).getRulesClient();
+
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const alert = req.body;
         const params = req.params;
         const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as RuleNotifyWhenType) : null;

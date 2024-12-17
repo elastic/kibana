@@ -6,3 +6,4 @@
  */
 
 export * from './src/components';
+export { useFetchGraphData } from './src/hooks';

@@ -155,6 +155,10 @@ export function ObservabilityAlertsCommonProvider({
     return await (await getQueryBar()).type(query);
   });
 
+  const clickOnQueryBar = retryOnStale.wrap(async () => {
+    return await (await getQueryBar()).click();
+  });
+
   const submitQuery = async (query: string) => {
     await typeInQueryBar(query);
     await testSubjects.click('querySubmitButton');
@@ -382,6 +386,7 @@ export function ObservabilityAlertsCommonProvider({
   return {
     getQueryBar,
     clearQueryBar,
+    clickOnQueryBar,
     closeAlertsFlyout,
     filterForValueButtonExists,
     getAlertsFlyout,

@@ -11,3 +11,6 @@ export const statusColors = {
   failed: euiThemeVars.euiColorVis9,
   unknown: euiThemeVars.euiColorLightShade,
 };
+
+export const HOST_NAME = 'host.name';
+export const USER_NAME = 'user.name';

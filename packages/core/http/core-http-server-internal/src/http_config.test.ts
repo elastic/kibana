@@ -517,9 +517,9 @@ describe('versioned', () => {
     ).toThrow(/failed validation/);
   });
 
-  it('defaults version resolution "none" when in dev', () => {
+  it('defaults version resolution "oldest" when in dev', () => {
     expect(config.schema.validate({}, { dev: true })).toMatchObject({
-      versioned: { versionResolution: 'none' },
+      versioned: { versionResolution: 'oldest' },
     });
   });
 });

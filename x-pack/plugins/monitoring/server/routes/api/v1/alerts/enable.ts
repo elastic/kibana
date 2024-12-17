@@ -30,6 +30,7 @@ export function enableAlertsRoute(server: MonitoringCore, npRoute: RouteDependen
         const actionContext = await context.actions;
 
         const alerts = RulesFactory.getAll();
+
         if (alerts.length) {
           const { isSufficientlySecure, hasPermanentEncryptionKey } = npRoute.alerting
             ?.getSecurityHealth
@@ -49,9 +50,10 @@ export function enableAlertsRoute(server: MonitoringCore, npRoute: RouteDependen
           }
         }
 
-        const rulesClient = alertingContext?.getRulesClient();
+        const rulesClient = await alertingContext?.getRulesClient();
         const actionsClient = actionContext?.getActionsClient();
         const types = actionContext?.listTypes();
+
         if (!rulesClient || !actionsClient || !types) {
           return response.ok({ body: undefined });
         }

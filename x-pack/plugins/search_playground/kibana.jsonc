@@ -18,7 +18,9 @@
       "actions",
       "data",
       "encryptedSavedObjects",
+      "licensing",
       "ml",
+      "features",
       "navigation",
       "share",
       "security",
@@ -29,6 +31,7 @@
       "cloud",
       "console",
       "usageCollection",
+      "searchNavigation",
     ],
     "requiredBundles": [
       "kibanaReact",

@@ -2,7 +2,10 @@
   "name": "Kibana",
   "build": {
     "dockerfile": "Dockerfile",
-    "context": ".."
+    "context": "..",
+    "args": {
+      "KBN_DIR": "${containerWorkspaceFolder}"
+    }
   },
   "customizations": {
     "vscode": {
@@ -23,8 +26,11 @@
     9230,
     9231
   ],
-  "postStartCommand": "/workspaces/kibana/.devcontainer/scripts/post_start.sh",
+  "postStartCommand": "${containerWorkspaceFolder}/.devcontainer/scripts/post_start.sh",
   "remoteUser": "vscode",
+  "containerEnv": {
+    "KBN_DIR": "${containerWorkspaceFolder}"
+  },
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "version": "latest",

@@ -46,6 +46,12 @@ const hasUserDataViewRouteFactory =
     router.versioned.get({ path, access: 'internal' }).addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'Authorization provided by saved objects client',
+          },
+        },
         validate: {
           request: {},
           response: {

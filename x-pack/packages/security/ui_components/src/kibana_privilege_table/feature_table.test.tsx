@@ -54,6 +54,7 @@ const setup = (config: TestConfig) => {
         kibanaPrivileges={kibanaPrivileges}
         onChange={onChange}
         onChangeAll={onChangeAll}
+        showAdditionalPermissionsMessage={true}
         canCustomizeSubFeaturePrivileges={config.canCustomizeSubFeaturePrivileges}
         privilegeIndex={config.privilegeIndex}
         allSpacesSelected={true}

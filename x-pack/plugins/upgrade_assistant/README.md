@@ -15,6 +15,7 @@ Some features of the UA are only needed when upgrading to a new major version. T
 * ML Snapshots (`featureSet.mlSnapshots`): Machine learning Upgrade mode can be toggled from outside Kibana, the purpose of this feature guard is to hide all ML related deprecations from the end user until the next major upgrade.
 When we want to enable ML model snapshot deprecation warnings again we need to change the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION` to something higher than 7.0.0 in the Elasticsearch code.
 * Migrating system indices (`featureSet.migrateSystemIndices`): Migrating system indices should only be enabled for major version upgrades. This config hides the second step from the UA UI for migrating system indices.
+* Reindex Data Streams (`featureSet.migrateDataStreams`): Migrating deprecated Data streams should only be enabled for major version upgrades. The purpose of this feature guard is to hide all data streams related deprecations from the end user until the next major upgrade.
 * Reindex corrective actions (`featureSet.reindexCorrectiveActions`): Deprecations with reindexing corrective actions are only enabled for major version upgrades. Currently, the reindex actions include some logic that is specific to the [8.0 upgrade](https://github.com/elastic/kibana/blob/main/x-pack/plugins/upgrade_assistant/server/lib/reindexing/index_settings.ts). End users could get into a bad situation if this is enabled before this logic is fixed.
 
 ## Deprecations
