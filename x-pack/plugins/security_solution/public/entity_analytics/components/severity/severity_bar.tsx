@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { EuiColorPaletteDisplay } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { RISK_SEVERITY_COLOUR } from '../../common/utils';
+import { useRiskSeverityColors } from '../../common/utils';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import type { SeverityCount } from './types';
 
@@ -31,21 +31,22 @@ type PalletteArray = PalletteObject[];
 export const SeverityBar: React.FC<{
   severityCount: SeverityCount;
 }> = ({ severityCount }) => {
+  const riskSeverityColor = useRiskSeverityColors();
   const palette = useMemo(
     () =>
-      (Object.keys(RISK_SEVERITY_COLOUR) as RiskSeverity[]).reduce(
+      (Object.keys(riskSeverityColor) as RiskSeverity[]).reduce(
         (acc: PalletteArray, status: RiskSeverity) => {
           const previousStop = acc.length > 0 ? acc[acc.length - 1].stop : 0;
           const newEntry: PalletteObject = {
             stop: previousStop + (severityCount[status] || 0),
-            color: RISK_SEVERITY_COLOUR[status],
+            color: riskSeverityColor[status],
           };
           acc.push(newEntry);
           return acc;
         },
         [] as PalletteArray
       ),
-    [severityCount]
+    [severityCount, riskSeverityColor]
   );
   return (
     <StyledEuiColorPaletteDisplay

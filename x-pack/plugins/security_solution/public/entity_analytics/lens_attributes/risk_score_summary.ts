@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import capitalize from 'lodash/capitalize';
-import { SEVERITY_UI_SORT_ORDER, RISK_SEVERITY_COLOUR, RISK_SCORE_RANGES } from '../common/utils';
+import { SEVERITY_UI_SORT_ORDER, RISK_SCORE_RANGES } from '../common/utils';
 import type { RiskSeverity } from '../../../common/search_strategy';
 import { RiskScoreEntity, RiskScoreFields } from '../../../common/search_strategy';
 
@@ -17,11 +17,12 @@ interface GetRiskScoreSummaryAttributesProps {
   spaceId?: string;
   severity?: RiskSeverity;
   riskEntity: RiskScoreEntity;
+  riskColors: { [k in RiskSeverity]: string };
 }
 
 export const getRiskScoreSummaryAttributes: (
   props: GetRiskScoreSummaryAttributesProps
-) => LensAttributes = ({ spaceId, query, severity, riskEntity }) => {
+) => LensAttributes = ({ spaceId, query, severity, riskEntity, riskColors }) => {
   const layerIds = [uuidv4(), uuidv4()];
   const internalReferenceId = uuidv4();
   const columnIds = [uuidv4(), uuidv4(), uuidv4()];
@@ -55,11 +56,11 @@ export const getRiskScoreSummaryAttributes: (
             rangeMax: null,
             progression: 'fixed',
             colorStops: SEVERITY_UI_SORT_ORDER.map((riskSeverity) => ({
-              color: RISK_SEVERITY_COLOUR[riskSeverity],
+              color: riskColors[riskSeverity],
               stop: RISK_SCORE_RANGES[riskSeverity].start,
             })),
             stops: SEVERITY_UI_SORT_ORDER.map((riskSeverity) => ({
-              color: RISK_SEVERITY_COLOUR[riskSeverity],
+              color: riskColors[riskSeverity],
               stop: RISK_SCORE_RANGES[riskSeverity].stop,
             })),
             continuity: 'above',
