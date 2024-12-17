@@ -307,11 +307,8 @@ export const useDiscoverHistogram = ({
       if (!skipRefetch.current) {
         if (source === 'discover') addLog('Unified Histogram - Discover refetch');
         if (source === 'lens') addLog('Unified Histogram - Lens suggestion refetch');
-        if (query === esqlQuery) {
-          unifiedHistogram.refetch();
-        }
+        unifiedHistogram.refetch();
       }
-
       skipRefetch.current = false;
     });
 
