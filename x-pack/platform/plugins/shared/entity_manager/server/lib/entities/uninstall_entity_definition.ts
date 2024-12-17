@@ -18,6 +18,9 @@ import { stopTransforms } from './stop_transforms';
 
 import { deleteTransforms } from './delete_transforms';
 import { EntityClient } from '../entity_client';
+import { EntityManagerServerSetup } from '../../types';
+import { deleteEntityDiscoveryAPIKey, readEntityDiscoveryAPIKey } from '../auth';
+import { getClientsFromAPIKey } from '../utils';
 
 export async function uninstallEntityDefinition({
   definition,
@@ -59,4 +62,25 @@ export async function uninstallBuiltInEntityDefinitions({
   );
 
   return definitions;
+}
+
+export async function disableBuiltInEntityDiscovery({
+  server,
+}: {
+  server: EntityManagerServerSetup;
+}) {
+  const apiKey = await readEntityDiscoveryAPIKey(server);
+  if (!apiKey) {
+    return;
+  }
+
+  const { clusterClient, soClient } = getClientsFromAPIKey({ apiKey, server });
+
+  const entityClient = new EntityClient({ clusterClient, soClient, logger: server.logger });
+  await uninstallBuiltInEntityDefinitions({ entityClient, deleteData: true });
+
+  await deleteEntityDiscoveryAPIKey(soClient);
+  await server.security.authc.apiKeys.invalidateAsInternalUser({
+    ids: [apiKey.id],
+  });
 }

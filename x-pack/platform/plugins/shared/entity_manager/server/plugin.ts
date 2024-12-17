@@ -16,13 +16,9 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { firstValueFrom } from 'rxjs';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
-import { builtInDefinitions } from './lib/entities/built_in';
-import { upgradeBuiltInEntityDefinitions } from './lib/entities/upgrade_entity_definition';
 import { EntityClient } from './lib/entity_client';
-import { installEntityManagerTemplates } from './lib/manage_index_templates';
 import { entityManagerRouteRepository } from './routes';
 import { EntityManagerRouteDependencies } from './routes/types';
 import { EntityDiscoveryApiKeyType, entityDefinition } from './saved_objects';
@@ -40,6 +36,7 @@ import {
   READ_ENTITIES_PRIVILEGE,
 } from './lib/v2/constants';
 import { installBuiltInDefinitions } from './lib/v2/definitions/install_built_in_definitions';
+import { disableBuiltInEntityDiscovery } from './lib/entities/uninstall_entity_definition';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityManagerServerPluginSetup {}
@@ -166,25 +163,10 @@ export class EntityManagerServerPlugin
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
     }
 
-    // Setup v1 definitions index
-    installEntityManagerTemplates({
-      esClient: core.elasticsearch.client.asInternalUser,
-      logger: this.logger,
-    })
-      .then(async () => {
-        // the api key validation requires a check against the cluster license
-        // which is lazily loaded. we ensure it gets loaded before the update
-        await firstValueFrom(plugins.licensing.license$);
-        const { success } = await upgradeBuiltInEntityDefinitions({
-          definitions: builtInDefinitions,
-          server: this.server!,
-        });
-
-        if (success) {
-          this.logger.info('Builtin definitions were successfully upgraded');
-        }
-      })
-      .catch((err) => this.logger.error(err));
+    // Disable v1 built-in definitions
+    disableBuiltInEntityDiscovery({ server: this.server! })
+      .then(() => this.logger.info(`Disabled built-in entity discovery`))
+      .catch((err) => this.logger.error(`Failed to disable built-in entity discovery: ${err}`));
 
     // Setup v2 definitions index
     setupEntityDefinitionsIndex(core.elasticsearch.client, this.logger)
