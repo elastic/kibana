@@ -156,25 +156,3 @@ export const getOnBeforeHook = (module: unknown, beforeSpecFilePath: string): Fu
 
   return module.onBeforeHook;
 };
-<<<<<<< HEAD:x-pack/plugins/security_solution/scripts/run_cypress/utils.ts
-=======
-
-/**
- * Sets the default log level for `ToolingLog` instances created by `createToolingLogger()`:
- * `x-pack/solutions/security/plugins/security_solution/common/endpoint/data_loaders/utils.ts:148`.
- * It will first check the NodeJs `process.env` to see if an Environment Variable was set
- * and then, if provided, it will use the value defined in the Cypress Config. file.
- */
-export const setDefaultToolingLoggingLevel = (defaultFallbackLoggingLevel?: string) => {
-  const logLevel =
-    process.env.TOOLING_LOG_LEVEL ||
-    process.env.CYPRESS_TOOLING_LOG_LEVEL ||
-    defaultFallbackLoggingLevel ||
-    '';
-
-  if (logLevel) {
-    createToolingLogger('info').info(`Setting tooling log level to [${logLevel}]`);
-    createToolingLogger.defaultLogLevel = logLevel as ToolingLogTextWriterConfig['level'];
-  }
-};
->>>>>>> da25d13a2ac (Sustainable Kibana Architecture: Move modules owned by `@elastic/security-solution` (#202851)):x-pack/solutions/security/plugins/security_solution/scripts/run_cypress/utils.ts
