@@ -8,14 +8,13 @@
  */
 
 import { createContext, useContext } from 'react';
-import { CustomMetrics } from './performance_context';
-
+import type { EventData } from './performance_context';
 export interface PerformanceApi {
   /**
    * Marks the end of the page ready state and measures the performance between the start of the page change and the end of the page ready state.
-   * @param customMetrics - Custom metrics to be included in the performance measure.
+   * @param eventData - Data to send with the performance measure, conforming the structure of a {@link EventData}.
    */
-  onPageReady(customMetrics?: CustomMetrics): void;
+  onPageReady(eventData?: EventData): void;
 }
 
 export const PerformanceContext = createContext<PerformanceApi | undefined>(undefined);
