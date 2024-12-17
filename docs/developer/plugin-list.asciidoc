@@ -864,7 +864,7 @@ to understand why a search request might be slow.
 Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/security_solution/README.md[securitySolution]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/security_solution/README.md[securitySolution]
 |Welcome to the Kibana Security Solution plugin! This README will go over getting started with development and testing.
 
 
