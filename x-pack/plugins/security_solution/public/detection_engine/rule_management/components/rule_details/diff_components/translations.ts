@@ -19,18 +19,17 @@ import {
   THREAT_INDEX_FIELD_LABEL,
   THREAT_MAPPING_FIELD_LABEL,
   HISTORY_WINDOW_SIZE_FIELD_LABEL,
+  DATA_SOURCE_FIELD_LABEL,
+  ALERT_SUPPRESSION_FIELD_LABEL,
+  INVESTIGATION_FIELDS_FIELD_LABEL,
 } from '../translations';
 
 /**
  * Used when fields have different display names or formats than their corresponding rule object fields
  */
 export const fieldToDisplayNameMap: Record<string, string> = {
-  data_source: i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.upgradeRuleFields.dataSourceLabel',
-    {
-      defaultMessage: 'Data source',
-    }
-  ),
+  alert_suppression: ALERT_SUPPRESSION_FIELD_LABEL,
+  data_source: DATA_SOURCE_FIELD_LABEL,
   note: i18n.translate('xpack.securitySolution.detectionEngine.rules.upgradeRuleFields.noteLabel', {
     defaultMessage: 'Investigation guide',
   }),
@@ -39,6 +38,7 @@ export const fieldToDisplayNameMap: Record<string, string> = {
   references: REFERENCES_FIELD_LABEL,
   threat_indicator_path: THREAT_INDICATOR_PATH_LABEL,
   index_patterns: INDEX_FIELD_LABEL,
+  investigation_fields: INVESTIGATION_FIELDS_FIELD_LABEL,
   data_view_id: DATA_VIEW_ID_FIELD_LABEL,
   threat: THREAT_FIELD_LABEL,
   eql_query: i18n.translate(
