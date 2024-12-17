@@ -82,4 +82,15 @@ export type SavedObjectsFieldMapping = EsMappingProperty &
      * to avoid type failures on all code using accessing them via `SavedObjectsFieldMapping.properties`.
      */
     properties?: Record<EsPropertyName, EsMappingProperty>;
+
+    /**
+     * @note Do not explicitly set `enabled`. Either use `dynamic: false` for
+     * objects or exclude this field from your mappings entirely.
+     */
+    enabled?: never;
+    /**
+     * @note Do not explicitly set `index`. Either use `dynamic: false` for
+     * objects or exclude this field from your mappings entirely.
+     */
+    index?: never;
   };
