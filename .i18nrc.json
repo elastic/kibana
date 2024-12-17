@@ -6,7 +6,7 @@
     "alertsUIShared": "packages/kbn-alerts-ui-shared/src",
     "alertingTypes": "packages/kbn-alerting-types",
     "apmOss": "src/plugins/apm_oss",
-    "autocomplete": "packages/kbn-securitysolution-autocomplete/src",
+    "autocomplete": "x-pack/solutions/security/packages/kbn-securitysolution-autocomplete/src",
     "avcBanner": "src/platform/packages/shared/kbn-avc-banner/src",
     "bfetch": "src/plugins/bfetch",
     "bfetchError": "packages/kbn-bfetch-error",
@@ -25,12 +25,13 @@
     "data": "src/plugins/data",
     "observabilityAlertDetails": "x-pack/solutions/observability/packages/alert_details",
     "dataViews": "src/plugins/data_views",
-    "defaultNavigation": [
-      "packages/default-nav",
-      "src/platform/packages/private/default-nav"
-    ],
+    "defaultNavigation": ["packages/default-nav", "src/platform/packages/private/default-nav"],
     "devTools": "src/platform/plugins/shared/dev_tools",
-    "discover": ["src/plugins/discover", "packages/kbn-discover-utils", "packages/kbn-discover-contextual-components"],
+    "discover": [
+      "src/plugins/discover",
+      "packages/kbn-discover-utils",
+      "packages/kbn-discover-contextual-components"
+    ],
     "savedSearch": "src/plugins/saved_search",
     "embeddableApi": "src/plugins/embeddable",
     "presentationPanel": "src/plugins/presentation_panel",
@@ -87,8 +88,8 @@
     "kibana-react": "src/plugins/kibana_react",
     "kibanaOverview": "src/plugins/kibana_overview",
     "lensFormulaDocs": "packages/kbn-lens-formula-docs",
-    "lists": "packages/kbn-securitysolution-list-utils/src",
-    "exceptionList-components": "packages/kbn-securitysolution-exception-list-components/src",
+    "lists": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src",
+    "exceptionList-components": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src",
     "management": [
       "src/platform/plugins/shared/management",
       "src/platform/packages/private/kbn-management",
@@ -120,11 +121,15 @@
     "searchResponseWarnings": "packages/kbn-search-response-warnings",
     "searchTypes": "packages/kbn-search-types",
     "securitySolutionPackages": [
-      "x-pack/solutions/security/packages"
+      "x-pack/solutions/security/packages/data_table",
+      "x-pack/solutions/security/packages/ecs_data_quality_dashboard",
+      "x-pack/solutions/security/packages/features",
+      "x-pack/solutions/security/packages/kbn-cloud-security-posture",
+      "x-pack/solutions/security/packages/navigation",
+      "x-pack/solutions/security/packages/side_nav",
+      "x-pack/solutions/security/packages/upselling"
     ],
-    "sharedPlatformPackages": [
-      "x-pack/platform/packages/shared/kbn-cloud-security-posture"
-    ],
+    "sharedPlatformPackages": ["x-pack/platform/packages/shared/kbn-cloud-security-posture"],
     "serverlessPackages": "packages/serverless",
     "sse": ["src/platform/packages/shared/kbn-sse-utils"],
     "coloring": "packages/kbn-coloring/src",
@@ -140,7 +145,7 @@
     "uiActionsExamples": "examples/ui_action_examples",
     "usageCollection": "src/plugins/usage_collection",
     "userProfileComponents": "packages/kbn-user-profile-components",
-    "utils": "packages/kbn-securitysolution-utils/src",
+    "utils": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src",
     "visDefaultEditor": "src/plugins/vis_default_editor",
     "visTypeGauge": "src/plugins/vis_types/gauge",
     "visTypeHeatmap": "src/plugins/vis_types/heatmap",

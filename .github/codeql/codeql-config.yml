@@ -78,8 +78,8 @@ paths-ignore:
   - x-pack/solutions/security/plugins/elastic_assistant/scripts
   - x-pack/plugins/event_log/scripts
   - x-pack/plugins/fleet/scripts
-  - x-pack/plugins/lists/scripts
-  - x-pack/plugins/lists/server/scripts
+  - x-pack/solutions/security/plugins/lists/scripts
+  - x-pack/solutions/security/plugins/lists/server/scripts
   - x-pack/plugins/observability_solution/*/scripts
   - x-pack/platform/plugins/shared/osquery/scripts
   - x-pack/plugins/rule_registry/scripts
