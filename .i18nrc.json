@@ -25,12 +25,13 @@
     "data": "src/plugins/data",
     "observabilityAlertDetails": "x-pack/solutions/observability/packages/alert_details",
     "dataViews": "src/plugins/data_views",
-    "defaultNavigation": [
-      "packages/default-nav",
-      "src/platform/packages/private/default-nav"
-    ],
+    "defaultNavigation": ["packages/default-nav", "src/platform/packages/private/default-nav"],
     "devTools": "src/platform/plugins/shared/dev_tools",
-    "discover": ["src/plugins/discover", "packages/kbn-discover-utils", "packages/kbn-discover-contextual-components"],
+    "discover": [
+      "src/plugins/discover",
+      "packages/kbn-discover-utils",
+      "packages/kbn-discover-contextual-components"
+    ],
     "savedSearch": "src/plugins/saved_search",
     "embeddableApi": "src/plugins/embeddable",
     "presentationPanel": "src/plugins/presentation_panel",
@@ -123,13 +124,12 @@
       "x-pack/solutions/security/packages/data_table",
       "x-pack/solutions/security/packages/ecs_data_quality_dashboard",
       "x-pack/solutions/security/packages/features",
+      "x-pack/solutions/security/packages/kbn-cloud-security-posture",
       "x-pack/solutions/security/packages/navigation",
       "x-pack/solutions/security/packages/side_nav",
       "x-pack/solutions/security/packages/upselling"
     ],
-    "sharedPlatformPackages": [
-      "x-pack/platform/packages/shared/kbn-cloud-security-posture"
-    ],
+    "sharedPlatformPackages": ["x-pack/platform/packages/shared/kbn-cloud-security-posture"],
     "serverlessPackages": "packages/serverless",
     "sse": ["src/platform/packages/shared/kbn-sse-utils"],
     "coloring": "packages/kbn-coloring/src",
