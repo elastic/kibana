@@ -151,45 +151,45 @@ export class Plugin implements InfraClientPluginClass {
           return [
             ...(logs.show
               ? [
-                  {
-                    label: logsTitle,
-                    sortKey: 200,
-                    entries: getLogsNavigationEntries({
-                      isLogsExplorerAccessible,
-                      config: this.config,
-                      routes: logRoutes,
-                    }),
-                  },
-                ]
+                {
+                  label: logsTitle,
+                  sortKey: 200,
+                  entries: getLogsNavigationEntries({
+                    isLogsExplorerAccessible,
+                    config: this.config,
+                    routes: logRoutes,
+                  }),
+                },
+              ]
               : []),
             ...(infrastructure.show
               ? [
-                  {
-                    label: metricsTitle,
-                    sortKey: 300,
-                    entries: [
-                      {
-                        label: inventoryTitle,
-                        app: 'metrics',
-                        path: '/inventory',
-                      },
-                      ...(this.config.featureFlags.metricsExplorerEnabled
-                        ? [
-                            {
-                              label: metricsExplorerTitle,
-                              app: 'metrics',
-                              path: '/explorer',
-                            },
-                          ]
-                        : []),
-                      {
-                        label: hostsTitle,
-                        app: 'metrics',
-                        path: '/hosts',
-                      },
-                    ],
-                  },
-                ]
+                {
+                  label: metricsTitle,
+                  sortKey: 300,
+                  entries: [
+                    {
+                      label: inventoryTitle,
+                      app: 'metrics',
+                      path: '/inventory',
+                    },
+                    ...(this.config.featureFlags.metricsExplorerEnabled
+                      ? [
+                        {
+                          label: metricsExplorerTitle,
+                          app: 'metrics',
+                          path: '/explorer',
+                        },
+                      ]
+                      : []),
+                    {
+                      label: hostsTitle,
+                      app: 'metrics',
+                      path: '/hosts',
+                    },
+                  ],
+                },
+              ]
               : []),
           ];
         })
@@ -262,14 +262,14 @@ export class Plugin implements InfraClientPluginClass {
         },
         ...(metricsExplorerEnabled
           ? [
-              {
-                id: 'metrics-explorer',
-                title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
-                  defaultMessage: 'Metrics Explorer',
-                }),
-                path: '/explorer',
-              },
-            ]
+            {
+              id: 'metrics-explorer',
+              title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
+                defaultMessage: 'Metrics Explorer',
+              }),
+              path: '/explorer',
+            },
+          ]
           : []),
         {
           id: 'settings',
@@ -386,11 +386,10 @@ export class Plugin implements InfraClientPluginClass {
     return startContract;
   }
 
-  stop() {}
+  stop() { }
 }
 
 const getLogsNavigationEntries = ({
-  isLogsExplorerAccessible,
   config,
   routes,
 }: {
@@ -401,15 +400,6 @@ const getLogsNavigationEntries = ({
   const entries: NavigationEntry[] = [];
 
   if (!config.featureFlags.logsUIEnabled) return entries;
-
-  if (isLogsExplorerAccessible) {
-    entries.push({
-      label: 'Explorer',
-      app: 'observability-logs-explorer',
-      path: '/',
-      isBetaFeature: true,
-    });
-  }
 
   // Display Stream nav entry when Logs Stream is enabled
   if (routes.stream) entries.push(createNavEntryFromRoute(routes.stream));
