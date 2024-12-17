@@ -333,6 +333,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
                   defaultMessage: 'Actions',
                 })}
                 color="text"
+                display="base"
                 iconType="boxesHorizontal"
                 onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
                 data-test-subj="mlExplorerAnomalyPanelMenu"
