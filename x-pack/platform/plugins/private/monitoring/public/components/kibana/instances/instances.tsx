@@ -46,7 +46,7 @@ import { formatLastSeenTimestamp } from '../format_last_seen_timestamp';
 import type { SetupMode } from '../../setup_mode/types';
 
 const tableCellSplitNumber = (theme: UseEuiTheme) => css`
-  font-size: ${euiFontSize(theme, 'm')};
+  font-size: ${euiFontSize(theme, 'm').fontSize};
 `;
 
 const getColumns = (

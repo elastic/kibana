@@ -15,7 +15,7 @@ import { Series } from './types';
 
 const tooltipLabelStyle = (theme: UseEuiTheme) => css`
   text-align: left;
-  font-size: ${euiFontSize(theme, 'xs')};
+  font-size: ${euiFontSize(theme, 'xs').fontSize};
   padding: ${theme.euiTheme.size.xs};
   word-wrap: break-word;
   white-space: normal;
@@ -24,7 +24,7 @@ const tooltipLabelStyle = (theme: UseEuiTheme) => css`
 
 const tooltipValueStyle = (theme: UseEuiTheme) => css`
   text-align: left;
-  font-size: ${euiFontSize(theme, 'xs')};
+  font-size: ${euiFontSize(theme, 'xs').fontSize};
   padding: ${theme.euiTheme.size.xs};
   word-wrap: break-word;
   white-space: normal;

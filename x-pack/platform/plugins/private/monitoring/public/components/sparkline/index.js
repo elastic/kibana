@@ -18,7 +18,7 @@ import { SparklineFlotChart } from './sparkline_flot_chart';
 const sparklineTooltipStyle = (theme) => css`
   font-weight: ${theme.euiTheme.font.weight.regular};
   background: ${transparentize(0.3, theme.euiTheme.colors.darkestShade)};
-  font-size: ${euiFontSize(theme, 'xs')};
+  font-size: ${euiFontSize(theme, 'xs').fontSize};
   padding: ${theme.euiTheme.size.xs};
   border-radius: ${theme.euiTheme.border.radius.medium};
   pointer-events: none;
@@ -42,7 +42,7 @@ const tooltipContainerStyle = ({ euiTheme }) => css`
 `;
 
 const tooltipCaretStyle = (theme) => css`
-  font-size: ${euiFontSize(theme, 'l')};
+  font-size: ${euiFontSize(theme, 'l').fontSize};
   color: ${transparentize(0.3, theme.euiTheme.colors.darkestShade)};
   display: none;
 `;
