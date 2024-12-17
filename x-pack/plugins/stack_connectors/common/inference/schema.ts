@@ -135,6 +135,8 @@ export const UnifiedChatCompleteParamsSchema = schema.object({
      */
     user: schema.maybe(schema.string()),
   }),
+  // abort signal from client
+  signal: schema.maybe(schema.any()),
 });
 
 export const UnifiedChatCompleteResponseSchema = schema.object({
