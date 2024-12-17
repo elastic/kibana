@@ -20,7 +20,7 @@ import { TelemetryQueue } from './queue';
 import type { MonitorUpdateTelemetryChannel, MonitorUpdateTelemetryChannelEvents } from './types';
 
 /**
- * Simplified version of https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/server/lib/telemetry/sender.ts
+ * Simplified version of https://github.com/elastic/kibana/blob/master/x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/sender.ts
  * Sends batched events to telemetry v3 api
  */
 export class TelemetryEventsSender {

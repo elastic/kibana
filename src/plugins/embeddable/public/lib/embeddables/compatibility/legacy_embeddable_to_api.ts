@@ -184,7 +184,6 @@ export const legacyEmbeddableToApi = (
   );
 
   const uuid = embeddable.id;
-  const parentApi = embeddable.parent;
   const disableTriggers = embeddable.getInput().disableTriggers;
 
   /**
@@ -248,7 +247,6 @@ export const legacyEmbeddableToApi = (
 
   return {
     api: {
-      parentApi: parentApi as LegacyEmbeddableAPI['parentApi'],
       uuid,
       disableTriggers: disableTriggers ?? false,
       viewMode,
