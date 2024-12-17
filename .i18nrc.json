@@ -11,7 +11,7 @@
     "bfetch": "src/plugins/bfetch",
     "bfetchError": "packages/kbn-bfetch-error",
     "cases": ["packages/kbn-cases-components"],
-    "cellActions": "packages/kbn-cell-actions",
+    "cellActions": "src/platform/packages/shared/kbn-cell-actions",
     "charts": "src/plugins/charts",
     "console": "src/platform/plugins/shared/console",
     "contentManagement": "packages/content-management",
@@ -23,7 +23,7 @@
     "domDragDrop": "packages/kbn-dom-drag-drop",
     "controls": "src/plugins/controls",
     "data": "src/plugins/data",
-    "observabilityAlertDetails": "x-pack/packages/observability/alert_details",
+    "observabilityAlertDetails": "x-pack/solutions/observability/packages/alert_details",
     "dataViews": "src/plugins/data_views",
     "defaultNavigation": [
       "packages/default-nav",

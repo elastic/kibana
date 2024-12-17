@@ -15,7 +15,7 @@ export const storybookAliases = {
   apm: 'x-pack/plugins/observability_solution/apm/.storybook',
   canvas: 'x-pack/plugins/canvas/storybook',
   cases: 'packages/kbn-cases-components/.storybook',
-  cell_actions: 'packages/kbn-cell-actions/.storybook',
+  cell_actions: 'src/platform/packages/shared/kbn-cell-actions/.storybook',
   cloud_security_posture_packages: 'x-pack/packages/kbn-cloud-security-posture/storybook/config',
   cloud: 'packages/cloud/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',
@@ -46,12 +46,12 @@ export const storybookAliases = {
   home: 'src/plugins/home/.storybook',
   infra: 'x-pack/plugins/observability_solution/infra/.storybook',
   inventory: 'x-pack/plugins/observability_solution/inventory/.storybook',
-  investigate: 'x-pack/plugins/observability_solution/investigate_app/.storybook',
+  investigate: 'x-pack/solutions/observability/plugins/investigate_app/.storybook',
   kibana_react: 'src/plugins/kibana_react/.storybook',
   lists: 'x-pack/plugins/lists/.storybook',
   logs_explorer: 'x-pack/plugins/observability_solution/logs_explorer/.storybook',
   management: 'packages/kbn-management/storybook/config',
-  observability: 'x-pack/plugins/observability_solution/observability/.storybook',
+  observability: 'x-pack/solutions/observability/plugins/observability/.storybook',
   observability_ai_assistant:
     'x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/.storybook',
   observability_ai_assistant_app:
