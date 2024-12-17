@@ -10,7 +10,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 import { Tags } from './tags';
 
-describe('Tags', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/204465
+describe.skip('Tags', () => {
   describe('when list is short', () => {
     it('renders a comma-separated list of tags', () => {
       const tags = ['tag1', 'tag2'];
