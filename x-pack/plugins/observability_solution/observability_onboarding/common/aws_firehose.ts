@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export const FIREHOSE_CLOUDFORMATION_STACK_NAME = 'Elastic-CloudwatchLogsAndMetricsToFirehose';
-export const FIREHOSE_STREAM_NAME = 'Elastic-CloudwatchLogsAndMetrics';
+export const FIREHOSE_CLOUDFORMATION_STACK_NAME = 'Elastic-Firehose';
+export const FIREHOSE_STREAM_NAME = 'Elastic-Cloudwatch';
 
 export const FIREHOSE_CLOUDFORMATION_TEMPLATE_URL =
   'https://elastic-cloudformation-templates.s3.amazonaws.com/v0.5.0/firehose_default_start.yml';
