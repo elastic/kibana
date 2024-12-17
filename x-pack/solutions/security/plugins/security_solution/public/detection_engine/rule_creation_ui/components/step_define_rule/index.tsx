@@ -92,6 +92,7 @@ import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 import { EsqlQueryEdit } from '../../../rule_creation/components/esql_query_edit';
 import { usePersistentQuery } from './use_persistent_query';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -192,6 +193,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const isThresholdRule = getIsThresholdRule(ruleType);
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
   const { getFields, reset, setFieldValue } = form;
+  const {
+    timelinePrivileges: { read: canAttachTimelineTemplates },
+  } = useUserPrivileges();
 
   // Callback for when user toggles between Data Views and Index Patterns
   const onChangeDataSource = useCallback(
@@ -793,7 +797,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             component={PickTimeline}
             componentProps={{
               idAria: 'detectionEngineStepDefineRuleTimeline',
-              isDisabled: isLoading,
+              isDisabled: isLoading || !canAttachTimelineTemplates,
               dataTestSubj: 'detectionEngineStepDefineRuleTimeline',
             }}
           />
