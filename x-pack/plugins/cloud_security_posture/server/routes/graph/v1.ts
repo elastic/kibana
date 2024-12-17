@@ -33,8 +33,7 @@ interface GraphEdge {
   action: string;
   targetIds: string[] | string;
   eventOutcome: string;
-  isOrigin: boolean;
-  isOriginAlert: boolean;
+  isAlert: boolean;
 }
 
 interface LabelEdges {
@@ -47,15 +46,10 @@ interface GraphContextServices {
   esClient: IScopedClusterClient;
 }
 
-interface OriginEventId {
-  id: string;
-  isAlert: boolean;
-}
-
 interface GetGraphParams {
   services: GraphContextServices;
   query: {
-    originEventIds: OriginEventId[];
+    eventIds: string[];
     spaceId?: string;
     start: string | number;
     end: string | number;
@@ -67,13 +61,11 @@ interface GetGraphParams {
 
 export const getGraph = async ({
   services: { esClient, logger },
-  query: { originEventIds, spaceId = 'default', start, end, esQuery },
+  query: { eventIds, spaceId = 'default', start, end, esQuery },
   showUnknownTarget,
   nodesLimit,
 }: GetGraphParams): Promise<Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>> => {
-  logger.trace(
-    `Fetching graph for [originEventIds: ${originEventIds.join(', ')}] in [spaceId: ${spaceId}]`
-  );
+  logger.trace(`Fetching graph for [eventIds: ${eventIds.join(', ')}] in [spaceId: ${spaceId}]`);
 
   const results = await fetchGraph({
     esClient,
@@ -81,7 +73,7 @@ export const getGraph = async ({
     logger,
     start,
     end,
-    originEventIds,
+    eventIds,
     esQuery,
   });
 
@@ -140,7 +132,7 @@ const fetchGraph = async ({
   logger,
   start,
   end,
-  originEventIds,
+  eventIds,
   showUnknownTarget,
   esQuery,
 }: {
@@ -148,21 +140,15 @@ const fetchGraph = async ({
   logger: Logger;
   start: string | number;
   end: string | number;
-  originEventIds: OriginEventId[];
+  eventIds: string[];
   showUnknownTarget: boolean;
   esQuery?: EsQuery;
 }): Promise<EsqlToRecords<GraphEdge>> => {
-  const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
   const query = `from logs-*
 | WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
-| EVAL isOrigin = ${
-    originEventIds.length > 0
-      ? `event.id in (${originEventIds.map((_id, idx) => `?og_id${idx}`).join(', ')})`
-      : 'false'
-  }
-| EVAL isOriginAlert = isOrigin AND ${
-    originAlertIds.length > 0
-      ? `event.id in (${originAlertIds.map((_id, idx) => `?og_alrt_id${idx}`).join(', ')})`
+| EVAL isAlert = ${
+    eventIds.length > 0
+      ? `event.id in (${eventIds.map((_id, idx) => `?al_id${idx}`).join(', ')})`
       : 'false'
   }
 | STATS badge = COUNT(*),
@@ -173,26 +159,19 @@ const fetchGraph = async ({
       action = event.action,
       targetIds = target.entity.id,
       eventOutcome = event.outcome,
-      isOrigin,
-      isOriginAlert
+      isAlert
 | LIMIT 1000
-| SORT isOrigin DESC`;
+| SORT isAlert DESC`;
 
   logger.trace(`Executing query [${query}]`);
 
-  const eventIds = originEventIds.map((originEventId) => originEventId.id);
   return await esClient.asCurrentUser.helpers
     .esql({
       columnar: false,
       filter: buildDslFilter(eventIds, showUnknownTarget, start, end, esQuery),
       query,
       // @ts-ignore - types are not up to date
-      params: [
-        ...originEventIds.map((originEventId, idx) => ({ [`og_id${idx}`]: originEventId.id })),
-        ...originEventIds
-          .filter((originEventId) => originEventId.isAlert)
-          .map((originEventId, idx) => ({ [`og_alrt_id${idx}`]: originEventId.id })),
-      ],
+      params: [...eventIds.map((id, idx) => ({ [`al_id${idx}`]: id }))],
     })
     .toRecords<GraphEdge>();
 };
@@ -259,7 +238,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       break;
     }
 
-    const { ips, hosts, users, actorIds, action, targetIds, isOriginAlert, eventOutcome } = record;
+    const { ips, hosts, users, actorIds, action, targetIds, isAlert, eventOutcome } = record;
     const actorIdsArray = castArray(actorIds);
     const targetIdsArray = castArray(targetIds);
     const unknownTargets: string[] = [];
@@ -278,7 +257,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
         nodesMap[id] = {
           id,
           label: unknownTargets.includes(id) ? 'Unknown' : undefined,
-          color: isOriginAlert ? 'danger' : 'primary',
+          color: isAlert ? 'danger' : 'primary',
           ...determineEntityNodeShape(
             id,
             castArray(ips ?? []),
@@ -301,7 +280,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
         const labelNode: LabelNodeDataModel = {
           id: edgeId + `label(${action})outcome(${eventOutcome})`,
           label: action,
-          color: isOriginAlert ? 'danger' : eventOutcome === 'failed' ? 'warning' : 'primary',
+          color: isAlert ? 'danger' : eventOutcome === 'failed' ? 'warning' : 'primary',
           shape: 'label',
         };
 

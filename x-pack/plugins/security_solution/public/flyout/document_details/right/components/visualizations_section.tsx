@@ -28,8 +28,7 @@ const KEY = 'visualizations';
  */
 export const VisualizationsSection = memo(() => {
   const expanded = useExpandSection({ title: KEY, defaultValue: false });
-  const { dataAsNestedObject, getFieldsData, dataFormattedForFieldBrowser } =
-    useDocumentDetailsContext();
+  const { dataAsNestedObject, getFieldsData } = useDocumentDetailsContext();
 
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
     ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
@@ -43,7 +42,6 @@ export const VisualizationsSection = memo(() => {
   const { hasGraphRepresentation } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
-    dataFormattedForFieldBrowser,
   });
 
   const shouldShowGraphPreview =

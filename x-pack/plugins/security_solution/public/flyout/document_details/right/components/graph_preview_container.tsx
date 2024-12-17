@@ -31,7 +31,6 @@ export const GraphPreviewContainer: React.FC = () => {
     scopeId,
     isPreview,
     isPreviewMode,
-    dataFormattedForFieldBrowser,
   } = useDocumentDetailsContext();
 
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
@@ -50,18 +49,16 @@ export const GraphPreviewContainer: React.FC = () => {
     eventIds,
     timestamp = new Date().toISOString(),
     hasGraphRepresentation,
-    isAlert,
   } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
-    dataFormattedForFieldBrowser,
   });
 
   // TODO: default start and end might not capture the original event
   const { isLoading, isError, data } = useFetchGraphData({
     req: {
       query: {
-        originEventIds: eventIds.map((id) => ({ id, isAlert })),
+        eventIds,
         start: `${timestamp}||-30m`,
         end: `${timestamp}||+30m`,
       },
