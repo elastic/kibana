@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { StreamDefinition } from '@kbn/streams-plugin/common';
-import React from 'react';
-import { StreamDetailEnrichingContent } from './page_content';
 
-export function StreamDetailEnriching({
-  definition,
-  refreshDefinition,
+import React from 'react';
+import { StreamDefinition } from '@kbn/streams-plugin/common';
+
+import { EnrichingEmptyPrompt } from './enriching_empty_prompt';
+
+export function StreamDetailEnrichingContent({
+  definition: _definition,
+  refreshDefinition: _refreshDefinition,
 }: {
   definition?: StreamDefinition;
   refreshDefinition: () => void;
 }) {
-  console.log(definition);
-
-  return <StreamDetailEnrichingContent />;
+  return <EnrichingEmptyPrompt onAddProcessor={() => {}} />;
 }
