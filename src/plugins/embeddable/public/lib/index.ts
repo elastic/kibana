@@ -15,4 +15,3 @@ export * from './state_transfer';
 export * from './reference_or_value_embeddable';
 export * from './self_styled_embeddable';
 export * from './filterable_embeddable';
-export * from './factory_migrations/run_factory_migrations';

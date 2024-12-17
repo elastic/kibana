@@ -26,11 +26,10 @@ import {
   HasLegacyLibraryTransforms,
   CanLockHoverActions,
 } from '@kbn/presentation-publishing';
+import { Adapters, HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import { Observable } from 'rxjs';
 import { EmbeddableInput } from '../../../common/types';
 import { EmbeddableHasTimeRange } from '../filterable_embeddable/types';
-import { HasInspectorAdapters } from '../inspector';
-import { Adapters } from '../types';
 
 export type EmbeddableError = ErrorLike;
 export type { EmbeddableInput };

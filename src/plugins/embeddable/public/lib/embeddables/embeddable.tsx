@@ -13,7 +13,7 @@ import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
 import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
-import { Adapters } from '../types';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import {
   EmbeddableError,
   EmbeddableOutput,

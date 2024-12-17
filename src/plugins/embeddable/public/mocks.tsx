@@ -21,10 +21,6 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
 import {
   EmbeddableInput,
-  EmbeddableSetup,
-  EmbeddableSetupDependencies,
-  EmbeddableStart,
-  EmbeddableStartDependencies,
   EmbeddableStateTransfer,
   FilterableEmbeddable,
   IEmbeddable,
@@ -32,6 +28,12 @@ import {
   SavedObjectEmbeddableInput,
   SelfStyledEmbeddable,
 } from '.';
+import type {
+  EmbeddableSetup,
+  EmbeddableSetupDependencies,
+  EmbeddableStart,
+  EmbeddableStartDependencies,
+} from './types';
 import { setKibanaServices } from './kibana_services';
 import { SelfStyledOptions } from './lib/self_styled_embeddable/types';
 import { EmbeddablePublicPlugin } from './plugin';
@@ -97,20 +99,12 @@ const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerAddFromLibraryType: jest.fn().mockImplementation(registerAddFromLibraryType),
     registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
-    registerEmbeddableFactory: jest.fn(),
-    registerEnhancement: jest.fn(),
   };
   return setupContract;
 };
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    getEmbeddableFactories: jest.fn(),
-    getEmbeddableFactory: jest.fn(),
-    telemetry: jest.fn(),
-    extract: jest.fn(),
-    inject: jest.fn(),
-    getAllMigrations: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
   };
   return startContract;

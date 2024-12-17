@@ -7,26 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Adapters } from './inspector';
-
-export interface Trigger {
-  id: string;
-  title?: string;
-  description?: string;
-}
-
-export interface PropertySpec {
-  displayName: string;
-  accessPath: string;
-  id: string;
-  description: string;
-  value?: string;
-}
 export { ViewMode } from '../../common/types';
-export type { Adapters };
-
-export interface CommonlyUsedRange {
-  from: string;
-  to: string;
-  display: string;
-}

@@ -17,16 +17,13 @@ export {
   CELL_VALUE_TRIGGER,
   contextMenuTrigger,
   CONTEXT_MENU_TRIGGER,
-  defaultEmbeddableFactoryProvider,
   Embeddable,
-  EmbeddableFactoryNotFoundError,
   EmbeddableStateTransfer,
   ErrorEmbeddable,
   genericEmbeddableInputIsEqual,
   isContextMenuTriggerContext,
   isEmbeddable,
   isErrorEmbeddable,
-  isExplicitInputWithAttributes,
   isFilterableEmbeddable,
   isMultiValueClickTriggerContext,
   isRangeSelectTriggerContext,
@@ -44,31 +41,23 @@ export {
   PANEL_BADGE_TRIGGER,
   PANEL_HOVER_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
-  runEmbeddableFactoryMigrations,
   SELECT_RANGE_TRIGGER,
   shouldFetch$,
   shouldRefreshFilterCompareOptions,
   VALUE_CLICK_TRIGGER,
   ViewMode,
-  withEmbeddableSubscription,
 } from './lib';
 export type {
-  Adapters,
   CellValueContext,
   ChartActionContext,
   EmbeddableContext,
   EmbeddableEditorState,
-  EmbeddableFactory,
-  EmbeddableFactoryDefinition,
   EmbeddableInput,
-  EmbeddableInstanceConfiguration,
   EmbeddableOutput,
   EmbeddablePackageState,
   FilterableEmbeddable,
   IEmbeddable,
   MultiValueClickContext,
-  OutputSpec,
-  PropertySpec,
   RangeSelectContext,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
@@ -77,11 +66,8 @@ export type {
 } from './lib';
 export type {
   EmbeddableSetup,
-  EmbeddableSetupDependencies,
   EmbeddableStart,
-  EmbeddableStartDependencies,
-} from './plugin';
-export type { EnhancementRegistryDefinition } from './types';
+} from './types';
 
 export {
   ReactEmbeddableRenderer,
@@ -92,10 +78,5 @@ export {
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
-
-export {
-  embeddableInputToSubject,
-  embeddableOutputToSubject,
-} from './lib/embeddables/compatibility/embeddable_compatibility_utils';
 
 export { COMMON_EMBEDDABLE_GROUPING } from './lib/embeddables/common/constants';
