@@ -23,7 +23,16 @@ function formatHit(hit: { [key: string]: {} }) {
 
 export function registerLoadRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
-    { path: addBasePath('/settings/{indexName}'), validate: { params: paramsSchema } },
+    {
+      path: addBasePath('/settings/{indexName}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: { params: paramsSchema },
+    },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { indexName } = request.params as typeof paramsSchema.type;

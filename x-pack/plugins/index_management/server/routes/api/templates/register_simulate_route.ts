@@ -16,6 +16,12 @@ export function registerSimulateRoute({ router, lib: { handleEsError } }: RouteD
   router.post(
     {
       path: addBasePath('/index_templates/simulate/{templateName?}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.nullable(bodySchema),
         params: schema.object({ templateName: schema.maybe(schema.string()) }),
