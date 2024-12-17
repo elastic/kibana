@@ -39,6 +39,14 @@ const getPipeline = (filename: string, removeSteps = true) => {
       return;
     }
 
+    const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
+    if (onlyRunQuickChecks) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
+      console.log('Isolated changes to renovate.json. Skipping main PR pipeline.');
+      return;
+    }
+
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
