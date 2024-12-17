@@ -36,10 +36,11 @@ export const SearchLabsBanner: React.FC = () => {
     <EuiPanel
       hasBorder
       hasShadow
-      color="success"
+      color="accentSecondary"
       css={css`
         background-image: url(${backgroundImagePath});
         background-repeat: no-repeat;
+        background-size: cover;
       `}
     >
       <SearchLabsLogo

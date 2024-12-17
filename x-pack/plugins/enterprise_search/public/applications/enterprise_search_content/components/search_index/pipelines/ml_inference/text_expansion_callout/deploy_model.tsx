@@ -38,12 +38,12 @@ export const DeployModel = ({
   const { createTextExpansionModel } = useActions(TextExpansionCalloutLogic);
 
   return (
-    <EuiCallOut color="success">
+    <EuiCallOut color="primary">
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiBadge color="success">
+              <EuiBadge color="primary">
                 <FormattedMessage
                   id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.titleBadge"
                   defaultMessage="New"
@@ -51,7 +51,7 @@ export const DeployModel = ({
               </EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow>
-              <EuiText color="success" size="xs">
+              <EuiText color="primary" size="xs">
                 <h3>
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.title',
@@ -87,7 +87,7 @@ export const DeployModel = ({
               >
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    color="success"
+                    color="primary"
                     data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-textExpansionCallOut-deployModel`}
                     disabled={isCreateButtonDisabled}
                     iconType="launch"

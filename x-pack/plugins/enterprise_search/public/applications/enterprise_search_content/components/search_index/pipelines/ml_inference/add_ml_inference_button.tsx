@@ -79,7 +79,7 @@ const AddButton: React.FC<{
   <EuiButton
     fullWidth
     data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addInferencePipeline`}
-    color={disabled ? undefined : 'success'}
+    color={disabled ? undefined : 'primary'}
     disabled={disabled}
     iconType={disabled ? 'lock' : 'plusInCircle'}
     onClick={onClick}
