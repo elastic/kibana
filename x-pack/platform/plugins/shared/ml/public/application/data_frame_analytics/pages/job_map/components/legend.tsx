@@ -43,10 +43,10 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJob
   const euiColorFullShade = euiTheme.colors.fullShade;
   const euiColorGhost = euiTheme.colors.ghost;
   const euiColorWarning = euiTheme.colors.warning;
-  const euiBorderThin = euiTheme.border.thin;
+  const euiBorderThin = euiTheme.border.width.thin;
   const euiBorderRadius = euiTheme.border.radius.medium;
   const euiBorderRadiusSmall = euiTheme.border.radius.small;
-  const euiBorderWidthThick = euiTheme.border.thick;
+  const euiBorderWidthThick = euiTheme.border.width.thick;
   const euiPageBackgroundColor = euiTheme.colors.backgroundBasePlain;
 
   // Amsterdam: euiTheme.colors.vis.euiColorVis2
