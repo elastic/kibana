@@ -33,6 +33,7 @@ jest.mock('./epm/elasticsearch/template/install', () => {
     ...jest.requireActual('./epm/elasticsearch/template/install'),
   };
 });
+jest.mock('./backfill_agentless');
 
 const mockedMethodThrowsError = (mockFn: jest.Mock) =>
   mockFn.mockImplementation(() => {
