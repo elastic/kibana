@@ -66,9 +66,6 @@ There are three common alert statuses:
 ====
 An alert can also be in a "flapping" state when it is switching repeatedly between active and recovered states.
 This state is possible only if you have enabled alert flapping detection in *{stack-manage-app} > {rules-ui} > Settings*.
-For each space, you can choose a look back window and threshold that are used to determine whether alerts are flapping.
-For example, you can specify that the alert must change status at least 6 times in the last 10 runs.
-If the rule has actions that run when the alert status changes, those actions are suppressed while the alert is flapping.
 ====
 
 
