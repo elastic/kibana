@@ -83,6 +83,7 @@ export interface ChatClient {
   ) => Promise<EvaluationResult>;
   getResults: () => EvaluationResult[];
   onResult: (cb: (result: EvaluationResult) => void) => () => void;
+  setScopes: (scope: AssistantScope[]) => void;
 }
 
 export class KibanaClient {
@@ -233,6 +234,18 @@ export class KibanaClient {
     }
   }
 
+  getMessages(message: string | Array<Message['message']>): Array<Message['message']> {
+    if (typeof message === 'string') {
+      return [
+        {
+          content: message,
+          role: MessageRole.User,
+        },
+      ];
+    }
+    return message;
+  }
+
   createChatClient({
     connectorId,
     evaluationConnectorId,
@@ -246,22 +259,11 @@ export class KibanaClient {
     suite?: Mocha.Suite;
     scopes: AssistantScope[];
   }): ChatClient {
-    function getMessages(message: string | Array<Message['message']>): Array<Message['message']> {
-      if (typeof message === 'string') {
-        return [
-          {
-            content: message,
-            role: MessageRole.User,
-          },
-        ];
-      }
-      return message;
-    }
-
     const that = this;
 
     let currentTitle: string = '';
     let firstSuiteName: string = '';
+    let currentScopes = scopes;
 
     if (suite) {
       suite.beforeEach(function () {
@@ -364,7 +366,7 @@ export class KibanaClient {
       that.log.info('Chat', name);
 
       const chat$ = defer(() => {
-        that.log.debug(`Calling chat API`);
+        that.log.info('Calling the chat API...');
         const params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat'>['params']['body'] =
           {
             name,
@@ -372,7 +374,7 @@ export class KibanaClient {
             connectorId: connectorIdOverride || connectorId,
             functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
             functionCall,
-            scopes,
+            scopes: currentScopes,
           };
 
         return that.axios.post(
@@ -406,7 +408,7 @@ export class KibanaClient {
     return {
       chat: async (message) => {
         const messages = [
-          ...getMessages(message).map((msg) => ({
+          ...this.getMessages(message).map((msg) => ({
             message: msg,
             '@timestamp': new Date().toISOString(),
           })),
@@ -414,7 +416,7 @@ export class KibanaClient {
         return chat('chat', { messages, functions: [] });
       },
       complete: async (...args) => {
-        that.log.info(`Complete`);
+        that.log.debug('Calling the chat complete API...');
         let messagesArg: StringOrMessageList | undefined;
         let conversationId: string | undefined;
         let options: Options = {};
@@ -446,7 +448,7 @@ export class KibanaClient {
         }
 
         const messages = [
-          ...getMessages(messagesArg!).map((msg) => ({
+          ...this.getMessages(messagesArg!).map((msg) => ({
             message: msg,
             '@timestamp': new Date().toISOString(),
           })),
@@ -466,7 +468,7 @@ export class KibanaClient {
                 connectorId,
                 persist,
                 title: currentTitle,
-                scopes,
+                scopes: currentScopes,
               },
               {
                 responseType: 'stream',
@@ -656,6 +658,9 @@ export class KibanaClient {
         };
         onResultCallbacks.push({ callback, unregister });
         return unregister;
+      },
+      setScopes: (newScope: AssistantScope[]) => {
+        currentScopes = newScope;
       },
     };
   }
