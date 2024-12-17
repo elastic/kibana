@@ -18,6 +18,8 @@ export {
   MOCK_IDP_ATTRIBUTE_ROLES,
   MOCK_IDP_ATTRIBUTE_EMAIL,
   MOCK_IDP_ATTRIBUTE_NAME,
+  MOCK_IDP_TEST_PLUGIN_PATH,
+  IDP_METADATA_PATHS,
 } from './constants';
 
 export { createMockIdpMetadata, createSAMLResponse, ensureSAMLRoleMapping } from './utils';
