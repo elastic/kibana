@@ -56,10 +56,15 @@ const isValidDate = (d: string) => isDate(d) && !isNaN(d.valueOf() as any);
  */
 export function parse(
   input: string,
-  options: { roundUp?: boolean; momentInstance?: typeof moment; forceNow?: Date } = {}
+  options: {
+    roundUp?: boolean;
+    roundMs?: boolean;
+    momentInstance?: typeof moment;
+    forceNow?: Date;
+  } = {}
 ) {
   const text = input;
-  const { roundUp = false, momentInstance = moment, forceNow } = options;
+  const { roundUp = false, roundMs = true, momentInstance = moment, forceNow } = options;
 
   if (!text) return undefined;
   if (momentInstance.isMoment(text)) return text;
@@ -75,6 +80,7 @@ export function parse(
 
   if (text.substring(0, 3) === 'now') {
     time = momentInstance(forceNow);
+    if (roundMs) time = time.set('millisecond', 0);
     mathString = text.substring('now'.length);
   } else {
     index = text.indexOf('||');
