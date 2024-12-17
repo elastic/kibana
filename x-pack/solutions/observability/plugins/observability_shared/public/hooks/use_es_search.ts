@@ -110,7 +110,6 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
           });
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...fnDeps]);
 
   const { rawResponse } = response as any;
