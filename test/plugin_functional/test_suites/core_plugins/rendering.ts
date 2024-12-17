@@ -128,7 +128,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data_visualizer.resultLinks.fileBeat.enabled (boolean)',
         'dev_tools.deeplinks.navLinkStatus (string?)',
         'discover.experimental.enabledProfiles (array?)',
-        'enterpriseSearch.canDeployEntSearch (boolean?)',
         'enterpriseSearch.host (string?)',
         'enterpriseSearch.ui.enabled (boolean?)',
         'home.disableWelcomeScreen (boolean?)',

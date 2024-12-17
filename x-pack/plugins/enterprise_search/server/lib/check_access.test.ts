@@ -50,7 +50,6 @@ describe('checkAccess', () => {
   const mockDependencies = {
     request: { auth: { isAuthenticated: true } },
     config: {
-      canDeployEntSearch: true,
       host: 'http://localhost:3002',
     },
     globalConfigService: new GlobalConfigService(),
