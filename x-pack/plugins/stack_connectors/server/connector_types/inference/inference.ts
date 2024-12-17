@@ -175,7 +175,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       {
         method: 'POST',
         path: `_inference/completion/${this.inferenceId}/_unified`,
-        body: params.body,
+        body: { ...params.body, n: undefined }, // exclude n param for now, constant is used on the inference API side
       },
       {
         asStream: true,
