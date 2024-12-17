@@ -18,20 +18,32 @@ export function SecuritySolutionESSUtils({
   const supertestWithoutAuth = getService('supertest');
   const security = getService('security');
 
+  const createSuperTest = async (role?: string, password: string = 'changeme') => {
+    if (!role) {
+      return supertestWithoutAuth;
+    }
+    const kbnUrl = formatUrl({
+      ...config.get('servers.kibana'),
+      auth: false,
+    });
+
+    return supertest.agent(kbnUrl).auth(role, password);
+  };
+
   return {
     getUsername: (_role?: string) =>
       Promise.resolve(config.get('servers.kibana.username') as string),
     createSearch: (_role?: string) => Promise.resolve(search),
-    createSuperTest: async (role?: string, password: string = 'changeme') => {
-      if (!role) {
-        return supertestWithoutAuth;
-      }
-      const kbnUrl = formatUrl({
-        ...config.get('servers.kibana'),
-        auth: false,
-      });
 
-      return supertest.agent(kbnUrl).auth(role, password);
+    createSuperTest,
+
+    createSuperTestWithUser: (user: User) => {
+      return createSuperTest(user.username, user.password);
+    },
+
+    cleanUpCustomRole: () => {
+      // In ESS this is a no-op
+      return Promise.resolve();
     },
 
     async createUser(user: User): Promise<void> {

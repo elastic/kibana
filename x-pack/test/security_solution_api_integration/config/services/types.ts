@@ -18,7 +18,9 @@ export interface SecuritySolutionServerlessSearch extends Omit<SearchSecureServi
 export interface SecuritySolutionUtilsInterface {
   getUsername: (role?: string) => Promise<string>;
   createSuperTest: (role?: string) => Promise<TestAgent<any>>;
+  createSuperTestWithUser: (user: User) => Promise<TestAgent<any>>;
   createSearch: (role?: string) => Promise<SecuritySolutionServerlessSearch>;
+  cleanUpCustomRole: () => Promise<void>;
 }
 
 interface FeaturesPrivileges {
@@ -33,8 +35,8 @@ interface ElasticsearchIndices {
 export interface Role {
   name: string;
   privileges: {
-    elasticsearch?: ElasticSearchPrivilege;
-    kibana?: KibanaPrivilege[];
+    elasticsearch: ElasticSearchPrivilege;
+    kibana: KibanaPrivilege[];
   };
 }
 export interface ElasticSearchPrivilege {
@@ -59,6 +61,8 @@ export interface SecuritySolutionESSUtilsInterface {
   getUsername: (role?: string) => Promise<string>;
   createSearch: (role?: string) => Promise<SearchService>;
   createSuperTest: (role?: string, password?: string) => Promise<TestAgent<any>>;
+  createSuperTestWithUser: (user: User) => Promise<TestAgent<any>>;
+  cleanUpCustomRole: () => Promise<void>;
   createUser: (user: User) => Promise<any>;
   deleteUsers: (userNames: string[]) => Promise<any>;
   createRole: (name: string, role: Role) => Promise<any>;
