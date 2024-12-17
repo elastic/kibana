@@ -49,6 +49,33 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJob
   const euiBorderWidthThick = euiTheme.border.thick;
   const euiPageBackgroundColor = euiTheme.colors.backgroundBasePlain;
 
+  // Amsterdam: euiTheme.colors.vis.euiColorVis2
+  // Borealis:  euiTheme.colors.vis.euiColorVis4
+  const borderColorIndexPattern = euiTheme.flags.hasVisColorAdjustment
+    ? euiTheme.colors.vis.euiColorVis2
+    : euiTheme.colors.vis.euiColorVis4;
+
+  // Amsterdam: euiTheme.colors.vis.euiColorVis7
+  // Borealis:  euiTheme.colors.vis.euiColorVis8
+  const borderColorIngestPipeline = euiTheme.flags.hasVisColorAdjustment
+    ? euiTheme.colors.vis.euiColorVis7
+    : euiTheme.colors.vis.euiColorVis8;
+
+  // Amsterdam: euiTheme.colors.vis.euiColorVis1
+  // Borealis:  euiTheme.colors.vis.euiColorVis2
+  const borderColorTransform = euiTheme.flags.hasVisColorAdjustment
+    ? euiTheme.colors.vis.euiColorVis1
+    : euiTheme.colors.vis.euiColorVis2;
+
+  // Amsterdam: euiTheme.colors.vis.euiColorVis3
+  // Borealis:  euiTheme.colors.vis.euiColorVis5
+  const borderBottomColorTrainedModel = euiTheme.flags.hasVisColorAdjustment
+    ? euiTheme.colors.vis.euiColorVis3
+    : euiTheme.colors.vis.euiColorVis5;
+
+  // Amsterdam + Borealis
+  const borderColorAnalytics = euiTheme.colors.vis.euiColorVis0;
+
   const cssOverrideBase = useMemo(
     () => ({
       height: euiSizeM,
@@ -91,7 +118,7 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJob
               data-test-subj="mlJobMapLegend__indexPattern"
               css={{
                 ...cssOverrideBase,
-                border: `${euiBorderWidthThick} solid ${euiTheme.colors.vis.euiColorVis2}`,
+                border: `${euiBorderWidthThick} solid ${borderColorIndexPattern}`,
                 transform: 'rotate(45deg)',
               }}
             />
@@ -113,7 +140,7 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJob
               data-test-subj="mlJobMapLegend__ingestPipeline"
               css={{
                 ...cssOverrideBase,
-                border: `${euiBorderWidthThick} solid ${euiTheme.colors.vis.euiColorVis7}`,
+                border: `${euiBorderWidthThick} solid ${borderColorIngestPipeline}`,
                 borderRadius: euiBorderRadiusSmall,
               }}
             />
@@ -135,7 +162,7 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJob
               data-test-subj="mlJobMapLegend__transform"
               css={{
                 ...cssOverrideBase,
-                border: `${euiBorderWidthThick} solid ${euiTheme.colors.vis.euiColorVis1}`,
+                border: `${euiBorderWidthThick} solid ${borderColorTransform}`,
               }}
             />
           </EuiFlexItem>
@@ -156,7 +183,7 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJob
                 height: '0px',
                 borderLeft: `${euiSizeS} solid ${euiPageBackgroundColor}`,
                 borderRight: `${euiSizeS} solid ${euiPageBackgroundColor}`,
-                borderBottom: `${euiSizeM} solid ${euiTheme.colors.vis.euiColorVis3}`,
+                borderBottom: `${euiSizeM} solid ${borderBottomColorTrainedModel}`,
               }}
             />
           </EuiFlexItem>
@@ -201,7 +228,7 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJob
               data-test-subj="mlJobMapLegend__analytics"
               css={{
                 ...cssOverrideBase,
-                border: `${euiBorderWidthThick} solid ${euiTheme.colors.vis.euiColorVis0}`,
+                border: `${euiBorderWidthThick} solid ${borderColorAnalytics}`,
                 borderRadius: '50%',
               }}
             />
