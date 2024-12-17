@@ -39,6 +39,21 @@ export const updateQueryStringWithVariable = (
   ].join('');
 };
 
+export const getQueryForFields = (queryString: string, cursorPosition?: monaco.Position) => {
+  const cursorColumn = cursorPosition?.column ?? 0;
+  const cursorLine = cursorPosition?.lineNumber ?? 0;
+  const lines = queryString.split('\n');
+
+  if (lines.length > 1) {
+    const queryArray = queryString.split('\n');
+    const lineToBeUpdated = cursorLine - 1;
+    return queryArray.slice(0, lineToBeUpdated).join('\n');
+  }
+  const queryBefore = queryString.slice(0, cursorColumn - 1);
+  const pipes = queryBefore.split('|');
+  return pipes.slice(0, pipes.length - 1).join('|');
+};
+
 export const areValuesIntervalsValid = (values: string[]) => {
   return values.every((value) => {
     // remove digits and empty spaces from the string to get the unit

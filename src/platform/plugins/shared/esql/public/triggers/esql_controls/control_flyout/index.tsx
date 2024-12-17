@@ -109,6 +109,7 @@ export function ESQLControlsFlyout({
         initialState={initialState}
         closeFlyout={closeFlyout}
         search={search}
+        cursorPosition={cursorPosition}
       />
     );
   }

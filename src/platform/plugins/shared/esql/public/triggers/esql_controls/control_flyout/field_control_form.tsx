@@ -17,11 +17,9 @@ import {
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
-import { getQueryForFields } from '@kbn/esql-validation-autocomplete/src/autocomplete/helper';
-import { buildQueryUntilPreviousCommand } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
-import { parse } from '@kbn/esql-ast';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import { esqlVariablesService } from '@kbn/esql-variables/common';
 import type { ESQLControlState } from '../types';
@@ -33,7 +31,7 @@ import {
   VariableName,
   ControlLabel,
 } from './shared_form_components';
-import { getRecurrentVariableName, getFlyoutStyling } from './helpers';
+import { getRecurrentVariableName, getFlyoutStyling, getQueryForFields } from './helpers';
 import { EsqlControlFlyoutType } from '../types';
 
 interface FieldControlFormProps {
@@ -43,6 +41,7 @@ interface FieldControlFormProps {
   closeFlyout: () => void;
   onCreateControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
   onEditControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
+  cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
   onCancelControlCb?: () => void;
 }
@@ -51,6 +50,7 @@ export function FieldControlForm({
   controlType,
   initialState,
   queryString,
+  cursorPosition,
   onCreateControl,
   onEditControl,
   onCancelControlCb,
@@ -92,13 +92,8 @@ export function FieldControlForm({
   const isControlInEditMode = useMemo(() => !!initialState, [initialState]);
 
   useEffect(() => {
-    if (controlType === EsqlControlType.FIELDS && !availableFieldsOptions.length) {
-      // get the valid query until the prev command and get the columns
-      const { root } = parse(queryString);
-      const queryForFields = getQueryForFields(
-        buildQueryUntilPreviousCommand(root.commands, queryString),
-        root.commands
-      );
+    if (!availableFieldsOptions.length) {
+      const queryForFields = getQueryForFields(queryString, cursorPosition);
       getESQLQueryColumnsRaw({
         esqlQuery: queryForFields,
         search,
@@ -114,7 +109,7 @@ export function FieldControlForm({
         );
       });
     }
-  }, [availableFieldsOptions.length, controlType, queryString, search]);
+  }, [availableFieldsOptions.length, controlType, cursorPosition, queryString, search]);
 
   useEffect(() => {
     const variableExists =
