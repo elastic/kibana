@@ -5778,6 +5778,40 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.LeafPrinter.string",
+            "type": "Function",
+            "tags": [],
+            "label": "string",
+            "description": [],
+            "signature": [
+              "(node: ",
+              "ESQLStringLiteral",
+              ") => string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.LeafPrinter.string.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "node",
+                "description": [],
+                "signature": [
+                  "ESQLStringLiteral"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.LeafPrinter.literal",
             "type": "Function",
             "tags": [],
