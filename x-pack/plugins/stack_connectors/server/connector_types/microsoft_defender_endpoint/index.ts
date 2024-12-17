@@ -36,7 +36,10 @@ export const getMicrosoftDefenderEndpointConnectorType = (): SubActionConnectorT
     config: MicrosoftDefenderEndpointConfigSchema,
     secrets: MicrosoftDefenderEndpointSecretsSchema,
   },
-  validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }],
+  validators: [
+    { type: ValidatorType.CONFIG, validator: urlAllowListValidator('oAuthServerUrl') },
+    { type: ValidatorType.CONFIG, validator: urlAllowListValidator('apiUrl') },
+  ],
   supportedFeatureIds: [SecurityConnectorFeatureId],
   minimumLicenseRequired: 'enterprise' as const,
 });
