@@ -8,6 +8,8 @@
  */
 
 import React from 'react';
+import { useMemo, useEffect, useState } from 'react';
+import { debounce } from 'lodash';
 import { EuiButtonIcon, EuiRangeTick, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
 import { TimeSliderStrings } from './time_slider_strings';
@@ -25,32 +27,64 @@ interface Props {
   timeRangeMin: number;
   timeRangeMax: number;
   compressed: boolean;
-  onMouseUp?: () => void;
 }
 
-export function TimeSliderPopoverContent(props: Props) {
-  const rangeInput = props.isAnchored ? (
+export function TimeSliderPopoverContent({
+  isAnchored,
+  setIsAnchored,
+  value,
+  onChange,
+  stepSize,
+  ticks,
+  timeRangeMin,
+  timeRangeMax,
+  compressed,
+}: Props) {
+  const [displayedValue, setDisplayedValue] = useState<Timeslice>(value ?? [0, 0]);
+
+  const debouncedOnChange = useMemo(
+    () =>
+      debounce((updateTimeslice: Timeslice | undefined) => {
+        onChange(updateTimeslice);
+      }, 350),
+    [onChange]
+  );
+  /**
+   * The following `useEffect` ensures that the changes to the value that come from the embeddable (for example,
+   * from the `clear` button on the dashboard) are reflected in the displayed value
+   */
+  useEffect(() => {
+    setDisplayedValue(value);
+  }, [value]);
+
+  const rangeInput = isAnchored ? (
     <TimeSliderAnchoredRange
-      value={props.value}
-      onChange={props.onChange}
-      stepSize={props.stepSize}
-      ticks={props.ticks}
-      timeRangeMin={props.timeRangeMin}
-      timeRangeMax={props.timeRangeMax}
-      compressed={props.compressed}
+      value={[displayedValue[0] || timeRangeMin, displayedValue[1] || timeRangeMax]}
+      onChange={(newValue) => {
+        setDisplayedValue(newValue as Timeslice);
+        debouncedOnChange(newValue);
+      }}
+      stepSize={stepSize}
+      ticks={ticks}
+      timeRangeMin={timeRangeMin}
+      timeRangeMax={timeRangeMax}
+      compressed={compressed}
     />
   ) : (
     <TimeSliderSlidingWindowRange
-      value={props.value}
-      onChange={props.onChange}
-      stepSize={props.stepSize}
-      ticks={props.ticks}
-      timeRangeMin={props.timeRangeMin}
-      timeRangeMax={props.timeRangeMax}
-      compressed={props.compressed}
+      value={[displayedValue[0] || timeRangeMin, displayedValue[1] || timeRangeMax]}
+      onChange={(newValue) => {
+        setDisplayedValue(newValue as Timeslice);
+        debouncedOnChange(newValue);
+      }}
+      stepSize={stepSize}
+      ticks={ticks}
+      timeRangeMin={timeRangeMin}
+      timeRangeMax={timeRangeMax}
+      compressed={compressed}
     />
   );
-  const anchorStartToggleButtonLabel = props.isAnchored
+  const anchorStartToggleButtonLabel = isAnchored
     ? TimeSliderStrings.control.getUnpinStart()
     : TimeSliderStrings.control.getPinStart();
 
@@ -60,18 +94,24 @@ export function TimeSliderPopoverContent(props: Props) {
       gutterSize="none"
       data-test-subj="timeSlider-popoverContents"
       responsive={false}
-      onMouseUp={props.onMouseUp}
+      onMouseUp={() => {
+        // when the pin is dropped (on mouse up), cancel any pending debounced changes and force the change
+        // in value to happen instantly (which, in turn, will re-calculate the from/to for the slider due to
+        // the `useEffect` above.
+        debouncedOnChange.cancel();
+        onChange(displayedValue);
+      }}
     >
       <EuiFlexItem grow={false}>
         <EuiToolTip content={anchorStartToggleButtonLabel} position="left">
           <EuiButtonIcon
-            iconType={props.isAnchored ? 'pinFilled' : 'pin'}
+            iconType={isAnchored ? 'pinFilled' : 'pin'}
             onClick={() => {
-              const nextIsAnchored = !props.isAnchored;
+              const nextIsAnchored = !isAnchored;
               if (nextIsAnchored) {
-                props.onChange([props.timeRangeMin, props.value[1]]);
+                onChange([timeRangeMin, value[1]]);
               }
-              props.setIsAnchored(nextIsAnchored);
+              setIsAnchored(nextIsAnchored);
             }}
             aria-label={anchorStartToggleButtonLabel}
             data-test-subj="timeSlider__anchorStartToggleButton"
