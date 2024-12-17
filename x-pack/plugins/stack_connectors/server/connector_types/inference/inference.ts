@@ -31,7 +31,6 @@ import {
 } from 'rxjs';
 import OpenAI from 'openai';
 import { ChatCompletionChunk } from 'openai/resources';
-import { IncomingMessage } from 'http';
 import {
   RerankParamsSchema,
   SparseEmbeddingParamsSchema,
@@ -129,7 +128,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   ): Promise<UnifiedChatCompleteResponse> {
     const res = await this.performApiUnifiedCompletionStream(params);
 
-    const v = from(eventSourceStreamIntoObservable(res as Readable)).pipe(
+    const v = from(eventSourceStreamIntoObservable(res as unknown as Readable)).pipe(
       filter((line) => !!line && line !== '[DONE]'),
       map((line) => {
         return JSON.parse(line) as OpenAI.ChatCompletionChunk | { error: { message: string } };
@@ -258,7 +257,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   public async performApiUnifiedCompletionStream(
     params: UnifiedChatCompleteParams & { signal?: AbortSignal }
   ) {
-    return (await this.esClient.transport.request<UnifiedChatCompleteResponse>(
+    return await this.esClient.transport.request<UnifiedChatCompleteResponse>(
       {
         method: 'POST',
         path: `_inference/completion/${this.inferenceId}/_unified`,
@@ -267,7 +266,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       {
         asStream: true,
       }
-    )) as unknown as IncomingMessage;
+    );
   }
 
   /**
@@ -291,10 +290,13 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       const res = await this.performApiUnifiedCompletionStream(params);
       const controller = new AbortController();
       // splits the stream in two, one is used for the UI and other for token tracking
-      return {
-        consumerStream: Stream.fromSSEResponse(res as unknown as Response, controller),
-        tokenCountStream: Stream.fromSSEResponse(res as unknown as Response, controller),
-      };
+
+      const stream = Stream.fromSSEResponse<ChatCompletionChunk>(
+        { body: res } as unknown as Response,
+        controller
+      );
+      const teed = stream.tee();
+      return { consumerStream: teed[0], tokenCountStream: teed[1] };
       // since we do not use the sub action connector request method, we need to do our own error handling
     } catch (e) {
       const errorMessage = this.getResponseErrorMessage(e);
