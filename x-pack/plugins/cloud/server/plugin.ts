@@ -209,18 +209,21 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       if (isCommonDefaultRoute && !this.hasHandlePersistingTokenCloud) {
         const queryOnboardingToken = request.url.searchParams.get('onboarding_token');
         if (queryOnboardingToken) {
-          core.getStartServices().then(async ([coreStart]) => {
-            const soClient = coreStart.savedObjects.createInternalRepository([
-              CLOUD_DATA_SAVED_OBJECT_TYPE,
-            ]);
-            const solutionType = this.config.onboarding?.default_solution;
-            await persistTokenCloudData(soClient, {
-              logger: this.logger,
-              onboardingToken: queryOnboardingToken,
-              solutionType,
-            });
-            this.setHandlePersistingTokenCloud(true);
-          });
+          core
+            .getStartServices()
+            .then(async ([coreStart]) => {
+              const soClient = coreStart.savedObjects.createInternalRepository([
+                CLOUD_DATA_SAVED_OBJECT_TYPE,
+              ]);
+              const solutionType = this.config.onboarding?.default_solution;
+              await persistTokenCloudData(soClient, {
+                logger: this.logger,
+                onboardingToken: queryOnboardingToken,
+                solutionType,
+              });
+              this.setHandlePersistingTokenCloud(true);
+            })
+            .catch((errorMsg) => this.logger.error(errorMsg));
         }
       }
 

@@ -51,7 +51,7 @@ export const setPostCloudSolutionDataRoute = ({ router }: RouteOptions) => {
         });
 
         try {
-          persistTokenCloudData(savedObjectsClient, {
+          await persistTokenCloudData(savedObjectsClient, {
             returnError: true,
             solutionType: request.body.onboardingData.solutionType,
             onboardingToken: request.body.onboardingData.token,
