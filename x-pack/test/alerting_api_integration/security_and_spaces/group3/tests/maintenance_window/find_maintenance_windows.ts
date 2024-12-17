@@ -327,7 +327,7 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/internal/alerting/rules/maintenance_window/_find?page=1&per_page=10&statuses=running`
+              )}/internal/alerting/rules/maintenance_window/_find?page=1&per_page=10&status=running`
             )
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
@@ -342,7 +342,7 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message:
-                  'API [GET /internal/alerting/rules/maintenance_window/_find?page=1&per_page=10&statuses=running] is unauthorized for user, this action is granted by the Kibana privileges [read-maintenance-window]',
+                  'API [GET /internal/alerting/rules/maintenance_window/_find?page=1&per_page=10&status=running] is unauthorized for user, this action is granted by the Kibana privileges [read-maintenance-window]',
                 statusCode: 403,
               });
               break;
@@ -417,7 +417,7 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/internal/alerting/rules/maintenance_window/_find?page=1&per_page=10&statuses=upcoming`
+              )}/internal/alerting/rules/maintenance_window/_find?page=1&per_page=10&status=upcoming`
             )
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
@@ -432,7 +432,7 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message:
-                  'API [GET /internal/alerting/rules/maintenance_window/_find?page=1&per_page=10&statuses=upcoming] is unauthorized for user, this action is granted by the Kibana privileges [read-maintenance-window]',
+                  'API [GET /internal/alerting/rules/maintenance_window/_find?page=1&per_page=10&status=upcoming] is unauthorized for user, this action is granted by the Kibana privileges [read-maintenance-window]',
                 statusCode: 403,
               });
               break;
@@ -507,7 +507,7 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/internal/alerting/rules/maintenance_window/_find?page=1&per_page=10&statuses=running&statuses=finished`
+              )}/internal/alerting/rules/maintenance_window/_find?page=1&per_page=10&status=running&status=finished`
             )
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
@@ -522,7 +522,7 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message:
-                  'API [GET /internal/alerting/rules/maintenance_window/_find?page=1&per_page=10&statuses=running&statuses=finished] is unauthorized for user, this action is granted by the Kibana privileges [read-maintenance-window]',
+                  'API [GET /internal/alerting/rules/maintenance_window/_find?page=1&per_page=10&status=running&status=finished] is unauthorized for user, this action is granted by the Kibana privileges [read-maintenance-window]',
                 statusCode: 403,
               });
               break;

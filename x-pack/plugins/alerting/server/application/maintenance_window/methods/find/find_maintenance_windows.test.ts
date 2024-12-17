@@ -184,7 +184,7 @@ describe('getStatusFilter', () => {
                 "type": "literal",
                 "value": "maintenance-window.attributes.events",
               },
-              "gte",
+              "gt",
               Object {
                 "isQuoted": true,
                 "type": "literal",
@@ -275,14 +275,14 @@ describe('getStatusFilter', () => {
   });
 
   it('return empty string if status does not exist', () => {
-    expect(getStatusFilter(['weird' as MaintenanceWindowStatus])).toMatchInlineSnapshot(`""`);
+    expect(getStatusFilter(['weird' as MaintenanceWindowStatus])).toBeUndefined();
   });
 
   it('return empty string if pass empty arguments', () => {
-    expect(getStatusFilter()).toMatchInlineSnapshot(`""`);
+    expect(getStatusFilter()).toBeUndefined();
   });
 
   it('return empty string if pass empty array', () => {
-    expect(getStatusFilter([])).toMatchInlineSnapshot(`""`);
+    expect(getStatusFilter([])).toBeUndefined();
   });
 });
