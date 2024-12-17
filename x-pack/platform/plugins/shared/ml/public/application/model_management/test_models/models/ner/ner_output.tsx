@@ -44,29 +44,41 @@ const ENTITY_TYPES: Record<EntityTypeName, EntityType> = {
   PER: {
     label: 'Person',
     icon: 'user',
-    color: 'euiColorVis9',
+    // Amsterdam color
+    color: 'euiColorVis5',
   },
   LOC: {
     label: 'Location',
     icon: 'visMapCoordinate',
-    color: 'euiColorVis2',
+    // Amsterdam color
+    color: 'euiColorVis1',
   },
   ORG: {
     label: 'Organization',
     icon: 'home',
+    // Amsterdam color
     color: 'euiColorVis0',
   },
   MISC: {
     label: 'Miscellaneous',
     icon: 'questionInCircle',
-    color: 'euiColorVis8',
+    // Amsterdam color
+    color: 'euiColorVis7',
   },
 };
 
 const UNKNOWN_ENTITY_TYPE: EntityType = {
   label: '',
   icon: 'questionInCircle',
-  color: 'euiColorVis9',
+  // Amsterdam color
+  color: 'euiColorVis5',
+};
+
+const amsterdam2BorealisColorMap: Record<string, EuiVisColor> = {
+  euiColorVis0: 'euiColorVis0',
+  euiColorVis1: 'euiColorVis2',
+  euiColorVis5: 'euiColorVis9',
+  euiColorVis7: 'euiColorVis8',
 };
 
 export const getNerOutputComponent = (inferrer: NerInference) => <NerOutput inferrer={inferrer} />;
@@ -154,13 +166,18 @@ const EntityBadge = ({
 }>) => {
   const { euiTheme } = useEuiTheme();
   const euiFontSizeXS = useEuiFontSize('xs').fontSize;
-  const color = getClassColor(euiTheme, entity.class_name);
+  const classColor = getClassColor(euiTheme, entity.class_name);
+  // For Amsterdam, add the `_behindText` postfix. Borealis doesn't need it because of updated contrasts.
+  const badgeColor = euiTheme.flags.hasVisColorAdjustment ? `${classColor}_behindText` : classColor;
+
   return (
     <EuiBadge
-      color={color}
+      color={badgeColor}
       style={{
         marginRight: ICON_PADDING,
         marginTop: `-${ICON_PADDING}`,
+        // For Amsterdam, add a border to the badge to improve contrast with the background.
+        ...(euiTheme.flags.hasVisColorAdjustment ? { border: `1px solid ${classColor}` } : {}),
         fontSize: euiFontSizeXS,
         padding: '0px 6px',
         pointerEvents: 'none',
@@ -194,5 +211,8 @@ export function getClassColor(euiTheme: EuiThemeComputed, className: string) {
   const color = isEntityTypeName(className)
     ? ENTITY_TYPES[className].color
     : UNKNOWN_ENTITY_TYPE.color;
-  return euiTheme.colors.vis[color];
+  // map colors from Amsterdam to Borealis if necessary
+  return euiTheme.flags.hasVisColorAdjustment
+    ? euiTheme.colors.vis[color]
+    : euiTheme.colors.vis[amsterdam2BorealisColorMap[color]];
 }
