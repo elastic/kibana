@@ -32,6 +32,7 @@ import {
   left,
   right,
   rawDocExistsInNamespaces,
+  getRawDocNamespacesFromSource,
 } from './utils';
 import { ApiExecutionContext } from './types';
 
@@ -173,13 +174,16 @@ export const performBulkGet = async <T>(
 
     // @ts-expect-error MultiGetHit._source is optional
     const docNotFound = !doc?.found || !rawDocExistsInNamespaces(registry, doc, namespaces);
-
+    // @ts-expect-error MultiGetHit._source is optional
+    const existingNamespaces = doc?._source
+      ? // @ts-expect-error MultiGetHit._source is optional
+        getRawDocNamespacesFromSource(registry, doc._source)
+      : [];
     authObjects.push({
       type,
       id,
       objectNamespaces: namespaces,
-      // @ts-expect-error MultiGetHit._source is optional
-      existingNamespaces: doc?._source?.namespaces ?? [],
+      existingNamespaces,
       error: docNotFound,
     });
 
