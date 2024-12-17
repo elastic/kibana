@@ -6679,6 +6679,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/relocate@link:packages/kbn-relocate":
+  version "0.0.0"
+  uid ""
+
 "@kbn/remote-clusters-plugin@link:x-pack/platform/plugins/private/remote_clusters":
   version "0.0.0"
   uid ""
