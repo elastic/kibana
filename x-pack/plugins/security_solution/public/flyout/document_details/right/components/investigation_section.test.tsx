@@ -22,10 +22,12 @@ import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 jest.mock('../hooks/use_expand_section');
 jest.mock('../../shared/hooks/use_highlighted_fields');
+jest.mock('../../../../common/hooks/use_experimental_features');
 
 const panelContextValue = {
   ...mockContextValue,
@@ -49,6 +51,7 @@ describe('<InvestigationSection />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useRuleWithFallback as jest.Mock).mockReturnValue({ rule: { note: 'test note' } });
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
   });
 
   it('should render investigation component', () => {

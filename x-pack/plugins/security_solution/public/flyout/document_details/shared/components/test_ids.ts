@@ -14,3 +14,5 @@ export const SESSION_VIEW_NO_DATA_TEST_ID = `${PREFIX}SessionViewNoData` as cons
 
 export const MISCONFIGURATIONS_TEST_ID = `${PREFIX}Misconfigurations` as const;
 export const VULNERABILITIES_TEST_ID = `${PREFIX}Vulnerabilities` as const;
+
+export const FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID = `${PREFIX}FooterDropdownButton` as const;

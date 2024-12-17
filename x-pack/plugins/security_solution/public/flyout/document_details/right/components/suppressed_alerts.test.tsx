@@ -16,17 +16,15 @@ import {
 } from './test_ids';
 import { SuppressedAlerts } from './suppressed_alerts';
 import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { LeftPanelInsightsTab } from '../../left';
-import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
-import { useDocumentDetailsContext } from '../../shared/context';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
-jest.mock('@kbn/expandable-flyout');
 jest.mock('../../shared/context');
 jest.mock('../../../../../common/detection_engine/utils', () => ({
   isSuppressionRuleInGA: jest.fn().mockReturnValue(false),
 }));
+
+const mockNavigateToLeftPanel = jest.fn();
+jest.mock('../../shared/hooks/use_navigate_to_left_panel');
 
 const TEXT_TEST_ID = SUMMARY_ROW_TEXT_TEST_ID(CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);
 const BUTTON_TEST_ID = SUMMARY_ROW_BUTTON_TEST_ID(CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);
@@ -38,23 +36,16 @@ const renderSuppressedAlerts = (alertSuppressionCount: number) =>
     </IntlProvider>
   );
 
-const mockOpenLeftPanel = jest.fn();
-const scopeId = 'scopeId';
-const eventId = 'eventId';
-const indexName = 'indexName';
 const isSuppressionRuleInGAMock = isSuppressionRuleInGA as jest.Mock;
 
 describe('<SuppressedAlerts />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useDocumentDetailsContext as jest.Mock).mockReturnValue({
-      eventId,
-      indexName,
-      scopeId,
-      isPreviewMode: false,
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
+      navigateToLeftPanel: mockNavigateToLeftPanel,
+      isEnabled: true,
     });
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
   });
 
   it('should render single suppressed alert correctly', () => {
@@ -87,17 +78,6 @@ describe('<SuppressedAlerts />', () => {
     const { getByTestId } = renderSuppressedAlerts(1);
     getByTestId(BUTTON_TEST_ID).click();
 
-    expect(mockOpenLeftPanel).toHaveBeenCalledWith({
-      id: DocumentDetailsLeftPanelKey,
-      path: {
-        tab: LeftPanelInsightsTab,
-        subTab: CORRELATIONS_TAB_ID,
-      },
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
+    expect(mockNavigateToLeftPanel).toHaveBeenCalled();
   });
 });
