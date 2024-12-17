@@ -116,7 +116,7 @@ export class ManifestTask {
       await startContract.taskManager.ensureScheduled({
         id: this.getTaskId(),
         taskType: ManifestTaskConstants.TYPE,
-        scope: ['securitySolution'],
+        scope: ['search'],
         schedule: {
           interval: this.endpointAppContext.serverConfig.packagerTaskInterval,
         },

@@ -12,6 +12,7 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
@@ -25,6 +26,7 @@ export interface SearchConnectorsPluginStartDependencies {
   fleet: FleetStartContract;
   taskManager: TaskManagerStartContract;
   soClient: SavedObjectsServiceStart;
+  licensing: LicensingPluginStart;
 }
 export interface SearchConnectorsPluginSetupDependencies {
   fleet: FleetSetupContract;

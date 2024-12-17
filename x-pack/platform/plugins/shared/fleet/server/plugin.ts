@@ -236,7 +236,7 @@ export interface FleetStartContract {
    * Services for Fleet's package policies
    */
   packagePolicyService: typeof packagePolicyService;
-  agentPolicyService: AgentPolicyServiceInterface;
+  agentPolicyService: typeof agentPolicyService;
   /**
    * Register callbacks for inclusion in fleet API processing
    * @param args
@@ -816,22 +816,7 @@ export class FleetPlugin
         core.elasticsearch.client.asInternalUser,
         internalSoClient
       ),
-      agentPolicyService: {
-        create: agentPolicyService.create,
-        runExternalCallbacks: agentPolicyService.runExternalCallbacks,
-        checkTamperProtectionLicense: agentPolicyService.checkTamperProtectionLicense,
-        checkAgentless: agentPolicyService.checkAgentless,
-        requireUniqueName: agentPolicyService.requireUniqueName,
-        triggerAgentPolicyUpdatedEvent: agentPolicyService.triggerAgentPolicyUpdatedEvent,
-        get: agentPolicyService.get,
-        list: agentPolicyService.list,
-        getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,
-        getByIds: agentPolicyService.getByIDs,
-        turnOffAgentTamperProtections:
-          agentPolicyService.turnOffAgentTamperProtections.bind(agentPolicyService),
-        fetchAllAgentPolicies: agentPolicyService.fetchAllAgentPolicies,
-        fetchAllAgentPolicyIds: agentPolicyService.fetchAllAgentPolicyIds,
-      },
+      agentPolicyService,
       packagePolicyService,
       registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {
         return appContextService.addExternalCallback(type, callback);
