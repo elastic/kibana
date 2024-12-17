@@ -299,7 +299,29 @@ describe('handleValidateMappings', () => {
           event: { target: 'event.action', confidence: 0.95, type: 'string' },
         },
       },
-      '@timestamp': { target: '@timestamp', confidence: 0.95, type: 'date', date_formats: [] },
+      timestamp: { target: '@timestamp', confidence: 0.95, type: 'date', date_formats: [] },
+    };
+    state.combinedSamples = JSON.stringify({
+      test: {
+        test: {
+          event: 'cert.create',
+        },
+      },
+    });
+    const { missingKeys } = handleValidateMappings({ state });
+
+    expect(missingKeys).toEqual([]);
+  });
+
+  it('should validate mapping with @timestamp target', () => {
+    const state: EcsMappingState = ecsTestState;
+    state.currentMapping = {
+      test: {
+        test: {
+          event: { target: 'event.action', confidence: 0.95, type: 'string' },
+          created: { target: '@timestamp', confidence: 0.95, type: 'date', date_formats: [] },
+        },
+      },
     };
     state.combinedSamples = JSON.stringify({
       test: {
@@ -321,7 +343,7 @@ describe('handleValidateMappings', () => {
           event: { target: 'event.action', confidence: 0.95, type: 'string' },
         },
       },
-      '@timestamp': { target: '@timestamp', confidence: 0.95, type: 'date', date_formats: [] },
+      timestamp: { target: '@timestamp', confidence: 0.95, type: 'date', date_formats: [] },
     };
     state.combinedSamples = JSON.stringify({
       test: {

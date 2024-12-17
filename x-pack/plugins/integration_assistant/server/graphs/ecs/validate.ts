@@ -40,14 +40,26 @@ function findMissingFields(combinedSamples: string, ecsMapping: AnyObject): stri
   const parsedSamples = JSON.parse(combinedSamples);
   const uniqueKeysFromSamples = extractKeys(parsedSamples);
   const ecsResponseKeys = extractKeys(ecsMapping);
-  console.log('ecsMapping', ecsMapping);
 
   const missingKeys = [...uniqueKeysFromSamples].filter((key) => !ecsResponseKeys.has(key));
-  if (!ecsResponseKeys.has(ECS_TIMESTAMP_FIELD)) {
-    console.log('ECS timestamp field is missing');
+  if (!hasTimestampField(ecsMapping)) {
     missingKeys.push(ECS_TIMESTAMP_FIELD);
   }
   return missingKeys;
+}
+
+function hasTimestampField(ecsMapping: AnyObject): boolean {
+  for (const key in ecsMapping) {
+    if (typeof ecsMapping[key] === 'object' && ecsMapping[key] !== null) {
+      if (ecsMapping[key].target === ECS_TIMESTAMP_FIELD) {
+        return true;
+      }
+      if (hasTimestampField(ecsMapping[key])) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 // Describes an LLM-generated ECS mapping candidate.

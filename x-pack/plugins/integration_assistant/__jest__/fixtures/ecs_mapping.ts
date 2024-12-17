@@ -10,12 +10,6 @@ import { EcsMappingState } from '../../server/types';
 
 export const ecsMappingExpectedResults = {
   mapping: {
-    '@timestamp': {
-      target: '@timestamp',
-      confidence: 0.99,
-      type: 'date',
-      date_formats: ['yyyy-MM-dd HH:mm:ss'],
-    },
     mysql_enterprise: {
       audit: {
         test_array: null,
@@ -278,12 +272,6 @@ export const ecsMappingExpectedResults = {
 };
 
 export const ecsInitialMappingMockedResponse = {
-  '@timestamp': {
-    target: '@timestamp',
-    confidence: 0.99,
-    type: 'date',
-    date_formats: ['yyyy-MM-dd HH:mm:ss'],
-  },
   mysql_enterprise: {
     audit: {
       test_array: null,
@@ -337,12 +325,6 @@ export const ecsInitialMappingMockedResponse = {
 };
 
 export const ecsDuplicateMockedResponse = {
-  '@timestamp': {
-    target: '@timestamp',
-    confidence: 0.99,
-    type: 'date',
-    date_formats: ['yyyy-MM-dd HH:mm:ss'],
-  },
   mysql_enterprise: {
     audit: {
       test_array: null,
@@ -378,12 +360,6 @@ export const ecsDuplicateMockedResponse = {
 };
 
 export const ecsMissingKeysMockedResponse = {
-  '@timestamp': {
-    target: '@timestamp',
-    confidence: 0.99,
-    type: 'date',
-    date_formats: ['yyyy-MM-dd HH:mm:ss'],
-  },
   mysql_enterprise: {
     audit: {
       test_array: null,
@@ -432,12 +408,6 @@ export const ecsMissingKeysMockedResponse = {
 };
 
 export const ecsInvalidMappingMockedResponse = {
-  // '@timestamp': {
-  //   target: '@timestamp',
-  //   confidence: 0.99,
-  //   type: 'date',
-  //   date_formats: ['yyyy-MM-dd HH:mm:ss'],
-  // },
   mysql_enterprise: {
     audit: {
       test_array: null,
