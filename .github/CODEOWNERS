@@ -537,7 +537,7 @@ x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infr
 x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
 x-pack/platform/packages/private/kbn-infra-forge @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/infra @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
-x-pack/plugins/ingest_pipelines @elastic/kibana-management
+x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
 src/plugins/input_control_vis @elastic/kibana-presentation
 src/plugins/inspector @elastic/kibana-presentation
 x-pack/platform/plugins/shared/integration_assistant @elastic/security-scalability
