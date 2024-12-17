@@ -284,7 +284,6 @@ packages/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
 packages/kbn-apm-data-view @elastic/obs-ux-infra_services-team
 packages/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 packages/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
-packages/kbn-apm-types @elastic/obs-ux-infra_services-team
 packages/kbn-apm-utils @elastic/obs-ux-infra_services-team
 packages/kbn-axe-config @elastic/kibana-qa
 packages/kbn-babel-preset @elastic/kibana-operations
@@ -375,6 +374,7 @@ packages/kbn-item-buffer @elastic/appex-sharedux
 packages/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-json-ast @elastic/kibana-operations
+packages/kbn-key-value-metadata-table @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
 packages/kbn-lens-embeddable-utils @elastic/obs-ux-infra_services-team @elastic/kibana-visualizations
 packages/kbn-lens-formula-docs @elastic/kibana-visualizations
@@ -837,10 +837,12 @@ x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infr
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
 x-pack/platform/packages/shared/index-management/index_management_shared_types @elastic/kibana-management
+x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-ux-infra_services-team
 x-pack/platform/packages/shared/kbn-data-forge @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-elastic-assistant @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
+x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/ml/aiops_common @elastic/ml-ui
