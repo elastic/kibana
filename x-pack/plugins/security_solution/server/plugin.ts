@@ -128,6 +128,7 @@ import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
 import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
+import { registerRiskScoreModulesDeprecation } from './deprecations/register_risk_score_modules_deprecation';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -442,6 +443,11 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.completeExternalResponseActionsTask.setup({ taskManager: plugins.taskManager });
     }
 
+    registerRiskScoreModulesDeprecation({
+      deprecationsService: core.deprecations,
+      docLinks: core.docLinks,
+    });
+
     core
       .getStartServices()
       .then(async ([coreStart, depsStart]) => {
@@ -506,7 +512,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       DEFAULT_QUEUE_CONFIG,
       this.telemetryReceiver,
       plugins.telemetry,
-      this.telemetryUsageCounter
+      this.telemetryUsageCounter,
+      core.analytics
     );
 
     this.telemetryEventsSender.setup(
@@ -530,6 +537,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       kibanaVersion: pluginContext.env.packageInfo.version,
       logger: this.logger,
       isFeatureEnabled: config.experimentalFeatures.defendInsights,
+      endpointContext: this.endpointContext.service,
     });
 
     return {
