@@ -108,18 +108,21 @@ const getEuiIconType = (suggestionType: QuerySuggestionTypes) => {
   }
 };
 
-const getEuiIconColor = (theme: UseEuiTheme, suggestionType: QuerySuggestionTypes): string => {
+const getEuiIconColor = (
+  { euiTheme }: UseEuiTheme,
+  suggestionType: QuerySuggestionTypes
+): string => {
   switch (suggestionType) {
     case QuerySuggestionTypes.Field:
-      return theme.euiTheme.colors.vis.euiColorVis7;
+      return euiTheme.colors.vis.euiColorVis7;
     case QuerySuggestionTypes.Value:
-      return theme.euiTheme.colors.vis.euiColorVis0;
+      return euiTheme.colors.vis.euiColorVis0;
     case QuerySuggestionTypes.Operator:
-      return theme.euiTheme.colors.vis.euiColorVis1;
+      return euiTheme.colors.vis.euiColorVis1;
     case QuerySuggestionTypes.Conjunction:
-      return theme.euiTheme.colors.vis.euiColorVis2;
+      return euiTheme.colors.vis.euiColorVis2;
     case QuerySuggestionTypes.RecentSearch:
     default:
-      return theme.euiTheme.colors.mediumShade;
+      return euiTheme.colors.mediumShade;
   }
 };
