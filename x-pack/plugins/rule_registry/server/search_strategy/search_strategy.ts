@@ -64,7 +64,7 @@ export const ruleRegistrySearchStrategyProvider = (
 
       const registeredRuleTypes = alerting.listTypes();
 
-      const [validRuleTypeIds] = partition(request.ruleTypeIds, (ruleTypeId) =>
+      const [validRuleTypeIds, _] = partition(request.ruleTypeIds, (ruleTypeId) =>
         registeredRuleTypes.has(ruleTypeId)
       );
 
