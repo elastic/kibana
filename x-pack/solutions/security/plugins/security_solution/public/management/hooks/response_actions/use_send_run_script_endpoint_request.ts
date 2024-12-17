@@ -13,13 +13,21 @@ import { KibanaServices } from '../../../common/lib/kibana';
 import { RUN_SCRIPT_ROUTE } from '../../../../common/endpoint/constants';
 import type { ResponseActionApiResponse } from '../../../../common/endpoint/types';
 
+export type RunScriptRequestCustomOptions = UseMutationOptions<
+  ResponseActionApiResponse,
+  IHttpFetchError,
+  RunScriptActionRequestBody
+>;
+
+export type UseSendRunScriptRequestResult = UseMutationResult<
+  ResponseActionApiResponse,
+  IHttpFetchError,
+  RunScriptActionRequestBody
+>;
+
 export const useSendRunScriptEndpoint = (
-  options?: UseMutationOptions<
-    ResponseActionApiResponse,
-    IHttpFetchError,
-    RunScriptActionRequestBody
-  >
-): UseMutationResult<ResponseActionApiResponse, IHttpFetchError, RunScriptActionRequestBody> => {
+  options?: RunScriptRequestCustomOptions
+): UseSendRunScriptRequestResult => {
   return useMutation<ResponseActionApiResponse, IHttpFetchError, RunScriptActionRequestBody>(
     (runScriptActionReqBody) => {
       return KibanaServices.get().http.post<ResponseActionApiResponse>(RUN_SCRIPT_ROUTE, {
