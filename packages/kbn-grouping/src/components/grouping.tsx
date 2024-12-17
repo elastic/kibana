@@ -14,7 +14,9 @@ import {
   EuiSpacer,
   EuiTablePagination,
   useEuiTheme,
+  useEuiFontSize,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { Filter } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
@@ -23,7 +25,7 @@ import { createGroupFilter, getNullGroupFilter } from '../containers/query/helpe
 import { GroupPanel } from './accordion_panel';
 import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_results_panel';
-import { countCss, groupingContainerCss, groupingContainerCssLevel } from './styles';
+import { groupingContainerCss, groupingContainerCssLevel } from './styles';
 import { GROUPS_UNIT, NULL_GROUP } from './translations';
 import type { ParsedGroupingAggregation, GroupPanelRenderer, GetGroupStats } from './types';
 import { GroupingBucket, OnGroupToggle } from './types';
@@ -80,6 +82,15 @@ const GroupingComponent = <T,>({
   groupsUnit = GROUPS_UNIT,
 }: GroupingProps<T>) => {
   const { euiTheme } = useEuiTheme();
+  const xsFontSize = useEuiFontSize('xs').fontSize;
+
+  const countCss = css`
+    font-size: ${xsFontSize};
+    font-weight: ${euiTheme.font.weight.semiBold};
+    border-right: ${euiTheme.border.thin};
+    margin-right: 16px;
+    padding-right: 16px;
+  `;
 
   const [trigger, setTrigger] = useState<Record<string, { state: 'open' | 'closed' | undefined }>>(
     {}
@@ -201,16 +212,12 @@ const GroupingComponent = <T,>({
             {groupCount > 0 && unitCount > 0 ? (
               <EuiFlexGroup gutterSize="none">
                 <EuiFlexItem grow={false}>
-                  <span css={countCss(euiTheme)} data-test-subj="unit-count">
+                  <span css={countCss} data-test-subj="unit-count">
                     {unitCountText}
                   </span>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <span
-                    css={countCss(euiTheme)}
-                    data-test-subj="group-count"
-                    style={{ borderRight: 'none' }}
-                  >
+                  <span css={countCss} data-test-subj="group-count" style={{ borderRight: 'none' }}>
                     {groupCountText}
                   </span>
                 </EuiFlexItem>
