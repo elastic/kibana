@@ -26,7 +26,6 @@ import {
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { HttpServiceSetup, Logger, PackageInfo } from '@kbn/core/server';
-import { Semaphore } from '@kbn/std';
 
 import type { ConfigType } from '@kbn/screenshotting-server';
 import { durationToNumber } from '@kbn/screenshotting-server';
@@ -58,8 +57,6 @@ const DEFAULT_SETUP_RESULT = {
 };
 
 export class Screenshots {
-  private semaphore: Semaphore;
-
   constructor(
     private readonly browserDriverFactory: HeadlessChromiumDriverFactory,
     private readonly logger: Logger,
@@ -67,9 +64,7 @@ export class Screenshots {
     private readonly http: HttpServiceSetup,
     private readonly config: ConfigType,
     private readonly cloud?: CloudSetup
-  ) {
-    this.semaphore = new Semaphore(config.poolSize);
-  }
+  ) {}
 
   private captureScreenshots(
     eventLogger: EventLogger,
@@ -89,7 +84,6 @@ export class Screenshots {
         logger
       )
       .pipe(
-        this.semaphore.acquire(),
         mergeMap(({ driver, error$, close }) => {
           const screen: ScreenshotObservableHandler = new ScreenshotObservableHandler(
             driver,

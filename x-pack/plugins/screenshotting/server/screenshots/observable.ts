@@ -230,6 +230,9 @@ export class ScreenshotObservableHandler {
       }
 
       await waitForRenderComplete(driver, eventLogger, layout);
+
+      // console.timeEnd('*** pageLoad');
+      // console.time('*** capturePng');
     }).pipe(
       mergeMap(() =>
         forkJoin({

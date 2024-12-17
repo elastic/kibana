@@ -90,6 +90,23 @@ const DEFAULT_ARGS = [
 ];
 
 const DIAGNOSTIC_TIME = 5 * 1000;
+let sharedBrowser: Browser | undefined;
+let sharedBrowserInitializing = false;
+let closeBrowserTimeout: NodeJS.Timeout | undefined;
+let numOfSessionsInProgress = 0;
+const promisesWaitingForSharedBrowser: Array<(value: unknown) => void> = [];
+
+function closeSharedBrowser() {
+  (async () => {
+    // eslint-disable-next-line no-console
+    console.log('*** Closing browser');
+    await sharedBrowser?.close();
+    sharedBrowser = undefined;
+  })().catch((e) => {
+    // eslint-disable-next-line no-console
+    console.log('*** Failed during the closing of the shared browser', e);
+  });
+}
 
 export class HeadlessChromiumDriverFactory {
   private userDataDir: string;
@@ -124,6 +141,9 @@ export class HeadlessChromiumDriverFactory {
     pLogger = this.logger
   ): Rx.Observable<CreatePageResult> {
     return new Rx.Observable((observer) => {
+      // console.timeEnd('*** pre-processing');
+      // console.time('*** headless prep');
+
       const logger = pLogger.get('browser-driver');
       logger.info(`Creating browser page driver`);
 
@@ -144,22 +164,36 @@ export class HeadlessChromiumDriverFactory {
       );
 
       (async () => {
-        let browser: Browser | undefined;
         try {
-          browser = await puppeteer.launch({
-            pipe: true,
-            userDataDir: this.userDataDir,
-            executablePath: this.binaryPath,
-            acceptInsecureCerts: true,
-            handleSIGHUP: false,
-            args: chromiumArgs,
-            defaultViewport: viewport,
-            env: {
-              TZ: browserTimezone,
-            },
-            headless: true,
-            protocolTimeout: 0,
-          });
+          numOfSessionsInProgress++;
+          if (closeBrowserTimeout) {
+            clearTimeout(closeBrowserTimeout);
+            closeBrowserTimeout = undefined;
+          }
+          if (sharedBrowserInitializing) {
+            await new Promise((resolve) => {
+              promisesWaitingForSharedBrowser.push(resolve);
+            });
+          }
+          if (!sharedBrowser) {
+            // console.time('puppeteer.launch(...)');
+            sharedBrowserInitializing = true;
+            sharedBrowser = await puppeteer.launch({
+              pipe: true,
+              userDataDir: this.userDataDir,
+              executablePath: this.binaryPath,
+              acceptInsecureCerts: true,
+              handleSIGHUP: false,
+              args: chromiumArgs,
+              headless: true,
+              protocolTimeout: 0,
+            });
+            sharedBrowserInitializing = false;
+            // console.timeEnd('puppeteer.launch(...)');
+            for (const resolve of promisesWaitingForSharedBrowser) {
+              resolve(sharedBrowser);
+            }
+          }
         } catch (err) {
           observer.error(
             new errors.FailedToSpawnBrowserError(`Error spawning Chromium browser! ${err}`)
@@ -167,7 +201,8 @@ export class HeadlessChromiumDriverFactory {
           return;
         }
 
-        const page = await browser.newPage();
+        const context = await sharedBrowser.createBrowserContext();
+        const page = await context.newPage();
         const devTools = await page.target().createCDPSession();
 
         await devTools.send('Performance.enable', { timeDomain: 'timeTicks' });
@@ -178,6 +213,7 @@ export class HeadlessChromiumDriverFactory {
         logger.debug(`Browser version: ${JSON.stringify(versionInfo)}`);
 
         await page.emulateTimezone(browserTimezone);
+        await page.setViewport(viewport);
 
         // Set the default timeout for all navigation methods to the openUrl timeout
         // All waitFor methods have their own timeout config passed in to them
@@ -207,14 +243,23 @@ export class HeadlessChromiumDriverFactory {
               logger.error(error);
             }
 
-            try {
-              logger.debug('Attempting to close browser...');
-              await browser?.close();
-              logger.debug('Browser closed.');
-            } catch (err) {
-              // do not throw
-              logger.error(err);
+            numOfSessionsInProgress--;
+            if (closeBrowserTimeout) {
+              clearTimeout(closeBrowserTimeout);
+              closeBrowserTimeout = undefined;
             }
+            if (numOfSessionsInProgress <= 0) {
+              // Close browser 1m after no activity
+              closeBrowserTimeout = setTimeout(closeSharedBrowser, 60000);
+            }
+            // try {
+            //   logger.debug('Attempting to close browser...');
+            //   await browser?.close();
+            //   logger.debug('Browser closed.');
+            // } catch (err) {
+            //   // do not throw
+            //   logger.error(err);
+            // }
 
             return { metrics };
           },
@@ -242,7 +287,7 @@ export class HeadlessChromiumDriverFactory {
 
         // taps the browser log streams and combine them to Kibana logs
         this.getBrowserLogger(page, logger).subscribe();
-        this.getProcessLogger(browser, logger).subscribe();
+        this.getProcessLogger(sharedBrowser, logger).subscribe();
 
         // HeadlessChromiumDriver: object to "drive" a browser page
         const driver = new HeadlessChromiumDriver(
@@ -252,9 +297,10 @@ export class HeadlessChromiumDriverFactory {
           page
         );
 
-        const error$ = Rx.concat(driver.screenshottingError$, this.getPageExit(browser, page)).pipe(
-          mergeMap((err) => Rx.throwError(err))
-        );
+        const error$ = Rx.concat(
+          driver.screenshottingError$,
+          this.getPageExit(sharedBrowser, page)
+        ).pipe(mergeMap((err) => Rx.throwError(err)));
 
         const close = () => Rx.from(childProcess.kill());
 

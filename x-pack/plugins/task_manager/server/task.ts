@@ -21,6 +21,7 @@ export enum TaskPriority {
 export enum TaskCost {
   Tiny = 1,
   Normal = 2,
+  Large = 5,
   ExtraLarge = 10,
 }
 

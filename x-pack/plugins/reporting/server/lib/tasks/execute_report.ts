@@ -35,7 +35,7 @@ import type {
   TaskManagerStartContract,
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server';
-import { throwRetryableError } from '@kbn/task-manager-plugin/server';
+import { throwRetryableError, TaskCost } from '@kbn/task-manager-plugin/server';
 
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import {
@@ -428,6 +428,10 @@ export class ExecuteReportTask implements ReportingTask {
          * If any error happens, additional retry attempts may be picked up by a separate instance
          */
         run: async () => {
+          // eslint-disable-next-line no-console
+          console.time(`*** generate report ${taskInstance.id}`);
+          // console.time('*** generate-report');
+          // console.time('*** pre-processing');
           let report: SavedReport | undefined;
           const isLastAttempt = taskAttempts >= this.getMaxAttempts();
 
@@ -547,6 +551,12 @@ export class ExecuteReportTask implements ReportingTask {
             this.reporting.untrackReport(jobId);
             logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
           }
+
+          // eslint-disable-next-line no-console
+          console.timeEnd(`*** generate report ${taskInstance.id}`);
+
+          // console.timeEnd('*** post-processing');
+          // console.timeEnd('*** generate-report');
         },
 
         /*
@@ -570,7 +580,6 @@ export class ExecuteReportTask implements ReportingTask {
   public getTaskDefinition() {
     // round up from ms to the nearest second
     const queueTimeout = Math.ceil(numberToDuration(this.config.queue.timeout).asSeconds()) + 's';
-    const maxConcurrency = this.config.queue.pollEnabled ? 1 : 0;
     const maxAttempts = this.getMaxAttempts();
 
     return {
@@ -579,7 +588,7 @@ export class ExecuteReportTask implements ReportingTask {
       createTaskRunner: this.getTaskRunner(),
       maxAttempts: maxAttempts + 1, // Add 1 so we get an extra attempt in case of failure during a Kibana restart
       timeout: queueTimeout,
-      maxConcurrency,
+      cost: TaskCost.Large,
     };
   }
 
