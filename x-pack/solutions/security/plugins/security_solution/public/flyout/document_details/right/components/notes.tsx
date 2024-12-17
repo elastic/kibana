@@ -79,13 +79,16 @@ export const Notes = memo(() => {
     });
 
   const isNotesDisabled = !isLinkEnabled || isPreview;
+  const cannotAddNotes = isNotesDisabled || !notesPrivileges.crud;
+  const cannotReadNotes = isNotesDisabled || !notesPrivileges.read;
+  const canReadNotes = !cannotReadNotes;
 
   useEffect(() => {
     // only fetch notes if we are not in a preview panel, or not in a rule preview workflow
-    if (!isNotesDisabled) {
+    if (canReadNotes) {
       dispatch(fetchNotesByDocumentIds({ documentIds: [eventId] }));
     }
-  }, [dispatch, eventId, isNotesDisabled]);
+  }, [dispatch, eventId, canReadNotes]);
 
   const fetchStatus = useSelector((state: State) => selectFetchNotesByDocumentIdsStatus(state));
   const fetchError = useSelector((state: State) => selectFetchNotesByDocumentIdsError(state));
@@ -100,9 +103,6 @@ export const Notes = memo(() => {
       });
     }
   }, [addErrorToast, fetchError, fetchStatus]);
-
-  const cannotAddNotes = isNotesDisabled || !notesPrivileges.crud;
-  const cannotReadNotes = isNotesDisabled || !notesPrivileges.read;
 
   const viewNotesButton = useMemo(
     () => (

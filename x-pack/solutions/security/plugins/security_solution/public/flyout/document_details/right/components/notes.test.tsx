@@ -50,7 +50,7 @@ describe('<Notes />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useUserPrivileges as jest.Mock).mockReturnValue({
-      notesPrivileges: { crud: true },
+      notesPrivileges: { crud: true, read: true },
     });
     (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
       navigateToLeftPanel: mockNavigateToLeftPanel,
@@ -313,7 +313,7 @@ describe('<Notes />', () => {
 
   it('should show a - if user does not have the correct privileges and no notes have been created', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
-      notesPrivileges: { crud: false },
+      notesPrivileges: { read: true, crud: false },
     });
 
     const { getByText, queryByTestId } = render(
