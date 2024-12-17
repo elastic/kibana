@@ -11,6 +11,7 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 
 /**
  * The deprecations service provides a way for the Kibana platform to communicate deprecated
@@ -87,27 +88,51 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
  * @public
  */
 export interface DeprecationsServiceSetup {
+  /**
+   * Registers deprecation messages or notices for a specific feature or functionality
+   * within the application. This allows developers to flag certain behaviors or APIs
+   * as deprecated, providing guidance and warnings for future deprecation plans.
+   *
+   * @param {RegisterDeprecationsConfig} deprecationContext - The configuration object containing
+   * information about the deprecated features, including messages, corrective actions,
+   * and any relevant metadata to inform users or developers about the deprecation.
+   */
   registerDeprecations: (deprecationContext: RegisterDeprecationsConfig) => void;
 }
 
 /**
+ * Options to provide when registering deprecations via {@link DeprecationsServiceSetup.registerDeprecations}.
  * @public
  */
 export interface RegisterDeprecationsConfig {
+  /**
+   * Method called when the user wants to list any existing deprecations.
+   * Returns the list of deprecation messages to warn about.
+   * @param {GetDeprecationsContext} context Scoped clients and helpers to ease fetching the deprecations.
+   */
   getDeprecations: (context: GetDeprecationsContext) => MaybePromise<DeprecationsDetails[]>;
 }
 
 /**
+ * Scoped clients and helpers to ease fetching the deprecations.
  * @public
  */
 export interface GetDeprecationsContext {
+  /** Elasticsearch client scoped to the current user */
   esClient: IScopedClusterClient;
+  /** Saved Objects client scoped to the current user and space */
   savedObjectsClient: SavedObjectsClientContract;
+  request: KibanaRequest;
 }
 
 /**
+ * Provides a method to scope the {@link DeprecationsServiceSetup | Deprecations Service} to a specific domain.
  * @public
  */
 export interface DeprecationRegistryProvider {
+  /**
+   * Returns the {@link DeprecationsServiceSetup | Deprecations Service} scoped to a specific domain.
+   * @param domainId Domain ID to categorize the deprecations reported under it.
+   */
   getRegistry: (domainId: string) => DeprecationsServiceSetup;
 }

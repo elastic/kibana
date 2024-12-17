@@ -15,7 +15,7 @@ jest.mock('../../enterprise_search_content/components/search_index/indices/indic
 
 import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { EuiSideNavItemType } from '@elastic/eui';
 
@@ -144,27 +144,6 @@ const baseNavItems = [
     ],
     name: 'Getting started',
   },
-  {
-    'data-test-subj': 'searchSideNav-EnterpriseSearch',
-    id: 'enterpriseSearch',
-    items: [
-      {
-        'data-test-subj': 'searchSideNav-AppSearch',
-        href: '/app/enterprise_search/app_search',
-        id: 'app_search',
-        items: undefined,
-        name: 'App Search',
-      },
-      {
-        'data-test-subj': 'searchSideNav-WorkplaceSearch',
-        href: '/app/enterprise_search/workplace_search',
-        id: 'workplace_search',
-        items: undefined,
-        name: 'Workplace Search',
-      },
-    ],
-    name: 'Enterprise Search',
-  },
 ];
 
 const mockNavLinks = [
@@ -264,86 +243,6 @@ describe('useEnterpriseSearchContentNav', () => {
 
     expect(result.current).toEqual(baseNavItems);
   });
-
-  it('excludes legacy products when the user has no access to them', () => {
-    const noProductAccess: ProductAccess = {
-      ...DEFAULT_PRODUCT_ACCESS,
-      hasAppSearchAccess: false,
-      hasWorkplaceSearchAccess: false,
-    };
-
-    setMockValues({
-      ...defaultMockValues,
-      productAccess: noProductAccess,
-    });
-    mockKibanaValues.uiSettings.get.mockReturnValue(false);
-
-    const { result } = renderHook(() => useEnterpriseSearchNav());
-    const esNav = result.current;
-    const legacyESNav = esNav?.find((item) => item.id === 'enterpriseSearch');
-    expect(legacyESNav).toBeUndefined();
-  });
-
-  it('excludes App Search when the user has no access to it', () => {
-    const workplaceSearchProductAccess: ProductAccess = {
-      ...DEFAULT_PRODUCT_ACCESS,
-      hasAppSearchAccess: false,
-      hasWorkplaceSearchAccess: true,
-    };
-
-    setMockValues({
-      ...defaultMockValues,
-      productAccess: workplaceSearchProductAccess,
-    });
-
-    const { result } = renderHook(() => useEnterpriseSearchNav());
-    const esNav = result.current;
-    const legacyESNav = esNav?.find((item) => item.id === 'enterpriseSearch');
-    expect(legacyESNav).not.toBeUndefined();
-    expect(legacyESNav).toEqual({
-      'data-test-subj': 'searchSideNav-EnterpriseSearch',
-      id: 'enterpriseSearch',
-      items: [
-        {
-          'data-test-subj': 'searchSideNav-WorkplaceSearch',
-          href: '/app/enterprise_search/workplace_search',
-          id: 'workplace_search',
-          name: 'Workplace Search',
-        },
-      ],
-      name: 'Enterprise Search',
-    });
-  });
-
-  it('excludes Workplace Search when the user has no access to it', () => {
-    const appSearchProductAccess: ProductAccess = {
-      ...DEFAULT_PRODUCT_ACCESS,
-      hasWorkplaceSearchAccess: false,
-    };
-
-    setMockValues({
-      ...defaultMockValues,
-      productAccess: appSearchProductAccess,
-    });
-
-    const { result } = renderHook(() => useEnterpriseSearchNav());
-    const esNav = result.current;
-    const legacyESNav = esNav?.find((item) => item.id === 'enterpriseSearch');
-    expect(legacyESNav).not.toBeUndefined();
-    expect(legacyESNav).toEqual({
-      'data-test-subj': 'searchSideNav-EnterpriseSearch',
-      id: 'enterpriseSearch',
-      items: [
-        {
-          'data-test-subj': 'searchSideNav-AppSearch',
-          href: '/app/enterprise_search/app_search',
-          id: 'app_search',
-          name: 'App Search',
-        },
-      ],
-      name: 'Enterprise Search',
-    });
-  });
 });
 
 describe('useEnterpriseSearchApplicationNav', () => {
@@ -370,7 +269,6 @@ describe('useEnterpriseSearchApplicationNav', () => {
       'Build',
       'Relevance',
       'Getting started',
-      'Enterprise Search',
     ]);
     const searchItem = navItems?.find((ni) => ni.id === 'build');
     expect(searchItem).not.toBeUndefined();
@@ -432,7 +330,6 @@ describe('useEnterpriseSearchApplicationNav', () => {
       'Build',
       'Relevance',
       'Getting started',
-      'Enterprise Search',
     ]);
     const searchItem = navItems?.find((ni) => ni.id === 'build');
     expect(searchItem).not.toBeUndefined();

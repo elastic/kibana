@@ -17,345 +17,7 @@
     "objects": []
   },
   "common": {
-    "classes": [
-      {
-        "parentPluginId": "@kbn/synthetics-e2e",
-        "id": "def-common.SyntheticsRunner",
-        "type": "Class",
-        "tags": [],
-        "label": "SyntheticsRunner",
-        "description": [],
-        "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/synthetics-e2e",
-            "id": "def-common.SyntheticsRunner.getService",
-            "type": "Any",
-            "tags": [],
-            "label": "getService",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/synthetics-e2e",
-            "id": "def-common.SyntheticsRunner.kibanaUrl",
-            "type": "string",
-            "tags": [],
-            "label": "kibanaUrl",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/synthetics-e2e",
-            "id": "def-common.SyntheticsRunner.testFilesLoaded",
-            "type": "boolean",
-            "tags": [],
-            "label": "testFilesLoaded",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/synthetics-e2e",
-            "id": "def-common.SyntheticsRunner.params",
-            "type": "Object",
-            "tags": [],
-            "label": "params",
-            "description": [],
-            "signature": [
-              "ArgParams"
-            ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/synthetics-e2e",
-            "id": "def-common.SyntheticsRunner.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/synthetics-e2e",
-                "id": "def-common.SyntheticsRunner.Unnamed.$1",
-                "type": "Any",
-                "tags": [],
-                "label": "getService",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/synthetics-e2e",
-                "id": "def-common.SyntheticsRunner.Unnamed.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "ArgParams"
-                ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/synthetics-e2e",
-            "id": "def-common.SyntheticsRunner.setup",
-            "type": "Function",
-            "tags": [],
-            "label": "setup",
-            "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/synthetics-e2e",
-            "id": "def-common.SyntheticsRunner.createTestUsers",
-            "type": "Function",
-            "tags": [],
-            "label": "createTestUsers",
-            "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/synthetics-e2e",
-            "id": "def-common.SyntheticsRunner.loadTestFiles",
-            "type": "Function",
-            "tags": [],
-            "label": "loadTestFiles",
-            "description": [],
-            "signature": [
-              "(callback: (reload?: boolean | undefined) => Promise<void>, reload?: boolean) => Promise<void>"
-            ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/synthetics-e2e",
-                "id": "def-common.SyntheticsRunner.loadTestFiles.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "callback",
-                "description": [],
-                "signature": [
-                  "(reload?: boolean | undefined) => Promise<void>"
-                ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/synthetics-e2e",
-                "id": "def-common.SyntheticsRunner.loadTestFiles.$2",
-                "type": "boolean",
-                "tags": [],
-                "label": "reload",
-                "description": [],
-                "signature": [
-                  "boolean"
-                ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/synthetics-e2e",
-            "id": "def-common.SyntheticsRunner.loadTestData",
-            "type": "Function",
-            "tags": [],
-            "label": "loadTestData",
-            "description": [],
-            "signature": [
-              "(e2eDir: string, dataArchives: string[]) => Promise<void>"
-            ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/synthetics-e2e",
-                "id": "def-common.SyntheticsRunner.loadTestData.$1",
-                "type": "string",
-                "tags": [],
-                "label": "e2eDir",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/synthetics-e2e",
-                "id": "def-common.SyntheticsRunner.loadTestData.$2",
-                "type": "Array",
-                "tags": [],
-                "label": "dataArchives",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/synthetics-e2e",
-            "id": "def-common.SyntheticsRunner.getKibanaUrl",
-            "type": "Function",
-            "tags": [],
-            "label": "getKibanaUrl",
-            "description": [],
-            "signature": [
-              "() => string"
-            ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/synthetics-e2e",
-            "id": "def-common.SyntheticsRunner.getElasticsearchUrl",
-            "type": "Function",
-            "tags": [],
-            "label": "getElasticsearchUrl",
-            "description": [],
-            "signature": [
-              "() => string"
-            ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/synthetics-e2e",
-            "id": "def-common.SyntheticsRunner.run",
-            "type": "Function",
-            "tags": [],
-            "label": "run",
-            "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/synthetics-e2e",
-            "id": "def-common.SyntheticsRunner.assertResults",
-            "type": "Function",
-            "tags": [],
-            "label": "assertResults",
-            "description": [],
-            "signature": [
-              "(results: { [x: string]: ",
-              "JourneyResult",
-              "; }) => void"
-            ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/synthetics-e2e",
-                "id": "def-common.SyntheticsRunner.assertResults.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "results",
-                "description": [],
-                "signature": [
-                  "{ [x: string]: ",
-                  "JourneyResult",
-                  "; }"
-                ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/synthetics-e2e",
-            "id": "def-common.SyntheticsRunner.cleanUp",
-            "type": "Function",
-            "tags": [],
-            "label": "cleanUp",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/synthetics_runner.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/synthetics-e2e",
@@ -369,7 +31,7 @@
           "Page",
           "; isRemote?: boolean | undefined; username?: string | undefined; password?: string | undefined; }) => { waitForLoadingToFinish(): Promise<void>; loginToKibana(usernameT?: \"editor\" | \"viewer\" | undefined, passwordT?: string | undefined): Promise<void>; }"
         ],
-        "path": "x-pack/plugins/observability_solution/synthetics/e2e/page_objects/login.tsx",
+        "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/login.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -380,7 +42,7 @@
             "tags": [],
             "label": "{\n  page,\n  isRemote = false,\n  username = 'elastic',\n  password = 'changeme',\n}",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/page_objects/login.tsx",
+            "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/login.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -394,7 +56,7 @@
                 "signature": [
                   "Page"
                 ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/page_objects/login.tsx",
+                "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/login.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -408,7 +70,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/page_objects/login.tsx",
+                "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/login.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -422,7 +84,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/page_objects/login.tsx",
+                "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/login.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -436,7 +98,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/page_objects/login.tsx",
+                "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/login.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -462,7 +124,7 @@
           "ElementHandle",
           "<HTMLElement | SVGElement>>; }"
         ],
-        "path": "x-pack/plugins/observability_solution/synthetics/e2e/page_objects/utils.tsx",
+        "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/utils.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -473,7 +135,7 @@
             "tags": [],
             "label": "{ page }",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/synthetics/e2e/page_objects/utils.tsx",
+            "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/utils.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -487,7 +149,7 @@
                 "signature": [
                   "Page"
                 ],
-                "path": "x-pack/plugins/observability_solution/synthetics/e2e/page_objects/utils.tsx",
+                "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/utils.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -501,22 +163,6 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/synthetics-e2e",
-        "id": "def-common.argv",
-        "type": "Object",
-        "tags": [],
-        "label": "argv",
-        "description": [],
-        "signature": [
-          "{ [x: string]: unknown; headless: boolean; bail: boolean; grep: undefined; _: string[]; $0: string; }"
-        ],
-        "path": "x-pack/plugins/observability_solution/synthetics/e2e/helpers/parse_args_params.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }
