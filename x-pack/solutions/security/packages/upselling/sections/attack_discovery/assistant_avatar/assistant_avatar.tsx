@@ -24,7 +24,7 @@ export const sizeMap = {
 /**
  * Default Elastic AI Assistant logo
  *
- * TODO: This may be removed when the logo is added to EUI
+ * @deprecated This component will soon be replaced by `AssistantIcon` from `@kbn/ai-assistant-icon`.
  */
 export const AssistantAvatar = ({ className, size = 's' }: Props) => (
   <svg
