@@ -145,7 +145,7 @@ export type DashboardApi = CanExpandPanels &
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
     forceRefresh: () => void;
-    getDashboardPanelFromId: (id: string) => Promise<DashboardPanelState>;
+    getDashboardPanelFromId: (id: string) => DashboardPanelState;
     getSettings: () => DashboardSettings;
     hasOverlays$: PublishingSubject<boolean>;
     hasUnsavedChanges$: PublishingSubject<boolean>;

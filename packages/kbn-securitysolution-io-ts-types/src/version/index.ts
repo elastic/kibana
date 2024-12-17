@@ -12,7 +12,7 @@ import { PositiveIntegerGreaterThanZero } from '../positive_integer_greater_than
 
 /**
  * Note this is just a positive number, but we use it as a type here which is still ok.
- * This type was originally from "x-pack/plugins/security_solution/common/detection_engine/schemas/common/schemas.ts"
+ * This type was originally from "x-pack/solutions/security/plugins/security_solution/common/detection_engine/schemas/common/schemas.ts"
  * but is moved here to make things more portable. No unit tests, but see PositiveIntegerGreaterThanZero integer for unit tests.
  */
 export const version = PositiveIntegerGreaterThanZero;
