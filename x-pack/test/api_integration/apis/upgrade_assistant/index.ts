@@ -5,10 +5,26 @@
  * 2.0.
  */
 
+import { version as kibanaVersion } from '../../../../package.json';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
+export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('Upgrade Assistant', function () {
+    const es = getService('es');
+
+    before(
+      "Check version to avoid failures during forward-compatibility tests where these don't make sense",
+      async () => {
+        const {
+          version: { number: esVersion },
+        } = await es.info();
+        if (esVersion !== kibanaVersion) {
+          // @ts-expect-error for some reason TS thinks it's jest and not mocha: https://mochajs.org/#inclusive-tests
+          this.skip();
+        }
+      }
+    );
+
     loadTestFile(require.resolve('./upgrade_assistant'));
     loadTestFile(require.resolve('./cloud_backup_status'));
     loadTestFile(require.resolve('./privileges'));
