@@ -266,8 +266,12 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables CrowdStrike's RunScript RTR command
    */
-
   crowdstrikeRunScriptEnabled: false,
+
+  /**
+   * Enables the Asset Inventory feature
+   */
+  assetInventoryStoreEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
