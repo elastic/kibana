@@ -12,13 +12,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { ConfigEntryView, DisplayType } from '../../../../common/dynamic_config/types';
+import { ConfigEntryView } from '../../../../common/dynamic_config/types';
 import { ConnectorConfigurationField } from './connector_configuration_field';
 
 interface ConnectorConfigurationFormItemsProps {
@@ -34,37 +33,24 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
   items,
   setConfigEntry,
   direction,
-  itemsGrow,
 }) => {
   return (
     <EuiFlexGroup direction={direction} data-test-subj="connector-configuration-fields">
       {items.map((configEntry) => {
-        const {
-          depends_on: dependencies,
-          key,
-          display,
-          isValid,
-          label,
-          sensitive,
-          tooltip,
-          validationErrors,
-          required,
-        } = configEntry;
+        const { key, isValid, label, sensitive, description, validationErrors, required } =
+          configEntry;
 
-        const helpText = tooltip;
+        const helpText = description;
         // toggle and sensitive textarea labels go next to the element, not in the row
-        const rowLabel =
-          display === DisplayType.TOGGLE || (display === DisplayType.TEXTAREA && sensitive) ? (
-            <></>
-          ) : tooltip ? (
-            <EuiFlexGroup gutterSize="xs">
-              <EuiFlexItem>
-                <p>{label}</p>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : (
-            <p>{label}</p>
-          );
+        const rowLabel = description ? (
+          <EuiFlexGroup gutterSize="xs">
+            <EuiFlexItem>
+              <p>{label}</p>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <p>{label}</p>
+        );
 
         const optionalLabel = !required ? (
           <EuiText color="subdued" size="xs">
@@ -74,31 +60,6 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
           </EuiText>
         ) : undefined;
 
-        if (dependencies?.length > 0) {
-          return (
-            <EuiFlexItem key={key} grow={itemsGrow}>
-              <EuiPanel color="subdued" borderRadius="none">
-                <EuiFormRow
-                  fullWidth={true}
-                  label={rowLabel}
-                  helpText={helpText}
-                  error={validationErrors}
-                  isInvalid={!isValid}
-                  labelAppend={optionalLabel}
-                  data-test-subj={`connector-configuration-formrow-${key}`}
-                >
-                  <ConnectorConfigurationField
-                    configEntry={configEntry}
-                    isLoading={isLoading}
-                    setConfigValue={(value) => {
-                      setConfigEntry(configEntry.key, value);
-                    }}
-                  />
-                </EuiFormRow>
-              </EuiPanel>
-            </EuiFlexItem>
-          );
-        }
         return (
           <EuiFlexItem key={key}>
             <EuiFormRow
@@ -114,17 +75,17 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
                 configEntry={configEntry}
                 isLoading={isLoading}
                 setConfigValue={(value) => {
-                  setConfigEntry(configEntry.key, value);
+                  setConfigEntry(key, value);
                 }}
               />
             </EuiFormRow>
-            {configEntry.sensitive ? (
+            {sensitive ? (
               <>
                 <EuiSpacer size="s" />
                 <EuiCallOut
                   size="s"
                   color="warning"
-                  title={`You will need to reenter you ${configEntry.label} each time you edit the connector`}
+                  title={`You will need to reenter your ${label} each time you edit the connector`}
                 />
               </>
             ) : null}
