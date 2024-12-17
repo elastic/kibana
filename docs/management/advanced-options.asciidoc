@@ -309,12 +309,6 @@ Limits the number of rows per page in the document table.
 [[discover-sample-size]]`discover:sampleSize`::
 Sets the maximum number of rows for the entire document table. This is the maximum number of documents fetched from {es}.
 
-[[discover-searchFieldsFromSource]]`discover:searchFieldsFromSource`::
-deprecated:[8.15.0]
-Load fields from the original JSON {ref}/mapping-source-field.html[`_source`].
-When disabled, *Discover* loads fields using the {es} search API's
-{ref}/search-fields.html#search-fields-param[`fields`] parameter.
-
 [[discover-searchonpageload]]`discover:searchOnPageLoad`::
 Controls whether a search is executed when *Discover* first loads. This setting
 does not have an effect when loading a saved search.

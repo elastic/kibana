@@ -14,6 +14,7 @@ import { getKibanaDir } from '#pipeline-utils';
 
 // TODO - how to generate this dynamically?
 const STORYBOOKS = [
+  'ai_assistant',
   'apm',
   'canvas',
   'cases',
@@ -26,7 +27,6 @@ const STORYBOOKS = [
   'dashboard_enhanced',
   'dashboard',
   'data',
-  'embeddable',
   'esql_editor',
   'expression_error',
   'expression_image',

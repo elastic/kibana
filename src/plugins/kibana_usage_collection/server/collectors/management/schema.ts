@@ -424,10 +424,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'discover:searchFieldsFromSource': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'securitySolution:rulesTableRefresh': {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },

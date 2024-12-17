@@ -7,29 +7,67 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiIconTip, IconType } from '@elastic/eui';
 import React from 'react';
 
-export const NoCreatorTip = (props: { iconType?: IconType }) => (
+const fallbackEntityNamePlural = i18n.translate(
+  'contentManagement.userProfiles.fallbackEntityNamePlural',
+  { defaultMessage: 'objects' }
+);
+
+export const NoCreatorTip = (props: {
+  iconType?: IconType;
+  includeVersionTip?: boolean;
+  entityNamePlural?: string;
+}) => (
   <NoUsersTip
     content={
-      <FormattedMessage
-        id="contentManagement.userProfiles.noCreatorTip"
-        defaultMessage="Creators are assigned when objects are created"
-      />
+      props.includeVersionTip ? (
+        <FormattedMessage
+          id="contentManagement.userProfiles.noCreatorTipWithVersion"
+          defaultMessage="Created by is set when {entityNamePlural} are created by users (not by API) starting from version {version}"
+          values={{
+            version: '8.14',
+            entityNamePlural: props.entityNamePlural ?? fallbackEntityNamePlural,
+          }}
+        />
+      ) : (
+        <FormattedMessage
+          id="contentManagement.userProfiles.noCreatorTip"
+          defaultMessage="Created by is set when {entityNamePlural} are created by users (not by API)"
+          values={{ entityNamePlural: props.entityNamePlural ?? fallbackEntityNamePlural }}
+        />
+      )
     }
     {...props}
   />
 );
 
-export const NoUpdaterTip = (props: { iconType?: string }) => (
+export const NoUpdaterTip = (props: {
+  iconType?: string;
+  includeVersionTip?: boolean;
+  entityNamePlural?: string;
+}) => (
   <NoUsersTip
     content={
-      <FormattedMessage
-        id="contentManagement.userProfiles.noUpdaterTip"
-        defaultMessage="Updated by is set when objects are updated"
-      />
+      props.includeVersionTip ? (
+        <FormattedMessage
+          id="contentManagement.userProfiles.noUpdaterTipWithVersion"
+          defaultMessage="Updated by is set when {entityNamePlural} are updated by users (not by API) starting from version {version}"
+          values={{
+            version: '8.15',
+            entityNamePlural: props.entityNamePlural ?? fallbackEntityNamePlural,
+          }}
+        />
+      ) : (
+        <FormattedMessage
+          id="contentManagement.userProfiles.noUpdaterTip"
+          defaultMessage="Updated by is set when {entityNamePlural} are created by users (not by API)"
+          values={{ entityNamePlural: props.entityNamePlural ?? fallbackEntityNamePlural }}
+        />
+      )
     }
     {...props}
   />
