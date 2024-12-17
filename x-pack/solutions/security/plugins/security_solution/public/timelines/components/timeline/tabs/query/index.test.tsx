@@ -518,7 +518,7 @@ describe('query tab with unified timeline', () => {
 
     expect(sampleSizeInput).toBeVisible();
 
-    fireEvent.change((sampleSizeInput as HTMLElement), {
+    fireEvent.change(sampleSizeInput as HTMLElement, {
       target: { value: sampleSize },
     });
   };
