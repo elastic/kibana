@@ -64,7 +64,7 @@ export const usePersistExceptionItem = ({
         setIsLoading(true);
 
         if (isUpdateExceptionItem(exceptionListItem)) {
-          // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
+          // Please see `x-pack/solutions/security/plugins/lists/public/exceptions/transforms.ts` doc notes
           // for context around the temporary `id`
           const transformedList = transformOutput(exceptionListItem);
 
@@ -74,7 +74,7 @@ export const usePersistExceptionItem = ({
             signal: abortCtrl.signal,
           });
         } else {
-          // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
+          // Please see `x-pack/solutions/security/plugins/lists/public/exceptions/transforms.ts` doc notes
           // for context around the temporary `id`
           const transformedList = transformNewItemOutput(exceptionListItem);
 

@@ -909,7 +909,6 @@ x-pack/plugins/graph @elastic/kibana-visualizations
 x-pack/plugins/index_management @elastic/kibana-management
 x-pack/plugins/lens @elastic/kibana-visualizations
 x-pack/plugins/licensing @elastic/kibana-core
-x-pack/plugins/lists @elastic/security-detection-engine
 x-pack/plugins/logstash @elastic/logstash
 x-pack/plugins/maps @elastic/kibana-presentation
 x-pack/plugins/monitoring @elastic/stack-monitoring
@@ -996,6 +995,7 @@ x-pack/solutions/security/plugins/cloud_security_posture @elastic/kibana-cloud-s
 x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 x-pack/solutions/security/plugins/elastic_assistant @elastic/security-generative-ai
 x-pack/solutions/security/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/plugins/lists @elastic/security-detection-engine
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
@@ -3377,7 +3377,7 @@ x-pack/solutions/security/plugins/cloud_security_posture @elastic/kibana-cloud-s
 x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 x-pack/solutions/security/plugins/elastic_assistant @elastic/security-generative-ai
 x-pack/solutions/security/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/plugins/lists @elastic/security-detection-engine
+x-pack/solutions/security/solutions/security/plugins/lists @elastic/security-detection-engine
 x-pack/solutions/security/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/solutions/security/plugins/security_solution_serverless @elastic/security-solution
