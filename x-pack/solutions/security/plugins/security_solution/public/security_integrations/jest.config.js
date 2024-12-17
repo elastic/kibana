@@ -8,7 +8,9 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution/public/security_integrations'],
+  roots: [
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/security_integrations',
+  ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/security_solution/public/security_integrations',
   coverageReporters: ['text', 'html'],
