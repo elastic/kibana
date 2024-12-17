@@ -7,6 +7,8 @@
 
 import { PluginInitializerContext } from '@kbn/core/server';
 
+export { config } from './config';
+
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { SearchSynonymsPlugin } = await import('./plugin');
   return new SearchSynonymsPlugin(initializerContext);
