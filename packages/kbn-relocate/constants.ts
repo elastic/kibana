@@ -46,8 +46,10 @@ export const EXTENSIONS = [
   'mdz',
   'asciidoc',
   'sh',
+  'snap',
   'ts',
   'jsonc',
+  'xml',
   'yaml',
   'yml',
 ];
