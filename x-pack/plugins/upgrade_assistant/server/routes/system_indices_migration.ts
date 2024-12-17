@@ -19,7 +19,16 @@ export function registerSystemIndicesMigrationRoutes({
 }: RouteDependencies) {
   // GET status of the system indices migration
   router.get(
-    { path: `${API_BASE_PATH}/system_indices_migration`, validate: false },
+    {
+      path: `${API_BASE_PATH}/system_indices_migration`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       try {
         const {
@@ -43,7 +52,16 @@ export function registerSystemIndicesMigrationRoutes({
 
   // POST starts the system indices migration
   router.post(
-    { path: `${API_BASE_PATH}/system_indices_migration`, validate: false },
+    {
+      path: `${API_BASE_PATH}/system_indices_migration`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       try {
         const {

@@ -29,6 +29,12 @@ export function registerPostOneApplyLatestMappings({
   router.post(
     {
       path: addBasePath('/data_streams/{name}/mappings_from_template'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { params: paramsSchema },
     },
     async (context, request, response) => {
@@ -79,6 +85,12 @@ export function registerPostOneRollover({
   router.post(
     {
       path: addBasePath('/data_streams/{name}/rollover'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { params: paramsSchema },
     },
     async (context, request, response) => {
