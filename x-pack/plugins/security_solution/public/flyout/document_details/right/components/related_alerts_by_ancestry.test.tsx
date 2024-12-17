@@ -16,22 +16,16 @@ import {
 } from './test_ids';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { LeftPanelInsightsTab } from '../../left';
-import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
-import { useDocumentDetailsContext } from '../../shared/context';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../shared/context');
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_ancestry');
 
-const mockOpenLeftPanel = jest.fn();
+const mockNavigateToLeftPanel = jest.fn();
+jest.mock('../../shared/hooks/use_navigate_to_left_panel');
+
 const documentId = 'documentId';
 const indices = ['indices'];
 const scopeId = 'scopeId';
-const eventId = 'eventId';
-const indexName = 'indexName';
 
 const TEXT_TEST_ID = SUMMARY_ROW_TEXT_TEST_ID(CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID);
 const BUTTON_TEST_ID = SUMMARY_ROW_BUTTON_TEST_ID(CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID);
@@ -49,14 +43,10 @@ const renderRelatedAlertsByAncestry = () =>
 describe('<RelatedAlertsByAncestry />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    (useDocumentDetailsContext as jest.Mock).mockReturnValue({
-      eventId,
-      indexName,
-      scopeId,
-      isPreviewMode: false,
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
+      navigateToLeftPanel: mockNavigateToLeftPanel,
+      isEnabled: true,
     });
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
   });
 
   it('should render single related alert correctly', () => {
@@ -112,17 +102,6 @@ describe('<RelatedAlertsByAncestry />', () => {
     const { getByTestId } = renderRelatedAlertsByAncestry();
     getByTestId(BUTTON_TEST_ID).click();
 
-    expect(mockOpenLeftPanel).toHaveBeenCalledWith({
-      id: DocumentDetailsLeftPanelKey,
-      path: {
-        tab: LeftPanelInsightsTab,
-        subTab: CORRELATIONS_TAB_ID,
-      },
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
+    expect(mockNavigateToLeftPanel).toHaveBeenCalled();
   });
 });
