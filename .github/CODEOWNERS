@@ -813,7 +813,7 @@ x-pack/packages/security/plugin_types_public @elastic/kibana-security
 x-pack/packages/security/plugin_types_server @elastic/kibana-security
 x-pack/packages/security/role_management_model @elastic/kibana-security
 x-pack/solutions/security/packages/distribution_bar @elastic/kibana-cloud-security-posture
-x-pack/plugins/security_solution_ess @elastic/security-solution
+x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/packages/features @elastic/security-threat-hunting-explore
 x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
 x-pack/solutions/security/packages/navigation @elastic/security-threat-hunting-explore
@@ -1585,7 +1585,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 
 # Security Solution Offering plugins
 # TODO: assign sub directories to sub teams
-/x-pack/plugins/security_solution_ess/ @elastic/security-solution
+/x-pack/solutions/security/plugins/security_solution_ess/ @elastic/security-solution
 /x-pack/plugins/security_solution_serverless/ @elastic/security-solution
 
 # GenAI in Security Solution
@@ -1930,7 +1930,7 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 # Security design
 /x-pack/plugins/endpoint/**/*.scss @elastic/security-design
 /x-pack/plugins/security_solution/**/*.scss @elastic/security-design
-/x-pack/plugins/security_solution_ess/**/*.scss @elastic/security-design
+/x-pack/solutions/security/plugins/security_solution_ess/**/*.scss @elastic/security-design
 /x-pack/plugins/security_solution_serverless/**/*.scss @elastic/security-design
 
 # Logstash
