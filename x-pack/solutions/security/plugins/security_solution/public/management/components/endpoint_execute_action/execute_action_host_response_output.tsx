@@ -98,6 +98,7 @@ interface ShellInfoContentProps {
   textSize?: 's' | 'xs';
   title: string;
 }
+
 const ShellInfoContent = memo<ShellInfoContentProps>(({ content, textSize, title }) => (
   <StyledEuiText size={textSize}>
     <strong>
@@ -178,10 +179,12 @@ export interface ExecuteActionHostResponseOutputProps {
   outputContent: ResponseActionExecuteOutputContent;
   'data-test-subj'?: string;
   textSize?: 's' | 'xs';
+  hideContext?: boolean;
 }
 
+// Note: also used for RunScript command
 export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOutputProps>(
-  ({ outputContent, 'data-test-subj': dataTestSubj, textSize = 'xs' }) => {
+  ({ outputContent, 'data-test-subj': dataTestSubj, textSize = 'xs', hideContext }) => {
     const contextContent = useMemo(
       () => (
         <>
@@ -216,14 +219,16 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
 
     return (
       <>
-        <EuiFlexItem>
-          <ExecutionActionOutputAccordion
-            content={contextContent}
-            data-test-subj={`${dataTestSubj}-context`}
-            textSize={textSize}
-            type="context"
-          />
-        </EuiFlexItem>
+        {!hideContext && (
+          <EuiFlexItem>
+            <ExecutionActionOutputAccordion
+              content={contextContent}
+              data-test-subj={`${dataTestSubj}-context`}
+              textSize={textSize}
+              type="context"
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           {outputContent.stderr.length > 0 && (
             <>

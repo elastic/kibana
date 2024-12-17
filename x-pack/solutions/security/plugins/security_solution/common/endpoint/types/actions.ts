@@ -97,7 +97,8 @@ export interface ResponseActionScanOutputContent {
 }
 
 export interface ResponseActionRunScriptOutputContent {
-  output: string;
+  stdout: string;
+  stderr: string;
   code: string;
 }
 

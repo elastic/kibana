@@ -17,6 +17,7 @@ import { GetProcessesRouteRequestSchema } from '../response_actions/running_proc
 import { KillProcessRouteRequestSchema } from '../response_actions/kill_process';
 import { SuspendProcessRouteRequestSchema } from '../response_actions/suspend_process';
 import { UploadActionRequestSchema } from '../response_actions/upload';
+import { RunScriptActionRequestSchema } from '../response_actions/run_script';
 
 export const ResponseActionBodySchema = schema.oneOf([
   IsolateRouteRequestSchema.body,
@@ -28,6 +29,7 @@ export const ResponseActionBodySchema = schema.oneOf([
   ExecuteActionRequestSchema.body,
   UploadActionRequestSchema.body,
   ScanActionRequestSchema.body,
+  RunScriptActionRequestSchema.body,
 ]);
 
 export type ResponseActionsRequestBody = TypeOf<typeof ResponseActionBodySchema>;

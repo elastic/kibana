@@ -17,6 +17,7 @@ import {
   GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
+  RUN_SCRIPT_ROUTE,
   SCAN_ROUTE,
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
@@ -42,6 +43,8 @@ import type {
   ResponseActionScanParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
+  ResponseActionRunScriptOutputContent,
+  ResponseActionRunScriptParameters,
 } from '../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
@@ -73,6 +76,8 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
   >;
 
   scan: () => ActionDetailsApiResponse<ResponseActionScanOutputContent>;
+
+  runscript: () => ActionDetailsApiResponse<ResponseActionRunScriptOutputContent>;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
@@ -271,6 +276,25 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
         ResponseActionScanParameters
       >({
         command: 'scan',
+      });
+
+      return { data: response };
+    },
+  },
+  {
+    id: 'runscript',
+    path: RUN_SCRIPT_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse<
+      ResponseActionRunScriptOutputContent,
+      ResponseActionRunScriptParameters
+    > => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails<
+        ResponseActionRunScriptOutputContent,
+        ResponseActionRunScriptParameters
+      >({
+        command: 'runscript',
       });
 
       return { data: response };
