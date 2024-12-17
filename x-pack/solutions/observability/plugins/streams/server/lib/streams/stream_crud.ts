@@ -11,7 +11,7 @@ import { IngestPipeline, IngestProcessorContainer } from '@elastic/elasticsearch
 import { set } from '@kbn/safer-lodash-set';
 import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { STREAMS_INDEX } from '../../../common/constants';
-import { FieldDefinition, StreamDefinition, StreamLifecycle } from '../../../common/types';
+import { FieldDefinition, ReadStreamDefinition, StreamDefinition, StreamLifecycle } from '../../../common/types';
 import { generateLayer } from './component_templates/generate_layer';
 import { deleteComponent, upsertComponent } from './component_templates/manage_component_templates';
 import { getComponentTemplateName } from './component_templates/name';
@@ -227,7 +227,7 @@ interface ReadStreamParams extends BaseParams {
 }
 
 export interface ReadStreamResponse {
-  definition: StreamDefinition;
+  definition: ReadStreamDefinition;
 }
 
 export async function readStream({
@@ -251,6 +251,7 @@ export async function readStream({
     return {
       definition: {
         ...definition,
+        inheritedFields: [],
         lifecycle: getDataStreamLifecycle(dataStream),
       },
     };
@@ -264,9 +265,11 @@ export async function readStream({
 
 export async function readDataStreamAsStream({ id, scopedClusterClient }: ReadStreamParams) {
   const dataStream = await getDataStream({ name: id, scopedClusterClient });
-  const definition: StreamDefinition = {
+  const definition: ReadStreamDefinition = {
     id,
     managed: false,
+    inheritedFields: [],
+    unmanaged_elasticsearch_assets: [],
     lifecycle: getDataStreamLifecycle(dataStream),
     children: [],
     fields: [],

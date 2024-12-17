@@ -109,8 +109,6 @@ export type StreamLifecycle = z.infer<typeof lifecycleSchema>;
 
 export const streamDefinitonSchema = streamWithoutIdDefinitonSchema.extend({
   id: z.string(),
-  unmanaged_elasticsearch_assets: z.optional(z.array(unmanagedElasticsearchAsset)),
-  lifecycle: lifecycleSchema,
 });
 
 export type StreamDefinition = z.infer<typeof streamDefinitonSchema>;
@@ -121,6 +119,8 @@ export type StreamWithoutChildrenDefinition = z.infer<typeof streamDefinitonWith
 
 export const readStreamDefinitonSchema = streamDefinitonSchema.extend({
   inheritedFields: z.array(fieldDefinitionSchema.extend({ from: z.string() })).default([]),
+  unmanaged_elasticsearch_assets: z.optional(z.array(unmanagedElasticsearchAsset)),
+  lifecycle: lifecycleSchema,
 });
 
 export type ReadStreamDefinition = z.infer<typeof readStreamDefinitonSchema>;
