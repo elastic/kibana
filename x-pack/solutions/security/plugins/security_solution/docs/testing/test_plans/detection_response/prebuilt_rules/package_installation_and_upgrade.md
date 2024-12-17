@@ -172,12 +172,17 @@ Then the package is installed without Kibana crashing with an Out Of Memory erro
 
 ```Gherkin
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 Given there are two package versions: A and B where A < B
 And the package of A version is installed
 =======
 Given there are two package versions: N-1 and N
 And the package of N-1 version is installed
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
+=======
+Given there are two package versions: A and B where A < B
+And the package of A version is installed
+>>>>>>> 5894739cfd3 (Finish applying suggestions in package_installation_and_upgrade.md):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 When user calls the status endpoint
 Then it should return a 200 response with some number of rules to install and 0 rules to upgrade
 When user calls the installation/_review endpoint
@@ -186,10 +191,14 @@ When user calls the installation/_perform_ endpoint
 Then it should return a 200 response matching the response of the status endpoint
 And rules returned in this response should exist as alert saved objects
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 When user installs version B of the package
 =======
 When user installs the package of N version
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
+=======
+When user installs version B of the package
+>>>>>>> 5894739cfd3 (Finish applying suggestions in package_installation_and_upgrade.md):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 Then it should be installed successfully
 When user calls the status endpoint
 Then it should return a 200 response with some number of new rules to install and some number of rules to upgrade
@@ -212,6 +221,7 @@ Then rules returned in this response should exist as alert saved objects
 ```Gherkin
 Given user is upgrading Kibana from version <A> to version <B>
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 And the <A> version Kibana instance has already installed prebuilt rules
 When the Kibana upgrade is complete
 Then user should be able to install new prebuilt rules
@@ -220,6 +230,10 @@ And upgrade installed prebuilt rules that have newer versions in Kibana version 
 =======
 And the <A> instance contains already installed prebuilt rules
 When the upgrade is complete
+=======
+And the <A> version Kibana instance has already installed prebuilt rules
+When the Kibana upgrade is complete
+>>>>>>> 5894739cfd3 (Finish applying suggestions in package_installation_and_upgrade.md):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 Then user should be able to install new prebuilt rules
 And delete installed prebuilt rules
 And upgrade installed prebuilt rules that have newer versions in <B>
