@@ -9,7 +9,7 @@ import { EuiButton, EuiCallOut, EuiHorizontalRule, EuiSpacer, EuiText } from '@e
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
-import { type LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -35,7 +35,7 @@ export function InstallElasticAgent() {
     services: { share },
   } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
 
-  const logsLocator = share.url.locators.get<LogsLocatorParams>('LOGS_LOCATOR_ID');
+  const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
 
   const { getState, setState } = useWizard();
   const wizardState = getState();

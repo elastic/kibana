@@ -9,7 +9,7 @@ import { useCallback, useMemo } from 'react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { type LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { AWSIndexName } from '../../../../common/aws_firehose';
 import { ObservabilityOnboardingContextValue } from '../../../plugin';
 
@@ -32,7 +32,7 @@ export function useAWSServiceGetStartedList(): AWSServiceGetStartedConfig[] {
     services: { share },
   } = useKibana<ObservabilityOnboardingContextValue>();
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
-  const logsLocator = share.url.locators.get<LogsLocatorParams>('LOGS_LOCATOR_ID');
+  const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
 
   const generateMetricsDashboardActionLink = useCallback(
     (dashboardId: string, name?: string) => ({

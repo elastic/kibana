@@ -21,7 +21,7 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
-import { type LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { getAutoDetectCommand } from './get_auto_detect_command';
 import { DASHBOARDS, useOnboardingFlow } from './use_onboarding_flow';
 import { ProgressIndicator } from '../shared/progress_indicator';
@@ -63,7 +63,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
   const customIntegrations = installedIntegrations.filter(
     (integration) => integration.installSource === 'custom'
   );
-  const logsLocator = share.url.locators.get<LogsLocatorParams>('LOGS_LOCATOR_ID');
+  const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
   const assetDetailsLocator = share.url.locators.get(ASSET_DETAILS_LOCATOR_ID);
 
