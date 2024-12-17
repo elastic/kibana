@@ -7,13 +7,14 @@
 import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-// import { StreamDetailEnrichingContent } from './page_content';
 
-const StreamDetailEnrichingContent = dynamic(() =>
-  import('./page_content').then((mod) => ({ default: mod.StreamDetailEnrichingContent }))
+const StreamDetailEnrichmentContent = dynamic(() =>
+  import(/* webpackChunkName: "management_enrichment" */ './page_content').then((mod) => ({
+    default: mod.StreamDetailEnrichmentContent,
+  }))
 );
 
-export function StreamDetailEnriching({
+export function StreamDetailEnrichment({
   definition,
   refreshDefinition,
 }: {
@@ -25,6 +26,6 @@ export function StreamDetailEnriching({
   if (!definition) return null;
 
   return (
-    <StreamDetailEnrichingContent definition={definition} refreshDefinition={refreshDefinition} />
+    <StreamDetailEnrichmentContent definition={definition} refreshDefinition={refreshDefinition} />
   );
 }

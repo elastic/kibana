@@ -10,11 +10,11 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { WelcomeImage } from '../welcome_image';
 
-interface EnrichingEmptyPromptProps {
+interface EnrichmentEmptyPromptProps {
   onAddProcessor: () => void;
 }
 
-export const EnrichingEmptyPrompt = ({ onAddProcessor }: EnrichingEmptyPromptProps) => {
+export const EnrichmentEmptyPrompt = ({ onAddProcessor }: EnrichmentEmptyPromptProps) => {
   return (
     <EuiEmptyPrompt
       color="subdued"
