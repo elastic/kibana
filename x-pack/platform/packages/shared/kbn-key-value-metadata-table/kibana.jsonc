@@ -4,7 +4,9 @@
   "owner": [
     "@elastic/obs-ux-infra_services-team",
     "@elastic/obs-ux-logs-team"
-  ]
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }
 
 
