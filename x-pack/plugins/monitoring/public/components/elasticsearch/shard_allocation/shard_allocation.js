@@ -14,13 +14,13 @@ import { i18n } from '@kbn/i18n';
 
 import { ClusterView } from './components/cluster_view';
 
-const clusterStyle = (theme) => css`
+const clusterStyle = ({ euiTheme }) => css`
   th {
     text-align: left;
   }
 
   td:first-child {
-    width: calc(${theme.euiTheme.base} * 12.5);
+    width: calc(${euiTheme.base} * 12.5);
   }
 `;
 

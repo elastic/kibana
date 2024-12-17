@@ -6,7 +6,14 @@
  */
 
 import React, { MouseEvent } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiIcon, UseEuiTheme, euiFontSize } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiIcon,
+  UseEuiTheme,
+  euiFontSize,
+  logicalCSS,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { includes, isFunction } from 'lodash';
 
@@ -25,8 +32,8 @@ const legendItemStyle = (isDisabled: boolean) => (theme: UseEuiTheme) =>
     ${isDisabled ? 'opacity: 0.5;' : ''}
   `;
 
-const legendHorizontalStyle = (theme: UseEuiTheme) => css`
-  margin-top: ${theme.euiTheme.size.xs};
+const legendHorizontalStyle = ({ euiTheme }: UseEuiTheme) => css`
+  ${logicalCSS('margin-top', euiTheme.size.xs)}
 `;
 
 const legendLabelStyle = css`
@@ -37,10 +44,10 @@ const legendLabelStyle = css`
   align-items: center;
 `;
 
-const legendValueStyle = (theme: UseEuiTheme) => css`
+const legendValueStyle = ({ euiTheme }: UseEuiTheme) => css`
   overflow: hidden;
   white-space: nowrap;
-  margin-left: ${theme.euiTheme.size.xs};
+  ${logicalCSS('margin-left', euiTheme.size.xs)}
 `;
 
 interface Row {

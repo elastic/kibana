@@ -34,16 +34,16 @@ import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link'
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-const clusterCellExpiredStyle = (theme) => css`
-  color: ${theme.euiTheme.colors.textParagraph};
+const clusterCellExpiredStyle = ({ euiTheme }) => css`
+  color: ${euiTheme.colors.textParagraph};
 `;
 
 const clusterCellLicenseStyle = (theme) => css`
   font-size: ${euiFontSize(theme, 'm')};
 `;
 
-const clusterCellExpirationStyle = (theme) => css`
-  color: ${theme.euiTheme.colors.darkShade};
+const clusterCellExpirationStyle = ({ euiTheme }) => css`
+  color: ${euiTheme.colors.darkShade};
 `;
 
 const IsClusterSupported = ({ isSupported, children }) => {

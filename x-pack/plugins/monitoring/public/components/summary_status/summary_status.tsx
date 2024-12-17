@@ -6,7 +6,14 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiStat, UseEuiTheme, euiTextTruncate } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiStat,
+  UseEuiTheme,
+  euiTextTruncate,
+  logicalCSS,
+} from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { css } from '@emotion/react';
 
@@ -17,9 +24,9 @@ import { StatusIcon, StatusIconProps } from '../status_icon';
 import { AlertsStatus } from '../../alerts/status';
 import type { AlertsByName } from '../../alerts/types';
 
-const summaryStatusNoWrapStyle = (theme: UseEuiTheme) => css`
-  margin-left: ${theme.euiTheme.size.m}
-  margin-right: ${theme.euiTheme.size.m}
+const summaryStatusNoWrapStyle = ({ euiTheme }: UseEuiTheme) => css`
+  ${logicalCSS('margin-left', euiTheme.size.m)}
+  ${logicalCSS('margin-right', euiTheme.size.m)}
 `;
 
 const summaryStatusNoWrapStatStyle = css`

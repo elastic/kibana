@@ -18,6 +18,7 @@ import {
   EuiTextAlign,
   EuiButtonEmpty,
   UseEuiTheme,
+  logicalCSS,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -32,12 +33,12 @@ import { AlertsBadge } from '../../alerts/badge';
 import type { AlertsByName } from '../../alerts/types';
 import { Series } from './types';
 
-const zoomStyle = (theme: UseEuiTheme) => css`
+const zoomStyle = ({ euiTheme }: UseEuiTheme) => css`
   visibility: hidden;
-  padding-right: ${theme.euiTheme.size.m};
+  ${logicalCSS('padding-right', euiTheme.size.m)}
 `;
 
-const wrapperStyle = (theme: UseEuiTheme) => css`
+const wrapperStyle = css`
   &:hover .rhythmChart__zoom {
     visibility: visible;
   }

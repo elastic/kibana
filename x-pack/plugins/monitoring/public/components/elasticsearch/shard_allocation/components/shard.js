@@ -8,7 +8,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { get } from 'lodash';
-import { EuiToolTip, EuiBadge, euiFontSize } from '@elastic/eui';
+import { EuiToolTip, EuiBadge, euiFontSize, logicalCSS } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -16,8 +16,8 @@ import { calculateClass } from '../lib/calculate_class';
 import { vents } from '../lib/vents';
 
 const shardStyle = (theme) => css`
+  ${logicalCSS('padding', `${theme.euiTheme.size.xs} ${theme.euiTheme.size.s}`)}
   align-self: center;
-  padding: ${theme.euiTheme.size.xs} ${theme.euiTheme.size.s};
   font-size: ${euiFontSize(theme, 'xs')};
   position: relative;
   display: inline-block;

@@ -7,7 +7,13 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiFieldSearch, EuiOutsideClickDetector, EuiPanel, UseEuiTheme } from '@elastic/eui';
+import {
+  EuiFieldSearch,
+  EuiOutsideClickDetector,
+  EuiPanel,
+  logicalCSS,
+  UseEuiTheme,
+} from '@elastic/eui';
 
 import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 
@@ -304,12 +310,12 @@ const autocompleteContainerCss = css`
   position: relative;
 `;
 
-const suggestionsPanelCss = (theme: UseEuiTheme) => css`
+const suggestionsPanelCss = ({ euiTheme }: UseEuiTheme) => css`
   position: absolute;
   width: 100%;
-  margin-top: 2px;
+  ${logicalCSS('margin-top', euiTheme.size.xxs)}
   overflow-x: hidden;
   overflow-y: scroll;
-  z-index: ${theme.euiTheme.levels.maskBelowHeader};
+  z-index: ${euiTheme.levels.maskBelowHeader};
   max-height: 322px;
 `;

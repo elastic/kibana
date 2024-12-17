@@ -8,10 +8,10 @@
 import React from 'react';
 import { css } from '@emotion/react';
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, UseEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, logicalCSS, UseEuiTheme } from '@elastic/eui';
 
-const collapsibleStatementStyle = (theme: UseEuiTheme) => css`
-  padding-left: ${theme.euiTheme.size.m};
+const collapsibleStatementStyle = ({ euiTheme }: UseEuiTheme) => css`
+  ${logicalCSS('padding-left', euiTheme.size.m)}
 `;
 
 function getToggleIconType(isCollapsed: boolean) {
