@@ -945,7 +945,6 @@ x-pack/plugins/search_notebooks @elastic/search-kibana
 x-pack/plugins/search_playground @elastic/search-kibana
 x-pack/plugins/search_solution/search_navigation @elastic/search-kibana
 x-pack/plugins/security @elastic/kibana-security
-x-pack/plugins/security_solution_serverless @elastic/security-solution
 x-pack/plugins/serverless @elastic/appex-sharedux
 x-pack/plugins/serverless_search @elastic/search-kibana
 x-pack/plugins/spaces @elastic/kibana-security
@@ -999,6 +998,7 @@ x-pack/solutions/security/plugins/elastic_assistant @elastic/security-generative
 x-pack/solutions/security/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
+x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
 x-pack/solutions/security/plugins/session_view @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/plugins/timelines @elastic/security-threat-hunting-investigations
@@ -1246,7 +1246,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 #CC# /src/plugins/home/server/services/ @elastic/appex-sharedux
 #CC# /src/plugins/home/ @elastic/appex-sharedux
 #CC# /x-pack/plugins/reporting/ @elastic/appex-sharedux
-#CC# /x-pack/plugins/security_solution_serverless/ @elastic/appex-sharedux
+#CC# /x-pack/solutions/security/plugins/security_solution_serverless/ @elastic/appex-sharedux
 
 
 # Observability UI
@@ -2153,7 +2153,7 @@ x-pack/test_serverless/functional/test_suites/security/index.mki_only.ts @elasti
 # Security Solution Offering plugins
 # TODO: assign sub directories to sub teams
 /x-pack/solutions/security/plugins/security_solution_ess/ @elastic/security-solution
-/x-pack/plugins/security_solution_serverless/ @elastic/security-solution
+/x-pack/solutions/security/plugins/security_solution_serverless/ @elastic/security-solution
 /x-pack/solutions/security/plugins/security_solution/public/app/404.tsx @elastic/security-solution
 /x-pack/solutions/security/plugins/security_solution/public/app/app.tsx @elastic/security-solution
 /x-pack/solutions/security/plugins/security_solution/public/app/home @elastic/security-solution
@@ -2251,7 +2251,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/draggables @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/events_tab @elastic/security-threat-hunting-investigations
-/x-pack/plugins/security_solution_serverless/public/upselling/pages/threat_intelligence_paywall.tsx @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/threat_intelligence_paywall.tsx @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/mock/mock_timeline_control_columns.tsx @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/exit_full_screen @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/app/home/template_wrapper/timeline @elastic/security-threat-hunting-investigations
@@ -2307,7 +2307,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/solutions/security/plugins/security_solution/public/onboarding @elastic/security-threat-hunting-explore
 /x-pack/solutions/security/plugins/security_solution/public/common/components/empty_page @elastic/security-threat-hunting-explore
 /x-pack/solutions/security/plugins/security_solution/public/common/components/empty_prompt @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution_serverless/public/components/dashboards_landing_callout @elastic/security-threat-hunting-explore
+/x-pack/solutions/security/plugins/security_solution_serverless/public/components/dashboards_landing_callout @elastic/security-threat-hunting-explore
 /x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/hosts @elastic/security-threat-hunting-explore
 /x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/matrix_histogram @elastic/security-threat-hunting-explore
 /x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/network @elastic/security-threat-hunting-explore
@@ -2452,15 +2452,15 @@ x-pack/solutions/security/plugins/security_solution/server/assistant/tools/defen
 /x-pack/test/security_solution_endpoint/ @elastic/security-defend-workflows
 /x-pack/test/security_solution_api_integration/test_suites/edr_workflows/ @elastic/security-defend-workflows
 /x-pack/test_serverless/shared/lib/security/kibana_roles/ @elastic/security-defend-workflows
-/x-pack/plugins/security_solution_serverless/public/upselling/sections/endpoint_management @elastic/security-defend-workflows
-/x-pack/plugins/security_solution_serverless/public/upselling/pages/endpoint_management @elastic/security-defend-workflows
-/x-pack/plugins/security_solution_serverless/server/endpoint @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/sections/endpoint_management @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/endpoint_management @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution_serverless/server/endpoint @elastic/security-defend-workflows
 x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/defend_insights @elastic/security-defend-workflows
 x-pack/plugins/elastic_assistant/server/__mocks__/defend_insights_schema.mock.ts @elastic/security-defend-workflows
 x-pack/plugins/elastic_assistant/server/ai_assistant_data_clients/defend_insights @elastic/security-defend-workflows
 x-pack/plugins/elastic_assistant/server/routes/defend_insights @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/common/components/response_actions @elastic/security-defend-workflows
-/x-pack/plugins/security_solution_serverless/public/upselling/pages/osquery_automated_response_actions.tsx @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/osquery_automated_response_actions.tsx @elastic/security-defend-workflows
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/solutions/security/plugins/security_solution/server/usage/ @elastic/security-data-analytics
@@ -2554,7 +2554,7 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 /x-pack/plugins/endpoint/**/*.scss @elastic/security-design
 /x-pack/solutions/security/plugins/security_solution/**/*.scss @elastic/security-design
 /x-pack/solutions/security/plugins/security_solution_ess/**/*.scss @elastic/security-design
-/x-pack/plugins/security_solution_serverless/**/*.scss @elastic/security-design
+/x-pack/solutions/security/plugins/security_solution_serverless/**/*.scss @elastic/security-design
 
 # Logstash
 /x-pack/test/functional/es_archives/logstash/example_pipelines @elastic/logstash
@@ -3380,7 +3380,7 @@ x-pack/solutions/security/plugins/kubernetes_security @elastic/kibana-cloud-secu
 x-pack/solutions/security/plugins/lists @elastic/security-detection-engine
 x-pack/solutions/security/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/solutions/security/plugins/security_solution_ess @elastic/security-solution
-x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
+x-pack/solutions/security/solutions/security/plugins/security_solution_serverless @elastic/security-solution
 x-pack/solutions/security/plugins/session_view @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/plugins/timelines @elastic/security-threat-hunting-investigations

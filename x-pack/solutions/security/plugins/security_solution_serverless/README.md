@@ -75,4 +75,4 @@ export class Plugin {
 If you're looking to contribute to this plugin, please follow the standard contribution guidelines of the Security Solution plugin. Ensure that all changes are tested in a serverless environment.
 
 ## **License**
-This plugin is licensed under the Elastic License. See the [LICENSE](../../../LICENSE.txt) file for more details.
+This plugin is licensed under the Elastic License. See the [LICENSE](../../../../../LICENSE.txt) file for more details.
