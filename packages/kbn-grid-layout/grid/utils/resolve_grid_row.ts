@@ -149,12 +149,12 @@ export const resolveGridRow = (
   // handle all collisions, row by row
   for (let row = dragRequest?.row ?? 0; row < collisionGrid.length; row++) {
     let collisions = getCollisionsInOrder(row);
-    // don't move on to sthe next row until the current row has no more collisions
+    // continue pushing panels down until all collisions in this row have been resolved
     while (collisions.length > 0) {
       const panelKey = collisions.shift();
       if (!panelKey) break;
 
-      // move the panel down
+      // move the current colliding panel down
       const panel = nextRowData.panels[panelKey];
       nextRowData.panels[panelKey].row += 1;
 
@@ -175,11 +175,8 @@ export const resolveGridRow = (
         collisionGrid[panel.row + panel.height - 1][panelColumn].push(panelKey);
       }
 
+      // re-check if the current row has collisions now that the panel has been moved down
       collisions = getCollisionsInOrder(row);
-      if (collisions.length <= 0) {
-        // no more collisions; break out early of "push panel down" loop
-        break;
-      }
     }
   }
 
