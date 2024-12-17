@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './apm';
-export * from './dataset_quality';
-export * from './dataset_quality_details';
-export * from './logs_explorer';
-export * from './observability_logs_explorer';
-export * from './observability_onboarding';
-export * from './uptime';
+import type { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+
+import { registerGetJoinIndicesRoute } from './get_join_indices';
+
+export const registerRoutes = (setup: CoreSetup, initContext: PluginInitializerContext) => {
+  const router = setup.http.createRouter();
+
+  registerGetJoinIndicesRoute(router, initContext);
+};

@@ -38,11 +38,15 @@ import {
 import { installBuiltInDefinitions } from './lib/v2/definitions/install_built_in_definitions';
 import { disableBuiltInEntityDiscovery } from './lib/entities/uninstall_entity_definition';
 import { installEntityManagerTemplates } from './lib/manage_index_templates';
+import { instanceAsFilter } from './lib/v2/definitions/instance_as_filter';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityManagerServerPluginSetup {}
 export interface EntityManagerServerPluginStart {
   getScopedClient: (options: { request: KibanaRequest }) => Promise<EntityClient>;
+  v2: {
+    instanceAsFilter: typeof instanceAsFilter;
+  };
 }
 
 export const config: PluginConfigDescriptor<EntityManagerConfig> = {
@@ -183,6 +187,9 @@ export class EntityManagerServerPlugin
     return {
       getScopedClient: async ({ request }: { request: KibanaRequest }) => {
         return this.getScopedClient({ request, coreStart: core });
+      },
+      v2: {
+        instanceAsFilter,
       },
     };
   }

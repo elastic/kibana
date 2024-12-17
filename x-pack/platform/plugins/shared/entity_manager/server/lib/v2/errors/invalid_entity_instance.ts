@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export enum ObservabilityTriggerId {
-  ApmTransactionContextMenu = 'apmTransactionContextMenu',
-  ApmErrorContextMenu = 'apmErrorContextMenu',
+export class InvalidEntityInstance extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidEntityInstance';
+  }
 }

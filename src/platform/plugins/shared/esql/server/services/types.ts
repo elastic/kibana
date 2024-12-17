@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './apm';
-export * from './dataset_quality';
-export * from './dataset_quality_details';
-export * from './logs_explorer';
-export * from './observability_logs_explorer';
-export * from './observability_onboarding';
-export * from './uptime';
+export interface JoinIndicesAutocompleteResult {
+  indices: JoinIndexAutocompleteItem[];
+}
+
+export interface JoinIndexAutocompleteItem {
+  name: string;
+  mode: 'lookup' | string;
+  aliases: string[];
+}
