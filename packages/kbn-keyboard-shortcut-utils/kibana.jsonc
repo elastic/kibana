@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/keyboard-shortcut-utils",
+  "owner": "@elastic/appex-sharedux"
+}
