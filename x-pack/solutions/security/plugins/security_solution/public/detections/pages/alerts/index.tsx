@@ -20,6 +20,7 @@ import { DetectionEnginePage } from '../detection_engine/detection_engine';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useReadonlyHeader } from '../../../use_readonly_header';
 import { AlertDetailsRedirect } from './alert_details_redirect';
+import { EventDetailsRedirect } from './event_details_redirect';
 
 const AlertsRoute = () => (
   <TrackApplicationView viewId={SecurityPageName.alerts}>
@@ -33,6 +34,10 @@ const AlertsContainerComponent: React.FC = () => {
   return (
     <Routes>
       <Route path={ALERTS_PATH} exact component={AlertsRoute} />
+      <Route
+        path={`${ALERT_DETAILS_REDIRECT_PATH}/events/:eventId`}
+        component={EventDetailsRedirect}
+      />
       {/* Redirect to the alerts page filtered for the given alert id */}
       <Route path={`${ALERT_DETAILS_REDIRECT_PATH}/:alertId`} component={AlertDetailsRedirect} />
       <Route component={NotFoundPage} />

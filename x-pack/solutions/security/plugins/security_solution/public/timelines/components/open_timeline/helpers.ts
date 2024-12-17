@@ -299,6 +299,7 @@ export interface QueryTimelineById {
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
   savedSearchId?: string;
+  eventId?: string;
 }
 
 export const useQueryTimelineById = () => {
@@ -315,8 +316,18 @@ export const useQueryTimelineById = () => {
     onOpenTimeline,
     openTimeline = true,
     savedSearchId,
+    eventId,
   }: QueryTimelineById) => {
     if (timelineId == null) {
+      const queryExpr = eventId ? `_id:"${eventId}"` : '';
+      let kqlQuery = null;
+      if (eventId) {
+        kqlQuery = {
+          filterQuery: {
+            kuery: { kind: 'kuery', expression: queryExpr },
+          },
+        };
+      }
       updateTimeline({
         id: TimelineId.active,
         duplicate: false,
@@ -327,6 +338,7 @@ export const useQueryTimelineById = () => {
           ...timelineDefaults,
           columns: defaultUdtHeaders,
           id: TimelineId.active,
+          kqlQuery,
           activeTab: activeTimelineTab,
           show: openTimeline,
           initialized: true,
