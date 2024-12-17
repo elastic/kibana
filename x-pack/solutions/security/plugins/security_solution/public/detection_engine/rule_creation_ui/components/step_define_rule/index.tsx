@@ -127,10 +127,6 @@ interface StepDefineRuleReadOnlyProps {
   indexPattern: DataViewBase;
 }
 
-const customMlJobButtonClassName = css`
-  padding-top: 20px;
-`;
-
 export const MyLabelButton = styled(EuiButtonEmpty)`
   height: 18px;
   font-size: 12px;
@@ -669,7 +665,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   <EuiFlexItem>
                     <MachineLearningJobIdEdit path="machineLearningJobId" />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false} className={customMlJobButtonClassName}>
+                  <EuiFlexItem grow={false}>
+                    <EuiSpacer size="l" />
                     <CreateCustomMlJobButton />
                   </EuiFlexItem>
                 </EuiFlexGroup>
