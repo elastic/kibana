@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('PNG reports: sample data created in 7.6', () => {
       const reportFileName = 'tsvb';
 
-      before(async () => {
+      before('apply kibana server settings: timeDefaults and defaultIndex', async () => {
         await kibanaServer.uiSettings.replace({
           'timepicker:timeDefaults':
             '{ "from": "2022-04-15T00:00:00.000Z", "to": "2022-05-22T00:00:00.000Z"}',
@@ -121,8 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await share.closeShareModal();
       });
 
-      // FAILING ARTIFACTS SNAPSHOT: https://github.com/elastic/kibana/issues/189590
-      it.skip('TSVB Gauge: PNG file matches the baseline image', async function () {
+      it('TSVB Gauge: PNG file matches the baseline image', async function () {
         log.debug('load saved visualization');
         await visualize.loadSavedVisualization('[K7.6-eCommerce] Sold Products per Day', {
           navigateToVisualize: false,
