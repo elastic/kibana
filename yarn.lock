@@ -4013,7 +4013,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/asset-inventory-plugin@link:x-pack/plugins/asset_inventory":
+"@kbn/asset-inventory-plugin@link:x-pack/solutions/security/plugins/asset_inventory":
   version "0.0.0"
   uid ""
 
@@ -4050,10 +4050,6 @@
   uid ""
 
 "@kbn/bfetch-error@link:packages/kbn-bfetch-error":
-  version "0.0.0"
-  uid ""
-
-"@kbn/bfetch-explorer-plugin@link:examples/bfetch_explorer":
   version "0.0.0"
   uid ""
 
@@ -4145,7 +4141,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-defend-plugin@link:x-pack/plugins/cloud_defend":
+"@kbn/cloud-defend-plugin@link:x-pack/solutions/security/plugins/cloud_defend":
   version "0.0.0"
   uid ""
 
@@ -4169,19 +4165,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture-common@link:x-pack/packages/kbn-cloud-security-posture/common":
+"@kbn/cloud-security-posture-common@link:x-pack/platform/packages/shared/kbn-cloud-security-posture/common":
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture-graph@link:x-pack/packages/kbn-cloud-security-posture/graph":
+"@kbn/cloud-security-posture-graph@link:x-pack/solutions/security/packages/kbn-cloud-security-posture/graph":
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture-plugin@link:x-pack/plugins/cloud_security_posture":
+"@kbn/cloud-security-posture-plugin@link:x-pack/solutions/security/plugins/cloud_security_posture":
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture@link:x-pack/packages/kbn-cloud-security-posture/public":
+"@kbn/cloud-security-posture@link:x-pack/solutions/security/packages/kbn-cloud-security-posture/public":
   version "0.0.0"
   uid ""
 
@@ -5313,7 +5309,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-security@link:packages/deeplinks/security":
+"@kbn/deeplinks-security@link:src/platform/packages/shared/deeplinks/security":
   version "0.0.0"
   uid ""
 
@@ -5514,6 +5510,10 @@
   uid ""
 
 "@kbn/eslint-config@link:packages/kbn-eslint-config":
+  version "0.0.0"
+  uid ""
+
+"@kbn/eslint-plugin-css@link:packages/kbn-eslint-plugin-css":
   version "0.0.0"
   uid ""
 
@@ -5961,7 +5961,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ingest-pipelines-plugin@link:x-pack/plugins/ingest_pipelines":
+"@kbn/ingest-pipelines-plugin@link:x-pack/platform/plugins/shared/ingest_pipelines":
   version "0.0.0"
   uid ""
 
@@ -6081,7 +6081,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kubernetes-security-plugin@link:x-pack/plugins/kubernetes_security":
+"@kbn/kubernetes-security-plugin@link:x-pack/solutions/security/plugins/kubernetes_security":
   version "0.0.0"
   uid ""
 
@@ -7085,7 +7085,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-ess@link:x-pack/plugins/security_solution_ess":
+"@kbn/security-solution-ess@link:x-pack/solutions/security/plugins/security_solution_ess":
   version "0.0.0"
   uid ""
 
@@ -7101,11 +7101,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-plugin@link:x-pack/plugins/security_solution":
+"@kbn/security-solution-plugin@link:x-pack/solutions/security/plugins/security_solution":
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-serverless@link:x-pack/plugins/security_solution_serverless":
+"@kbn/security-solution-serverless@link:x-pack/solutions/security/plugins/security_solution_serverless":
   version "0.0.0"
   uid ""
 
@@ -7249,7 +7249,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-security-settings@link:packages/serverless/settings/security_project":
+"@kbn/serverless-security-settings@link:src/platform/packages/shared/serverless/settings/security_project":
   version "0.0.0"
   uid ""
 
@@ -7269,7 +7269,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/session-view-plugin@link:x-pack/plugins/session_view":
+"@kbn/session-view-plugin@link:x-pack/solutions/security/plugins/session_view":
   version "0.0.0"
   uid ""
 
@@ -7489,7 +7489,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/slo-plugin@link:x-pack/plugins/observability_solution/slo":
+"@kbn/slo-plugin@link:x-pack/solutions/observability/plugins/slo":
   version "0.0.0"
   uid ""
 
@@ -9184,12 +9184,12 @@
     require-from-string "^2.0.2"
     uri-js-replace "^1.0.1"
 
-"@redocly/cli@^1.25.15":
-  version "1.25.15"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.25.15.tgz#12e487dd7a45ceda38655f2a93721ac15868f4e6"
-  integrity sha512-ZD743CJX4FpMJvGNE9Cm3gNn8LNRzRjyrYNVPi1C4iIEtrFkr5Zq791qv6gUFehWns71svbVyzWD9ftVTdfqYg==
+"@redocly/cli@^1.26.0":
+  version "1.26.0"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.26.0.tgz#0f5707f55d833993ffc9644fed7d85fcafe37877"
+  integrity sha512-yUsrTmEPHaBDQf16jSFGi2n+AJabHacLpr7La92Dseo0tRkgLKsUWiaVEEyqm79POBytD87mVTi3THitqnSyZQ==
   dependencies:
-    "@redocly/openapi-core" "1.25.15"
+    "@redocly/openapi-core" "1.26.0"
     abort-controller "^3.0.0"
     chokidar "^3.5.1"
     colorette "^1.2.0"
@@ -9214,10 +9214,10 @@
   resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.17.1.tgz#2def04cecf440dd78c0f102f53f3444fac050768"
   integrity sha512-CEmvaJuG7pm2ylQg53emPmtgm4nW2nxBgwXzbVEHpGas/lGnMyN8Zlkgiz6rPw0unASg6VW3wlz27SOL5XFHYQ==
 
-"@redocly/openapi-core@1.25.15", "@redocly/openapi-core@^1.4.0":
-  version "1.25.15"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.25.15.tgz#61d82b054340e080998efc3f701ca55c20f7fdb8"
-  integrity sha512-/dpr5zpGj2t1Bf7EIXEboRZm1hsJZBQfv3Q1pkivtdAEg3if2khv+b9gY68aquC6cM/2aQY2kMLy8LlY2tn+Og==
+"@redocly/openapi-core@1.26.0", "@redocly/openapi-core@^1.4.0":
+  version "1.26.0"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.26.0.tgz#ffd6c3d9f7e98c4b61584d5c0511cf953d1cfade"
+  integrity sha512-8Ofu6WpBp7eoLmf1qQ4+T0W4LRr8es+4Drw/RJG+acPXmaT2TmHk2B2v+3+1R9GqSIj6kx3N7JmQkxAPCnvDLw==
   dependencies:
     "@redocly/ajv" "^8.11.2"
     "@redocly/config" "^0.17.0"
@@ -11344,6 +11344,11 @@
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/@types/cookiejar/-/cookiejar-2.1.5.tgz#14a3e83fa641beb169a2dd8422d91c3c345a9a78"
   integrity sha512-he+DHOWReW0nghN24E1WUqM0efK4kI9oTqDm6XmK8ZPe2djZ90BSNdGnIyCLzCPw7/pogPlGbzI2wHGGmi4O/Q==
+
+"@types/cssstyle@^2.2.4":
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/@types/cssstyle/-/cssstyle-2.2.4.tgz#3d333ab9f8e6c40183ad1d6ebeebfcb8da2bfe4b"
+  integrity sha512-FTGMeuHZtLB7hRm+NGvOLZElslR1UkKvZmEmFevOZe/e7Av0nFleka1s8ZwoX+QvbJ2y7r9NDZXIzyqpRWDJXQ==
 
 "@types/cytoscape@^3.14.0":
   version "3.14.0"
@@ -16342,6 +16347,13 @@ cssstyle@^2.3.0:
   integrity sha512-AZL67abkUzIuvcHqk7c09cezpGNcxUxU4Ioi/05xHk4DQeTkWmGYftIE6ctU6AEt+Gn4n1lDStOtj7FKycP71A==
   dependencies:
     cssom "~0.3.6"
+
+cssstyle@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/cssstyle/-/cssstyle-4.1.0.tgz#161faee382af1bafadb6d3867a92a19bcb4aea70"
+  integrity sha512-h66W1URKpBS5YMI/V8PyXvTMFT8SupJ1IzoIV8IeBC/ji8WVmrO8dGlTi+2dh6whmdk6BiKJLD/ZBkhWbcg6nA==
+  dependencies:
+    rrweb-cssom "^0.7.1"
 
 csstype@3.1.2:
   version "3.1.2"
@@ -28898,6 +28910,11 @@ robust-predicates@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/robust-predicates/-/robust-predicates-3.0.1.tgz#ecde075044f7f30118682bd9fb3f123109577f9a"
   integrity sha512-ndEIpszUHiG4HtDsQLeIuMvRsDnn8c8rYStabochtUeCvfuvNptb5TUbVD68LRAILPX7p9nqQGh4xJgn3EHS/g==
+
+rrweb-cssom@^0.7.1:
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/rrweb-cssom/-/rrweb-cssom-0.7.1.tgz#c73451a484b86dd7cfb1e0b2898df4b703183e4b"
+  integrity sha512-TrEMa7JGdVm0UThDJSx7ddw5nVm3UJS9o9CCIZ72B1vSyEZoziDqBYP3XIoi/12lKrJR8rE3jeFHMok2F/Mnsg==
 
 rst-selector-parser@^2.2.3:
   version "2.2.3"
