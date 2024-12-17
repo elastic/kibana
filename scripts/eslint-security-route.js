@@ -14,10 +14,10 @@ require('../src/setup_node_env');
 const { execSync, execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const { getCodeOwnersForFile, getPathsWithOwnersReversed } = require('@kbn/code-owners');
+const { findCodeOwnersEntryForPath, getCodeOwnersEntries } = require('@kbn/code-owners');
 
-process.env.ROUTE_TYPE = 'authorized';
-const DRY_RUN = process.env.DRY_RUN === 'true';
+process.env.ROUTE_TYPE = 'unauthorized';
+const DRY_RUN = true;
 
 console.log('DRY_RUN:', DRY_RUN);
 
@@ -198,10 +198,12 @@ function getChangedFiles() {
 
 function groupFilesByOwners(files) {
   const ownerFilesMap = {};
-  const reversedCodeowners = getPathsWithOwnersReversed();
+  const reversedCodeowners = getCodeOwnersEntries();
 
   files.forEach((file) => {
-    let owner = getCodeOwnersForFile(file, reversedCodeowners)?.replaceAll('elastic/', '');
+    let owner = findCodeOwnersEntryForPath(file, reversedCodeowners)
+      ?.teams.join(',')
+      .replaceAll('elastic/', '');
 
     if (owner) {
       if (!ownerFilesMap[owner]) ownerFilesMap[owner] = [];
@@ -240,8 +242,8 @@ function processChangesByOwners(ownerFilesMap) {
       const tempBranch = `temp/${process.env.ROUTE_TYPE}-eslint-changes-by-${rawOwner}`;
       const targetBranch = `authz-migration/${process.env.ROUTE_TYPE}-routes-${rawOwner}`;
 
-      if (havePrs.includes(targetBranch)) {
-        console.log(`PR already exists for ${targetBranch}. Skipping.`);
+      if (rawOwner !== 'kibana-management') {
+        console.log(`PR already exists for ${rawOwner}. Skipping.`);
         continue;
       }
 
@@ -336,17 +338,17 @@ function runESLint() {
     // runCommand(
     //   `grep -rEl --include="*.ts" "router\.(get|post|delete|put)|router\.versioned\.(get|post|put|delete)" ./x-pack/plugins/ ./x-pack/packages/ | xargs env ${eslintRuleFlag} npx eslint --fix --rule "@kbn/eslint/no_deprecated_authz_config:error"`
     // );
-    // const directories = ['./x-pack/plugins', './x-pack/packages', './src/plugins'];
-    const directories = [
-      './x-pack/plugins/security_solution',
-      './x-pack/plugins/spaces',
-      './x-pack/plugins/security',
-    ]; // For testing purposes
+    const directories = ['./x-pack/plugins', './x-pack/packages', './src/plugins'];
+    // const directories = [
+    //   './x-pack/plugins/security_solution',
+    //   './x-pack/plugins/spaces',
+    //   './x-pack/plugins/security',
+    // ]; // For testing purposes
 
-    for (const directory of directories) {
-      console.log(`Running ESLint autofix for ${directory}`);
-      runCommand(`${eslintRuleFlag} npx eslint --ext .ts --fix ${directory}`, true);
-    }
+    // for (const directory of directories) {
+    //   console.log(`Running ESLint autofix for ${directory}`);
+    //   runCommand(`${eslintRuleFlag} npx eslint --ext .ts --fix ${directory}`, true);
+    // }
 
     console.log('ESLint autofix complete');
   } catch (error) {
