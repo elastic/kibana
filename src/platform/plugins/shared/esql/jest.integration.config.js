@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-
-export const plugin = async (initContext: PluginInitializerContext) => {
-  const { EsqlServerPlugin } = await import('./plugin');
-  return new EsqlServerPlugin(initContext);
+module.exports = {
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/shared/esql'],
 };

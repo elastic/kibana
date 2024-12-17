@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+export interface JoinIndicesAutocompleteResult {
+  indices: JoinIndexAutocompleteItem[];
+}
 
-export const plugin = async (initContext: PluginInitializerContext) => {
-  const { EsqlServerPlugin } = await import('./plugin');
-  return new EsqlServerPlugin(initContext);
-};
+export interface JoinIndexAutocompleteItem {
+  name: string;
+  mode: 'lookup' | string;
+  aliases: string[];
+}

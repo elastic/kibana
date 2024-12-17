@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 
-export const plugin = async (initContext: PluginInitializerContext) => {
-  const { EsqlServerPlugin } = await import('./plugin');
-  return new EsqlServerPlugin(initContext);
+import { registerGetJoinIndicesRoute } from './get_join_indices';
+
+export const registerRoutes = (setup: CoreSetup, initContext: PluginInitializerContext) => {
+  const router = setup.http.createRouter();
+
+  registerGetJoinIndicesRoute(router, initContext);
 };
