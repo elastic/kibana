@@ -1102,12 +1102,12 @@ module.exports = {
         'x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/packages/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/security_solution_ess/public/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/security_solution_serverless/public/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/security_solution_ess/common/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/security_solution_serverless/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_ess/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_serverless/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_ess/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_serverless/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/timelines/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}',
@@ -1140,9 +1140,9 @@ module.exports = {
         'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-langchain/**/*.{ts,tsx}',
         'x-pack/solutions/security/packages/**/*.{ts,tsx}',
-        'x-pack/plugins/security_solution/**/*.{ts,tsx}',
-        'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
-        'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_ess/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
@@ -1155,9 +1155,9 @@ module.exports = {
         'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-langchain/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/solutions/security/packages/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/solutions/security/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -1176,9 +1176,9 @@ module.exports = {
         'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-langchain/**/*.{ts,tsx}',
         'x-pack/solutions/security/packages/**/*.{ts,tsx}',
-        'x-pack/plugins/security_solution/**/*.{ts,tsx}',
-        'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
-        'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_ess/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{ts,tsx}',
@@ -1210,9 +1210,9 @@ module.exports = {
         'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/shared/kbn-langchain/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/packages/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/timelines/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
@@ -1310,9 +1310,9 @@ module.exports = {
           files: [
             'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
             'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
-            'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
-            'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
-            'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
+            'x-pack/solutions/security/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+            'x-pack/solutions/security/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
+            'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
             'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
             'x-pack/solutions/security/packages/features/**/*.{js,mjs,ts,tsx}',
             'x-pack/solutions/security/packages/navigation/**/*.{js,mjs,ts,tsx}',
@@ -1965,7 +1965,7 @@ module.exports = {
      * Cloud Security Team overrides
      */
     {
-      files: ['x-pack/plugins/cloud_security_posture/**/*.{js,mjs,ts,tsx}'],
+      files: ['x-pack/solutions/security/plugins/cloud_security_posture/**/*.{js,mjs,ts,tsx}'],
       plugins: ['testing-library'],
       rules: {
         'testing-library/await-async-utils': 'error',
@@ -1997,9 +1997,6 @@ module.exports = {
     },
     {
       files: [
-        // logsShared depends on o11y/private plugins, but platform plugins depend on it
-        'x-pack/plugins/observability_solution/logs_shared/**',
-
         // TODO @kibana/operations
         'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
         'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)

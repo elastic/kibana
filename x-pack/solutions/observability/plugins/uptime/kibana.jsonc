@@ -37,7 +37,8 @@
       "taskManager",
       "triggersActionsUi",
       "usageCollection",
-      "unifiedSearch"
+      "unifiedSearch",
+      "charts"
     ],
     "optionalPlugins": [
       "cloud",
