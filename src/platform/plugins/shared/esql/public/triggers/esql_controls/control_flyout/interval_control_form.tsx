@@ -9,7 +9,13 @@
 
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFieldText, EuiFormRow, EuiFlyoutBody, type EuiSwitchEvent } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiFlyoutBody,
+  type EuiSwitchEvent,
+  EuiComboBox,
+  type EuiComboBoxOptionOption,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
 import { esqlVariablesService } from '@kbn/esql-variables/common';
@@ -23,7 +29,7 @@ import {
   VariableName,
   ControlLabel,
 } from './shared_form_components';
-import { getRecurrentVariableName } from './helpers';
+import { getRecurrentVariableName, getFlyoutStyling } from './helpers';
 import { EsqlControlFlyoutType } from '../types';
 
 interface IntervalControlFormProps {
@@ -47,11 +53,6 @@ export function IntervalControlForm({
   onEditControl,
   onCancelControlCb,
 }: IntervalControlFormProps) {
-  const suggestedStaticValues = useMemo(
-    () => (initialState ? initialState.availableOptions : SUGGESTED_VALUES),
-    [initialState]
-  );
-
   const suggestedVariableName = useMemo(() => {
     const existingVariables = esqlVariablesService.getVariablesByType(controlType);
 
@@ -63,7 +64,28 @@ export function IntervalControlForm({
         );
   }, [controlType, initialState]);
 
-  const [values, setValues] = useState<string | undefined>(suggestedStaticValues.join(','));
+  const [selectedIntervals, setSelectedIntervals] = useState<EuiComboBoxOptionOption[]>(
+    initialState
+      ? initialState.availableOptions.map((option) => {
+          return {
+            label: option,
+            'data-test-subj': option,
+            key: option,
+          };
+        })
+      : []
+  );
+  const [availableIntervalOptions, setAvailableIntervalOptions] = useState<
+    EuiComboBoxOptionOption[]
+  >(
+    SUGGESTED_VALUES.map((option) => {
+      return {
+        label: option,
+        'data-test-subj': option,
+        key: option,
+      };
+    })
+  );
   const [formIsInvalid, setFormIsInvalid] = useState(false);
   const [variableName, setVariableName] = useState(suggestedVariableName);
   const [label, setLabel] = useState(initialState?.title ?? '');
@@ -73,20 +95,45 @@ export function IntervalControlForm({
   const isControlInEditMode = useMemo(() => !!initialState, [initialState]);
 
   const areValuesValid = useMemo(() => {
-    return areValuesIntervalsValid(values);
-  }, [values]);
+    return areValuesIntervalsValid(selectedIntervals.map((option) => option.label));
+  }, [selectedIntervals]);
 
   useEffect(() => {
     const variableExists =
       esqlVariablesService.variableExists(variableName.replace('?', '')) && !isControlInEditMode;
-    setFormIsInvalid(!values || !variableName || variableExists || !areValuesValid);
-  }, [areValuesValid, isControlInEditMode, values, variableName]);
+    setFormIsInvalid(
+      !selectedIntervals.length || !variableName || variableExists || !areValuesValid
+    );
+  }, [areValuesValid, isControlInEditMode, selectedIntervals, variableName]);
 
-  const onValuesChange = useCallback(
-    (e: { target: { value: React.SetStateAction<string | undefined> } }) => {
-      setValues(e.target.value);
+  const onIntervalsChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
+    setSelectedIntervals(selectedOptions);
+  }, []);
+
+  const onCreateOption = useCallback(
+    (searchValue: string, flattenedOptions: EuiComboBoxOptionOption[] = []) => {
+      if (!searchValue) {
+        return;
+      }
+
+      const normalizedSearchValue = searchValue.trim().toLowerCase();
+
+      const newOption = {
+        value: searchValue,
+        label: searchValue,
+      };
+
+      if (
+        flattenedOptions.findIndex(
+          (option) => option.label.trim().toLowerCase() === normalizedSearchValue
+        ) === -1
+      ) {
+        setAvailableIntervalOptions([...availableIntervalOptions, newOption]);
+      }
+
+      setSelectedIntervals((prevSelected) => [...prevSelected, newOption]);
     },
-    []
+    [availableIntervalOptions]
   );
 
   const onVariableNameChange = useCallback(
@@ -109,7 +156,7 @@ export function IntervalControlForm({
   }, []);
 
   const onCreateIntervalControl = useCallback(async () => {
-    const availableOptions = values?.split(',').map((value) => value.trim()) ?? [];
+    const availableOptions = selectedIntervals.map((interval) => interval.label);
     const state = {
       availableOptions,
       selectedOptions: [availableOptions[0]],
@@ -130,7 +177,7 @@ export function IntervalControlForm({
     }
     closeFlyout();
   }, [
-    values,
+    selectedIntervals,
     minimumWidth,
     label,
     variableName,
@@ -143,27 +190,14 @@ export function IntervalControlForm({
     onEditControl,
   ]);
 
+  const styling = useMemo(() => getFlyoutStyling(), []);
+
   return (
     <>
       <Header />
       <EuiFlyoutBody
         css={css`
-          // styles needed to display extra drop targets that are outside of the config panel main area
-          overflow-y: auto;
-          pointer-events: none;
-          .euiFlyoutBody__overflow {
-            -webkit-mask-image: none;
-            padding-left: inherit;
-            margin-left: inherit;
-            overflow-y: hidden;
-            transform: initial;
-            > * {
-              pointer-events: auto;
-            }
-          }
-          .euiFlyoutBody__overflowContent {
-            block-size: 100%;
-          }
+          ${styling}
         `}
       >
         <ControlType isDisabled initialControlFlyoutType={EsqlControlFlyoutType.STATIC_VALUES} />
@@ -179,33 +213,31 @@ export function IntervalControlForm({
             defaultMessage: 'Values',
           })}
           helpText={i18n.translate('esql.flyout.values.helpText', {
-            defaultMessage:
-              'Comma separated values (e.g. 5 minutes, 1 hour, 1 day, 1 week, 1 year)',
+            defaultMessage: 'Interval values (e.g. 5 minutes, 1 hour, 1 day, 1 week, 1 year)',
           })}
           fullWidth
-          isInvalid={!values || !areValuesValid}
+          isInvalid={!areValuesValid}
           error={
-            !values
-              ? i18n.translate('esql.flyout.values.error', {
-                  defaultMessage: 'Values are required',
-                })
-              : !areValuesValid
+            !areValuesValid
               ? i18n.translate('esql.flyout.valuesInterval.error', {
                   defaultMessage: 'Interval values are not valid',
                 })
               : undefined
           }
         >
-          <EuiFieldText
-            placeholder={i18n.translate('esql.flyout.values.placeholder', {
-              defaultMessage: 'Set the static values',
-            })}
-            value={values}
-            onChange={onValuesChange}
+          <EuiComboBox
             aria-label={i18n.translate('esql.flyout.values.placeholder', {
-              defaultMessage: 'Set the static values',
+              defaultMessage: 'Select the interval values or add a new one',
             })}
+            placeholder={i18n.translate('esql.flyout.values.placeholder', {
+              defaultMessage: 'Select the interval values or add a new one',
+            })}
+            options={availableIntervalOptions}
+            selectedOptions={selectedIntervals}
+            onChange={onIntervalsChange}
+            onCreateOption={onCreateOption}
             fullWidth
+            compressed
           />
         </EuiFormRow>
 

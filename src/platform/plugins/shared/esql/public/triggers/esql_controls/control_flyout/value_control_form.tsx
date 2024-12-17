@@ -10,11 +10,12 @@
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiFieldText,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFormRow,
   EuiFlyoutBody,
   type EuiSwitchEvent,
-  EuiTextArea,
+  EuiPanel,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ISearchGeneric } from '@kbn/search-types';
@@ -31,7 +32,7 @@ import {
   VariableName,
   ControlLabel,
 } from './shared_form_components';
-import { getRecurrentVariableName, getValuesFromQueryField } from './helpers';
+import { getRecurrentVariableName, getValuesFromQueryField, getFlyoutStyling } from './helpers';
 import { EsqlControlFlyoutType } from '../types';
 
 interface ValueControlFormProps {
@@ -55,11 +56,6 @@ export function ValueControlForm({
   onCreateControl,
   onEditControl,
 }: ValueControlFormProps) {
-  const suggestedStaticValues = useMemo(
-    () => (initialState ? initialState.availableOptions : []),
-    [initialState]
-  );
-
   const suggestedVariableName = useMemo(() => {
     const existingVariables = esqlVariablesService.getVariablesByType(controlType);
 
@@ -85,7 +81,23 @@ export function ValueControlForm({
   const [controlFlyoutType, setControlFlyoutType] = useState<EsqlControlFlyoutType>(
     EsqlControlFlyoutType.VALUES_FROM_QUERY
   );
-  const [values, setValues] = useState<string | undefined>(suggestedStaticValues.join(','));
+
+  const [availableValuesOptions, setAvailableValuesOptions] = useState<EuiComboBoxOptionOption[]>(
+    []
+  );
+
+  const [selectedValues, setSelectedValues] = useState<EuiComboBoxOptionOption[]>(
+    initialState
+      ? initialState.availableOptions.map((option) => {
+          return {
+            label: option,
+            'data-test-subj': option,
+            key: option,
+          };
+        })
+      : []
+  );
+
   const [valuesQuery, setValuesQuery] = useState<string>(initialState?.esqlQuery ?? '');
   const [esqlQueryErrors, setEsqlQueryErrors] = useState<Error[] | undefined>();
   const [formIsInvalid, setFormIsInvalid] = useState(false);
@@ -100,14 +112,11 @@ export function ValueControlForm({
     const variableExists =
       esqlVariablesService.variableExists(variableName.replace('?', '')) && !isControlInEditMode;
     setFormIsInvalid(!valuesQuery || !variableName || variableExists);
-  }, [isControlInEditMode, values, valuesQuery, variableName]);
+  }, [isControlInEditMode, valuesQuery, variableName]);
 
-  const onValuesChange = useCallback(
-    (e: { target: { value: React.SetStateAction<string | undefined> } }) => {
-      setValues(e.target.value);
-    },
-    []
-  );
+  const onValuesChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
+    setSelectedValues(selectedOptions);
+  }, []);
 
   const onVariableNameChange = useCallback(
     (e: { target: { value: React.SetStateAction<string> } }) => {
@@ -140,7 +149,16 @@ export function ValueControlForm({
             dropNullColumns: true,
           }).then((results) => {
             const valuesArray = results.response.values.map((value) => value[0]);
-            setValues(valuesArray.filter((v) => v).join(', '));
+            const options = valuesArray
+              .filter((v) => v)
+              .map((option) => {
+                return {
+                  label: String(option),
+                  key: String(option),
+                };
+              });
+            setSelectedValues(options);
+            setAvailableValuesOptions(options);
             setEsqlQueryErrors([]);
           });
           setValuesQuery(query);
@@ -153,7 +171,7 @@ export function ValueControlForm({
   );
 
   useEffect(() => {
-    if (!values?.length) {
+    if (!selectedValues?.length && controlFlyoutType === EsqlControlFlyoutType.VALUES_FROM_QUERY) {
       const column = getValuesFromQueryField(queryString);
       const queryForValues =
         suggestedVariableName !== ''
@@ -162,16 +180,17 @@ export function ValueControlForm({
       onValuesQuerySubmit(queryForValues);
     }
   }, [
+    controlFlyoutType,
     controlType,
     onValuesQuerySubmit,
     queryString,
+    selectedValues?.length,
     suggestedVariableName,
-    values?.length,
     variableName,
   ]);
 
   const onCreateValueControl = useCallback(async () => {
-    const availableOptions = values?.split(',').map((value) => value.trim()) ?? [];
+    const availableOptions = selectedValues.map((value) => value.label);
     const state = {
       availableOptions,
       selectedOptions: [availableOptions[0]],
@@ -192,7 +211,7 @@ export function ValueControlForm({
     }
     closeFlyout();
   }, [
-    values,
+    selectedValues,
     minimumWidth,
     label,
     variableName,
@@ -206,27 +225,14 @@ export function ValueControlForm({
     onEditControl,
   ]);
 
+  const styling = useMemo(() => getFlyoutStyling(), []);
+
   return (
     <>
       <Header />
       <EuiFlyoutBody
         css={css`
-          // styles needed to display extra drop targets that are outside of the config panel main area
-          overflow-y: auto;
-          pointer-events: none;
-          .euiFlyoutBody__overflow {
-            -webkit-mask-image: none;
-            padding-left: inherit;
-            margin-left: inherit;
-            overflow-y: hidden;
-            transform: initial;
-            > * {
-              pointer-events: auto;
-            }
-          }
-          .euiFlyoutBody__overflowContent {
-            block-size: 100%;
-          }
+          ${styling}
         `}
       >
         <ControlType
@@ -248,14 +254,6 @@ export function ValueControlForm({
                 defaultMessage: 'Values query',
               })}
               fullWidth
-              isInvalid={!valuesQuery}
-              error={
-                !valuesQuery
-                  ? i18n.translate('esql.flyout.valuesQueryEditor.error', {
-                      defaultMessage: 'Query is required',
-                    })
-                  : undefined
-              }
             >
               <ESQLEditor
                 query={{ esql: valuesQuery }}
@@ -282,19 +280,17 @@ export function ValueControlForm({
               })}
               fullWidth
             >
-              <EuiTextArea
-                placeholder={i18n.translate('esql.flyout.values.placeholder', {
-                  defaultMessage: 'Set the static values',
-                })}
-                value={values}
-                disabled
-                compressed
-                onChange={() => {}}
-                aria-label={i18n.translate('esql.flyout.previewValues.placeholder', {
-                  defaultMessage: 'Values preview',
-                })}
-                fullWidth
-              />
+              <EuiPanel
+                paddingSize="s"
+                hasBorder
+                css={css`
+                  white-space: wrap;
+                  overflow-y: auto;
+                  max-height: 200px;
+                `}
+              >
+                {selectedValues.map((value) => value.label).join(', ')}
+              </EuiPanel>
             </EuiFormRow>
           </>
         )}
@@ -308,25 +304,23 @@ export function ValueControlForm({
                 'Comma separated values (e.g. 5 minutes, 1 hour, 1 day, 1 week, 1 year)',
             })}
             fullWidth
-            isInvalid={!values}
-            error={
-              !values
-                ? i18n.translate('esql.flyout.values.error', {
-                    defaultMessage: 'Values are required',
-                  })
-                : undefined
-            }
           >
-            <EuiFieldText
-              placeholder={i18n.translate('esql.flyout.values.placeholder', {
-                defaultMessage: 'Set the static values',
-              })}
-              value={values}
-              onChange={onValuesChange}
+            <EuiComboBox
               aria-label={i18n.translate('esql.flyout.values.placeholder', {
-                defaultMessage: 'Set the static values',
+                defaultMessage: 'Select the options',
               })}
+              placeholder={i18n.translate('esql.flyout.values.placeholder', {
+                defaultMessage: 'Select the options',
+              })}
+              options={availableValuesOptions}
+              selectedOptions={selectedValues}
+              onChange={onValuesChange}
               fullWidth
+              compressed
+              css={css`
+                max-height: 200px;
+                overflow-y: auto;
+              `}
             />
           </EuiFormRow>
         )}

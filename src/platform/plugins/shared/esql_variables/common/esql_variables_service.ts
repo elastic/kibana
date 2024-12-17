@@ -30,9 +30,6 @@ export class EsqlVariablesService {
   }
 
   addVariable(variable: ESQLControlVariable): void {
-    // if (!this.isEnabled) {
-    //   return;
-    // }
     const variables = [...this.esqlVariables];
     const variableExists = variables.find((v) => v.key === variable.key);
     if (variableExists) {
@@ -59,9 +56,6 @@ export class EsqlVariablesService {
   }
 
   updateVariable(variable: ESQLControlVariable) {
-    // if (!this.isEnabled) {
-    //   return;
-    // }
     const variables = this.esqlVariables.map((v) => {
       if (v.key === variable.key) {
         const value = Number.isNaN(Number(variable.value))
@@ -77,18 +71,12 @@ export class EsqlVariablesService {
   }
 
   removeVariable(key: string) {
-    // if (!this.isEnabled) {
-    //   return;
-    // }
     const variables = this.esqlVariables.filter((variable) => variable.key !== key);
     this.esqlVariables$.next(variables);
     this.esqlVariables = variables;
   }
 
   clearVariables() {
-    // if (!this.isEnabled) {
-    //   return;
-    // }
     this.esqlVariables$.next([]);
     this.esqlVariables = [];
   }

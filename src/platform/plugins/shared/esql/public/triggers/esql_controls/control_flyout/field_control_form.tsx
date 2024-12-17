@@ -33,7 +33,7 @@ import {
   VariableName,
   ControlLabel,
 } from './shared_form_components';
-import { getRecurrentVariableName } from './helpers';
+import { getRecurrentVariableName, getFlyoutStyling } from './helpers';
 import { EsqlControlFlyoutType } from '../types';
 
 interface FieldControlFormProps {
@@ -171,7 +171,7 @@ export function FieldControlForm({
     [availableFieldsOptions]
   );
 
-  const onCreateIntervalControl = useCallback(async () => {
+  const onCreateFieldControl = useCallback(async () => {
     const availableOptions = selectedFields.map((field) => field.label);
     const state = {
       availableOptions,
@@ -206,27 +206,14 @@ export function FieldControlForm({
     onEditControl,
   ]);
 
+  const styling = useMemo(() => getFlyoutStyling(), []);
+
   return (
     <>
       <Header />
       <EuiFlyoutBody
         css={css`
-          // styles needed to display extra drop targets that are outside of the config panel main area
-          overflow-y: auto;
-          pointer-events: none;
-          .euiFlyoutBody__overflow {
-            -webkit-mask-image: none;
-            padding-left: inherit;
-            margin-left: inherit;
-            overflow-y: hidden;
-            transform: initial;
-            > * {
-              pointer-events: auto;
-            }
-          }
-          .euiFlyoutBody__overflowContent {
-            block-size: 100%;
-          }
+          ${styling}
         `}
       >
         <ControlType isDisabled initialControlFlyoutType={EsqlControlFlyoutType.STATIC_VALUES} />
@@ -245,14 +232,6 @@ export function FieldControlForm({
             defaultMessage: 'Select multiple values',
           })}
           fullWidth
-          isInvalid={!selectedFields.length}
-          error={
-            !selectedFields.length
-              ? i18n.translate('esql.flyout.fieldvalues.error', {
-                  defaultMessage: 'At least one field is required',
-                })
-              : undefined
-          }
         >
           <EuiComboBox
             aria-label={i18n.translate('esql.flyout.fieldsOptions.placeholder', {
@@ -266,6 +245,7 @@ export function FieldControlForm({
             onChange={onFieldsChange}
             onCreateOption={onCreateOption}
             fullWidth
+            compressed
           />
         </EuiFormRow>
 
@@ -284,7 +264,7 @@ export function FieldControlForm({
         onCancelControlCb={onCancelControlCb}
         isSaveDisabled={formIsInvalid}
         closeFlyout={closeFlyout}
-        onCreateControl={onCreateIntervalControl}
+        onCreateControl={onCreateFieldControl}
       />
     </>
   );

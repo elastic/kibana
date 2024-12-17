@@ -134,6 +134,16 @@ export function LensEditConfigurationFlyout({
     }
   });
 
+  const panel = useMemo(() => {
+    if (!panelId) {
+      return;
+    }
+    return dashboardPanels?.[panelId] as {
+      updateAttributes: (attributes: TypedLensSerializedState['attributes']) => void;
+      onEdit: () => Promise<void>;
+    };
+  }, [dashboardPanels, panelId]);
+
   const onSaveControlCb = useCallback(
     async (controlState: Record<string, unknown>, updatedQuery: string) => {
       if (!panelId) {
@@ -148,11 +158,6 @@ export function LensEditConfigurationFlyout({
           id: uuidv4(),
         },
       });
-
-      const panel = dashboardPanels?.[panelId] as {
-        updateAttributes: (attributes: TypedLensSerializedState['attributes']) => void;
-        onEdit: () => Promise<void>;
-      };
       if (panel && updatedQuery) {
         const abortController = new AbortController();
         const newVariables = esqlVariablesService.getVariables();
@@ -186,8 +191,8 @@ export function LensEditConfigurationFlyout({
       adHocDataViews,
       attributes,
       controlGroupApi,
-      dashboardPanels,
       datasourceMap,
+      panel,
       panelId,
       startDependencies,
       visualizationMap,
@@ -196,7 +201,10 @@ export function LensEditConfigurationFlyout({
 
   const onCancelControlCb = useCallback(() => {
     closeFlyout?.();
-  }, [closeFlyout]);
+    if (panel) {
+      panel.onEdit();
+    }
+  }, [closeFlyout, panel]);
 
   const dispatch = useLensDispatch();
   useEffect(() => {

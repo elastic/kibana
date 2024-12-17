@@ -113,6 +113,7 @@ export function ControlType({
         onChange={onFlyoutTypeChange}
         fullWidth
         isDisabled={isDisabled}
+        compressed
       />
     </EuiFormRow>
   );
@@ -132,6 +133,9 @@ export function VariableName({
       label={i18n.translate('esql.flyout.variableName.label', {
         defaultMessage: 'Name',
       })}
+      helpText={i18n.translate('esql.flyout.variableName.helpText', {
+        defaultMessage: 'This name will be prefaced with an "?" in the editor',
+      })}
       fullWidth
       autoFocus
       isInvalid={
@@ -150,18 +154,29 @@ export function VariableName({
           : undefined
       }
     >
-      <EuiFieldText
-        placeholder={i18n.translate('esql.flyout.variableName.placeholder', {
-          defaultMessage: 'Set a variable name',
+      <EuiToolTip
+        content={i18n.translate('esql.flyout.variableName.helpText', {
+          defaultMessage: 'This name will be prefaced with an "?" in the editor',
         })}
-        value={variableName}
-        onChange={onVariableNameChange}
-        aria-label={i18n.translate('esql.flyout.variableName.placeholder', {
-          defaultMessage: 'Set a variable name',
-        })}
-        fullWidth
-        disabled={isControlInEditMode}
-      />
+        css={css`
+          width: 100%;
+        `}
+        display="block"
+      >
+        <EuiFieldText
+          placeholder={i18n.translate('esql.flyout.variableName.placeholder', {
+            defaultMessage: 'Set a variable name',
+          })}
+          value={variableName}
+          onChange={onVariableNameChange}
+          aria-label={i18n.translate('esql.flyout.variableName.placeholder', {
+            defaultMessage: 'Set a variable name',
+          })}
+          fullWidth
+          disabled={isControlInEditMode}
+          compressed
+        />
+      </EuiToolTip>
     </EuiFormRow>
   );
 }
@@ -193,6 +208,7 @@ export function ControlLabel({
           defaultMessage: 'Set a label',
         })}
         fullWidth
+        compressed
       />
     </EuiFormRow>
   );

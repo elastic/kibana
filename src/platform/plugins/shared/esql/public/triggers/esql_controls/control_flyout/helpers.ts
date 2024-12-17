@@ -39,8 +39,8 @@ export const updateQueryStringWithVariable = (
   ].join('');
 };
 
-export const areValuesIntervalsValid = (values: string | undefined) => {
-  return values?.split(',').every((value) => {
+export const areValuesIntervalsValid = (values: string[]) => {
+  return values.every((value) => {
     // remove digits and empty spaces from the string to get the unit
     const unit = value.replace(/[0-9]/g, '').replace(/\s/g, '');
     return inKnownTimeInterval(unit);
@@ -70,4 +70,24 @@ export const getValuesFromQueryField = (queryString: string) => {
   if (columns.length) {
     return `${columns[columns.length - 1].name}`;
   }
+};
+
+export const getFlyoutStyling = () => {
+  return `
+          overflow-y: auto;
+          pointer-events: none;
+          .euiFlyoutBody__overflow {
+            -webkit-mask-image: none;
+            padding-left: inherit;
+            margin-left: inherit;
+            overflow-y: hidden;
+            transform: initial;
+            > * {
+              pointer-events: auto;
+            }
+          }
+          .euiFlyoutBody__overflowContent {
+            block-size: 100%;
+          }
+  `;
 };
