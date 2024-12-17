@@ -376,7 +376,7 @@ src/platform/packages/shared/deeplinks/management @elastic/kibana-management
 src/platform/packages/shared/deeplinks/ml @elastic/ml-ui
 src/platform/packages/shared/deeplinks/observability @elastic/obs-ux-management-team
 packages/deeplinks/search @elastic/search-kibana
-packages/deeplinks/security @elastic/security-solution
+src/platform/packages/shared/deeplinks/security @elastic/security-solution
 packages/deeplinks/shared @elastic/appex-sharedux
 packages/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/private/default-nav/devtools @elastic/kibana-management
@@ -812,12 +812,12 @@ x-pack/packages/security/plugin_types_public @elastic/kibana-security
 x-pack/packages/security/plugin_types_server @elastic/kibana-security
 x-pack/packages/security/role_management_model @elastic/kibana-security
 x-pack/solutions/security/packages/distribution_bar @elastic/kibana-cloud-security-posture
-x-pack/plugins/security_solution_ess @elastic/security-solution
+x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/packages/features @elastic/security-threat-hunting-explore
 x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
 x-pack/solutions/security/packages/navigation @elastic/security-threat-hunting-explore
-x-pack/plugins/security_solution @elastic/security-solution
-x-pack/plugins/security_solution_serverless @elastic/security-solution
+x-pack/solutions/security/plugins/security_solution @elastic/security-solution
+x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
 x-pack/solutions/security/packages/side_nav @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-explore
@@ -854,7 +854,7 @@ packages/serverless/settings/observability_project @elastic/appex-sharedux @elas
 packages/serverless/project_switcher @elastic/appex-sharedux
 x-pack/plugins/serverless_search @elastic/search-kibana
 packages/serverless/settings/search_project @elastic/search-kibana @elastic/kibana-management
-packages/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
+src/platform/packages/shared/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
 packages/serverless/storybook/config @elastic/appex-sharedux
 packages/serverless/types @elastic/appex-sharedux
 test/plugin_functional/plugins/session_notifications @elastic/kibana-core
