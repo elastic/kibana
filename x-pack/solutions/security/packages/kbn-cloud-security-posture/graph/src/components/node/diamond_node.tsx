@@ -61,6 +61,7 @@ export const DiamondNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           <>
             <NodeButton onClick={(e) => nodeClick?.(e, props)} />
             <NodeExpandButton
+              color={color}
               onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
               x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize}px`}
               y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2 - 4}px`}
