@@ -42,6 +42,11 @@ export const createMigrationIndex = async ({
           },
         },
       },
+      mappings: {
+        _meta: {
+          version,
+        },
+      },
     },
   });
 
