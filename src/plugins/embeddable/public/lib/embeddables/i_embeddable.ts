@@ -8,7 +8,6 @@
  */
 
 import { ErrorLike } from '@kbn/expressions-plugin/common';
-import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
   HasEditCapabilities,
   HasType,
@@ -18,7 +17,6 @@ import {
   PublishesDataViews,
   PublishesDisabledActionIds,
   PublishesUnifiedSearch,
-  HasParentApi,
   HasUniqueId,
   PublishesViewMode,
   PublishesWritablePanelDescription,
@@ -26,12 +24,10 @@ import {
   PublishesPhaseEvents,
   PublishesSavedObjectId,
   HasLegacyLibraryTransforms,
-  EmbeddableAppContext,
   CanLockHoverActions,
 } from '@kbn/presentation-publishing';
 import { Observable } from 'rxjs';
 import { EmbeddableInput } from '../../../common/types';
-import { IContainer } from '../containers/i_container';
 import { EmbeddableHasTimeRange } from '../filterable_embeddable/types';
 import { HasInspectorAdapters } from '../inspector';
 import { Adapters } from '../types';
@@ -57,7 +53,6 @@ export type LegacyEmbeddableAPI = HasType &
   PublishesWritablePanelTitle &
   PublishesWritablePanelDescription &
   Partial<HasLegacyLibraryTransforms> &
-  HasParentApi<DefaultPresentationPanelApi['parentApi']> &
   EmbeddableHasTimeRange &
   PublishesSavedObjectId &
   CanLockHoverActions;
@@ -89,18 +84,6 @@ export interface IEmbeddable<
   O extends EmbeddableOutput = EmbeddableOutput,
   N = any
 > extends LegacyEmbeddableAPI {
-  /**
-   * Is this embeddable an instance of a Container class, can it contain
-   * nested embeddables?
-   **/
-  readonly isContainer: boolean;
-
-  /**
-   * If this embeddable is nested inside a container, this will contain
-   * a reference to its parent.
-   **/
-  readonly parent?: IContainer;
-
   /**
    * The type of embeddable, this is what will be used to take a serialized
    * embeddable and find the correct factory for which to create an instance of it.
@@ -146,12 +129,6 @@ export interface IEmbeddable<
    * the embeddable is loaded immediately.
    */
   reportsEmbeddableLoad(): boolean;
-
-  /**
-   * A functional representation of the isContainer variable, but helpful for typescript to
-   * know the shape if this returns true
-   */
-  getIsContainer(): this is IContainer;
 
   /**
    * Get the input used to instantiate this embeddable. The input is a serialized representation of
@@ -223,17 +200,6 @@ export interface IEmbeddable<
   getDescription(): string | undefined;
 
   /**
-   * Returns the top most parent embeddable, or itself if this embeddable
-   * is not within a parent.
-   */
-  getRoot(): IEmbeddable | IContainer;
-
-  /**
-   * Returns the context of this embeddable's container, or undefined.
-   */
-  getAppContext(): EmbeddableAppContext | undefined;
-
-  /**
    * Renders the embeddable at the given node.
    * @param domNode
    * @returns A React node to mount or void in the case when rendering is done without React.
@@ -275,8 +241,6 @@ export interface IEmbeddable<
    * Used to diff explicit embeddable input
    */
   getExplicitInputIsEqual(lastInput: Partial<I>): Promise<boolean>;
-
-  refreshInputFromParent(): void;
 
   untilInitializationFinished(): Promise<void>;
 }
