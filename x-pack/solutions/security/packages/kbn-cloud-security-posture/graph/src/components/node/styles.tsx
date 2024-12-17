@@ -9,7 +9,7 @@ import React from 'react';
 import styled from '@emotion/styled';
 import {
   type EuiIconProps,
-  type _EuiBackgroundColor,
+  type EuiTextProps,
   EuiButtonIcon,
   EuiIcon,
   EuiText,
@@ -19,6 +19,7 @@ import {
 import { rgba } from 'polished';
 import { getSpanIcon } from './get_span_icon';
 import type { NodeExpandButtonProps } from './node_expand_button';
+import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
 
 export const LABEL_PADDING_X = 15;
 export const LABEL_BORDER_WIDTH = 1;
@@ -32,8 +33,12 @@ export const LabelNodeContainer = styled.div`
   height: 24px;
 `;
 
-export const LabelShape = styled(EuiText)`
-  background: ${(props) => useEuiBackgroundColor(props.color as _EuiBackgroundColor)};
+interface LabelShapeProps extends EuiTextProps {
+  color: LabelNodeViewModel['color'];
+}
+
+export const LabelShape = styled(EuiText)<LabelShapeProps>`
+  background: ${(props) => useNodeFillColor(props.color)};
   border: ${(props) => {
     const { euiTheme } = useEuiTheme();
     return `solid ${
@@ -220,6 +225,13 @@ export const RoundEuiButtonIcon = styled(EuiButtonIcon)`
 export const HandleStyleOverride: React.CSSProperties = {
   background: 'none',
   border: 'none',
+};
+
+export const useNodeFillColor = (
+  color: EntityNodeViewModel['color'] | LabelNodeViewModel['color'] | undefined
+) => {
+  const fillColor = (color === 'danger' ? 'primary' : color) ?? 'primary';
+  return useEuiBackgroundColor(fillColor);
 };
 
 export const GroupStyleOverride = (size?: {

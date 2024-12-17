@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import {
   NodeShapeContainer,
@@ -16,6 +16,7 @@ import {
   NodeIcon,
   NodeButton,
   HandleStyleOverride,
+  useNodeFillColor,
 } from './styles';
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import { RectangleHoverShape, RectangleShape } from './shapes/rectangle_shape';
@@ -51,7 +52,7 @@ export const RectangleNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           xmlns="http://www.w3.org/2000/svg"
         >
           <RectangleShape
-            fill={useEuiBackgroundColor(color ?? 'primary')}
+            fill={useNodeFillColor(color)}
             stroke={euiTheme.colors[color ?? 'primary']}
           />
           {icon && <NodeIcon x="8" y="7" icon={icon} color={color} />}
