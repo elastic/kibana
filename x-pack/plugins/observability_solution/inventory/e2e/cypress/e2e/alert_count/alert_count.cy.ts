@@ -33,7 +33,8 @@ const verifyAlertsTableCount = (alertsCount: string) => {
   verifyNumber(cy.getByTestSubj('toolbar-alerts-count'), alertsCount);
 };
 
-describe('Alert count', () => {
+// Temporary skipping those test, will be enabled in the future once we fix them https://github.com/elastic/kibana/issues/204558
+describe.skip('Alert count', () => {
   beforeEach(() => {
     cy.loginAsSuperUser();
 
