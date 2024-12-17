@@ -136,8 +136,6 @@ export const PresentationPanelHoverActions = ({
 
   const [borderStyles, setBorderStyles] = useState<string>(TOP_ROUNDED_CORNERS);
 
-  console.log({ EDIT_MODE_OUTLINE, VIEW_MODE_OUTLINE, ALL_ROUNDED_CORNERS, TOP_ROUNDED_CORNERS });
-
   const updateCombineHoverActions = () => {
     if (!hoverActionsRef.current || !anchorRef.current) return;
     const anchorBox = anchorRef.current.getBoundingClientRect();
@@ -147,11 +145,11 @@ export const PresentationPanelHoverActions = ({
     const hoverActionsWidth =
       (rightHoverActionsRef.current?.offsetWidth ?? 0) +
       (dragHandleRef.current?.offsetWidth ?? 0) +
-      parseInt(euiTheme.size.m, 10) * 2;
+      parseInt(euiTheme.size.base, 10) * 2;
     const hoverActionsHeight = rightHoverActionsRef.current?.offsetHeight ?? 0;
 
     // Left align hover actions when they would get cut off by the right edge of the window
-    if (anchorLeft - (hoverActionsWidth - anchorWidth) <= parseInt(euiTheme.size.m, 10)) {
+    if (anchorLeft - (hoverActionsWidth - anchorWidth) <= parseInt(euiTheme.size.base, 10)) {
       dragHandleRef.current?.style.removeProperty('right');
       dragHandleRef.current?.style.setProperty('left', '0');
     } else {
@@ -524,7 +522,7 @@ export const PresentationPanelHoverActions = ({
             z-index: ${euiTheme.levels.menu};
           }
           .embPanel__hoverActionsWrapper {
-            z-index: ${euiTheme.levels.modal};
+            z-index: ${euiTheme.levels.toast};
             top: -${euiTheme.size.xl};
 
             .embPanel__hoverActions {
@@ -540,12 +538,12 @@ export const PresentationPanelHoverActions = ({
           ref={hoverActionsRef}
           className="embPanel__hoverActionsWrapper"
           css={css`
-            height: ${euiTheme.size.XL};
+            height: ${euiTheme.size.xl};
             position: absolute;
             top: 0;
             display: flex;
             justify-content: space-between;
-            padding: 0 ${euiTheme.size.medium};
+            padding: 0 ${euiTheme.size.base};
             flex-wrap: nowrap;
             min-width: 100%;
             z-index: -1;
