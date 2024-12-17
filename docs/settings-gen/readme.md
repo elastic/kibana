@@ -9,89 +9,49 @@ The YAML settings files in the `settings-gen/source` folder are converted to Asc
 
 Following is a schema for all available properties in a YAML settings file.
 
-
-
-## Schema with descriptions
+## Schema
 
 ```
-product: <Required (string) - the Elastic product name, e.g. 'Elasticsearch', 'Kibana', 'Enterprise Search', 'Elasticsearch Service', 'Elastic Cloud Enterprise'>
-collection: <Required (string) - the settings page title, e.g. Alerting and action settings in Kibana>
-page_description:
-  - <"Optional (asciidoc) - A summary description that appears at the top of the settings page">
+product: REQUIRED e.g. Elasticsearch, Kibana, Enterprise Search
+collection: REQUIRED e.g. Alerting and action settings in Kibana
+page_description: |
+  OPTIONAL
+  Multiline string. Can include tables, lists, code examples, etc.
 
 groups:
-  - group: [Optional] (string) - Section title on the settings page, e.g. Preconfigured connector settings
-    id: [Optional] (string) - ID used for documentation links, e.g., general-alert-action-settings
-    description:
-     - [Optional] (asciidoc in quotes) - The description content that appears below the group title.
-     - [Optional] (asciidoc in quotes) - Paragraph 2
-     - [Optional] (asciidoc in quotes) - Paragraph 3
-    example: |
-      These lines are interpreted as literal strings.
-      Include any complex Asciidoc such as tables, lists, code examples, etc.
-      Note that comments marked by # are ignored
+  - group: REQUIRED e.g. Preconfigured connector settings
+    id: REQUIRED The ID used for documentation links, e.g., general-alert-action-settings
+    # description: |
+      OPTIONAL
+      Multiline string. Can include tables, lists, code examples, etc.
+    # example: |
+      OPTIONAL
+      Multiline string.
+      Can include tables, lists, code examples, etc.      
 
     settings:
-      - setting: [Required] (string) - Setting name, e.g. xpack.encryptedSavedObjects.encryptionKey
-        setting_id: <Optional (string) - ID to used for documentation links, e.g., xpack-encryptedsavedobjects-encryptionkey.>
-        description:
-          - [Optional] (asciidoc in quotes) - The description content that appears below the group title.
-          - [Optional] (asciidoc in quotes) - Paragraph 2
-          - [Optional] (asciidoc in quotes) - Paragraph 3
-        state: [Optional] - 'deprecated', 'technical-preview', or 'hidden'
-        deprecation_details: [Optional] (asciidoc in quotes) - details about when it was deprecated and/or what setting to use instead
-        note: [Optional] (asciidoc in quotes) - Text to display in a 'note' callout
-        tip: [Optional] (asciidoc in quotes) - Text to display in a 'tip' callout
-        warning: [Optional] (asciidoc in quotes) - Text to display in a 'warning' callout
-        important: [Optional] (asciidoc in quotes) - Text to display in an 'important' callout
-        default: [Optional] (string) - The setting's default value
-        options:
-          - option: [Optional] (string) - A setting option, e.g., zh-cn
-            description: [Optional] (asciidoc in quotes) - Description of the setting option
-          - option: [Optional] (string) - A setting option, e.g., ja-jp
-            description: [Optional] (asciidoc in quotes) - Description of the setting option
-        type: [Optional] One of 'static' or 'dynamic'
-        platforms:
-          - [Optional] - one of cloud/serverless/self-managed
-          - [Optional] - one of cloud/serverless/self-managed
-          - [Optional] - one of cloud/serverless/self-managed
-        example: |
-          These lines are interpreted as literal strings.
-          Include any complex Asciidoc such as tables, lists, code examples, etc.
-          Note that comments marked by # are ignored
-```
-
-
-## Schema without descriptions (for easier cutting and pasting)
-
-```
-product: REQUIRED
-collection: REQUIRED
-
-groups:
-  - group: REQUIRED
-    id: REQUIRED
-    # description:
-    #  - ""
-    # example: example-group-name.asciidoc
-    settings:
-
-      - setting: REQUIRED
-        # id: 
-        description:
-          - "REQUIRED"
-        # state: deprecated/hidden/tech-preview
-        # deprecation_details: ""
-        # note: ""
-        # tip: ""
-        # warning: ""
-        # important: ""
-        # default:
+      - setting: REQUIRED e.g. xpack.encryptedSavedObjects.encryptionKey
+        # id: OPTIONAL ID used for documentation links, e.g., xpack-encryptedsavedobjects-encryptionkey
+        description: |
+          REQUIRED
+          Multiline string. Can include tables, lists, code examples, etc.
+        # state: OPTIONAL One of deprecated/hidden/tech-preview
+        # deprecation_details: "" OPTIONAL
+        # note: "" OPTIONAL
+        # tip: "" OPTIONAL
+        # warning: "" OPTIONAL
+        # important: "" OPTIONAL
+        # datatype: REQUIRED One of string/bool/int/float/enum. For enum include the supported 'options', below.
+        # default: OPTIONAL
         # options:
-        #   - option:
-        #     description: ""
-        # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        #   - option: OPTIONAL
+        #     description: "" OPTIONAL
+        # type: OPTIONAL ONe of static/dynamic
+        # platforms: OPTIONAL, list each supported platform
+        #   - cloud
+        #   - serverless
+        #   - self-managed
         # example: |
+          OPTIONAL
+          Multiline string. Can include tables, lists, code examples, etc.
 ```

@@ -1,11 +1,7 @@
 #!/usr/bin/perl
 
-# This little script finds any .yml files in the /source directory and, for each, generates an asciidoc file of the same name.
-# The output asciidoc file is a set of tagged regions, one for each configuration setting in the yaml file.
-# The tagged region can then be included in any Asciidoc file by means of an `include` statement. 
-# Run the script with:   perl parse-settings.pl
-# There are no parameters
-
+# This script takes all .yml files in the /source directory and, for each, generates an asciidoc file of the same name.
+# Run the script:   perl parse-settings.pl
 
 use strict;
 use warnings;
@@ -54,21 +50,11 @@ sub parsefile {
 
   # build the page preamble paragraphs
   my $page_description = $yaml->[0]->{page_description};
-  my $page_description_string = "";
-  for my $paragraph (@$page_description) {
-    $page_description_string .= $paragraph."\n\n";
+  if ($page_description) {
+    # preserve newlines
+    $page_description =~ s/\n/\n\n/g;
+    $asciidocoutput .= $page_description;
   }
-  # remove the + sign after the last paragraph of the description
-  if ($page_description_string) {
-    $page_description_string =~ s/\+$//;
-    chomp ($page_description_string);
-  }
-  if ($page_description_string) {
-    $asciidocoutput .= $page_description_string;
-  }
-
-
-
 
   my $groups = $yaml->[0]{groups};
   for my $group (@$groups) {
@@ -87,19 +73,13 @@ sub parsefile {
     else {
       $asciidocoutput .= "[float]\n=== ".$group_name."\n\n";
     } 
-    # build the group preamble paragraphs
-    my $group_description_string = "";
-    for my $paragraph (@$group_description) {
-      $group_description_string .= $paragraph."\n\n";
+    if ($group_description) {
+      # preserve newlines
+      $group_description =~ s/\n/\n\n/g;
+      $asciidocoutput .= "\n$group_description\n";
     }
-    # remove the + sign after the last paragraph of the description
-    #if ($group_description_string) {
-    #  $group_description_string =~ s/\+$//;
-    #  chomp ($group_description_string);
-    #}
-    if ($group_description_string) {
-      $asciidocoutput .= $group_description_string;
-    }
+
+
     # Add an example if there is one, like this:    include::../examples/example-logging-root-level.asciidoc[]
     if ($group_example) {
       $asciidocoutput .= "\n\n$group_example\n\n";
@@ -116,6 +96,7 @@ sub parsefile {
       my $setting_warning = $setting->{warning};
       my $setting_important = $setting->{important};
       my $setting_tip = $setting->{tip};
+      my $setting_datatype = $setting->{datatype};
       my $setting_default = $setting->{default};
       my $setting_type = $setting->{type};
       my $setting_options = $setting->{options};
@@ -148,20 +129,6 @@ sub parsefile {
         if ($platform =~ /cloud/) {$supported_cloud = 1;}
       }
   
-      # build the description paragraphs
-      my $setting_description_string = "";
-      for my $paragraph (@$setting_description) {
-        $setting_description_string .= $paragraph."\n\n";
-      }
-  
-      # Currently, we're just adding the "C" icon when Cloud is supported, but in future we might instead want to provide the supported platforms (cloud, serverless, self-managed) as a list.
-      #my $setting_platforms_string = "";
-      #for my $platform (@$setting_platforms) {
-      #  $setting_platforms_string .= '`'.$platform.'`, ';
-      #}
-      ## remove the comma after the last platform in the list
-      #if ($setting_platforms_string) {$setting_platforms_string =~ s/, $//;}
-  
       # Add the settings info to the asciidoc file contents
       $asciidocoutput .= "\n";
       if ($setting_id) {
@@ -173,8 +140,8 @@ sub parsefile {
       }
       $asciidocoutput .= "::\n+\n====\n";
 
-      # Add a standard disclaimer for technical preview settings
       if ($setting_state) {
+        # Add a standard disclaimer for technical preview settings
         if ($setting_state =~ /technical-preview/i) 
           {
             $asciidocoutput .= "\n\npreview::[]\n\n";
@@ -194,8 +161,13 @@ sub parsefile {
         }
       }
 
-      if ($setting_description_string) {
-        $asciidocoutput .= $setting_description_string;
+      #if ($setting_description_string) {
+      #  $asciidocoutput .= $setting_description_string;
+      #}
+      if ($setting_description) {
+        # preserve newlines
+        $setting_description =~ s/\n/\n\n/g;
+        $asciidocoutput .= "$setting_description";
       }
 
       if ($setting_note) {
@@ -214,17 +186,16 @@ sub parsefile {
       # If any of these are defined (setting options, setting default value, settting type...) add those inside a box.
       # We put a " +" at the end of each line to to achieve single spacing inside the box.
   
-      if (($setting_options_string) || ($setting_default) || ($setting_type)) {
+      if (($setting_options_string) || ($setting_datatype) || ($setting_default) || ($setting_type)) {
+        if ($setting_datatype) {
+          $asciidocoutput .= "Data type: ".'`'.$setting_datatype.'`'.' +'."\n";
+        }
         if ($setting_options_string) {
           $asciidocoutput .= "\nOptions:\n\n".$setting_options_string."\n";
         }
         if ($setting_default) {
           $asciidocoutput .= "Default: ".'`'.$setting_default.'`'.' +'."\n";
         }
-        # Removing this. Instead, settings supported on Cloud will be marked with the "C" icon.
-        # if ($setting_platforms_string) {
-        #   $asciidocoutput .= "+\nPlatforms: ".$setting_platforms_string."\n";
-        # }
         if ($setting_type) {
           $asciidocoutput .= 'Type: `'.$setting_type.'` +'."\n";
         }
@@ -238,7 +209,6 @@ sub parsefile {
       $asciidocoutput .= "====\n";
     }
   }
-
 
   # Just in case we need to grab all of the keys, this is how:
   # foreach my $key (keys %hash) { ... }

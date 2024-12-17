@@ -9,12 +9,4 @@
 :frontmatter-tags-content-type: [reference] 
 :frontmatter-tags-user-goals: [configure]
 
-Alerting and actions are enabled by default in {kib}, but require you to configure the following:
-
-. <<using-kibana-with-security,Set up {kib} to work with {stack} {security-features}>>.
-. <<configuring-tls-kib-es,Set up TLS encryption between {kib} and {es}>>.
-. If you are using an *on-premises* Elastic Stack deployment, <<general-alert-action-settings,specify a value for `xpack.encryptedSavedObjects.encryptionKey`>>.
-
-You can configure the following settings in the `kibana.yml` file.
-
 include::../settings-gen/source/kibana-alert-action-settings.asciidoc[]
