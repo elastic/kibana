@@ -60,6 +60,10 @@ describe('InferenceConnector', () => {
     });
 
     it('uses the completion task_type is supplied', async () => {
+      mockEsClient.transport.request.mockImplementationOnce(() =>
+        Promise.resolve(new PassThrough())
+      );
+
       const response = await connector.performApiUnifiedCompletion({
         body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
       });
@@ -77,7 +81,7 @@ describe('InferenceConnector', () => {
 
     it('errors during API calls are properly handled', async () => {
       // @ts-ignore
-      mockEsClient.inference.inference = mockError;
+      mockEsClient.transport.request = mockError;
 
       await expect(
         connector.performApiUnifiedCompletion({
@@ -292,10 +296,10 @@ describe('InferenceConnector', () => {
     });
 
     it('responds with a readable stream', async () => {
-      const response = await connector.performApiUnifiedCompletionStream({
+      const response = await connector.performApiUnifiedCompletion({
         body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
       });
-      expect(response instanceof PassThrough).toEqual(true);
+      expect(response).toEqual(true);
     });
   });
 });
