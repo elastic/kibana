@@ -8,26 +8,54 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiIcon, EuiTitle, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiIcon,
+  EuiTitle,
+  EuiText,
+  EuiButtonEmpty,
+  EuiBadge,
+} from '@elastic/eui';
 
+interface BackButtonProps {
+  label: string;
+  onClickBack: () => void;
+}
 interface SearchEmptyPromptProps {
   actions?: React.ReactNode;
+  backButton?: BackButtonProps;
   body?: React.ReactNode;
   description?: string;
   icon?: string;
+  isComingSoon?: boolean;
   title: string;
 }
 
 export const SearchEmptyPrompt: React.FC<SearchEmptyPromptProps> = ({
   actions,
+  backButton,
   body,
   description,
   icon,
+  isComingSoon,
   title,
 }) => {
   return (
     <EuiPanel paddingSize="l" hasShadow={false} hasBorder>
       <EuiFlexGroup alignItems="center" justifyContent="center" direction="column" gutterSize="l">
+        {backButton && (
+          <EuiFlexItem>
+            <EuiButtonEmpty
+              data-test-subj="serverlessSearchElasticManagedWebCrawlerEmptyBackButton"
+              iconType="arrowLeft"
+              onClick={backButton.onClickBack}
+            >
+              {backButton.label}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
         {icon && (
           <EuiFlexItem>
             <EuiIcon size="xxl" type={icon} />
@@ -38,6 +66,11 @@ export const SearchEmptyPrompt: React.FC<SearchEmptyPromptProps> = ({
             <h2>{title}</h2>
           </EuiTitle>
         </EuiFlexItem>
+        {isComingSoon && (
+          <EuiFlexItem>
+            <EuiBadge color="accent">Coming soon</EuiBadge>
+          </EuiFlexItem>
+        )}
         {description && (
           <EuiFlexItem>
             <EuiText textAlign="center" color="subdued">

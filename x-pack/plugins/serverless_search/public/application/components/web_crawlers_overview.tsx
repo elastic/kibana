@@ -20,7 +20,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-ui';
-
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
 import { ELASTIC_MANAGED_WEB_CRAWLERS_PATH, BASE_WEB_CRAWLERS_PATH } from '../constants';
 
@@ -74,10 +73,10 @@ export const WebCrawlersOverview = () => {
       </EuiPageTemplate.Header>
       <EuiPageTemplate.Section restrictWidth color="subdued">
         <SearchEmptyPrompt
+          icon={webCrawlersIcon}
           title={i18n.translate('xpack.serverlessSearch.webCrawlersEmpty.title', {
             defaultMessage: 'Set up a web crawler',
           })}
-          icon={webCrawlersIcon}
           description={i18n.translate('xpack.serverlessSearch.webCrawlersEmpty.description', {
             defaultMessage:
               "To set up and deploy a web crawler you'll be working between data source, your terminal, and the Kibana UI. The high level process looks like this:",
