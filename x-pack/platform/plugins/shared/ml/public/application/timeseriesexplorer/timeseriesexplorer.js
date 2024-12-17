@@ -28,7 +28,6 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiSpacer,
   EuiPanel,
   EuiTitle,
@@ -64,7 +63,6 @@ import { mlJobServiceFactory } from '../services/job_service';
 import { mlResultsServiceProvider } from '../services/results_service';
 import { toastNotificationServiceProvider } from '../services/toast_notification_service';
 
-import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
 import { TimeseriesexplorerNoChartData } from './components/timeseriesexplorer_no_chart_data';
 import { TimeSeriesExplorerPage } from './timeseriesexplorer_page';
 import { TimeSeriesExplorerHelpPopover } from './timeseriesexplorer_help_popover';
