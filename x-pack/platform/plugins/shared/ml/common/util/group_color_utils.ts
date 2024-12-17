@@ -13,6 +13,7 @@ const colorMap: Record<string, string> = Object.create(null);
 
 export function tabColor(name: string, euiTheme: EuiThemeComputed): string {
   const COLORS = [
+    // Amsterdam + Borealis
     euiTheme.colors.vis.euiColorVis0,
     euiTheme.colors.vis.euiColorVis1,
     euiTheme.colors.vis.euiColorVis2,
