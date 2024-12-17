@@ -1998,9 +1998,6 @@ module.exports = {
     },
     {
       files: [
-        // logsShared depends on o11y/private plugins, but platform plugins depend on it
-        'x-pack/plugins/observability_solution/logs_shared/**',
-
         // this plugin depends on visTypeTimeseries plugin (for TSVB viz) which is platform/private ATM
         'x-pack/plugins/observability_solution/infra/**',
 

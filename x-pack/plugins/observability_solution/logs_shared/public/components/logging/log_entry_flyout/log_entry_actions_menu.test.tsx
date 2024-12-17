@@ -7,6 +7,8 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import {
+  TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR,
+  TransactionDetailsByTraceIdLocatorParams,
   uptimeOverviewLocatorID,
   UptimeOverviewLocatorInfraParams,
   UptimeOverviewLocatorParams,
@@ -26,15 +28,21 @@ coreStartMock.application.getUrlForApp.mockImplementation((app, options) => {
 });
 
 const emptyUrlService = new MockUrlService();
-const urlServiceWithUptimeLocator = new MockUrlService();
+const urlServiceWithMockLocators = new MockUrlService();
 // we can't use the actual locator here because its import would create a
 // forbidden ts project reference cycle
-urlServiceWithUptimeLocator.locators.create<
+urlServiceWithMockLocators.locators.create<
   UptimeOverviewLocatorInfraParams | UptimeOverviewLocatorParams
 >({
   id: uptimeOverviewLocatorID,
   getLocation: async (params) => {
     return { app: 'uptime', path: '/overview', state: {} };
+  },
+});
+urlServiceWithMockLocators.locators.create<TransactionDetailsByTraceIdLocatorParams>({
+  id: TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR,
+  getLocation: async (params) => {
+    return { app: 'apm', path: '/trace-id', state: {} };
   },
 });
 
@@ -90,7 +98,7 @@ describe('LogEntryActionsMenu component', () => {
   describe('uptime link with legacy uptime enabled', () => {
     it('renders as enabled when a host ip is present in the log entry', () => {
       const elementWrapper = mount(
-        <ProviderWrapper urlService={urlServiceWithUptimeLocator}>
+        <ProviderWrapper urlService={urlServiceWithMockLocators}>
           <LogEntryActionsMenu
             logEntry={{
               fields: [{ field: 'host.ip', value: ['HOST_IP'] }],
@@ -120,7 +128,7 @@ describe('LogEntryActionsMenu component', () => {
 
     it('renders as enabled when a container id is present in the log entry', () => {
       const elementWrapper = mount(
-        <ProviderWrapper urlService={urlServiceWithUptimeLocator}>
+        <ProviderWrapper urlService={urlServiceWithMockLocators}>
           <LogEntryActionsMenu
             logEntry={{
               fields: [{ field: 'container.id', value: ['CONTAINER_ID'] }],
@@ -150,7 +158,7 @@ describe('LogEntryActionsMenu component', () => {
 
     it('renders as enabled when a pod uid is present in the log entry', () => {
       const elementWrapper = mount(
-        <ProviderWrapper urlService={urlServiceWithUptimeLocator}>
+        <ProviderWrapper urlService={urlServiceWithMockLocators}>
           <LogEntryActionsMenu
             logEntry={{
               fields: [{ field: 'kubernetes.pod.uid', value: ['POD_UID'] }],
@@ -180,7 +188,7 @@ describe('LogEntryActionsMenu component', () => {
 
     it('renders as disabled when no supported field is present in the log entry', () => {
       const elementWrapper = mount(
-        <ProviderWrapper urlService={urlServiceWithUptimeLocator}>
+        <ProviderWrapper urlService={urlServiceWithMockLocators}>
           <LogEntryActionsMenu
             logEntry={{
               fields: [],
@@ -215,7 +223,7 @@ describe('LogEntryActionsMenu component', () => {
   describe('apm link', () => {
     it('renders with a trace id filter when present in log entry', () => {
       const elementWrapper = mount(
-        <ProviderWrapper>
+        <ProviderWrapper urlService={urlServiceWithMockLocators}>
           <LogEntryActionsMenu
             logEntry={{
               fields: [{ field: 'trace.id', value: ['1234567'] }],
@@ -246,7 +254,7 @@ describe('LogEntryActionsMenu component', () => {
     it('renders with a trace id filter and timestamp when present in log entry', () => {
       const timestamp = '2019-06-27T17:44:08.693Z';
       const elementWrapper = mount(
-        <ProviderWrapper>
+        <ProviderWrapper urlService={urlServiceWithMockLocators}>
           <LogEntryActionsMenu
             logEntry={{
               fields: [
@@ -279,7 +287,7 @@ describe('LogEntryActionsMenu component', () => {
 
     it('renders as disabled when no supported field is present in log entry', () => {
       const elementWrapper = mount(
-        <ProviderWrapper>
+        <ProviderWrapper urlService={urlServiceWithMockLocators}>
           <LogEntryActionsMenu
             logEntry={{
               fields: [],
@@ -303,7 +311,10 @@ describe('LogEntryActionsMenu component', () => {
       elementWrapper.update();
 
       expect(
-        elementWrapper.find(`button${testSubject('~apmLogEntryActionsMenuItem')}`).prop('disabled')
+        elementWrapper
+          .find(`${testSubject('~apmLogEntryActionsMenuItem')}`)
+          .first()
+          .prop('disabled')
       ).toEqual(true);
     });
   });
