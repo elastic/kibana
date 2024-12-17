@@ -29,7 +29,7 @@ export function initializeZipShareableWorkpadRoute(deps: RouteInitializerDeps) {
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason: 'This route is opted out from authorization because it is only serving static files.',
           },
         },
         validate: { request: { body: RenderedWorkpadSchema } },

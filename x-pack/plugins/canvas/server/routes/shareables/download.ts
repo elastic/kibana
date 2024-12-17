@@ -24,7 +24,7 @@ export function initializeDownloadShareableWorkpadRoute(deps: RouteInitializerDe
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason: 'This route is opted out from authorization because it is only serving static files.',
           },
         },
         validate: false,
