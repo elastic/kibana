@@ -198,7 +198,7 @@ export const MonitorAlerts = ({
                   { field: 'kibana.alert.status', values: ['recovered'] },
                   ...(locationFilter ?? []),
                 ],
-                color: euiTheme.colors.vis.euiColorVis0,
+                color: euiTheme.colors.success,
               },
             ]}
           />

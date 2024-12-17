@@ -77,9 +77,9 @@ export function useStatusByLocation({
     const getColor = (status: string) => {
       switch (status) {
         case 'up':
-          return euiTheme.colors.vis.euiColorVis0;
+          return euiTheme.colors.success;
         case 'down':
-          return euiTheme.colors.vis.euiColorVis9;
+          return euiTheme.colors.vis.euiColorVis6;
         default:
           return euiTheme.colors.backgroundBaseSubdued;
       }
@@ -113,8 +113,8 @@ export function useStatusByLocation({
     data?.aggregations?.locations.buckets,
     loading,
     monitorLocations,
-    euiTheme.colors.vis.euiColorVis0,
-    euiTheme.colors.vis.euiColorVis9,
+    euiTheme.colors.success,
+    euiTheme.colors.vis.euiColorVis6,
     euiTheme.colors.backgroundBaseSubdued,
   ]);
 }

@@ -40,13 +40,13 @@ const useGetColor = (isEnabled: boolean, status?: string) => {
   }
   switch (status) {
     case 'down':
-      return euiTheme.colors.vis.euiColorVis9;
+      return euiTheme.colors.vis.euiColorVis6;
     case 'up':
-      return euiTheme.colors.vis.euiColorVis0;
+      return euiTheme.colors.success;
     case 'unknown':
       return euiTheme.colors.backgroundBaseDisabled;
     default:
-      return euiTheme.colors.vis.euiColorVis0;
+      return euiTheme.colors.success;
   }
 };
 

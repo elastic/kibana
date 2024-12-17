@@ -27,10 +27,10 @@ export const MonitorLocations = ({ locations, monitorId, overviewStatus }: Props
 
     if (overviewStatus?.downConfigs[locById]) {
       status = 'down';
-      color = euiTheme.colors.vis.euiColorVis9;
+      color = euiTheme.colors.vis.euiColorVis6;
     } else if (overviewStatus?.upConfigs[locById]) {
       status = 'up';
-      color = euiTheme.colors.vis.euiColorVis0;
+      color = euiTheme.colors.success;
     }
 
     return {
