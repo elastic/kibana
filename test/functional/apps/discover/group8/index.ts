@@ -25,5 +25,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_default_route'));
     loadTestFile(require.resolve('./_hide_announcements'));
     loadTestFile(require.resolve('./_flyouts'));
+    loadTestFile(require.resolve('./_sidenav_link'));
   });
 }

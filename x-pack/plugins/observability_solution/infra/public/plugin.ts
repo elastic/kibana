@@ -21,7 +21,6 @@ import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public'
 import {
   METRICS_EXPLORER_LOCATOR_ID,
   MetricsExplorerLocatorParams,
-  ObservabilityTriggerId,
 } from '@kbn/observability-shared-plugin/common';
 import {
   BehaviorSubject,
@@ -102,10 +101,6 @@ export class Plugin implements InfraClientPluginClass {
     if (pluginsSetup.home) {
       registerFeatures(pluginsSetup.home);
     }
-
-    pluginsSetup.uiActions.registerTrigger({
-      id: ObservabilityTriggerId.LogEntryContextMenu,
-    });
 
     const assetDetailsLocator =
       pluginsSetup.share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
