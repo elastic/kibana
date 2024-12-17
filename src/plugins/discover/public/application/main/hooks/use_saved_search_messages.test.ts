@@ -206,7 +206,7 @@ describe('test useSavedSearch message generators', () => {
         done();
       }
     });
-    sendFetchStartMsg(main$, timeRange, timeRangeRelative, query);
+    sendFetchStartMsg(main$, timeRange, timeRangeRelative, query, {});
     sendLoadingMsg(main$);
   });
 });
