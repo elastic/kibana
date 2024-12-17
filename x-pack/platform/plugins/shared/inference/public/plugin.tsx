@@ -7,7 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { MessageRole } from '@kbn/inference-common';
 import { createOutputApi } from '../common/output';
 import type { GetConnectorsResponseBody } from '../common/http_apis';
 import { createChatCompleteApi } from './chat_complete';
@@ -44,7 +43,7 @@ export class InferencePlugin
     const chatComplete = createChatCompleteApi({ http: coreStart.http });
     const output = createOutputApi(chatComplete);
 
-    const api: InferencePublicStart = {
+    return {
       chatComplete,
       output,
       getConnectors: async () => {
@@ -54,25 +53,5 @@ export class InferencePlugin
         return res.connectors;
       },
     };
-
-    api.getConnectors().then(async (connectors) => {
-      const stream = api.chatComplete({
-        stream: true,
-        connectorId: '93f0989b-4f72-4aab-b2ea-e986c3f4d5c3',
-        // system: '',
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'Hello. What can you do?',
-          },
-        ],
-      });
-
-      stream.forEach((event) => {
-        console.log('***', event);
-      });
-    });
-
-    return api;
   }
 }
