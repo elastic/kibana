@@ -1075,8 +1075,8 @@
             "text": "PublishingSubject"
           },
           "<string | undefined>; forceRefresh: () => void; getSettings: () => ",
-          "DashboardStateFromSettingsFlyout",
-          "; getDashboardPanelFromId: (id: string) => Promise<",
+          "DashboardSettings",
+          "; getDashboardPanelFromId: (id: string) => ",
           {
             "pluginId": "dashboard",
             "scope": "common",
@@ -1092,7 +1092,7 @@
             "section": "def-common.SavedObjectEmbeddableInput",
             "text": "SavedObjectEmbeddableInput"
           },
-          ">>; hasOverlays$: ",
+          ">; hasOverlays$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1183,7 +1183,7 @@
             "text": "Query"
           },
           " | undefined) => void; setScrollToPanelId: (id: string | undefined) => void; setSettings: (settings: ",
-          "DashboardStateFromSettingsFlyout",
+          "DashboardSettings",
           ") => void; setTags: (tags: string[]) => void; setTimeRange: (timeRange?: ",
           {
             "pluginId": "@kbn/es-query",
