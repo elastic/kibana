@@ -5,10 +5,14 @@ This is a test plan for the workflows of installing and updating the Prebuilt Ru
 > For the test plans for installing and upgrading prebuilt rules, see [Installation of Prebuilt Rules](./installation.md) and [Upgrade of Prebuilt Rules](./upgrade.md).
 
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 Status: `in progress`. The current test plan matches [Rule Immutability/Customization Milestone 3 epic](https://github.com/elastic/kibana/issues/174168).
 =======
 Status: `in progress`. The current test plan matches `Milestone 3` of the [Rule Immutability/Customization](https://github.com/elastic/kibana/issues/174168) epic.
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
+=======
+Status: `in progress`. The current test plan matches [Rule Immutability/Customization Milestone 3 epic](https://github.com/elastic/kibana/issues/174168).
+>>>>>>> a71de796f01 (Apply partial suggestions for `package_installation_and_upgrade.md`):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 
 ## Table of Contents
 
@@ -33,10 +37,14 @@ Status: `in progress`. The current test plan matches `Milestone 3` of the [Rule 
 ### Tickets
 
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 - [Rule Immutability/Customization epic](https://github.com/elastic/security-team/issues/1974)(internal)
 =======
 - [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974) epic
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
+=======
+- [Rule Immutability/Customization epic](https://github.com/elastic/security-team/issues/1974)(internal)
+>>>>>>> a71de796f01 (Apply partial suggestions for `package_installation_and_upgrade.md`):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 
 **Milestone 3 - Prebuilt Rules Customization:**
 - [Milestone 3 epic ticket](https://github.com/elastic/kibana/issues/174168)
@@ -93,12 +101,17 @@ Status: `in progress`. The current test plan matches `Milestone 3` of the [Rule 
 
 ```Gherkin
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 Given the prebuilt rules package is not installed
 When user opens any Security Solution page
 =======
 Given the package is not installed
 When user opens the Rule Management page
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
+=======
+Given the prebuilt rules package is not installed
+When user opens any Security Solution page
+>>>>>>> a71de796f01 (Apply partial suggestions for `package_installation_and_upgrade.md`):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 Then the package gets installed in the background from EPR
 ```
 
@@ -109,6 +122,7 @@ Then the package gets installed in the background from EPR
 ```Gherkin
 Given the package is not installed
 And user is in an air-gapped environment
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 When user opens any Security Solution page
 Then the package gets installed in the background from packages bundled into Kibana
@@ -122,6 +136,13 @@ Then the package gets installed in the background from packages bundled into Kib
 
 #### **Scenario: Large package can be installed on a small Kibana instance**
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
+=======
+When user opens any Security Solution page
+Then the package gets installed in the background from packages bundled into Kibana
+```
+
+#### **Scenario: Large package can be installed on a memory restricted Kibana instance**
+>>>>>>> a71de796f01 (Apply partial suggestions for `package_installation_and_upgrade.md`):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 
 **Automation**: 1 integration test.
 
@@ -130,10 +151,14 @@ Given the package is not installed
 And the package contains the largest amount of historical rule versions (15000)
 And the Kibana instance has a memory heap size of 700 Mb (see note below)
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 When user opens any Security Solution page
 =======
 When user opens the Rule Management page
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
+=======
+When user opens any Security Solution page
+>>>>>>> a71de796f01 (Apply partial suggestions for `package_installation_and_upgrade.md`):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 Then the package is installed without Kibana crashing with an Out Of Memory error
 ```
 
