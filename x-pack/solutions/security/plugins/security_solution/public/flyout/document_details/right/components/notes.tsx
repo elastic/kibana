@@ -174,7 +174,7 @@ export const Notes = memo(() => {
           ) : (
             <>
               {notes.length === 0 ? (
-                 <>{kibanaSecuritySolutionsPrivileges.crud ? addNoteButton : getEmptyTagValue()}</>
+                <>{kibanaSecuritySolutionsPrivileges.crud ? addNoteButton : getEmptyTagValue()}</>
               ) : (
                 <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
                   <EuiFlexItem data-test-subj={NOTES_COUNT_TEST_ID}>
