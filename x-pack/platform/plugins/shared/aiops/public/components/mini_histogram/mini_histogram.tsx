@@ -13,7 +13,7 @@ import type { PartialTheme } from '@elastic/charts';
 import { Chart, BarSeries, ScaleType, Settings, Tooltip, TooltipType } from '@elastic/charts';
 import { useEuiTheme, EuiLoadingChart, EuiTextColor } from '@elastic/eui';
 
-import { LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR } from '@kbn/aiops-log-rate-analysis';
+import { useLogRateAnalysisBarColors } from '@kbn/aiops-log-rate-analysis';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItemHistogramItem } from '@kbn/ml-agg-utils';
 import { i18n } from '@kbn/i18n';
@@ -41,6 +41,7 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({
 
   const { euiTheme } = useEuiTheme();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
+  const barColors = useLogRateAnalysisBarColors();
 
   const miniHistogramChartTheme: PartialTheme = {
     chartMargins: {
@@ -93,10 +94,10 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({
     );
   }
 
-  const barColor = barColorOverride ? [barColorOverride] : undefined;
+  const barColor = barColorOverride ? [barColorOverride] : barColors.barColor;
   const barHighlightColor = barHighlightColorOverride
     ? [barHighlightColorOverride]
-    : [LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR];
+    : [barColors.barHighlightColor];
 
   return (
     <div css={cssChartSize}>
