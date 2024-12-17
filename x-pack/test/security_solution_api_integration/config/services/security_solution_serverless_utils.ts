@@ -24,7 +24,6 @@ export function SecuritySolutionServerlessUtils({
   const config = getService('config');
   const log = getService('log');
   const SecureSearch = getService('secureSearch');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   const rolesCredentials = new Map<string, RoleCredentials>();
   const commonRequestHeader = svlCommonApi.getCommonRequestHeader();
