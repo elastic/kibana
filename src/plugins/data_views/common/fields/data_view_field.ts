@@ -141,7 +141,7 @@ export class DataViewField implements DataViewFieldBase {
    */
 
   public get customDescription() {
-    return this.spec.customDescription;
+    return this.spec.customDescription ?? this.spec.ecsDescription;
   }
 
   /**
