@@ -946,7 +946,6 @@ x-pack/plugins/search_playground @elastic/search-kibana
 x-pack/plugins/search_solution/search_navigation @elastic/search-kibana
 x-pack/plugins/security @elastic/kibana-security
 x-pack/plugins/security_solution @elastic/security-solution
-x-pack/plugins/security_solution_ess @elastic/security-solution
 x-pack/plugins/security_solution_serverless @elastic/security-solution
 x-pack/plugins/serverless @elastic/appex-sharedux
 x-pack/plugins/serverless_search @elastic/search-kibana
@@ -999,6 +998,7 @@ x-pack/solutions/security/plugins/cloud_security_posture @elastic/kibana-cloud-s
 x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 x-pack/solutions/security/plugins/elastic_assistant @elastic/security-generative-ai
 x-pack/solutions/security/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/plugins/session_view @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/plugins/timelines @elastic/security-threat-hunting-investigations
@@ -2152,7 +2152,7 @@ x-pack/test_serverless/functional/test_suites/security/index.mki_only.ts @elasti
 
 # Security Solution Offering plugins
 # TODO: assign sub directories to sub teams
-/x-pack/plugins/security_solution_ess/ @elastic/security-solution
+/x-pack/solutions/security/plugins/security_solution_ess/ @elastic/security-solution
 /x-pack/plugins/security_solution_serverless/ @elastic/security-solution
 /x-pack/plugins/security_solution/public/app/404.tsx @elastic/security-solution
 /x-pack/plugins/security_solution/public/app/app.tsx @elastic/security-solution
@@ -2162,7 +2162,7 @@ x-pack/test_serverless/functional/test_suites/security/index.mki_only.ts @elasti
 /x-pack/plugins/security_solution/public/assistant @elastic/security-generative-ai
 /x-pack/plugins/security_solution/public/attack_discovery @elastic/security-generative-ai
 /x-pack/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
-/x-pack/plugins/security_solution_ess/public/upselling/pages/attack_discovery @elastic/security-generative-ai
+/x-pack/solutions/security/plugins/security_solution_ess/public/upselling/pages/attack_discovery @elastic/security-generative-ai
 /x-pack/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/security-scalability
 
 # Security Solution cross teams ownership
@@ -2553,7 +2553,7 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 # Security design
 /x-pack/plugins/endpoint/**/*.scss @elastic/security-design
 /x-pack/plugins/security_solution/**/*.scss @elastic/security-design
-/x-pack/plugins/security_solution_ess/**/*.scss @elastic/security-design
+/x-pack/solutions/security/plugins/security_solution_ess/**/*.scss @elastic/security-design
 /x-pack/plugins/security_solution_serverless/**/*.scss @elastic/security-design
 
 # Logstash
@@ -3379,7 +3379,7 @@ x-pack/solutions/security/plugins/elastic_assistant @elastic/security-generative
 x-pack/solutions/security/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/lists @elastic/security-detection-engine
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
-x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
+x-pack/solutions/security/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
 x-pack/solutions/security/plugins/session_view @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
