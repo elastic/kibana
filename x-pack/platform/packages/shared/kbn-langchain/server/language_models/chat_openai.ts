@@ -202,7 +202,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       // security sends this from connectors, it is only missing from preconfigured connectors
       // this should be undefined otherwise so the connector handles the model (stack_connector has access to preconfigured connector model values)
       model: this.model,
-      // n: completionRequest.n,
+      n: completionRequest.n,
       stop: completionRequest.stop,
       tools: completionRequest.tools,
       ...('tool_choice' in completionRequest ? { tool_choice: completionRequest.tool_choice } : {}),
@@ -211,7 +211,6 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
         role: message.role,
         content: message.content ?? '',
         ...('name' in message ? { name: message?.name } : {}),
-        // ...('function_call' in message ? { function_call: message?.function_call } : {}),
         ...('tool_calls' in message ? { tool_calls: message?.tool_calls } : {}),
         ...('tool_call_id' in message ? { tool_call_id: message?.tool_call_id } : {}),
       })),

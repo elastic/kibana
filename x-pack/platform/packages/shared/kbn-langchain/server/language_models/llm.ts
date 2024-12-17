@@ -90,7 +90,6 @@ export class ActionsClientLlm extends LLM {
         )} `
     );
 
-    console.log('==> this.llmType:', this.llmType);
     // create a new connector request body with the assistant message:
     const requestBody = {
       actionId: this.#connectorId,
@@ -102,7 +101,6 @@ export class ActionsClientLlm extends LLM {
                 body: {
                   model: this.model,
                   messages: [assistantMessage], // the assistant message
-                  ...getDefaultArguments(this.llmType, this.temperature),
                 },
               },
             }
@@ -120,7 +118,6 @@ export class ActionsClientLlm extends LLM {
     };
 
     const actionResult = await this.#actionsClient.execute(requestBody);
-    console.log('==> actionResult:', actionResult);
     if (actionResult.status === 'error') {
       const error = new Error(
         `${LLM_TYPE}: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
@@ -129,6 +126,18 @@ export class ActionsClientLlm extends LLM {
         error.name = actionResult?.serviceMessage;
       }
       throw error;
+    }
+
+    if (this.llmType === 'inference') {
+      const content = get('data.choices[0].message.content', actionResult);
+
+      if (typeof content !== 'string') {
+        throw new Error(
+          `${LLM_TYPE}: inference content should be a string, but it had an unexpected type: ${typeof content}`
+        );
+      }
+
+      return content; // per the contact of _call, return a string
     }
 
     const content = get('data.message', actionResult);
