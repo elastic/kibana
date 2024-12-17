@@ -15,9 +15,6 @@ import type { UpsellingService } from '@kbn/security-solution-upselling/service'
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { ReactQueryClientProvider } from '../../../../../../../common/containers/query_client/query_client_provider';
 import { UpsellingProvider } from '../../../../../../../common/components/upselling_provider';
-import { DiffableRuleContextProvider } from '../../diffable_rule_context';
-import type { DiffableRule } from '../../../../../../../../common/api/detection_engine';
-import { mockCustomQueryRule } from './mocks';
 
 function createKibanaServicesMock(overrides?: Partial<CoreStart>) {
   const baseMock = {
@@ -72,18 +69,14 @@ function createMockStore() {
   return store;
 }
 
-const setRuleFieldResolvedValueMock = () => {};
-
 interface StorybookProvidersProps {
   children: React.ReactNode;
   kibanaServicesOverrides?: Record<string, unknown>;
-  finalDiffableRule?: DiffableRule;
 }
 
 export function ThreeWayDiffStorybookProviders({
   children,
   kibanaServicesOverrides,
-  finalDiffableRule = mockCustomQueryRule(),
 }: StorybookProvidersProps) {
   const kibanaServicesMock = createKibanaServicesMock(kibanaServicesOverrides);
   const KibanaReactContext = createKibanaReactContext(kibanaServicesMock);
@@ -95,12 +88,7 @@ export function ThreeWayDiffStorybookProviders({
       <ReactQueryClientProvider>
         <ReduxStoreProvider store={store}>
           <UpsellingProvider upsellingService={kibanaServicesMock.upsellingService}>
-            <DiffableRuleContextProvider
-              finalDiffableRule={finalDiffableRule}
-              setRuleFieldResolvedValue={setRuleFieldResolvedValueMock}
-            >
-              {children}
-            </DiffableRuleContextProvider>
+            {children}
           </UpsellingProvider>
         </ReduxStoreProvider>
       </ReactQueryClientProvider>
