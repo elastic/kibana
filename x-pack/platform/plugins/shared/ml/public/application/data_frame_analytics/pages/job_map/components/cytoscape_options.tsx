@@ -61,29 +61,46 @@ function iconForNode(el: cytoscape.NodeSingular) {
   }
 }
 
-function borderColorForNode(el: cytoscape.NodeSingular, theme: EuiThemeComputed) {
+function borderColorForNode(el: cytoscape.NodeSingular, euiTheme: EuiThemeComputed) {
   if (el.selected()) {
-    return theme.colors.primary;
+    return euiTheme.colors.primary;
   }
 
   const type = el.data('type');
 
   switch (type) {
     case JOB_MAP_NODE_TYPES.ANALYTICS_JOB_MISSING:
-      return theme.colors.fullShade;
+      return euiTheme.colors.fullShade;
     case JOB_MAP_NODE_TYPES.ANALYTICS:
-      return theme.colors.vis.euiColorVis0;
+      // Amsterdam + Borealis
+      return euiTheme.colors.vis.euiColorVis0;
     case JOB_MAP_NODE_TYPES.TRANSFORM:
-      return theme.colors.vis.euiColorVis1;
+      // Amsterdam: euiTheme.colors.vis.euiColorVis1
+      // Borealis:  euiTheme.colors.vis.euiColorVis2
+      return euiTheme.flags.hasVisColorAdjustment
+        ? euiTheme.colors.vis.euiColorVis1
+        : euiTheme.colors.vis.euiColorVis2;
     case JOB_MAP_NODE_TYPES.INDEX:
-      return theme.colors.vis.euiColorVis2;
+      // Amsterdam: euiTheme.colors.vis.euiColorVis2
+      // Borealis:  euiTheme.colors.vis.euiColorVis4
+      return euiTheme.flags.hasVisColorAdjustment
+        ? euiTheme.colors.vis.euiColorVis2
+        : euiTheme.colors.vis.euiColorVis4;
     case JOB_MAP_NODE_TYPES.TRAINED_MODEL:
-      return theme.colors.vis.euiColorVis3;
+      // Amsterdam: euiTheme.colors.vis.euiColorVis3
+      // Borealis:  euiTheme.colors.vis.euiColorVis5
+      return euiTheme.flags.hasVisColorAdjustment
+        ? euiTheme.colors.vis.euiColorVis3
+        : euiTheme.colors.vis.euiColorVis5;
     case JOB_MAP_NODE_TYPES.INGEST_PIPELINE:
-      return theme.colors.vis.euiColorVis7;
+      // Amsterdam: euiTheme.colors.vis.euiColorVis7
+      // Borealis:  euiTheme.colors.vis.euiColorVis8
+      return euiTheme.flags.hasVisColorAdjustment
+        ? euiTheme.colors.vis.euiColorVis7
+        : euiTheme.colors.vis.euiColorVis8;
 
     default:
-      return theme.colors.mediumShade;
+      return euiTheme.colors.mediumShade;
   }
 }
 
