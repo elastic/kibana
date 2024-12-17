@@ -59,7 +59,7 @@ export const updateOverwriteExceptionListItem = async ({
         entries,
         expire_time: expireTime,
         immutable: undefined,
-        item_id: itemId,
+        item_id: itemId ?? exceptionListItem.item_id,
         list_id: exceptionListItem.list_id,
         list_type: 'item',
         meta,
@@ -72,7 +72,7 @@ export const updateOverwriteExceptionListItem = async ({
         version: exceptionListItem._version ? parseInt(exceptionListItem._version, 10) : undefined,
       },
       {
-        id,
+        id: id ?? exceptionListItem.id,
         overwrite: true,
         version: _version,
       }
