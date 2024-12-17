@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin } from '@kbn/core/server';
+import { Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 
@@ -15,7 +15,7 @@ interface FixtureStartDeps {
 }
 
 export class FixturePlugin implements Plugin<void, void, {}, FixtureStartDeps> {
-  constructor() {}
+  constructor(context: PluginInitializerContext<{}>) {}
 
   public setup() {}
   public start() {}
