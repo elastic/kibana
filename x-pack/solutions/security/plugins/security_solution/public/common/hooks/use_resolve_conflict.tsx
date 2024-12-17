@@ -18,14 +18,8 @@ import { useKibana } from '../lib/kibana';
 import { URL_PARAM_KEY } from './use_url_state';
 
 /**
- * Unfortunately the url change initiated when clicking the button to otherObjectPath doesn't seem to be
- * respected by the useSetInitialStateFromUrl here: x-pack/plugins/security_solution/public/common/components/url_state/initialize_redux_by_url.tsx
- *
- * FYI: It looks like the routing causes replaceStateInLocation to be called instead:
- * x-pack/plugins/security_solution/public/common/components/url_state/helpers.ts
- *
  * Potentially why the markdown component needs a click handler as well for timeline?
- * see: /x-pack/plugins/security_solution/public/common/components/markdown_editor/plugins/timeline/processor.tsx
+ * see: x-pack/solutions/security/plugins/security_solution/public/common/components/markdown_editor/plugins/timeline/processor.tsx
  */
 export const useResolveConflict = () => {
   const { search, pathname } = useLocation();
