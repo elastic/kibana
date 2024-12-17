@@ -18,7 +18,7 @@ import { vents } from '../lib/vents';
 const shardStyle = (theme) => css`
   ${logicalCSS('padding', `${theme.euiTheme.size.xs} ${theme.euiTheme.size.s}`)}
   align-self: center;
-  font-size: ${euiFontSize(theme, 'xs')};
+  font-size: ${euiFontSize(theme, 'xs').fontSize};
   position: relative;
   display: inline-block;
 `;

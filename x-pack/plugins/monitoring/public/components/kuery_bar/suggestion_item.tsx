@@ -46,7 +46,7 @@ const suggestionItemContainerStyle = (isSelected?: boolean) => (theme: UseEuiThe
   css`
     display: flex;
     flex-direction: row;
-    font-size: ${euiFontSize(theme, 's')};
+    font-size: ${euiFontSize(theme, 's').fontSize};
     height: ${theme.euiTheme.size.xl};
     white-space: nowrap;
     background-color: ${isSelected ? theme.euiTheme.colors.lightestShade : 'transparent'};

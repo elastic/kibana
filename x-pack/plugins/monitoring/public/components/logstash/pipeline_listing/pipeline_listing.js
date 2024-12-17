@@ -31,7 +31,7 @@ import { EuiMonitoringSSPTable } from '../../table';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
 const tableCellNumberStyle = (theme) => css`
-  font-size: ${euiFontSize(theme, 'l')};
+  font-size: ${euiFontSize(theme, 'l').fontSize};
 `;
 
 export class PipelineListing extends Component {

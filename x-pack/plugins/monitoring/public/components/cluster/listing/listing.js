@@ -39,7 +39,7 @@ const clusterCellExpiredStyle = ({ euiTheme }) => css`
 `;
 
 const clusterCellLicenseStyle = (theme) => css`
-  font-size: ${euiFontSize(theme, 'm')};
+  font-size: ${euiFontSize(theme, 'm').fontSize};
 `;
 
 const clusterCellExpirationStyle = ({ euiTheme }) => css`

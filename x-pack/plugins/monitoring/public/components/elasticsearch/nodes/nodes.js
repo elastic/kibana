@@ -42,11 +42,11 @@ import { ClusterStatus } from '../cluster_status';
 import { MetricCell, OfflineCell } from './cells';
 
 const tableCellNameStyle = (theme) => css`
-  font-size: ${euiFontSize(theme, 'm')};
+  ${euiFontSize(theme, 'm')}
 `;
 
 const tableCellTransportAddressStyle = (theme) => css`
-  font-size: ${euiFontSize(theme, 's')};
+  ${euiFontSize(theme, 's')}
   color: ${theme.euiTheme.colors.darkShade};
 `;
 

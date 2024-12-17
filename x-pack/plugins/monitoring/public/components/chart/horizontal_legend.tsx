@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 const legendItemStyle = (isDisabled: boolean) => (theme: UseEuiTheme) =>
   css`
     display: flex;
-    font-size: ${euiFontSize(theme, 'xs')};
+    font-size: ${euiFontSize(theme, 'xs').fontSize};
     cursor: pointer;
     color: ${theme.euiTheme.colors.textParagraph};
     display: flex;

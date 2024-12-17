@@ -20,7 +20,7 @@ const assignedChildrenStyle = ({ euiTheme }) => css`
 const childTitleStyle = (theme) => css`
   ${logicalCSS('padding', `${theme.euiTheme.size.l} ${theme.euiTheme.size.s}`)}
   text-align: center;
-  font-size: ${euiFontSize(theme, 'xs')};
+  font-size: ${euiFontSize(theme, 'xs').fontSize};
   color: ${theme.euiTheme.colors.ghost};
   display: flex;
   flex-direction: row;
@@ -30,7 +30,7 @@ const childTitleStyle = (theme) => css`
 const shardStyle = (theme) => css`
   align-self: center;
   ${logicalCSS('padding', `${theme.euiTheme.size.xs} ${theme.euiTheme.size.s}`)}
-  font-size: ${euiFontSize(theme, 'xs')};
+  font-size: ${euiFontSize(theme, 'xs').fontSize};
   position: relative;
   display: inline-block;
 `;
