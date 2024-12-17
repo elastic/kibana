@@ -52,6 +52,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     version: '1.14.0',
   };
 
+  const regularDatasetName = datasetNames[0];
   const regularDataStreamName = `logs-${datasetNames[0]}-${defaultNamespace}`;
   const degradedDatasetName = datasetNames[2];
   const degradedDataStreamName = `logs-${degradedDatasetName}-${defaultNamespace}`;
@@ -329,7 +330,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         // Confirm dataset selector text in observability logs explorer
         const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-        originalExpect(datasetSelectorText).toMatch(regularDataStreamName);
+        originalExpect(datasetSelectorText).toMatch(regularDatasetName);
       });
 
       it('should go log explorer for degraded docs when the button next to breakdown selector is clicked', async () => {
@@ -343,7 +344,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         // Confirm dataset selector text in observability logs explorer
         const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-        originalExpect(datasetSelectorText).toMatch(apacheAccessDataStreamName);
+        originalExpect(datasetSelectorText).toMatch(apacheAccessDatasetName);
       });
     });
 
