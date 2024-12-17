@@ -43,12 +43,6 @@ export const scheduleAssetCriticalityEcsCompliancyMigration = async ({
     auditLogger,
   });
 
-  const shouldMigrateMappings = await migrationClient.isEcsMappingsMigrationRequired();
-  if (shouldMigrateMappings) {
-    logger.debug('Migrating Asset Criticality mappings');
-    await migrationClient.migrateEcsMappings();
-  }
-
   const shouldMigrateData = await migrationClient.isEcsDataMigrationRequired();
   if (shouldMigrateData && taskManagerStart) {
     logger.debug(`Task scheduled: "${TASK_TYPE}"`);

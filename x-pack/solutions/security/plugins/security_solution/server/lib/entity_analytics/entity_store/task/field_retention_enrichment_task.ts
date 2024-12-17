@@ -13,6 +13,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { getAvailableEntityTypes } from '../../../../../common/entity_analytics/entity_store/constants';
 import {
   EngineComponentResourceEnum,
   type EntityType,
@@ -24,10 +25,7 @@ import {
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import {
-  getAvailableEntityTypes,
-  getUnitedEntityDefinitionVersion,
-} from '../united_entity_definitions';
+import { getUnitedEntityDefinitionVersion } from '../united_entity_definitions';
 import { executeFieldRetentionEnrichPolicy } from '../elasticsearch_assets';
 
 import { getEntitiesIndexName } from '../utils';

@@ -62,7 +62,7 @@ import {
 } from '../../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { LastEventTime } from '../../../../common/components/last_event_time';
-import { LastEventIndexKey, RiskScoreEntity } from '../../../../../common/search_strategy';
+import { LastEventIndexKey, RiskScoreEntityType } from '../../../../../common/search_strategy';
 
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import type { UserSummaryProps } from '../../../../overview/components/user_overview';
@@ -187,7 +187,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   const refetchRiskScore = useRefetchOverviewPageRiskScore(USER_OVERVIEW_RISK_SCORE_QUERY_ID);
   const { calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    RiskScoreEntity.user,
+    RiskScoreEntityType.user,
     detailName,
     { onSuccess: refetchRiskScore }
   );

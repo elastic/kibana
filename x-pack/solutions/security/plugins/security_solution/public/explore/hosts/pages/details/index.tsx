@@ -36,7 +36,7 @@ import { useSignalIndex } from '../../../../detections/containers/detection_engi
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import type { HostItem } from '../../../../../common/search_strategy';
-import { LastEventIndexKey, RiskScoreEntity } from '../../../../../common/search_strategy';
+import { LastEventIndexKey, RiskScoreEntityType } from '../../../../../common/search_strategy';
 import { SecurityPageName } from '../../../../app/types';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -188,7 +188,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
   const refetchRiskScore = useRefetchOverviewPageRiskScore(HOST_OVERVIEW_RISK_SCORE_QUERY_ID);
   const { calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    RiskScoreEntity.host,
+    RiskScoreEntityType.host,
     detailName,
     { onSuccess: refetchRiskScore }
   );

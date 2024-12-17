@@ -8,7 +8,7 @@ import type { RenderResult } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { SecurityPageName } from '../../../../common/constants';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/search_strategy';
 import { useGetSecuritySolutionLinkProps } from '../../../common/components/links';
 import { RiskScoreHeaderContent } from './header_content';
 
@@ -37,7 +37,7 @@ describe('RiskScoreHeaderContent', () => {
           path: '/userRisk',
         }}
         onSelectSeverityFilter={jest.fn()}
-        riskEntity={RiskScoreEntity.user}
+        riskEntity={RiskScoreEntityType.user}
         selectedSeverity={[]}
         toggleStatus={true}
       />
@@ -68,7 +68,7 @@ describe('RiskScoreHeaderContent', () => {
           path: '/userRisk',
         }}
         onSelectSeverityFilter={jest.fn()}
-        riskEntity={RiskScoreEntity.user}
+        riskEntity={RiskScoreEntityType.user}
         selectedSeverity={[]}
         toggleStatus={false}
       />

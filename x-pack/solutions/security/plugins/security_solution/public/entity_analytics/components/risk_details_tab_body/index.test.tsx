@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { RiskDetailsTabBody } from '.';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/search_strategy';
 import { HostsType } from '../../../explore/hosts/store/model';
 import { UsersType } from '../../../explore/users/store/model';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
@@ -19,7 +19,7 @@ jest.mock('../../api/hooks/use_risk_score');
 jest.mock('../../../common/containers/query_toggle');
 jest.mock('../../../common/lib/kibana');
 
-describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
+describe.each([RiskScoreEntityType.host, RiskScoreEntityType.user])(
   'Risk Tab Body entityType: %s',
   (riskEntity) => {
     const defaultProps = {
@@ -29,7 +29,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       skip: false,
       startDate: '2019-06-25T04:31:59.345Z',
       endDate: '2019-06-25T06:31:59.345Z',
-      type: riskEntity === RiskScoreEntity.host ? HostsType.page : UsersType.page,
+      type: riskEntity === RiskScoreEntityType.host ? HostsType.page : UsersType.page,
       riskEntity,
     };
 

@@ -8,18 +8,18 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/search_strategy';
 
 const RiskScoreHeaderTitleComponent = ({
   riskScoreEntity,
   title,
 }: {
-  riskScoreEntity: RiskScoreEntity;
+  riskScoreEntity: RiskScoreEntityType;
   title?: string;
 }) => (
   <>
     {title ??
-      (riskScoreEntity === RiskScoreEntity.user ? (
+      (riskScoreEntity === RiskScoreEntityType.user ? (
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.usersRiskDashboard.title"
           defaultMessage="User Risk Scores"

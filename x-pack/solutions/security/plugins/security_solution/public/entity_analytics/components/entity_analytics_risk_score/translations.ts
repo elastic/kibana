@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { getRiskEntityTranslation } from '../risk_score/translations';
-import type { RiskScoreEntity } from '../../../../common/search_strategy';
+import type { RiskScoreEntityType } from '../../../../common/search_strategy';
 export * from '../risk_score/translations';
 
-export const ENTITY_NAME = (riskEntity: RiskScoreEntity) =>
+export const ENTITY_NAME = (riskEntity: RiskScoreEntityType) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.riskDashboard.nameTitle', {
     defaultMessage: '{riskEntity} Name',
     values: {

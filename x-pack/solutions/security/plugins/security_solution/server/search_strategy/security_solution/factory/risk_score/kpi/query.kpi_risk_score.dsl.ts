@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import {
+  RiskScoreEntityLevelField,
+  RiskScoreEntityNameField,
+} from '../../../../../../common/entity_analytics/risk_engine';
 import type { RiskScoreKpiRequestOptions } from '../../../../../../common/api/search_strategy';
-import { RiskScoreEntity, RiskScoreFields } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 export const buildKpiRiskScoreQuery = ({
@@ -38,16 +41,12 @@ export const buildKpiRiskScoreQuery = ({
       aggs: {
         risk: {
           terms: {
-            field:
-              entity === RiskScoreEntity.user ? RiskScoreFields.userRisk : RiskScoreFields.hostRisk,
+            field: RiskScoreEntityLevelField[entity],
           },
           aggs: {
             unique_entries: {
               cardinality: {
-                field:
-                  entity === RiskScoreEntity.user
-                    ? RiskScoreFields.userName
-                    : RiskScoreFields.hostName,
+                field: RiskScoreEntityNameField[entity],
               },
             },
           },

@@ -7,7 +7,7 @@
 
 import { EuiEmptyPrompt, EuiPanel, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/search_strategy';
 
 import { HeaderSection } from '../../../common/components/header_section';
 import * as i18n from './translations';
@@ -20,7 +20,7 @@ const RiskScoresNoDataDetectedComponent = ({
   entityType,
   refetch,
 }: {
-  entityType: RiskScoreEntity;
+  entityType: RiskScoreEntityType;
   refetch: inputsModel.Refetch;
 }) => {
   const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();
@@ -28,8 +28,9 @@ const RiskScoresNoDataDetectedComponent = ({
   const translations = useMemo(
     () => ({
       title:
-        entityType === RiskScoreEntity.user ? i18n.USER_WARNING_TITLE : i18n.HOST_WARNING_TITLE,
-      body: entityType === RiskScoreEntity.user ? i18n.USER_WARNING_BODY : i18n.HOST_WARNING_BODY,
+        entityType === RiskScoreEntityType.user ? i18n.USER_WARNING_TITLE : i18n.HOST_WARNING_TITLE,
+      body:
+        entityType === RiskScoreEntityType.user ? i18n.USER_WARNING_BODY : i18n.HOST_WARNING_BODY,
     }),
     [entityType]
   );

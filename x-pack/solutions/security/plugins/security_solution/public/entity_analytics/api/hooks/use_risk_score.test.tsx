@@ -13,7 +13,7 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../common/hooks/use_app_toasts.mock';
 import { useRiskScoreFeatureStatus } from './use_risk_score_feature_status';
 import { useIsNewRiskScoreModuleInstalled } from './use_risk_engine_status';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/search_strategy';
 jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));
@@ -66,7 +66,7 @@ const defaultSearchResponse = {
   inspect: {},
   error: undefined,
 };
-describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
+describe.each([RiskScoreEntityType.host, RiskScoreEntityType.user])(
   'useRiskScore entityType: %s',
   (riskEntity) => {
     beforeEach(() => {

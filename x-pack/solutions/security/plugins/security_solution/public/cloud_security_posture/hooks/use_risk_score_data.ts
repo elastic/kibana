@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import {
-  RiskScoreEntity,
+  RiskScoreEntityType,
   type HostRiskScore,
   type UserRiskScore,
   buildHostNamesFilter,
@@ -29,7 +29,7 @@ export const useHasRiskScore = ({
     [isHostNameField, value]
   );
   const { data } = useRiskScore({
-    riskEntity: isHostNameField ? RiskScoreEntity.host : RiskScoreEntity.user,
+    riskEntity: isHostNameField ? RiskScoreEntityType.host : RiskScoreEntityType.user,
     filterQuery: buildFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,

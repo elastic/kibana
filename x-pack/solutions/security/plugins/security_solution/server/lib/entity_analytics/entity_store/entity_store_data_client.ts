@@ -288,7 +288,7 @@ export class EntityStoreDataClient {
 
     const { config } = this.options;
 
-    await this.riskScoreDataClient.createRiskScoreLatestIndex().catch((e) => {
+    await this.riskScoreDataClient.createOrUpdateRiskScoreLatestIndex().catch((e) => {
       if (e.meta.body.error.type === 'resource_already_exists_exception') {
         this.options.logger.debug(
           `Risk score index for ${entityType} already exists, skipping creation.`

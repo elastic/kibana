@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { RiskScoreEntity } from '../../../../common/search_strategy/security_solution/risk_score';
+import { RiskScoreEntityType } from '../../../../common/search_strategy/security_solution/risk_score';
 import { useEntityInfo } from './use_entity';
 
 jest.mock('react-redux', () => {
@@ -19,7 +19,7 @@ jest.mock('react-redux', () => {
 
 describe('useEntityInfo', () => {
   it('should return host entity info', () => {
-    const { result } = renderHook(() => useEntityInfo(RiskScoreEntity.host));
+    const { result } = renderHook(() => useEntityInfo(RiskScoreEntityType.host));
     expect(result?.current).toMatchInlineSnapshot(`
       Object {
         "kpiQueryId": "headerHostRiskScoreKpiQuery",
@@ -33,7 +33,7 @@ describe('useEntityInfo', () => {
     `);
   });
   it('should return user entity info', () => {
-    const { result } = renderHook(() => useEntityInfo(RiskScoreEntity.user));
+    const { result } = renderHook(() => useEntityInfo(RiskScoreEntityType.user));
     expect(result?.current).toMatchInlineSnapshot(`
       Object {
         "kpiQueryId": "headerUserRiskScoreKpiQuery",

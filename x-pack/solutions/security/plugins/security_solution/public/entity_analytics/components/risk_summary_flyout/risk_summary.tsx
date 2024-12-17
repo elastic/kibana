@@ -27,7 +27,7 @@ import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { ONE_WEEK_IN_HOURS } from '../../../flyout/entity_details/shared/constants';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/risk_engine';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
@@ -45,7 +45,7 @@ import {
 } from './common';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
 
-export interface RiskSummaryProps<T extends RiskScoreEntity> {
+export interface RiskSummaryProps<T extends RiskScoreEntityType> {
   riskScoreData: RiskScoreState<T>;
   recalculatingScore: boolean;
   queryId: string;
@@ -53,7 +53,7 @@ export interface RiskSummaryProps<T extends RiskScoreEntity> {
   isPreviewMode?: boolean;
 }
 
-const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
+const FlyoutRiskSummaryComponent = <T extends RiskScoreEntityType>({
   riskScoreData,
   recalculatingScore,
   queryId,
@@ -74,7 +74,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
       severity: entityData?.risk?.calculated_level,
       query: `${fieldName}: ${entityName}`,
       spaceId: 'default',
-      riskEntity: isUserRiskData(riskData) ? RiskScoreEntity.user : RiskScoreEntity.host,
+      riskEntity: isUserRiskData(riskData) ? RiskScoreEntityType.user : RiskScoreEntityType.host,
     });
   }, [entityData?.name, entityData?.risk?.calculated_level, riskData]);
 

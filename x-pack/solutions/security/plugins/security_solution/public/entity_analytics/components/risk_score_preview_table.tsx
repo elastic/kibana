@@ -14,7 +14,7 @@ import type { RiskSeverity } from '../../../common/search_strategy';
 import { RiskScoreLevel } from './severity/common';
 
 import { HostDetailsLink, UserDetailsLink } from '../../common/components/links';
-import { RiskScoreEntity } from '../../../common/entity_analytics/risk_engine';
+import { RiskScoreEntityType } from '../../../common/entity_analytics/risk_engine';
 
 type RiskScoreColumn = EuiBasicTableColumn<EntityRiskScoreRecord> & {
   field: keyof EntityRiskScoreRecord;
@@ -25,7 +25,7 @@ export const RiskScorePreviewTable = ({
   type,
 }: {
   items: EntityRiskScoreRecord[];
-  type: RiskScoreEntity;
+  type: RiskScoreEntityType;
 }) => {
   const columns: RiskScoreColumn[] = [
     {
@@ -37,7 +37,7 @@ export const RiskScorePreviewTable = ({
         />
       ),
       render: (itemName: string) => {
-        return type === RiskScoreEntity.host ? (
+        return type === RiskScoreEntityType.host ? (
           <HostDetailsLink hostName={itemName} />
         ) : (
           <UserDetailsLink userName={itemName} />
@@ -81,7 +81,7 @@ export const RiskScorePreviewTable = ({
   return (
     <EuiInMemoryTable<EntityRiskScoreRecord>
       data-test-subj={
-        type === RiskScoreEntity.host ? 'host-risk-preview-table' : 'user-risk-preview-table'
+        type === RiskScoreEntityType.host ? 'host-risk-preview-table' : 'user-risk-preview-table'
       }
       responsiveBreakpoint={false}
       items={items}

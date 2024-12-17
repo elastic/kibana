@@ -8,7 +8,7 @@
 import React from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../../common/search_strategy';
 import { RiskDetailsTabBody } from '../../../../entity_analytics/components/risk_details_tab_body';
 import { HostsType, HostsTableType } from '../../store/model';
 import { AnomaliesQueryTabBody } from '../../../../common/containers/anomalies/anomalies_query_tab_body';
@@ -70,7 +70,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.risk})`}>
           <RiskDetailsTabBody
             {...tabProps}
-            riskEntity={RiskScoreEntity.host}
+            riskEntity={RiskScoreEntityType.host}
             entityName={tabProps.hostName}
           />
         </Route>

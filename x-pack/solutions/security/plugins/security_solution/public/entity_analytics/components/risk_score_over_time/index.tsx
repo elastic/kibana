@@ -14,7 +14,7 @@ import { InspectButtonContainer } from '../../../common/components/inspect';
 
 import type {
   HostRiskScore,
-  RiskScoreEntity,
+  RiskScoreEntityType,
   UserRiskScore,
 } from '../../../../common/search_strategy';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
@@ -26,7 +26,7 @@ export interface RiskScoreOverTimeProps {
   to: string;
   loading: boolean;
   riskScore?: Array<HostRiskScore | UserRiskScore>;
-  riskEntity: RiskScoreEntity;
+  riskEntity: RiskScoreEntityType;
   queryId: string;
   title: string;
   toggleStatus: boolean;

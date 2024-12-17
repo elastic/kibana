@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
+import { RiskScoreEntityType, RiskSeverity } from '../../../../common/search_strategy';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
@@ -27,7 +27,7 @@ describe('ChartContent', () => {
   const props = {
     dataExists: true,
     kpiQueryId: 'mockQueryId',
-    riskEntity: RiskScoreEntity.host,
+    riskEntity: RiskScoreEntityType.host,
     severityCount: undefined,
     timerange: { from: '2022-04-05T12:00:00.000Z', to: '2022-04-08T12:00:00.000Z' },
     selectedSeverity: [RiskSeverity.Unknown],

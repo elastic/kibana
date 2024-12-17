@@ -25,7 +25,7 @@ import { useQueryInspector } from '../../../common/components/page/manage_query'
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/risk_engine';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { HostPanelContent } from './content';
@@ -76,7 +76,7 @@ export const HostPanel = ({
   );
 
   const riskScoreState = useRiskScore({
-    riskEntity: RiskScoreEntity.host,
+    riskEntity: RiskScoreEntityType.host,
     filterQuery: hostNameFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
@@ -93,7 +93,7 @@ export const HostPanel = ({
   }, [refetch, refetchRiskInputsTab]);
 
   const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    RiskScoreEntity.host,
+    RiskScoreEntityType.host,
     hostName,
     { onSuccess: refetchRiskScore }
   );

@@ -9,6 +9,7 @@ import { AssetCriticalityEcsMigrationClient } from './asset_criticality_migratio
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import { ASSET_CRITICALITY_MAPPINGS_VERSIONS } from './constants';
 
 jest.mock('./asset_criticality_data_client');
 
@@ -43,20 +44,21 @@ describe('AssetCriticalityEcsMigrationClient', () => {
   });
 
   describe('isEcsMappingsMigrationRequired', () => {
-    it('should return true if any index mappings do not have asset property', async () => {
+    it('should return true if versions are different', async () => {
       assetCriticalityDataClient.getIndexMappings.mockResolvedValue({
         index1: { mappings: { properties: {} } },
-        index2: { mappings: { properties: { asset: {} } } },
+        index2: { mappings: { properties: {}, _meta: { version: '9999' } } },
       });
 
       const result = await migrationClient.isEcsMappingsMigrationRequired();
       expect(result).toBe(true);
     });
 
-    it('should return false if all index mappings have asset property', async () => {
+    it('should return false if versions are equal', async () => {
       assetCriticalityDataClient.getIndexMappings.mockResolvedValue({
-        index1: { mappings: { properties: { asset: {} } } },
-        index2: { mappings: { properties: { asset: {} } } },
+        index1: {
+          mappings: { properties: {}, _meta: { version: ASSET_CRITICALITY_MAPPINGS_VERSIONS } },
+        },
       });
 
       const result = await migrationClient.isEcsMappingsMigrationRequired();

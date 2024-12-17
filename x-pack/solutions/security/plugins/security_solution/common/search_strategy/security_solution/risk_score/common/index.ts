@@ -8,11 +8,10 @@
 import type { ESQuery } from '../../../../typed_json';
 import { RISKY_HOSTS_INDEX_PREFIX, RISKY_USERS_INDEX_PREFIX } from '../../../../constants';
 import {
-  RiskScoreEntity,
+  RiskScoreEntityType,
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,
 } from '../../../../entity_analytics/risk_engine';
-export { RiskQueries } from '../../../../api/search_strategy';
 
 /**
  * Make sure this aligns with the index in step 6, 9 in
@@ -52,11 +51,11 @@ export const buildUserNamesFilter = (userNames: string[]) => {
 
 export const buildEntityNameFilter = (
   entityNames: string[],
-  riskEntity: RiskScoreEntity
+  riskEntity: RiskScoreEntityType
 ): ESQuery => {
-  return riskEntity === RiskScoreEntity.host
+  return riskEntity === RiskScoreEntityType.host
     ? { terms: { 'host.name': entityNames } }
     : { terms: { 'user.name': entityNames } };
 };
 
-export { RiskScoreEntity };
+export { RiskScoreEntityType };

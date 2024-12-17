@@ -42,7 +42,7 @@ import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { UsersKpiComponent } from '../components/kpi_users';
-import { LastEventIndexKey, RiskScoreEntity } from '../../../../common/search_strategy';
+import { LastEventIndexKey, RiskScoreEntityType } from '../../../../common/search_strategy';
 import { generateSeverityFilter } from '../../hosts/store/helpers';
 import { UsersTableType } from '../store/model';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
@@ -91,7 +91,7 @@ const UsersComponent = () => {
     }
 
     if (tabName === UsersTableType.risk) {
-      const severityFilter = generateSeverityFilter(severitySelection, RiskScoreEntity.user);
+      const severityFilter = generateSeverityFilter(severitySelection, RiskScoreEntityType.user);
 
       return [...severityFilter, ...globalFilters];
     }

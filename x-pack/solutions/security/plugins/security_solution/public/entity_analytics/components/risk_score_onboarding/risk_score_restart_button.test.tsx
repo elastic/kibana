@@ -7,7 +7,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import React from 'react';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/search_strategy';
 import { TestProviders } from '../../../common/mock';
 import { RiskScoreRestartButton } from './risk_score_restart_button';
 
@@ -49,51 +49,54 @@ describe('RiskScoreRestartButton', () => {
     jest.clearAllMocks();
     jest.useRealTimers();
   });
-  describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])('%s', (riskScoreEntity) => {
-    it('Renders expected children', () => {
-      render(
-        <TestProviders>
-          <RiskScoreRestartButton refetch={mockRefetch} riskScoreEntity={riskScoreEntity} />
-        </TestProviders>
-      );
+  describe.each([[RiskScoreEntityType.host], [RiskScoreEntityType.user]])(
+    '%s',
+    (riskScoreEntity) => {
+      it('Renders expected children', () => {
+        render(
+          <TestProviders>
+            <RiskScoreRestartButton refetch={mockRefetch} riskScoreEntity={riskScoreEntity} />
+          </TestProviders>
+        );
 
-      expect(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`)).toHaveTextContent(
-        'Restart'
-      );
-    });
-
-    it('calls restartRiskScoreTransforms with correct entity', async () => {
-      render(
-        <TestProviders>
-          <RiskScoreRestartButton refetch={mockRefetch} riskScoreEntity={riskScoreEntity} />
-        </TestProviders>
-      );
-
-      await user.click(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`));
-
-      await waitFor(() => {
-        expect(mockRestartRiskScoreTransforms).toHaveBeenCalled();
-        expect(mockRestartRiskScoreTransforms.mock.calls[0][0].riskScoreEntity).toEqual(
-          riskScoreEntity
+        expect(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`)).toHaveTextContent(
+          'Restart'
         );
       });
-    });
 
-    it('Update button state while installing', async () => {
-      render(
-        <TestProviders>
-          <RiskScoreRestartButton refetch={mockRefetch} riskScoreEntity={riskScoreEntity} />
-        </TestProviders>
-      );
-
-      await user.click(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`));
-
-      await waitFor(() => {
-        expect(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`)).toHaveProperty(
-          'disabled',
-          true
+      it('calls restartRiskScoreTransforms with correct entity', async () => {
+        render(
+          <TestProviders>
+            <RiskScoreRestartButton refetch={mockRefetch} riskScoreEntity={riskScoreEntity} />
+          </TestProviders>
         );
+
+        await user.click(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`));
+
+        await waitFor(() => {
+          expect(mockRestartRiskScoreTransforms).toHaveBeenCalled();
+          expect(mockRestartRiskScoreTransforms.mock.calls[0][0].riskScoreEntity).toEqual(
+            riskScoreEntity
+          );
+        });
       });
-    });
-  });
+
+      it('Update button state while installing', async () => {
+        render(
+          <TestProviders>
+            <RiskScoreRestartButton refetch={mockRefetch} riskScoreEntity={riskScoreEntity} />
+          </TestProviders>
+        );
+
+        await user.click(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`));
+
+        await waitFor(() => {
+          expect(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`)).toHaveProperty(
+            'disabled',
+            true
+          );
+        });
+      });
+    }
+  );
 });

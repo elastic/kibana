@@ -8,7 +8,7 @@ import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/ap
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import type { IdentifierType } from '../../../../common/entity_analytics/risk_engine';
 import {
-  RiskScoreEntity,
+  RiskScoreEntityType,
   riskScoreBaseIndexName,
 } from '../../../../common/entity_analytics/risk_engine';
 import type { IIndexPatternString } from '../utils/create_datastream';
@@ -114,7 +114,7 @@ export const riskScoreFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  ...buildIdentityRiskFields(RiskScoreEntity.host),
+  ...buildIdentityRiskFields(RiskScoreEntityType.host),
   'user.name': {
     type: 'keyword',
     array: false,
@@ -125,7 +125,18 @@ export const riskScoreFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  ...buildIdentityRiskFields(RiskScoreEntity.user),
+  ...buildIdentityRiskFields(RiskScoreEntityType.user),
+  'service.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.risk': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  ...buildIdentityRiskFields(RiskScoreEntityType.service),
 } as const;
 
 export const mappingComponentName = '.risk-score-mappings';
@@ -159,7 +170,7 @@ export const getTransformOptions = ({
   },
   latest: {
     sort: '@timestamp',
-    unique_key: [`host.name`, `user.name`],
+    unique_key: [`host.name`, `user.name`, `service.name`],
   },
   source: {
     index: source,
@@ -175,8 +186,7 @@ export const getTransformOptions = ({
     unattended: true, // In unattended mode, the transform retries indefinitely in case of an error
   },
   _meta: {
-    version: 2, // When this field is updated we automatically update the transform
-
+    version: 3, // When this field is updated we automatically update the transform
     managed: true, // Metadata that identifies the transform. It has no functionality
     managed_by: 'security-entity-analytics', // Metadata that identifies the transform. It has no functionality
   },
