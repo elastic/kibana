@@ -8,7 +8,6 @@
 import type { Observable } from 'rxjs';
 
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-browser';
-import type { UserProfileData } from '@kbn/core-user-profile-common';
 
 export type {
   GetUserProfileResponse,
@@ -18,13 +17,10 @@ export type {
 } from '@kbn/core-user-profile-browser';
 
 export type UserProfileAPIClient = CoreUserProfileDelegateContract & {
-  readonly userProfile$: Observable<UserProfileData | null>;
   /**
    * Indicates if the user profile data has been loaded from the server.
    * Useful to distinguish between the case when the user profile data is `null` because the HTTP
    * request has not finished or because there is no user profile data for the current user.
    */
   readonly userProfileLoaded$: Observable<boolean>;
-  /** Flag to indicate if the current user has a user profile. Anonymous users don't have user profiles. */
-  readonly enabled$: Observable<boolean>;
 };

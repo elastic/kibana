@@ -8,13 +8,14 @@
  */
 
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { SecurityServiceStart } from '@kbn/core-security-browser';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type {
-  GetFavoritesResponse as GetFavoritesResponseServer,
   AddFavoriteResponse,
+  GetFavoritesResponse as GetFavoritesResponseServer,
   RemoveFavoriteResponse,
 } from '@kbn/content-management-favorites-server';
+import { firstValueFrom } from 'rxjs';
 
 export interface GetFavoritesResponse<Metadata extends object | void = void>
   extends GetFavoritesResponseServer {
@@ -44,21 +45,13 @@ export class FavoritesClient<Metadata extends object | void = void>
     private readonly favoriteObjectType: string,
     private readonly deps: {
       http: HttpStart;
-      security: SecurityServiceStart;
+      userProfile: UserProfileServiceStart;
       usageCollection?: UsageCollectionStart;
     }
   ) {}
 
-  private isAvailableCached?: boolean;
   public async isAvailable(): Promise<boolean> {
-    if (typeof this.isAvailableCached === 'boolean') return this.isAvailableCached;
-
-    try {
-      const user = await this.deps.security.authc.getCurrentUser();
-      return (this.isAvailableCached = Boolean(user.profile_uid));
-    } catch (e) {
-      return (this.isAvailableCached = false);
-    }
+    return firstValueFrom(this.deps.userProfile.getEnabled$());
   }
 
   private async ifAvailablePreCheck() {

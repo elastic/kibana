@@ -17,6 +17,7 @@ import {
   QueryColumn,
   HistoryAndStarredQueriesTabs,
 } from './history_starred_queries';
+import { of } from 'rxjs';
 
 jest.mock('../history_local_storage', () => {
   const module = jest.requireActual('../history_local_storage');
@@ -278,9 +279,8 @@ describe('Starred and History queries components', () => {
     });
 
     it('should hide starred tab if starred service failed to initialize', async () => {
-      services.core.security.authc.getCurrentUser.mockResolvedValue(
-        securityServiceMock.createMockAuthenticatedUser({ profile_uid: undefined })
-      );
+      jest.spyOn(services.core.userProfile, 'getEnabled$').mockImplementation(() => of(false));
+
       render(
         <KibanaContextProvider services={services}>
           <HistoryAndStarredQueriesTabs

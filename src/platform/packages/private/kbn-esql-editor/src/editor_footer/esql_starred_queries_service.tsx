@@ -43,7 +43,7 @@ export interface StarredQueryItem extends QueryHistoryItem {
 
 interface EsqlStarredQueriesServices {
   http: CoreStart['http'];
-  security: CoreStart['security'];
+  userProfile: CoreStart['userProfile'];
   storage: Storage;
   usageCollection?: UsageCollectionStart;
 }
@@ -82,7 +82,7 @@ export class EsqlStarredQueriesService {
   static async initialize(services: EsqlStarredQueriesServices) {
     const client = new FavoritesClient<StarredQueryMetadata>('esql_editor', 'esql_query', {
       http: services.http,
-      security: services.security,
+      userProfile: services.userProfile,
       usageCollection: services.usageCollection,
     });
 

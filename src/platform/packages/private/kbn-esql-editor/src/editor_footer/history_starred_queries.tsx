@@ -470,16 +470,16 @@ export function HistoryAndStarredQueriesTabs({
   const kibana = useKibana<ESQLEditorDeps>();
   const { core, usageCollection, storage } = kibana.services;
 
-  const [starredQueriesService, setStarredQueriesService] = useState<EsqlStarredQueriesService>();
+  const [starredQueriesService, setStarredQueriesService] = useState<
+    EsqlStarredQueriesService | null | undefined
+  >();
   const [starredQueries, setStarredQueries] = useState<StarredQueryItem[]>([]);
-  const [starredQueriesServiceFailedToInitilize, setStarredQueriesServiceFailedToInitialize] =
-    useState(false);
 
   useEffect(() => {
     const initializeService = async () => {
       const starredService = await EsqlStarredQueriesService.initialize({
         http: core.http,
-        security: core.security,
+        userProfile: core.userProfile,
         usageCollection,
         storage,
       });
@@ -487,13 +487,13 @@ export function HistoryAndStarredQueriesTabs({
       if (starredService) {
         setStarredQueriesService(starredService);
       } else {
-        setStarredQueriesServiceFailedToInitialize(true);
+        setStarredQueriesService(null);
       }
     };
     if (!starredQueriesService) {
       initializeService();
     }
-  }, [core.http, core.security, starredQueriesService, storage, usageCollection]);
+  }, [core.http, core.userProfile, starredQueriesService, storage, usageCollection]);
 
   starredQueriesService?.queries$.subscribe((nextQueries) => {
     if (nextQueries.length !== starredQueries.length) {
@@ -525,11 +525,11 @@ export function HistoryAndStarredQueriesTabs({
             tableCaption={i18n.translate('esqlEditor.query.querieshistoryTable', {
               defaultMessage: 'Queries history table',
             })}
-            starredQueriesService={starredQueriesService}
+            starredQueriesService={starredQueriesService ?? undefined}
           />
         ),
       },
-      !starredQueriesServiceFailedToInitilize && {
+      starredQueriesService !== null && {
         id: 'starred-queries-tab',
         dataTestSubj: 'starred-queries-tab',
         name: i18n.translate('esqlEditor.query.starredQueriesTabLabel', {
@@ -551,7 +551,7 @@ export function HistoryAndStarredQueriesTabs({
             tableCaption={i18n.translate('esqlEditor.query.starredQueriesTable', {
               defaultMessage: 'Starred queries table',
             })}
-            starredQueriesService={starredQueriesService}
+            starredQueriesService={starredQueriesService ?? undefined}
             isStarredTab={true}
           />
         ),
@@ -564,7 +564,6 @@ export function HistoryAndStarredQueriesTabs({
     onUpdateAndSubmit,
     starredQueries,
     starredQueriesService,
-    starredQueriesServiceFailedToInitilize,
   ]);
 
   const [selectedTabId, setSelectedTabId] = useState('history-queries-tab');

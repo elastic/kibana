@@ -9,8 +9,8 @@
 
 import { EsqlStarredQueriesService } from './esql_starred_queries_service';
 import { coreMock } from '@kbn/core/public/mocks';
-import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 
 class LocalStorageMock {
   public store: Record<string, unknown>;
@@ -35,25 +35,24 @@ describe('EsqlStarredQueriesService', () => {
   const core = coreMock.createStart();
   const storage = new LocalStorageMock({}) as unknown as Storage;
 
+  const isUserProfileEnabled$ = new BehaviorSubject<boolean>(true);
+  jest.spyOn(core.userProfile, 'getEnabled$').mockImplementation(() => isUserProfileEnabled$);
+
   beforeEach(() => {
-    core.security.authc.getCurrentUser.mockResolvedValue(
-      securityServiceMock.createMockAuthenticatedUser()
-    );
+    isUserProfileEnabled$.next(true);
   });
 
   const initialize = async () => {
     const service = await EsqlStarredQueriesService.initialize({
       http: core.http,
-      security: core.security,
+      userProfile: core.userProfile,
       storage,
     });
     return service!;
   };
 
   it('should return null if favorites service not available', async () => {
-    core.security.authc.getCurrentUser.mockResolvedValue(
-      securityServiceMock.createMockAuthenticatedUser({ profile_uid: undefined })
-    );
+    isUserProfileEnabled$.next(false);
     const service = await initialize();
     expect(service).toBeNull();
   });

@@ -28,6 +28,7 @@ const createSetupMock = () => {
 const createStartMock = () => {
   const mock: jest.Mocked<UserProfileServiceStart> = {
     getUserProfile$: jest.fn().mockReturnValue(of(null)),
+    getEnabled$: jest.fn().mockReturnValue(of(false)),
     getCurrent: jest.fn(),
     bulkGet: jest.fn(),
     suggest: jest.fn(),
@@ -49,6 +50,7 @@ const createInternalSetupMock = () => {
 const createInternalStartMock = () => {
   const mock: jest.Mocked<InternalUserProfileServiceStart> = {
     getUserProfile$: jest.fn().mockReturnValue(of(null)),
+    getEnabled$: jest.fn().mockReturnValue(of(false)),
     getCurrent: jest.fn(),
     bulkGet: jest.fn(),
     suggest: jest.fn(),
