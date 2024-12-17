@@ -82,7 +82,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     const objectRemover = new ObjectRemover(supertest);
     let connectorId: string;
     const transformId = 'test_transform_01';
-    const destinationIndex = generateDestIndex(transformId);
 
     beforeEach(async () => {
       await esTestIndexTool.destroy();
@@ -98,8 +97,11 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
       connectorId = await createConnector();
 
-      await transform.api.createIndices(destinationIndex);
       await createTransform(transformId);
+
+      // Create additional transforms to exclude from the rule
+      await createTransform('exclude_transform_01');
+      await createTransform('exclude_transform_02');
     });
 
     afterEach(async () => {
@@ -112,10 +114,12 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
     it('runs correctly', async () => {
       await stopTransform(transformId);
+      await stopTransform('exclude_transform_01');
 
       const ruleId = await createRule({
         name: 'Test all transforms',
         includeTransforms: ['*'],
+        excludeTransforms: ['exclude_transform_*'],
       });
 
       log.debug('Checking created alerts...');
@@ -160,6 +164,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     }
 
     async function createTransform(id: string) {
+      const destinationIndex = generateDestIndex(id);
+      await transform.api.createIndices(destinationIndex);
       const config = generateTransformConfig(id);
       await transform.api.createAndRunTransform(id, config);
     }
@@ -183,20 +189,20 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         },
       };
 
+      const { name, ...transformHealthRuleParams } = params;
+
       const { status, body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: params.name,
+          name,
           consumer: 'alerts',
           enabled: true,
           rule_type_id: RULE_TYPE_ID,
           schedule: { interval: '1d' },
           actions: [action],
           notify_when: 'onActiveAlert',
-          params: {
-            includeTransforms: params.includeTransforms,
-          },
+          params: transformHealthRuleParams,
         });
 
       // will print the error body, if an error occurred
