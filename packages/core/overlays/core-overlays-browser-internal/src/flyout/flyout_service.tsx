@@ -9,6 +9,7 @@
 
 /* eslint-disable max-classes-per-file */
 
+import { css } from '@emotion/react';
 import { EuiFlyout, EuiFlyoutResizable } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -128,6 +129,15 @@ export class FlyoutService {
           );
         };
 
+        const overlayMountWrapperStyle = css({
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          overflow: 'hidden',
+        });
+
+        // NOTE: The kbnOverlayMountWrapper className is used for allowing consumers to add additional styles
+        // that support drag-and-drop (padding, pointer styles). It is not used for internal styling.
         render(
           <KibanaRenderContextProvider
             analytics={analytics}
@@ -135,7 +145,13 @@ export class FlyoutService {
             theme={theme}
             userProfile={userProfile}
           >
-            {getWrapper(<MountWrapper mount={mount} className="kbnOverlayMountWrapper" />)}
+            {getWrapper(
+              <MountWrapper
+                mount={mount}
+                css={overlayMountWrapperStyle}
+                className="kbnOverlayMountWrapper"
+              />
+            )}
           </KibanaRenderContextProvider>,
           this.targetDomElement
         );
