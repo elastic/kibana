@@ -102,13 +102,14 @@ export const Notes = memo(() => {
   }, [addErrorToast, fetchError, fetchStatus]);
 
   const cannotAddNotes = isNotesDisabled || !notesPrivileges.crud;
+  const cannotReadNotes = isNotesDisabled || !notesPrivileges.read;
 
   const viewNotesButton = useMemo(
     () => (
       <EuiButtonEmpty
         onClick={openExpandedFlyoutNotesTab}
         size="s"
-        disabled={cannotAddNotes}
+        disabled={cannotReadNotes}
         aria-label={VIEW_NOTES_BUTTON_ARIA_LABEL}
         data-test-subj={NOTES_VIEW_NOTES_BUTTON_TEST_ID}
       >
@@ -119,7 +120,7 @@ export const Notes = memo(() => {
         />
       </EuiButtonEmpty>
     ),
-    [cannotAddNotes, notes.length, openExpandedFlyoutNotesTab]
+    [cannotReadNotes, notes.length, openExpandedFlyoutNotesTab]
   );
   const addNoteButton = useMemo(
     () => (

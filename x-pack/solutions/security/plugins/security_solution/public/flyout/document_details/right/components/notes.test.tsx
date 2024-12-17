@@ -280,7 +280,7 @@ describe('<Notes />', () => {
 
   it('should show View note button if user does not have the correct privileges but notes have already been created', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
-      notesPrivileges: { crud: false },
+      notesPrivileges: { crud: false, read: true },
     });
 
     const contextValue = {
