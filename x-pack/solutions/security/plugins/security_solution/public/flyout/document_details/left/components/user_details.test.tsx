@@ -16,7 +16,6 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { mockAnomalies } from '../../../../common/components/ml/mock';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useUserRelatedHosts } from '../../../../common/containers/related_entities/related_hosts';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import {
   USER_DETAILS_TEST_ID,
@@ -42,9 +41,6 @@ import { useAlertsByStatus } from '../../../../overview/components/detection_res
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
-
-jest.mock('../../../../common/hooks/use_experimental_features');
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -174,19 +170,17 @@ describe('<UserDetails />', () => {
     mockUseObservedUserDetails.mockReturnValue(mockUserDetailsResponse);
     mockUseRiskScore.mockReturnValue(mockRiskScoreResponse);
     mockUseUsersRelatedHosts.mockReturnValue(mockRelatedHostsResponse);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
     (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
   });
 
   it('should render user details correctly', () => {
-    const { getByTestId, queryByTestId } = renderUserDetails(mockContextValue);
+    const { getByTestId } = renderUserDetails(mockContextValue);
     expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(USER_DETAILS_TEST_ID))).toBeInTheDocument();
-    expect(queryByTestId(USER_DETAILS_LINK_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(USER_DETAILS_LINK_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render user name as clicable link when feature flag is true', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+  it('should render user name as clicable link', () => {
     const { getByTestId } = renderUserDetails(mockContextValue);
     expect(getByTestId(USER_DETAILS_LINK_TEST_ID)).toBeInTheDocument();
 
@@ -233,7 +227,7 @@ describe('<UserDetails />', () => {
 
   describe('Related hosts', () => {
     it('should render the related host table with correct dates and indices', () => {
-      const { getByTestId, queryByTestId } = renderUserDetails(mockContextValue);
+      const { getByTestId } = renderUserDetails(mockContextValue);
       expect(mockUseUsersRelatedHosts).toBeCalledWith({
         from: timestamp,
         userName: 'test user',
@@ -241,7 +235,7 @@ describe('<UserDetails />', () => {
         skip: false,
       });
       expect(getByTestId(USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID)).toBeInTheDocument();
-      expect(queryByTestId(USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID)).not.toBeInTheDocument();
+      expect(getByTestId(USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID)).toBeInTheDocument();
     });
 
     it('should render host risk score column when license is valid', () => {
@@ -274,8 +268,7 @@ describe('<UserDetails />', () => {
       );
     });
 
-    it('should render host name and ip as clicable link when preview is enabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    it('should render host name and ip as clicable link', () => {
       const { getAllByTestId } = renderUserDetails(mockContextValue);
       expect(getAllByTestId(USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID).length).toBe(1);
 
