@@ -33,6 +33,7 @@ exports[`renders matching snapshot 1`] = `
     Object {
       "bulkGet": [MockFunction],
       "getCurrent": [MockFunction],
+      "getEnabled$": [MockFunction],
       "getUserProfile$": [MockFunction],
       "partialUpdate": [MockFunction],
       "suggest": [MockFunction],
