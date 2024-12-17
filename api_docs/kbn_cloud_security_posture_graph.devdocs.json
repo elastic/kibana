@@ -25,7 +25,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +45,7 @@
                 "text": "GraphProps"
               }
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -68,7 +68,7 @@
         "signature": [
           "React.FunctionComponent<GraphInvestigationProps>"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph_investigation/graph_investigation.tsx",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph_investigation/graph_investigation.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -116,7 +116,7 @@
           "GraphPopoverProps",
           ") => React.JSX.Element | null"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph_popover.tsx",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph_popover.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -130,7 +130,7 @@
             "signature": [
               "GraphPopoverProps"
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph_popover.tsx",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph_popover.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -154,7 +154,7 @@
           ") => ",
           "UseFetchGraphDataResult"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/hooks/use_fetch_graph_data.ts",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/hooks/use_fetch_graph_data.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -168,7 +168,7 @@
             "signature": [
               "UseFetchGraphDataParams"
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/hooks/use_fetch_graph_data.ts",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/hooks/use_fetch_graph_data.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -190,7 +190,7 @@
           "(id: string) => ",
           "GraphPopoverState"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/use_graph_popover.tsx",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/use_graph_popover.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -204,7 +204,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/use_graph_popover.tsx",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/use_graph_popover.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -232,7 +232,7 @@
           },
           " extends Record<string, unknown>,Readonly<{} & { source: string; id: string; color: \"warning\" | \"primary\" | \"danger\"; target: string; }>"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -255,7 +255,7 @@
           },
           " extends Record<string, unknown>,Readonly<{ label?: string | undefined; icon?: string | undefined; } & { id: string; shape: \"ellipse\" | \"rectangle\" | \"hexagon\" | \"pentagon\" | \"diamond\"; color: \"warning\" | \"primary\" | \"danger\"; }>,BaseNodeDataViewModel"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -270,7 +270,7 @@
               "ExpandButtonClickCallback",
               " | undefined"
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -285,7 +285,7 @@
               "NodeClickCallback",
               " | undefined"
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -310,7 +310,7 @@
           " extends ",
           "CommonProps"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -333,7 +333,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -356,7 +356,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -369,7 +369,7 @@
             "description": [
               "\nDetermines whether the graph is interactive (allows panning, zooming, etc.).\nWhen set to false, the graph is locked and user interactions are disabled, effectively putting it in view-only mode."
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -385,7 +385,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -409,7 +409,7 @@
           },
           " extends Record<string, unknown>,Readonly<{ label?: string | undefined; icon?: string | undefined; } & { id: string; shape: \"group\"; }>,BaseNodeDataViewModel"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -432,7 +432,7 @@
           },
           " extends Record<string, unknown>,Readonly<{ label?: string | undefined; icon?: string | undefined; parentId?: string | undefined; } & { id: string; shape: \"label\"; color: \"warning\" | \"primary\" | \"danger\"; }>,BaseNodeDataViewModel"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -447,7 +447,7 @@
               "ExpandButtonClickCallback",
               " | undefined"
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -487,7 +487,7 @@
           },
           ", string>, \"type\" | \"zIndex\" | \"dragging\">> & { isConnectable: boolean; positionAbsoluteX: number; positionAbsoluteY: number; }"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -524,7 +524,7 @@
             "text": "LabelNodeViewModel"
           }
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

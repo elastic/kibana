@@ -7,15 +7,9 @@
 
 import React, { FunctionComponent } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  EuiTextColor,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { Index } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
 import { OverviewCard } from './overview_card';
@@ -24,7 +18,6 @@ export const SizeDocCountDetails: FunctionComponent<{
   size: Index['size'];
   documents: Index['documents'];
 }> = ({ size, documents }) => {
-  const { euiTheme } = useEuiTheme();
   const { config } = useAppContext();
   if (!config.enableSizeAndDocCount) {
     return null;
@@ -41,7 +34,7 @@ export const SizeDocCountDetails: FunctionComponent<{
             <EuiFlexItem grow={false}>
               <EuiText
                 css={css`
-                  font-size: ${euiTheme.font.scale.l};
+                  font-size: ${euiThemeVars.euiFontSizeL};
                 `}
               >
                 {size}

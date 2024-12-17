@@ -16,7 +16,6 @@ import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-import { DashboardContainerInput } from '../../../common';
 import type { DashboardSearchOut } from '../../../server/content_management';
 import {
   DASHBOARD_CONTENT_ID,
@@ -35,6 +34,7 @@ import {
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 import { DashboardSavedObjectUserContent } from '../types';
+import { UpdateDashboardMetaProps } from '../../services/dashboard_content_management_service/lib/update_dashboard_meta';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];
@@ -130,7 +130,7 @@ export const useDashboardListingTable = ({
   }, [dashboardBackupService, goToDashboard, useSessionStorageIntegration]);
 
   const updateItemMeta = useCallback(
-    async (props: Pick<DashboardContainerInput, 'id' | 'title' | 'description' | 'tags'>) => {
+    async (props: UpdateDashboardMetaProps) => {
       await dashboardContentManagementService.updateDashboardMeta(props);
 
       setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());

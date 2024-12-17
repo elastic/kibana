@@ -44,7 +44,7 @@ export const IGNORE_FILE_GLOBS = [
   'packages/kbn-test/jest-preset.js',
   'packages/kbn-test/*/jest-preset.js',
   'test/package/Vagrantfile',
-  'x-pack/plugins/security_solution/scripts/endpoint/common/vagrant/Vagrantfile',
+  'x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/vagrant/Vagrantfile',
   '**/test/**/fixtures/**/*',
   'packages/kbn-router-to-openapispec/openapi-types.d.ts',
 

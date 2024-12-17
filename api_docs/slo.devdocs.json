@@ -11,7 +11,7 @@
         "tags": [],
         "label": "SLOPublicPluginsSetup",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+        "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -31,7 +31,7 @@
                 "text": "DataPublicPluginSetup"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -51,7 +51,7 @@
                 "text": "EmbeddableSetup"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -71,7 +71,7 @@
                 "text": "LicensingPluginSetup"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -161,7 +161,7 @@
               },
               "; }"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -182,7 +182,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -206,7 +206,7 @@
               },
               "[]>) => void; }; }"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -226,7 +226,7 @@
                 "text": "PresentationUtilPluginStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -247,7 +247,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -295,7 +295,7 @@
               },
               ") => void; }"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -315,7 +315,7 @@
                 "text": "TriggersAndActionsUIPublicPluginSetup"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -361,7 +361,7 @@
               },
               "<any>) => void; }"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -381,7 +381,7 @@
                 "text": "UsageCollectionSetup"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -402,7 +402,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -416,7 +416,7 @@
         "tags": [],
         "label": "SLOPublicPluginsStart",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+        "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -436,7 +436,7 @@
                 "text": "AiopsPluginStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -456,7 +456,7 @@
                 "text": "CasesPublicStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -479,7 +479,7 @@
               "ActiveCursor",
               "; }"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -500,7 +500,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -520,7 +520,7 @@
                 "text": "DashboardStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -540,7 +540,7 @@
                 "text": "DataPublicPluginStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -560,7 +560,7 @@
                 "text": "PluginStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -580,7 +580,7 @@
                 "text": "PluginStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -600,7 +600,7 @@
                 "text": "DataViewsServicePublic"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -621,7 +621,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -641,7 +641,7 @@
                 "text": "DiscoverSharedPublicStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -661,7 +661,7 @@
                 "text": "EmbeddableStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -682,7 +682,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -712,7 +712,7 @@
               },
               "; }"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -732,7 +732,7 @@
                 "text": "LensPublicStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -752,7 +752,7 @@
                 "text": "LicensingPluginStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -800,7 +800,7 @@
               "LinkProps",
               "; }"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -821,7 +821,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -865,7 +865,7 @@
               },
               ">; }) => void; }"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -885,7 +885,7 @@
                 "text": "PresentationUtilPluginStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -906,7 +906,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -946,7 +946,7 @@
               },
               ">): void; }"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -967,7 +967,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -987,7 +987,7 @@
                 "text": "TriggersAndActionsUIPublicPluginStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1075,7 +1075,7 @@
               },
               "; }"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1095,7 +1095,7 @@
                 "text": "UnifiedSearchPublicPluginStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1115,7 +1115,7 @@
                 "text": "UsageCollectionStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1136,7 +1136,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1165,7 +1165,7 @@
         },
         "<{ name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.synthetics.availability\"; params: { monitorIds: { value: string; label: string; }[]; index: string; } & { tags?: { value: string; label: string; }[] | undefined; projects?: { value: string; label: string; }[] | undefined; filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; }; total: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }); } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; } & { id?: string | undefined; settings?: { syncDelay?: string | undefined; frequency?: string | undefined; preventInitialBackfill?: boolean | undefined; syncField?: string | null | undefined; } | undefined; tags?: string[] | undefined; groupBy?: string | string[] | undefined; revision?: number | undefined; }> | undefined; }>; }"
       ],
-      "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+      "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -1211,7 +1211,7 @@
         "SloListLocatorParams",
         ">; }"
       ],
-      "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+      "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -1229,7 +1229,7 @@
         "tags": [],
         "label": "SloClient",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/slo/server/client/index.ts",
+        "path": "x-pack/solutions/observability/plugins/slo/server/client/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1243,7 +1243,7 @@
             "signature": [
               "() => Promise<string[]>"
             ],
-            "path": "x-pack/plugins/observability_solution/slo/server/client/index.ts",
+            "path": "x-pack/solutions/observability/plugins/slo/server/client/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1263,7 +1263,7 @@
       "tags": [],
       "label": "SLOServerSetup",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/slo/server/types.ts",
+      "path": "x-pack/solutions/observability/plugins/slo/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1277,7 +1277,7 @@
       "tags": [],
       "label": "SLOServerStart",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/slo/server/types.ts",
+      "path": "x-pack/solutions/observability/plugins/slo/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1306,7 +1306,7 @@
               "text": "SloClient"
             }
           ],
-          "path": "x-pack/plugins/observability_solution/slo/server/types.ts",
+          "path": "x-pack/solutions/observability/plugins/slo/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1327,7 +1327,7 @@
                 },
                 "<unknown, unknown, unknown, any>"
               ],
-              "path": "x-pack/plugins/observability_solution/slo/server/types.ts",
+              "path": "x-pack/solutions/observability/plugins/slo/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1356,7 +1356,7 @@
         "signature": [
           "\"SLOs\""
         ],
-        "path": "x-pack/plugins/observability_solution/slo/common/index.ts",
+        "path": "x-pack/solutions/observability/plugins/slo/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1371,7 +1371,7 @@
         "signature": [
           "\"slo\""
         ],
-        "path": "x-pack/plugins/observability_solution/slo/common/index.ts",
+        "path": "x-pack/solutions/observability/plugins/slo/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1388,7 +1388,7 @@
         "signature": [
           "{ slos: string; slosSettings: string; slosWelcome: string; slosOutdatedDefinitions: string; sloCreate: string; sloCreateWithEncodedForm: (encodedParams: string) => string; sloEdit: (sloId: string) => string; sloEditWithEncodedForm: (sloId: string, encodedParams: string) => string; sloDetails: (sloId: string, instanceId?: string | undefined, remoteName?: string | undefined, tabId?: string | undefined) => string; }"
         ],
-        "path": "x-pack/plugins/observability_solution/slo/common/index.ts",
+        "path": "x-pack/solutions/observability/plugins/slo/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

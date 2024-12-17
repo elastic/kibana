@@ -13,13 +13,26 @@ export const BASE_FOLDER = process.cwd() + '/';
 export const BASE_FOLDER_DEPTH = process.cwd().split('/').length;
 export const KIBANA_FOLDER = process.cwd().split('/').pop()!;
 export const EXCLUDED_MODULES = ['@kbn/core'];
-export const TARGET_FOLDERS = [
-  'src/platform/plugins/',
-  'src/platform/packages/',
-  'x-pack/platform/plugins/',
-  'x-pack/platform/packages/',
-  'x-pack/solutions/',
-];
+export const TARGET_FOLDERS: Record<string, string[]> = {
+  'platform:private': [
+    'src/platform/packages/private/',
+    'src/platform/plugins/private/',
+    'x-pack/platform/packages/private/',
+    'x-pack/platform/plugins/private/',
+  ],
+  'platform:shared': [
+    'src/platform/packages/shared/',
+    'src/platform/plugins/shared/',
+    'x-pack/platform/packages/shared/',
+    'x-pack/platform/plugins/shared/',
+  ],
+  'observability:private': [
+    'x-pack/solutions/observability/packages/',
+    'x-pack/solutions/observability/plugins/',
+  ],
+  'search:private': ['x-pack/solutions/search/packages/', 'x-pack/solutions/search/plugins/'],
+  'security:private': ['x-pack/solutions/security/packages/', 'x-pack/solutions/security/plugins/'],
+};
 export const EXTENSIONS = [
   'eslintignore',
   'gitignore',

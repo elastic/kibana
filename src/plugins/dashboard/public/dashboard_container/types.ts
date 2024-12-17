@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContainerOutput } from '@kbn/embeddable-plugin/public';
 import { SerializableRecord } from '@kbn/utility-types';
 
 import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import type { DashboardContainerInput } from '../../common';
-import type { DashboardOptions, DashboardPanel } from '../../server/content_management';
+import type { DashboardPanel } from '../../server/content_management';
 
 export interface UnsavedPanelState {
   [key: string]: object | undefined;
@@ -23,13 +22,6 @@ export type RedirectToProps =
   | { destination: 'dashboard'; id?: string; useReplace?: boolean; editMode?: boolean }
   | { destination: 'listing'; filter?: string; useReplace?: boolean };
 
-export type DashboardStateFromSaveModal = Pick<
-  DashboardContainerInput,
-  'title' | 'description' | 'tags' | 'timeRestore'
->;
-
-export type DashboardStateFromSettingsFlyout = DashboardStateFromSaveModal & DashboardOptions;
-
 export type DashboardLoadType =
   | 'sessionFirstLoad'
   | 'dashboardFirstLoad'
@@ -39,12 +31,6 @@ export interface DashboardRenderPerformanceStats {
   lastTimeToData: number;
   panelsRenderDoneTime: number;
   panelsRenderStartTime: number;
-}
-
-export type DashboardContainerInputWithoutId = Omit<DashboardContainerInput, 'id'>;
-
-export interface DashboardContainerOutput extends ContainerOutput {
-  usedDataViewIds?: string[];
 }
 
 export type DashboardLoadedEventStatus = 'done' | 'error';

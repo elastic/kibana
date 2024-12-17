@@ -91,7 +91,7 @@ export interface SelectedPromptContext {
  * initializing it. This is used to provide 'category' options when users create Quick Prompts.
  * Also, useful for collating all of a solutions' prompts in one place.
  *
- * e.g. see Security Solution's x-pack/plugins/security_solution/public/assistant/prompt_contexts/index.tsx
+ * e.g. see Security Solution's x-pack/solutions/security/plugins/security_solution/public/assistant/prompt_contexts/index.tsx
  */
 export type PromptContextTemplate = Omit<PromptContext, 'id' | 'getPromptContext'>;
 

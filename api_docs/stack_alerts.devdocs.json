@@ -13,7 +13,7 @@
         "signature": [
           "({ dependencies: { dataViews, dataViewEditor }, metadata, dataView, onSelectDataView, onChangeMetaData, }: ",
           "DataViewSelectPopoverProps",
-          ") => React.JSX.Element | null"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx",
         "deprecated": false,
