@@ -19,6 +19,7 @@ cytoscape.use(dagre);
 
 const euiTheme = {
   size: { avatarSizing: { l: { size: 10 } } },
+  animation: { normal: '1s' },
 } as unknown as EuiThemeComputed;
 
 describe('useCytoscapeEventHandlers', () => {
