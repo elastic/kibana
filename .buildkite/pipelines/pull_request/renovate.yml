@@ -1,3 +1,5 @@
+env:
+  DISABLE_CI_STATS_SHIPPING: 'true'
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
