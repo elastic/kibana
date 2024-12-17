@@ -14,15 +14,53 @@ export const javaDefinition: LanguageDefinition = {
   iconType: 'java.svg',
   github: {
     label: i18n.translate('xpack.serverlessSearch.languages.java.githubLabel', {
-      defaultMessage: 'elasticsearch-java-serverless',
+      defaultMessage: 'elasticsearch-java/java-client-serverless',
     }),
     link: 'https://github.com/elastic/elasticsearch-java/tree/main/java-client-serverless',
   },
   // Code Snippets,
-  installClient: `dependencies {
+  installClient: `// Gradle dependencies
+// In the preview phase, artifacts are hosted on GitHub
+// See https://ela.st/github-gradle-registry
+repositories {
+    maven {
+        name = "GitHubElasticsearchJava"
+        url = uri("https://maven.pkg.github.com/elastic/elasticsearch-java")
+
+        credentials(PasswordCredentials::class)
+    }
+}
+
+dependencies {
     implementation 'co.elastic.clients:elasticsearch-java-serverless:1.0.0-20231031'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
-}`,
+}
+
+// Maven dependencies
+// In the preview phase, artifacts are hosted on GitHub
+// See https://ela.st/github-maven-registry
+<project>
+  <repositories>
+    <repository>
+      <id>GitHubElasticsearchJava</id>
+      <url>https://maven.pkg.github.com/elastic/elasticsearch-java</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>co.elastic.clients</groupId>
+      <artifactId>elasticsearch-java-serverless</artifactId>
+      <version>1.0.0-20231031</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.12.3</version>
+    </dependency>
+  </dependencies>
+</project>
+`,
   configureClient: ({ apiKey, url }) => `// URL and API key
 String serverUrl = "${url}";
 String apiKey = "${apiKey}";
