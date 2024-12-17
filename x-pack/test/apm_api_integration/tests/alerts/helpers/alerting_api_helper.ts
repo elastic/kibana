@@ -10,7 +10,11 @@ import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import pRetry from 'p-retry';
 import type { Agent as SuperTestAgent } from 'supertest';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
+import { TransactionDurationRuleTypeParams } from '@kbn/response-ops-rule-params/transaction_duration';
+import { ErrorCountRuleTypeParams } from '@kbn/response-ops-rule-params/error_count';
+import { ApmAnomalyRuleTypeParams } from '@kbn/response-ops-rule-params/apm_anomaly';
+import { TransactionErrorRateRuleTypeParams } from '@kbn/response-ops-rule-params/transaction_error_rate';
+
 import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import {
   APM_ACTION_VARIABLE_INDEX,
@@ -27,7 +31,11 @@ export async function createApmRule<T extends ApmRuleType>({
   supertest: SuperTestAgent;
   ruleTypeId: T;
   name: string;
-  params: ApmRuleParamsType[T];
+  params:
+    | TransactionDurationRuleTypeParams
+    | ErrorCountRuleTypeParams
+    | ApmAnomalyRuleTypeParams
+    | TransactionErrorRateRuleTypeParams;
   actions?: any[];
 }) {
   try {

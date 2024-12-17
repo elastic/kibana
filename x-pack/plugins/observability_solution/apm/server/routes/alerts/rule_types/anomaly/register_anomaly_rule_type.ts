@@ -35,6 +35,10 @@ import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { compact } from 'lodash';
+import {
+  apmAnomalyParamsSchema,
+  ApmAnomalyRuleTypeParams,
+} from '@kbn/response-ops-rule-params/apm_anomaly';
 import { getSeverity } from '../../../../../common/anomaly_detection';
 import {
   PROCESSOR_EVENT,
@@ -62,7 +66,6 @@ import {
   RegisterRuleDependencies,
 } from '../../register_apm_rule_types';
 import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
-import { anomalyParamsSchema, ApmRuleParamsType } from '../../../../../common/rules/schema';
 import {
   getAnomalyDetectorIndex,
   getAnomalyDetectorType,
@@ -70,7 +73,6 @@ import {
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 
-type AnomalyRuleTypeParams = ApmRuleParamsType[ApmRuleType.Anomaly];
 type AnomalyActionGroups = ActionGroupIdsOf<typeof THRESHOLD_MET_GROUP>;
 type AnomalyRuleTypeState = RuleTypeState;
 type AnomalyAlertState = AlertState;
@@ -95,11 +97,11 @@ export function registerAnomalyRuleType({
     name: ruleTypeConfig.name,
     actionGroups: ruleTypeConfig.actionGroups,
     defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
-    validate: { params: anomalyParamsSchema },
+    validate: { params: apmAnomalyParamsSchema },
     schemas: {
       params: {
         type: 'config-schema',
-        schema: anomalyParamsSchema,
+        schema: apmAnomalyParamsSchema,
       },
     },
     actionVariables: {
@@ -120,7 +122,7 @@ export function registerAnomalyRuleType({
     isExportable: true,
     executor: async (
       options: RuleExecutorOptions<
-        AnomalyRuleTypeParams,
+        ApmAnomalyRuleTypeParams,
         AnomalyRuleTypeState,
         AnomalyAlertState,
         AnomalyAlertContext,
