@@ -15,6 +15,7 @@ const settingsDefaults = {
   'pipeline.workers': null, // Defaults to number of CPU cores
   'pipeline.batch.size': 125,
   'pipeline.batch.delay': 50,
+  'pipeline.ecs_compatibility': null, // Defaults to LS-core setting
   'queue.type': 'memory',
   'queue.max_bytes.number': 1,
   'queue.max_bytes.units': 'gb',
