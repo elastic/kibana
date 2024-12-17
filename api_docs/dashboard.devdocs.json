@@ -1075,7 +1075,7 @@
             "text": "PublishingSubject"
           },
           "<string | undefined>; forceRefresh: () => void; getSettings: () => ",
-          "DashboardStateFromSettingsFlyout",
+          "DashboardSettings",
           "; getDashboardPanelFromId: (id: string) => ",
           {
             "pluginId": "dashboard",
@@ -1183,7 +1183,7 @@
             "text": "Query"
           },
           " | undefined) => void; setScrollToPanelId: (id: string | undefined) => void; setSettings: (settings: ",
-          "DashboardStateFromSettingsFlyout",
+          "DashboardSettings",
           ") => void; setTags: (tags: string[]) => void; setTimeRange: (timeRange?: ",
           {
             "pluginId": "@kbn/es-query",

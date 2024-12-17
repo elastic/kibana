@@ -770,10 +770,9 @@ export const runActionTestSuite = ({
     });
   });
 
-  // Reindex doesn't return any errors on it's own, so we have to test
+  // Reindex doesn't return any errors on its own, so we have to test
   // together with waitForReindexTask
-  // Failing: See https://github.com/elastic/kibana/issues/166190
-  describe.skip('reindex & waitForReindexTask', () => {
+  describe('reindex & waitForReindexTask', () => {
     it('resolves right when reindex succeeds without reindex script', async () => {
       const res = (await reindex({
         client,
@@ -1444,8 +1443,7 @@ export const runActionTestSuite = ({
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/166199
-  describe.skip('waitForPickupUpdatedMappingsTask', () => {
+  describe('waitForPickupUpdatedMappingsTask', () => {
     it('rejects if there are failures', async () => {
       const res = (await pickupUpdatedMappings(
         client,
