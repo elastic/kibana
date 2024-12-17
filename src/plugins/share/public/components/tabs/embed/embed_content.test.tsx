@@ -20,7 +20,6 @@ describe('Share modal embed content tab', () => {
       component = mountWithIntl(
         <EmbedContent
           objectType="dashboard"
-          setIsNotSaved={() => jest.fn()}
           shareableUrl="/home#/"
         />
       );
