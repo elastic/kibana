@@ -262,7 +262,7 @@ describe('take action dropdown', () => {
         </TestProviders>
       );
       wrapper
-        .find(`button[data-test-subj="${FLYOUT_FOOTER_DEOPDOEN_BUTTON_TEST_ID}"]`)
+        .find(`button[data-test-subj="${FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID}"]`)
         .simulate('click');
 
       await waitFor(() => {
