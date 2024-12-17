@@ -67,17 +67,24 @@ export class HorizontalLegend extends React.Component<Props> {
     this.createSeries = this.createSeries.bind(this);
   }
 
+  /**
+   * @param {Number} value Final value to display
+   */
   displayValue(value: number) {
     return <span css={legendValueStyle}>{value}</span>;
   }
 
+  /**
+   * @param {Number} value True if value is falsy and/or not a number
+   */
   validValue(value: number) {
     return value !== null && value !== undefined && (typeof value === 'string' || !isNaN(value));
   }
 
   /**
-   * `value` will be shown in the horizontal legend
-   * A `null` means no data for the time bucket and will be formatted as `N/A`
+   * @param {Number} value The value to format and show in the horizontallegend.
+   * A null means no data for the time bucket and will be formatted as 'N/A'
+   * @param {Object} row Props passed form a parent by row index
    */
   formatter(value: number, row: Row) {
     if (!this.validValue(value)) {
