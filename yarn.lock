@@ -7211,7 +7211,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-security-settings@link:packages/serverless/settings/security_project":
+"@kbn/serverless-security-settings@link:src/platform/packages/shared/serverless/settings/security_project":
   version "0.0.0"
   uid ""
 

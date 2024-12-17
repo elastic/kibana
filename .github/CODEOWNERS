@@ -855,7 +855,7 @@ packages/serverless/settings/observability_project @elastic/appex-sharedux @elas
 packages/serverless/project_switcher @elastic/appex-sharedux
 x-pack/plugins/serverless_search @elastic/search-kibana
 packages/serverless/settings/search_project @elastic/search-kibana @elastic/kibana-management
-packages/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
+src/platform/packages/shared/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
 packages/serverless/storybook/config @elastic/appex-sharedux
 packages/serverless/types @elastic/appex-sharedux
 test/plugin_functional/plugins/session_notifications @elastic/kibana-core
