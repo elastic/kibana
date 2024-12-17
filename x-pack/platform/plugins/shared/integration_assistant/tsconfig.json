@@ -13,7 +13,9 @@
     "../../typings/**/*",
     "server/graphs/cel/validation/wasm/wasm_exec.js"
   ],
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
