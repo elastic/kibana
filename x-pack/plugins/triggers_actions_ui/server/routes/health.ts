@@ -25,6 +25,13 @@ export function createHealthRoute(
   router.get(
     {
       path,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization as the health route does not require any.',
+        },
+      },
       validate: false,
       options: {
         access: 'internal',
