@@ -22,7 +22,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
@@ -82,10 +81,6 @@ interface PrevalenceDetailsRow extends PrevalenceData {
    */
   isPlatinumPlus: boolean;
   /**
-   * If enabled, clicking host or user should open an entity preview
-   */
-  isPreviewEnabled: boolean;
-  /**
    * Scope id to pass to the preview link
    */
   scopeId: string;
@@ -115,7 +110,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     render: (data: PrevalenceDetailsRow) => (
       <EuiFlexGroup direction="column" gutterSize="none">
         {data.values.map((value) => {
-          if (data.isPreviewEnabled && hasPreview(data.field)) {
+          if (hasPreview(data.field)) {
             return (
               <EuiFlexItem key={value}>
                 <CellActions field={data.field} value={value}>
@@ -331,7 +326,6 @@ export const PrevalenceDetails: React.FC = () => {
     useDocumentDetailsContext();
 
   const isPlatinumPlus = useLicense().isPlatinumPlus();
-  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   // these two are used by the usePrevalence hook to fetch the data
   const [start, setStart] = useState(DEFAULT_FROM);
@@ -382,10 +376,9 @@ export const PrevalenceDetails: React.FC = () => {
         from: absoluteStart,
         to: absoluteEnd,
         isPlatinumPlus,
-        isPreviewEnabled,
         scopeId,
       })),
-    [data, absoluteStart, absoluteEnd, isPlatinumPlus, isPreviewEnabled, scopeId]
+    [data, absoluteStart, absoluteEnd, isPlatinumPlus, scopeId]
   );
 
   const upsell = (

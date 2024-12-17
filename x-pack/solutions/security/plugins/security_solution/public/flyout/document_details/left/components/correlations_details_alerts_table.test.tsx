@@ -11,7 +11,6 @@ import { TestProviders } from '../../../../common/mock';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_table';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
@@ -20,8 +19,6 @@ import { DocumentDetailsContext } from '../../shared/context';
 import { RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../../rule_details/right';
 
 jest.mock('../hooks/use_paginated_alerts');
-jest.mock('../../../../common/hooks/use_experimental_features');
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('@kbn/expandable-flyout');
 
@@ -47,7 +44,6 @@ const renderCorrelationsTable = (panelContext: DocumentDetailsContext) =>
 describe('CorrelationsDetailsAlertsTable', () => {
   beforeEach(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     jest.mocked(usePaginatedAlerts).mockReturnValue({
       setPagination: jest.fn(),
       setSorting: jest.fn(),
@@ -88,16 +84,16 @@ describe('CorrelationsDetailsAlertsTable', () => {
   });
 
   it('renders EuiBasicTable with correct props', () => {
-    const { getByTestId, queryByTestId, queryAllByRole } =
+    const { getByTestId, getAllByTestId, queryAllByRole } =
       renderCorrelationsTable(mockContextValue);
 
     expect(getByTestId(`${TEST_ID}InvestigateInTimeline`)).toBeInTheDocument();
     expect(getByTestId(`${TEST_ID}Table`)).toBeInTheDocument();
-    expect(queryByTestId(`${TEST_ID}AlertPreviewButton`)).not.toBeInTheDocument();
+    expect(getAllByTestId(`${TEST_ID}AlertPreviewButton`)).toHaveLength(2);
 
     expect(jest.mocked(usePaginatedAlerts)).toHaveBeenCalled();
 
-    expect(queryAllByRole('columnheader').length).toBe(4);
+    expect(queryAllByRole('columnheader').length).toBe(5);
     expect(queryAllByRole('row').length).toBe(3); // 1 header row and 2 data rows
     expect(queryAllByRole('row')[1].textContent).toContain('Jan 1, 2022 @ 00:00:00.000');
     expect(queryAllByRole('row')[1].textContent).toContain('Reason1');
@@ -105,8 +101,7 @@ describe('CorrelationsDetailsAlertsTable', () => {
     expect(queryAllByRole('row')[1].textContent).toContain('Severity1');
   });
 
-  it('renders open preview button when feature flag is on', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+  it('renders open preview button', () => {
     const { getByTestId, getAllByTestId } = renderCorrelationsTable({
       ...mockContextValue,
       isPreviewMode: true,
@@ -128,8 +123,7 @@ describe('CorrelationsDetailsAlertsTable', () => {
     });
   });
 
-  it('opens rule preview when feature flag is on and isPreview is false', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+  it('opens rule preview when isPreview is false', () => {
     const { getAllByTestId } = renderCorrelationsTable(mockContextValue);
 
     expect(getAllByTestId(`${TEST_ID}RulePreview`).length).toBe(2);
@@ -145,8 +139,7 @@ describe('CorrelationsDetailsAlertsTable', () => {
     });
   });
 
-  it('does not render preview link when feature flag is on and isPreview is true', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+  it('does not render preview link when isPreview is true', () => {
     const { queryByTestId } = renderCorrelationsTable({ ...mockContextValue, isPreview: true });
     expect(queryByTestId(`${TEST_ID}RulePreview`)).not.toBeInTheDocument();
   });

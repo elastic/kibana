@@ -24,7 +24,6 @@ import {
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { TestProviders } from '../../../../common/mock';
 import { licenseService } from '../../../../common/hooks/use_license';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
@@ -45,9 +44,6 @@ jest.mock('../../../../common/lib/kibana', () => {
     }),
   };
 });
-
-jest.mock('../../../../common/hooks/use_experimental_features');
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('../../shared/hooks/use_prevalence');
 
@@ -138,7 +134,6 @@ describe('PrevalenceDetails', () => {
     jest.clearAllMocks();
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
   });
 
   it('should render the table with all data if license is platinum', () => {
@@ -162,13 +157,10 @@ describe('PrevalenceDetails', () => {
     ).toBeGreaterThan(1);
     expect(queryByTestId(PREVALENCE_DETAILS_UPSELL_TEST_ID)).not.toBeInTheDocument();
     expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
-    expect(
-      queryByTestId(PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID)
-    ).not.toBeInTheDocument();
+    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID)).toHaveLength(2);
   });
 
-  it('should render host and user name as clickable link if preview is enabled', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+  it('should render host and user name as clickable link', () => {
     (usePrevalence as jest.Mock).mockReturnValue(mockPrevelanceReturnValue);
 
     const { getAllByTestId } = renderPrevalenceDetails();
