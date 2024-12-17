@@ -14,6 +14,8 @@ import { KNOWLEDGE_BASE_RETRIEVAL_TOOL } from './knowledge_base/knowledge_base_r
 import { KNOWLEDGE_BASE_WRITE_TOOL } from './knowledge_base/knowledge_base_write_tool';
 import { SECURITY_LABS_KNOWLEDGE_BASE_TOOL } from './security_labs/security_labs_tool';
 
+// any new tool should also be added to telemetry schema in
+// x-pack/solutions/security/plugins/elastic_assistant/server/lib/telemetry/event_based_telemetry.ts
 export const assistantTools = [
   ALERT_COUNTS_TOOL,
   DEFEND_INSIGHTS_TOOL,
