@@ -43,7 +43,7 @@ async function evaluateEsqlQuery({
   return;
 }
 
-describe.skip('ES|QL query generation', () => {
+describe('ES|QL query generation', () => {
   describe('other queries', () => {
     describe('with packetbeat data', () => {
       before(async () => {
