@@ -299,7 +299,7 @@ const determineEntityNodeShape = (
   users: string[]
 ): {
   shape: EntityNodeDataModel['shape'];
-  icon: string;
+  icon?: string;
 } => {
   // If actor is a user return ellipse
   if (users.includes(actorId)) {
@@ -316,7 +316,7 @@ const determineEntityNodeShape = (
     return { shape: 'diamond', icon: 'globe' };
   }
 
-  return { shape: 'hexagon', icon: 'questionInCircle' };
+  return { shape: 'hexagon' };
 };
 
 const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
