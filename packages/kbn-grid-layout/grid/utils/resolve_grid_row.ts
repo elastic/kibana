@@ -149,6 +149,7 @@ export const resolveGridRow = (
   // handle all collisions, row by row
   for (let row = dragRequest?.row ?? 0; row < collisionGrid.length; row++) {
     let collisions = getCollisionsInOrder(row);
+
     // continue pushing panels down until all collisions in this row have been resolved
     while (collisions.length > 0) {
       const panelKey = collisions.shift();
