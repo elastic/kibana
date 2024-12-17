@@ -56,7 +56,7 @@ const PortableDashboardsDemos = ({
   history: AppMountParameters['history'];
 }) => {
   return (
-    <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
+    <KibanaRenderContextProvider {...coreStart}>
       <Router history={history}>
         <Routes>
           <Route exact path="/">

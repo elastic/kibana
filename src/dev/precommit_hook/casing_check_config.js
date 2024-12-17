@@ -44,7 +44,7 @@ export const IGNORE_FILE_GLOBS = [
   'packages/kbn-test/jest-preset.js',
   'packages/kbn-test/*/jest-preset.js',
   'test/package/Vagrantfile',
-  'x-pack/plugins/security_solution/scripts/endpoint/common/vagrant/Vagrantfile',
+  'x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/vagrant/Vagrantfile',
   '**/test/**/fixtures/**/*',
   'packages/kbn-router-to-openapispec/openapi-types.d.ts',
 
@@ -165,7 +165,7 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/core/server/core_app/assets/favicons/safari-pinned-tab.svg',
   'test/functional/apps/management/exports/_import_objects-conflicts.json',
   'x-pack/legacy/plugins/index_management/public/lib/editSettings.js',
-  'x-pack/legacy/plugins/license_management/public/store/reducers/licenseManagement.js',
+  'x-pack/legacy/platform/plugins/shared/license_management/public/store/reducers/licenseManagement.js',
   'x-pack/plugins/monitoring/public/icons/health-gray.svg',
   'x-pack/plugins/monitoring/public/icons/health-green.svg',
   'x-pack/plugins/monitoring/public/icons/health-red.svg',

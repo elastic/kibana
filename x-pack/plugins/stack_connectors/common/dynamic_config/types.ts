@@ -5,15 +5,6 @@
  * 2.0.
  */
 
-export enum DisplayType {
-  TEXTBOX = 'textbox',
-  TEXTAREA = 'textarea',
-  NUMERIC = 'numeric',
-  TOGGLE = 'toggle',
-  DROPDOWN = 'dropdown',
-  CHECKABLE = 'checkable',
-}
-
 export interface SelectOption {
   label: string;
   value: string;
@@ -28,7 +19,6 @@ export interface Dependency {
 export enum FieldType {
   STRING = 'str',
   INTEGER = 'int',
-  LIST = 'list',
   BOOLEAN = 'bool',
 }
 
@@ -44,21 +34,13 @@ export interface Validation {
 }
 
 export interface ConfigProperties {
-  category?: string;
   default_value: string | number | boolean | null;
-  depends_on: Dependency[];
-  display: DisplayType;
+  description: string | null;
   label: string;
-  options?: SelectOption[];
-  order?: number | null;
-  placeholder?: string;
   required: boolean;
   sensitive: boolean;
-  tooltip: string | null;
+  updatable: boolean;
   type: FieldType;
-  ui_restrictions: string[];
-  validations: Validation[];
-  value: string | number | boolean | null;
 }
 
 interface ConfigEntry extends ConfigProperties {
@@ -68,4 +50,5 @@ interface ConfigEntry extends ConfigProperties {
 export interface ConfigEntryView extends ConfigEntry {
   isValid: boolean;
   validationErrors: string[];
+  value: string | number | boolean | null;
 }
