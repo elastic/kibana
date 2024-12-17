@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { IdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
-
-export const getGroupByTermsAgg = (fields: IdentityFieldsPerEntityType, maxSize = 500) => {
-  return Array.from(fields).reduce((acc, [entityType, identityFields]) => {
-    acc[entityType] = {
+export const getGroupByTermsAgg = (fields: { [key: string]: string[] }, maxSize = 500) => {
+  return Object.entries(fields).reduce((acc, [sourceId, identityFields]) => {
+    acc[sourceId] = {
       composite: {
         size: maxSize,
         sources: identityFields.map((field) => ({
