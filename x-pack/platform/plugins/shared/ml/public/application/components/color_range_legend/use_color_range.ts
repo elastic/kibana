@@ -153,7 +153,15 @@ export const useColorRange = (
   const colorRanges: Record<COLOR_RANGE, string[]> = {
     [COLOR_RANGE.BLUE]: [
       d3.rgb(euiTheme.colors.emptyShade).toString(),
-      d3.rgb(euiTheme.colors.vis.euiColorVis1).toString(),
+      d3
+        .rgb(
+          // Amsterdam: euiTheme.colors.vis.euiColorVis1
+          // Borealis:  euiTheme.colors.vis.euiColorVis2
+          euiTheme.flags.hasVisColorAdjustment
+            ? euiTheme.colors.vis.euiColorVis1
+            : euiTheme.colors.vis.euiColorVis2
+        )
+        .toString(),
     ],
     [COLOR_RANGE.RED]: [
       d3.rgb(euiTheme.colors.emptyShade).toString(),
