@@ -16,10 +16,7 @@ import {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { MetricsExplorerLocatorParams } from '@kbn/observability-shared-plugin/common';
-import {
-  METRICS_EXPLORER_LOCATOR_ID,
-  ObservabilityTriggerId,
-} from '@kbn/observability-shared-plugin/common';
+import { METRICS_EXPLORER_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 import {
   BehaviorSubject,
   combineLatest,
@@ -100,10 +97,6 @@ export class Plugin implements InfraClientPluginClass {
     if (pluginsSetup.home) {
       registerFeatures(pluginsSetup.home);
     }
-
-    pluginsSetup.uiActions.registerTrigger({
-      id: ObservabilityTriggerId.LogEntryContextMenu,
-    });
 
     const assetDetailsLocator =
       pluginsSetup.share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
