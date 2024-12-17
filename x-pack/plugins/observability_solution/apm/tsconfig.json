@@ -130,6 +130,7 @@
     "@kbn/saved-search-component",
     "@kbn/saved-search-plugin",
     "@kbn/key-value-metadata-table",
+    "@kbn/event-stacktrace"
   ],
   "exclude": ["target/**/*"]
 }

@@ -73,4 +73,5 @@ export const storybookAliases = {
   ui_actions_enhanced: 'src/plugins/ui_actions_enhanced/.storybook',
   unified_search: 'src/plugins/unified_search/.storybook',
   profiling: 'x-pack/plugins/observability_solution/profiling/.storybook',
+  event_stacktrace: 'x-pack/platform/packages/shared/kbn-event-stacktrace/.storybook',
 };
