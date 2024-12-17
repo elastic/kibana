@@ -10,7 +10,7 @@ import { getOr } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 import deepMerge from 'deepmerge';
 import { useDiscoverInTimelineContext } from '../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
-import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
+import type { ColumnHeaderOptions, KueryFilterQuery } from '../../../../common/types/timeline';
 import type {
   TimelineResponse,
   ColumnHeaderResult,
@@ -299,7 +299,8 @@ export interface QueryTimelineById {
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
   savedSearchId?: string;
-  eventId?: string;
+  /* Lucene or Kql query */
+  query?: KueryFilterQuery;
 }
 
 export const useQueryTimelineById = () => {
@@ -316,18 +317,9 @@ export const useQueryTimelineById = () => {
     onOpenTimeline,
     openTimeline = true,
     savedSearchId,
-    eventId,
+    query,
   }: QueryTimelineById) => {
     if (timelineId == null) {
-      const queryExpr = eventId ? `_id:"${eventId}"` : '';
-      let kqlQuery = null;
-      if (eventId) {
-        kqlQuery = {
-          filterQuery: {
-            kuery: { kind: 'kuery', expression: queryExpr },
-          },
-        };
-      }
       updateTimeline({
         id: TimelineId.active,
         duplicate: false,
@@ -338,7 +330,7 @@ export const useQueryTimelineById = () => {
           ...timelineDefaults,
           columns: defaultUdtHeaders,
           id: TimelineId.active,
-          kqlQuery,
+          kqlQuery: query,
           activeTab: activeTimelineTab,
           show: openTimeline,
           initialized: true,

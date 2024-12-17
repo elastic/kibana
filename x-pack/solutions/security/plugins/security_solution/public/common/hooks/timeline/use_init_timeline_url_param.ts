@@ -28,7 +28,6 @@ export const useInitTimelineFromUrlParam = () => {
 
   const onInitialize = useCallback(
     (initialState: TimelineUrl | null) => {
-      console.log({ initialState });
       if (initialState != null) {
         queryTimelineById({
           activeTimelineTab:
@@ -40,7 +39,7 @@ export const useInitTimelineFromUrlParam = () => {
           timelineId: initialState.id,
           openTimeline: initialState.isOpen,
           savedSearchId: initialState.savedSearchId,
-          eventId: initialState.eventId,
+          query: initialState.query,
         });
       }
     },
