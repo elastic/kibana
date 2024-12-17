@@ -7,18 +7,22 @@
 
 import expect from '@kbn/expect';
 
-import { ReindexStatus, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-plugin/common/types';
+import {
+  ReindexStatus,
+  REINDEX_OP_TYPE,
+  type ResolveIndexResponseFromES,
+} from '@kbn/upgrade-assistant-plugin/common/types';
 import { generateNewIndexName } from '@kbn/upgrade-assistant-plugin/server/lib/reindexing/index_settings';
 import { getIndexState } from '@kbn/upgrade-assistant-plugin/common/get_index_state';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
   // Utility function that keeps polling API until reindex operation has completed or failed.
-  const waitForReindexToComplete = async (indexName) => {
-    console.log(`Waiting for reindex to complete...`);
+  const waitForReindexToComplete = async (indexName: string) => {
     let lastState;
 
     while (true) {
@@ -34,7 +38,7 @@ export default function ({ getService }) {
     return lastState;
   };
 
-  describe.skip('reindexing', () => {
+  describe('reindexing', () => {
     afterEach(() => {
       // Cleanup saved objects
       return es.deleteByQuery({
@@ -71,9 +75,9 @@ export default function ({ getService }) {
       // The new index was created
       expect(indexSummary[newIndexName]).to.be.an('object');
       // The original index name is aliased to the new one
-      expect(indexSummary[newIndexName].aliases.dummydata).to.be.an('object');
+      expect(indexSummary[newIndexName].aliases?.dummydata).to.be.an('object');
       // Verify mappings exist on new index
-      expect(indexSummary[newIndexName].mappings.properties).to.be.an('object');
+      expect(indexSummary[newIndexName].mappings?.properties).to.be.an('object');
       // The number of documents in the new index matches what we expect
       expect((await es.count({ index: lastState.newIndexName })).count).to.be(3);
 
@@ -89,7 +93,7 @@ export default function ({ getService }) {
       // This new index is the new soon to be created reindexed index. We create it
       // upfront to simulate a situation in which the user restarted kibana half
       // way through the reindex process and ended up with an extra index.
-      await es.indices.create({ index: 'reindexed-v7-dummydata' });
+      await es.indices.create({ index: 'reindexed-v9-dummydata' });
 
       const { body } = await supertest
         .post(`/api/upgrade_assistant/reindex/dummydata`)
@@ -148,8 +152,8 @@ export default function ({ getService }) {
     });
 
     it('shows no warnings', async () => {
-      const resp = await supertest.get(`/api/upgrade_assistant/reindex/7.0-data`);
-      // By default all reindexing operations will replace an index with an alias (with the same name)
+      const resp = await supertest.get(`/api/upgrade_assistant/reindex/reindexed-v8-6.0-data`); // reusing the index previously migrated in v8->v9 UA tests
+      // By default, all reindexing operations will replace an index with an alias (with the same name)
       // pointing to a newly created "reindexed" index.
       expect(resp.body.warnings.length).to.be(1);
       expect(resp.body.warnings[0].warningType).to.be('replaceIndexWithAlias');
@@ -157,20 +161,23 @@ export default function ({ getService }) {
 
     it('reindexes old 7.0 index', async () => {
       const { body } = await supertest
-        .post(`/api/upgrade_assistant/reindex/7.0-data`)
+        .post(`/api/upgrade_assistant/reindex/reindexed-v8-6.0-data`) // reusing the index previously migrated in v8->v9 UA tests
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
-      expect(body.indexName).to.equal('7.0-data');
+      expect(body.indexName).to.equal('reindexed-v8-6.0-data');
       expect(body.status).to.equal(ReindexStatus.inProgress);
 
-      const lastState = await waitForReindexToComplete('7.0-data');
+      const lastState = await waitForReindexToComplete('reindexed-v8-6.0-data');
       expect(lastState.errorMessage).to.equal(null);
       expect(lastState.status).to.equal(ReindexStatus.completed);
     });
 
     it('should reindex a batch in order and report queue state', async () => {
-      const assertQueueState = async (firstInQueueIndexName, queueLength) => {
+      const assertQueueState = async (
+        firstInQueueIndexName: string | undefined,
+        queueLength: number
+      ) => {
         const response = await supertest
           .get(`/api/upgrade_assistant/reindex/batch/queue`)
           .set('kbn-xsrf', 'xxx')
@@ -193,13 +200,13 @@ export default function ({ getService }) {
       const test2 = 'batch-reindex-test2';
       const test3 = 'batch-reindex-test3';
 
-      const cleanupReindex = async (indexName) => {
+      const cleanupReindex = async (indexName: string) => {
         try {
           await es.indices.delete({ index: generateNewIndexName(indexName) });
         } catch (e) {
           try {
             await es.indices.delete({ index: indexName });
-          } catch (e) {
+          } catch (_err) {
             // Ignore
           }
         }
@@ -240,7 +247,10 @@ export default function ({ getService }) {
           name: nameOfIndexThatShouldBeClosed,
         });
 
-        const test1ReindexedState = getIndexState(nameOfIndexThatShouldBeClosed, resolvedIndices);
+        const test1ReindexedState = getIndexState(
+          nameOfIndexThatShouldBeClosed,
+          resolvedIndices as ResolveIndexResponseFromES
+        );
         expect(test1ReindexedState).to.be('closed');
       } finally {
         await cleanupReindex(test1);
