@@ -45,7 +45,7 @@ export const findMaintenanceWindowsRequestQuerySchema = schema.object(
         },
       })
     ),
-    statuses: schema.maybe(schema.oneOf([statusSchema, schema.arrayOf(statusSchema)])),
+    status: schema.maybe(schema.oneOf([statusSchema, schema.arrayOf(statusSchema)])),
   },
   {
     validate: (params) => {

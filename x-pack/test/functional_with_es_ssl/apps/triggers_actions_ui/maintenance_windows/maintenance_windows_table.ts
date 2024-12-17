@@ -252,7 +252,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
       });
 
-      await pageObjects.maintenanceWindows.searchMaintenanceWindows('archived-mw');
       await testSubjects.click('status-filter-button');
       await testSubjects.click('status-filter-archived'); // select Archived status filter
 

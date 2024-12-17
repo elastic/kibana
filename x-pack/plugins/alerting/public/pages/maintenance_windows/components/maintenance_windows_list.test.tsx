@@ -101,8 +101,8 @@ describe('MaintenanceWindowsList', () => {
         onPageChange={() => {}}
         inputText={''}
         onSearchKeyup={() => {}}
-        onSelectedStatusesChange={() => {}}
-        selectedStatuses={[]}
+        onStatusChange={() => {}}
+        selectedStatus={[]}
         onSearchChange={() => {}}
       />
     );
@@ -143,8 +143,8 @@ describe('MaintenanceWindowsList', () => {
         onPageChange={() => {}}
         inputText={''}
         onSearchKeyup={() => {}}
-        onSelectedStatusesChange={() => {}}
-        selectedStatuses={[]}
+        onStatusChange={() => {}}
+        selectedStatus={[]}
         onSearchChange={() => {}}
       />
     );
@@ -169,8 +169,8 @@ describe('MaintenanceWindowsList', () => {
         onPageChange={() => {}}
         inputText={''}
         onSearchKeyup={() => {}}
-        onSelectedStatusesChange={() => {}}
-        selectedStatuses={[]}
+        onStatusChange={() => {}}
+        selectedStatus={[]}
         onSearchChange={() => {}}
       />
     );

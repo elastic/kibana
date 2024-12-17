@@ -73,8 +73,8 @@ describe('findMaintenanceWindows', () => {
       http,
       page: 1,
       perPage: 10,
-      searchText: '',
-      selectedStatuses: [],
+      search: '',
+      selectedStatus: [],
     });
 
     expect(result).toEqual({ maintenanceWindows: maintenanceWindow, total: 1 });
@@ -86,7 +86,7 @@ describe('findMaintenanceWindows', () => {
             "page": 1,
             "per_page": 10,
             "search": "",
-            "statuses": Array [],
+            "status": Array [],
           },
         },
       ]

@@ -11,13 +11,12 @@ import { FindMaintenanceWindowsParams } from '../../../../../../application/main
 export const transformFindMaintenanceWindowParams = (
   params: FindMaintenanceWindowsRequestQuery
 ): FindMaintenanceWindowsParams => {
-  const statuses =
-    params.statuses && typeof params.statuses === 'string' ? [params.statuses] : params.statuses;
+  const status = params.status && !Array.isArray(params.status) ? [params.status] : params.status;
 
   return {
     ...(params.page ? { page: params.page } : {}),
     ...(params.per_page ? { perPage: params.per_page } : {}),
     ...(params.search ? { search: params.search } : {}),
-    ...(params.statuses ? { statuses } : {}),
+    ...(params.status ? { status } : {}),
   };
 };

@@ -17,26 +17,28 @@ import type {
 } from './types';
 import { findMaintenanceWindowsParamsSchema } from './schemas';
 
-export const getStatusFilter = (statuses?: MaintenanceWindowsStatus[]): KueryNode | string => {
-  if (!statuses || statuses.length === 0) return '';
+export const getStatusFilter = (
+  status?: MaintenanceWindowsStatus[]
+): KueryNode | string | undefined => {
+  if (!status || status.length === 0) return undefined;
 
   const statusToQueryMapping = {
     [MaintenanceWindowStatus.Running]: '(maintenance-window.attributes.events: "now")',
     [MaintenanceWindowStatus.Upcoming]:
-      '(not (maintenance-window.attributes.events: "now") and maintenance-window.attributes.events >= "now")',
+      '(not maintenance-window.attributes.events: "now" and maintenance-window.attributes.events > "now")',
     [MaintenanceWindowStatus.Finished]:
       '(not (maintenance-window.attributes.events >= "now" or maintenance-window.attributes.expirationDate < "now"))',
     [MaintenanceWindowStatus.Archived]: '(maintenance-window.attributes.expirationDate < "now")',
   };
 
-  const fullQuery = statuses
+  const fullQuery = status
     ?.slice(1)
     .reduce(
       (acc, currentStatusFilter) => acc + ` or ${statusToQueryMapping[currentStatusFilter] || ''}`,
-      statusToQueryMapping[statuses[0]] || ''
+      statusToQueryMapping[status[0]] || ''
     );
 
-  return fullQuery ? fromKueryExpression(fullQuery) : '';
+  return fullQuery ? fromKueryExpression(fullQuery) : undefined;
 };
 
 export async function findMaintenanceWindows(
@@ -53,7 +55,7 @@ export async function findMaintenanceWindows(
     throw Boom.badRequest(`Error validating find maintenance windows data - ${error.message}`);
   }
 
-  const filter = getStatusFilter(params?.statuses);
+  const filter = getStatusFilter(params?.status);
 
   try {
     const result = await findMaintenanceWindowSo({

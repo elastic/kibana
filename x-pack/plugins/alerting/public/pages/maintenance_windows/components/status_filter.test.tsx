@@ -22,17 +22,13 @@ describe('StatusFilter', () => {
   });
 
   test('it renders', () => {
-    const result = appMockRenderer.render(
-      <StatusFilter selectedStatuses={[]} onChange={onChange} />
-    );
+    const result = appMockRenderer.render(<StatusFilter selectedStatus={[]} onChange={onChange} />);
 
     expect(result.getByTestId('status-filter-button')).toBeInTheDocument();
   });
 
   test('it shows the popover', async () => {
-    const result = appMockRenderer.render(
-      <StatusFilter selectedStatuses={[]} onChange={onChange} />
-    );
+    const result = appMockRenderer.render(<StatusFilter selectedStatus={[]} onChange={onChange} />);
 
     fireEvent.click(result.getByTestId('status-filter-button'));
 
@@ -46,7 +42,7 @@ describe('StatusFilter', () => {
   test('should have 2 active filters', async () => {
     const result = appMockRenderer.render(
       <StatusFilter
-        selectedStatuses={[MaintenanceWindowStatus.Running, MaintenanceWindowStatus.Upcoming]}
+        selectedStatus={[MaintenanceWindowStatus.Running, MaintenanceWindowStatus.Upcoming]}
         onChange={onChange}
       />
     );

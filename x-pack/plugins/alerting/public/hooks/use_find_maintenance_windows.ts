@@ -15,12 +15,12 @@ interface UseFindMaintenanceWindowsProps {
   enabled?: boolean;
   page: number;
   perPage: number;
-  searchText: string;
-  selectedStatuses: MaintenanceWindowStatus[];
+  search: string;
+  selectedStatus: MaintenanceWindowStatus[];
 }
 
 export const useFindMaintenanceWindows = (params: UseFindMaintenanceWindowsProps) => {
-  const { enabled = true, page, perPage, searchText, selectedStatuses } = params;
+  const { enabled = true, page, perPage, search, selectedStatus } = params;
 
   const {
     http,
@@ -32,8 +32,8 @@ export const useFindMaintenanceWindows = (params: UseFindMaintenanceWindowsProps
       http,
       page,
       perPage,
-      searchText,
-      selectedStatuses,
+      search,
+      selectedStatus,
     });
   };
 
@@ -47,13 +47,7 @@ export const useFindMaintenanceWindows = (params: UseFindMaintenanceWindowsProps
     }
   };
 
-  const queryKey = [
-    'findMaintenanceWindows',
-    ...(page ? [page] : []),
-    ...(perPage ? [perPage] : []),
-    ...(searchText ? [searchText] : []),
-    ...(selectedStatuses ? [selectedStatuses] : []),
-  ];
+  const queryKey = ['findMaintenanceWindows', page, perPage, search, selectedStatus];
 
   const { isLoading, isFetching, isInitialLoading, data, refetch } = useQuery({
     queryKey,

@@ -103,7 +103,7 @@ describe('findMaintenanceWindowsRoute', () => {
           page: 1,
           per_page: 3,
           search: 'mw name',
-          statuses: ['running'],
+          status: ['running'],
         },
       }
     );
@@ -131,7 +131,7 @@ describe('findMaintenanceWindowsRoute', () => {
       page: 1,
       perPage: 3,
       search: 'mw name',
-      statuses: ['running'],
+      status: ['running'],
     });
     expect(res.ok).toHaveBeenLastCalledWith({
       body: {

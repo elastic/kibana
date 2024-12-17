@@ -30,7 +30,8 @@ import { LicensePrompt } from './components/license_prompt';
 import {
   MAINTENANCE_WINDOW_FEATURE_ID,
   MAINTENANCE_WINDOW_DEEP_LINK_IDS,
-  MAINTENANCE_WINDOW_DEFAULT_SEARCH_PAGE_SIZE,
+  MAINTENANCE_WINDOW_DEFAULT_PER_PAGE,
+  MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE,
   MaintenanceWindowStatus,
 } from '../../../common';
 
@@ -43,12 +44,12 @@ export const MaintenanceWindowsPage = React.memo(() => {
   const { isAtLeastPlatinum } = useLicense();
   const hasLicense = isAtLeastPlatinum();
 
-  const [page, setPage] = useState<number>(1);
-  const [perPage, setPerPage] = useState<number>(MAINTENANCE_WINDOW_DEFAULT_SEARCH_PAGE_SIZE);
+  const [page, setPage] = useState<number>(MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE);
+  const [perPage, setPerPage] = useState<number>(MAINTENANCE_WINDOW_DEFAULT_PER_PAGE);
 
   const [inputText, setInputText] = useState<string>('');
-  const [selectedStatuses, setSelectedStatuses] = useState<MaintenanceWindowStatus[]>([]);
-  const [searchText, setSearchText] = useState<string>('');
+  const [selectedStatus, setSelectedStatus] = useState<MaintenanceWindowStatus[]>([]);
+  const [search, setSearch] = useState<string>('');
 
   const { navigateToCreateMaintenanceWindow } = useCreateMaintenanceWindowNavigation();
 
@@ -56,8 +57,8 @@ export const MaintenanceWindowsPage = React.memo(() => {
     enabled: hasLicense,
     page,
     perPage,
-    searchText,
-    selectedStatuses,
+    search,
+    selectedStatus,
   });
 
   const { maintenanceWindows, total } = data;
@@ -71,12 +72,12 @@ export const MaintenanceWindowsPage = React.memo(() => {
   const refreshData = useCallback(() => refetch(), [refetch]);
   const showWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID].show;
   const writeWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID].save;
-  const isFiltered = searchText === '' && selectedStatuses.length === 0;
+  const isNotFiltered = search === '' && selectedStatus.length === 0;
 
   const showEmptyPrompt =
     !isLoading &&
     maintenanceWindows.length === 0 &&
-    isFiltered &&
+    isNotFiltered &&
     showWindowMaintenance &&
     writeWindowMaintenance;
 
@@ -110,21 +111,21 @@ export const MaintenanceWindowsPage = React.memo(() => {
     []
   );
 
-  const onSelectedStatusesChange = useCallback((statuses: MaintenanceWindowStatus[]) => {
-    setSelectedStatuses(statuses);
+  const onSelectedStatusChange = useCallback((status: MaintenanceWindowStatus[]) => {
+    setSelectedStatus(status);
   }, []);
 
   const onSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setInputText(e.target.value);
     if (e.target.value === '') {
-      setSearchText(e.target.value);
+      setSearch(e.target.value);
     }
   }, []);
 
   const onSearchKeyup = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Enter') {
-        setSearchText(inputText);
+        setSearch(inputText);
       }
     },
     [inputText]
@@ -183,8 +184,8 @@ export const MaintenanceWindowsPage = React.memo(() => {
             total={total}
             onPageChange={onPageChange}
             inputText={inputText}
-            selectedStatuses={selectedStatuses}
-            onSelectedStatusesChange={onSelectedStatusesChange}
+            selectedStatus={selectedStatus}
+            onStatusChange={onSelectedStatusChange}
             onSearchKeyup={onSearchKeyup}
             onSearchChange={onSearchChange}
           />

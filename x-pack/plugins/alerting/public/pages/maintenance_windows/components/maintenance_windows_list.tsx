@@ -45,8 +45,8 @@ interface MaintenanceWindowsListProps {
   onPageChange: ({ page: { index, size } }: { page: { index: number; size: number } }) => void;
   inputText: string;
   onSearchKeyup: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  onSelectedStatusesChange: (statuses: MaintenanceWindowStatus[]) => void;
-  selectedStatuses: MaintenanceWindowStatus[];
+  onStatusChange: (status: MaintenanceWindowStatus[]) => void;
+  selectedStatus: MaintenanceWindowStatus[];
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -111,8 +111,8 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     total,
     onPageChange,
     inputText,
-    selectedStatuses,
-    onSelectedStatusesChange,
+    selectedStatus,
+    onStatusChange,
     onSearchKeyup,
     onSearchChange,
   }) => {
@@ -206,10 +206,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <StatusFilter
-                selectedStatuses={selectedStatuses}
-                onChange={onSelectedStatusesChange}
-              />
+              <StatusFilter selectedStatus={selectedStatus} onChange={onStatusChange} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton

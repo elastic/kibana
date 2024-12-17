@@ -12,22 +12,22 @@ import * as i18n from '../translations';
 import { MaintenanceWindowStatus } from '../../../../common';
 
 export interface RuleStatusFilterProps {
-  selectedStatuses: MaintenanceWindowStatus[];
-  onChange: (selectedStatuses: MaintenanceWindowStatus[]) => void;
+  selectedStatus: MaintenanceWindowStatus[];
+  onChange: (selectedStatus: MaintenanceWindowStatus[]) => void;
 }
 
 export const StatusFilter: React.FC<RuleStatusFilterProps> = React.memo(
-  ({ selectedStatuses, onChange }) => {
+  ({ selectedStatus, onChange }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
     const onFilterItemClick = useCallback(
       (newOption: MaintenanceWindowStatus) => () => {
-        const options = selectedStatuses.includes(newOption)
-          ? selectedStatuses.filter((option) => option !== newOption)
-          : [...selectedStatuses, newOption];
+        const options = selectedStatus.includes(newOption)
+          ? selectedStatus.filter((option) => option !== newOption)
+          : [...selectedStatus, newOption];
         onChange(options);
       },
-      [onChange, selectedStatuses]
+      [onChange, selectedStatus]
     );
 
     const openPopover = useCallback(() => {
@@ -47,9 +47,9 @@ export const StatusFilter: React.FC<RuleStatusFilterProps> = React.memo(
             <EuiFilterButton
               data-test-subj="status-filter-button"
               iconType="arrowDown"
-              hasActiveFilters={selectedStatuses.length > 0}
-              numActiveFilters={selectedStatuses.length}
-              numFilters={selectedStatuses.length}
+              hasActiveFilters={selectedStatus.length > 0}
+              numActiveFilters={selectedStatus.length}
+              numFilters={selectedStatus.length}
               onClick={openPopover}
             >
               {i18n.TABLE_STATUS}
@@ -59,11 +59,11 @@ export const StatusFilter: React.FC<RuleStatusFilterProps> = React.memo(
           <>
             {STATUS_OPTIONS.map((status) => {
               return (
-                <EuiFilterSelectItem // use EuiSelectable
+                <EuiFilterSelectItem
                   key={status.value}
                   data-test-subj={`status-filter-${status.value}`}
                   onClick={onFilterItemClick(status.value)}
-                  checked={selectedStatuses.includes(status.value) ? 'on' : undefined}
+                  checked={selectedStatus.includes(status.value) ? 'on' : undefined}
                 >
                   {status.name}
                 </EuiFilterSelectItem>

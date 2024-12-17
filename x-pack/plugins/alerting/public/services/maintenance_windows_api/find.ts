@@ -15,14 +15,14 @@ export async function findMaintenanceWindows({
   http,
   page,
   perPage,
-  searchText,
-  selectedStatuses,
+  search,
+  selectedStatus,
 }: {
   http: HttpSetup;
   page: number;
   perPage: number;
-  searchText: string;
-  selectedStatuses: MaintenanceWindowStatus[];
+  search: string;
+  selectedStatus: MaintenanceWindowStatus[];
 }): Promise<{ maintenanceWindows: MaintenanceWindow[]; total: number }> {
   const res = await http.get<FindMaintenanceWindowsResponse>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/_find`,
@@ -30,8 +30,8 @@ export async function findMaintenanceWindows({
       query: {
         page,
         per_page: perPage,
-        search: searchText,
-        statuses: selectedStatuses,
+        search,
+        status: selectedStatus,
       },
     }
   );

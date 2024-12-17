@@ -12,30 +12,50 @@ describe('transformFindMaintenanceWindowParams', () => {
     jest.resetAllMocks();
   });
 
-  it('passing string in statuses should return array', () => {
+  it('passing string in status should return array', () => {
     const result = transformFindMaintenanceWindowParams({
       page: 1,
       per_page: 10,
       search: 'fake mw name',
-      statuses: 'running',
+      status: 'running',
     });
 
-    expect(result).toEqual({ page: 1, perPage: 10, search: 'fake mw name', statuses: ['running'] });
+    expect(result).toEqual({ page: 1, perPage: 10, search: 'fake mw name', status: ['running'] });
   });
 
-  it('passing array in statuses should return array', () => {
+  it('passing undefined in status should return object without status', () => {
     const result = transformFindMaintenanceWindowParams({
       page: 1,
       per_page: 10,
       search: 'fake mw name',
-      statuses: ['upcoming', 'finished'],
+    });
+
+    expect(result).toEqual({ page: 1, perPage: 10, search: 'fake mw name' });
+  });
+
+  it('passing undefined in search should return object without search', () => {
+    const result = transformFindMaintenanceWindowParams({
+      page: 1,
+      per_page: 10,
+      status: ['upcoming'],
+    });
+
+    expect(result).toEqual({ page: 1, perPage: 10, status: ['upcoming'] });
+  });
+
+  it('passing array in status should return array', () => {
+    const result = transformFindMaintenanceWindowParams({
+      page: 1,
+      per_page: 10,
+      search: 'fake mw name',
+      status: ['upcoming', 'finished'],
     });
 
     expect(result).toEqual({
       page: 1,
       perPage: 10,
       search: 'fake mw name',
-      statuses: ['upcoming', 'finished'],
+      status: ['upcoming', 'finished'],
     });
   });
 });

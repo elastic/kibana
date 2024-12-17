@@ -96,9 +96,9 @@ describe('MaintenanceWindowClient - find', () => {
       per_page: 5,
     } as unknown as SavedObjectsFindResponse);
 
-    const result = await findMaintenanceWindows(mockContext, { statuses: ['running'] });
+    const result = await findMaintenanceWindows(mockContext, { status: ['running'] });
 
-    expect(spy).toHaveBeenCalledWith({ statuses: ['running'] });
+    expect(spy).toHaveBeenCalledWith({ status: ['running'] });
     expect(savedObjectsClient.find).toHaveBeenLastCalledWith({
       filter: {
         arguments: [

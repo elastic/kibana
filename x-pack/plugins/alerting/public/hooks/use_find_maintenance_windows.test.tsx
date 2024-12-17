@@ -35,7 +35,7 @@ jest.mock('../services/maintenance_windows_api/find', () => ({
 
 const { findMaintenanceWindows } = jest.requireMock('../services/maintenance_windows_api/find');
 
-const defaultHookProps = { page: 1, perPage: 10, searchText: '', selectedStatuses: [] };
+const defaultHookProps = { page: 1, perPage: 10, search: '', selectedStatus: [] };
 
 let appMockRenderer: AppMockRenderer;
 
