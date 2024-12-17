@@ -22,6 +22,7 @@ import type {
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { renderApp as renderStatusApp } from './status';
 import {
   renderApp as renderErrorApp,
@@ -45,6 +46,7 @@ export interface CoreAppsServiceStartDeps {
   analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
 }
 
 export class CoreAppsService {
@@ -86,9 +88,7 @@ export class CoreAppsService {
     http,
     notifications,
     uiSettings,
-    analytics,
-    i18n,
-    theme,
+    ...startDeps
   }: CoreAppsServiceStartDeps) {
     if (!application.history) {
       return;
@@ -101,7 +101,7 @@ export class CoreAppsService {
       uiSettings,
     });
 
-    setupPublicBaseUrlConfigWarning({ docLinks, http, notifications, analytics, i18n, theme });
+    setupPublicBaseUrlConfigWarning({ docLinks, http, notifications, ...startDeps });
   }
 
   public stop() {

@@ -57,7 +57,7 @@ describe('FeatureRegistry', () => {
             app: ['app1'],
             savedObject: {
               all: ['space', 'etc', 'telemetry'],
-              read: ['canvas', 'config', 'config-global', 'url'],
+              read: ['canvas', 'config', 'config-global', 'url', 'tag'],
             },
             api: ['someApiEndpointTag', 'anotherEndpointTag'],
             ui: ['allowsFoo', 'showBar', 'showBaz'],
@@ -65,7 +65,7 @@ describe('FeatureRegistry', () => {
           read: {
             savedObject: {
               all: [],
-              read: ['config', 'config-global', 'url', 'telemetry'],
+              read: ['config', 'config-global', 'url', 'telemetry', 'tag'],
             },
             ui: [],
           },
@@ -130,7 +130,7 @@ describe('FeatureRegistry', () => {
                 app: ['app1'],
                 savedObject: {
                   all: ['space', 'etc', 'telemetry'],
-                  read: ['canvas', 'config', 'config-global', 'url'],
+                  read: ['canvas', 'config', 'config-global', 'url', 'tag'],
                 },
                 api: ['someApiEndpointTag', 'anotherEndpointTag'],
                 ui: ['allowsFoo', 'showBar', 'showBaz'],
@@ -314,7 +314,7 @@ describe('FeatureRegistry', () => {
       expect(allPrivilege?.savedObject.all).toEqual(['telemetry']);
     });
 
-    it(`automatically grants access to config, config-global, url, and telemetry saved objects`, () => {
+    it(`automatically grants access to config, config-global, url, telemetry and tag saved objects`, () => {
       const feature: KibanaFeatureConfig = {
         id: 'test-feature',
         name: 'Test Feature',
@@ -348,16 +348,17 @@ describe('FeatureRegistry', () => {
 
       const allPrivilege = result[0].privileges?.all;
       const readPrivilege = result[0].privileges?.read;
-      expect(allPrivilege?.savedObject.read).toEqual(['config', 'config-global', 'url']);
+      expect(allPrivilege?.savedObject.read).toEqual(['config', 'config-global', 'url', 'tag']);
       expect(readPrivilege?.savedObject.read).toEqual([
         'config',
         'config-global',
         'telemetry',
         'url',
+        'tag',
       ]);
     });
 
-    it(`automatically grants 'all' access to telemetry and 'read' to [config, config-global, url] saved objects for the reserved privilege`, () => {
+    it(`automatically grants 'all' access to telemetry and 'read' to [config, config-global, url, tag] saved objects for the reserved privilege`, () => {
       const feature: KibanaFeatureConfig = {
         id: 'test-feature',
         name: 'Test Feature',
@@ -388,7 +389,7 @@ describe('FeatureRegistry', () => {
 
       const reservedPrivilege = result[0]!.reserved!.privileges[0].privilege;
       expect(reservedPrivilege.savedObject.all).toEqual(['telemetry']);
-      expect(reservedPrivilege.savedObject.read).toEqual(['config', 'config-global', 'url']);
+      expect(reservedPrivilege.savedObject.read).toEqual(['config', 'config-global', 'url', 'tag']);
     });
 
     it(`does not duplicate the automatic grants if specified on the incoming feature`, () => {
@@ -402,14 +403,14 @@ describe('FeatureRegistry', () => {
             ui: [],
             savedObject: {
               all: ['telemetry'],
-              read: ['config', 'config-global', 'url'],
+              read: ['config', 'config-global', 'url', 'tag'],
             },
           },
           read: {
             ui: [],
             savedObject: {
               all: [],
-              read: ['config', 'config-global', 'url'],
+              read: ['config', 'config-global', 'url', 'tag'],
             },
           },
         },
@@ -426,11 +427,12 @@ describe('FeatureRegistry', () => {
       const allPrivilege = result[0].privileges!.all;
       const readPrivilege = result[0].privileges!.read;
       expect(allPrivilege?.savedObject.all).toEqual(['telemetry']);
-      expect(allPrivilege?.savedObject.read).toEqual(['config', 'config-global', 'url']);
+      expect(allPrivilege?.savedObject.read).toEqual(['config', 'config-global', 'url', 'tag']);
       expect(readPrivilege?.savedObject.read).toEqual([
         'config',
         'config-global',
         'url',
+        'tag',
         'telemetry',
       ]);
     });
@@ -518,7 +520,7 @@ describe('FeatureRegistry', () => {
             name: 'Foo',
             app: ['app1', 'app2'],
             savedObject: {
-              all: ['config', 'config-global', 'space', 'etc'],
+              all: ['config', 'config-global', 'space', 'tag', 'etc'],
               read: ['canvas'],
             },
             api: ['someApiEndpointTag', 'anotherEndpointTag'],
@@ -2455,7 +2457,7 @@ describe('FeatureRegistry', () => {
         expect(featureA.privileges).toEqual({
           all: {
             ui: [],
-            savedObject: { all: ['telemetry'], read: ['config', 'config-global', 'url'] },
+            savedObject: { all: ['telemetry'], read: ['config', 'config-global', 'url', 'tag'] },
             composedOf: [
               { feature: 'featureC', privileges: ['subFeatureCOne'] },
               { feature: 'featureD', privileges: ['all'] },
@@ -2463,7 +2465,7 @@ describe('FeatureRegistry', () => {
           },
           read: {
             ui: [],
-            savedObject: { all: [], read: ['config', 'config-global', 'telemetry', 'url'] },
+            savedObject: { all: [], read: ['config', 'config-global', 'telemetry', 'url', 'tag'] },
             composedOf: [{ feature: 'featureD', privileges: ['read'] }],
           },
         });
@@ -2483,12 +2485,12 @@ describe('FeatureRegistry', () => {
         expect(featureA.privileges).toEqual({
           all: {
             ui: [],
-            savedObject: { all: ['telemetry'], read: ['config', 'config-global', 'url'] },
+            savedObject: { all: ['telemetry'], read: ['config', 'config-global', 'url', 'tag'] },
             composedOf: [{ feature: 'featureE', privileges: ['all'] }],
           },
           read: {
             ui: [],
-            savedObject: { all: [], read: ['config', 'config-global', 'telemetry', 'url'] },
+            savedObject: { all: [], read: ['config', 'config-global', 'telemetry', 'url', 'tag'] },
           },
         });
       });

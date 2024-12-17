@@ -17,7 +17,7 @@ export const OnboardingCardContentPanel = React.memo<PropsWithChildren<EuiPanelP
 
     return (
       <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false} className={panelClassName}>
-        <EuiPanel {...panelProps} hasShadow={false} paddingSize="l" className={nestedClassName}>
+        <EuiPanel hasShadow={false} paddingSize="l" {...panelProps} className={nestedClassName}>
           {children}
         </EuiPanel>
       </EuiPanel>

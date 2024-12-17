@@ -22,3 +22,12 @@ export interface Integration {
   data_streams: Array<{ dataset: string; title: string; index_pattern: string }>;
   elser_embedding: string;
 }
+
+export interface RuleMigrationPrebuiltRule {
+  rule_id: string;
+  installedRuleId?: string;
+  name: string;
+  description: string;
+  elser_embedding: string;
+  mitre_attack_ids?: string[];
+}

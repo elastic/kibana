@@ -12,17 +12,20 @@ import type {
   UpdateResponse,
   WriteResponseBase,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
+import type { DefendInsight, DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
 
 import type {
   SearchParams,
   SecurityWorkflowInsight,
 } from '../../../../common/endpoint/types/workflow_insights';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 import { SecurityWorkflowInsightsFailedInitialized } from './errors';
-import { buildEsQueryParams, createDatastream, createPipeline } from './helpers';
+import { buildEsQueryParams, createDatastream, createPipeline, generateInsightId } from './helpers';
 import { DATA_STREAM_NAME } from './constants';
+import { buildWorkflowInsights } from './builders';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -30,6 +33,7 @@ interface SetupInterface {
   kibanaVersion: string;
   logger: Logger;
   isFeatureEnabled: boolean;
+  endpointContext: EndpointAppContextService;
 }
 
 interface StartInterface {
@@ -42,6 +46,7 @@ class SecurityWorkflowInsightsService {
   private stop$ = new ReplaySubject<void>(1);
   private ds: DataStreamSpacesAdapter | undefined;
   private _esClient: ElasticsearchClient | undefined;
+  private _endpointContext: EndpointAppContextService | undefined;
   private _logger: Logger | undefined;
   private _isInitialized: Promise<[void, void]> = firstValueFrom(
     combineLatest<[void, void]>([this.setup$, this.start$])
@@ -52,13 +57,14 @@ class SecurityWorkflowInsightsService {
     return this._isInitialized;
   }
 
-  public setup({ kibanaVersion, logger, isFeatureEnabled }: SetupInterface) {
+  public setup({ kibanaVersion, logger, isFeatureEnabled, endpointContext }: SetupInterface) {
     this.isFeatureEnabled = isFeatureEnabled;
     if (!isFeatureEnabled) {
       return;
     }
 
     this._logger = logger;
+    this._endpointContext = endpointContext;
 
     try {
       this.ds = createDatastream(kibanaVersion);
@@ -85,14 +91,18 @@ class SecurityWorkflowInsightsService {
         esClient,
         pluginStop$: this.stop$,
       });
-      await esClient.indices.createDataStream({ name: DATA_STREAM_NAME });
-    } catch (err) {
-      // ignore datastream already exists error
-      if (err?.body?.error?.type === 'resource_already_exists_exception') {
-        return;
-      }
 
-      this.logger.warn(new SecurityWorkflowInsightsFailedInitialized(err.message).message);
+      try {
+        await esClient.indices.createDataStream({ name: DATA_STREAM_NAME });
+      } catch (err) {
+        if (err?.body?.error?.type === 'resource_already_exists_exception') {
+          this.logger.debug(`Datastream ${DATA_STREAM_NAME} already exists`);
+        } else {
+          throw new SecurityWorkflowInsightsFailedInitialized(err.message);
+        }
+      }
+    } catch (err) {
+      this.logger.warn(err.message);
       return;
     }
 
@@ -108,12 +118,35 @@ class SecurityWorkflowInsightsService {
     this.stop$.complete();
   }
 
+  public async createFromDefendInsights(
+    defendInsights: DefendInsight[],
+    request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>
+  ): Promise<WriteResponseBase[]> {
+    await this.isInitialized;
+
+    const workflowInsights = await buildWorkflowInsights({
+      defendInsights,
+      request,
+      endpointMetadataService: this.endpointContext.getEndpointMetadataService(),
+    });
+    return Promise.all(workflowInsights.map((insight) => this.create(insight)));
+  }
+
   public async create(insight: SecurityWorkflowInsight): Promise<WriteResponseBase> {
     await this.isInitialized;
 
+    const id = generateInsightId(insight);
+
+    // if insight already exists, update instead
+    const existingInsights = await this.fetch({ ids: [id] });
+    if (existingInsights.length) {
+      return this.update(id, insight, existingInsights[0]._index);
+    }
+
     const response = await this.esClient.index<SecurityWorkflowInsight>({
       index: DATA_STREAM_NAME,
-      body: insight,
+      body: { ...insight, id },
+      refresh: 'wait_for',
     });
 
     return response;
@@ -121,14 +154,26 @@ class SecurityWorkflowInsightsService {
 
   public async update(
     id: string,
-    insight: Partial<SecurityWorkflowInsight>
+    insight: Partial<SecurityWorkflowInsight>,
+    backingIndex?: string
   ): Promise<UpdateResponse> {
     await this.isInitialized;
 
+    let index = backingIndex;
+    if (!index) {
+      const retrievedInsight = (await this.fetch({ ids: [id] }))[0];
+      index = retrievedInsight?._index;
+    }
+
+    if (!index) {
+      throw new Error('invalid backing index for updating workflow insight');
+    }
+
     const response = await this.esClient.update<SecurityWorkflowInsight>({
-      index: DATA_STREAM_NAME,
+      index,
       id,
       body: { doc: insight },
+      refresh: 'wait_for',
     });
 
     return response;
@@ -171,6 +216,14 @@ class SecurityWorkflowInsightsService {
     }
 
     return this._logger;
+  }
+
+  private get endpointContext(): EndpointAppContextService {
+    if (!this._endpointContext) {
+      throw new SecurityWorkflowInsightsFailedInitialized('no endpoint context found');
+    }
+
+    return this._endpointContext;
   }
 }
 

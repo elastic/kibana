@@ -118,7 +118,7 @@ const extractDiffableCommonFields = (
     version: rule.version,
 
     // Main domain fields
-    name: rule.name,
+    name: rule.name.trim(),
     tags: rule.tags ?? [],
     description: rule.description,
     severity: rule.severity,
@@ -213,7 +213,6 @@ const extractDiffableThreatMatchFieldsFromRuleObject = (
     threat_index: rule.threat_index,
     threat_mapping: rule.threat_mapping,
     threat_indicator_path: rule.threat_indicator_path,
-    threat_language: rule.threat_language,
     alert_suppression: rule.alert_suppression,
   };
 };

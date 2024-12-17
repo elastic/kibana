@@ -40,11 +40,6 @@ info:
   x-feedbackLink:
     label: Feedback
     url: https://github.com/elastic/docs-content/issues/new?assignees=&labels=feedback%2Ccommunity&projects=&template=api-feedback.yaml&title=%5BFeedback%5D%3A+
-servers:
-  - url: https://{kibana_url}
-    variables:
-      kibana_url:
-        default: localhost:5601
 security:
   - apiKeyAuth: []
   - basicAuth: []

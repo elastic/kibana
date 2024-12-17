@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const GET_MIGRATION_PREBUILT_RULES_FAILURE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.getMigrationPrebuiltRulesFailDescription',
+  {
+    defaultMessage: 'Failed to fetch prebuilt rules',
+  }
+);
+
 export const GET_MIGRATION_RULES_FAILURE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.getMigrationRulesFailDescription',
   {
@@ -25,5 +32,12 @@ export const INSTALL_MIGRATION_RULES_FAILURE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.installMigrationRulesFailDescription',
   {
     defaultMessage: 'Failed to install migration rules',
+  }
+);
+
+export const UPDATE_MIGRATION_RULES_FAILURE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.updateMigrationRulesFailDescription',
+  {
+    defaultMessage: 'Failed to update migration rules',
   }
 );

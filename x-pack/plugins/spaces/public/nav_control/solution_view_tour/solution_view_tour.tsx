@@ -72,6 +72,7 @@ export const SolutionViewTour: FC<Props> = ({ children, solution, isTourOpen, on
       onFinish={onFinishTour}
       step={1}
       stepsTotal={1}
+      repositionOnScroll
       title={i18n.translate('xpack.spaces.navControl.tour.title', {
         defaultMessage: 'You chose the {solution} solution view',
         values: { solution: solutionLabel },

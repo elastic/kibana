@@ -94,7 +94,7 @@ jest.mock('../../../lib/rule_api/rules_kuery_filter');
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_health_status', () => ({
   fetchUiHealthStatus: jest.fn(() => ({ isRulesAvailable: true })),
 }));
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config', () => ({
+jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => ({
   fetchUiConfig: jest
     .fn()
     .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
@@ -1382,7 +1382,8 @@ describe('rules_list with show only capability', () => {
   });
 });
 
-describe('MaintenanceWindowsMock', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/203179
+describe.skip('MaintenanceWindowsMock', () => {
   beforeEach(() => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
 

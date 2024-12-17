@@ -14,6 +14,7 @@ import createCache from '@emotion/cache';
 import { EuiProvider, EuiProviderProps, euiStylisPrefixer } from '@elastic/eui';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import { getColorMode, defaultTheme } from '@kbn/react-kibana-context-common';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 
 /**
@@ -21,6 +22,7 @@ import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
  */
 export interface KibanaEuiProviderProps extends Pick<EuiProviderProps<{}>, 'modify' | 'colorMode'> {
   theme: ThemeServiceStart;
+  userProfile?: Pick<UserProfileService, 'getUserProfile$'>; // TODO: use this to access a "high contrast mode" flag from user settings. Pass the flag to EuiProvider, when it is supported in EUI.
   globalStyles?: boolean;
 }
 

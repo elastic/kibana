@@ -61,7 +61,7 @@ export const wrapSuppressedEsqlAlerts = ({
 
       const suppressionTerms = getSuppressionTerms({
         alertSuppression: completeRule?.ruleParams?.alertSuppression,
-        fields: combinedFields,
+        input: combinedFields,
       });
 
       const id = generateAlertId({

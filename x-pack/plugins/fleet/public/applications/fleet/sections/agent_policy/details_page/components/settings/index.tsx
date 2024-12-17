@@ -18,9 +18,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { useHistory } from 'react-router-dom';
 
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
-
 import type { AgentPolicy } from '../../../../../types';
 import {
   useStartServices,
@@ -30,6 +31,8 @@ import {
   sendGetAgentStatus,
   useAgentPolicyRefresh,
   useBreadcrumbs,
+  useFleetStatus,
+  useLink,
 } from '../../../../../hooks';
 import {
   AgentPolicyForm,
@@ -79,14 +82,17 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
   ({ agentPolicy: originalAgentPolicy }) => {
     useBreadcrumbs('policy_details', { policyName: originalAgentPolicy.name });
     const { notifications } = useStartServices();
+    const { spaceId } = useFleetStatus();
     const {
       agents: { enabled: isFleetEnabled },
     } = useConfig();
+    const { getPath } = useLink();
     const hasAllAgentPoliciesPrivileges = useAuthz().fleet.allAgentPolicies;
     const refreshAgentPolicy = useAgentPolicyRefresh();
     const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>({
       ...originalAgentPolicy,
     });
+    const history = useHistory();
     const spaceSettings = useSpaceSettingsContext();
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -121,8 +127,15 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
               values: { name: agentPolicy.name },
             })
           );
-          refreshAgentPolicy();
-          setHasChanges(false);
+          if (
+            agentPolicy.space_ids &&
+            !agentPolicy.space_ids.includes(spaceId ?? DEFAULT_SPACE_ID)
+          ) {
+            history.replace(getPath('policies_list'));
+          } else {
+            refreshAgentPolicy();
+            setHasChanges(false);
+          }
         } else {
           notifications.toasts.addDanger(
             error

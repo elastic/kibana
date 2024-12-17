@@ -14,6 +14,27 @@ export const COLUMN_ACTIONS = i18n.translate(
   }
 );
 
+export const COLUMN_AUTHOR = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.tableColumn.authorLabel',
+  {
+    defaultMessage: 'Author',
+  }
+);
+
+export const ELASTIC_AUTHOR_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.tableColumn.elasticAuthorTitle',
+  {
+    defaultMessage: 'Elastic',
+  }
+);
+
+export const CUSTOM_AUTHOR_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.tableColumn.customAuthorTitle',
+  {
+    defaultMessage: 'Custom',
+  }
+);
+
 export const ACTIONS_VIEW_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.tableColumn.actionsViewLabel',
   {

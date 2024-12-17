@@ -23,8 +23,8 @@ ADD INSTRUCTIONS FOR USERS LOOKING TO UPGRADE. HOW CAN THEY WORK AROUND THIS?
 1. Copy and edit the template in the right area section of this file. Most recent entries should be at the top of the section. 
 2. Edit the anchor ID [[REPO-PR]] of the template with proper values. 
 3. Don't hardcode the link to the new entry. Instead, make it available through the doc link service files:
-  - https://github.com/elastic/kibana/blob/main/packages/kbn-doc-links/src/get_doc_links.ts
-  - https://github.com/elastic/kibana/blob/main/packages/kbn-doc-links/src/types.ts
+  - https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-doc-links/src/get_doc_links.ts
+  - https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-doc-links/src/types.ts
 
 The entry in the main links file should look like this:
 
@@ -334,6 +334,56 @@ The `xpack.actions.enabled` setting has been removed. For more information, refe
 Before you upgrade to 8.0.0, remove `xpack.actions.enabled` from kibana.yml.
 ====
 
+[discrete]
+[[breaking-legacy-rbac]]
+.[Alerting] Legacy RBAC exemption (9.0.0)
+[%collapsible]
+====
+*Details* +
+The legacy role-based action control exemption for alerting rules has been removed in version 9.0.0.
+
+*Impact* +
+Any alerting rules that rely on the legacy exemption will fail to trigger actions for alerts starting
+from version 9.0.0.
+
+*Action* +
+To identify the affected rules run the following query in *{dev-tools-app}*:
+
+[source,js]
+----------------------------------
+GET .kibana*/_search
+{
+  "runtime_mappings": {
+    "apiKeyVersion": {
+      "type": "keyword",
+      "script": {
+        "source": "def alert = params._source['alert']; if (alert != null) { def meta = alert.meta; if (meta != null) { emit(meta.versionApiKeyLastmodified); } else { emit('');}}"
+      }
+    }
+  },
+  "size": 10000,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "type": "alert"
+          }
+        },
+        {
+          "term": {
+            "apiKeyVersion": "pre-7.10.0"
+          }
+        }
+      ]
+    }
+  },
+  "_source": ["alert.name", "namespaces"]
+}
+----------------------------------
+
+To use normal RBAC authorization, edit each affected rule to update the API key.
+====
 
 // Data views
 
@@ -1769,6 +1819,15 @@ unchanged. For more information, refer to {kibana-pull}178159[#178159].
 // Visualizations
 
 [discrete]
+[[kibana-197227]]
+.[Visualizations] Removed `metrics:allowCheckingForFailedShards` advanced setting. (8.17)
+[%collapsible]
+====
+*Details* +
+The `metrics:allowCheckingForFailedShards` advanced setting has been removed. With this change, it is no longer possible to suppress warnings about failed shards in TSVB. For more information, refer to ({kibana-pull}197227[#197227]).
+====
+
+[discrete]
 [[kibana-156455]]
 .[Visualizations] The ability to create legacy input controls was hidden. (8.9)
 [%collapsible]
@@ -1811,6 +1870,15 @@ When you create *Lens* visualization, the default for the *Legend width* is now 
 
 [float]
 ==== Elastic Observability solution
+
+[discrete]
+[[deprecation]]
+.The Observability > Logs > Explorer app is now deprecated in favor of Discover. (8.17)
+[%collapsible]
+====
+*Details* +
+Both the Logs Explorer and Logs Stream applications are now deprecated and will be removed in 9.0. We continue to make enhancements to Discover to offer similar functionality in 9.x.
+====
 
 [discrete]
 [[deprecation-192003]]

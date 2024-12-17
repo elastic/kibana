@@ -6,12 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
 import { NewTermsFieldsReadOnly } from './new_terms_fields';
-import { FieldReadOnly } from '../../field_readonly';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
-import { mockNewTermsRule } from '../../storybook/mocks';
-import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: NewTermsFieldsReadOnly,
@@ -19,22 +14,4 @@ export default {
     'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/new_terms_fields',
 };
 
-interface TemplateProps {
-  finalDiffableRule: DiffableRule;
-}
-
-const Template: Story<TemplateProps> = (args) => {
-  return (
-    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
-      <FieldReadOnly fieldName="new_terms_fields" />
-    </ThreeWayDiffStorybookProviders>
-  );
-};
-
-export const Default = Template.bind({});
-
-Default.args = {
-  finalDiffableRule: mockNewTermsRule({
-    new_terms_fields: ['user.name', 'source.ip'],
-  }),
-};
+export const Default = () => <NewTermsFieldsReadOnly newTermsFields={['user.name', 'source.ip']} />;

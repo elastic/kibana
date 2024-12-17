@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type {
   UseFetchRelatedAlertsByAncestryParams,
   UseFetchRelatedAlertsByAncestryResult,
@@ -22,8 +22,8 @@ const scopeId = 'scopeId';
 
 describe('useFetchRelatedAlertsByAncestry', () => {
   let hookResult: RenderHookResult<
-    UseFetchRelatedAlertsByAncestryParams,
-    UseFetchRelatedAlertsByAncestryResult
+    UseFetchRelatedAlertsByAncestryResult,
+    UseFetchRelatedAlertsByAncestryParams
   >;
 
   it('should return loading true while data is loading', () => {
