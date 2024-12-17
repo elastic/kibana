@@ -13,6 +13,7 @@ import type { ObservabilityAIAssistantClient } from '../../service/client';
 import type { FunctionCallChatFunction } from '../../service/types';
 import { RecallRanking, recallRankingEventType } from '../../analytics/recall_ranking';
 import { RecalledEntry } from '../../service/knowledge_base_service';
+import { rewriteUserPrompt } from './rewrite_user_prompt';
 
 export type RecalledSuggestion = Pick<RecalledEntry, 'id' | 'text' | 'score'>;
 
@@ -39,6 +40,16 @@ export async function recallAndScore({
   scores?: Array<{ id: string; score: number }>;
   suggestions: RecalledSuggestion[];
 }> {
+  // rewrite user prompt. It should also include previous messages
+  const rewrittenUserPrompt = await rewriteUserPrompt({
+    logger,
+    messages,
+    userPrompt,
+    context,
+    signal,
+    chat,
+  });
+
   const queries = [
     { text: userPrompt, boost: 3 },
     { text: context, boost: 1 },

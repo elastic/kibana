@@ -18,6 +18,7 @@ export function registerSummarizationFunction({
 }: FunctionRegistrationParameters) {
   functions.registerFunction(
     {
+      strict: false,
       name: SUMMARIZE_FUNCTION_NAME,
       description: `Use this function to store facts in the knowledge database if the user requests it.
         You can score the learnings with a confidence metric, whether it is a correction on a previous learning.

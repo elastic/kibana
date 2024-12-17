@@ -16,10 +16,12 @@ import { parseSuggestionScores } from './parse_suggestion_scores';
 import { RecalledSuggestion } from './recall_and_score';
 import { ShortIdTable } from '../../../common/utils/short_id_table';
 
+const SCORE_FUNCTION_NAME = 'score';
+
 const scoreFunctionRequestRt = t.type({
   message: t.type({
     function_call: t.type({
-      name: t.literal('score'),
+      name: t.literal(SCORE_FUNCTION_NAME),
       arguments: t.string,
     }),
   }),
@@ -86,7 +88,8 @@ export async function scoreSuggestions({
   };
 
   const scoreFunction = {
-    name: 'score',
+    strict: true,
+    name: SCORE_FUNCTION_NAME,
     description:
       'Use this function to score documents based on how relevant they are to the conversation.',
     parameters: {
@@ -102,7 +105,7 @@ export async function scoreSuggestions({
           type: 'string',
         },
       },
-      required: ['score'],
+      required: ['scores'],
     } as const,
   };
 
@@ -110,7 +113,7 @@ export async function scoreSuggestions({
     chat('score_suggestions', {
       messages: [...messages.slice(0, -2), newUserMessage],
       functions: [scoreFunction],
-      functionCall: 'score',
+      functionCall: SCORE_FUNCTION_NAME,
       signal,
     }).pipe(concatenateChatCompletionChunks())
   );
@@ -145,8 +148,5 @@ export async function scoreSuggestions({
 
   logger.debug(() => `Relevant documents: ${JSON.stringify(relevantDocuments, null, 2)}`);
 
-  return {
-    relevantDocuments,
-    scores: scores.map((score) => ({ id: score.id, score: score.score })),
-  };
+  return { relevantDocuments, scores };
 }

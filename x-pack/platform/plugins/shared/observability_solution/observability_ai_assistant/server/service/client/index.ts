@@ -474,7 +474,12 @@ export class ObservabilityAIAssistantClient {
     }: {
       messages: Message[];
       connectorId: string;
-      functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
+      functions?: Array<{
+        name: string;
+        description: string;
+        parameters?: CompatibleJSONSchema;
+        strict?: boolean;
+      }>;
       functionCall?: string;
       signal: AbortSignal;
       simulateFunctionCalling?: boolean;

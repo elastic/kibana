@@ -59,6 +59,7 @@ export function getGeneratedTitle({
       ],
       functions: [
         {
+          strict: true,
           name: TITLE_CONVERSATION_FUNCTION_NAME,
           description:
             'Use this function to title the conversation. Do not wrap the title in quotes',

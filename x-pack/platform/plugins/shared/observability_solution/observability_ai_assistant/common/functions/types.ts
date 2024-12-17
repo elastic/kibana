@@ -38,6 +38,7 @@ export type FunctionResponse =
 export interface FunctionDefinition<
   TParameters extends CompatibleJSONSchema = CompatibleJSONSchema
 > {
+  strict: boolean;
   name: string;
   description: string;
   visibility?: FunctionVisibility;
