@@ -56,7 +56,7 @@ export function sendFetchStartMsg(
   timeRange: TimeRange,
   timeRangeRelative: TimeRange,
   query: AggregateQuery | Query | undefined,
-  appState: DiscoverAppState
+  appState: DiscoverAppState | undefined
 ) {
   main$.next({
     ...main$.getValue(),
