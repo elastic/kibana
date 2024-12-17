@@ -14,16 +14,16 @@ import axios from 'axios';
 
 import type { InfoResponse, LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
 
-import { appContextService } from '../services';
-
 import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
+
+import { appContextService } from '../services';
 
 import { TelemetryQueue } from './queue';
 
 import type { FleetTelemetryChannel, FleetTelemetryChannelEvents } from './types';
 
 /**
- * Simplified version of https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/server/lib/telemetry/sender.ts
+ * Simplified version of https://github.com/elastic/kibana/blob/master/x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/sender.ts
  * Sends batched events to telemetry v3 api
  */
 export class TelemetryEventsSender {

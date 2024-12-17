@@ -28,7 +28,7 @@ allowing users to configure their advanced settings, also known
 as uiSettings within the code.
 
 
-|{kib-repo}blob/{branch}/src/plugins/ai_assistant_management/selection/README.md[aiAssistantManagementSelection]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/ai_assistant_management/selection/README.md[aiAssistantManagementSelection]
 |The aiAssistantManagementSelection plugin manages the Ai Assistant management section.
 
 
@@ -40,7 +40,7 @@ as uiSettings within the code.
 |The Charts plugin is a way to create easier integration of shared colors, themes, types and other utilities across all Kibana charts and visualizations.
 
 
-|{kib-repo}blob/{branch}/src/plugins/console/README.md[console]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/console/README.md[console]
 |Console provides the user with tools for storing and executing requests against Elasticsearch.
 
 
@@ -83,7 +83,7 @@ and field lists across the various Kibana apps. It's typically used in conjuncti
 <DocLink id="kibDevTutorialDataSearchAndSessions" section="high-level-search" text="SearchSource" /> for composing queries.
 
 
-|{kib-repo}blob/{branch}/src/plugins/dev_tools/README.md[devTools]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/dev_tools/README.md[devTools]
 |The ui/registry/dev_tools is removed in favor of the devTools plugin which exposes a register method in the setup contract.
 Registering app works mostly the same as registering apps in core.application.register.
 Routing will be handled by the id of the dev tool - your dev tool will be mounted when the URL matches /app/dev_tools#/<YOUR ID>.
@@ -110,7 +110,7 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Contains a Discover-like table specifically for ES|QL queries:
 
 
-|{kib-repo}blob/{branch}/src/plugins/es_ui_shared/README.md[esUiShared]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/es_ui_shared/README.md[esUiShared]
 |This plugin contains reusable code in the form of self-contained modules (or libraries). Each of these modules exports a set of functionality relevant to the domain of the module.
 
 
@@ -258,7 +258,7 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |This plugin adds the Links panel which allows authors to create hard links to navigate on click and bring all context from the source dashboard to the destination dashboard.
 
 
-|{kib-repo}blob/{branch}/src/plugins/management/README.md[management]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/management/README.md[management]
 |This plugins contains the "Stack Management" page framework. It offers navigation and an API
 to link individual management section into it. This plugin does not contain any individual
 management section itself.
@@ -470,7 +470,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/asset_inventory/README.md[assetInventory]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/asset_inventory/README.md[assetInventory]
 |Centralized asset inventory experience within the Elastic Security solution. A central place for users to view and manage all their assets from different environments.
 
 
@@ -495,11 +495,11 @@ The plugin exposes the static DefaultEditorController class to consume.
 It was removed, but the plugin was left behind to register no longer used config keys.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_data_migration/README.md[cloudDataMigration]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration/README.md[cloudDataMigration]
 |Static migration page where self-managed users can see text/copy about migrating to Elastic Cloud
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_defend/README.md[cloudDefend]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/cloud_defend/README.md[cloudDefend]
 |This plugin currently only exists to provide custom fleet policy UX for a set of new BPF LSM features. The first feature being container "drift prevention".
 
 
@@ -516,11 +516,11 @@ This plugin no-longer exposes any evaluation APIs. Refer to <DocLink id="kibFeat
 |Adds all the links to the Elastic Cloud console.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_security_posture/README.md[cloudSecurityPosture]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/cloud_security_posture/README.md[cloudSecurityPosture]
 |Cloud Posture automates the identification and remediation of risks across cloud infrastructures
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cross_cluster_replication/README.md[crossClusterReplication]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/cross_cluster_replication/README.md[crossClusterReplication]
 |You can run a local cluster and simulate a remote cluster within a single Kibana directory.
 
 
@@ -541,7 +541,7 @@ Plugin server-side only. Plugin has three main functions:
 |In order to make ongoing maintenance of log collection easy we want to introduce the concept of data set quality, where users can easily get an overview on the data sets they have with information such as integration, size, last activity, among others.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/data_usage/README.md[dataUsage]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/data_usage/README.md[dataUsage]
 |Serverless only plugin for users to view data usage
 
 
@@ -553,11 +553,11 @@ Plugin server-side only. Plugin has three main functions:
 |Contains the enhancements to the OSS discover app.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ecs_data_quality_dashboard/README.md[ecsDataQualityDashboard]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/ecs_data_quality_dashboard/README.md[ecsDataQualityDashboard]
 |This plugin implements (server) APIs used to render the content of the Data Quality dashboard.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/elastic_assistant/README.md[elasticAssistant]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/elastic_assistant/README.md[elasticAssistant]
 |This plugin implements (only) server APIs for the Elastic AI Assistant.
 
 
@@ -592,7 +592,7 @@ security and spaces filtering.
 activities.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/exploratory_view/README.md[exploratoryView]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/exploratory_view/README.md[exploratoryView]
 |A shared component for visualizing observability data types via lens embeddable. For further details.
 
 
@@ -629,12 +629,12 @@ or dashboards from the Kibana instance, from both server and client-side plugins
 |This is the main source folder of the Graph plugin. It contains all of the Kibana server and client source code. x-pack/test/functional/apps/graph contains additional functional tests.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/grokdebugger/README.md[grokdebugger]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/grokdebugger/README.md[grokdebugger]
 |This plugin helps users define Grok patterns,
 which are particularly useful for ingesting logs.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/index_lifecycle_management/README.md[indexLifecycleManagement]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/index_lifecycle_management/README.md[indexLifecycleManagement]
 |You can test that the Frozen badge, phase filtering, and lifecycle information is surfaced in
 Index Management by running this series of requests in Console:
 
@@ -653,11 +653,11 @@ external LLM APIs. Its goals are:
 the infrastructure monitoring use-case within Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ingest_pipelines/README.md[ingestPipelines]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/ingest_pipelines/README.md[ingestPipelines]
 |The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/integration_assistant/README.md[integrationAssistant]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/integration_assistant/README.md[integrationAssistant]
 |Team owner: Security Integrations Scalability
 
 
@@ -665,15 +665,15 @@ the infrastructure monitoring use-case within Kibana.
 |Home of the Inventory plugin, which renders the... inventory.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/investigate/README.md[investigate]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/investigate/README.md[investigate]
 |undefined
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/investigate_app/README.md[investigateApp]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/investigate_app/README.md[investigateApp]
 |undefined
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/kubernetes_security/README.md[kubernetesSecurity]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/kubernetes_security/README.md[kubernetesSecurity]
 |This plugin provides interactive visualizations of your Kubernetes workload and session data.
 
 
@@ -681,11 +681,11 @@ the infrastructure monitoring use-case within Kibana.
 |Lens is a visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/license_api_guard/README.md[licenseApiGuard]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/license_api_guard/README.md[licenseApiGuard]
 |This plugin is used by ES UI plugins to reject API requests when the plugin is unsupported by the user's license.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/license_management/README.md[licenseManagement]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/license_management/README.md[licenseManagement]
 |This plugin enables users to activate a trial license, downgrade to Basic, and upload a new license.
 
 
@@ -743,19 +743,19 @@ Elastic.
 |The Notifications plugin provides a set of services to help Solutions and plugins send notifications to users.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability/README.md[observability]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability/README.md[observability]
 |This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_ai_assistant/README.md[observabilityAIAssistant]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/README.md[observabilityAIAssistant]
 |This document gives an overview of the features of the Observability AI Assistant at the time of writing, and how to use them. At a high level, the Observability AI Assistant offers contextual insights, and a chat functionality that we enrich with function calling, allowing the LLM to hook into the user's data. We also allow the LLM to store things it considers new information as embeddings into Elasticsearch, and query this knowledge base when it decides it needs more information, using ELSER.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_ai_assistant_app/README.md[observabilityAIAssistantApp]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_ai_assistant_app/README.md[observabilityAIAssistantApp]
 |This app registers defaults functions. It exists as a separate plugin to avoid cyclical dependencies.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_ai_assistant_management/README.md[observabilityAiAssistantManagement]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_ai_assistant_management/README.md[observabilityAiAssistantManagement]
 |The observabilityAiAssistantManagement plugin manages the Ai Assistant for Observability and Search management section.
 
 
@@ -771,11 +771,11 @@ Elastic.
 |A plugin that contains components and utilities shared by all Observability plugins.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/osquery/README.md[osquery]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/osquery/README.md[osquery]
 |This plugin adds extended support to Security Solution Fleet Osquery integration
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/painless_lab/README.md[painlessLab]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/painless_lab/README.md[painlessLab]
 |This plugin helps users learn how to use the Painless scripting language.
 
 
@@ -791,7 +791,7 @@ Elastic.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/remote_clusters/README.md[remoteClusters]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/remote_clusters/README.md[remoteClusters]
 |This plugin helps users manage their remote clusters, which enable cross-cluster search and cross-cluster replication.
 
 
@@ -799,7 +799,7 @@ Elastic.
 |An awesome Kibana reporting plugin
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/rollup/README.md[rollup]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/rollup/README.md[rollup]
 |Welcome to the Kibana rollup plugin! This plugin provides Kibana support for Elasticsearch's rollup feature. Please refer to the Elasticsearch documentation to understand rollup indices and how to create rollup jobs.
 
 
@@ -807,7 +807,7 @@ Elastic.
 |The rule registry plugin aims to make it easy for rule type producers to have their rules produce the data that they need to build rich experiences on top of a unified experience, without the risk of mapping conflicts.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/runtime_fields/README.md[runtimeFields]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/runtime_fields/README.md[runtimeFields]
 |Welcome to the home of the runtime field editor and everything related to runtime fields!
 
 
@@ -852,7 +852,7 @@ It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 |The Search Playground is a tool for developers to experiment with their own data using LLMs.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/searchprofiler/README.md[searchprofiler]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/searchprofiler/README.md[searchprofiler]
 |The search profiler consumes the Profile API
 by sending a search API with profile: true enabled in the request body. The response contains
 detailed information on how Elasticsearch executed the search request. People use this information
@@ -864,16 +864,16 @@ to understand why a search request might be slow.
 Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/security_solution/README.md[securitySolution]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/security_solution/README.md[securitySolution]
 |Welcome to the Kibana Security Solution plugin! This README will go over getting started with development and testing.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/security_solution_ess/README.md[securitySolutionEss]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/security_solution_ess/README.md[securitySolutionEss]
 |The security_solution_ess plugin is an internal plugin for Kibana's Security Solution, designed to encapsulate ESS-specific logic.
 This plugin is only enabled when the application is built for stateful deployments (ESS or on-prem), keeping the main security_solution plugin clean and agnostic of the offering model.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/security_solution_serverless/README.md[securitySolutionServerless]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/security_solution_serverless/README.md[securitySolutionServerless]
 |The security_solution_serverless plugin is an internal plugin for Kibana's Security Solution, designed to encapsulate serverless-specific logic.
 This plugin is only enabled when the application is built for serverless project, keeping the main security_solution plugin clean and agnostic of the offering model.
 
@@ -882,7 +882,7 @@ This plugin is only enabled when the application is built for serverless project
 |
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/serverless_observability/README.mdx[serverlessObservability]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/serverless_observability/README.mdx[serverlessObservability]
 |This plugin contains configuration and code used to create a Serverless Observability project.  It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
 
 
@@ -890,15 +890,15 @@ This plugin is only enabled when the application is built for serverless project
 |This plugin contains configuration and code used to create a Serverless Search project. It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/session_view/README.md[sessionView]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/session_view/README.md[sessionView]
 |Session View is meant to provide a visualization into what is going on in a particular Linux environment where the agent is running. It looks likes a terminal emulator; however, it is a tool for introspecting process activity and understanding user and service behaviour in your Linux servers and infrastructure. It is a time-ordered series of process executions displayed in a tree over time.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/slo/README.md[slo]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/slo/README.md[slo]
 |A Kibana plugin
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/snapshot_restore/README.md[snapshotRestore]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/snapshot_restore/README.md[snapshotRestore]
 |or
 
 
@@ -925,7 +925,7 @@ routes, etc.
 |Home of the Streams app plugin, which allows users to manage Streams via the UI.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/synthetics/README.md[synthetics]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/synthetics/README.md[synthetics]
 |The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening
 in their infrastructure.
 
@@ -938,11 +938,11 @@ in their infrastructure.
 |Gathers all usage collection, retrieving them from both: OSS and X-Pack plugins.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/threat_intelligence/README.md[threatIntelligence]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/threat_intelligence/README.md[threatIntelligence]
 |Elastic Threat Intelligence makes it easy to analyze and investigate potential security threats by aggregating data from multiple sources in one place. You’ll be able to view data from all activated threat intelligence feeds and take action.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/timelines/README.md[timelines]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/timelines/README.md[timelines]
 |Timelines is a plugin that provides a grid component with accompanying server side apis to help users identify events of interest and perform root cause analysis within Kibana.
 
 
@@ -964,7 +964,7 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 |Upgrade Assistant helps users prepare their Stack for being upgraded to the next version of the Elastic stack.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/uptime/README.md[uptime]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/uptime/README.md[uptime]
 |The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening
 in their infrastructure.
 
@@ -973,11 +973,11 @@ in their infrastructure.
 |NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/ux/readme.md[ux]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/ux/readme.md[ux]
 |https://docs.elastic.dev/kibana-dev-docs/welcome
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/watcher/README.md[watcher]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/watcher/README.md[watcher]
 |This plugins adopts some conventions in addition to or in place of conventions in Kibana (at the time of the plugin's creation):
 
 
