@@ -15,7 +15,7 @@ jest.mock('../../enterprise_search_content/components/search_index/indices/indic
 
 import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { EuiSideNavItemType } from '@elastic/eui';
 
@@ -35,7 +35,7 @@ const DEFAULT_PRODUCT_ACCESS: ProductAccess = {
 const baseNavItems = [
   expect.objectContaining({
     'data-test-subj': 'searchSideNav-Home',
-    href: '/app/enterprise_search/overview',
+    href: '/app/elasticsearch/overview',
     id: 'home',
     items: undefined,
   }),
@@ -45,21 +45,21 @@ const baseNavItems = [
     items: [
       {
         'data-test-subj': 'searchSideNav-Indices',
-        href: '/app/enterprise_search/content/search_indices',
+        href: '/app/elasticsearch/content/search_indices',
         id: 'search_indices',
         items: [],
         name: 'Indices',
       },
       {
         'data-test-subj': 'searchSideNav-Connectors',
-        href: '/app/enterprise_search/content/connectors',
+        href: '/app/elasticsearch/content/connectors',
         id: 'connectors',
         items: undefined,
         name: 'Connectors',
       },
       {
         'data-test-subj': 'searchSideNav-Crawlers',
-        href: '/app/enterprise_search/content/crawlers',
+        href: '/app/elasticsearch/content/crawlers',
         id: 'crawlers',
         items: undefined,
         name: 'Web Crawlers',
@@ -80,14 +80,14 @@ const baseNavItems = [
       },
       {
         'data-test-subj': 'searchSideNav-SearchApplications',
-        href: '/app/enterprise_search/applications/search_applications',
+        href: '/app/elasticsearch/applications/search_applications',
         id: 'searchApplications',
         items: undefined,
         name: 'Search Applications',
       },
       {
         'data-test-subj': 'searchSideNav-BehavioralAnalytics',
-        href: '/app/enterprise_search/analytics',
+        href: '/app/elasticsearch/analytics',
         id: 'analyticsCollections',
         items: undefined,
         name: 'Behavioral Analytics',
@@ -115,28 +115,28 @@ const baseNavItems = [
     items: [
       {
         'data-test-subj': 'searchSideNav-Elasticsearch',
-        href: '/app/enterprise_search/elasticsearch',
+        href: '/app/elasticsearch/elasticsearch',
         id: 'elasticsearch',
         items: undefined,
         name: 'Elasticsearch',
       },
       {
         'data-test-subj': 'searchSideNav-VectorSearch',
-        href: '/app/enterprise_search/vector_search',
+        href: '/app/elasticsearch/vector_search',
         id: 'vectorSearch',
         items: undefined,
         name: 'Vector Search',
       },
       {
         'data-test-subj': 'searchSideNav-SemanticSearch',
-        href: '/app/enterprise_search/semantic_search',
+        href: '/app/elasticsearch/semantic_search',
         id: 'semanticSearch',
         items: undefined,
         name: 'Semantic Search',
       },
       {
         'data-test-subj': 'searchSideNav-AISearch',
-        href: '/app/enterprise_search/ai_search',
+        href: '/app/elasticsearch/ai_search',
         id: 'aiSearch',
         items: undefined,
         name: 'AI Search',
@@ -144,48 +144,27 @@ const baseNavItems = [
     ],
     name: 'Getting started',
   },
-  {
-    'data-test-subj': 'searchSideNav-EnterpriseSearch',
-    id: 'enterpriseSearch',
-    items: [
-      {
-        'data-test-subj': 'searchSideNav-AppSearch',
-        href: '/app/enterprise_search/app_search',
-        id: 'app_search',
-        items: undefined,
-        name: 'App Search',
-      },
-      {
-        'data-test-subj': 'searchSideNav-WorkplaceSearch',
-        href: '/app/enterprise_search/workplace_search',
-        id: 'workplace_search',
-        items: undefined,
-        name: 'Workplace Search',
-      },
-    ],
-    name: 'Enterprise Search',
-  },
 ];
 
 const mockNavLinks = [
   {
     id: 'enterpriseSearch',
-    url: '/app/enterprise_search/overview',
+    url: '/app/elasticsearch/overview',
   },
   {
     id: 'enterpriseSearchContent:searchIndices',
     title: 'Indices',
-    url: '/app/enterprise_search/content/search_indices',
+    url: '/app/elasticsearch/content/search_indices',
   },
   {
     id: 'enterpriseSearchContent:connectors',
     title: 'Connectors',
-    url: '/app/enterprise_search/content/connectors',
+    url: '/app/elasticsearch/content/connectors',
   },
   {
     id: 'enterpriseSearchContent:webCrawlers',
     title: 'Web Crawlers',
-    url: '/app/enterprise_search/content/crawlers',
+    url: '/app/elasticsearch/content/crawlers',
   },
   {
     id: 'searchPlayground',
@@ -195,12 +174,12 @@ const mockNavLinks = [
   {
     id: 'enterpriseSearchApplications:searchApplications',
     title: 'Search Applications',
-    url: '/app/enterprise_search/applications/search_applications',
+    url: '/app/elasticsearch/applications/search_applications',
   },
   {
     id: 'enterpriseSearchAnalytics',
     title: 'Behavioral Analytics',
-    url: '/app/enterprise_search/analytics',
+    url: '/app/elasticsearch/analytics',
   },
   {
     id: 'searchInferenceEndpoints:inferenceEndpoints',
@@ -220,22 +199,22 @@ const mockNavLinks = [
   {
     id: 'enterpriseSearchElasticsearch',
     title: 'Elasticsearch',
-    url: '/app/enterprise_search/elasticsearch',
+    url: '/app/elasticsearch/elasticsearch',
   },
   {
     id: 'enterpriseSearchVectorSearch',
     title: 'Vector Search',
-    url: '/app/enterprise_search/vector_search',
+    url: '/app/elasticsearch/vector_search',
   },
   {
     id: 'enterpriseSearchSemanticSearch',
     title: 'Semantic Search',
-    url: '/app/enterprise_search/semantic_search',
+    url: '/app/elasticsearch/semantic_search',
   },
   {
     id: 'enterpriseSearchAISearch',
     title: 'AI Search',
-    url: '/app/enterprise_search/ai_search',
+    url: '/app/elasticsearch/ai_search',
   },
 ];
 
@@ -264,86 +243,6 @@ describe('useEnterpriseSearchContentNav', () => {
 
     expect(result.current).toEqual(baseNavItems);
   });
-
-  it('excludes legacy products when the user has no access to them', () => {
-    const noProductAccess: ProductAccess = {
-      ...DEFAULT_PRODUCT_ACCESS,
-      hasAppSearchAccess: false,
-      hasWorkplaceSearchAccess: false,
-    };
-
-    setMockValues({
-      ...defaultMockValues,
-      productAccess: noProductAccess,
-    });
-    mockKibanaValues.uiSettings.get.mockReturnValue(false);
-
-    const { result } = renderHook(() => useEnterpriseSearchNav());
-    const esNav = result.current;
-    const legacyESNav = esNav?.find((item) => item.id === 'enterpriseSearch');
-    expect(legacyESNav).toBeUndefined();
-  });
-
-  it('excludes App Search when the user has no access to it', () => {
-    const workplaceSearchProductAccess: ProductAccess = {
-      ...DEFAULT_PRODUCT_ACCESS,
-      hasAppSearchAccess: false,
-      hasWorkplaceSearchAccess: true,
-    };
-
-    setMockValues({
-      ...defaultMockValues,
-      productAccess: workplaceSearchProductAccess,
-    });
-
-    const { result } = renderHook(() => useEnterpriseSearchNav());
-    const esNav = result.current;
-    const legacyESNav = esNav?.find((item) => item.id === 'enterpriseSearch');
-    expect(legacyESNav).not.toBeUndefined();
-    expect(legacyESNav).toEqual({
-      'data-test-subj': 'searchSideNav-EnterpriseSearch',
-      id: 'enterpriseSearch',
-      items: [
-        {
-          'data-test-subj': 'searchSideNav-WorkplaceSearch',
-          href: '/app/enterprise_search/workplace_search',
-          id: 'workplace_search',
-          name: 'Workplace Search',
-        },
-      ],
-      name: 'Enterprise Search',
-    });
-  });
-
-  it('excludes Workplace Search when the user has no access to it', () => {
-    const appSearchProductAccess: ProductAccess = {
-      ...DEFAULT_PRODUCT_ACCESS,
-      hasWorkplaceSearchAccess: false,
-    };
-
-    setMockValues({
-      ...defaultMockValues,
-      productAccess: appSearchProductAccess,
-    });
-
-    const { result } = renderHook(() => useEnterpriseSearchNav());
-    const esNav = result.current;
-    const legacyESNav = esNav?.find((item) => item.id === 'enterpriseSearch');
-    expect(legacyESNav).not.toBeUndefined();
-    expect(legacyESNav).toEqual({
-      'data-test-subj': 'searchSideNav-EnterpriseSearch',
-      id: 'enterpriseSearch',
-      items: [
-        {
-          'data-test-subj': 'searchSideNav-AppSearch',
-          href: '/app/enterprise_search/app_search',
-          id: 'app_search',
-          name: 'App Search',
-        },
-      ],
-      name: 'Enterprise Search',
-    });
-  });
 });
 
 describe('useEnterpriseSearchApplicationNav', () => {
@@ -370,7 +269,6 @@ describe('useEnterpriseSearchApplicationNav', () => {
       'Build',
       'Relevance',
       'Getting started',
-      'Enterprise Search',
     ]);
     const searchItem = navItems?.find((ni) => ni.id === 'build');
     expect(searchItem).not.toBeUndefined();
@@ -387,17 +285,17 @@ describe('useEnterpriseSearchApplicationNav', () => {
     const engineItem: EuiSideNavItemType<unknown> = enginesItem!.items[0];
     expect(engineItem).toMatchInlineSnapshot(`
       Object {
-        "href": "/app/enterprise_search/applications/search_applications/my-test-engine",
+        "href": "/app/elasticsearch/applications/search_applications/my-test-engine",
         "id": "searchApplicationId",
         "items": Array [
           Object {
-            "href": "/app/enterprise_search/applications/search_applications/my-test-engine/docs_explorer",
+            "href": "/app/elasticsearch/applications/search_applications/my-test-engine/docs_explorer",
             "id": "enterpriseSearchApplicationDocsExplorer",
             "items": undefined,
             "name": "Docs Explorer",
           },
           Object {
-            "href": "/app/enterprise_search/applications/search_applications/my-test-engine/content",
+            "href": "/app/elasticsearch/applications/search_applications/my-test-engine/content",
             "iconToString": undefined,
             "id": "enterpriseSearchApplicationsContent",
             "items": undefined,
@@ -410,7 +308,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
             "nameToString": "Content",
           },
           Object {
-            "href": "/app/enterprise_search/applications/search_applications/my-test-engine/connect",
+            "href": "/app/elasticsearch/applications/search_applications/my-test-engine/connect",
             "id": "enterpriseSearchApplicationConnect",
             "items": undefined,
             "name": "Connect",
@@ -432,7 +330,6 @@ describe('useEnterpriseSearchApplicationNav', () => {
       'Build',
       'Relevance',
       'Getting started',
-      'Enterprise Search',
     ]);
     const searchItem = navItems?.find((ni) => ni.id === 'build');
     expect(searchItem).not.toBeUndefined();
@@ -448,7 +345,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
     // @ts-ignore
     const engineItem: EuiSideNavItemType<unknown> = enginesItem!.items[0];
     expect(engineItem).toEqual({
-      href: `/app/enterprise_search/applications/search_applications/${engineName}`,
+      href: `/app/elasticsearch/applications/search_applications/${engineName}`,
       id: 'searchApplicationId',
       name: engineName,
     });
@@ -470,7 +367,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
 
     expect(engineItem).toMatchInlineSnapshot(`
       Object {
-        "href": "/app/enterprise_search/applications/search_applications/my-test-engine/content",
+        "href": "/app/elasticsearch/applications/search_applications/my-test-engine/content",
         "iconToString": "warning",
         "id": "enterpriseSearchApplicationsContent",
         "items": undefined,
@@ -535,24 +432,24 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
     expect(analyticsNav).not.toBeUndefined();
     expect(analyticsNav).toEqual({
       'data-test-subj': 'searchSideNav-BehavioralAnalytics',
-      href: '/app/enterprise_search/analytics',
+      href: '/app/elasticsearch/analytics',
       id: 'analyticsCollections',
       items: [
         {
           id: 'analyticsCollection',
           items: [
             {
-              href: '/app/enterprise_search/analytics/overview-path',
+              href: '/app/elasticsearch/analytics/overview-path',
               id: 'analyticsCollectionOverview',
               name: 'Overview',
             },
             {
-              href: '/app/enterprise_search/analytics/explorer-path',
+              href: '/app/elasticsearch/analytics/explorer-path',
               id: 'analyticsCollectionExplorer',
               name: 'Explorer',
             },
             {
-              href: '/app/enterprise_search/analytics/integration-path',
+              href: '/app/elasticsearch/analytics/integration-path',
               id: 'analyticsCollectionIntegration',
               name: 'Integration',
             },

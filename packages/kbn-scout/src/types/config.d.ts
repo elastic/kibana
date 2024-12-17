@@ -25,10 +25,10 @@ export interface ScoutLoaderConfig {
     ssl: boolean;
   };
   kbnTestServer: {
-    env?: any;
-    buildArgs?: string[];
-    sourceArgs?: string[];
+    env: any;
+    buildArgs: string[];
+    sourceArgs: string[];
     serverArgs: string[];
-    useDedicatedTastRunner?: boolean;
+    useDedicatedTestRunner?: boolean;
   };
 }

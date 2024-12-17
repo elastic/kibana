@@ -9,6 +9,7 @@
 
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 export const GRID_EXAMPLE_APP_ID = 'gridExample';
 const gridExampleTitle = 'Grid Example';
@@ -17,20 +18,28 @@ interface GridExamplePluginSetupDependencies {
   developerExamples: DeveloperExamplesSetup;
 }
 
+export interface GridExamplePluginStartDependencies {
+  uiActions: UiActionsStart;
+}
+
 export class GridExamplePlugin
-  implements Plugin<void, void, GridExamplePluginSetupDependencies, {}>
+  implements
+    Plugin<void, void, GridExamplePluginSetupDependencies, GridExamplePluginStartDependencies>
 {
-  public setup(core: CoreSetup<{}>, { developerExamples }: GridExamplePluginSetupDependencies) {
+  public setup(
+    core: CoreSetup<GridExamplePluginStartDependencies>,
+    { developerExamples }: GridExamplePluginSetupDependencies
+  ) {
     core.application.register({
       id: GRID_EXAMPLE_APP_ID,
       title: gridExampleTitle,
       visibleIn: [],
       async mount(params: AppMountParameters) {
-        const [{ renderGridExampleApp }, [coreStart]] = await Promise.all([
+        const [{ renderGridExampleApp }, [coreStart, deps]] = await Promise.all([
           import('./app'),
           core.getStartServices(),
         ]);
-        return renderGridExampleApp(params.element, coreStart);
+        return renderGridExampleApp(params.element, { coreStart, uiActions: deps.uiActions });
       },
     });
     developerExamples.register({

@@ -22,19 +22,23 @@ import type {
   CrowdstrikeGetTokenResponse,
   CrowdstrikeGetAgentOnlineStatusResponse,
   RelaxedCrowdstrikeBaseApiResponse,
-  CrowdstrikeInitRTRParams,
+  CrowdStrikeExecuteRTRResponse,
 } from '../../../common/crowdstrike/types';
 import {
   CrowdstrikeHostActionsParamsSchema,
   CrowdstrikeGetAgentsParamsSchema,
-  CrowdstrikeGetTokenResponseSchema,
   CrowdstrikeHostActionsResponseSchema,
   RelaxedCrowdstrikeBaseApiResponseSchema,
-  CrowdstrikeInitRTRResponseSchema,
   CrowdstrikeRTRCommandParamsSchema,
+  CrowdstrikeExecuteRTRResponseSchema,
+  CrowdstrikeGetScriptsParamsSchema,
+  CrowdstrikeApiDoNotValidateResponsesSchema,
+  CrowdstrikeGetTokenResponseSchema,
 } from '../../../common/crowdstrike/schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 import { CrowdstrikeError } from './error';
+
+const SUPPORTED_RTR_COMMANDS = ['runscript'];
 
 const paramsSerializer = (params: Record<string, string>) => {
   return Object.entries(params)
@@ -56,8 +60,6 @@ export class CrowdstrikeConnector extends SubActionConnector<
 > {
   private static token: string | null;
   private static tokenExpiryTimeout: NodeJS.Timeout;
-  // @ts-expect-error not used at the moment, will be used in a follow up PR
-  private static currentBatchId: string | undefined;
   private static base64encodedToken: string;
   private experimentalFeatures: ExperimentalFeatures;
 
@@ -69,6 +71,10 @@ export class CrowdstrikeConnector extends SubActionConnector<
     agentStatus: string;
     batchInitRTRSession: string;
     batchRefreshRTRSession: string;
+    batchExecuteRTR: string;
+    batchActiveResponderExecuteRTR: string;
+    batchAdminExecuteRTR: string;
+    getRTRCloudScriptsDetails: string;
   };
 
   constructor(
@@ -84,6 +90,10 @@ export class CrowdstrikeConnector extends SubActionConnector<
       agentStatus: `${this.config.url}/devices/entities/online-state/v1`,
       batchInitRTRSession: `${this.config.url}/real-time-response/combined/batch-init-session/v1`,
       batchRefreshRTRSession: `${this.config.url}/real-time-response/combined/batch-refresh-session/v1`,
+      batchExecuteRTR: `${this.config.url}/real-time-response/combined/batch-command/v1`,
+      batchActiveResponderExecuteRTR: `${this.config.url}/real-time-response/combined/batch-active-responder-command/v1`,
+      batchAdminExecuteRTR: `${this.config.url}/real-time-response/combined/batch-admin-command/v1`,
+      getRTRCloudScriptsDetails: `${this.config.url}/real-time-response/entities/scripts/v1`,
     };
 
     if (!CrowdstrikeConnector.base64encodedToken) {
@@ -123,6 +133,22 @@ export class CrowdstrikeConnector extends SubActionConnector<
         name: SUB_ACTION.EXECUTE_RTR_COMMAND,
         method: 'executeRTRCommand',
         schema: CrowdstrikeRTRCommandParamsSchema, // Define a proper schema for the command
+      });
+      this.registerSubAction({
+        name: SUB_ACTION.EXECUTE_ACTIVE_RESPONDER_RTR,
+        method: 'batchActiveResponderExecuteRTR',
+        schema: CrowdstrikeRTRCommandParamsSchema, // Define a proper schema for the command
+      });
+      this.registerSubAction({
+        name: SUB_ACTION.EXECUTE_ADMIN_RTR,
+        method: 'batchAdminExecuteRTR',
+        schema: CrowdstrikeRTRCommandParamsSchema, // Define a proper schema for the command
+      });
+      // temporary to fetch scripts and help testing
+      this.registerSubAction({
+        name: SUB_ACTION.GET_RTR_CLOUD_SCRIPTS,
+        method: 'getRTRCloudScripts',
+        schema: CrowdstrikeGetScriptsParamsSchema,
       });
     }
   }
@@ -194,7 +220,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
     ) as Promise<CrowdstrikeGetAgentOnlineStatusResponse>;
   }
 
-  private async getTokenRequest(connectorUsageCollector: ConnectorUsageCollector) {
+  private getTokenRequest = async (connectorUsageCollector: ConnectorUsageCollector) => {
     const response = await this.request<CrowdstrikeGetTokenResponse>(
       {
         url: this.urls.getToken,
@@ -204,7 +230,8 @@ export class CrowdstrikeConnector extends SubActionConnector<
           'Content-Type': 'application/x-www-form-urlencoded',
           authorization: 'Basic ' + CrowdstrikeConnector.base64encodedToken,
         },
-        responseSchema: CrowdstrikeGetTokenResponseSchema,
+        responseSchema:
+          CrowdstrikeApiDoNotValidateResponsesSchema as unknown as typeof CrowdstrikeGetTokenResponseSchema,
       },
       connectorUsageCollector
     );
@@ -219,13 +246,13 @@ export class CrowdstrikeConnector extends SubActionConnector<
       }, 29 * 60 * 1000);
     }
     return token;
-  }
+  };
 
-  private async crowdstrikeApiRequest<R extends RelaxedCrowdstrikeBaseApiResponse>(
+  private crowdstrikeApiRequest = async <R extends RelaxedCrowdstrikeBaseApiResponse>(
     req: SubActionRequestParams<R>,
     connectorUsageCollector: ConnectorUsageCollector,
     retried?: boolean
-  ): Promise<R> {
+  ): Promise<R> => {
     try {
       if (!CrowdstrikeConnector.token) {
         CrowdstrikeConnector.token = (await this.getTokenRequest(
@@ -240,7 +267,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
           // where the external system might add/remove/change values in the response that we have no
           // control over.
           responseSchema:
-            RelaxedCrowdstrikeBaseApiResponseSchema as unknown as SubActionRequestParams<R>['responseSchema'],
+            CrowdstrikeApiDoNotValidateResponsesSchema as unknown as SubActionRequestParams<R>['responseSchema'],
           headers: {
             ...req.headers,
             Authorization: `Bearer ${CrowdstrikeConnector.token}`,
@@ -257,39 +284,106 @@ export class CrowdstrikeConnector extends SubActionConnector<
       }
       throw new CrowdstrikeError(error.message);
     }
-  }
+  };
 
-  public async batchInitRTRSession(
-    payload: CrowdstrikeInitRTRParams,
+  // Helper method to execute RTR commands with different API endpoints
+  private executeRTRCommandWithUrl = async (
+    url: string,
+    payload: {
+      command: string;
+      endpoint_ids: string[];
+    },
     connectorUsageCollector: ConnectorUsageCollector
-  ) {
-    const response = await this.crowdstrikeApiRequest(
-      {
-        url: this.urls.batchInitRTRSession,
-        method: 'post',
-        data: {
-          host_ids: payload.endpoint_ids,
-        },
-        paramsSerializer,
-        responseSchema: CrowdstrikeInitRTRResponseSchema,
-      },
-      connectorUsageCollector
-    );
-
-    CrowdstrikeConnector.currentBatchId = response.batch_id;
-  }
-
-  // TODO: WIP - just to have session init logic in place
-  public async executeRTRCommand(
-    payload: { command: string; endpoint_ids: string[] },
-    connectorUsageCollector: ConnectorUsageCollector
-  ) {
+  ): Promise<CrowdStrikeExecuteRTRResponse> => {
     const batchId = await this.crowdStrikeSessionManager.initializeSession(
       { endpoint_ids: payload.endpoint_ids },
       connectorUsageCollector
     );
 
-    return Promise.resolve({ batchId });
+    const baseCommand = payload.command.split(' ')[0];
+
+    if (!SUPPORTED_RTR_COMMANDS.includes(baseCommand)) {
+      throw new CrowdstrikeError('Command not supported');
+    }
+    return await this.crowdstrikeApiRequest<CrowdStrikeExecuteRTRResponse>(
+      {
+        url,
+        method: 'post',
+        data: {
+          base_command: baseCommand,
+          command_string: payload.command,
+          batch_id: batchId,
+          hosts: payload.endpoint_ids,
+          persist_all: false,
+        },
+        paramsSerializer,
+        responseSchema:
+          CrowdstrikeExecuteRTRResponseSchema as unknown as SubActionRequestParams<CrowdStrikeExecuteRTRResponse>['responseSchema'],
+      },
+      connectorUsageCollector
+    );
+  };
+
+  // Public method for generic RTR command execution
+  public async executeRTRCommand(
+    payload: {
+      command: string;
+      endpoint_ids: string[];
+    },
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<CrowdStrikeExecuteRTRResponse> {
+    return await this.executeRTRCommandWithUrl(
+      this.urls.batchExecuteRTR,
+      payload,
+      connectorUsageCollector
+    );
+  }
+
+  // Public method for Active Responder RTR command execution
+  public async batchActiveResponderExecuteRTR(
+    payload: {
+      command: string;
+      endpoint_ids: string[];
+    },
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<CrowdStrikeExecuteRTRResponse> {
+    return await this.executeRTRCommandWithUrl(
+      this.urls.batchActiveResponderExecuteRTR,
+      payload,
+      connectorUsageCollector
+    );
+  }
+
+  // Public method for Admin RTR command execution
+  public async batchAdminExecuteRTR(
+    payload: {
+      command: string;
+      endpoint_ids: string[];
+    },
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<CrowdStrikeExecuteRTRResponse> {
+    return await this.executeRTRCommandWithUrl(
+      this.urls.batchAdminExecuteRTR,
+      payload,
+      connectorUsageCollector
+    );
+  }
+
+  // TODO: for now just for testing purposes, will be a part of a following PR
+  public async getRTRCloudScripts(
+    payload: CrowdstrikeGetAgentsParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<CrowdstrikeGetAgentOnlineStatusResponse> {
+    // @ts-expect-error will be a part of the next PR
+    return this.crowdstrikeApiRequest(
+      {
+        url: this.urls.getRTRCloudScriptsDetails,
+        method: 'GET',
+        paramsSerializer,
+        responseSchema: RelaxedCrowdstrikeBaseApiResponseSchema,
+      },
+      connectorUsageCollector
+    );
   }
 
   protected getResponseErrorMessage(

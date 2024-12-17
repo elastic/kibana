@@ -23,7 +23,8 @@ import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useDashboardGridSettings } from './use_dashboard_grid_settings';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import { getPanelLayoutsAreEqual } from '../../state/diffing/dashboard_diffing_utils';
+import { arePanelLayoutsEqual } from '../../../dashboard_api/are_panel_layouts_equal';
+import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
 import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 
 export const DashboardGrid = ({
@@ -34,14 +35,15 @@ export const DashboardGrid = ({
   viewportWidth: number;
 }) => {
   const dashboardApi = useDashboardApi();
+  const dashboardInternalApi = useDashboardInternalApi();
 
   const [animatePanelTransforms, expandedPanelId, focusedPanelId, panels, useMargins, viewMode] =
     useBatchedPublishingSubjects(
-      dashboardApi.animatePanelTransforms$,
+      dashboardInternalApi.animatePanelTransforms$,
       dashboardApi.expandedPanelId,
       dashboardApi.focusedPanelId$,
       dashboardApi.panels$,
-      dashboardApi.useMargins$,
+      dashboardApi.settings.useMargins$,
       dashboardApi.viewMode
     );
 
@@ -116,7 +118,7 @@ export const DashboardGrid = ({
         },
         {} as { [key: string]: DashboardPanelState }
       );
-      if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
+      if (!arePanelLayoutsEqual(panels, updatedPanels)) {
         dashboardApi.setPanels(updatedPanels);
       }
     },
