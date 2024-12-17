@@ -14,8 +14,7 @@ import {
   EuiIcon,
   EuiText,
   EuiTextColor,
-  useEuiTheme,
-  euiFontSize,
+  useEuiFontSize,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
@@ -30,7 +29,7 @@ import { OverviewCard } from './overview_card';
 export const DataStreamDetails: FunctionComponent<{ dataStreamName: string }> = ({
   dataStreamName,
 }) => {
-  const themeContext = useEuiTheme();
+  const largeFontSize = useEuiFontSize('l').fontSize;
   const { error, data: dataStream, isLoading, resendRequest } = useLoadDataStream(dataStreamName);
   const {
     core: { getUrlForApp },
@@ -41,7 +40,7 @@ export const DataStreamDetails: FunctionComponent<{ dataStreamName: string }> = 
       <EuiFlexItem grow={false}>
         <EuiText
           css={css`
-            font-size: ${euiFontSize(themeContext, 'l')};
+            font-size: ${largeFontSize};
           `}
         >
           {dataStream?.generation}

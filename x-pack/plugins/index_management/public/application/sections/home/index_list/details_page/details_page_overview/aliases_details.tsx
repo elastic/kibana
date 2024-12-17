@@ -22,8 +22,7 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
-  useEuiTheme,
-  euiFontSize,
+  useEuiFontSize,
 } from '@elastic/eui';
 
 import { Index } from '../../../../../../../common';
@@ -32,7 +31,7 @@ import { OverviewCard } from './overview_card';
 const MAX_VISIBLE_ALIASES = 3;
 
 export const AliasesDetails: FunctionComponent<{ aliases: Index['aliases'] }> = ({ aliases }) => {
-  const themeContext = useEuiTheme();
+  const largeFontSize = useEuiFontSize('l').fontSize;
   const [isShowingAliases, setIsShowingAliases] = useState<boolean>(false);
   if (!Array.isArray(aliases)) {
     return null;
@@ -60,7 +59,7 @@ export const AliasesDetails: FunctionComponent<{ aliases: Index['aliases'] }> = 
               <EuiFlexItem grow={false}>
                 <EuiText
                   css={css`
-                    font-size: ${euiFontSize(themeContext, 'l')};
+                    font-size: ${largeFontSize};
                   `}
                 >
                   {aliases.length}
