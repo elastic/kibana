@@ -174,7 +174,7 @@ export const Graph: React.FC<GraphProps> = ({
         minZoom={0.1}
       >
         {interactive && <Controls onInteractiveChange={onInteractiveStateChange} />}
-        <Background id={backgroundId} />{' '}
+        <Background id={backgroundId} />
       </ReactFlow>
     </div>
   );
