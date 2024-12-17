@@ -10,6 +10,7 @@
 import React, { useCallback, useState } from 'react';
 import { ReactWrapper } from 'enzyme';
 import {
+  EuiProvider,
   EuiButton,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
@@ -99,7 +100,9 @@ function getProps(): UnifiedDataTableProps {
 
 const DataTable = (props: Partial<UnifiedDataTableProps>) => (
   <KibanaContextProvider services={servicesMock}>
-    <UnifiedDataTable {...getProps()} {...props} />
+    <EuiProvider>
+      <UnifiedDataTable {...getProps()} {...props} />
+    </EuiProvider>
   </KibanaContextProvider>
 );
 
