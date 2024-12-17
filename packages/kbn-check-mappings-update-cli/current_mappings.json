@@ -17,11 +17,7 @@
   },
   "action_task_params": {
     "dynamic": false,
-    "properties": {
-      "apiKeyId": {
-        "type": "keyword"
-      }
-    }
+    "properties": {}
   },
   "ad_hoc_run_params": {
     "dynamic": false,
@@ -3632,9 +3628,6 @@
         "type": "keyword"
       },
       "partition": {
-        "type": "integer"
-      },
-      "priority": {
         "type": "integer"
       },
       "retryAt": {
