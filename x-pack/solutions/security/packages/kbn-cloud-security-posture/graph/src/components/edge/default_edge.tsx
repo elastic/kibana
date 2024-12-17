@@ -52,7 +52,7 @@ export function DefaultEdge({
         }}
         markerStart={
           data?.sourceShape !== 'label' && data?.sourceShape !== 'group'
-            ? getMarkerStart(data?.sourceColor ?? 'primary')
+            ? getMarkerStart(color)
             : undefined
         }
         markerEnd={
