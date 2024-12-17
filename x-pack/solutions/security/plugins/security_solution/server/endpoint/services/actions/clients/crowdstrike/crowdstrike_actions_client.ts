@@ -415,7 +415,6 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
           content: {
             stdout,
             stderr,
-            // TODO: maybe change the interface - we do not really need this
             code: '200',
           },
           type: 'text' as const,
