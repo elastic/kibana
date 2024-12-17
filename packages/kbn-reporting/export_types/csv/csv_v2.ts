@@ -55,7 +55,7 @@ export class CsvV2ExportType extends ExportType<
   id = CSV_REPORT_TYPE_V2;
   name = CSV_REPORT_TYPE_V2;
   jobType = CSV_REPORT_TYPE_V2;
-  jobContentEncoding = 'base64' as const;
+  jobContentEncoding = 'csv' as const;
   jobContentExtension = 'csv' as const;
   validLicenses = [
     LICENSE_TYPE_TRIAL,

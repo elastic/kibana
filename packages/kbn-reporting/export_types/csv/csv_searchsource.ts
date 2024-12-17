@@ -51,7 +51,7 @@ export class CsvSearchSourceExportType extends ExportType<
   id = CSV_REPORT_TYPE;
   name = CSV_JOB_TYPE;
   jobType = CSV_JOB_TYPE;
-  jobContentEncoding = 'base64' as const;
+  jobContentEncoding = 'csv' as const;
   jobContentExtension = 'csv' as const;
   validLicenses = [
     LICENSE_TYPE_TRIAL,
