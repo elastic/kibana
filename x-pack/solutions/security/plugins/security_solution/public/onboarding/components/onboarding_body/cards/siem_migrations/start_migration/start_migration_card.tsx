@@ -5,31 +5,24 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { PanelText } from '../../../../../../common/components/panel_text';
+import { RuleMigrationDataInputWrapper } from '../../../../../../siem_migrations/rules/components/data_input_flyout/data_input_wrapper';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { OnboardingCardId } from '../../../../../constants';
-import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useLatestStats } from '../../../../../../siem_migrations/rules/service/hooks/use_latest_stats';
-import { MigrationDataInputFlyout } from '../../../../../../siem_migrations/rules/components/data_input_flyout';
 import { CenteredLoadingSpinner } from '../../../../../../common/components/centered_loading_spinner';
 import type { OnboardingCardComponent } from '../../../../../types';
 import { OnboardingCardContentPanel } from '../../common/card_content_panel';
-import { UploadRulesPanels } from './upload_rules_panels';
-import { StartMigrationContextProvider } from './context';
+import { RuleMigrationsPanels } from './rule_migrations_panels';
 import { useStyles } from './start_migration_card.styles';
 import * as i18n from './translations';
-import { MissingAIConnectorCallout } from './missing_ai_connector_callout';
 
 export const StartMigrationCard: OnboardingCardComponent = React.memo(
   ({ setComplete, isCardComplete, setExpandedCardId }) => {
     const styles = useStyles();
     const { data: migrationsStats, isLoading, refreshStats } = useLatestStats();
-
-    const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>();
-    const [flyoutMigrationStats, setFlyoutMigrationStats] = useState<
-      RuleMigrationTaskStats | undefined
-    >();
 
     useEffect(() => {
       // Set card complete if any migration is finished
@@ -40,44 +33,33 @@ export const StartMigrationCard: OnboardingCardComponent = React.memo(
       }
     }, [isCardComplete, migrationsStats, setComplete]);
 
-    const closeFlyout = useCallback(() => {
-      setIsFlyoutOpen(false);
-      setFlyoutMigrationStats(undefined);
-      refreshStats();
-    }, [refreshStats]);
+    const isConnectorsCardComplete = useMemo(
+      () => isCardComplete(OnboardingCardId.siemMigrationsAiConnectors),
+      [isCardComplete]
+    );
 
-    const openFlyout = useCallback((migrationStats?: RuleMigrationTaskStats) => {
-      setFlyoutMigrationStats(migrationStats);
-      setIsFlyoutOpen(true);
-    }, []);
-
-    if (!isCardComplete(OnboardingCardId.siemMigrationsAiConnectors)) {
-      return (
-        <MissingAIConnectorCallout
-          onExpandAiConnectorsCard={() =>
-            setExpandedCardId(OnboardingCardId.siemMigrationsAiConnectors)
-          }
-        />
-      );
-    }
+    const expandConnectorsCard = useCallback(() => {
+      setExpandedCardId(OnboardingCardId.siemMigrationsAiConnectors);
+    }, [setExpandedCardId]);
 
     return (
-      <StartMigrationContextProvider openFlyout={openFlyout} closeFlyout={closeFlyout}>
+      <RuleMigrationDataInputWrapper onFlyoutClosed={refreshStats}>
         <OnboardingCardContentPanel paddingSize="none" className={styles}>
           {isLoading ? (
             <CenteredLoadingSpinner />
           ) : (
-            <UploadRulesPanels migrationsStats={migrationsStats} />
+            <RuleMigrationsPanels
+              migrationsStats={migrationsStats}
+              isConnectorsCardComplete={isConnectorsCardComplete}
+              expandConnectorsCard={expandConnectorsCard}
+            />
           )}
           <EuiSpacer size="m" />
-          <EuiText size="xs" color="subdued">
+          <PanelText size="xs" subdued>
             <p>{i18n.START_MIGRATION_CARD_FOOTER_NOTE}</p>
-          </EuiText>
+          </PanelText>
         </OnboardingCardContentPanel>
-        {isFlyoutOpen && (
-          <MigrationDataInputFlyout onClose={closeFlyout} migrationStats={flyoutMigrationStats} />
-        )}
-      </StartMigrationContextProvider>
+      </RuleMigrationDataInputWrapper>
     );
   }
 );
