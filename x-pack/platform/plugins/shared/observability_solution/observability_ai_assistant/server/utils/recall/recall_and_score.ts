@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { AnalyticsServiceStart } from '@kbn/core/server';
+import { AnalyticsServiceStart, IScopedClusterClient, IUiSettingsClient } from '@kbn/core/server';
 import { scoreSuggestions } from './score_suggestions';
 import type { Message } from '../../../common';
 import type { ObservabilityAIAssistantClient } from '../../service/client';
@@ -18,6 +18,8 @@ import { rewriteUserPrompt } from './rewrite_user_prompt';
 export type RecalledSuggestion = Pick<RecalledEntry, 'id' | 'text' | 'score'>;
 
 export async function recallAndScore({
+  esClient,
+  uiSettingsClient,
   recall,
   chat,
   analytics,
@@ -27,6 +29,8 @@ export async function recallAndScore({
   logger,
   signal,
 }: {
+  esClient: IScopedClusterClient;
+  uiSettingsClient: IUiSettingsClient;
   recall: ObservabilityAIAssistantClient['recall'];
   chat: FunctionCallChatFunction;
   analytics: AnalyticsServiceStart;
@@ -40,8 +44,10 @@ export async function recallAndScore({
   scores?: Array<{ id: string; score: number }>;
   suggestions: RecalledSuggestion[];
 }> {
-  // rewrite user prompt. It should also include previous messages
-  const rewrittenUserPrompt = await rewriteUserPrompt({
+  // rewrite user prompt to include context and message history
+  const { rewrittenUserPrompt, keywordFilters, timestampFilter } = await rewriteUserPrompt({
+    esClient,
+    uiSettingsClient,
     logger,
     messages,
     userPrompt,

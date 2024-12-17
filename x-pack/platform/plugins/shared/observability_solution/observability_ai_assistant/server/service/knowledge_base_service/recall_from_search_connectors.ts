@@ -28,7 +28,7 @@ export async function recallFromSearchConnectors({
   logger: Logger;
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
 }): Promise<RecalledEntry[]> {
-  const connectorIndices = await getConnectorIndices(esClient, uiSettingsClient, logger);
+  const connectorIndices = await getConnectorIndices({ esClient, uiSettingsClient, logger });
   logger.debug(`Found connector indices: ${connectorIndices}`);
 
   const [semanticTextConnectors, legacyConnectors] = await Promise.all([
@@ -199,11 +199,15 @@ async function recallFromLegacyConnectors({
   return results;
 }
 
-async function getConnectorIndices(
-  esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient },
-  uiSettingsClient: IUiSettingsClient,
-  logger: Logger
-) {
+export async function getConnectorIndices({
+  esClient,
+  uiSettingsClient,
+  logger,
+}: {
+  esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
+  uiSettingsClient: IUiSettingsClient;
+  logger: Logger;
+}) {
   // improve performance by running this in parallel with the `uiSettingsClient` request
   const responsePromise = esClient.asInternalUser.connector
     .list({ filter_path: 'results.index_name' })

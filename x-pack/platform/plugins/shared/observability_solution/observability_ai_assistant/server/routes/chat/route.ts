@@ -198,6 +198,8 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
 
     const response$ = from(
       recallAndScore({
+        esClient: (await resources.context.core).elasticsearch.client,
+        uiSettingsClient: (await resources.context.core).uiSettings.client,
         analytics: (await resources.plugins.core.start()).analytics,
         chat: (name, params) =>
           client
