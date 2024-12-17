@@ -34,12 +34,15 @@ function bundledPackagesFromCache() {
 }
 
 export async function getBundledPackages(): Promise<BundledPackage[]> {
+  /*
   const config = appContextService.getConfig();
   if (config?.developer?.disableBundledPackagesCache !== true && CACHE_BUNDLED_PACKAGES) {
     return bundledPackagesFromCache();
   }
+  */
 
-  const bundledPackageLocation = config?.developer?.bundledPackageLocation;
+  // const bundledPackageLocation = config?.developer?.bundledPackageLocation;
+  const bundledPackageLocation = path.resolve(path.dirname(__filename), 'bundle');
 
   if (!bundledPackageLocation) {
     throw new BundledPackageLocationNotFoundError(
@@ -52,6 +55,8 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
   try {
     await fs.stat(bundledPackageLocation);
   } catch (error) {
+    const logger = appContextService.getLogger();
+    logger.warn(`unable to stat ${bundledPackageLocation}: ${error}`);
     return [];
   }
 
@@ -78,7 +83,7 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
     return bundledPackagesFromCache();
   } catch (err) {
     const logger = appContextService.getLogger();
-    logger.warn(`Unable to read bundled packages from ${bundledPackageLocation}`);
+    logger.warn(`Unable to read bundled packages from ${bundledPackageLocation}: ${err}`);
 
     return [];
   }
