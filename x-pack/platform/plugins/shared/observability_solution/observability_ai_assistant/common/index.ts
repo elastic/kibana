@@ -47,8 +47,6 @@ export {
 
 export { concatenateChatCompletionChunks } from './utils/concatenate_chat_completion_chunks';
 
-export { isSupportedConnectorType } from './connectors';
-
 export { ShortIdTable } from './utils/short_id_table';
 
 export { KnowledgeBaseType } from './types';
