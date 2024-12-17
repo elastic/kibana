@@ -8,9 +8,9 @@
 import React, { memo } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import { EuiSpacer } from '@elastic/eui';
-import { ThreatMatchIndexEdit } from '../../../rule_creation/components/threat_match_index_edit';
-import { ThreatMatchQueryEdit } from '../../../rule_creation/components/threat_match_query_edit';
-import { ThreatMatchMappingEdit } from '../../../rule_creation/components/threat_match_mapping_edit';
+import { ThreatMatchIndexEdit } from '../../rule_creation/components/threat_match_index_edit';
+import { ThreatMatchQueryEdit } from '../../rule_creation/components/threat_match_query_edit';
+import { ThreatMatchMappingEdit } from '../../rule_creation/components/threat_match_mapping_edit';
 
 interface ThreatMatchEditProps {
   indexPatternPath: string;
