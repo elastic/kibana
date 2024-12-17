@@ -24,7 +24,7 @@ import type { AppToast } from '.';
 import * as i18n from './translations';
 
 /**
- * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ * @deprecated Use x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
  */
 interface FullErrorProps {
   isShowing: boolean;
@@ -33,7 +33,7 @@ interface FullErrorProps {
 }
 
 /**
- * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ * @deprecated Use x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
  */
 const ModalAllErrorsComponent: React.FC<FullErrorProps> = ({ isShowing, toast, toggle }) => {
   const handleClose = useCallback(() => toggle(toast), [toggle, toast]);
@@ -73,18 +73,18 @@ const ModalAllErrorsComponent: React.FC<FullErrorProps> = ({ isShowing, toast, t
 };
 
 /**
- * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ * @deprecated Use x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
  */
 export const ModalAllErrors = React.memo(ModalAllErrorsComponent);
 
 /**
- * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ * @deprecated Use x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
  */
 const MyEuiCodeBlock = styled(EuiCodeBlock)`
   margin-top: 4px;
 `;
 
 /**
- * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
+ * @deprecated Use x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
  */
 MyEuiCodeBlock.displayName = 'MyEuiCodeBlock';

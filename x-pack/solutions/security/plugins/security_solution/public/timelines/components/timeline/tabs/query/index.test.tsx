@@ -1250,7 +1250,7 @@ describe('query tab with unified timeline', () => {
             );
             /*
              * Above event is alert and not an event but `getEventType` in
-             *x-pack/plugins/security_solution/public/timelines/components/timeline/body/helpers.tsx
+             * x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/body/helpers.tsx
              * returns it has event and not an alert even though, it has event.kind as signal.
              * Need to see if it is okay
              *
@@ -1313,7 +1313,7 @@ describe('query tab with unified timeline', () => {
             );
             /*
              * Above event is alert and not an event but `getEventType` in
-             * x-pack/plugins/security_solution/public/timelines/components/timeline/body/helpers.tsx
+             * x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/body/helpers.tsx
              * returns it has event and not an alert even though, it has event.kind as signal.
              * Need to see if it is okay
              *

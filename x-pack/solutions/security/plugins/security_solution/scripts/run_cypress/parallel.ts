@@ -67,7 +67,7 @@ ${JSON.stringify(argv, null, 2)}
 `);
 
       const isOpen = argv._.includes('open');
-      const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
+      const cypressConfigFilePath = require.resolve(`../../../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
 
       // Adjust tooling log level based on the `TOOLING_LOG_LEVEL` property, which can be

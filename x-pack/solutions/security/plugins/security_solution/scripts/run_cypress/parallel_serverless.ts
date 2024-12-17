@@ -357,7 +357,7 @@ ${JSON.stringify(argv, null, 2)}
 `);
 
       const isOpen = argv._.includes('open');
-      const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
+      const cypressConfigFilePath = require.resolve(`../../../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
 
       // if KIBANA_MKI_QUALITY_GATE exists and has a value, we are running the tests against the Kibana QA quality gate.

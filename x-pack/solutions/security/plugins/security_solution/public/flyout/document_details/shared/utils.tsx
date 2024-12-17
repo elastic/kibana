@@ -9,7 +9,7 @@ import { startCase } from 'lodash';
 import type { GetFieldsData } from './hooks/use_get_fields_data';
 
 /**
- * Helper function to retrieve a field's value (used in combination with the custom hook useGetFieldsData (https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/public/common/hooks/use_get_fields_data.ts)
+ * Helper function to retrieve a field's value (used in combination with the custom hook useGetFieldsData (x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/shared/hooks/use_get_fields_data.ts)
  * @param field type unknown or unknown[]
  * @param emptyValue optional parameter to return if field is incorrect
  * @return the field's value, or null/emptyValue
