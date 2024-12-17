@@ -776,8 +776,8 @@ packages/kbn-saved-objects-settings @elastic/appex-sharedux
 src/plugins/saved_objects_tagging_oss @elastic/appex-sharedux
 x-pack/plugins/saved_objects_tagging @elastic/appex-sharedux
 packages/kbn-saved-search-component @elastic/obs-ux-logs-team
-packages/kbn-scout @elastic/appex-qa
 src/plugins/saved_search @elastic/kibana-data-discovery
+packages/kbn-scout @elastic/appex-qa
 examples/screenshot_mode_example @elastic/appex-sharedux
 src/plugins/screenshot_mode @elastic/appex-sharedux
 x-pack/examples/screenshotting_example @elastic/appex-sharedux
@@ -1988,6 +1988,13 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics
 /.github/workflows/oblt-github-commands   @elastic/observablt-robots @elastic/kibana-operations
 /.github/workflows/undeploy-my-kibana.yml @elastic/observablt-robots @elastic/kibana-operations
 
+####
+## These rules are always last so they take ultimate priority over everything else
+####
+
+# See https://github.com/elastic/kibana/pull/199404
+# Prevent backport assignments
+* @kibanamachine
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
