@@ -913,7 +913,7 @@ packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/shared-ux/modal/tabbed @elastic/appex-sharedux
 packages/shared-ux/table_persist @elastic/appex-sharedux
 packages/kbn-shared-ux-utility @elastic/appex-sharedux
-x-pack/plugins/observability_solution/slo @elastic/obs-ux-management-team
+x-pack/solutions/observability/plugins/slo @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/platform/plugins/private/snapshot_restore @elastic/kibana-management
 packages/kbn-some-dev-log @elastic/kibana-operations
