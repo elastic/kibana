@@ -31,7 +31,6 @@ import {
 } from 'rxjs';
 import OpenAI from 'openai';
 import { ChatCompletionChunk } from 'openai/resources';
-import { IncomingMessage } from 'http';
 import {
   RerankParamsSchema,
   SparseEmbeddingParamsSchema,
@@ -54,7 +53,7 @@ import {
 } from '../../../common/inference/types';
 import { SUB_ACTION } from '../../../common/inference/constants';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
-import { arrayToAsyncIterator, eventSourceStreamIntoObservable } from './helpers';
+import { eventSourceStreamIntoObservable } from './helpers';
 
 export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   // Not using Axios
@@ -129,7 +128,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   ): Promise<UnifiedChatCompleteResponse> {
     const res = await this.performApiUnifiedCompletionStream(params);
 
-    const v = from(eventSourceStreamIntoObservable(res as Readable)).pipe(
+    const v = from(eventSourceStreamIntoObservable(res as unknown as Readable)).pipe(
       filter((line) => !!line && line !== '[DONE]'),
       map((line) => {
         return JSON.parse(line) as OpenAI.ChatCompletionChunk | { error: { message: string } };
@@ -258,7 +257,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   public async performApiUnifiedCompletionStream(
     params: UnifiedChatCompleteParams & { signal?: AbortSignal }
   ) {
-    return (await this.esClient.transport.request<UnifiedChatCompleteResponse>(
+    return await this.esClient.transport.request<UnifiedChatCompleteResponse>(
       {
         method: 'POST',
         path: `_inference/completion/${this.inferenceId}/_unified`,
@@ -267,7 +266,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       {
         asStream: true,
       }
-    )) as unknown as IncomingMessage;
+    );
   }
 
   /**
@@ -289,45 +288,15 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     try {
       connectorUsageCollector.addRequestBodyBytes(undefined, params.body);
       const res = await this.performApiUnifiedCompletionStream(params);
-      // splits the stream in two, teed[0] is used for the UI and teed[1] for token tracking
       const controller = new AbortController();
-      const iter: OpenAI.ChatCompletionChunk[] = [];
-      from(eventSourceStreamIntoObservable(res as Readable)).pipe(
-        filter((line) => !!line && line !== '[DONE]'),
-        map((line) => {
-          return JSON.parse(line) as OpenAI.ChatCompletionChunk | { error: { message: string } };
-        }),
-        tap((line) => {
-          if ('error' in line) {
-            throw new Error(line.error.message);
-          }
-          if (
-            'choices' in line &&
-            line.choices.length &&
-            line.choices[0].finish_reason === 'length'
-          ) {
-            throw new Error('createTokenLimitReachedError()');
-          }
-        }),
-        filter((line): line is OpenAI.ChatCompletionChunk => {
-          return 'object' in line && line.object === 'chat.completion.chunk' && !line.usage;
-        }),
-        mergeMap((chunk: OpenAI.ChatCompletionChunk) => {
-          iter.push(chunk);
-          return iter;
-        }),
-        identity
+      // splits the stream in two, one is used for the UI and other for token tracking
+
+      const stream = Stream.fromSSEResponse<ChatCompletionChunk>(
+        { body: res } as unknown as Response,
+        controller
       );
-      return {
-        consumerStream: new Stream<ChatCompletionChunk>(
-          () => arrayToAsyncIterator(iter),
-          controller
-        ),
-        tokenCountStream: new Stream<ChatCompletionChunk>(
-          () => arrayToAsyncIterator(iter),
-          controller
-        ),
-      };
+      const teed = stream.tee();
+      return { consumerStream: teed[0], tokenCountStream: teed[1] };
       // since we do not use the sub action connector request method, we need to do our own error handling
     } catch (e) {
       const errorMessage = this.getResponseErrorMessage(e);

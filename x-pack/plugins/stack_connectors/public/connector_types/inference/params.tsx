@@ -14,7 +14,6 @@ import { EuiTextArea, EuiFormRow, EuiSpacer, EuiSelect } from '@elastic/eui';
 import type { RuleFormParamsErrors } from '@kbn/response-ops-rule-form';
 import { ActionVariable } from '@kbn/alerting-types';
 import {
-  ChatCompleteParams,
   RerankParams,
   SparseEmbeddingParams,
   TextEmbeddingParams,
@@ -170,22 +169,6 @@ const UnifiedCompletionParamsFields: React.FunctionComponent<{
         dataTestSubj="inference-bodyJsonEditor"
       />
     </>
-  );
-};
-
-const CompletionParamsFields: React.FunctionComponent<{
-  subActionParams: ChatCompleteParams;
-  errors: RuleFormParamsErrors;
-  editSubActionParams: (params: Partial<InferenceActionParams['subActionParams']>) => void;
-}> = ({ subActionParams, editSubActionParams, errors }) => {
-  const { input } = subActionParams;
-
-  return (
-    <InferenceInput
-      input={input}
-      editSubActionParams={editSubActionParams}
-      inputError={errors.input as string}
-    />
   );
 };
 
