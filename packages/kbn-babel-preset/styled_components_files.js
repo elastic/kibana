@@ -21,6 +21,7 @@ module.exports = {
     /x-pack[\/\\]test[\/\\]plugin_functional[\/\\]plugins[\/\\]resolver_test[\/\\]/,
     /x-pack[\/\\]packages[\/\\]elastic_assistant[\/\\]/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]packages[\/\\]ecs_data_quality_dashboard[\/\\]/,
+    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]/,
     /x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-elastic-assistant[\/\\]/,
   ],
 };

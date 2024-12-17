@@ -19,15 +19,21 @@ const codeOwners: Record<string, string[]> = {
   'plugins/data_charts': ['team_visualization'],
   'plugins/analytics': ['team_analytics'],
   'plugins/notification': ['team_alerts', 'team_notifications'],
-  'plugins/security_solution/public/entity_analytics/components': ['team_security_analytics'],
-  'plugins/security_solution/public/entity_analytics/components/componentA.ts': [
+  'solutions/security/plugins/security_solution/public/entity_analytics/components': [
     'team_security_analytics',
   ],
-  'plugins/security_solution/public/entity_analytics/components/componentB.ts': [
+  'solutions/security/plugins/security_solution/public/entity_analytics/components/componentA.ts': [
     'team_security_analytics',
   ],
-  'plugins/security_solution/server/lib/analytics/analytics.ts': ['team_security_analytics'],
-  'plugins/security_solution/common/api/detection_engine': ['team_security_solution'],
+  'solutions/security/plugins/security_solution/public/entity_analytics/components/componentB.ts': [
+    'team_security_analytics',
+  ],
+  'solutions/security/plugins/security_solution/server/lib/analytics/analytics.ts': [
+    'team_security_analytics',
+  ],
+  'solutions/security/plugins/security_solution/common/api/detection_engine': [
+    'team_security_solution',
+  ],
 };
 
 jest.mock('dependency-cruiser', () => ({
@@ -301,23 +307,23 @@ describe('identifyDependencyUsage', () => {
         summary: {
           violations: [
             {
-              from: 'plugins/security_solution/public/entity_analytics/components/componentA.ts',
+              from: 'solutions/security/plugins/security_solution/public/entity_analytics/components/componentA.ts',
               to: 'node_modules/lodash/fp.js',
             },
             {
-              from: 'plugins/security_solution/public/entity_analytics/components/componentB.ts',
+              from: 'solutions/security/plugins/security_solution/public/entity_analytics/components/componentB.ts',
               to: 'node_modules/lodash/partition.js',
             },
             {
-              from: 'plugins/security_solution/server/lib/analytics/analytics.ts',
+              from: 'solutions/security/plugins/security_solution/server/lib/analytics/analytics.ts',
               to: 'node_modules/lodash/partition.js',
             },
             {
-              from: 'plugins/security_solution/server/lib/analytics/analytics.ts',
+              from: 'solutions/security/plugins/security_solution/server/lib/analytics/analytics.ts',
               to: 'node_modules/lodash/cloneDeep.js',
             },
             {
-              from: 'plugins/security_solution/common/api/detection_engine',
+              from: 'solutions/security/plugins/security_solution/common/api/detection_engine',
               to: 'node_modules/lodash/sortBy.js',
             },
           ],
@@ -337,15 +343,15 @@ describe('identifyDependencyUsage', () => {
     expect(result).toEqual({
       team_security_analytics: {
         modules: [
-          'plugins/security_solution/public/entity_analytics/components/componentA.ts',
-          'plugins/security_solution/public/entity_analytics/components/componentB.ts',
-          'plugins/security_solution/server/lib/analytics/analytics.ts',
+          'solutions/security/plugins/security_solution/public/entity_analytics/components/componentA.ts',
+          'solutions/security/plugins/security_solution/public/entity_analytics/components/componentB.ts',
+          'solutions/security/plugins/security_solution/server/lib/analytics/analytics.ts',
         ],
         deps: ['lodash/fp.js', 'lodash/partition.js', 'lodash/cloneDeep.js'],
         teams: ['team_security_analytics'],
       },
       team_security_solution: {
-        modules: ['plugins/security_solution/common/api/detection_engine'],
+        modules: ['solutions/security/plugins/security_solution/common/api/detection_engine'],
         deps: ['lodash/sortBy.js'],
         teams: ['team_security_solution'],
       },

@@ -32,7 +32,7 @@ const LazyIndicatorsPageWrapper = React.lazy(() => import('./containers/indicato
 
 /**
  * This is used here:
- * x-pack/plugins/security_solution/public/threat_intelligence/routes.tsx
+ * x-pack/solutions/security/plugins/security_solution/public/threat_intelligence/routes.tsx
  */
 export const createApp =
   (services: Services) =>

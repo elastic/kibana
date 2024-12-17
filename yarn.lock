@@ -5309,7 +5309,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-security@link:packages/deeplinks/security":
+"@kbn/deeplinks-security@link:src/platform/packages/shared/deeplinks/security":
   version "0.0.0"
   uid ""
 
@@ -7085,7 +7085,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-ess@link:x-pack/plugins/security_solution_ess":
+"@kbn/security-solution-ess@link:x-pack/solutions/security/plugins/security_solution_ess":
   version "0.0.0"
   uid ""
 
@@ -7101,11 +7101,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-plugin@link:x-pack/plugins/security_solution":
+"@kbn/security-solution-plugin@link:x-pack/solutions/security/plugins/security_solution":
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-serverless@link:x-pack/plugins/security_solution_serverless":
+"@kbn/security-solution-serverless@link:x-pack/solutions/security/plugins/security_solution_serverless":
   version "0.0.0"
   uid ""
 
@@ -7249,7 +7249,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-security-settings@link:packages/serverless/settings/security_project":
+"@kbn/serverless-security-settings@link:src/platform/packages/shared/serverless/settings/security_project":
   version "0.0.0"
   uid ""
 

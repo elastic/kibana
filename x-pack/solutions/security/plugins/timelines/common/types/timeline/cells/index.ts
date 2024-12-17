@@ -14,7 +14,7 @@ import { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
 /**
  * The following props are provided to the function called by `renderCellValue`.
  * Warning: This type might be outdated. Therefore, migrate to the new one from
- * `plugins/security_solution/common/types/timeline/cells/index.ts`.
+ * `solutions/security/plugins/security_solution/common/types/timeline/cells/index.ts`.
  * @deprecated
  */
 export type DeprecatedCellValueElementProps = EuiDataGridCellValueElementProps & {

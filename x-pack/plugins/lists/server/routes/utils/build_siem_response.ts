@@ -13,7 +13,7 @@ import {
 } from '@kbn/core/server';
 
 /**
- * Copied from x-pack/plugins/security_solution/server/lib/detection_engine/routes/utils.ts
+ * Copied from x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/utils.ts
  * We cannot put this in kbn package just yet as the types from 'src/core/server' aren't a kbn package yet and this would pull in a lot of copied things.
  * TODO: Once more types are moved into kbn package we can move this into a kbn package.
  */
@@ -46,7 +46,7 @@ const statusToErrorMessage = (
 };
 
 /**
- * Copied from x-pack/plugins/security_solution/server/lib/detection_engine/routes/utils.ts
+ * Copied from x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/utils.ts
  * We cannot put this in kbn package just yet as the types from 'src/core/server' aren't a kbn package yet and this would pull in a lot of copied things.
  * TODO: Once more types are moved into kbn package we can move this into a kbn package.
  */
@@ -87,7 +87,7 @@ export class SiemResponseFactory {
 }
 
 /**
- * Copied from x-pack/plugins/security_solution/server/lib/detection_engine/routes/utils.ts
+ * Copied from x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/utils.ts
  * We cannot put this in kbn package just yet as the types from 'src/core/server' aren't a kbn package yet and this would pull in a lot of copied things.
  * TODO: Once more types are moved into kbn package we can move this into a kbn package.
  */

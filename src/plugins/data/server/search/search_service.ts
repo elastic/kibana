@@ -189,7 +189,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     // We don't want to register this because we don't want the client to be able to access this
     // strategy, but we do want to expose it to other server-side plugins
-    // see x-pack/plugins/security_solution/server/search_strategy/timeline/index.ts
+    // see x-pack/solutions/security/plugins/security_solution/server/search_strategy/timeline/index.ts
     // for example use case
     this.searchAsInternalUser = enhancedEsSearchStrategyProvider(
       this.initializerContext.config.legacy.globalConfig$,
