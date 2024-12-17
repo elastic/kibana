@@ -20,13 +20,18 @@ import { checkLicense } from '../../license_check';
 const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printablePdfV2') => () => {
   const {
     objectType,
-    sharingData: { title, locatorParams },
+    sharingData: { title, locatorParams, layout: outerLayout },
     optimizedForPrinting,
   } = opts;
 
-  const el = document.querySelector('[data-shared-items-container]');
-  const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
-  const dimensions = { height, width };
+  let dimensions = outerLayout?.dimensions;
+
+  if (!dimensions) {
+    const el = document.querySelector('[data-shared-items-container]');
+    const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
+    dimensions = { height, width };
+  }
+
   const layoutId = optimizedForPrinting ? ('print' as const) : ('preserve_layout' as const);
   const layout = { id: layoutId, dimensions };
   const baseParams = { objectType, layout, title };
