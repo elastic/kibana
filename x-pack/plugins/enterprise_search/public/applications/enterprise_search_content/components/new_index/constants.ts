@@ -18,7 +18,7 @@ export const NEW_INDEX_TEMPLATE_TYPES: { [key: string]: string } = {
     defaultMessage: 'Connector',
   }),
   crawler: i18n.translate('xpack.enterpriseSearch.content.newIndex.types.crawler', {
-    defaultMessage: 'Web crawler',
+    defaultMessage: 'Web Crawler',
   }),
   elasticsearch: i18n.translate('xpack.enterpriseSearch.content.newIndex.types.elasticsearch', {
     defaultMessage: 'Elasticsearch index',

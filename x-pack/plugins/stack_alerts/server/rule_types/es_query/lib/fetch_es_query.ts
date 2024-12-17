@@ -154,6 +154,7 @@ export async function fetchEsQuery({
       esResult: searchResult,
       resultLimit: alertLimit,
       sourceFieldsParams: params.sourceFields,
+      termField: params.termField,
     }),
     link,
     query: sortedQuery,
