@@ -7,8 +7,8 @@
 import { euiThemeVars } from '@kbn/ui-theme';
 
 export const statusColors = {
-  passed: euiThemeVars.euiColorSuccess,
-  failed: euiThemeVars.euiColorVis9,
+  passed: '#00bfb3',
+  failed: '#e7664c',
   unknown: euiThemeVars.euiColorLightShade,
 };
 
