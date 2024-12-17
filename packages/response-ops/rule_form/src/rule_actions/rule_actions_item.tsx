@@ -691,7 +691,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
       }
       buttonContentClassName="eui-fullWidth"
       buttonContent={
-        <EuiPanel color={subdued} paddingSize="m">
+        <EuiPanel color="transparent" paddingSize="m">
           <EuiFlexGroup alignItems="center" responsive={false}>
             {accordionIcon}
             {connectorTitle}

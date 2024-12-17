@@ -18,7 +18,7 @@ const Stat = styled(EuiStat)`
 `;
 
 const Divider = styled.div`
-  border-right: 1px solid ${(props) => props.theme.border.thin};
+  border-right: ${(props) => props.theme.euiTheme.border.thin};
   height: 100%;
 `;
 
