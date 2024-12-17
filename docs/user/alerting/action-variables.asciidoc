@@ -231,15 +231,15 @@ To use it, surround the date and formatting parameters with `{{#FormatDate}}...{
 
 The format of the text passed to the lambda is: `<date>; <time zone>; <date format>`, where semicolons (`;`) separate each parameter.
 The `<date>` parameter is required; the `<time zone>` and `<date format>` parameters are optional.
-The default time zone is `"UTC"` and the default date format is `"YYYY-MM-DD hh:mma"`.
+The default time zone is `"UTC"` and the default date format is `"YYYY-MM-DD hh:mm"`.
 For example, the following templates all render the same value:
  
 [source]
 ----
     {{#FormatDate}} {{{timestamp}}} {{/FormatDate}}
     {{#FormatDate}} {{{timestamp}}} ; UTC {{/FormatDate}}
-    {{#FormatDate}} {{{timestamp}}} ; UTC; YYYY-MM-DD hh:mma {{/FormatDate}}
-    {{#FormatDate}} {{{timestamp}}} ; ; YYYY-MM-DD hh:mma {{/FormatDate}}
+    {{#FormatDate}} {{{timestamp}}} ; UTC; YYYY-MM-DD hh:mm {{/FormatDate}}
+    {{#FormatDate}} {{{timestamp}}} ; ; YYYY-MM-DD hh:mm {{/FormatDate}}
 ----
 
 The `<time zone>` parameter must be a valid time zone identifier as listed in https://en.wikipedia.org/wiki/List_of_tz_database_time_zones[TZ database time zone names], such as `"America/New_York"`.
