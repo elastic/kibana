@@ -39,7 +39,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
       return;
     }
 
-    const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
+    pipeline.push(getAgentImageConfig({ returnYaml: true }));
+    const onlyRunQuickChecks = true; // await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
     if (onlyRunQuickChecks) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
@@ -47,7 +48,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
       return;
     }
 
-    pipeline.push(getAgentImageConfig({ returnYaml: true }));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
     if (await doAnyChangesMatch([/^packages\/kbn-handlebars/])) {
