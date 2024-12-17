@@ -47,7 +47,7 @@ export function LogsOverviewStacktrace({
   const [source, setSource] = useState<Record<string, unknown>>();
 
   const [requestState, esHit] = useEsDocSearch({
-    id: hit.raw._id,
+    id: hit.raw._id || '',
     index: hit.raw._index,
     dataView,
   });
