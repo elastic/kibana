@@ -16,15 +16,11 @@ export { getRegistryUrl } from './epm/registry/registry_url';
 
 export interface AgentPolicyServiceInterface {
   create: (typeof agentPolicyService)['create'];
-  runExternalCallbacks: (typeof agentPolicyService)['runExternalCallbacks'];
-  checkTamperProtectionLicense: (typeof agentPolicyService)['checkTamperProtectionLicense'];
-  checkAgentless: (typeof agentPolicyService)['checkAgentless'];
-  requireUniqueName: (typeof agentPolicyService)['requireUniqueName'];
-  triggerAgentPolicyUpdatedEvent: (typeof agentPolicyService)['triggerAgentPolicyUpdatedEvent'];
   get: (typeof agentPolicyService)['get'];
   list: (typeof agentPolicyService)['list'];
+  delete: (typeof agentPolicyService)['delete'];
   getFullAgentPolicy: (typeof agentPolicyService)['getFullAgentPolicy'];
-  getByIds: (typeof agentPolicyService)['getByIDs'];
+  getByIDs: (typeof agentPolicyService)['getByIDs'];
   turnOffAgentTamperProtections: (typeof agentPolicyService)['turnOffAgentTamperProtections'];
   fetchAllAgentPolicyIds: (typeof agentPolicyService)['fetchAllAgentPolicyIds'];
   fetchAllAgentPolicies: (typeof agentPolicyService)['fetchAllAgentPolicies'];
