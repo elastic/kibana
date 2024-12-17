@@ -100,7 +100,12 @@ interface LensApiProps {}
 
 export type LensSavedObjectAttributes = Omit<LensDocument, 'savedObjectId' | 'type'>;
 
+/**
+ * This visualization context can have a different attributes than the
+ * one stored in the Lens API attributes
+ */
 export interface VisualizationContext {
+  activeAttributes: LensDocument | undefined;
   mergedSearchContext: ExecutionContextSearch;
   indexPatterns: IndexPatternMap;
   indexPatternRefs: IndexPatternRef[];
@@ -111,7 +116,7 @@ export interface VisualizationContext {
 
 export interface VisualizationContextHelper {
   // the doc prop here is a convenience reference to the internalApi.attributes
-  getVisualizationContext: () => VisualizationContext & { doc: LensDocument | undefined };
+  getVisualizationContext: () => VisualizationContext;
   updateVisualizationContext: (newContext: Partial<VisualizationContext>) => void;
 }
 

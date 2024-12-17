@@ -47,10 +47,10 @@ function setupActionsApi(
   const apiMock = getLensApiMock();
   // create the internal API and customize internal state
   const internalApi = getLensInternalApiMock();
-  internalApi.updateAttributes(runtimeState.attributes);
-  if (contextOverrides) {
-    internalApi.updateVisualizationContext(contextOverrides);
-  }
+  internalApi.updateVisualizationContext({
+    ...contextOverrides,
+    activeAttributes: runtimeState.attributes,
+  });
 
   const { api } = initializeActionApi(
     uuid,
@@ -91,6 +91,7 @@ describe('Dashboard actions', () => {
   describe('Explore in Discover', () => {
     // make it pass the basic check on viewUnderlyingData
     const visualizationContextMockOverrides = {
+      activeAttributes: undefined,
       mergedSearchContext: {},
       indexPatterns: {
         [DATAVIEW_ID]: {

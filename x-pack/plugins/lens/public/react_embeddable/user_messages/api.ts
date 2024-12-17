@@ -42,7 +42,7 @@ function getUpdatedState(
   datasourceMap: LensEmbeddableStartServices['datasourceMap']
 ) {
   const {
-    doc,
+    activeAttributes,
     mergedSearchContext,
     indexPatterns,
     indexPatternRefs,
@@ -50,15 +50,15 @@ function getUpdatedState(
     activeDatasourceState,
     activeData,
   } = getVisualizationContext();
-  const activeVisualizationId = getActiveVisualizationIdFromDoc(doc);
-  const activeDatasourceId = getActiveDatasourceIdFromDoc(doc);
+  const activeVisualizationId = getActiveVisualizationIdFromDoc(activeAttributes);
+  const activeDatasourceId = getActiveDatasourceIdFromDoc(activeAttributes);
   const activeDatasource = activeDatasourceId ? datasourceMap[activeDatasourceId] : null;
   const activeVisualization = activeVisualizationId
     ? visualizationMap[activeVisualizationId]
     : undefined;
   const dataViewObject = getInitialDataViewsObject(indexPatterns, indexPatternRefs);
   return {
-    doc,
+    activeAttributes,
     mergedSearchContext,
     activeDatasource,
     activeVisualization,
@@ -129,7 +129,7 @@ export function buildUserMessagesHelpers(
 
   const getUserMessages: UserMessagesGetter = (locationId, filters) => {
     const {
-      doc,
+      activeAttributes,
       activeVisualizationState,
       activeVisualization,
       activeVisualizationId,
@@ -144,7 +144,7 @@ export function buildUserMessagesHelpers(
 
     userMessages.push(
       ...getApplicationUserMessages({
-        visualizationType: doc?.visualizationType,
+        visualizationType: activeAttributes?.visualizationType,
         visualizationState: {
           state: activeVisualizationState,
           activeId: activeVisualizationId,
@@ -160,7 +160,7 @@ export function buildUserMessagesHelpers(
       })
     );
 
-    if (!doc || !activeDatasourceState || !activeVisualizationState) {
+    if (!activeAttributes || !activeDatasourceState || !activeVisualizationState) {
       return userMessages;
     }
 
@@ -176,7 +176,7 @@ export function buildUserMessagesHelpers(
         datasourceMap,
         dataViewObject.indexPatterns
       ),
-      query: doc.state.query,
+      query: activeAttributes.state.query,
       filters: mergedSearchContext.filters ?? [],
       dateRange: {
         fromDate: mergedSearchContext.timeRange?.from ?? '',

@@ -236,6 +236,7 @@ export function loadEmbeddableData(
     // update the visualization context before anything else
     // as it will be used to compute blocking errors also in case of issues
     internalApi.updateVisualizationContext({
+      activeAttributes: currentState.attributes,
       mergedSearchContext: params?.searchContext || {},
       ...rest,
     });

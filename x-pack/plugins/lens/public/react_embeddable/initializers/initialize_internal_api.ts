@@ -54,6 +54,9 @@ export function initializeInternalApi(
   const isNewlyCreated$ = new BehaviorSubject<boolean>(initialState.isNewPanel || false);
 
   const visualizationContext$ = new BehaviorSubject<VisualizationContext>({
+    // doc can point to a different set of attributes for the visualization
+    // i.e. when inline editing or applying a suggestion
+    activeAttributes: undefined,
     mergedSearchContext: {},
     indexPatterns: {},
     indexPatternRefs: [],
@@ -126,10 +129,7 @@ export function initializeInternalApi(
 
       return displayOptions;
     },
-    getVisualizationContext: () => ({
-      doc: attributes$.getValue(),
-      ...visualizationContext$.getValue(),
-    }),
+    getVisualizationContext: () => visualizationContext$.getValue(),
     updateVisualizationContext: (newVisualizationContext: Partial<VisualizationContext>) => {
       visualizationContext$.next({
         ...visualizationContext$.getValue(),

@@ -293,6 +293,7 @@ export function getVisualizationContextHelperMock(
 ) {
   return {
     getVisualizationContext: jest.fn(() => ({
+      activeAttributes: getLensAttributesMock(attributesOverrides),
       mergedSearchContext: {},
       indexPatterns: {},
       indexPatternRefs: [],
@@ -300,7 +301,6 @@ export function getVisualizationContextHelperMock(
       activeDatasourceState: undefined,
       activeData: undefined,
       ...contextOverrides,
-      doc: getLensAttributesMock(attributesOverrides),
     })),
     updateVisualizationContext: jest.fn(),
   };

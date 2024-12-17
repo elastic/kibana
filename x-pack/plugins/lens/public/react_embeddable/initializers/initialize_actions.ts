@@ -132,16 +132,21 @@ function loadViewUnderlyingDataArgs(
     visualizationMap,
   }: LensEmbeddableStartServices
 ) {
-  const { doc, activeData, activeDatasourceState, activeVisualizationState, indexPatterns } =
-    getVisualizationContext();
-  const activeVisualizationId = getActiveVisualizationIdFromDoc(doc);
-  const activeDatasourceId = getActiveDatasourceIdFromDoc(doc);
+  const {
+    activeAttributes,
+    activeData,
+    activeDatasourceState,
+    activeVisualizationState,
+    indexPatterns,
+  } = getVisualizationContext();
+  const activeVisualizationId = getActiveVisualizationIdFromDoc(activeAttributes);
+  const activeDatasourceId = getActiveDatasourceIdFromDoc(activeAttributes);
   const activeVisualization = activeVisualizationId
     ? visualizationMap[activeVisualizationId]
     : undefined;
   const activeDatasource = activeDatasourceId ? datasourceMap[activeDatasourceId] : undefined;
   if (
-    !doc ||
+    !activeAttributes ||
     !activeData ||
     !activeDatasource ||
     !activeDatasourceState ||
