@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/css';
 import { filter, firstValueFrom } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
@@ -53,8 +54,6 @@ import {
   LOAD_BOOTSTRAP_START,
   LOAD_START,
 } from './events';
-
-import './core_system.scss';
 
 /**
  * @internal
@@ -405,10 +404,16 @@ export class CoreSystem {
 
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';
-      this.rootDomElement.classList.add('coreSystemRootDomElement');
       this.rootDomElement.appendChild(coreUiTargetDomElement);
       this.rootDomElement.appendChild(notificationsTargetDomElement);
       this.rootDomElement.appendChild(overlayTargetDomElement);
+
+      const coreSystemRootDomElement = css`
+        overflow-x: hidden;
+        min-width: 100%;
+        min-height: 100%;
+      `;
+      this.rootDomElement.classList.add(coreSystemRootDomElement);
 
       this.rendering.start({
         application,

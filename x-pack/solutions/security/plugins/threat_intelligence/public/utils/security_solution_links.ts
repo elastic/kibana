@@ -10,7 +10,7 @@ import { threatIntelligencePages } from '../constants/navigation';
 
 /**
  * Properties used in the Security Solution plugin to add links to the navigation.
- * The properties come from LinkItem (x-pack/plugins/security_solution/public/common/links/types.ts).
+ * The properties come from LinkItem (x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts).
  *
  * If we want to control more from within the Threat Intelligence plugin, we can keep growing this interface.
  */

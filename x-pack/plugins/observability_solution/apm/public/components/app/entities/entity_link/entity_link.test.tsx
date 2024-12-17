@@ -173,7 +173,9 @@ describe('Entity link', () => {
     renderEntityLink({
       isEntityCentricExperienceEnabled: true,
       serviceEntitySummaryMockReturnValue: {
-        serviceEntitySummary: { dataStreamTypes: ['metrics'] } as unknown as ServiceEntitySummary,
+        serviceEntitySummary: {
+          ['data_stream.type']: ['metrics'],
+        } as unknown as ServiceEntitySummary,
         serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
       },
       hasApmDataFetcherMockReturnValue: {
@@ -200,7 +202,9 @@ describe('Entity link', () => {
     renderEntityLink({
       isEntityCentricExperienceEnabled: true,
       serviceEntitySummaryMockReturnValue: {
-        serviceEntitySummary: { dataStreamTypes: ['metrics'] } as unknown as ServiceEntitySummary,
+        serviceEntitySummary: {
+          ['data_stream.type']: ['metrics'],
+        } as unknown as ServiceEntitySummary,
         serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
       },
       hasApmDataFetcherMockReturnValue: {

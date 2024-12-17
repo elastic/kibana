@@ -174,7 +174,7 @@ export type TIPage = 'indicators';
 
 /**
  * All the IDs for the threat intelligence pages.
- * This needs to match the threat intelligence page entries in SecurityPageName` (x-pack/plugins/security_solution/common/constants.ts).
+ * This needs to match the threat intelligence page entries in SecurityPageName` (x-pack/solutions/security/plugins/security_solution/common/constants.ts).
  *
  * Example to add more IDs:
  *   export type TIPageId = 'threat_intelligence' | 'threat_intelligence-feed';

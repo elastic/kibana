@@ -25,4 +25,9 @@ export interface ISavedObjectsSpacesExtension {
    * If a wildcard '*' is used, it is expanded to an explicit list of namespace strings.
    */
   getSearchableNamespaces: (namespaces: string[] | undefined) => Promise<string[]>;
+  /**
+   * Returns a new Saved Objects Spaces Extension scoped to the specified namespace.
+   * @param namespace Space to which the extension should be scoped to.
+   */
+  asScopedToNamespace(namespace: string): ISavedObjectsSpacesExtension;
 }

@@ -8,25 +8,12 @@
  */
 
 import fastIsEqual from 'fast-deep-equal';
-import {
-  PublishingSubject,
-  StateComparators,
-  initializeTitles,
-} from '@kbn/presentation-publishing';
+import { StateComparators, initializeTitles } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { DashboardState } from './types';
+import { DashboardSettings, DashboardState } from './types';
 import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
-import { DashboardStateFromSettingsFlyout } from '../dashboard_container/types';
 
-export function initializeSettingsManager({
-  initialState,
-  setTimeRestore,
-  timeRestore$,
-}: {
-  initialState?: DashboardState;
-  setTimeRestore: (timeRestore: boolean) => void;
-  timeRestore$: PublishingSubject<boolean | undefined>;
-}) {
+export function initializeSettingsManager(initialState?: DashboardState) {
   const syncColors$ = new BehaviorSubject<boolean>(
     initialState?.syncColors ?? DEFAULT_DASHBOARD_INPUT.syncColors
   );
@@ -50,6 +37,12 @@ export function initializeSettingsManager({
     if (!fastIsEqual(tags, tags$.value)) tags$.next(tags);
   }
   const titleManager = initializeTitles(initialState ?? {});
+  const timeRestore$ = new BehaviorSubject<boolean | undefined>(
+    initialState?.timeRestore ?? DEFAULT_DASHBOARD_INPUT.timeRestore
+  );
+  function setTimeRestore(timeRestore: boolean) {
+    if (timeRestore !== timeRestore$.value) timeRestore$.next(timeRestore);
+  }
   const useMargins$ = new BehaviorSubject<boolean>(
     initialState?.useMargins ?? DEFAULT_DASHBOARD_INPUT.useMargins
   );
@@ -69,7 +62,7 @@ export function initializeSettingsManager({
     };
   }
 
-  function setSettings(settings: DashboardStateFromSettingsFlyout) {
+  function setSettings(settings: DashboardSettings) {
     setSyncColors(settings.syncColors);
     setSyncCursor(settings.syncCursor);
     setSyncTooltips(settings.syncTooltips);
@@ -100,35 +93,16 @@ export function initializeSettingsManager({
       syncColors: [syncColors$, setSyncColors],
       syncCursor: [syncCursor$, setSyncCursor],
       syncTooltips: [syncTooltips$, setSyncTooltips],
+      timeRestore: [timeRestore$, setTimeRestore],
       useMargins: [useMargins$, setUseMargins],
-    } as StateComparators<
-      Pick<
-        DashboardState,
-        | 'description'
-        | 'hidePanelTitles'
-        | 'syncColors'
-        | 'syncCursor'
-        | 'syncTooltips'
-        | 'title'
-        | 'useMargins'
-      >
-    >,
+    } as StateComparators<Omit<DashboardSettings, 'tags'>>,
     internalApi: {
-      getState: (): Pick<
-        DashboardState,
-        | 'description'
-        | 'hidePanelTitles'
-        | 'syncColors'
-        | 'syncCursor'
-        | 'syncTooltips'
-        | 'tags'
-        | 'title'
-        | 'useMargins'
-      > => {
+      getState: (): DashboardSettings => {
         const settings = getSettings();
         return {
           ...settings,
           title: settings.title ?? '',
+          timeRestore: settings.timeRestore ?? DEFAULT_DASHBOARD_INPUT.timeRestore,
           hidePanelTitles: settings.hidePanelTitles ?? DEFAULT_DASHBOARD_INPUT.hidePanelTitles,
         };
       },

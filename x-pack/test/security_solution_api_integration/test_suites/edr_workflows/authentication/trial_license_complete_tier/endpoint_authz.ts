@@ -40,9 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
   }
   // @skipInServerlessMKI - this test uses internal index manipulation in before/after hooks
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
-  // FLAKY: https://github.com/elastic/kibana/issues/203909
-  // FLAKY: https://github.com/elastic/kibana/issues/203910
-  describe.skip('@ess @serverless @skipInServerlessMKI When attempting to call an endpoint api', function () {
+  describe('@ess @serverless @skipInServerlessMKI When attempting to call an endpoint api', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     let actionId = '';
     let agentId = '';

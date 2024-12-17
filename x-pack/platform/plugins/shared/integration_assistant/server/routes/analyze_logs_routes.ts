@@ -10,7 +10,12 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { ANALYZE_LOGS_PATH, AnalyzeLogsRequestBody, AnalyzeLogsResponse } from '../../common';
-import { ROUTE_HANDLER_TIMEOUT } from '../constants';
+import {
+  ACTIONS_AND_CONNECTORS_ALL_ROLE,
+  FLEET_ALL_ROLE,
+  INTEGRATIONS_ALL_ROLE,
+  ROUTE_HANDLER_TIMEOUT,
+} from '../constants';
 import { getLogFormatDetectionGraph } from '../graphs/log_type_detection/graph';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { getLLMClass, getLLMType } from '../util/llm';
@@ -39,9 +44,11 @@ export function registerAnalyzeLogsRoutes(
         version: '1',
         security: {
           authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because the privileges are not defined yet.',
+            requiredPrivileges: [
+              FLEET_ALL_ROLE,
+              INTEGRATIONS_ALL_ROLE,
+              ACTIONS_AND_CONNECTORS_ALL_ROLE,
+            ],
           },
         },
         validate: {

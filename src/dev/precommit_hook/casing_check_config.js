@@ -44,7 +44,7 @@ export const IGNORE_FILE_GLOBS = [
   'packages/kbn-test/jest-preset.js',
   'packages/kbn-test/*/jest-preset.js',
   'test/package/Vagrantfile',
-  'x-pack/plugins/security_solution/scripts/endpoint/common/vagrant/Vagrantfile',
+  'x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/vagrant/Vagrantfile',
   '**/test/**/fixtures/**/*',
   'packages/kbn-router-to-openapispec/openapi-types.d.ts',
 
@@ -98,7 +98,19 @@ export const IGNORE_FILE_GLOBS = [
  *
  * @type {Array}
  */
-export const KEBAB_CASE_DIRECTORY_GLOBS = ['packages/*', 'x-pack', 'x-pack/packages/*'];
+export const KEBAB_CASE_DIRECTORY_GLOBS = [
+  'packages/*',
+  'x-pack',
+  'x-pack/packages/*',
+  'src/core/packages/*/*',
+  'src/platform/packages/private/*',
+  'src/platform/packages/shared/*',
+  'x-pack/platform/packages/private/*',
+  'x-pack/platform/packages/shared/*',
+  'x-pack/solutions/observability/packages/*',
+  'x-pack/solutions/search/packages/*',
+  'x-pack/solutions/security/packages/*',
+];
 
 /**
  * These patterns are matched against directories and indicate
