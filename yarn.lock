@@ -2318,10 +2318,10 @@
     "@types/lodash" "^4.14.202"
     lodash "^4.17.21"
 
-"@elastic/eui@98.2.0-borealis.0":
-  version "98.2.0-borealis.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-98.2.0-borealis.0.tgz#a56ef258bd82151bf9cd6ce1d33de2b08a0f2443"
-  integrity sha512-t48eJnGuNC+2cP9iWrq7PQtn5y/zb3tRFkvqwWWd9zX7nbQ2YoqoAU8Xr3zKDFcAWkadCBcWiEIS8ZDFUM4HKQ==
+"@elastic/eui@98.2.1-borealis.0":
+  version "98.2.1-borealis.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-98.2.1-borealis.0.tgz#e613f0917989561395cc4a9c8206245eac618c1a"
+  integrity sha512-qZBPMfdBcXITGYuwy5OAo5FU2+eKMrZYsxs2hBQFZOUlLL4VLJ6SzgwAzJZx7BJWBTJSDtv8+PhPgNk/3FSMJg==
   dependencies:
     "@elastic/eui-theme-common" "0.0.5"
     "@hello-pangea/dnd" "^16.6.0"
