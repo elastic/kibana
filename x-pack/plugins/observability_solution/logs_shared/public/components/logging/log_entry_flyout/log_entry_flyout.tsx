@@ -28,7 +28,6 @@ import { useLogEntry } from '../../../containers/logs/log_entry';
 import { CenteredEuiFlyoutBody } from '../../centered_flyout_body';
 import { DataSearchErrorCallout } from '../../data_search_error_callout';
 import { DataSearchProgress } from '../../data_search_progress';
-import LogAIAssistant from '../../log_ai_assistant/log_ai_assistant';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';
 import { LogEntryFieldsTable } from './log_entry_fields_table';
 
@@ -42,7 +41,7 @@ export interface LogEntryFlyoutProps {
 export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
   const flyoutRef = useRef<OverlayRef>();
   const {
-    services: { http, data, share, uiSettings, application, observabilityAIAssistant },
+    services: { http, data, share, uiSettings, application, logsShared },
     overlays: { openFlyout },
   } = useKibanaContextForPlugin();
 
@@ -58,7 +57,7 @@ export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
         share,
         uiSettings,
         application,
-        observabilityAIAssistant,
+        logsShared,
       });
 
       flyoutRef.current = openFlyout(
@@ -72,12 +71,12 @@ export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
       );
     },
     [
+      logsShared,
       application,
       closeLogEntryFlyout,
       data,
       http,
       logViewReference,
-      observabilityAIAssistant,
       openFlyout,
       share,
       uiSettings,
@@ -115,7 +114,11 @@ export const LogEntryFlyout = ({
     logEntryId,
   });
 
-  const { observabilityAIAssistant } = useKibanaContextForPlugin().services;
+  const {
+    services: {
+      logsShared: { LogAIAssistant },
+    },
+  } = useKibanaContextForPlugin();
 
   useEffect(() => {
     if (logViewReference && logEntryId) {
@@ -183,12 +186,9 @@ export const LogEntryFlyout = ({
           }
         >
           <EuiFlexGroup direction="column" gutterSize="m">
-            {observabilityAIAssistant && (
+            {LogAIAssistant && (
               <EuiFlexItem grow={false}>
-                <LogAIAssistant
-                  observabilityAIAssistant={observabilityAIAssistant}
-                  doc={logEntry}
-                />
+                <LogAIAssistant doc={logEntry} />
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>

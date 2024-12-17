@@ -20,8 +20,7 @@ import {
 } from '../types';
 
 export type PluginKibanaContextValue = CoreStart &
-  LogsSharedClientStartDeps &
-  LogsSharedClientStartExports;
+  LogsSharedClientStartDeps & { logsShared: LogsSharedClientStartExports };
 
 export const createKibanaContextForPlugin = (
   core: CoreStart,
@@ -31,7 +30,7 @@ export const createKibanaContextForPlugin = (
   createKibanaReactContext<PluginKibanaContextValue>({
     ...core,
     ...plugins,
-    ...pluginStart,
+    logsShared: pluginStart,
   });
 
 export const useKibanaContextForPlugin =

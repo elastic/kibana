@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './apm';
-export * from './dataset_quality';
-export * from './dataset_quality_details';
-export * from './logs_explorer';
-export * from './observability_logs_explorer';
-export * from './observability_onboarding';
-export * from './uptime';
+import { SerializableRecord } from '@kbn/utility-types';
+
+export const TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR = 'TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR';
+
+export interface TransactionDetailsByTraceIdLocatorParams extends SerializableRecord {
+  rangeFrom?: string;
+  rangeTo?: string;
+  traceId: string;
+}
