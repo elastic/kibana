@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContainerOutput } from '@kbn/embeddable-plugin/public';
 import { SerializableRecord } from '@kbn/utility-types';
 
 import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
@@ -32,10 +31,6 @@ export interface DashboardRenderPerformanceStats {
   lastTimeToData: number;
   panelsRenderDoneTime: number;
   panelsRenderStartTime: number;
-}
-
-export interface DashboardContainerOutput extends ContainerOutput {
-  usedDataViewIds?: string[];
 }
 
 export type DashboardLoadedEventStatus = 'done' | 'error';
