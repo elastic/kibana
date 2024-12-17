@@ -87,8 +87,8 @@ export const RunScriptActionResult = memo<
         agentId={command.commandDefinition?.meta?.endpointId}
         textSize="s"
         data-test-subj="console"
-        hideFile={false}
-        hideContext={false}
+        hideFile={true}
+        hideContext={true}
       />
     </ResultComponent>
   );
