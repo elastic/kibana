@@ -16,8 +16,8 @@ import type {
   CrowdStrikeExecuteRTRResponse,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import { v4 as uuidv4 } from 'uuid';
-import { upperFirst } from 'lodash';
 
+import { mapParametersToCrowdStrikeArguments } from './utils';
 import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
 import type {
   CommonResponseActionMethodOptions,
@@ -316,38 +316,6 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       command: 'runscript',
     };
 
-    const transformCommands = (parameters: RunScriptActionRequestBody['parameters']): string => {
-      // Map each parameter to the required syntax and join them with spaces
-
-      // In short: this function has to transform the parameters object into a string that can be used as a CS command
-      // One word commands eg. 'ls' can go as it is, but if there are more elemenets eg. 'ls -l', they have to be wrapped in triple backticks
-      const commandParts = Object.entries(parameters).map(([key, value]) => {
-        // Check and process the parameter value
-        let sanitizedValue;
-        if (typeof value === 'string') {
-          if (/^```.*```$/.test(value)) {
-            // If already wrapped in triple backticks, leave unchanged
-            sanitizedValue = value;
-          } else {
-            const strippedValue = value.trim(); // Remove spaces at the beginning and end
-            if (strippedValue.split(/\s+/).length === 1) {
-              // If it's a single element (no spaces), use it as-is
-              sanitizedValue = strippedValue;
-            } else {
-              // If it contains multiple elements (spaces), wrap in ```
-              sanitizedValue = '```${strippedValue}```';
-            }
-          }
-        } else {
-          sanitizedValue = value;
-        }
-        return `--${upperFirst(key)}=${sanitizedValue}`;
-      });
-
-      // Combine the base command with the constructed parameters
-      return `runscript ${commandParts.join(' ')}`;
-    };
-
     let actionResponse: ActionTypeExecutorResult<CrowdStrikeExecuteRTRResponse> | undefined;
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
@@ -359,7 +327,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         try {
           actionResponse = (await this.sendAction(SUB_ACTION.EXECUTE_ADMIN_RTR, {
             actionParameters: { comment: this.buildExternalComment(reqIndexOptions) },
-            command: transformCommands(actionRequest.parameters),
+            command: mapParametersToCrowdStrikeArguments('runscript', actionRequest.parameters),
             endpoint_ids: actionRequest.endpoint_ids,
           })) as ActionTypeExecutorResult<CrowdStrikeExecuteRTRResponse>;
         } catch (err) {
