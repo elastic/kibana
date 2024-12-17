@@ -6,5 +6,6 @@
  */
 
 export enum DashboardsCardItemId {
-  discover = 'discover',
+  default = 'default',
+  custom = 'custom',
 }

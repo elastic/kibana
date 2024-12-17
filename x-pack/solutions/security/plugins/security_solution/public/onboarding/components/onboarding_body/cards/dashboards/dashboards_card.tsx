@@ -73,6 +73,7 @@ export const DashboardsCard: OnboardingCardComponent = ({
           </CardSubduedText>
           <EuiSpacer />
           <CardSelectorList
+            title={i18n.DASHBOARDS_CARD_STEP_SELECTOR_TITLE}
             items={DASHBOARDS_CARD_ITEMS}
             onSelect={onSelectCard}
             selectedItem={selectedCardItem}

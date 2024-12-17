@@ -18,7 +18,7 @@ export const DASHBOARDS_CARD_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.onboarding.dashboardsCard.description',
   {
     defaultMessage:
-      'View and analyze data in Discover by exploring, filtering, and visualizing to identify threats and investigate incidents efficiently.',
+      'Use dashboards to visualize data and stay up-to-date with key information. Elastic’s default dashboards, or create your own.',
   }
 );
 
@@ -46,6 +46,6 @@ export const DASHBOARDS_CARD_GO_TO_DASHBOARDS_BUTTON = i18n.translate(
 export const DASHBOARDS_CARD_STEP_SELECTOR_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.dashboardsCard.stepSelectorTitle',
   {
-    defaultMessage: 'Go to dashboards',
+    defaultMessage: 'Here are two ways you can use dashboards',
   }
 );

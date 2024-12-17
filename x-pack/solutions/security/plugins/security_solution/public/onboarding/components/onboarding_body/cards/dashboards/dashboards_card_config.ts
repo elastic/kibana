@@ -7,28 +7,49 @@
 
 import { i18n } from '@kbn/i18n';
 import { DashboardsCardItemId } from './types';
+import customDashboardsImageSrc from './images/custom_dashboards.png';
+import prebuiltDashboardsImageSrc from './images/prebuilt_dashboards.png';
 import type { CardSelectorAssetListItem } from '../types';
 import { CardAssetType } from '../types';
 
-const VIDEO_SOURCE = '//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?autoplay=1';
-
 export const DASHBOARDS_CARD_ITEMS: CardSelectorAssetListItem[] = [
   {
-    id: DashboardsCardItemId.discover,
-    title: i18n.translate('xpack.securitySolution.onboarding.dashboardsCard.discover.title', {
-      defaultMessage: 'Intro to Elastic Discover',
+    id: DashboardsCardItemId.default,
+    title: i18n.translate('xpack.securitySolution.onboarding.dashboardsCard.default.title', {
+      defaultMessage: 'Use Elastic’s default dashboards',
     }),
     description: i18n.translate(
-      'xpack.securitySolution.onboarding.dashboardsCard.discover.description',
+      'xpack.securitySolution.onboarding.dashboardsCard.default.description',
       {
-        defaultMessage: 'Quickly add and enable the rules you need with Elastic’s prebuilt rules',
+        defaultMessage:
+          'Out-of-the-box dashboards for alerts, data quality, entity analytics, and more',
       }
     ),
     asset: {
-      type: CardAssetType.video,
-      source: VIDEO_SOURCE,
-      alt: i18n.translate('xpack.securitySolution.onboarding.dashboardsCard.discover.description', {
-        defaultMessage: 'Quickly add and enable the rules you need with Elastic’s prebuilt rules',
+      type: CardAssetType.image,
+      source: prebuiltDashboardsImageSrc,
+      alt: i18n.translate('xpack.securitySolution.onboarding.dashboardsCard.default.description', {
+        defaultMessage:
+          'Out-of-the-box dashboards for alerts, data quality, entity analytics, and more',
+      }),
+    },
+  },
+  {
+    id: DashboardsCardItemId.custom,
+    title: i18n.translate('xpack.securitySolution.onboarding.dashboardsCard.custom.title', {
+      defaultMessage: 'Create a dashboard',
+    }),
+    description: i18n.translate(
+      'xpack.securitySolution.onboarding.dashboardsCard.custom.description',
+      {
+        defaultMessage: 'Drag and drop your way to a custom visualization',
+      }
+    ),
+    asset: {
+      type: CardAssetType.image,
+      source: customDashboardsImageSrc,
+      alt: i18n.translate('xpack.securitySolution.onboarding.dashboardsCard.custom.description', {
+        defaultMessage: 'Drag and drop your way to a custom visualization',
       }),
     },
   },

@@ -6,12 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import installRulesImageSrc from './images/install_rule.png';
+import previewRulesImageSrc from './images/preview_rules.png';
+import customRulesImageSrc from './images/custom_rules.png';
 import { RulesCardItemId } from './types';
 import type { CardSelectorAssetListItem } from '../types';
 import { CardAssetType } from '../types';
-
-const VIDEO_SOURCE = '//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?autoplay=1';
 
 export const RULES_CARD_ITEMS: CardSelectorAssetListItem[] = [
   {
@@ -27,7 +26,7 @@ export const RULES_CARD_ITEMS: CardSelectorAssetListItem[] = [
     ),
     asset: {
       type: CardAssetType.image,
-      source: installRulesImageSrc,
+      source: previewRulesImageSrc,
       alt: i18n.translate('xpack.securitySolution.onboarding.rulesCards.install.description', {
         defaultMessage: 'Quickly add and enable the rules you need with Elastic’s prebuilt rules',
       }),
@@ -42,8 +41,8 @@ export const RULES_CARD_ITEMS: CardSelectorAssetListItem[] = [
       defaultMessage: 'Create a custom detection rule for local or remote data',
     }),
     asset: {
-      type: CardAssetType.video,
-      source: VIDEO_SOURCE,
+      type: CardAssetType.image,
+      source: customRulesImageSrc,
       alt: i18n.translate('xpack.securitySolution.onboarding.rulesCards.create.description', {
         defaultMessage: 'Create a custom detection rule for local or remote data',
       }),

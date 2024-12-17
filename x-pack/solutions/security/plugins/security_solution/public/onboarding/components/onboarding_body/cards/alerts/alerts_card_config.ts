@@ -8,11 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import alertTimelineImageSrc from './images/alert_timeline.png';
 import sessionViewImageSrc from './images/session_view.png';
+import alertListImageSrc from './images/alert_list.png';
+import eventAnalyzerImageSrc from './images/event_analyzer.png';
 import { AlertsCardItemId } from './types';
 import type { CardSelectorAssetListItem } from '../types';
 import { CardAssetType } from '../types';
-
-const VIDEO_SOURCE = '//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?autoplay=1';
 
 export const ALERTS_CARD_ITEMS: CardSelectorAssetListItem[] = [
   {
@@ -27,8 +27,8 @@ export const ALERTS_CARD_ITEMS: CardSelectorAssetListItem[] = [
       }
     ),
     asset: {
-      type: CardAssetType.video,
-      source: VIDEO_SOURCE,
+      type: CardAssetType.image,
+      source: alertListImageSrc,
       alt: i18n.translate('xpack.securitySolution.onboarding.alertsCards.details.description', {
         defaultMessage: 'Sort through alerts and drill down into its details',
       }),
@@ -65,8 +65,8 @@ export const ALERTS_CARD_ITEMS: CardSelectorAssetListItem[] = [
       }
     ),
     asset: {
-      type: CardAssetType.video,
-      source: VIDEO_SOURCE,
+      type: CardAssetType.image,
+      source: eventAnalyzerImageSrc,
       alt: i18n.translate('xpack.securitySolution.onboarding.alertsCards.analyzer.description', {
         defaultMessage: 'Simplify alert analysis by visualizing threat detection processes',
       }),
