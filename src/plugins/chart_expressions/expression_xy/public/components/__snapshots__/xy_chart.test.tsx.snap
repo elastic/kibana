@@ -1751,6 +1751,13 @@ exports[`XYChart component it renders area 1`] = `
             "getAll": [MockFunction],
           }
         }
+        palettes={
+          KbnPalettes {
+            "get": [Function],
+            "getAll": [Function],
+            "query": [Function],
+          }
+        }
         shouldShowValueLabels={true}
         syncColors={false}
         timeZone="UTC"
@@ -3304,6 +3311,13 @@ exports[`XYChart component it renders bar 1`] = `
           Object {
             "get": [MockFunction],
             "getAll": [MockFunction],
+          }
+        }
+        palettes={
+          KbnPalettes {
+            "get": [Function],
+            "getAll": [Function],
+            "query": [Function],
           }
         }
         shouldShowValueLabels={true}
@@ -4861,6 +4875,13 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             "getAll": [MockFunction],
           }
         }
+        palettes={
+          KbnPalettes {
+            "get": [Function],
+            "getAll": [Function],
+            "query": [Function],
+          }
+        }
         shouldShowValueLabels={true}
         syncColors={false}
         timeZone="UTC"
@@ -6414,6 +6435,13 @@ exports[`XYChart component it renders line 1`] = `
           Object {
             "get": [MockFunction],
             "getAll": [MockFunction],
+          }
+        }
+        palettes={
+          KbnPalettes {
+            "get": [Function],
+            "getAll": [Function],
+            "query": [Function],
           }
         }
         shouldShowValueLabels={true}
@@ -7971,6 +7999,13 @@ exports[`XYChart component it renders stacked area 1`] = `
             "getAll": [MockFunction],
           }
         }
+        palettes={
+          KbnPalettes {
+            "get": [Function],
+            "getAll": [Function],
+            "query": [Function],
+          }
+        }
         shouldShowValueLabels={true}
         syncColors={false}
         timeZone="UTC"
@@ -9526,6 +9561,13 @@ exports[`XYChart component it renders stacked bar 1`] = `
             "getAll": [MockFunction],
           }
         }
+        palettes={
+          KbnPalettes {
+            "get": [Function],
+            "getAll": [Function],
+            "query": [Function],
+          }
+        }
         shouldShowValueLabels={true}
         syncColors={false}
         timeZone="UTC"
@@ -11079,6 +11121,13 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           Object {
             "get": [MockFunction],
             "getAll": [MockFunction],
+          }
+        }
+        palettes={
+          KbnPalettes {
+            "get": [Function],
+            "getAll": [Function],
+            "query": [Function],
           }
         }
         shouldShowValueLabels={true}
@@ -12860,6 +12909,13 @@ exports[`XYChart component split chart should render split chart if both, splitR
           Object {
             "get": [MockFunction],
             "getAll": [MockFunction],
+          }
+        }
+        palettes={
+          KbnPalettes {
+            "get": [Function],
+            "getAll": [Function],
+            "query": [Function],
           }
         }
         shouldShowValueLabels={true}
@@ -14650,6 +14706,13 @@ exports[`XYChart component split chart should render split chart if splitColumnA
             "getAll": [MockFunction],
           }
         }
+        palettes={
+          KbnPalettes {
+            "get": [Function],
+            "getAll": [Function],
+            "query": [Function],
+          }
+        }
         shouldShowValueLabels={true}
         syncColors={false}
         timeZone="UTC"
@@ -16434,6 +16497,13 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           Object {
             "get": [MockFunction],
             "getAll": [MockFunction],
+          }
+        }
+        palettes={
+          KbnPalettes {
+            "get": [Function],
+            "getAll": [Function],
+            "query": [Function],
           }
         }
         shouldShowValueLabels={true}

@@ -33,6 +33,9 @@ export {
   type AssistantMessage,
   type UserMessage,
   type ToolMessage,
+  type AssistantMessageOf,
+  type MessageOf,
+  type ToolMessageOf,
 } from './messages';
 export { type ToolSchema, type ToolSchemaType, type FromToolSchema } from './tool_schema';
 export {

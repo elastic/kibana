@@ -142,6 +142,7 @@ describe('openAIAdapter', () => {
             ],
           },
           {
+            name: 'my_function',
             role: MessageRole.Tool,
             toolCallId: '0',
             response: {
