@@ -46,7 +46,7 @@ const dslFilter = ({
 const statsCommand = ({ source }: { source: EntitySourceDefinition }) => {
   const aggs = source.metadata_fields
     .filter((field) => !source.identity_fields.some((idField) => idField === field))
-    .map((field) => `${field} = TOP(${asKeyword(field)}, 10, "ASC")`);
+    .map((field) => `${field} = VALUES(${asKeyword(field)})`);
 
   if (source.timestamp_field) {
     aggs.push(`entity.last_seen_timestamp = MAX(${source.timestamp_field})`);

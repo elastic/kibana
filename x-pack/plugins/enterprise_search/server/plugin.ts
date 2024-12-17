@@ -58,10 +58,19 @@ import {
   databaseSearchGuideConfig,
 } from '../common/guided_onboarding/search_guide_config';
 
-import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
+import {
+  AS_TELEMETRY_NAME,
+  registerTelemetryUsageCollector as registerASTelemetryUsageCollector,
+} from './collectors/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerCNTelemetryUsageCollector } from './collectors/connectors/telemetry';
-import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } from './collectors/enterprise_search/telemetry';
-import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
+import {
+  ES_TELEMETRY_NAME,
+  registerTelemetryUsageCollector as registerESTelemetryUsageCollector,
+} from './collectors/enterprise_search/telemetry';
+import {
+  WS_TELEMETRY_NAME,
+  registerTelemetryUsageCollector as registerWSTelemetryUsageCollector,
+} from './collectors/workplace_search/telemetry';
 import { registerEnterpriseSearchIntegrations } from './integrations';
 
 import { entSearchHttpAgent } from './lib/enterprise_search_http_agent';
@@ -194,8 +203,8 @@ export class EnterpriseSearchPlugin implements Plugin {
           api: [],
           catalogue: PLUGIN_IDS,
           savedObject: {
-            all: [],
-            read: [],
+            all: [ES_TELEMETRY_NAME, AS_TELEMETRY_NAME, WS_TELEMETRY_NAME],
+            read: [ES_TELEMETRY_NAME, AS_TELEMETRY_NAME, WS_TELEMETRY_NAME],
           },
           ui: [],
         },

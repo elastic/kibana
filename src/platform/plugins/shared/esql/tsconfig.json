@@ -33,6 +33,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
     "@kbn/esql-variables"
+    "@kbn/core-test-helpers-kbn-server",
   ],
   "exclude": [
     "target/**/*",

@@ -49,6 +49,7 @@ import { DEFAULT_DASHBOARD_INPUT, GLOBAL_STATE_STORAGE_KEY } from '../dashboard_
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
+  timeRestore$: PublishingSubject<boolean | undefined>,
   waitForPanelsToLoad$: Observable<void>,
   getLastSavedState: () => DashboardState | undefined,
   creationOptions?: DashboardCreationOptions
@@ -97,12 +98,6 @@ export function initializeUnifiedSearchManager(
     if (creationOptions?.useUnifiedSearchIntegration) {
       timefilterService.setTime(timeRangeOrDefault);
     }
-  }
-  const timeRestore$ = new BehaviorSubject<boolean | undefined>(
-    initialState?.timeRestore ?? DEFAULT_DASHBOARD_INPUT.timeRestore
-  );
-  function setTimeRestore(timeRestore: boolean) {
-    if (timeRestore !== timeRestore$.value) timeRestore$.next(timeRestore);
   }
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
   const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(initialState.filters);
@@ -316,9 +311,8 @@ export function initializeUnifiedSearchManager(
           return true;
         },
       ],
-      timeRestore: [timeRestore$, setTimeRestore],
     } as StateComparators<
-      Pick<DashboardState, 'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'timeRestore'>
+      Pick<DashboardState, 'filters' | 'query' | 'refreshInterval' | 'timeRange'>
     >,
     internalApi: {
       controlGroupReload$,
@@ -329,7 +323,6 @@ export function initializeUnifiedSearchManager(
           ...lastSavedState.filters,
         ]);
         setQuery(lastSavedState.query);
-        setTimeRestore(lastSavedState.timeRestore);
         if (lastSavedState.timeRestore) {
           setAndSyncRefreshInterval(lastSavedState.refreshInterval);
           setAndSyncTimeRange(lastSavedState.timeRange);
@@ -345,8 +338,6 @@ export function initializeUnifiedSearchManager(
         timeRange: timeRange$.value,
         timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_INPUT.timeRestore,
       }),
-      setTimeRestore,
-      timeRestore$,
     },
     cleanup: () => {
       controlGroupSubscriptions.unsubscribe();
