@@ -56,7 +56,7 @@ export function initializeInternalApi(
   const visualizationContext$ = new BehaviorSubject<VisualizationContext>({
     // doc can point to a different set of attributes for the visualization
     // i.e. when inline editing or applying a suggestion
-    activeAttributes: undefined,
+    activeAttributes: initialState.attributes,
     mergedSearchContext: {},
     indexPatterns: {},
     indexPatternRefs: [],
