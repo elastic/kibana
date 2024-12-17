@@ -25,17 +25,7 @@ exports[`Statement component renders a CollapsibleStatement with else body for n
         size="xs"
       >
         <span
-          css={
-            Object {
-              "map": undefined,
-              "name": "1xxe9l9",
-              "next": undefined,
-              "styles": "
-  font-weight: bold;
-",
-              "toString": [Function],
-            }
-          }
+          css={[Function]}
         >
           else
         </span>
@@ -70,17 +60,7 @@ exports[`Statement component renders a CollapsibleStatement with if body for bra
         size="xs"
       >
         <span
-          css={
-            Object {
-              "map": undefined,
-              "name": "1xxe9l9",
-              "next": undefined,
-              "styles": "
-  font-weight: bold;
-",
-              "toString": [Function],
-            }
-          }
+          css={[Function]}
         >
           if
         </span>
@@ -166,17 +146,7 @@ exports[`Statement component renders spacers for element with depth > 0 1`] = `
         size="xs"
       >
         <span
-          css={
-            Object {
-              "map": undefined,
-              "name": "1xxe9l9",
-              "next": undefined,
-              "styles": "
-  font-weight: bold;
-",
-              "toString": [Function],
-            }
-          }
+          css={[Function]}
         >
           else
         </span>
