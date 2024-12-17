@@ -8,7 +8,7 @@
  */
 
 import path from 'path';
-import { CliSupportedServerModes } from '../types';
+import { CliSupportedServerModes } from '../../types';
 
 export const getConfigFilePath = (config: CliSupportedServerModes): string => {
   if (config === 'stateful') {

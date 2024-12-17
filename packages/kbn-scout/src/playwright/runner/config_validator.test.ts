@@ -14,6 +14,7 @@ import { VALID_CONFIG_MARKER } from '../types';
 
 jest.mock('fs');
 
+const existsSyncMock = jest.spyOn(Fs, 'existsSync');
 const loadConfigModuleMock = jest.spyOn(configLoader, 'loadConfigModule');
 
 describe('validatePlaywrightConfig', () => {
@@ -23,7 +24,7 @@ describe('validatePlaywrightConfig', () => {
 
   it('should pass validation for a valid config file', async () => {
     const configPath = 'valid/path/config.ts';
-    jest.spyOn(Fs, 'existsSync').mockReturnValue(true);
+    existsSyncMock.mockReturnValue(true);
     loadConfigModuleMock.mockResolvedValue({
       default: {
         use: { [VALID_CONFIG_MARKER]: true },
@@ -36,7 +37,7 @@ describe('validatePlaywrightConfig', () => {
 
   it('should throw an error if the config file does not have the valid marker', async () => {
     const configPath = 'valid/path/config.ts';
-    jest.spyOn(Fs, 'existsSync').mockReturnValue(true);
+    existsSyncMock.mockReturnValue(true);
     loadConfigModuleMock.mockResolvedValue({
       default: {
         use: {},
@@ -51,7 +52,7 @@ describe('validatePlaywrightConfig', () => {
 
   it(`should throw an error if the config file does not have a 'testDir'`, async () => {
     const configPath = 'valid/path/config.ts';
-    jest.spyOn(Fs, 'existsSync').mockReturnValue(true);
+    existsSyncMock.mockReturnValue(true);
     loadConfigModuleMock.mockResolvedValue({
       default: {
         use: { [VALID_CONFIG_MARKER]: true },
@@ -65,7 +66,7 @@ describe('validatePlaywrightConfig', () => {
 
   it('should throw an error if the config file does not have a default export', async () => {
     const configPath = 'valid/path/config.ts';
-    jest.spyOn(Fs, 'existsSync').mockReturnValue(true);
+    existsSyncMock.mockReturnValue(true);
     loadConfigModuleMock.mockResolvedValue({
       test: {
         use: {},
@@ -80,7 +81,7 @@ describe('validatePlaywrightConfig', () => {
 
   it('should throw an error if the path does not exist', async () => {
     const configPath = 'invalid/path/to/config.ts';
-    jest.spyOn(Fs, 'existsSync').mockReturnValue(false);
+    existsSyncMock.mockReturnValue(false);
 
     await expect(validatePlaywrightConfig(configPath)).rejects.toThrow(
       `Path to a valid TypeScript config file is required: --config <relative path to .ts file>`
@@ -89,7 +90,7 @@ describe('validatePlaywrightConfig', () => {
 
   it('should throw an error if the file does not have a .ts extension', async () => {
     const configPath = 'config.js';
-    jest.spyOn(Fs, 'existsSync').mockReturnValue(true);
+    existsSyncMock.mockReturnValue(true);
 
     await expect(validatePlaywrightConfig(configPath)).rejects.toThrow(
       `Path to a valid TypeScript config file is required: --config <relative path to .ts file>`

@@ -8,6 +8,5 @@
  */
 
 export { readConfigFile } from './loader';
-export { getConfigFilePath } from './get_config_file';
-export { loadServersConfig } from './utils';
+export { getConfigFilePath, loadServersConfig } from './utils';
 export type { Config } from './config';

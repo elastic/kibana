@@ -14,7 +14,7 @@ import { cloneDeepWith, get, has, toPath } from 'lodash';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from './schema';
 import { ScoutServerConfig, ScoutTestConfig } from '../types';
-import { formatCurrentDate, getProjectType } from './utils';
+import { formatCurrentDate, getProjectType } from './utils/utils';
 
 const $values = Symbol('values');
 
