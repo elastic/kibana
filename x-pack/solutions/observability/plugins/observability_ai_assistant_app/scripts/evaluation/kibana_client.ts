@@ -130,7 +130,7 @@ export class KibanaClient {
         'x-elastic-internal-origin': 'foo',
       },
     }).catch((error) => {
-      if (isAxiosError(error) && error.response?.status !== 404) {
+      if (isAxiosError(error) && error.status !== 409) {
         const interestingPartsOfError = {
           ...omit(error, 'request', 'response', 'config'),
           ...pick(
