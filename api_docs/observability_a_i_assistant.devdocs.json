@@ -102,7 +102,9 @@
         "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.AssistantAvatar",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "AssistantAvatar",
         "description": [],
         "signature": [
@@ -111,8 +113,42 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/public/components/assistant_avatar.tsx",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/ai-assistant",
+            "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_header.tsx"
+          },
+          {
+            "plugin": "@kbn/ai-assistant",
+            "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_header.tsx"
+          },
+          {
+            "plugin": "@kbn/ai-assistant",
+            "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_item_avatar.tsx"
+          },
+          {
+            "plugin": "@kbn/ai-assistant",
+            "path": "x-pack/packages/kbn-ai-assistant/src/chat/chat_item_avatar.tsx"
+          },
+          {
+            "plugin": "searchAssistant",
+            "path": "x-pack/plugins/search_assistant/public/components/nav_control/index.tsx"
+          },
+          {
+            "plugin": "searchAssistant",
+            "path": "x-pack/plugins/search_assistant/public/components/nav_control/index.tsx"
+          },
+          {
+            "plugin": "observabilityAIAssistantApp",
+            "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/components/rca/rca_callout/index.tsx"
+          },
+          {
+            "plugin": "observabilityAIAssistantApp",
+            "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/components/rca/rca_callout/index.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "observabilityAIAssistant",
@@ -2498,7 +2534,7 @@
               ", { errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
               "InferenceInferenceEndpointInfo",
               "> | undefined; model_stats?: { deployment_state: ",
-              "MlDeploymentState",
+              "MlDeploymentAssignmentState",
               " | undefined; allocation_state: ",
               "MlDeploymentAllocationState",
               " | undefined; } | undefined; }, ",
@@ -3476,7 +3512,7 @@
               ", { errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
               "InferenceInferenceEndpointInfo",
               "> | undefined; model_stats?: { deployment_state: ",
-              "MlDeploymentState",
+              "MlDeploymentAssignmentState",
               " | undefined; allocation_state: ",
               "MlDeploymentAllocationState",
               " | undefined; } | undefined; }, ",
@@ -4178,7 +4214,7 @@
                 "signature": [
                   "TEndpoint"
                 ],
-                "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
+                "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -4241,7 +4277,7 @@
                   },
                   "]"
                 ],
-                "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
+                "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -5191,7 +5227,7 @@
           ", { errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
           "InferenceInferenceEndpointInfo",
           "> | undefined; model_stats?: { deployment_state: ",
-          "MlDeploymentState",
+          "MlDeploymentAssignmentState",
           " | undefined; allocation_state: ",
           "MlDeploymentAllocationState",
           " | undefined; } | undefined; }, ",
@@ -6396,7 +6432,7 @@
           ", { errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
           "InferenceInferenceEndpointInfo",
           "> | undefined; model_stats?: { deployment_state: ",
-          "MlDeploymentState",
+          "MlDeploymentAssignmentState",
           " | undefined; allocation_state: ",
           "MlDeploymentAllocationState",
           " | undefined; } | undefined; }, ",
@@ -8923,7 +8959,7 @@
               "() => Promise<{ ready: boolean; enabled: boolean; errorMessage: string; endpoint?: undefined; model_stats?: undefined; } | { endpoint: ",
               "InferenceInferenceEndpointInfo",
               "; ready: boolean; enabled: boolean; model_stats: { allocation_count: number; deployment_state: ",
-              "MlDeploymentState",
+              "MlDeploymentAssignmentState",
               " | undefined; allocation_state: ",
               "MlDeploymentAllocationState",
               " | undefined; }; errorMessage?: undefined; }>"
@@ -9752,7 +9788,7 @@
           ", { errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
           "InferenceInferenceEndpointInfo",
           "> | undefined; model_stats?: { deployment_state: ",
-          "MlDeploymentState",
+          "MlDeploymentAssignmentState",
           " | undefined; allocation_state: ",
           "MlDeploymentAllocationState",
           " | undefined; } | undefined; }, ",
