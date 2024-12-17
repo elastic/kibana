@@ -133,7 +133,11 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
   });
 
   return (
-    <div className={editorStyle} onKeyDown={handleKeyDown}>
+    <div
+      data-test-subj="url-template-editor-container"
+      className={editorStyle}
+      onKeyDown={handleKeyDown}
+    >
       <Editor
         languageId={HandlebarsLang}
         height={height}
