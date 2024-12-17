@@ -6,6 +6,7 @@
  */
 
 import { of, Subject, toArray, firstValueFrom } from 'rxjs';
+import { InferenceTaskError, InferenceTaskErrorCode } from '@kbn/inference-common';
 import { handleCancellation } from './handle_cancellation';
 
 describe('handleCancellation', () => {
@@ -45,7 +46,8 @@ describe('handleCancellation', () => {
     source$.next(3);
 
     expect(values).toEqual([1, 2]);
-    expect(thrownError).toBeDefined();
+    expect(thrownError).toBeInstanceOf(InferenceTaskError);
+    expect(thrownError.code).toBe(InferenceTaskErrorCode.abortedError);
     expect(thrownError.message).toContain('Request was aborted');
   });
 });

@@ -94,8 +94,8 @@ export function createInferenceRequestError(
   });
 }
 
-export function createInferenceRequestAbortedError(message: string): InferenceTaskAbortedError {
-  return new InferenceTaskError(InferenceTaskErrorCode.abortedError, message, {
+export function createInferenceRequestAbortedError(): InferenceTaskAbortedError {
+  return new InferenceTaskError(InferenceTaskErrorCode.abortedError, 'Request was aborted', {
     status: 499,
   });
 }

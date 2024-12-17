@@ -28,7 +28,7 @@ export function handleCancellation<T>(abortSignal: AbortSignal): OperatorFunctio
         },
         complete: () => {
           if (abortSignal.aborted) {
-            subscriber.error(createInferenceRequestAbortedError('Request was aborted'));
+            subscriber.error(createInferenceRequestAbortedError());
           } else {
             subscriber.complete();
           }
