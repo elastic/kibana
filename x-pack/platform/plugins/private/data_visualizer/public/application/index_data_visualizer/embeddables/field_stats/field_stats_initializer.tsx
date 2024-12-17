@@ -6,6 +6,7 @@
  */
 
 import {
+  mathWithUnits,
   useEuiTheme,
   EuiButton,
   EuiButtonEmpty,
@@ -61,7 +62,12 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
   onPreview,
   isNewPanel,
 }) => {
-  const { euiTheme } = useEuiTheme();
+  const euiContext = useEuiTheme();
+  const { euiTheme } = euiContext;
+
+  // FIXME: add a token for this on euiTheme.components. https://github.com/elastic/eui/issues/8217
+  const formMaxWidth = mathWithUnits(euiTheme.size.base, (x) => x * 25);
+
   const {
     data: { dataViews },
     unifiedSearch: {
@@ -172,16 +178,8 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
         css={css`
           // styles needed to display extra drop targets that are outside of the config panel main area
           overflow-y: auto;
-          padding-left: ${
-            // TODO fix EUI types
-            // @ts-expect-error
-            euiTheme.components.forms.maxWidth
-          };
-          margin-left: -${
-              // TODO fix EUI types
-              // @ts-expect-error
-              euiTheme.components.forms.maxWidth
-            };
+          padding-left: ${formMaxWidth};
+          margin-left: -${formMaxWidth};
           pointer-events: none;
           .euiFlyoutBody__overflow {
             -webkit-mask-image: none;
