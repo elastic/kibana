@@ -10,12 +10,20 @@
 import React from 'react';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 
-export const ConnectorIcon: React.FC<{ name: string; serviceType: string; iconPath?: string }> = ({
+interface ConnectorIconProps {
+  name: string;
+  serviceType: string;
+  iconPath?: string;
+  showTooltip?: boolean;
+}
+
+export const ConnectorIcon: React.FC<ConnectorIconProps> = ({
   name,
   serviceType,
   iconPath,
-}) => (
-  <EuiToolTip content={name}>
-    <EuiIcon size="l" title={name} id={serviceType} type={iconPath || 'defaultIcon'} />
-  </EuiToolTip>
-);
+  showTooltip = true,
+}) => {
+  const icon = <EuiIcon size="l" title={name} id={serviceType} type={iconPath || 'defaultIcon'} />;
+
+  return showTooltip ? <EuiToolTip content={name}>{icon}</EuiToolTip> : icon;
+};

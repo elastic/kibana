@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { ConnectorIcon } from '@kbn/search-ui';
 import { docLinks } from '../../../../common/doc_links';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
@@ -27,7 +28,6 @@ import { useCreateConnector } from '../../hooks/api/use_create_connector';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useConnectors } from '../../hooks/api/use_connectors';
 import { DecorativeHorizontalStepper } from '../common/decorative_horizontal_stepper';
-import { ConnectorIcon } from './connector_icon';
 
 import { ELASTIC_MANAGED_CONNECTOR_PATH, BASE_CONNECTORS_PATH } from '../../constants';
 
@@ -116,6 +116,7 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                                     name={connector.name}
                                     serviceType={connector.serviceType}
                                     iconPath={connector.iconPath}
+                                    showTooltip
                                   />
                                 </EuiFlexItem>
                               </React.Fragment>

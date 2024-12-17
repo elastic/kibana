@@ -135,6 +135,7 @@ export const ConnectorsElasticManaged = () => {
                                     name={connector.name}
                                     serviceType={connector.serviceType}
                                     iconPath={connector.iconPath}
+                                    showTooltip
                                   />
                                 </EuiFlexItem>
                               </React.Fragment>

@@ -218,6 +218,7 @@ export const ConnectorsOverview = () => {
                                       name={connector.name}
                                       serviceType={connector.serviceType}
                                       iconPath={connector.iconPath}
+                                      showTooltip
                                     />
                                   </EuiFlexItem>
                                 </React.Fragment>
