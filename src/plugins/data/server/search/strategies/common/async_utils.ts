@@ -28,6 +28,7 @@ export function getCommonDefaultAsyncSubmitParams(
   }
 ): Pick<
   AsyncSearchSubmitRequest,
+  // @ts-expect-error 'keep_alive' has been removed from the types but still available in the docs
   'keep_alive' | 'wait_for_completion_timeout' | 'keep_on_completion'
 > {
   const useSearchSessions =

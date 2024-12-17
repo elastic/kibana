@@ -74,6 +74,12 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             data_stream: {
               failure_store: true,
             },
+            // The output requires it to be `string[] | undefined` but the input is `string | string[] | undefined`
+            ignore_missing_component_templates: !template.ignore_missing_component_templates
+              ? undefined
+              : Array.isArray(template.ignore_missing_component_templates)
+              ? template.ignore_missing_component_templates
+              : [template.ignore_missing_component_templates],
           };
 
           return merge({}, template, next);

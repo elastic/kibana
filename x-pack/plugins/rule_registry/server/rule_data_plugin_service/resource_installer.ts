@@ -94,7 +94,7 @@ export class ResourceInstaller {
                     esClient: clusterClient,
                     template: {
                       name: ECS_COMPONENT_TEMPLATE_NAME,
-                      body: ecsComponentTemplate,
+                      ...ecsComponentTemplate,
                     },
                     totalFieldsLimit: TOTAL_FIELDS_LIMIT,
                   }),
@@ -104,7 +104,7 @@ export class ResourceInstaller {
               esClient: clusterClient,
               template: {
                 name: TECHNICAL_COMPONENT_TEMPLATE_NAME,
-                body: technicalComponentTemplate,
+                ...technicalComponentTemplate,
               },
               totalFieldsLimit: TOTAL_FIELDS_LIMIT,
             }),
@@ -168,13 +168,11 @@ export class ResourceInstaller {
                 esClient: clusterClient,
                 template: {
                   name: indexInfo.getComponentTemplateName(ct.name),
-                  body: {
-                    template: {
-                      settings: ct.settings ?? {},
-                      mappings: ct.mappings,
-                    },
-                    _meta: ct._meta,
+                  template: {
+                    settings: ct.settings ?? {},
+                    mappings: ct.mappings,
                   },
+                  _meta: ct._meta,
                 },
                 totalFieldsLimit: TOTAL_FIELDS_LIMIT,
               });
