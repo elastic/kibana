@@ -10,7 +10,6 @@ import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react'
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageBody,
@@ -55,6 +54,7 @@ import { COMPARISON_LABEL, REFERENCE_LABEL } from './constants';
 import { SearchPanelContent } from '../index_data_visualizer/components/search_panel/search_bar';
 import { useSearch } from '../common/hooks/use_search';
 import { DocumentCountWithBrush } from './document_count_with_brush';
+import { useDataDriftColors } from './use_data_drift_colors';
 
 const dataViewTitleHeader = css({
   minWidth: '300px',
@@ -264,12 +264,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
     });
   }, [dataService, searchQueryLanguage, searchString]);
 
-  const { euiTheme } = useEuiTheme();
-  const colors = {
-    referenceColor: euiTheme.colors.vis.euiColorVis2,
-    comparisonColor: euiTheme.colors.vis.euiColorVis1,
-    overlapColor: '#490771',
-  };
+  const colors = useDataDriftColors();
 
   const [brushRanges, setBrushRanges] = useState<WindowParameters | undefined>();
 

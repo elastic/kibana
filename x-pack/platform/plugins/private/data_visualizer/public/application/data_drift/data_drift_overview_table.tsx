@@ -11,7 +11,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn, EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
-  useEuiTheme,
   EuiButtonIcon,
   EuiIcon,
   EuiInMemoryTable,
@@ -26,6 +25,7 @@ import { formatSignificanceLevel } from './data_drift_utils';
 import { SingleDistributionChart } from './charts/single_distribution_chart';
 import { OverlapDistributionComparison } from './charts/overlap_distribution_chart';
 import { DataDriftDistributionChart } from './charts/data_drift_distribution_chart';
+import { useDataDriftColors } from './use_data_drift_colors';
 
 const dataComparisonYesLabel = i18n.translate('xpack.dataVisualizer.dataDrift.fieldTypeYesLabel', {
   defaultMessage: 'Yes',
@@ -47,15 +47,8 @@ export const DataDriftOverviewTable = ({
   data: Feature[];
   status: FETCH_STATUS;
 } & UseTableState<Feature>) => {
-  const { euiTheme } = useEuiTheme();
+  const colors = useDataDriftColors();
 
-  const colors = useMemo(
-    () => ({
-      referenceColor: euiTheme.colors.vis.euiColorVis2,
-      comparisonColor: euiTheme.colors.vis.euiColorVis1,
-    }),
-    [euiTheme]
-  );
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
