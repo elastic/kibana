@@ -16,8 +16,9 @@ import {
   EuiBasicTable,
   EuiHealth,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
-import { Chart, BarSeries, Settings, ScaleType } from '@elastic/charts';
+import { Chart, BarSeries, Settings, ScaleType, DARK_THEME, LIGHT_THEME } from '@elastic/charts';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { PanelText } from '../../../../common/components/panel_text';
@@ -119,6 +120,7 @@ MigrationResultPanel.displayName = 'MigrationResultPanel';
 const TranslationResultsChart = React.memo<{
   translationStats: RuleMigrationTranslationStats;
 }>(({ translationStats }) => {
+  const { colorMode } = useEuiTheme();
   const translationResultColors = useResultVisColors();
   const data = [
     {
@@ -152,7 +154,11 @@ const TranslationResultsChart = React.memo<{
 
   return (
     <Chart size={{ height: 130 }}>
-      <Settings showLegend={false} rotation={90} />
+      <Settings
+        showLegend={false}
+        rotation={90}
+        baseTheme={colorMode === 'DARK' ? DARK_THEME : LIGHT_THEME}
+      />
       <BarSeries
         id="results"
         name="Results"
@@ -201,9 +207,7 @@ const TranslationResultsTable = React.memo<{
 
   return (
     <EuiBasicTable
-      tableCaption="Demo of EuiBasicTable"
       items={items}
-      rowHeader="firstName"
       compressed
       columns={[
         {
