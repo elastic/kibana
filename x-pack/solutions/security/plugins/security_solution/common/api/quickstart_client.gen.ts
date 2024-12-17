@@ -367,6 +367,8 @@ import type {
   GetRuleMigrationRequestQueryInput,
   GetRuleMigrationRequestParamsInput,
   GetRuleMigrationResponse,
+  GetRuleMigrationIntegrationsRequestParamsInput,
+  GetRuleMigrationIntegrationsResponse,
   GetRuleMigrationPrebuiltRulesRequestParamsInput,
   GetRuleMigrationPrebuiltRulesResponse,
   GetRuleMigrationResourcesRequestQueryInput,
@@ -1456,6 +1458,24 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves all related integrations
+   */
+  async getRuleMigrationIntegrations(props: GetRuleMigrationIntegrationsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationIntegrations`);
+    return this.kbnClient
+      .request<GetRuleMigrationIntegrationsResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/integrations',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Retrieves all available prebuilt rules (installed and installable)
    */
   async getRuleMigrationPrebuiltRules(props: GetRuleMigrationPrebuiltRulesProps) {
@@ -2458,6 +2478,9 @@ export interface GetRuleExecutionResultsProps {
 export interface GetRuleMigrationProps {
   query: GetRuleMigrationRequestQueryInput;
   params: GetRuleMigrationRequestParamsInput;
+}
+export interface GetRuleMigrationIntegrationsProps {
+  params: GetRuleMigrationIntegrationsRequestParamsInput;
 }
 export interface GetRuleMigrationPrebuiltRulesProps {
   params: GetRuleMigrationPrebuiltRulesRequestParamsInput;
