@@ -7,13 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { getUiSettings } from './ui_settings';
+import { registerRoutes } from './routes';
 
 export class EsqlServerPlugin implements Plugin {
+  private readonly initContext: PluginInitializerContext;
+
+  constructor(initContext: PluginInitializerContext) {
+    this.initContext = { ...initContext };
+  }
+
   public setup(core: CoreSetup, plugins: { contentManagement: ContentManagementServerSetup }) {
+    const { initContext } = this;
+
     core.uiSettings.register(getUiSettings());
 
     plugins.contentManagement.favorites.registerFavoriteType('esql_query', {
@@ -23,6 +32,9 @@ export class EsqlServerPlugin implements Plugin {
         status: schema.string(),
       }),
     });
+
+    registerRoutes(core, initContext);
+
     return {};
   }
 

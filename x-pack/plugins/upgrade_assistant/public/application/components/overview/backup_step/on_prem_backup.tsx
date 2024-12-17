@@ -27,6 +27,7 @@ const SnapshotRestoreAppLink: React.FunctionComponent = () => {
     // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiButton
       href={snapshotRestoreUrl}
+      target="_blank"
       onClick={() => {
         uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_BACKUP_DATA_ON_PREM_CLICK);
       }}
@@ -46,12 +47,12 @@ export const OnPremBackup: React.FunctionComponent = () => {
       <EuiText>
         <p>
           {i18n.translate('xpack.upgradeAssistant.overview.backupStepDescription', {
-            defaultMessage: 'Make sure you have a current snapshot before making any changes.',
+            defaultMessage: 'Make sure you have a current snapshot before proceeding.',
           })}
         </p>
       </EuiText>
 
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
 
       <SnapshotRestoreAppLink />
     </>
