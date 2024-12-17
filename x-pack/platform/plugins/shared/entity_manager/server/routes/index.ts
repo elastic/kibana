@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { enablementRoutes } from './enablement';
 import { entitiesRoutes } from './entities';
 import { v2Routes } from './v2';
 
 export const entityManagerRouteRepository = {
+  ...enablementRoutes,
   ...entitiesRoutes,
   ...v2Routes,
 };
