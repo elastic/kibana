@@ -4,6 +4,6 @@
   "owner": [
     "@elastic/obs-ux-infra_services-team"
   ],
-  "group": "observability",
-  "visibility": "private"
+  "group": "platform",
+  "visibility": "shared"
 }
