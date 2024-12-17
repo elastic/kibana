@@ -9,6 +9,7 @@ import { EuiLink, EuiPageTemplate, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
+import { SearchEmptyPrompt } from '@kbn/search-ui';
 
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
 
@@ -55,6 +56,7 @@ export const WebCrawlersOverview = () => {
       </EuiPageTemplate.Header>
       <EuiPageTemplate.Section restrictWidth color="subdued">
         <EmptyWebCrawlersPrompt />
+        <SearchEmptyPrompt />
       </EuiPageTemplate.Section>
       {embeddableConsole}
     </EuiPageTemplate>

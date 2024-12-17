@@ -817,6 +817,7 @@
     "@kbn/search-response-warnings": "link:packages/kbn-search-response-warnings",
     "@kbn/search-shared-ui": "link:x-pack/packages/search/shared_ui",
     "@kbn/search-types": "link:packages/kbn-search-types",
+    "@kbn/search-ui": "link:packages/kbn-search-ui",
     "@kbn/searchprofiler-plugin": "link:x-pack/platform/plugins/shared/searchprofiler",
     "@kbn/security-api-key-management": "link:x-pack/packages/security/api_key_management",
     "@kbn/security-authorization-core": "link:x-pack/packages/security/authorization_core",
