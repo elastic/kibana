@@ -11,8 +11,7 @@ import { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elas
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { generateEsHits, additionalFieldGroups } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { render, screen } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { render, screen, renderHook } from '@testing-library/react';
 import React from 'react';
 import { ReactNode, useState } from 'react';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';

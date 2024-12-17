@@ -72,7 +72,7 @@ export const ControlGroupEditor = ({ onCancel, onSave, onDeleteAll, stateManager
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiTitle size="s">
           <h2>{ControlGroupStrings.management.getFlyoutTitle()}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -80,7 +80,7 @@ export const ControlGroupEditor = ({ onCancel, onSave, onDeleteAll, stateManager
         <EuiForm component="form" fullWidth>
           <EuiFormRow label={ControlGroupStrings.management.labelPosition.getLabelPositionTitle()}>
             <EuiButtonGroup
-              color="primary"
+              buttonSize="compressed"
               options={CONTROL_LAYOUT_OPTIONS}
               data-test-subj="control-group-layout-options"
               idSelected={selectedLabelPosition}
@@ -193,7 +193,7 @@ export const ControlGroupEditor = ({ onCancel, onSave, onDeleteAll, stateManager
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               aria-label={`cancel-editing-group`}
-              iconType="cross"
+              flush="left"
               onClick={() => {
                 onCancel();
               }}
@@ -204,7 +204,7 @@ export const ControlGroupEditor = ({ onCancel, onSave, onDeleteAll, stateManager
           <EuiFlexItem grow={false}>
             <EuiButton
               aria-label={`save-group`}
-              iconType="check"
+              fill
               color="primary"
               data-test-subj="control-group-editor-save"
               onClick={() => {

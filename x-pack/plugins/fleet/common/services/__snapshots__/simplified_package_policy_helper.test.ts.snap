@@ -238,6 +238,7 @@ Object {
   "policy_ids": Array [
     "policy123",
   ],
+  "supports_agentless": undefined,
   "vars": undefined,
 }
 `;

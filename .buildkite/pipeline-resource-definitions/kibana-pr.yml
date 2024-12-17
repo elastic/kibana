@@ -21,7 +21,6 @@ spec:
       env:
         ELASTIC_PR_COMMENTS_ENABLED: 'true'
         GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
-        GITHUB_STEP_COMMIT_STATUS_ENABLED: 'true'
         GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-ci
       allow_rebuilds: true
       branch_configuration: ''
@@ -29,7 +28,6 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/scripts/pipelines/pull_request/pipeline.sh
-      skip_intermediate_builds: false
       provider_settings:
         build_branches: false
         build_pull_requests: true

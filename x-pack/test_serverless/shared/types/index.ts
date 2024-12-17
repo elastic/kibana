@@ -8,13 +8,13 @@
 import { ServerlessProjectType } from '@kbn/es';
 import { InheritedServices } from '../../api_integration/services';
 
-export interface CreateTestConfigOptions {
+export interface CreateTestConfigOptions<TServices extends {} = InheritedServices> {
   serverlessProject: ServerlessProjectType;
   esServerArgs?: string[];
   kbnServerArgs?: string[];
   testFiles: string[];
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
-  services?: InheritedServices;
+  services?: TServices;
   apps?: Record<string, { pathname: string; hash?: string }>;
 }

@@ -21,7 +21,14 @@ export const ExternalIncidentServiceConfiguration = {
   ),
   createIncidentJson: schema.string(), // stringified object
   createIncidentResponseKey: schema.string(),
+  getIncidentMethod: schema.oneOf(
+    [schema.literal(WebhookMethods.GET), schema.literal(WebhookMethods.POST)],
+    {
+      defaultValue: WebhookMethods.GET,
+    }
+  ),
   getIncidentUrl: schema.string(),
+  getIncidentJson: schema.nullable(schema.string()),
   getIncidentResponseExternalTitleKey: schema.string(),
   viewIncidentUrl: schema.string(),
   updateIncidentUrl: schema.string(),

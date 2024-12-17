@@ -168,7 +168,7 @@ Array [
           >
             <ul
               aria-label="Recently viewed links"
-              class="euiListGroup kbnCollapsibleNav__recentsListGroup emotion-euiListGroup-none"
+              class="euiListGroup emotion-EuiListGroup"
               style="max-inline-size: none;"
             >
               <li
@@ -218,10 +218,10 @@ Array [
       class="euiHorizontalRule emotion-euiHorizontalRule-full"
     />
     <div
-      class="euiFlexItem kbnCollapsibleNav__solutions emotion-euiFlexItem-grow-1"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-EuiCollapsibleNavGroup"
         data-test-subj="collapsibleNavGroup-kibana"
       >
         <div
@@ -230,7 +230,7 @@ Array [
           <button
             aria-controls="generated-id"
             aria-expanded="true"
-            class="euiAccordion__button kbnCollapsibleNav__solutionGroupButton emotion-euiAccordion__button"
+            class="euiAccordion__button euiCollapsibleNavGroup__heading emotion-euiAccordion__button"
             id="generated-id"
             type="button"
           >
@@ -351,7 +351,7 @@ Array [
         </div>
       </div>
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-EuiCollapsibleNavGroup"
         data-test-subj="collapsibleNavGroup-observability"
       >
         <div
@@ -360,7 +360,7 @@ Array [
           <button
             aria-controls="generated-id"
             aria-expanded="true"
-            class="euiAccordion__button kbnCollapsibleNav__solutionGroupButton emotion-euiAccordion__button"
+            class="euiAccordion__button euiCollapsibleNavGroup__heading emotion-euiAccordion__button"
             id="generated-id"
             type="button"
           >
@@ -464,7 +464,7 @@ Array [
         </div>
       </div>
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-EuiCollapsibleNavGroup"
         data-test-subj="collapsibleNavGroup-securitySolution"
       >
         <div
@@ -473,7 +473,7 @@ Array [
           <button
             aria-controls="generated-id"
             aria-expanded="true"
-            class="euiAccordion__button kbnCollapsibleNav__solutionGroupButton emotion-euiAccordion__button"
+            class="euiAccordion__button euiCollapsibleNavGroup__heading emotion-euiAccordion__button"
             id="generated-id"
             type="button"
           >
@@ -560,7 +560,7 @@ Array [
         </div>
       </div>
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-EuiCollapsibleNavGroup"
         data-test-subj="collapsibleNavGroup-management"
       >
         <div
@@ -569,7 +569,7 @@ Array [
           <button
             aria-controls="generated-id"
             aria-expanded="true"
-            class="euiAccordion__button kbnCollapsibleNav__solutionGroupButton emotion-euiAccordion__button"
+            class="euiAccordion__button euiCollapsibleNavGroup__heading emotion-euiAccordion__button"
             id="generated-id"
             type="button"
           >
@@ -858,7 +858,15 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   <EuiCollapsibleNav
     aria-label="Primary"
     button={<button />}
-    className="kbnCollapsibleNav"
+    css={
+      Object {
+        "map": undefined,
+        "name": "1pvcuvk",
+        "next": undefined,
+        "styles": "@media (max-height: 240px){overflow-y:auto;}",
+        "toString": [Function],
+      }
+    }
     data-test-subj="collapsibleNav"
     id="collapsibe-nav"
     isOpen={false}
@@ -1045,7 +1053,15 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   <EuiCollapsibleNav
     aria-label="Primary"
     button={<button />}
-    className="kbnCollapsibleNav"
+    css={
+      Object {
+        "map": undefined,
+        "name": "1pvcuvk",
+        "next": undefined,
+        "styles": "@media (max-height: 240px){overflow-y:auto;}",
+        "toString": [Function],
+      }
+    }
     data-test-subj="collapsibleNav"
     id="collapsibe-nav"
     isOpen={false}

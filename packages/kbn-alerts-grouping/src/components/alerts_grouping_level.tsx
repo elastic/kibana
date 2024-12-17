@@ -46,7 +46,8 @@ const DEFAULT_FILTERS: Filter[] = [];
 const typedMemo: <T>(c: T) => T = memo;
 export const AlertsGroupingLevel = typedMemo(
   <T extends BaseAlertsGroupAggregations>({
-    featureIds,
+    ruleTypeIds,
+    consumers,
     defaultFilters = DEFAULT_FILTERS,
     from,
     getGrouping,
@@ -86,7 +87,8 @@ export const AlertsGroupingLevel = typedMemo(
 
     const aggregationsQuery = useMemo<UseGetAlertsGroupAggregationsQueryProps['params']>(() => {
       return {
-        featureIds,
+        ruleTypeIds,
+        consumers,
         groupByField: selectedGroup,
         aggregations: getAggregationsByGroupingField(selectedGroup)?.reduce(
           (acc, val) => Object.assign(acc, val),
@@ -107,12 +109,13 @@ export const AlertsGroupingLevel = typedMemo(
         pageSize,
       };
     }, [
-      featureIds,
+      consumers,
       filters,
       from,
       getAggregationsByGroupingField,
       pageIndex,
       pageSize,
+      ruleTypeIds,
       selectedGroup,
       to,
     ]);

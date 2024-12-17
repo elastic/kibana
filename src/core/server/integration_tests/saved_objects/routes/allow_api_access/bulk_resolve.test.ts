@@ -20,7 +20,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from '../routes_test_utils';
+import { deprecationMock, setupConfig } from '../routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -59,7 +59,14 @@ describe('POST /api/saved_objects/_bulk_resolve with allowApiAccess true', () =>
 
     const config = setupConfig(true);
     const access = 'public';
-    registerBulkResolveRoute(router, { config, coreUsageData, logger, access });
+
+    registerBulkResolveRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });

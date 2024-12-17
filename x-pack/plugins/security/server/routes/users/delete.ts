@@ -15,6 +15,12 @@ export function defineDeleteUserRoutes({ router }: RouteDefinitionParams) {
   router.delete(
     {
       path: '/internal/security/users/{username}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Core's scoped ES cluster client`,
+        },
+      },
       validate: {
         params: schema.object({ username: schema.string({ minLength: 1, maxLength: 1024 }) }),
       },

@@ -25,6 +25,7 @@ import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DashboardGrid } from '../grid';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
+import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 
 export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
@@ -41,8 +42,9 @@ export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
   return { ref, width };
 };
 
-export const DashboardViewport = () => {
+export const DashboardViewport = ({ dashboardContainer }: { dashboardContainer?: HTMLElement }) => {
   const dashboardApi = useDashboardApi();
+  const dashboardInternalApi = useDashboardInternalApi();
   const [hasControls, setHasControls] = useState(false);
   const [
     controlGroupApi,
@@ -53,7 +55,6 @@ export const DashboardViewport = () => {
     panels,
     viewMode,
     useMargins,
-    uuid,
     fullScreenMode,
   ] = useBatchedPublishingSubjects(
     dashboardApi.controlGroupApi$,
@@ -63,8 +64,7 @@ export const DashboardViewport = () => {
     dashboardApi.focusedPanelId$,
     dashboardApi.panels$,
     dashboardApi.viewMode,
-    dashboardApi.useMargins$,
-    dashboardApi.uuid$,
+    dashboardApi.settings.useMargins$,
     dashboardApi.fullScreenMode$
   );
   const onExit = useCallback(() => {
@@ -126,7 +126,7 @@ export const DashboardViewport = () => {
             ControlGroupRuntimeState,
             ControlGroupApi
           >
-            key={uuid}
+            key={dashboardApi.uuid}
             hidePanelChrome={true}
             panelProps={{ hideLoader: true }}
             type={CONTROL_GROUP_TYPE}
@@ -134,11 +134,12 @@ export const DashboardViewport = () => {
             getParentApi={() => {
               return {
                 ...dashboardApi,
-                getSerializedStateForChild: dashboardApi.getSerializedStateForControlGroup,
-                getRuntimeStateForChild: dashboardApi.getRuntimeStateForControlGroup,
+                reload$: dashboardInternalApi.controlGroupReload$,
+                getSerializedStateForChild: dashboardInternalApi.getSerializedStateForControlGroup,
+                getRuntimeStateForChild: dashboardInternalApi.getRuntimeStateForControlGroup,
               };
             }}
-            onApiAvailable={(api) => dashboardApi.setControlGroupApi(api)}
+            onApiAvailable={(api) => dashboardInternalApi.setControlGroupApi(api)}
           />
         </div>
       ) : null}
@@ -160,7 +161,9 @@ export const DashboardViewport = () => {
             otherwise, there is a race condition where the panels can end up being squashed 
             TODO only render when dashboardInitialized
         */}
-        {viewportWidth !== 0 && <DashboardGrid viewportWidth={viewportWidth} />}
+        {viewportWidth !== 0 && (
+          <DashboardGrid dashboardContainer={dashboardContainer} viewportWidth={viewportWidth} />
+        )}
       </div>
     </div>
   );

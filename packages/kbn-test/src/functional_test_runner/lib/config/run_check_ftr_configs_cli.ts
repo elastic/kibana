@@ -50,6 +50,11 @@ export async function runCheckFtrConfigsCli() {
           return false;
         }
 
+        // playwright config files
+        if (file.match(/\/ui_tests\/*playwright*.config.ts$/)) {
+          return false;
+        }
+
         if (!file.match(/(test|e2e).*config[^\/]*\.(t|j)s$/)) {
           return false;
         }

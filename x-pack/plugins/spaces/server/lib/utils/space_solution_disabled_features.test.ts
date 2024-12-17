@@ -58,7 +58,7 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
   });
 
   describe('when the space solution is "oblt"', () => {
-    test('it removes the "search" and "security" features', () => {
+    test('it removes the "security" features', () => {
       const spaceDisabledFeatures: string[] = [];
       const spaceSolution = 'oblt';
 
@@ -68,7 +68,7 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
         spaceSolution
       );
 
-      expect(result).toEqual(['feature2', 'feature3']);
+      expect(result).toEqual(['feature3']);
     });
   });
 

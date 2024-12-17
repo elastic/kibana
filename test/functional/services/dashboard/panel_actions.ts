@@ -12,7 +12,6 @@ import { FtrService } from '../../ftr_provider_context';
 
 const REMOVE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-deletePanel';
 const EDIT_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-editPanel';
-const INLINE_EDIT_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_CONFIGURE_IN_LENS';
 const EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ = 'navigateToLensEditorLink';
 const CLONE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-clonePanel';
 const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-togglePanel';
@@ -128,7 +127,9 @@ export class DashboardPanelActionsService extends FtrService {
 
   async navigateToEditorFromFlyout(wrapper?: WebElementWrapper) {
     this.log.debug('navigateToEditorFromFlyout');
-    await this.clickPanelAction(INLINE_EDIT_PANEL_DATA_TEST_SUBJ, wrapper);
+    // make sure the context menu is open before proceeding
+    await this.openContextMenu();
+    await this.clickPanelAction(EDIT_PANEL_DATA_TEST_SUBJ);
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ);
     const isConfirmModalVisible = await this.testSubjects.exists('confirmModalConfirmButton');
@@ -139,9 +140,9 @@ export class DashboardPanelActionsService extends FtrService {
     }
   }
 
-  async clickInlineEdit() {
+  async clickInlineEdit(wrapper?: WebElementWrapper) {
     this.log.debug('clickInlineEditAction');
-    await this.clickPanelAction(INLINE_EDIT_PANEL_DATA_TEST_SUBJ);
+    await this.clickPanelAction(EDIT_PANEL_DATA_TEST_SUBJ, wrapper);
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitForTopNavToBeVisible();
   }
@@ -307,12 +308,9 @@ export class DashboardPanelActionsService extends FtrService {
     await this.expectExistsPanelAction(REMOVE_PANEL_DATA_TEST_SUBJ, title);
   }
 
-  async expectExistsEditPanelAction(title = '', allowsInlineEditing?: boolean) {
+  async expectExistsEditPanelAction(title = '') {
     this.log.debug('expectExistsEditPanelAction');
-    let testSubj = EDIT_PANEL_DATA_TEST_SUBJ;
-    if (allowsInlineEditing) {
-      testSubj = INLINE_EDIT_PANEL_DATA_TEST_SUBJ;
-    }
+    const testSubj = EDIT_PANEL_DATA_TEST_SUBJ;
     await this.expectExistsPanelAction(testSubj, title);
   }
 

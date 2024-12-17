@@ -63,21 +63,6 @@ describe('Fleet server health_check handler', () => {
     });
   });
 
-  it('should return a bad request error if body contains deprecated parameter `host`', async () => {
-    const res = await postHealthCheckHandler(
-      mockContext,
-      { body: { host: 'https://localhost:8220' } } as any,
-      mockResponse as any
-    );
-
-    expect(res).toEqual({
-      body: {
-        message: `Property 'host' is deprecated. Please use id instead.`,
-      },
-      statusCode: 400,
-    });
-  });
-
   it('should return 200 and active status when fetch response is `active`', async () => {
     const activeRes = {
       status: 'ONLINE',
@@ -105,7 +90,6 @@ describe('Fleet server health_check handler', () => {
     );
 
     const expectedResponse = {
-      host: 'https://localhost:8220',
       host_id: 'default-fleet-server',
       name: 'Default',
       status: 'ONLINE',

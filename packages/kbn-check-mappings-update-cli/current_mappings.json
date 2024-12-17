@@ -788,6 +788,10 @@
       }
     }
   },
+  "cloud": {
+    "dynamic": false,
+    "properties": {}
+  },
   "cloud-security-posture-settings": {
     "dynamic": false,
     "properties": {}
@@ -1509,6 +1513,10 @@
       "favoriteIds": {
         "type": "keyword"
       },
+      "favoriteMetadata": {
+        "dynamic": false,
+        "type": "object"
+      },
       "type": {
         "type": "keyword"
       },
@@ -1585,6 +1593,7 @@
     }
   },
   "fleet-agent-policies": {
+    "dynamic": false,
     "properties": {
       "advanced_settings": {
         "index": false,
@@ -1707,6 +1716,9 @@
   },
   "fleet-package-policies": {
     "properties": {
+      "bump_agent_policy_revision": {
+        "type": "boolean"
+      },
       "created_at": {
         "type": "date"
       },
@@ -1774,6 +1786,9 @@
             "type": "keyword"
           }
         }
+      },
+      "supports_agentless": {
+        "type": "boolean"
       },
       "updated_at": {
         "type": "date"
@@ -1948,6 +1963,7 @@
     "properties": {}
   },
   "ingest-agent-policies": {
+    "dynamic": false,
     "properties": {
       "advanced_settings": {
         "index": false,
@@ -2292,6 +2308,9 @@
   },
   "ingest-package-policies": {
     "properties": {
+      "bump_agent_policy_revision": {
+        "type": "boolean"
+      },
       "created_at": {
         "type": "date"
       },
@@ -2359,6 +2378,9 @@
             "type": "keyword"
           }
         }
+      },
+      "supports_agentless": {
+        "type": "boolean"
       },
       "updated_at": {
         "type": "date"
@@ -2834,6 +2856,26 @@
       "note": {
         "index": false,
         "type": "text"
+      }
+    }
+  },
+  "product-doc-install-status": {
+    "dynamic": false,
+    "properties": {
+      "index_name": {
+        "type": "keyword"
+      },
+      "installation_status": {
+        "type": "keyword"
+      },
+      "last_installation_date": {
+        "type": "date"
+      },
+      "product_name": {
+        "type": "keyword"
+      },
+      "product_version": {
+        "type": "keyword"
       }
     }
   },
@@ -3549,6 +3591,10 @@
     }
   },
   "synthetics-param": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "synthetics-private-location": {
     "dynamic": false,
     "properties": {}
   },

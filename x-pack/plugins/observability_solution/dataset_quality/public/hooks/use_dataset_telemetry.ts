@@ -77,7 +77,7 @@ function getDatasetEbtProps(
       namespace: dataset.namespace,
       type: dataset.type,
     },
-    data_stream_health: dataset.degradedDocs.quality,
+    data_stream_health: dataset.quality,
     data_stream_aggregatable: nonAggregatableDatasets.some(
       (indexName) => indexName === dataset.rawName
     ),

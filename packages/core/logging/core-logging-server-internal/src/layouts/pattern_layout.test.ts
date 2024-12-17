@@ -326,6 +326,21 @@ describe('schema', () => {
           `"Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH"`
         );
       });
+
+      it('fails on %date with schema too long', () => {
+        const generateLongFormat = () => {
+          const longFormat = [];
+          for (let i = 1; i < 1001; i++) {
+            longFormat.push(`${i}`);
+          }
+          return longFormat.join('');
+        };
+        expect(() =>
+          patternSchema.validate(`%date${generateLongFormat()}`)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"value has length [2898] but it must have a maximum length of [1000]."`
+        );
+      });
     });
   });
 });

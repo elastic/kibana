@@ -14,6 +14,7 @@ import type {
   SavedObject,
 } from '@kbn/core/server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
+import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 
@@ -84,7 +85,13 @@ export interface ISpacesClient {
  * Client for interacting with spaces.
  */
 export class SpacesClient implements ISpacesClient {
-  private isServerless = false;
+  private readonly isServerless: boolean;
+
+  /**
+   * A map of deprecated feature IDs to the feature IDs that replace them used to transform the disabled features
+   * of a space to make sure they only reference non-deprecated features.
+   */
+  private readonly deprecatedFeaturesReferences: Map<string, Set<string>>;
 
   constructor(
     private readonly debugLogger: (message: string) => void,
@@ -95,6 +102,9 @@ export class SpacesClient implements ISpacesClient {
     private readonly features: FeaturesPluginStart
   ) {
     this.isServerless = this.buildFlavour === 'serverless';
+    this.deprecatedFeaturesReferences = this.collectDeprecatedFeaturesReferences(
+      features.getKibanaFeatures()
+    );
   }
 
   public async getAll(options: v1.GetAllSpacesOptions = {}): Promise<v1.GetSpaceResult[]> {
@@ -247,6 +257,8 @@ export class SpacesClient implements ISpacesClient {
   };
 
   private transformSavedObjectToSpace = (savedObject: SavedObject<any>): v1.Space => {
+    // Solution isn't supported in the serverless offering.
+    const solution = !this.isServerless ? savedObject.attributes.solution : undefined;
     return {
       id: savedObject.id,
       name: savedObject.attributes.name ?? '',
@@ -256,11 +268,13 @@ export class SpacesClient implements ISpacesClient {
       imageUrl: savedObject.attributes.imageUrl,
       disabledFeatures: withSpaceSolutionDisabledFeatures(
         this.features.getKibanaFeatures(),
-        savedObject.attributes.disabledFeatures ?? [],
-        !this.isServerless ? savedObject.attributes.solution : undefined
+        savedObject.attributes.disabledFeatures?.flatMap((featureId: string) =>
+          Array.from(this.deprecatedFeaturesReferences.get(featureId) ?? [featureId])
+        ) ?? [],
+        solution
       ),
       _reserved: savedObject.attributes._reserved,
-      ...(!this.isServerless ? { solution: savedObject.attributes.solution } : {}),
+      ...(solution ? { solution } : {}),
     } as v1.Space;
   };
 
@@ -275,4 +289,41 @@ export class SpacesClient implements ISpacesClient {
       ...(!this.isServerless && space.solution ? { solution: space.solution } : {}),
     };
   };
+
+  /**
+   * Collects a map of all deprecated feature IDs and the feature IDs that replace them.
+   * @param features A list of all available Kibana features including deprecated ones.
+   */
+  private collectDeprecatedFeaturesReferences(features: KibanaFeature[]) {
+    const deprecatedFeatureReferences = new Map();
+    for (const feature of features) {
+      if (!feature.deprecated || !feature.scope?.includes(KibanaFeatureScope.Spaces)) {
+        continue;
+      }
+
+      // Collect all feature privileges including the ones provided by sub-features, if any.
+      const allPrivileges = Object.values(feature.privileges ?? {}).concat(
+        feature.subFeatures?.flatMap((subFeature) =>
+          subFeature.privilegeGroups.flatMap(({ privileges }) => privileges)
+        ) ?? []
+      );
+
+      // Collect all features IDs that are referenced by the deprecated feature privileges.
+      const referencedFeaturesIds = new Set();
+      for (const privilege of allPrivileges) {
+        const replacedBy = privilege.replacedBy
+          ? 'default' in privilege.replacedBy
+            ? privilege.replacedBy.default.concat(privilege.replacedBy.minimal)
+            : privilege.replacedBy
+          : [];
+        for (const privilegeReference of replacedBy) {
+          referencedFeaturesIds.add(privilegeReference.feature);
+        }
+      }
+
+      deprecatedFeatureReferences.set(feature.id, referencedFeaturesIds);
+    }
+
+    return deprecatedFeatureReferences;
+  }
 }

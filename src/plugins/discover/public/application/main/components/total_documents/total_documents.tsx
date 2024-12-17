@@ -28,7 +28,7 @@ export const TotalDocuments = ({
     <EuiText
       grow={false}
       size="s"
-      style={{ paddingRight: 2 }}
+      css={{ paddingRight: 2 }}
       data-test-subj="savedSearchTotalDocuments"
     >
       {isEsqlMode ? (

@@ -86,7 +86,7 @@ describe('LensVisService suggestions', () => {
       ],
       isPlainRecord: true,
       allSuggestions: [],
-      hasHistogramSuggestionForESQL: false,
+      isTransformationalESQL: true,
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(UnifiedHistogramSuggestionType.unsupported);
@@ -115,7 +115,7 @@ describe('LensVisService suggestions', () => {
       ],
       isPlainRecord: true,
       allSuggestions: [],
-      hasHistogramSuggestionForESQL: true,
+      isTransformationalESQL: false,
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(
@@ -153,7 +153,7 @@ describe('LensVisService suggestions', () => {
       ],
       isPlainRecord: true,
       allSuggestions: [],
-      hasHistogramSuggestionForESQL: true,
+      isTransformationalESQL: false,
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(
@@ -191,7 +191,7 @@ describe('LensVisService suggestions', () => {
       ],
       isPlainRecord: true,
       allSuggestions: [],
-      hasHistogramSuggestionForESQL: true,
+      isTransformationalESQL: true,
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(UnifiedHistogramSuggestionType.unsupported);
@@ -225,7 +225,7 @@ describe('LensVisService suggestions', () => {
       ],
       isPlainRecord: true,
       allSuggestions: [],
-      hasHistogramSuggestionForESQL: true,
+      isTransformationalESQL: false,
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(
@@ -276,7 +276,7 @@ describe('LensVisService suggestions', () => {
       ],
       isPlainRecord: true,
       allSuggestions: allSuggestionsMock,
-      hasHistogramSuggestionForESQL: true,
+      isTransformationalESQL: false,
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(
@@ -307,7 +307,7 @@ describe('LensVisService suggestions', () => {
       ],
       isPlainRecord: true,
       allSuggestions: [],
-      hasHistogramSuggestionForESQL: true,
+      isTransformationalESQL: false,
     });
 
     expect(lensVis.currentSuggestionContext?.type).toBe(

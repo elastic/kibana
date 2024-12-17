@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip, EuiPanel } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -66,7 +66,9 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
                 <p>{label}</p>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiIcon type="questionInCircle" />
+                <div role="tooltip">
+                  <EuiIconTip content={tooltip} />
+                </div>
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : (
@@ -77,46 +79,42 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
           return (
             <EuiFlexItem key={key}>
               <EuiPanel color="subdued" borderRadius="none">
-                <EuiToolTip content={tooltip}>
-                  <EuiFormRow
-                    label={rowLabel}
-                    helpText={helpText}
-                    error={validationErrors}
-                    isInvalid={!isValid}
-                    data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
-                  >
-                    <ConnectorConfigurationField
-                      configEntry={configEntry}
-                      isLoading={isLoading}
-                      setConfigValue={(value) => {
-                        setConfigEntry(configEntry.key, value);
-                      }}
-                    />
-                  </EuiFormRow>
-                </EuiToolTip>
+                <EuiFormRow
+                  label={rowLabel}
+                  helpText={helpText}
+                  error={validationErrors}
+                  isInvalid={!isValid}
+                  data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
+                >
+                  <ConnectorConfigurationField
+                    configEntry={configEntry}
+                    isLoading={isLoading}
+                    setConfigValue={(value) => {
+                      setConfigEntry(configEntry.key, value);
+                    }}
+                  />
+                </EuiFormRow>
               </EuiPanel>
             </EuiFlexItem>
           );
         }
         return (
           <EuiFlexItem key={key}>
-            <EuiToolTip content={tooltip}>
-              <EuiFormRow
-                label={rowLabel}
-                helpText={helpText}
-                error={validationErrors}
-                isInvalid={!isValid}
-                data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
-              >
-                <ConnectorConfigurationField
-                  configEntry={configEntry}
-                  isLoading={isLoading}
-                  setConfigValue={(value) => {
-                    setConfigEntry(configEntry.key, value);
-                  }}
-                />
-              </EuiFormRow>
-            </EuiToolTip>
+            <EuiFormRow
+              label={rowLabel}
+              helpText={helpText}
+              error={validationErrors}
+              isInvalid={!isValid}
+              data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
+            >
+              <ConnectorConfigurationField
+                configEntry={configEntry}
+                isLoading={isLoading}
+                setConfigValue={(value) => {
+                  setConfigEntry(configEntry.key, value);
+                }}
+              />
+            </EuiFormRow>
           </EuiFlexItem>
         );
       })}

@@ -23,4 +23,5 @@ export interface LogsSharedBackendLibs extends LogsSharedDomainLibs {
   getStartServices: LogsSharedPluginStartServicesAccessor;
   getUsageCollector: () => UsageCollector;
   logger: Logger;
+  isServerless: boolean;
 }

@@ -267,4 +267,28 @@ function expectApisToCallServicesSuccessfully(
     );
     expect(mockgetLatestAvailableAgentVersion).toHaveBeenCalledTimes(1);
   });
+
+  test('client.getLatestAgentAvailableBaseVersion strips away IAR suffix', async () => {
+    mockgetLatestAvailableAgentVersion.mockResolvedValue('1.2.3+build12345678987654321');
+    await expect(agentClient.getLatestAgentAvailableBaseVersion()).resolves.toEqual('1.2.3');
+  });
+
+  test('client.getLatestAgentAvailableBaseVersion does not break on usual version numbers', async () => {
+    mockgetLatestAvailableAgentVersion.mockResolvedValue('8.17.0');
+    await expect(agentClient.getLatestAgentAvailableBaseVersion()).resolves.toEqual('8.17.0');
+  });
+
+  test('client.getLatestAgentAvailableDockerImageVersion transforms IAR suffix', async () => {
+    mockgetLatestAvailableAgentVersion.mockResolvedValue('1.2.3+build12345678987654321');
+    await expect(agentClient.getLatestAgentAvailableDockerImageVersion()).resolves.toEqual(
+      '1.2.3.build12345678987654321'
+    );
+  });
+
+  test('client.getLatestAgentAvailableDockerImageVersion does not break on usual version numbers', async () => {
+    mockgetLatestAvailableAgentVersion.mockResolvedValue('8.17.0');
+    await expect(agentClient.getLatestAgentAvailableDockerImageVersion()).resolves.toEqual(
+      '8.17.0'
+    );
+  });
 }

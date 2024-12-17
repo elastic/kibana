@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SearchHit, UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { FileStatus } from '@kbn/files-plugin/common/types';
+import pMap from 'p-map';
 
 import {
   FILE_STORAGE_DATA_INDEX_PATTERN,
@@ -19,6 +20,8 @@ import {
 import { getFileMetadataIndexName } from '../../../common/services';
 
 import { ES_SEARCH_LIMIT } from '../../../common/constants';
+
+import { MAX_CONCURRENT_AGENT_FILES_UPLOADS } from '../../constants';
 
 import { parseFileStorageIndex } from './utils';
 
@@ -145,14 +148,15 @@ export async function fileIdsWithoutChunksByIndex(
  * @param fileIdsByIndex
  * @param status
  */
-export function updateFilesStatus(
+export async function updateFilesStatus(
   esClient: ElasticsearchClient,
   abortController: AbortController | undefined,
   fileIdsByIndex: FileIdsByIndex,
   status: FileStatus
 ): Promise<UpdateByQueryResponse[]> {
-  return Promise.all(
-    Object.entries(fileIdsByIndex).map(([index, fileIds]) => {
+  return await pMap(
+    Object.entries(fileIdsByIndex),
+    ([index, fileIds]) => {
       return esClient
         .updateByQuery(
           {
@@ -174,6 +178,9 @@ export function updateFilesStatus(
           Error.captureStackTrace(err);
           throw err;
         });
-    })
+    },
+    {
+      concurrency: MAX_CONCURRENT_AGENT_FILES_UPLOADS,
+    }
   );
 }

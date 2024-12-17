@@ -6,6 +6,7 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
+import { IndexMode } from '../../common/types/data_streams';
 import type { DataStream, EnhancedDataStreamFromEs, Health } from '../../common';
 
 export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs): DataStream {
@@ -28,6 +29,7 @@ export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs
     lifecycle,
     global_max_retention: globalMaxRetention,
     next_generation_managed_by: nextGenerationManagedBy,
+    index_mode: indexMode,
   } = dataStreamFromEs;
   const meteringStorageSize =
     meteringStorageSizeBytes !== undefined
@@ -41,13 +43,13 @@ export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs
       ({
         index_name: indexName,
         index_uuid: indexUuid,
-        prefer_ilm: preferILM,
+        prefer_ilm: preferILM = false,
         managed_by: managedBy,
       }: {
         index_name: string;
         index_uuid: string;
-        prefer_ilm: boolean;
-        managed_by: string;
+        prefer_ilm?: boolean;
+        managed_by?: string;
       }) => ({
         name: indexName,
         uuid: indexUuid,
@@ -73,6 +75,7 @@ export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs
       globalMaxRetention,
     },
     nextGenerationManagedBy,
+    indexMode: (indexMode ?? 'standard') as IndexMode,
   };
 }
 

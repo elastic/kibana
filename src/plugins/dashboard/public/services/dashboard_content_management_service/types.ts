@@ -8,17 +8,20 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import type { Query, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
 import { DashboardContainerInput } from '../../../common';
-import { DashboardAttributes, DashboardCrudTypes } from '../../../common/content_management';
+import type { DashboardAttributes, DashboardGetOut } from '../../../server/content_management';
 import { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
 import {
   FindDashboardsByIdResponse,
   SearchDashboardsArgs,
   SearchDashboardsResponse,
 } from './lib/find_dashboards';
+import { DashboardState } from '../../dashboard_api/types';
+import { UpdateDashboardMetaProps } from './lib/update_dashboard_meta';
 
 export interface DashboardContentManagementService {
   findDashboards: FindDashboardsService;
@@ -26,9 +29,7 @@ export interface DashboardContentManagementService {
   loadDashboardState: (props: { id?: string }) => Promise<LoadDashboardReturn>;
   saveDashboardState: (props: SaveDashboardProps) => Promise<SaveDashboardReturn>;
   checkForDuplicateDashboardTitle: (meta: DashboardDuplicateTitleCheckProps) => Promise<boolean>;
-  updateDashboardMeta: (
-    props: Pick<DashboardContainerInput, 'id' | 'title' | 'description' | 'tags'>
-  ) => Promise<void>;
+  updateDashboardMeta: (props: UpdateDashboardMetaProps) => Promise<void>;
 }
 
 /**
@@ -38,7 +39,7 @@ export interface LoadDashboardFromSavedObjectProps {
   id?: string;
 }
 
-type DashboardResolveMeta = DashboardCrudTypes['GetOut']['meta'];
+type DashboardResolveMeta = DashboardGetOut['meta'];
 
 export type SavedDashboardInput = DashboardContainerInput & {
   /**
@@ -54,6 +55,10 @@ export type SavedDashboardInput = DashboardContainerInput & {
   controlGroupState?: Partial<ControlGroupRuntimeState>;
 };
 
+export type DashboardSearchSource = Omit<SerializedSearchSourceFields, 'query'> & {
+  query?: Query;
+};
+
 export interface LoadDashboardReturn {
   dashboardFound: boolean;
   newDashboardCreated?: boolean;
@@ -61,7 +66,6 @@ export interface LoadDashboardReturn {
   managed?: boolean;
   resolveMeta?: DashboardResolveMeta;
   dashboardInput: SavedDashboardInput;
-  anyMigrationRun?: boolean;
 
   /**
    * Raw references returned directly from the Dashboard saved object. These
@@ -77,7 +81,7 @@ export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolea
 
 export interface SaveDashboardProps {
   controlGroupReferences?: Reference[];
-  currentState: SavedDashboardInput;
+  currentState: DashboardState;
   saveOptions: SavedDashboardSaveOpts;
   panelReferences?: Reference[];
   lastSavedId?: string;

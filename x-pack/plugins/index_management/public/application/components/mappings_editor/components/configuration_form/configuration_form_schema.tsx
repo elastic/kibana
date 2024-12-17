@@ -75,12 +75,9 @@ export const configurationFormSchema: FormSchema = {
     },
   },
   sourceField: {
-    enabled: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.sourceFieldLabel', {
-        defaultMessage: 'Enable _source field',
-      }),
-      type: FIELD_TYPES.TOGGLE,
-      defaultValue: true,
+    option: {
+      type: FIELD_TYPES.SUPER_SELECT,
+      defaultValue: 'stored',
     },
     includes: {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.includeSourceFieldsLabel', {

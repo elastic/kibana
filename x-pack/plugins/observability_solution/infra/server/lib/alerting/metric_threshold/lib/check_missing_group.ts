@@ -57,9 +57,9 @@ export const checkMissingGroups = async (
     ];
   });
 
-  logger.trace(`Request: ${JSON.stringify({ searches })}`);
+  logger.trace(() => `Request: ${JSON.stringify({ searches })}`);
   const response = await esClient.msearch({ searches });
-  logger.trace(`Response: ${JSON.stringify(response)}`);
+  logger.trace(() => `Response: ${JSON.stringify(response)}`);
 
   const verifiedMissingGroups = response.responses
     .map((resp, index) => {

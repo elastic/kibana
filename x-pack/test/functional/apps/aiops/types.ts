@@ -68,6 +68,7 @@ export interface TestData {
   fieldSelectorSearch: string;
   fieldSelectorApplyAvailable: boolean;
   query?: string;
+  editedQuery?: string;
   action?: TestDataTableActionLogPatternAnalysis;
   expected: TestDataExpectedWithSampleProbability | TestDataExpectedWithoutSampleProbability;
 }

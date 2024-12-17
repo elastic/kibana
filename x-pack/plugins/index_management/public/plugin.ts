@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Subject } from 'rxjs';
 import SemVer from 'semver/classes/semver';
 
 import {
@@ -14,12 +15,14 @@ import {
   Plugin,
   PluginInitializerContext,
   ScopedHistory,
+  Capabilities,
 } from '@kbn/core/public';
 import {
   IndexManagementPluginSetup,
   IndexManagementPluginStart,
 } from '@kbn/index-management-shared-types';
 import { IndexManagementLocator } from '@kbn/index-management-shared-types';
+import { Subscription } from 'rxjs';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 import { ExtensionsService } from './services/extensions_service';
 
@@ -57,6 +60,10 @@ export class IndexMgmtUIPlugin
     enableProjectLevelRetentionChecks: boolean;
     enableSemanticText: boolean;
   };
+  private canUseSyntheticSource: boolean = false;
+  private licensingSubscription?: Subscription;
+
+  private capabilities$ = new Subject<Capabilities>();
 
   constructor(ctx: PluginInitializerContext) {
     // Temporary hack to provide the service instances in module files in order to avoid a big refactor
@@ -95,28 +102,34 @@ export class IndexMgmtUIPlugin
     coreSetup: CoreSetup<StartDependencies>,
     plugins: SetupDependencies
   ): IndexManagementPluginSetup {
-    if (this.config.isIndexManagementUiEnabled) {
-      const { fleet, usageCollection, management, cloud } = plugins;
+    const { fleet, usageCollection, management, cloud } = plugins;
 
-      management.sections.section.data.registerApp({
-        id: PLUGIN.id,
-        title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
-        order: 0,
-        mount: async (params) => {
-          const { mountManagementSection } = await import('./application/mount_management_section');
-          return mountManagementSection({
-            coreSetup,
-            usageCollection,
-            params,
-            extensionsService: this.extensionsService,
-            isFleetEnabled: Boolean(fleet),
-            kibanaVersion: this.kibanaVersion,
-            config: this.config,
-            cloud,
-          });
-        },
-      });
-    }
+    this.capabilities$.subscribe((capabilities) => {
+      const { monitor, manageEnrich, monitorEnrich } = capabilities.index_management;
+      if (this.config.isIndexManagementUiEnabled && (monitor || manageEnrich || monitorEnrich)) {
+        management.sections.section.data.registerApp({
+          id: PLUGIN.id,
+          title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
+          order: 0,
+          mount: async (params) => {
+            const { mountManagementSection } = await import(
+              './application/mount_management_section'
+            );
+            return mountManagementSection({
+              coreSetup,
+              usageCollection,
+              params,
+              extensionsService: this.extensionsService,
+              isFleetEnabled: Boolean(fleet),
+              kibanaVersion: this.kibanaVersion,
+              config: this.config,
+              cloud,
+              canUseSyntheticSource: this.canUseSyntheticSource,
+            });
+          },
+        });
+      }
+    });
 
     this.locator = plugins.share.url.locators.create(
       new IndexManagementLocatorDefinition({
@@ -133,6 +146,13 @@ export class IndexMgmtUIPlugin
 
   public start(coreStart: CoreStart, plugins: StartDependencies): IndexManagementPluginStart {
     const { fleet, usageCollection, cloud, share, console, ml, licensing } = plugins;
+
+    this.capabilities$.next(coreStart.application.capabilities);
+
+    this.licensingSubscription = licensing?.license$.subscribe((next) => {
+      this.canUseSyntheticSource = next.hasAtLeast('enterprise');
+    });
+
     return {
       extensionsService: this.extensionsService.setup(),
       getIndexMappingComponent: (deps: { history: ScopedHistory<unknown> }) => {
@@ -213,5 +233,7 @@ export class IndexMgmtUIPlugin
       },
     };
   }
-  public stop() {}
+  public stop() {
+    this.licensingSubscription?.unsubscribe();
+  }
 }

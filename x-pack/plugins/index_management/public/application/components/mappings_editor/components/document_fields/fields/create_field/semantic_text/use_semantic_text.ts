@@ -19,6 +19,7 @@ import { useMLModelNotificationToasts } from '../../../../../../../../hooks/use_
 
 import { getInferenceEndpoints } from '../../../../../../../services/api';
 import { getFieldByPathName } from '../../../../../lib/utils';
+
 interface UseSemanticTextProps {
   form: FormHook<Field, Field>;
   ml?: MlPluginStart;
@@ -61,9 +62,6 @@ export function useSemanticText(props: UseSemanticTextProps) {
       if (!form.getFormData().reference_field) {
         form.setFieldValue('reference_field', referenceField);
       }
-      if (!form.getFormData().inference_id) {
-        form.setFieldValue('inference_id', 'elser_model_2');
-      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldTypeValue]);
@@ -85,7 +83,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
         : {
             service: defaultInferenceEndpointConfig.service,
             service_settings: {
-              num_allocations: 1,
+              adaptive_allocations: { enabled: true },
               num_threads: 1,
               model_id: trainedModelId,
             },

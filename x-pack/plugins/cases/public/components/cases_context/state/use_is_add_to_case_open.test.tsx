@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { createAppMockRenderer } from '../../../common/mock';
 import { useIsAddToCaseOpen } from './use_is_add_to_case_open';
@@ -26,9 +26,8 @@ describe('use is add to existing case modal open hook', () => {
   });
 
   it('should throw if called outside of a cases context', () => {
-    const { result } = renderHook(useIsAddToCaseOpen);
-    expect(result.error?.message).toContain(
-      'useCasesStateContext must be used within a CasesProvider and have a defined value'
+    expect(() => renderHook(useIsAddToCaseOpen)).toThrow(
+      /useCasesStateContext must be used within a CasesProvider and have a defined value/
     );
   });
 

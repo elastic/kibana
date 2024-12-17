@@ -8,10 +8,7 @@
 import { Plugin, CoreSetup, CoreStart, Logger, PluginInitializerContext } from '@kbn/core/server';
 import { firstValueFrom, Subject } from 'rxjs';
 import { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
-import {
-  PluginStartContract as AlertingPluginsStart,
-  PluginSetupContract as AlertingPluginSetup,
-} from '@kbn/alerting-plugin/server/plugin';
+import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -25,6 +22,7 @@ import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/serve
 import { IEventLogClientService } from '@kbn/event-log-plugin/server';
 import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { defineRoutes } from './routes';
 import { defineActionTypes } from './action_types';
@@ -34,13 +32,13 @@ import { defineConnectorAdapters } from './connector_adapters';
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
   actions: ActionsPluginSetup;
-  alerting: AlertingPluginSetup;
+  alerting: AlertingServerSetup;
   taskManager: TaskManagerSetupContract;
   ruleRegistry: RuleRegistryPluginSetupContract;
 }
 
 export interface FixtureStartDeps {
-  alerting: AlertingPluginsStart;
+  alerting: AlertingServerStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
@@ -49,6 +47,35 @@ export interface FixtureStartDeps {
   eventLog: IEventLogClientService;
   notifications: NotificationsPluginStart;
 }
+
+const testRuleTypes = [
+  'test.always-firing',
+  'test.cumulative-firing',
+  'test.never-firing',
+  'test.failing',
+  'test.authorization',
+  'test.delayed',
+  'test.validation',
+  'test.onlyContextVariables',
+  'test.onlyStateVariables',
+  'test.noop',
+  'test.unrestricted-noop',
+  'test.patternFiring',
+  'test.patternSuccessOrFailure',
+  'test.throw',
+  'test.longRunning',
+  'test.exceedsAlertLimit',
+  'test.always-firing-alert-as-data',
+  'test.patternFiringAad',
+  'test.waitingRule',
+  'test.patternFiringAutoRecoverFalse',
+  'test.severity',
+];
+
+const testAlertingFeatures = testRuleTypes.map((ruleTypeId) => ({
+  ruleTypeId,
+  consumers: ['alertsFixture', ALERTING_FEATURE_ID],
+}));
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   private readonly logger: Logger;
@@ -72,30 +99,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'Alerts',
       app: ['alerts', 'kibana'],
       category: { id: 'foo', label: 'foo' },
+      alerting: testAlertingFeatures,
       scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-      alerting: [
-        'test.always-firing',
-        'test.cumulative-firing',
-        'test.never-firing',
-        'test.failing',
-        'test.authorization',
-        'test.delayed',
-        'test.validation',
-        'test.onlyContextVariables',
-        'test.onlyStateVariables',
-        'test.noop',
-        'test.unrestricted-noop',
-        'test.patternFiring',
-        'test.patternSuccessOrFailure',
-        'test.throw',
-        'test.longRunning',
-        'test.exceedsAlertLimit',
-        'test.always-firing-alert-as-data',
-        'test.patternFiringAad',
-        'test.waitingRule',
-        'test.patternFiringAutoRecoverFalse',
-        'test.severity',
-      ],
       privileges: {
         all: {
           app: ['alerts', 'kibana'],
@@ -105,29 +110,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           },
           alerting: {
             rule: {
-              all: [
-                'test.always-firing',
-                'test.cumulative-firing',
-                'test.never-firing',
-                'test.failing',
-                'test.delayed',
-                'test.authorization',
-                'test.validation',
-                'test.onlyContextVariables',
-                'test.onlyStateVariables',
-                'test.noop',
-                'test.unrestricted-noop',
-                'test.patternFiring',
-                'test.patternSuccessOrFailure',
-                'test.throw',
-                'test.longRunning',
-                'test.exceedsAlertLimit',
-                'test.always-firing-alert-as-data',
-                'test.patternFiringAad',
-                'test.waitingRule',
-                'test.patternFiringAutoRecoverFalse',
-                'test.severity',
-              ],
+              all: testAlertingFeatures,
             },
           },
           ui: [],
@@ -140,29 +123,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           },
           alerting: {
             rule: {
-              read: [
-                'test.always-firing',
-                'test.cumulative-firing',
-                'test.never-firing',
-                'test.failing',
-                'test.authorization',
-                'test.delayed',
-                'test.validation',
-                'test.onlyContextVariables',
-                'test.onlyStateVariables',
-                'test.noop',
-                'test.unrestricted-noop',
-                'test.patternFiring',
-                'test.patternSuccessOrFailure',
-                'test.throw',
-                'test.longRunning',
-                'test.exceedsAlertLimit',
-                'test.always-firing-alert-as-data',
-                'test.patternFiringAad',
-                'test.waitingRule',
-                'test.patternFiringAutoRecoverFalse',
-                'test.severity',
-              ],
+              read: testAlertingFeatures,
             },
           },
           ui: [],

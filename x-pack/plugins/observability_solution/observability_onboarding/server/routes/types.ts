@@ -13,13 +13,13 @@ import {
 } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { ObservabilityOnboardingServerRouteRepository } from '.';
-import { ObservabilityOnboardingConfig } from '..';
 import { EsLegacyConfigService } from '../services/es_legacy_config_service';
 import {
   ObservabilityOnboardingPluginSetupDependencies,
   ObservabilityOnboardingPluginStartDependencies,
   ObservabilityOnboardingRequestHandlerContext,
 } from '../types';
+import { ObservabilityOnboardingConfig } from '../config';
 
 export type { ObservabilityOnboardingServerRouteRepository };
 
@@ -46,10 +46,8 @@ export interface ObservabilityOnboardingRouteHandlerResources {
 }
 
 export interface ObservabilityOnboardingRouteCreateOptions {
-  options: {
-    tags: string[];
-    xsrfRequired?: boolean;
-  };
+  tags: string[];
+  xsrfRequired?: boolean;
 }
 
 export const IntegrationRT = t.intersection([

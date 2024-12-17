@@ -145,3 +145,15 @@ export async function getIndices(dataClient: IScopedClusterClient, pattern: stri
 
   return indices.buckets ? indices.buckets.map((bucket) => bucket.key) : [];
 }
+export async function getDataStreams(
+  dataClient: IScopedClusterClient,
+  pattern: string,
+  limit = 10
+) {
+  const response = await dataClient.asCurrentUser.indices.getDataStream({
+    name: pattern,
+    expand_wildcards: 'open',
+  });
+
+  return response.data_streams ? response.data_streams.map((dataStream) => dataStream.name) : [];
+}

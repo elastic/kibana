@@ -23,7 +23,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { all: true },
       },
-      description: 'Rotate fleet message signing key pair',
+      summary: 'Rotate a Fleet message signing key pair',
       options: {
         tags: ['oas-tag:Message Signing Service'],
       },

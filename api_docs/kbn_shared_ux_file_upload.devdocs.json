@@ -2,26 +2,10 @@
   "id": "@kbn/shared-ux-file-upload",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-file-upload",
-        "id": "def-common.FileUpload",
+        "id": "def-public.FileUpload",
         "type": "Function",
         "tags": [],
         "label": "FileUpload",
@@ -30,9 +14,9 @@
           "(props: ",
           {
             "pluginId": "@kbn/shared-ux-file-upload",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxFileUploadPluginApi",
-            "section": "def-common.FileUploadProps",
+            "section": "def-public.FileUploadProps",
             "text": "FileUploadProps"
           },
           ") => React.JSX.Element"
@@ -43,7 +27,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-file-upload",
-            "id": "def-common.FileUpload.$1",
+            "id": "def-public.FileUpload.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -51,9 +35,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/shared-ux-file-upload",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSharedUxFileUploadPluginApi",
-                "section": "def-common.FileUploadProps",
+                "section": "def-public.FileUploadProps",
                 "text": "FileUploadProps"
               }
             ],
@@ -70,7 +54,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/shared-ux-file-upload",
-        "id": "def-common.DoneNotification",
+        "id": "def-public.DoneNotification",
         "type": "Interface",
         "tags": [],
         "label": "DoneNotification",
@@ -78,9 +62,9 @@
         "signature": [
           {
             "pluginId": "@kbn/shared-ux-file-upload",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxFileUploadPluginApi",
-            "section": "def-common.DoneNotification",
+            "section": "def-public.DoneNotification",
             "text": "DoneNotification"
           },
           "<Meta>"
@@ -91,7 +75,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-file-upload",
-            "id": "def-common.DoneNotification.id",
+            "id": "def-public.DoneNotification.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -102,7 +86,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-file-upload",
-            "id": "def-common.DoneNotification.kind",
+            "id": "def-public.DoneNotification.kind",
             "type": "string",
             "tags": [],
             "label": "kind",
@@ -113,7 +97,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-file-upload",
-            "id": "def-common.DoneNotification.fileJSON",
+            "id": "def-public.DoneNotification.fileJSON",
             "type": "Object",
             "tags": [],
             "label": "fileJSON",
@@ -140,7 +124,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-file-upload",
-        "id": "def-common.FileUploadProps",
+        "id": "def-public.FileUploadProps",
         "type": "Type",
         "tags": [],
         "label": "FileUploadProps",
@@ -155,6 +139,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

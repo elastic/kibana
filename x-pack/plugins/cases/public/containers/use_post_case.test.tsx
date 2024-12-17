@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import * as api from './api';
 import { ConnectorTypes } from '../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -49,7 +49,7 @@ describe('usePostCase', () => {
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'postCase');
-    const { waitForNextUpdate, result } = renderHook(() => usePostCase(), {
+    const { result } = renderHook(() => usePostCase(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -57,14 +57,12 @@ describe('usePostCase', () => {
       result.current.mutate({ request: samplePost });
     });
 
-    await waitForNextUpdate();
-
-    expect(spy).toHaveBeenCalledWith({ newCase: samplePost });
+    await waitFor(() => expect(spy).toHaveBeenCalledWith({ newCase: samplePost }));
   });
 
   it('invalidates the queries correctly', async () => {
     const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
-    const { waitForNextUpdate, result } = renderHook(() => usePostCase(), {
+    const { result } = renderHook(() => usePostCase(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -72,15 +70,15 @@ describe('usePostCase', () => {
       result.current.mutate({ request: samplePost });
     });
 
-    await waitForNextUpdate();
-
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.casesList());
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.userProfiles());
+    await waitFor(() => {
+      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.casesList());
+      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
+      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.userProfiles());
+    });
   });
 
   it('does not show a success toaster', async () => {
-    const { waitForNextUpdate, result } = renderHook(() => usePostCase(), {
+    const { result } = renderHook(() => usePostCase(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -88,15 +86,13 @@ describe('usePostCase', () => {
       result.current.mutate({ request: samplePost });
     });
 
-    await waitForNextUpdate();
-
-    expect(addSuccess).not.toHaveBeenCalled();
+    await waitFor(() => expect(addSuccess).not.toHaveBeenCalled());
   });
 
   it('shows a toast error when the api return an error', async () => {
     jest.spyOn(api, 'postCase').mockRejectedValue(new Error('usePostCase: Test error'));
 
-    const { waitForNextUpdate, result } = renderHook(() => usePostCase(), {
+    const { result } = renderHook(() => usePostCase(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -104,8 +100,6 @@ describe('usePostCase', () => {
       result.current.mutate({ request: samplePost });
     });
 
-    await waitForNextUpdate();
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => expect(addError).toHaveBeenCalled());
   });
 });

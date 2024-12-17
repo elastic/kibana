@@ -26,7 +26,6 @@ export interface TaskClaimerOpts {
   events$: Subject<TaskClaim>;
   taskStore: TaskStore;
   definitions: TaskTypeDictionary;
-  unusedTypes: string[];
   excludedTaskTypes: string[];
   taskMaxAttempts: Record<string, number>;
   logger: Logger;
@@ -40,6 +39,7 @@ export interface ClaimOwnershipResult {
     tasksClaimed: number;
     tasksLeftUnclaimed?: number;
     tasksErrors?: number;
+    staleTasks?: number;
   };
   docs: ConcreteTaskInstance[];
   timing?: TaskTiming;
@@ -70,6 +70,7 @@ export function getEmptyClaimOwnershipResult(): ClaimOwnershipResult {
       tasksUpdated: 0,
       tasksConflicted: 0,
       tasksClaimed: 0,
+      staleTasks: 0,
     },
     docs: [],
   };

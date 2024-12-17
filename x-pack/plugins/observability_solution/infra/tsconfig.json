@@ -8,7 +8,8 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "types/**/*"
+    "types/**/*",
+    "./emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -65,7 +66,6 @@
     "@kbn/discover-plugin",
     "@kbn/observability-shared-plugin",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/ui-theme",
     "@kbn/ml-anomaly-utils",
     "@kbn/aiops-plugin",
     "@kbn/field-formats-plugin",
@@ -114,9 +114,12 @@
     "@kbn/management-settings-ids",
     "@kbn/core-ui-settings-common",
     "@kbn/entityManager-plugin",
-    "@kbn/observability-utils",
     "@kbn/entities-schema",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/observability-utils-server",
+    "@kbn/core-plugins-server",
+    "@kbn/config",
+    "@kbn/observability-utils-common"
   ],
   "exclude": ["target/**/*"]
 }

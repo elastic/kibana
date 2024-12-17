@@ -252,11 +252,22 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
         expect(e?.event?.outcome).to.eql('success');
       }
 
-      // invoke the invalidate task
-      await runInvalidateTask();
+      // wait for all the ad hoc run SO to be deleted
+      await retry.try(async () => {
+        try {
+          // throws when not found
+          await getAdHocRunSO(backfillId);
+          throw new Error('should have thrown');
+        } catch (e) {
+          expect(e.message).not.to.eql('should have thrown');
+        }
+      });
 
       // pending API key should now be deleted because backfill is done
       await retry.try(async () => {
+        // invoke the invalidate task
+        await runInvalidateTask();
+
         const results = await getApiKeysPendingInvalidation();
         expect(results.length).to.eql(0);
         return results;

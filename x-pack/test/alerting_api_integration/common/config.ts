@@ -88,7 +88,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     verificationMode = 'full',
     preconfiguredAlertHistoryEsIndex = false,
     customizeLocalHostSsl = false,
-    rejectUnauthorized = true, // legacy
     emailDomainsAllowed = undefined,
     testFiles = undefined,
     reportName = undefined,
@@ -128,7 +127,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       ? [
           `--xpack.actions.proxyUrl=http://localhost:${proxyPort}`,
           `--xpack.actions.proxyOnlyHosts=${JSON.stringify(proxyHosts)}`,
-          '--xpack.actions.proxyRejectUnauthorizedCertificates=false',
         ]
       : [
           `--xpack.actions.proxyUrl=http://elastic.co`,
@@ -212,7 +210,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.alerting.enableFrameworkAlerts=true`,
           `--xpack.alerting.rulesSettings.cacheInterval=10000`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
-          `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
           `--xpack.actions.microsoftGraphApiUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}/api/_actions-FTS-external-service-simulators/exchange/users/test@/sendMail`,
           `--xpack.actions.ssl.verificationMode=${verificationMode}`,
           ...actionsProxyUrl,
@@ -220,7 +217,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...emailSettings,
           ...maxScheduledPerMinuteSettings,
           '--xpack.eventLog.logEntries=true',
-          '--xpack.task_manager.ephemeral_tasks.enabled=false',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
             'actions:test.excluded',
           ])}`,

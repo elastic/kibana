@@ -124,10 +124,25 @@ export type InstallablePackage = RegistryPackage | ArchivePackage;
 
 export type AssetsMap = Map<string, Buffer | undefined>;
 
+export interface ArchiveEntry {
+  path: string;
+  buffer?: Buffer;
+}
+
+export interface ArchiveIterator {
+  traverseEntries: (onEntry: (entry: ArchiveEntry) => Promise<void>) => Promise<void>;
+  getPaths: () => Promise<string[]>;
+}
+
 export interface PackageInstallContext {
   packageInfo: InstallablePackage;
+  /**
+   * @deprecated Use `archiveIterator` to access the package archive entries
+   * without loading them all into memory at once.
+   */
   assetsMap: AssetsMap;
   paths: string[];
+  archiveIterator: ArchiveIterator;
 }
 
 export type ArchivePackage = PackageSpecManifest &
@@ -192,6 +207,15 @@ export interface DeploymentsModes {
   default?: DeploymentsModesDefault;
 }
 
+type Action = 'action';
+type NextStep = 'next_step';
+export interface ConfigurationLink {
+  title: string;
+  url: string;
+  type: Action | NextStep;
+  content?: string;
+}
+
 export enum RegistryPolicyTemplateKeys {
   categories = 'categories',
   data_streams = 'data_streams',
@@ -208,6 +232,7 @@ export enum RegistryPolicyTemplateKeys {
   icons = 'icons',
   screenshots = 'screenshots',
   deployment_modes = 'deployment_modes',
+  configuration_links = 'configuration_links',
 }
 interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
@@ -217,6 +242,7 @@ interface BaseTemplate {
   [RegistryPolicyTemplateKeys.screenshots]?: RegistryImage[];
   [RegistryPolicyTemplateKeys.multiple]?: boolean;
   [RegistryPolicyTemplateKeys.deployment_modes]?: DeploymentsModes;
+  [RegistryPolicyTemplateKeys.configuration_links]?: ConfigurationLink[];
 }
 export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;
@@ -296,6 +322,7 @@ export type RegistrySearchResult = Pick<
   | 'icons'
   | 'internal'
   | 'data_streams'
+  | 'policy_templates_behavior'
   | 'policy_templates'
   | 'categories'
 >;
@@ -531,8 +558,8 @@ export type PackageList = PackageListItem[];
 export type PackageListItem = Installable<RegistrySearchResult> & {
   id: string;
   integration?: string;
-  installationInfo?: InstallationInfo;
   savedObject?: InstallableSavedObject;
+  installationInfo?: InstallationInfo;
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =

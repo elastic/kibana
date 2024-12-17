@@ -29,12 +29,134 @@
           "\nA hook that stores and retrieves from local storage the table page size and sort criteria.\nReturns the persisting page size and sort and the onTableChange handler that should be passed\nas props to an Eui table component."
         ],
         "signature": [
-          "<T extends object>({ tableId, customOnTableChange, initialSort, initialPageSize, pageSizeOptions, }: ",
+          "(props: ",
+          "EuiTablePersistProps",
+          "<T> & { initialSort: ",
+          "PropertySort",
+          "<T>; }) => { sorting: { sort: ",
+          "PropertySort",
+          "<T>; }; pageSize: number; onTableChange: (nextValues: ",
+          "CriteriaWithPagination",
+          "<T>) => void; }"
+        ],
+        "path": "packages/shared-ux/table_persist/src/use_table_persist.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-table-persist",
+            "id": "def-common.useEuiTablePersist.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "EuiTablePersistProps",
+              "<T> & { initialSort: ",
+              "PropertySort",
+              "<T>; }"
+            ],
+            "path": "packages/shared-ux/table_persist/src/use_table_persist.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-table-persist",
+        "id": "def-common.useEuiTablePersist",
+        "type": "Function",
+        "tags": [],
+        "label": "useEuiTablePersist",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "EuiTablePersistProps",
+          "<T> & { initialSort?: undefined; }) => { sorting: true; pageSize: number; onTableChange: (nextValues: ",
+          "CriteriaWithPagination",
+          "<T>) => void; }"
+        ],
+        "path": "packages/shared-ux/table_persist/src/use_table_persist.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-table-persist",
+            "id": "def-common.useEuiTablePersist.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "EuiTablePersistProps",
+              "<T> & { initialSort?: undefined; }"
+            ],
+            "path": "packages/shared-ux/table_persist/src/use_table_persist.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-table-persist",
+        "id": "def-common.useEuiTablePersist",
+        "type": "Function",
+        "tags": [],
+        "label": "useEuiTablePersist",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "EuiTablePersistProps",
+          "<T>) => { sorting: true | { sort: ",
+          "PropertySort",
+          "<T>; }; pageSize: number; onTableChange: (nextValues: ",
+          "CriteriaWithPagination",
+          "<T>) => void; }"
+        ],
+        "path": "packages/shared-ux/table_persist/src/use_table_persist.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-table-persist",
+            "id": "def-common.useEuiTablePersist.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "EuiTablePersistProps",
+              "<T>"
+            ],
+            "path": "packages/shared-ux/table_persist/src/use_table_persist.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-table-persist",
+        "id": "def-common.useEuiTablePersist",
+        "type": "Function",
+        "tags": [],
+        "label": "useEuiTablePersist",
+        "description": [],
+        "signature": [
+          "({\n  tableId,\n  customOnTableChange,\n  initialSort,\n  initialPageSize,\n  pageSizeOptions,\n}: ",
           "EuiTablePersistProps",
           "<T>) => { pageSize: number; sorting: boolean | { sort: ",
           "PropertySort",
           "<T>; }; onTableChange: (nextValues: ",
-          "Criteria",
+          "CriteriaWithPagination",
           "<T>) => void; }"
         ],
         "path": "packages/shared-ux/table_persist/src/use_table_persist.ts",
@@ -60,9 +182,144 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-table-persist",
+        "id": "def-common.withEuiTablePersist",
+        "type": "Function",
+        "tags": [],
+        "label": "withEuiTablePersist",
+        "description": [],
+        "signature": [
+          "(WrappedComponent: React.ComponentClass<Props & ",
+          {
+            "pluginId": "@kbn/shared-ux-table-persist",
+            "scope": "common",
+            "docId": "kibKbnSharedUxTablePersistPluginApi",
+            "section": "def-common.EuiTablePersistInjectedProps",
+            "text": "EuiTablePersistInjectedProps"
+          },
+          "<T>, any>, euiTablePersistDefault: (",
+          "EuiTablePersistProps",
+          "<T> & { get?: undefined; }) | { get: ",
+          {
+            "pluginId": "@kbn/shared-ux-table-persist",
+            "scope": "common",
+            "docId": "kibKbnSharedUxTablePersistPluginApi",
+            "section": "def-common.EuiTablePersistPropsGetter",
+            "text": "EuiTablePersistPropsGetter"
+          },
+          "<T, Props>; }) => React.FC<",
+          {
+            "pluginId": "@kbn/shared-ux-table-persist",
+            "scope": "common",
+            "docId": "kibKbnSharedUxTablePersistPluginApi",
+            "section": "def-common.HOCProps",
+            "text": "HOCProps"
+          },
+          "<T, Omit<Props, \"euiTablePersist\">>>"
+        ],
+        "path": "packages/shared-ux/table_persist/src/table_persist_hoc.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-table-persist",
+            "id": "def-common.withEuiTablePersist.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "WrappedComponent",
+            "description": [],
+            "signature": [
+              "React.ComponentClass<Props & ",
+              {
+                "pluginId": "@kbn/shared-ux-table-persist",
+                "scope": "common",
+                "docId": "kibKbnSharedUxTablePersistPluginApi",
+                "section": "def-common.EuiTablePersistInjectedProps",
+                "text": "EuiTablePersistInjectedProps"
+              },
+              "<T>, any>"
+            ],
+            "path": "packages/shared-ux/table_persist/src/table_persist_hoc.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-table-persist",
+            "id": "def-common.withEuiTablePersist.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "euiTablePersistDefault",
+            "description": [],
+            "signature": [
+              "(",
+              "EuiTablePersistProps",
+              "<T> & { get?: undefined; }) | { get: ",
+              {
+                "pluginId": "@kbn/shared-ux-table-persist",
+                "scope": "common",
+                "docId": "kibKbnSharedUxTablePersistPluginApi",
+                "section": "def-common.EuiTablePersistPropsGetter",
+                "text": "EuiTablePersistPropsGetter"
+              },
+              "<T, Props>; }"
+            ],
+            "path": "packages/shared-ux/table_persist/src/table_persist_hoc.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-table-persist",
+        "id": "def-common.EuiTablePersistInjectedProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "EuiTablePersistInjectedProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-table-persist",
+            "scope": "common",
+            "docId": "kibKbnSharedUxTablePersistPluginApi",
+            "section": "def-common.EuiTablePersistInjectedProps",
+            "text": "EuiTablePersistInjectedProps"
+          },
+          "<T>"
+        ],
+        "path": "packages/shared-ux/table_persist/src/table_persist_hoc.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-table-persist",
+            "id": "def-common.EuiTablePersistInjectedProps.euiTablePersist",
+            "type": "Object",
+            "tags": [],
+            "label": "euiTablePersist",
+            "description": [],
+            "signature": [
+              "{ onTableChange: (change: ",
+              "CriteriaWithPagination",
+              "<T>) => void; sorting: true | { sort: ",
+              "PropertySort",
+              "<T>; }; pageSize: number; }"
+            ],
+            "path": "packages/shared-ux/table_persist/src/table_persist_hoc.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
@@ -76,6 +333,57 @@
           "number[]"
         ],
         "path": "packages/shared-ux/table_persist/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-table-persist",
+        "id": "def-common.EuiTablePersistPropsGetter",
+        "type": "Type",
+        "tags": [],
+        "label": "EuiTablePersistPropsGetter",
+        "description": [],
+        "signature": [
+          "(props: Omit<P, \"euiTablePersist\">) => ",
+          "EuiTablePersistProps",
+          "<T>"
+        ],
+        "path": "packages/shared-ux/table_persist/src/table_persist_hoc.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-table-persist",
+            "id": "def-common.EuiTablePersistPropsGetter.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "{ [P in Exclude<keyof P, \"euiTablePersist\">]: P[P]; }"
+            ],
+            "path": "packages/shared-ux/table_persist/src/table_persist_hoc.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-table-persist",
+        "id": "def-common.HOCProps",
+        "type": "Type",
+        "tags": [],
+        "label": "HOCProps",
+        "description": [],
+        "signature": [
+          "P & { euiTablePersistProps?: Partial<",
+          "EuiTablePersistProps",
+          "<T>> | undefined; }"
+        ],
+        "path": "packages/shared-ux/table_persist/src/table_persist_hoc.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

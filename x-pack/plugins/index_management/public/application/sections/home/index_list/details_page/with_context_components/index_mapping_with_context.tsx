@@ -20,6 +20,7 @@ export const IndexMappingWithContext: React.FC<IndexMappingWithContextProps> = (
   dependencies,
   index,
   showAboutMappings,
+  hasUpdateMappingsPrivilege,
 }) => {
   // this normally happens when the index management app is rendered
   // but if components are embedded elsewhere that setup is skipped, so we have to do it here
@@ -42,7 +43,11 @@ export const IndexMappingWithContext: React.FC<IndexMappingWithContextProps> = (
   };
   return (
     <IndexManagementAppContext core={core} dependencies={newDependencies}>
-      <DetailsPageMappings index={index} showAboutMappings={showAboutMappings} />
+      <DetailsPageMappings
+        index={index}
+        showAboutMappings={showAboutMappings}
+        hasUpdateMappingsPrivilege={hasUpdateMappingsPrivilege}
+      />
     </IndexManagementAppContext>
   );
 };

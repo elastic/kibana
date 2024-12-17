@@ -16,8 +16,7 @@ import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-import { DashboardContainerInput } from '../../../common';
-import { DashboardItem } from '../../../common/content_management';
+import type { DashboardSearchOut } from '../../../server/content_management';
 import {
   DASHBOARD_CONTENT_ID,
   SAVED_OBJECT_DELETE_TIME,
@@ -35,6 +34,7 @@ import {
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 import { DashboardSavedObjectUserContent } from '../types';
+import { UpdateDashboardMetaProps } from '../../services/dashboard_content_management_service/lib/update_dashboard_meta';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];
@@ -42,7 +42,9 @@ type GetDetailViewLink =
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 
-const toTableListViewSavedObject = (hit: DashboardItem): DashboardSavedObjectUserContent => {
+const toTableListViewSavedObject = (
+  hit: DashboardSearchOut['hits'][number]
+): DashboardSavedObjectUserContent => {
   const { title, description, timeRestore } = hit.attributes;
   return {
     type: 'dashboard',
@@ -51,7 +53,7 @@ const toTableListViewSavedObject = (hit: DashboardItem): DashboardSavedObjectUse
     createdAt: hit.createdAt,
     createdBy: hit.createdBy,
     updatedBy: hit.updatedBy,
-    references: hit.references,
+    references: hit.references ?? [],
     managed: hit.managed,
     attributes: {
       title,
@@ -128,7 +130,7 @@ export const useDashboardListingTable = ({
   }, [dashboardBackupService, goToDashboard, useSessionStorageIntegration]);
 
   const updateItemMeta = useCallback(
-    async (props: Pick<DashboardContainerInput, 'id' | 'title' | 'description' | 'tags'>) => {
+    async (props: UpdateDashboardMetaProps) => {
       await dashboardContentManagementService.updateDashboardMeta(props);
 
       setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
@@ -211,6 +213,10 @@ export const useDashboardListingTable = ({
           size: listingLimit,
           hasReference: references,
           hasNoReference: referencesToExclude,
+          options: {
+            // include only tags references in the response to save bandwidth
+            includeReferences: ['tag'],
+          },
         })
         .then(({ total, hits }) => {
           const searchEndTime = window.performance.now();

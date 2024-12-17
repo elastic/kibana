@@ -10,8 +10,8 @@ import { first } from 'lodash';
 import moment from 'moment';
 import { metricsExplorerResponseRT } from '@kbn/infra-plugin/common/http_api/metrics_explorer';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { DATES } from './constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { DATES } from './utils/constants';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const { min, max } = DATES['7.0.0'].hosts;
 

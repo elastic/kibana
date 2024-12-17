@@ -135,6 +135,7 @@ export default ({ getService }: FtrProviderContext) => {
         responseCode: 200,
         moduleIds: [
           'security_auth',
+          'security_host',
           'security_linux_v3',
           'security_network',
           'security_windows_v3',

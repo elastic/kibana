@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 
-import { useGetAppInfo, UseGetAppInfo, UseGetAppInfoProps } from './use_get_app_info';
+import { useGetAppInfo } from './use_get_app_info';
 import { getAppInfo } from './api';
 import { ServiceNowActionConnector } from './types';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -50,7 +50,7 @@ describe('useGetAppInfo', () => {
   });
 
   it('init', async () => {
-    const { result } = renderHook<UseGetAppInfoProps, UseGetAppInfo>(() =>
+    const { result } = renderHook(() =>
       useGetAppInfo({
         actionTypeId,
         http,
@@ -64,7 +64,7 @@ describe('useGetAppInfo', () => {
   });
 
   it('returns the application information', async () => {
-    const { result } = renderHook<UseGetAppInfoProps, UseGetAppInfo>(() =>
+    const { result } = renderHook(() =>
       useGetAppInfo({
         actionTypeId,
         http,
@@ -86,7 +86,7 @@ describe('useGetAppInfo', () => {
       throw new Error('An error occurred');
     });
 
-    const { result } = renderHook<UseGetAppInfoProps, UseGetAppInfo>(() =>
+    const { result } = renderHook(() =>
       useGetAppInfo({
         actionTypeId,
         http,
@@ -108,7 +108,7 @@ describe('useGetAppInfo', () => {
       throw error;
     });
 
-    const { result } = renderHook<UseGetAppInfoProps, UseGetAppInfo>(() =>
+    const { result } = renderHook(() =>
       useGetAppInfo({
         actionTypeId,
         http,

@@ -325,7 +325,15 @@
                 "section": "def-common.ConditionalType",
                 "text": "ConditionalType"
               },
-              "<true, boolean, boolean>; }>"
+              "<true, boolean, boolean>; experimental: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<Readonly<{ themeSwitcherEnabled?: boolean | undefined; } & {}> | undefined>; }>"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_config.ts",
             "deprecated": false,

@@ -26,7 +26,6 @@ import {
   asTaskPollingCycleEvent,
   TaskManagerStat,
   asTaskManagerStatEvent,
-  EphemeralTaskRejectedDueToCapacity,
   TaskManagerMetric,
 } from './task_events';
 import { fillPool, FillPoolResult, TimedFillPoolResult } from './lib/fill_pool';
@@ -55,7 +54,6 @@ export interface ITaskEventEmitter<T> {
 export type TaskPollingLifecycleOpts = {
   logger: Logger;
   definitions: TaskTypeDictionary;
-  unusedTypes: string[];
   taskStore: TaskStore;
   config: TaskManagerConfig;
   middleware: Middleware;
@@ -72,8 +70,7 @@ export type TaskLifecycleEvent =
   | TaskRunRequest
   | TaskPollingCycle
   | TaskManagerStat
-  | TaskManagerMetric
-  | EphemeralTaskRejectedDueToCapacity;
+  | TaskManagerMetric;
 
 /**
  * The public interface into the task manager system.
@@ -115,7 +112,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     config,
     taskStore,
     definitions,
-    unusedTypes,
     executionContext,
     usageCounter,
     taskPartitioner,
@@ -153,7 +149,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       maxAttempts: config.max_attempts,
       excludedTaskTypes: config.unsafe.exclude_task_types,
       definitions,
-      unusedTypes,
       logger: this.logger,
       getAvailableCapacity: (taskType?: string) => this.pool.availableCapacity(taskType),
       taskPartitioner,

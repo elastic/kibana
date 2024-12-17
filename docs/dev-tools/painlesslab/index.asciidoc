@@ -12,7 +12,8 @@ process {ref}/docs-reindex.html[reindexed data], define complex
 <<watcher-create-advanced-watch, Watcher conditions>>,
 and work with data in other contexts.
 
-To get started, open the main menu, click *Dev Tools*, and then click *Painless Lab*.
+Find *Painless Lab* by navigating to the *Developer tools* page using the
+navigation menu or the <<kibana-navigation-search,global search field>>.
 
 [role="screenshot"]
 image::dev-tools/painlesslab/images/painless-lab.png[Painless Lab]

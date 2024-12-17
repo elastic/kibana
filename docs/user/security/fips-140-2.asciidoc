@@ -29,7 +29,7 @@ For {kib}, adherence to FIPS 140-2 is ensured by:
 
 ==== Configuring {kib} for FIPS 140-2
 
-Apart from setting `xpack.security.experimental.fipsMode.enabled` to `true` in your {kib} config, a number of security related 
+Apart from setting `xpack.security.fipsMode.enabled` to `true` in your {kib} config, a number of security related 
 settings need to be reviewed and configured in order to run {kib} successfully in a FIPS 140-2 compliant Node.js 
 environment.
 
@@ -56,8 +56,3 @@ As an example, avoid PKCS#12 specific settings such as:
 * `server.ssl.truststore.path`
 * `elasticsearch.ssl.keystore.path`
 * `elasticsearch.ssl.truststore.path`
-
-===== Limitations
-
-Configuring {kib} to run in FIPS mode is still considered to be experimental. Not all features are guaranteed to
-function as expected.

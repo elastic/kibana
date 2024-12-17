@@ -35,7 +35,7 @@ export function GlobalFilterCheckbox({
       });
 
   return (
-    <EuiFormRow display="columnCompressedSwitch">
+    <EuiFormRow display="columnCompressed">
       <EuiToolTip position="top" content={tooltipMessage}>
         <EuiSwitch
           label={label}

@@ -22,8 +22,8 @@ const ConfirmTitle = () => (
 
 interface ConfirmDescriptionProps {
   output: Output;
-  agentCount: number;
-  agentPolicyCount: number;
+  agentCount?: number;
+  agentPolicyCount?: number;
 }
 
 const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
@@ -32,36 +32,47 @@ const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
   agentPolicyCount,
 }) => (
   <>
-    <FormattedMessage
-      data-test-subj="settings.outputModal"
-      id="xpack.fleet.settings.updateOutput.confirmModalText"
-      defaultMessage="This action will update {outputName} output. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
-      values={{
-        outputName: <strong>{output.name}</strong>,
-        agents: (
-          <strong>
-            <FormattedMessage
-              id="xpack.fleet.settings.updateOutput.agentsCount"
-              defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
-              values={{
-                agentCount,
-              }}
-            />
-          </strong>
-        ),
-        policies: (
-          <strong>
-            <FormattedMessage
-              id="xpack.fleet.settings.updateOutput.agentPolicyCount"
-              defaultMessage="{agentPolicyCount, plural, one {# agent policy} other {# agent policies}}"
-              values={{
-                agentPolicyCount,
-              }}
-            />
-          </strong>
-        ),
-      }}
-    />
+    {agentCount !== undefined && agentPolicyCount !== undefined ? (
+      <FormattedMessage
+        data-test-subj="settings.outputModal"
+        id="xpack.fleet.settings.updateOutput.confirmModalText"
+        defaultMessage="This action will update {outputName} output. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
+        values={{
+          outputName: <strong>{output.name}</strong>,
+          agents: (
+            <strong>
+              <FormattedMessage
+                id="xpack.fleet.settings.updateOutput.agentsCount"
+                defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
+                values={{
+                  agentCount,
+                }}
+              />
+            </strong>
+          ),
+          policies: (
+            <strong>
+              <FormattedMessage
+                id="xpack.fleet.settings.updateOutput.agentPolicyCount"
+                defaultMessage="{agentPolicyCount, plural, one {# agent policy} other {# agent policies}}"
+                values={{
+                  agentPolicyCount,
+                }}
+              />
+            </strong>
+          ),
+        }}
+      />
+    ) : (
+      <FormattedMessage
+        data-test-subj="settings.outputModal"
+        id="xpack.fleet.settings.updateOutput.confirmModalTextWithoutCount"
+        defaultMessage="This action will update {outputName} output. It will update related policies and agents. This action can not be undone. Are you sure you wish to continue?"
+        values={{
+          outputName: <strong>{output.name}</strong>,
+        }}
+      />
+    )}
 
     {output.type === 'logstash' ? (
       <>
@@ -91,7 +102,13 @@ export async function confirmUpdate(
   output: Output,
   confirm: ReturnType<typeof useConfirmModal>['confirm']
 ) {
-  const { agentCount, agentPolicyCount } = await getAgentAndPolicyCountForOutput(output);
+  const { agentCount, agentPolicyCount } =
+    // Fail gracefully if not agent and policy count not available
+    await getAgentAndPolicyCountForOutput(output).catch(() => ({
+      agentCount: undefined,
+      agentPolicyCount: undefined,
+    }));
+
   return confirm(
     <ConfirmTitle />,
     <ConfirmDescription

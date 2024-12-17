@@ -76,6 +76,15 @@ period: {{period}}
 processors:
 {{processors}}
 {{/if}}
+tags:
+  - test
+{{#each tags as |tag i|}}
+  - {{tag}}
+{{/each}}
+tags_streams: 
+{{#each tags_streams as |tag i|}}
+  - {{tag}}
+{{/each}}
 `),
   ],
 ]);

@@ -5,40 +5,31 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
-import {
-  AllDatasetsLocatorParams,
-  ALL_DATASETS_LOCATOR_ID,
-  DatasetLocatorParams,
-} from '@kbn/deeplinks-observability';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-
-import { euiThemeVars } from '@kbn/ui-theme';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
 const pageConfigurations = {
   stream: {
     dismissalStorageKey: 'log_stream_deprecation_callout_dismissed',
-    message: i18n.translate('xpack.infra.logsDeprecationCallout.p.theNewLogsExplorerLabel', {
+    message: i18n.translate('xpack.infra.logsDeprecationCallout.stream.exploreWithDiscover', {
       defaultMessage:
-        'The new Logs Explorer makes viewing and inspecting your logs easier with more features, better performance, and more intuitive navigation. We recommend switching to Logs Explorer, as it will replace Logs Stream in a future version.',
+        'Logs Stream and Logs Explorer are set to be deprecated. Switch to Discover which now includes their functionality plus more features, better performance, and more intuitive navigation. ',
     }),
   },
   settings: {
     dismissalStorageKey: 'log_settings_deprecation_callout_dismissed',
-    message: i18n.translate(
-      'xpack.infra.logsSettingsDeprecationCallout.p.theNewLogsExplorerLabel',
-      {
-        defaultMessage:
-          'These settings only apply to the legacy Logs Stream app, and we do not recommend configuring them. Instead, use Logs Explorer which makes viewing and inspecting your logs easier with more features, better performance, and more intuitive navigation.',
-      }
-    ),
+    message: i18n.translate('xpack.infra.logsDeprecationCallout.settings.exploreWithDiscover', {
+      defaultMessage:
+        'These settings only apply to the legacy Logs Stream app. Switch to Discover for the same functionality plus more features, better performance, and more intuitive navigation.',
+    }),
   },
 };
 
@@ -47,6 +38,7 @@ interface LogsDeprecationCalloutProps {
 }
 
 export const LogsDeprecationCallout = ({ page }: LogsDeprecationCalloutProps) => {
+  const { euiTheme } = useEuiTheme();
   const {
     services: {
       share,
@@ -60,10 +52,9 @@ export const LogsDeprecationCallout = ({ page }: LogsDeprecationCalloutProps) =>
 
   const [isDismissed, setDismissed] = useLocalStorage(dismissalStorageKey, false);
 
-  const allDatasetLocator =
-    share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
-  if (isDismissed || !(allDatasetLocator && discover?.show && fleet?.read)) {
+  if (isDismissed || !(discoverLocator && discover?.show && fleet?.read)) {
     return null;
   }
 
@@ -76,30 +67,28 @@ export const LogsDeprecationCallout = ({ page }: LogsDeprecationCalloutProps) =>
       iconType="iInCircle"
       heading="h2"
       onDismiss={() => setDismissed(true)}
-      className={calloutStyle}
+      css={css`
+        margin-bottom: ${euiTheme.size.l};
+      `}
     >
       <p>{message}</p>
       <EuiButton
         fill
-        data-test-subj="infraLogsDeprecationCalloutTryLogsExplorerButton"
+        data-test-subj="infraLogsDeprecationCalloutGoToDiscoverButton"
         color="warning"
-        {...getLogsExplorerLinkProps(allDatasetLocator)}
+        {...getDiscoverLinkProps(discoverLocator)}
       >
-        {i18n.translate('xpack.infra.logsDeprecationCallout.tryLogsExplorerButtonLabel', {
-          defaultMessage: 'Try Logs Explorer',
+        {i18n.translate('xpack.infra.logsDeprecationCallout.goToDiscoverButtonLabel', {
+          defaultMessage: 'Go to Discover',
         })}
       </EuiButton>
     </EuiCallOut>
   );
 };
 
-const getLogsExplorerLinkProps = (locator: LocatorPublic<DatasetLocatorParams>) => {
+const getDiscoverLinkProps = (locator: LocatorPublic<DiscoverAppLocatorParams>) => {
   return getRouterLinkProps({
     href: locator.getRedirectUrl({}),
     onClick: () => locator.navigate({}),
   });
 };
-
-const calloutStyle = css`
-  margin-bottom: ${euiThemeVars.euiSizeL};
-`;

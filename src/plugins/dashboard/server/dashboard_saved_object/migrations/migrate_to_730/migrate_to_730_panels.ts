@@ -13,7 +13,7 @@ import semverSatisfies from 'semver/functions/satisfies';
 import { i18n } from '@kbn/i18n';
 import type { SerializableRecord } from '@kbn/utility-types';
 
-import {
+import type {
   SavedDashboardPanel620,
   SavedDashboardPanel630,
   SavedDashboardPanel610,
@@ -25,7 +25,7 @@ import {
   RawSavedDashboardPanel640To720,
   RawSavedDashboardPanel730ToLatest,
 } from './types';
-import { GridData } from '../../../../common/content_management';
+import type { GridData } from '../../../content_management';
 
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS = 4;

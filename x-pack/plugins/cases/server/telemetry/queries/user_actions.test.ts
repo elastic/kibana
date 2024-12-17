@@ -62,7 +62,7 @@ describe('user_actions', () => {
           counts: {
             date_range: {
               field: 'cases-user-actions.attributes.created_at',
-              format: 'dd/MM/YYYY',
+              format: 'dd/MM/yyyy',
               ranges: [
                 {
                   from: 'now-1d',

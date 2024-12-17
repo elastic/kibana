@@ -27,6 +27,8 @@ import { auditLoggingService } from '../../audit_logging';
 
 import * as Registry from '../registry';
 
+import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
+
 import { getInstalledPackages, getPackageInfo, getPackages, getPackageUsageStats } from './get';
 
 jest.mock('../registry');
@@ -915,11 +917,38 @@ owner: elastic`,
       MockRegistry.getPackage.mockResolvedValue({
         paths: [],
         assetsMap: new Map(),
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
         packageInfo: {
           name: 'my-package',
           version: '1.0.0',
         } as RegistryPackage,
       });
+    });
+
+    it('should avoid loading archive when isAirGapped == true', async () => {
+      const mockContract = createAppContextStartContractMock({ isAirGapped: true });
+      appContextService.start(mockContract);
+
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      MockRegistry.fetchInfo.mockResolvedValue({
+        name: 'my-package',
+        version: '1.0.0',
+        assets: [],
+      } as unknown as RegistryPackage);
+
+      await expect(
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'my-package',
+          pkgVersion: '1.0.0',
+        })
+      ).resolves.toMatchObject({
+        latestVersion: '1.0.0',
+        status: 'not_installed',
+      });
+
+      expect(MockRegistry.getPackage).not.toHaveBeenCalled();
     });
 
     describe('installation status', () => {

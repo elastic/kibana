@@ -10,7 +10,7 @@
 import React, { FC, PropsWithChildren } from 'react';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { getAnalytics, getI18n, getTheme } from '../kibana_services';
+import { getAnalytics, getI18n, getTheme, getUserProfile } from '../kibana_services';
 
 /**
  * Represents the result of trying to persist the saved object.
@@ -68,7 +68,7 @@ export function showSaveModal(
         children: augmentedElement,
       });
     }),
-    { analytics: getAnalytics(), theme: getTheme(), i18n: getI18n() }
+    { analytics: getAnalytics(), theme: getTheme(), i18n: getI18n(), userProfile: getUserProfile() }
   );
 
   unmount = mount(document.createElement('div'));

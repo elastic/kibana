@@ -19,6 +19,7 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import _ from 'lodash';
@@ -69,12 +70,14 @@ interface Props {
   data: IndexSettingsResponse;
   indexName: string;
   reloadIndexSettings: () => void;
+  hasUpdateSettingsPrivilege?: boolean;
 }
 
 export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
   data,
   indexName,
   reloadIndexSettings,
+  hasUpdateSettingsPrivilege,
 }) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const {
@@ -184,17 +187,32 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          <EuiSwitch
-            data-test-subj="indexDetailsSettingsEditModeSwitch"
-            label={
-              <FormattedMessage
-                id="xpack.idxMgmt.indexDetails.settings.editModeSwitchLabel"
-                defaultMessage="Edit mode"
-              />
+          <EuiToolTip
+            position="bottom"
+            content={
+              /* for serverless search users hasUpdateSettingsPrivilege flag indicates if user has privilege to update index settings, for stack hasUpdateSettingsPrivilege would be undefined */
+              hasUpdateSettingsPrivilege === false
+                ? i18n.translate('xpack.idxMgmt.indexDetails.settings.saveSettingsErrorMessage', {
+                    defaultMessage: 'You do not have permission to update index settings',
+                  })
+                : undefined
             }
-            checked={isEditMode}
-            onChange={onEditModeChange}
-          />
+            data-test-subj="indexDetailsSettingsEditModeSwitchToolTip"
+          >
+            <EuiSwitch
+              data-test-subj="indexDetailsSettingsEditModeSwitch"
+              label={
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexDetails.settings.editModeSwitchLabel"
+                  defaultMessage="Edit mode"
+                />
+              }
+              checked={isEditMode}
+              onChange={onEditModeChange}
+              disabled={hasUpdateSettingsPrivilege === false}
+            />
+          </EuiToolTip>
+
           <EuiSpacer size="m" />
           <EuiFlexGroup>
             <EuiFlexItem grow={1}>

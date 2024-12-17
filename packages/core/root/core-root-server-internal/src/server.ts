@@ -309,6 +309,7 @@ export class Server {
       elasticsearch: elasticsearchServiceSetup,
       deprecations: deprecationsSetup,
       coreUsageData: coreUsageDataSetup,
+      docLinks: docLinksSetup,
     });
 
     const uiSettingsSetup = await this.uiSettings.setup({
