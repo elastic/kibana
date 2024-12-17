@@ -24,12 +24,20 @@ describe('ESQLEditor', () => {
     get: (key: string) => uiConfig[key],
   } as IUiSettingsClient;
 
+  const esqlVariablesService = {
+    enable: jest.fn(),
+    disable: jest.fn(),
+    getVariablesByType: jest.fn(),
+    isEnabled: false,
+  };
+
   const services = {
     uiSettings,
     settings: {
       client: uiSettings,
     },
     core: coreMock.createStart(),
+    esqlService: esqlVariablesService,
   };
 
   function renderESQLEditorComponent(testProps: ESQLEditorProps) {
