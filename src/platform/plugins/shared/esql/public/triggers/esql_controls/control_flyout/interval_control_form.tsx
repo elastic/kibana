@@ -212,9 +212,6 @@ export function IntervalControlForm({
           label={i18n.translate('esql.flyout.values.label', {
             defaultMessage: 'Values',
           })}
-          helpText={i18n.translate('esql.flyout.values.helpText', {
-            defaultMessage: 'Interval values (e.g. 5 minutes, 1 hour, 1 day, 1 week, 1 year)',
-          })}
           fullWidth
           isInvalid={!areValuesValid}
           error={
