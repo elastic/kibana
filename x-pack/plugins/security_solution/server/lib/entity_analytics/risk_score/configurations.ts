@@ -126,6 +126,11 @@ export const riskScoreFieldMap: FieldMap = {
     required: false,
   },
   ...buildIdentityRiskFields(RiskScoreEntity.user),
+  'event.ingested': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
 } as const;
 
 export const mappingComponentName = '.risk-score-mappings';
