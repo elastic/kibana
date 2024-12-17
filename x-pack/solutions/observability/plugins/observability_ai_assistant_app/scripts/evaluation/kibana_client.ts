@@ -74,7 +74,6 @@ type CompleteFunction = (
 export interface ChatClient {
   chat: (message: StringOrMessageList) => Promise<InnerMessage>;
   complete: CompleteFunction;
-
   evaluate: (
     {}: { conversationId?: string; messages: InnerMessage[]; errors: ChatCompletionErrorEvent[] },
     criteria: string[]
@@ -127,7 +126,7 @@ export class KibanaClient {
       ...(method.toLowerCase() !== 'delete' ? { data: data || {} } : {}),
       headers: {
         'kbn-xsrf': 'true',
-        'x-elastic-internal-origin': 'foo',
+        'x-elastic-internal-origin': 'Kibana',
       },
     }).catch((error) => {
       if (isAxiosError(error) && error.status !== 409) {
@@ -378,7 +377,11 @@ export class KibanaClient {
             pathname: '/internal/observability_ai_assistant/chat',
           }),
           params,
-          { responseType: 'stream', timeout: NaN, headers: { 'x-elastic-internal-origin': true } }
+          {
+            responseType: 'stream',
+            timeout: NaN,
+            headers: { 'x-elastic-internal-origin': 'Kibana' },
+          }
         );
       }).pipe(
         switchMap((response) => streamIntoObservable(response.data)),
@@ -465,7 +468,7 @@ export class KibanaClient {
               {
                 responseType: 'stream',
                 timeout: NaN,
-                headers: { 'x-elastic-internal-origin': true },
+                headers: { 'x-elastic-internal-origin': 'Kibana' },
               }
             )
           );
