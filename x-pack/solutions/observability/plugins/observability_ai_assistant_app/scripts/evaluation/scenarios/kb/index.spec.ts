@@ -11,7 +11,7 @@ import expect from '@kbn/expect/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { chatClient, esClient } from '../../services';
 
-describe.skip('kb functions', () => {
+describe('kb functions', () => {
   it('summarizes and recalls information', async () => {
     let conversation = await chatClient.complete(
       'Remember that this cluster is used to test the AI Assistant using the Observability AI Evaluation Framework'

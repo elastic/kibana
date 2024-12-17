@@ -15,7 +15,7 @@ import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { chatClient, kibanaClient, synthtraceEsClients } from '../../services';
 import { apmErrorCountAIAssistant } from '../../alert_templates/templates';
 
-describe.skip('apm', () => {
+describe('apm', () => {
   const ruleIds: any[] = [];
   before(async () => {
     const responseApmRule = await kibanaClient.callKibana<RuleResponse>(

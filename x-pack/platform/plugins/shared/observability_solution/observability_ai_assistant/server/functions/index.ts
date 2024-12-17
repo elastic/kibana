@@ -91,6 +91,7 @@ export const registerFunctions: RegistrationCallback = async ({
 
   functions.registerInstruction(({ availableFunctionNames }) => {
     const instructions: string[] = [];
+    console.log('availableFunctionNames', availableFunctionNames);
 
     if (
       availableFunctionNames.includes(QUERY_FUNCTION_NAME) &&

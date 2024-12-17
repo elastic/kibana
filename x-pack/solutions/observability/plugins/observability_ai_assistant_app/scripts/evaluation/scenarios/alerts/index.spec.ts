@@ -155,7 +155,7 @@ describe('alert function', () => {
       'post',
       { pathname: `/api/content_management/rpc/delete` },
       {
-        contentTypeId: 'index-pattern',
+        contentTypeId: customThresholdAIAssistantLogCount.dataViewParams.contentTypeId,
         id: customThresholdAIAssistantLogCount.dataViewParams.options.id,
         options: { force: true },
         version: 1,
