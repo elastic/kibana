@@ -59,7 +59,7 @@ exports[`OpenSearchPanel render 1`] = `
         <EuiButton
           data-test-subj="manageSearchesBtn"
           fill={true}
-          href="/app/management/kibana/objects?initialQuery=type:(\\"discover session / search\\")"
+          href="/app/management/kibana/objects?initialQuery=type:(\\"discover session\\")"
           onClick={[MockFunction]}
         >
           <MemoizedFormattedMessage
