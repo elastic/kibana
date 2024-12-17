@@ -1387,6 +1387,25 @@
                                       "nullable": true,
                                       "type": "number"
                                     },
+                                    "gap_range": {
+                                      "additionalProperties": false,
+                                      "nullable": true,
+                                      "properties": {
+                                        "gte": {
+                                          "description": "End of the gap range.",
+                                          "type": "string"
+                                        },
+                                        "lte": {
+                                          "description": "Start of the gap range.",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "lte",
+                                        "gte"
+                                      ],
+                                      "type": "object"
+                                    },
                                     "total_alerts_created": {
                                       "description": "Total number of alerts created during last rule run.",
                                       "nullable": true,
@@ -1406,6 +1425,27 @@
                                       "description": "Total time spent performing Elasticsearch searches as measured by Kibana; includes network latency and time spent serializing or deserializing the request and response.",
                                       "nullable": true,
                                       "type": "number"
+                                    },
+                                    "unfilled_gaps_ms": {
+                                      "additionalProperties": false,
+                                      "nullable": true,
+                                      "properties": {
+                                        "last_1d": {
+                                          "type": "number"
+                                        },
+                                        "last_3d": {
+                                          "type": "number"
+                                        },
+                                        "last_7d": {
+                                          "type": "number"
+                                        }
+                                      },
+                                      "required": [
+                                        "last_1d",
+                                        "last_3d",
+                                        "last_7d"
+                                      ],
+                                      "type": "object"
                                     }
                                   },
                                   "type": "object"
@@ -2561,6 +2601,25 @@
                                       "nullable": true,
                                       "type": "number"
                                     },
+                                    "gap_range": {
+                                      "additionalProperties": false,
+                                      "nullable": true,
+                                      "properties": {
+                                        "gte": {
+                                          "description": "End of the gap range.",
+                                          "type": "string"
+                                        },
+                                        "lte": {
+                                          "description": "Start of the gap range.",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "lte",
+                                        "gte"
+                                      ],
+                                      "type": "object"
+                                    },
                                     "total_alerts_created": {
                                       "description": "Total number of alerts created during last rule run.",
                                       "nullable": true,
@@ -2580,6 +2639,27 @@
                                       "description": "Total time spent performing Elasticsearch searches as measured by Kibana; includes network latency and time spent serializing or deserializing the request and response.",
                                       "nullable": true,
                                       "type": "number"
+                                    },
+                                    "unfilled_gaps_ms": {
+                                      "additionalProperties": false,
+                                      "nullable": true,
+                                      "properties": {
+                                        "last_1d": {
+                                          "type": "number"
+                                        },
+                                        "last_3d": {
+                                          "type": "number"
+                                        },
+                                        "last_7d": {
+                                          "type": "number"
+                                        }
+                                      },
+                                      "required": [
+                                        "last_1d",
+                                        "last_3d",
+                                        "last_7d"
+                                      ],
+                                      "type": "object"
                                     }
                                   },
                                   "type": "object"
@@ -3718,6 +3798,25 @@
                                       "nullable": true,
                                       "type": "number"
                                     },
+                                    "gap_range": {
+                                      "additionalProperties": false,
+                                      "nullable": true,
+                                      "properties": {
+                                        "gte": {
+                                          "description": "End of the gap range.",
+                                          "type": "string"
+                                        },
+                                        "lte": {
+                                          "description": "Start of the gap range.",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "lte",
+                                        "gte"
+                                      ],
+                                      "type": "object"
+                                    },
                                     "total_alerts_created": {
                                       "description": "Total number of alerts created during last rule run.",
                                       "nullable": true,
@@ -3737,6 +3836,27 @@
                                       "description": "Total time spent performing Elasticsearch searches as measured by Kibana; includes network latency and time spent serializing or deserializing the request and response.",
                                       "nullable": true,
                                       "type": "number"
+                                    },
+                                    "unfilled_gaps_ms": {
+                                      "additionalProperties": false,
+                                      "nullable": true,
+                                      "properties": {
+                                        "last_1d": {
+                                          "type": "number"
+                                        },
+                                        "last_3d": {
+                                          "type": "number"
+                                        },
+                                        "last_7d": {
+                                          "type": "number"
+                                        }
+                                      },
+                                      "required": [
+                                        "last_1d",
+                                        "last_3d",
+                                        "last_7d"
+                                      ],
+                                      "type": "object"
                                     }
                                   },
                                   "type": "object"
@@ -5072,6 +5192,25 @@
                                       "nullable": true,
                                       "type": "number"
                                     },
+                                    "gap_range": {
+                                      "additionalProperties": false,
+                                      "nullable": true,
+                                      "properties": {
+                                        "gte": {
+                                          "description": "End of the gap range.",
+                                          "type": "string"
+                                        },
+                                        "lte": {
+                                          "description": "Start of the gap range.",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "lte",
+                                        "gte"
+                                      ],
+                                      "type": "object"
+                                    },
                                     "total_alerts_created": {
                                       "description": "Total number of alerts created during last rule run.",
                                       "nullable": true,
@@ -5091,6 +5230,27 @@
                                       "description": "Total time spent performing Elasticsearch searches as measured by Kibana; includes network latency and time spent serializing or deserializing the request and response.",
                                       "nullable": true,
                                       "type": "number"
+                                    },
+                                    "unfilled_gaps_ms": {
+                                      "additionalProperties": false,
+                                      "nullable": true,
+                                      "properties": {
+                                        "last_1d": {
+                                          "type": "number"
+                                        },
+                                        "last_3d": {
+                                          "type": "number"
+                                        },
+                                        "last_7d": {
+                                          "type": "number"
+                                        }
+                                      },
+                                      "required": [
+                                        "last_1d",
+                                        "last_3d",
+                                        "last_7d"
+                                      ],
+                                      "type": "object"
                                     }
                                   },
                                   "type": "object"

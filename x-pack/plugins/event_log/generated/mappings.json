@@ -325,6 +325,51 @@
                                     "type": "keyword",
                                     "ignore_above": 1024
                                 },
+                                "gap": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "keyword",
+                                            "ignore_above": 1024
+                                        },
+                                        "range": {
+                                            "type": "date_range",
+                                            "format": "strict_date_optional_time||epoch_millis"
+                                        },
+                                        "filled_intervals": {
+                                            "type": "date_range",
+                                            "format": "strict_date_optional_time||epoch_millis",
+                                            "meta": {
+                                                "isArray": "true"
+                                            }
+                                        },
+                                        "unfilled_intervals": {
+                                            "format": "strict_date_optional_time||epoch_millis",
+                                            "type": "date_range",
+                                            "meta": {
+                                                "isArray": "true"
+                                            }
+                                        },
+                                        "in_progress_intervals": {
+                                            "format": "strict_date_optional_time||epoch_millis",
+                                            "type": "date_range",
+                                            "meta": {
+                                                "isArray": "true"
+                                            }
+                                        },
+                                        "total_gap_duration_ms": {
+                                            "type": "long"
+                                        },
+                                        "filled_duration_ms": {
+                                            "type": "long"
+                                        },
+                                        "unfilled_duration_ms": {
+                                            "type": "long"
+                                        },
+                                        "in_progress_duration_ms": {
+                                            "type": "long"
+                                        }
+                                    }
+                                },
                                 "execution": {
                                     "properties": {
                                         "uuid": {
@@ -391,6 +436,10 @@
                                                 },
                                                 "execution_gap_duration_s": {
                                                     "type": "long"
+                                                },
+                                                "gap_range": {
+                                                    "type": "date_range",
+                                                    "format": "strict_date_optional_time||epoch_millis"
                                                 },
                                                 "rule_type_run_duration_ms": {
                                                     "type": "long"

@@ -395,6 +395,26 @@ export class AlertingEventLogger {
 
     this.eventLogger.logEvent(this.event);
   }
+
+  public reportGap({
+    gap,
+  }: {
+    gap: {
+      lte: string;
+      gte: string;
+    };
+  }): void {
+    if (!this.isInitialized || !this.context || !this.ruleData) {
+      throw new Error('AlertingEventLogger not initialized');
+    }
+
+    this.eventLogger.logEvent(
+      createGapRecord(this.context, this.ruleData, this.relatedSavedObjects, {
+        status: 'unfilled',
+        range: gap,
+      })
+    );
+  }
 }
 
 export function createAlertRecord(
@@ -485,6 +505,33 @@ export function createExecuteTimeoutRecord(
     savedObjects,
     ruleName: ruleData?.name,
     ruleRevision: ruleData?.revision,
+  });
+}
+
+export function createGapRecord(
+  context: ContextOpts,
+  ruleData: RuleContext,
+  savedObjects: SavedObjects[],
+  gap: {
+    status: string;
+    range: {
+      gte: string;
+      lte: string;
+    };
+  }
+) {
+  return createAlertEventLogRecordObject({
+    ruleId: ruleData?.id,
+    ruleType: ruleData?.type,
+    consumer: ruleData?.consumer,
+    namespace: context.namespace,
+    spaceId: context.spaceId,
+    executionId: context.executionId,
+    action: EVENT_LOG_ACTIONS.gap,
+    savedObjects,
+    ruleName: ruleData?.name,
+    ruleRevision: ruleData?.revision,
+    gap,
   });
 }
 

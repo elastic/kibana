@@ -6,7 +6,12 @@
  */
 
 import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { rawRuleSchemaV1, rawRuleSchemaV2, rawRuleSchemaV3 } from '../schemas/raw_rule';
+import {
+  rawRuleSchemaV1,
+  rawRuleSchemaV2,
+  rawRuleSchemaV3,
+  rawRuleSchemaV4,
+} from '../schemas/raw_rule';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -28,6 +33,42 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: rawRuleSchemaV3.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV3,
+    },
+  },
+  '4': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          monitoring: {
+            properties: {
+              run: {
+                properties: {
+                  last_run: {
+                    properties: {
+                      metrics: {
+                        properties: {
+                          unfilled_gaps_ms: {
+                            properties: {
+                              last_1d: { type: 'long' },
+                              last_3d: { type: 'long' },
+                              last_7d: { type: 'long' },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV4.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV4,
     },
   },
 };

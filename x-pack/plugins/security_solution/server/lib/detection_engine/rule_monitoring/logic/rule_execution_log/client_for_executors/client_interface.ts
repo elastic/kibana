@@ -130,4 +130,5 @@ export interface MetricsArgs {
   indexingDurations?: string[];
   enrichmentDurations?: string[];
   executionGap?: Duration;
+  gapRange?: { gte: string; lte: string };
 }

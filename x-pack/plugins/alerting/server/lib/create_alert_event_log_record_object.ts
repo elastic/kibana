@@ -44,6 +44,13 @@ interface CreateAlertEventLogRecordParams {
   };
   maintenanceWindowIds?: string[];
   ruleRevision?: number;
+  gap?: {
+    status: string;
+    range: {
+      gte: string;
+      lte: string;
+    };
+  };
 }
 
 export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecordParams): Event {
@@ -64,6 +71,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     alertSummary,
     maintenanceWindowIds,
     ruleRevision,
+    gap,
   } = params;
   const alerting =
     params.instanceId || group || alertSummary
@@ -109,6 +117,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
                 },
               }
             : {}),
+          ...(gap ? { gap } : {}),
         },
       },
       ...(alerting ? alerting : {}),
