@@ -6,3 +6,5 @@
  */
 
 export { openAIAdapter } from './openai_adapter';
+export { toolChoiceToOpenAI, messagesToOpenAI, toolsToOpenAI } from './to_openai';
+export { chunkFromOpenAI, tokenCountFromOpenAI } from './from_openai';
