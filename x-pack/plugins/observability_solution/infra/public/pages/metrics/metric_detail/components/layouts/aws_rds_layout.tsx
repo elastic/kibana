@@ -13,10 +13,7 @@ import { ChartSectionVis } from '../chart_section_vis';
 import { Section } from '../section';
 import { SubSection } from '../sub_section';
 
-// Related to https://github.com/elastic/kibana/issues/203338
-// Theme here is a prop that is passed down from packages/react/kibana_context
-// So it's not in the scope of Observability, hence the we can't update the theme.
-export const AwsRDSLayout = withTheme(
+export const AwsRDSLayout = withEuiTheme(
   ({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
     <EuiPanel>
       <Section

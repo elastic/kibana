@@ -379,8 +379,8 @@ const CodeLine = ({ command }: { command: string }) => {
       <EuiCode
         transparentBackground
         css={css`
-          color: ${euiTheme.euiTheme.colors.textParagraph};
-          font-weight: ${euiTheme.euiTheme.font.weight.medium};
+          color: ${euiTheme.colors.textParagraph};
+          font-weight: ${euiTheme.font.weight.medium};
         `}
       >
         {command}
