@@ -473,7 +473,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
           <EuiIconTip
             size="m"
             iconProps={{
-              style: { marginLeft: euiTheme.size.xs },
+              css: { marginLeft: euiTheme.size.xs },
             }}
             content={i18n.translate(
               'xpack.apm.correlations.latencyCorrelations.advancedStatisticsTooltipContent',

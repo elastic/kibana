@@ -29,6 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import numeral from '@elastic/numeral';
+import { css } from '@emotion/react';
 import { termQuery } from '../../../../../common/utils/term_query';
 import {
   SERVICE_NAME,
@@ -279,7 +280,9 @@ export function FieldStatsPopover({
           }
         )}
         data-test-subj={'apmCorrelationsContextPopoverButton'}
-        style={{ marginLeft: euiTheme.size.xs }}
+        css={css`
+          marginleft: ${euiTheme.size.xs};
+        `}
       />
     </EuiToolTip>
   );
