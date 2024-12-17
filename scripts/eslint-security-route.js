@@ -240,7 +240,7 @@ function processChangesByOwners(ownerFilesMap) {
     for (const [owner] of Object.entries(ownerFilesMap)) {
       const rawOwner = owner.replaceAll(',', '_');
       const tempBranch = `temp/${process.env.ROUTE_TYPE}-eslint-changes-by-${rawOwner}`;
-      const targetBranch = `authz-migration/${process.env.ROUTE_TYPE}-routes-${rawOwner}`;
+      const targetBranch = `authz-migration/${process.env.ROUTE_TYPE}-routes-owner-${rawOwner}`;
 
       if (rawOwner !== 'kibana-management') {
         console.log(`PR already exists for ${rawOwner}. Skipping.`);
@@ -338,7 +338,12 @@ function runESLint() {
     // runCommand(
     //   `grep -rEl --include="*.ts" "router\.(get|post|delete|put)|router\.versioned\.(get|post|put|delete)" ./x-pack/plugins/ ./x-pack/packages/ | xargs env ${eslintRuleFlag} npx eslint --fix --rule "@kbn/eslint/no_deprecated_authz_config:error"`
     // );
-    const directories = ['./x-pack/plugins', './x-pack/packages', './src/plugins'];
+    const directories = [
+      './x-pack/plugins',
+      './x-pack/packages',
+      './src/plugins',
+      './src/platform',
+    ];
     // const directories = [
     //   './x-pack/plugins/security_solution',
     //   './x-pack/plugins/spaces',
