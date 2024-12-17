@@ -27,9 +27,9 @@ export function DataViewSelectorField({ field }: DataViewSelectorProps): JSX.Ele
   const errorMessage = fieldAndError?.errorMessage;
   const comboBoxOptions = useMemo(
     () =>
-      dataViews.map(({ id, title: label }) => ({
+      dataViews.map(({ id, title: label, name }) => ({
         id,
-        label,
+        label: name ?? label,
       })),
     [dataViews]
   );
