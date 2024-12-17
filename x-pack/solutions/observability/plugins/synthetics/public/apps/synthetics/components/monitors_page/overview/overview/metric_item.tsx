@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { Chart, DARK_THEME, Metric, MetricTrendShape, Settings } from '@elastic/charts';
-import { EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,8 +33,7 @@ import { FlyoutParamProps } from './types';
 
 const METRIC_ITEM_HEIGHT = 160;
 
-const useGetColor = (isEnabled: boolean, status?: string) => {
-  const { euiTheme } = useEuiTheme();
+export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?: string) => {
   if (!isEnabled) {
     return euiTheme.colors.backgroundBaseDisabled;
   }
@@ -59,6 +58,7 @@ export const MetricItem = ({
   style?: React.CSSProperties;
   onClick: (params: FlyoutParamProps) => void;
 }) => {
+  const { euiTheme } = useEuiTheme();
   const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.locationId];
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
@@ -158,7 +158,7 @@ export const MetricItem = ({
                       </div>
                     ) : undefined,
                   valueFormatter: (d: number) => formatDuration(d),
-                  color: useGetColor(monitor.isEnabled, status),
+                  color: getColor(euiTheme, monitor.isEnabled, status),
                   body: <MetricItemBody monitor={monitor} />,
                 },
               ],

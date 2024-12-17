@@ -23,7 +23,7 @@ export const MonitorLocations = ({ locations, monitorId, overviewStatus }: Props
     const locById = `${monitorId}-${loc.id}`;
 
     let status: string = 'unknown';
-    let color = euiTheme.colors.backgroundBaseDisabled;
+    let color = euiTheme.colors.disabled;
 
     if (overviewStatus?.downConfigs[locById]) {
       status = 'down';
