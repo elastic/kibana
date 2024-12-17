@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import pMap from 'p-map';
 
-import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS, SO_SEARCH_LIMIT } from '../constants';
+import { SO_SEARCH_LIMIT } from '../constants';
 
 import type { AgentPolicySOAttributes, PackagePolicy, PackagePolicySOAttributes } from '../types';
 
@@ -92,7 +92,7 @@ export async function backfillPackagePolicySupportsAgentless(esClient: Elasticse
         );
       },
       {
-        concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
+        concurrency: 50,
       }
     );
   }
