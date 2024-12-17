@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
-import { ThreatMatchIndexEditAdapter } from './threat_match_index_edit_adapter';
+import { RuleFieldEditFormWrapper } from '../../../field_final_side';
+import { ThreatMatchIndicatorPathEditAdapter } from './indicator_path_edit_adapter';
 
-export function ThreatMatchIndexEditForm(): JSX.Element {
+export function ThreatMatchIndicatorPathEditForm(): JSX.Element {
   return (
     <RuleFieldEditFormWrapper
-      component={ThreatMatchIndexEditAdapter}
+      component={ThreatMatchIndicatorPathEditAdapter}
       ruleFieldFormSchema={schema}
     />
   );

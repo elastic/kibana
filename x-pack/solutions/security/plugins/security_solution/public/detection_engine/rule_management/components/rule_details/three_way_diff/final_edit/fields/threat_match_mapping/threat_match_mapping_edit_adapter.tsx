@@ -7,23 +7,25 @@
 
 import React from 'react';
 import type { DataViewBase } from '@kbn/es-query';
+import { ThreatMatchMappingEdit } from '../../../../../../../rule_creation/components/threat_match_mapping_edit';
 import type { ThreatIndex } from '../../../../../../../../../common/api/detection_engine';
-import { ThreatMatchQueryEdit } from '../../../../../../../rule_creation/components/threat_match_query_edit';
-import type { RuleFieldEditComponentProps } from '../rule_field_edit_component_props';
+import type { RuleFieldEditComponentProps } from '../../../field_final_side';
 import { useDataView } from '../hooks/use_data_view';
+import { useDiffableRuleDataView } from '../hooks/use_diffable_rule_data_view';
 
-export function ThreatMatchQueryEditAdapter({
+export function ThreatMatchMappingEditAdapter({
   finalDiffableRule,
 }: RuleFieldEditComponentProps): JSX.Element | null {
-  const { dataView, isLoading } = useDataView({
+  const { dataView: ruleDataView } = useDiffableRuleDataView(finalDiffableRule);
+  const { dataView: threatIndexPatterns } = useDataView({
     indexPatterns: (finalDiffableRule as { threat_index: ThreatIndex }).threat_index ?? [],
   });
 
   return (
-    <ThreatMatchQueryEdit
-      path="threatQuery"
-      threatIndexPatterns={dataView ?? DEFAULT_DATA_VIEW}
-      loading={isLoading}
+    <ThreatMatchMappingEdit
+      path="threat_mapping"
+      indexPatterns={ruleDataView ?? DEFAULT_DATA_VIEW}
+      threatIndexPatterns={threatIndexPatterns ?? DEFAULT_DATA_VIEW}
     />
   );
 }

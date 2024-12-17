@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
+import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import { ThreatMatchMappingEditAdapter } from './threat_match_mapping_edit_adapter';
 
 export function ThreatMatchMappingEditForm(): JSX.Element {
