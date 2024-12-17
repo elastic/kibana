@@ -9,4 +9,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-event-stacktrace'],
+  setupFiles: [
+    '<rootDir>/x-pack/platform/packages/shared/kbn-event-stacktrace/.storybook/jest_setup.js',
+  ],
 };
