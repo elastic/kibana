@@ -11,7 +11,7 @@ import { useKibanaContextForPlugin } from './use_kibana';
 export function useEntityCentricExperienceSetting() {
   const { uiSettings } = useKibanaContextForPlugin().services;
 
-  const isEntityCentricExperienceEnabled = uiSettings.get<boolean>(entityCentricExperience, true);
+  const isEntityCentricExperienceEnabled = uiSettings.get<boolean>(entityCentricExperience);
 
   return { isEntityCentricExperienceEnabled };
 }

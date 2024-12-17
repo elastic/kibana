@@ -13,6 +13,7 @@ declare namespace Cypress {
       password: string;
     }): Cypress.Chainable<Cypress.Response<any>>;
     getByTestSubj(selector: string): Chainable<JQuery<Element>>;
+    updateAdvancedSettings(settings: Record<string, unknown>): void;
     visitKibana(url: string): void;
   }
 }
