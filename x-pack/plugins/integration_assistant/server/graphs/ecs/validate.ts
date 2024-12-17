@@ -224,7 +224,6 @@ export function findInvalidEcsFields(currentMapping: AnyObject): string[] {
       results.push(`Reserved ECS field mapping identified for ${ecsValue} : ${field.join(', ')}`);
     }
   }
-
   return results;
 }
 
@@ -236,7 +235,6 @@ export function handleValidateMappings({ state }: EcsBaseNodeParams): AnyObject 
   const missingKeys = findMissingFields(samples, mapping);
   const duplicateFields = findDuplicateFields(state?.prefixedSamples, mapping);
   const invalidEcsFields = findInvalidEcsFields(mapping);
-
   return {
     missingKeys,
     duplicateFields,
