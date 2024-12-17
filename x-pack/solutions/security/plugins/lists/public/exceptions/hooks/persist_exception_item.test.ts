@@ -17,7 +17,7 @@ import { getExceptionListItemSchemaMock } from '../../../common/schemas/response
 
 const mockKibanaHttpService = coreMock.createStart().http;
 
-// TODO: Port this test over to packages/kbn-securitysolution-list-hooks/src/use_persist_exception_item/index.test.ts once the other mocks are added to the kbn package system
+// TODO: Port this test over to x-pack/solutions/security/packages/kbn-securitysolution-list-hooks/src/use_persist_exception_item/index.test.ts once the other mocks are added to the kbn package system
 
 describe('usePersistExceptionItem', () => {
   let addExceptionListItemSpy: jest.SpyInstance<ReturnType<typeof api.addEndpointExceptionList>>;

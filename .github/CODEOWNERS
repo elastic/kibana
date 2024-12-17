@@ -454,7 +454,6 @@ packages/kbn-search-index-documents @elastic/search-kibana
 packages/kbn-search-response-warnings @elastic/kibana-data-discovery
 packages/kbn-search-types @elastic/kibana-data-discovery
 packages/kbn-security-hardening @elastic/kibana-security
-packages/kbn-securitysolution-list-hooks @elastic/security-detection-engine
 packages/kbn-securitysolution-list-utils @elastic/security-detection-engine
 packages/kbn-securitysolution-lists-common @elastic/security-detection-engine
 packages/kbn-securitysolution-rules @elastic/security-detection-engine
@@ -985,6 +984,7 @@ x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types @el
 x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-list-api @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-list-constants @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-securitysolution-list-hooks @elastic/security-detection-engine
 x-pack/solutions/security/packages/navigation @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/side_nav @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-explore
@@ -3363,7 +3363,7 @@ x-pack/solutions/security/x-pack/solutions/security/packages/kbn-securitysolutio
 x-pack/solutions/security/x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types @elastic/security-detection-engine
 x-pack/solutions/security/x-pack/solutions/security/packages/kbn-securitysolution-list-api @elastic/security-detection-engine
 x-pack/solutions/security/x-pack/solutions/security/packages/kbn-securitysolution-list-constants @elastic/security-detection-engine
-x-pack/solutions/security/packages/kbn-securitysolution-list-hooks @elastic/security-detection-engine
+x-pack/solutions/security/x-pack/solutions/security/packages/kbn-securitysolution-list-hooks @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-list-utils @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-lists-common @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security-detection-engine

@@ -15,7 +15,7 @@ import { createQueryWrapperMock } from '../mocks/query_wrapper';
 
 jest.mock('@kbn/securitysolution-list-api');
 
-// TODO: This test should be ported to the package: packages/kbn-securitysolution-list-hooks/src/use_create_list_index/index.test.ts once we have mocks in kbn packages
+// TODO: This test should be ported to the package: x-pack/solutions/security/packages/kbn-securitysolution-list-hooks/src/use_create_list_index/index.test.ts once we have mocks in kbn packages
 
 const { wrapper: queryWrapper, queryClient } = createQueryWrapperMock();
 
