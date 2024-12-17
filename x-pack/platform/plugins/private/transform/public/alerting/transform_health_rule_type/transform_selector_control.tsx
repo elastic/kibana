@@ -54,13 +54,8 @@ export const TransformSelectorControl: FC<TransformSelectorControlProps> = ({
   }) as Exclude<EuiComboBoxProps<string>['onChange'], undefined>;
 
   const onCreateOption = allowCustomOptions
-    ? (((searchValue, existingOptions) => {
-        if (
-          searchValue.includes('*') &&
-          !existingOptions.some((option) => option.label === searchValue)
-        ) {
-          onChange([...selectedOptions, searchValue]);
-        }
+    ? (((searchValue) => {
+        onChange([...selectedOptions, searchValue]);
       }) as EuiComboBoxOptionsListProps<string>['onCreateOption'])
     : undefined;
 
