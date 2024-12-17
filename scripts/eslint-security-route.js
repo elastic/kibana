@@ -345,10 +345,10 @@ function runESLint() {
     //   './x-pack/plugins/security',
     // ]; // For testing purposes
 
-    // for (const directory of directories) {
-    //   console.log(`Running ESLint autofix for ${directory}`);
-    //   runCommand(`${eslintRuleFlag} npx eslint --ext .ts --fix ${directory}`, true);
-    // }
+    for (const directory of directories) {
+      console.log(`Running ESLint autofix for ${directory}`);
+      runCommand(`${eslintRuleFlag} npx eslint --ext .ts --fix ${directory}`, true);
+    }
 
     console.log('ESLint autofix complete');
   } catch (error) {
