@@ -3,10 +3,14 @@
 This is a test plan for the workflows of installing prebuilt rules.
 
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 Status: `in progress`. The current test plan matches [Rule Immutability/Customization Milestone 3 epic](https://github.com/elastic/kibana/issues/174168).
 =======
 Status: `in progress`. The current test plan matches `Milestone 3` of the [Rule Immutability/Customization](https://github.com/elastic/kibana/issues/174168) epic.
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+Status: `in progress`. The current test plan matches [Rule Immutability/Customization Milestone 3 epic](https://github.com/elastic/kibana/issues/174168).
+>>>>>>> 45f3f0068f7 (Apply suggestions):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 
 ## Table of Contents
 
@@ -51,10 +55,14 @@ Status: `in progress`. The current test plan matches `Milestone 3` of the [Rule 
 ### Tickets
 
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 - [Rule Immutability/Customization epic](https://github.com/elastic/security-team/issues/1974)(internal)
 =======
 - [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974) epic
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+- [Rule Immutability/Customization epic](https://github.com/elastic/security-team/issues/1974)(internal)
+>>>>>>> 45f3f0068f7 (Apply suggestions):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 
 **Milestone 3 - Prebuilt Rules Customization:**
 - [Milestone 3 epic ticket](https://github.com/elastic/kibana/issues/174168)
@@ -185,12 +193,17 @@ Examples:
 
 ```Gherkin
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 Given no prebuilt rule assets exist in Kibana
 And no prebuilt rules are installed
 =======
 Given no prebuilt rules are installed in Kibana
 And no prebuilt rule assets exist
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+Given no prebuilt rule assets exist in Kibana
+And no prebuilt rules are installed
+>>>>>>> 45f3f0068f7 (Apply suggestions):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 When user opens the Rule Management page
 Then user should NOT see a CTA to install prebuilt rules
 And user should NOT see a number of rules available to install
@@ -205,11 +218,16 @@ And user should NOT see the Rule Updates table
 
 ```Gherkin
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 Given the latest prebuilt rule assets exist in Kibana
 And all the latest prebuilt rules from those rule assets are installed
 =======
 Given all the latest prebuilt rules are installed in Kibana
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+Given the latest prebuilt rule assets exist in Kibana
+And all the latest prebuilt rules from those rule assets are installed
+>>>>>>> 45f3f0068f7 (Apply suggestions):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 When user opens the Rule Management page
 Then user should NOT see a CTA to install prebuilt rules
 And user should NOT see a number of rules available to install
@@ -224,11 +242,16 @@ And user should NOT see the Rule Updates table
 
 ```Gherkin
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 Given X prebuilt rule assets exist in Kibana
 And no prebuilt rules are installed
 =======
 Given no prebuilt rules are installed in Kibana
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+Given X prebuilt rule assets exist in Kibana
+And no prebuilt rules are installed
+>>>>>>> 45f3f0068f7 (Apply suggestions):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 And there are X prebuilt rules available to install
 When user opens the Rule Management page
 Then user should see a CTA to install prebuilt rules
@@ -244,11 +267,16 @@ And user should NOT see the Rule Updates table
 
 ```Gherkin
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 Given Y prebuilt rule assets exist in Kibana
 And X (where X < Y) prebuilt rules are installed
 =======
 Given X prebuilt rules are installed in Kibana
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+Given Y prebuilt rule assets exist in Kibana
+And X (where X < Y) prebuilt rules are installed
+>>>>>>> 45f3f0068f7 (Apply suggestions):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 And there are Y more prebuilt rules available to install
 And for all X installed rules there are no new versions available
 When user opens the Rule Management page
@@ -265,6 +293,7 @@ And user should NOT see the Rule Updates table
 
 ```Gherkin
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 Given Y prebuilt rule assets exist in Kibana
 And X (where X < Y) prebuilt rules are installed
 And Z (where Z < X)  installed rules have matching prebuilt rule assets with higher version available
@@ -272,6 +301,11 @@ And Z (where Z < X)  installed rules have matching prebuilt rule assets with hig
 Given X prebuilt rules are installed in Kibana
 And there are Y more prebuilt rules available to install
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+Given Y prebuilt rule assets exist in Kibana
+And X (where X < Y) prebuilt rules are installed
+And Z (where Z < X)  installed rules have matching prebuilt rule assets with higher version available
+>>>>>>> 45f3f0068f7 (Apply suggestions):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 And for Z of the installed rules there are new versions available
 When user opens the Rule Management page
 Then user should see a CTA to install prebuilt rules
@@ -291,10 +325,14 @@ When user opens the Rule Management page
 And user deletes Y prebuilt rules
 Then user should see a CTA to install prebuilt rules
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 And user should see <Y> rules available to install
 =======
 And user should see the number of rules available to install (Y)
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+And user should see <Y> rules available to install
+>>>>>>> 45f3f0068f7 (Apply suggestions):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 ```
 
 ### Rule installation workflow: base cases
