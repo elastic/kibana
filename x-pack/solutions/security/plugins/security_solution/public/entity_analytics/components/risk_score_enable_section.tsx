@@ -289,7 +289,7 @@ export const RiskScoreEnableSection: React.FC<{
                 <RiskEngineStatusRow
                   currentRiskEngineStatus={currentRiskEngineStatus}
                   onSwitchClick={onSwitchClick}
-                  isLoading={isLoading}
+                  isLoading={isLoading && !currentRiskEngineStatus}
                   privileges={privileges}
                 />
               )}
