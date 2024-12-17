@@ -4,18 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { StreamDefinition } from '@kbn/streams-plugin/common';
+import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
 import React from 'react';
-import { StreamDetailEnrichingContent } from './page_content';
+import { dynamic } from '@kbn/shared-ux-utility';
+// import { StreamDetailEnrichingContent } from './page_content';
+
+const StreamDetailEnrichingContent = dynamic(() =>
+  import('./page_content').then((mod) => ({ default: mod.StreamDetailEnrichingContent }))
+);
 
 export function StreamDetailEnriching({
   definition,
   refreshDefinition,
 }: {
-  definition?: StreamDefinition;
+  definition?: ReadStreamDefinition;
   refreshDefinition: () => void;
 }) {
   console.log(definition);
 
-  return <StreamDetailEnrichingContent />;
+  if (!definition) return null;
+
+  return (
+    <StreamDetailEnrichingContent definition={definition} refreshDefinition={refreshDefinition} />
+  );
 }

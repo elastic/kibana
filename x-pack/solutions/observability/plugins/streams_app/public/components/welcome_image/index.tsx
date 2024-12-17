@@ -10,19 +10,19 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useState } from 'react';
 
-export function WelcomeImage(props: Omit<EuiImageProps, 'src' | 'url'>) {
+export function WelcomeImage(props: Omit<EuiImageProps, 'src' | 'url' | 'alt'>) {
   const { colorMode } = useEuiTheme();
 
   const [imageSrc, setImageSrc] = useState<string>();
 
   useEffect(() => {
-    const imagePath =
-      colorMode === 'LIGHT' ? '../assets/welcome--light.png' : '../assets/welcome--dark.png';
+    const dynamicImageImport =
+      colorMode === 'LIGHT' ? import('./welcome_light.png') : import('./welcome_dark.png');
 
-    import(imagePath).then(setImageSrc);
+    dynamicImageImport.then((module) => setImageSrc(module.default));
   }, [colorMode]);
 
-  return imageSrc ? <EuiImage alt={welcomeAlt} size="l" {...props} src={imageSrc} /> : null;
+  return imageSrc ? <EuiImage size="l" {...props} alt={welcomeAlt} src={imageSrc} /> : null;
 }
 
 const welcomeAlt = i18n.translate('xpack.streams.streamDetailView.welcomeImage', {

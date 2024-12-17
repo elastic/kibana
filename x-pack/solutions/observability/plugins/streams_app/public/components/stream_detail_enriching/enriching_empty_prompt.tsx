@@ -6,33 +6,20 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiImage, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
-import { useEffect, useState } from 'react';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { WelcomeImage } from '../welcome_image';
 
 interface EnrichingEmptyPromptProps {
   onAddProcessor: () => void;
 }
 
 export const EnrichingEmptyPrompt = ({ onAddProcessor }: EnrichingEmptyPromptProps) => {
-  const { colorMode } = useEuiTheme();
-
-  const [imageSrc, setImageSrc] = useState<string>();
-
-  useEffect(() => {
-    const imagePath =
-      colorMode === 'LIGHT' ? '../../assets/welcome--light.svg' : '../../assets/welcome--dark.svg';
-
-    import(imagePath).then(setImageSrc);
-  }, [colorMode]);
-
-  const image = imageSrc ? <EuiImage src={imageSrc} alt="" /> : null;
-
   return (
     <EuiEmptyPrompt
       color="subdued"
-      titleSize="m"
-      icon={image}
+      titleSize="xs"
+      icon={<WelcomeImage />}
       title={title}
       body={body}
       actions={[
@@ -50,19 +37,17 @@ export const EnrichingEmptyPrompt = ({ onAddProcessor }: EnrichingEmptyPromptPro
 };
 
 const title = (
-  <EuiTitle>
-    <p>
-      {i18n.translate('xpack.streams.streamDetailView.managementTab.enrichmentEmptyPrompt.title', {
-        defaultMessage: 'Start extracting useful fields from your data',
-      })}
-    </p>
-  </EuiTitle>
+  <h2>
+    {i18n.translate('xpack.streams.streamDetailView.managementTab.enrichmentEmptyPrompt.title', {
+      defaultMessage: 'Start extracting useful fields from your data',
+    })}
+  </h2>
 );
 
 const body = (
-  <EuiText component="p">
+  <p>
     {i18n.translate('xpack.streams.streamDetailView.managementTab.enrichmentEmptyPrompt.body', {
       defaultMessage: 'Use processors to transform data before indexing',
     })}
-  </EuiText>
+  </p>
 );

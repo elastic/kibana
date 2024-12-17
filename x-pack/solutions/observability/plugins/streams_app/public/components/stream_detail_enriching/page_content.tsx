@@ -6,16 +6,22 @@
  */
 
 import React from 'react';
-import { StreamDefinition } from '@kbn/streams-plugin/common';
+import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
 
 import { EnrichingEmptyPrompt } from './enriching_empty_prompt';
 
 export function StreamDetailEnrichingContent({
-  definition: _definition,
-  refreshDefinition: _refreshDefinition,
+  definition,
+  refreshDefinition,
 }: {
-  definition?: StreamDefinition;
+  definition: ReadStreamDefinition;
   refreshDefinition: () => void;
 }) {
-  return <EnrichingEmptyPrompt onAddProcessor={() => {}} />;
+  const hasProcessors = definition.processing.length > 0;
+
+  if (!hasProcessors) {
+    return <EnrichingEmptyPrompt onAddProcessor={() => {}} />;
+  }
+
+  return <>Hello</>;
 }
