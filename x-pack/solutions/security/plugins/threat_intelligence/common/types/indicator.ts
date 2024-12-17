@@ -52,7 +52,7 @@ export enum RawIndicatorFieldId {
 
 /**
  * Threat indicator field map to Enriched Event.
- * (reverse of https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/cti/constants.ts#L35)
+ * (reverse of https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/common/cti/constants.ts#L35)
  */
 export const IndicatorFieldEventEnrichmentMap: { [id: string]: string[] } = {
   [RawIndicatorFieldId.FileSha256]: ['file.hash.sha256'],
