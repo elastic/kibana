@@ -13,17 +13,14 @@ describe('mergeEntities', () => {
   it('modifies one service', () => {
     const entities: EntityLatestServiceRaw[] = [
       {
-        service: {
-          name: 'service-1',
-          environment: 'test',
-        },
-        agent: { name: ['nodejs'] },
-        source_data_stream: { type: ['metrics', 'logs'] },
-        entity: {
-          last_seen_timestamp: '2024-06-05T10:34:40.810Z',
-          identity_fields: ['service.name', 'service.environment'],
-          id: 'service-1:test',
-        },
+        'data_stream.type': ['metrics', 'logs'],
+        'agent.name': 'nodejs',
+        'service.environment': 'test',
+        'entity.last_seen_timestamp': '2024-12-13T14:52:35.461Z',
+        'service.name': 'service-1',
+        'entity.type': 'built_in_services_from_ecs_data',
+        'entity.id': 'service-1',
+        'entity.display_name': 'service-1',
       },
     ];
     const result = mergeEntities({ entities });
@@ -32,7 +29,7 @@ describe('mergeEntities', () => {
         agentName: 'nodejs' as AgentName,
         dataStreamTypes: ['metrics', 'logs'],
         environments: ['test'],
-        lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
+        lastSeenTimestamp: '2024-12-13T14:52:35.461Z',
         serviceName: 'service-1',
       },
     ]);
@@ -41,56 +38,44 @@ describe('mergeEntities', () => {
   it('joins two service with the same name ', () => {
     const entities: EntityLatestServiceRaw[] = [
       {
-        service: {
-          name: 'service-1',
-          environment: 'env-service-1',
-        },
-        agent: { name: ['nodejs'] },
-        source_data_stream: { type: ['foo'] },
-        entity: {
-          last_seen_timestamp: '2024-03-05T10:34:40.810Z',
-          identity_fields: ['service.name', 'service.environment'],
-          id: 'service-1:env-service-1',
-        },
+        'data_stream.type': ['foo'],
+        'agent.name': 'nodejs',
+        'service.environment': 'env-service-1',
+        'entity.last_seen_timestamp': '2024-12-13T14:52:35.461Z',
+        'service.name': 'service-1',
+        'entity.type': 'built_in_services_from_ecs_data',
+        'entity.id': 'service-1:env-service-1',
+        'entity.display_name': 'service-1',
       },
       {
-        service: {
-          name: 'service-1',
-          environment: 'env-service-2',
-        },
-        agent: { name: ['nodejs'] },
-        source_data_stream: { type: ['bar'] },
-        entity: {
-          last_seen_timestamp: '2024-03-05T10:34:40.810Z',
-          identity_fields: ['service.name', 'service.environment'],
-          id: 'apm-only-1:synthtrace-env-2',
-        },
+        'data_stream.type': ['bar'],
+        'agent.name': 'nodejs',
+        'service.environment': 'env-service-2',
+        'entity.last_seen_timestamp': '2024-12-13T14:52:35.461Z',
+        'service.name': 'service-1',
+        'entity.type': 'built_in_services_from_ecs_data',
+        'entity.id': 'service-1:env-service-2',
+        'entity.display_name': 'service-1',
       },
       {
-        service: {
-          name: 'service-2',
-          environment: 'env-service-3',
-        },
-        agent: { name: ['java'] },
-        source_data_stream: { type: ['baz'] },
-        entity: {
-          last_seen_timestamp: '2024-06-05T10:34:40.810Z',
-          identity_fields: ['service.name', 'service.environment'],
-          id: 'service-2:env-service-3',
-        },
+        'data_stream.type': ['baz'],
+        'agent.name': 'java',
+        'service.environment': 'env-service-3',
+        'entity.last_seen_timestamp': '2024-12-13T14:52:35.461Z',
+        'service.name': 'service-2',
+        'entity.type': 'built_in_services_from_ecs_data',
+        'entity.id': 'service-2:env-service-3',
+        'entity.display_name': 'service-2',
       },
       {
-        service: {
-          name: 'service-2',
-          environment: 'env-service-4',
-        },
-        agent: { name: ['java'] },
-        source_data_stream: { type: ['baz'] },
-        entity: {
-          last_seen_timestamp: '2024-06-05T10:34:40.810Z',
-          identity_fields: ['service.name', 'service.environment'],
-          id: 'service-2:env-service-3',
-        },
+        'data_stream.type': ['baz'],
+        'agent.name': ['java'],
+        'service.environment': 'env-service-4',
+        'entity.last_seen_timestamp': '2024-12-13T14:52:35.461Z',
+        'service.name': 'service-2',
+        'entity.type': 'built_in_services_from_ecs_data',
+        'entity.id': 'service-2:env-service-4',
+        'entity.display_name': 'service-2',
       },
     ];
 
@@ -100,14 +85,14 @@ describe('mergeEntities', () => {
         agentName: 'nodejs' as AgentName,
         dataStreamTypes: ['foo', 'bar'],
         environments: ['env-service-1', 'env-service-2'],
-        lastSeenTimestamp: '2024-03-05T10:34:40.810Z',
+        lastSeenTimestamp: '2024-12-13T14:52:35.461Z',
         serviceName: 'service-1',
       },
       {
         agentName: 'java' as AgentName,
         dataStreamTypes: ['baz'],
         environments: ['env-service-3', 'env-service-4'],
-        lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
+        lastSeenTimestamp: '2024-12-13T14:52:35.461Z',
         serviceName: 'service-2',
       },
     ]);
@@ -115,43 +100,34 @@ describe('mergeEntities', () => {
   it('handles duplicate environments and data streams', () => {
     const entities: EntityLatestServiceRaw[] = [
       {
-        service: {
-          name: 'service-1',
-          environment: 'test',
-        },
-        agent: { name: ['nodejs'] },
-        source_data_stream: { type: ['metrics', 'logs'] },
-        entity: {
-          last_seen_timestamp: '2024-06-05T10:34:40.810Z',
-          identity_fields: ['service.name', 'service.environment'],
-          id: 'service-1:test',
-        },
+        'data_stream.type': ['metrics', 'logs'],
+        'agent.name': ['nodejs'],
+        'service.environment': 'test',
+        'entity.last_seen_timestamp': '2024-12-13T14:52:35.461Z',
+        'service.name': 'service-1',
+        'entity.type': 'built_in_services_from_ecs_data',
+        'entity.id': 'service-1:test',
+        'entity.display_name': 'service-1',
       },
       {
-        service: {
-          name: 'service-1',
-          environment: 'test',
-        },
-        agent: { name: ['nodejs'] },
-        source_data_stream: { type: ['metrics', 'logs'] },
-        entity: {
-          last_seen_timestamp: '2024-06-05T10:34:40.810Z',
-          identity_fields: ['service.name', 'service.environment'],
-          id: 'service-1:test',
-        },
+        'data_stream.type': ['metrics', 'logs'],
+        'agent.name': ['nodejs'],
+        'service.environment': 'test',
+        'entity.last_seen_timestamp': '2024-12-13T14:52:35.461Z',
+        'service.name': 'service-1',
+        'entity.type': 'built_in_services_from_ecs_data',
+        'entity.id': 'service-1:test',
+        'entity.display_name': 'service-1',
       },
       {
-        service: {
-          name: 'service-1',
-          environment: 'prod',
-        },
-        agent: { name: ['nodejs'] },
-        source_data_stream: { type: ['foo'] },
-        entity: {
-          last_seen_timestamp: '2024-23-05T10:34:40.810Z',
-          identity_fields: ['service.name', 'service.environment'],
-          id: 'service-1:prod',
-        },
+        'data_stream.type': ['foo'],
+        'agent.name': ['nodejs'],
+        'service.environment': 'prod',
+        'entity.last_seen_timestamp': '2024-12-13T14:52:35.461Z',
+        'service.name': 'service-1',
+        'entity.type': 'built_in_services_from_ecs_data',
+        'entity.id': 'service-1:prod',
+        'entity.display_name': 'service-1',
       },
     ];
     const result = mergeEntities({ entities });
@@ -160,7 +136,7 @@ describe('mergeEntities', () => {
         agentName: 'nodejs' as AgentName,
         dataStreamTypes: ['metrics', 'logs', 'foo'],
         environments: ['test', 'prod'],
-        lastSeenTimestamp: '2024-23-05T10:34:40.810Z',
+        lastSeenTimestamp: '2024-12-13T14:52:35.461Z',
         serviceName: 'service-1',
       },
     ]);
@@ -168,17 +144,14 @@ describe('mergeEntities', () => {
   it('handles null environment', () => {
     const entity: EntityLatestServiceRaw[] = [
       {
-        service: {
-          name: 'service-1',
-          environment: undefined,
-        },
-        agent: { name: ['nodejs'] },
-        source_data_stream: { type: [] },
-        entity: {
-          last_seen_timestamp: '2024-06-05T10:34:40.810Z',
-          identity_fields: ['service.name'],
-          id: 'service-1:test',
-        },
+        'data_stream.type': [],
+        'agent.name': ['nodejs'],
+        'service.environment': null,
+        'entity.last_seen_timestamp': '2024-12-13T14:52:35.461Z',
+        'service.name': 'service-1',
+        'entity.type': 'built_in_services_from_ecs_data',
+        'entity.id': 'service-1:test',
+        'entity.display_name': 'service-1',
       },
     ];
     const entityResult = mergeEntities({ entities: entity });
@@ -187,35 +160,31 @@ describe('mergeEntities', () => {
         agentName: 'nodejs' as AgentName,
         dataStreamTypes: [],
         environments: [],
-        lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
+        lastSeenTimestamp: '2024-12-13T14:52:35.461Z',
         serviceName: 'service-1',
       },
     ]);
 
     const entities: EntityLatestServiceRaw[] = [
       {
-        service: {
-          name: 'service-1',
-        },
-        agent: { name: ['nodejs'] },
-        source_data_stream: { type: [] },
-        entity: {
-          last_seen_timestamp: '2024-06-05T10:34:40.810Z',
-          identity_fields: ['service.name'],
-          id: 'service-1:test',
-        },
+        'data_stream.type': [],
+        'agent.name': ['nodejs'],
+        'service.environment': null,
+        'entity.last_seen_timestamp': '2024-12-13T14:52:35.461Z',
+        'service.name': 'service-1',
+        'entity.type': 'built_in_services_from_ecs_data',
+        'entity.id': 'service-1:test',
+        'entity.display_name': 'service-1',
       },
       {
-        service: {
-          name: 'service-1',
-        },
-        agent: { name: ['nodejs'] },
-        source_data_stream: { type: [] },
-        entity: {
-          last_seen_timestamp: '2024-06-05T10:34:40.810Z',
-          identity_fields: ['service.name'],
-          id: 'service-1:test',
-        },
+        'data_stream.type': [],
+        'agent.name': ['nodejs'],
+        'service.environment': null,
+        'entity.last_seen_timestamp': '2024-12-13T14:52:35.461Z',
+        'service.name': 'service-1',
+        'entity.type': 'built_in_services_from_ecs_data',
+        'entity.id': 'service-1:test',
+        'entity.display_name': 'service-1',
       },
     ];
     const result = mergeEntities({ entities });
@@ -224,7 +193,7 @@ describe('mergeEntities', () => {
         agentName: 'nodejs' as AgentName,
         dataStreamTypes: [],
         environments: [],
-        lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
+        lastSeenTimestamp: '2024-12-13T14:52:35.461Z',
         serviceName: 'service-1',
       },
     ]);
@@ -233,16 +202,13 @@ describe('mergeEntities', () => {
   it('handles undefined environment', () => {
     const entity: EntityLatestServiceRaw[] = [
       {
-        service: {
-          name: 'service-1',
-        },
-        agent: { name: ['nodejs'] },
-        source_data_stream: { type: [] },
-        entity: {
-          last_seen_timestamp: '2024-06-05T10:34:40.810Z',
-          identity_fields: ['service.name'],
-          id: 'service-1:test',
-        },
+        'data_stream.type': [],
+        'agent.name': ['nodejs'],
+        'entity.last_seen_timestamp': '2024-12-13T14:52:35.461Z',
+        'service.name': 'service-1',
+        'entity.type': 'built_in_services_from_ecs_data',
+        'entity.id': 'service-1:test',
+        'entity.display_name': 'service-1',
       },
     ];
     const entityResult = mergeEntities({ entities: entity });
@@ -251,35 +217,29 @@ describe('mergeEntities', () => {
         agentName: 'nodejs',
         dataStreamTypes: [],
         environments: [],
-        lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
+        lastSeenTimestamp: '2024-12-13T14:52:35.461Z',
         serviceName: 'service-1',
       },
     ]);
 
     const entities: EntityLatestServiceRaw[] = [
       {
-        service: {
-          name: 'service-1',
-        },
-        agent: { name: ['nodejs'] },
-        source_data_stream: { type: [] },
-        entity: {
-          last_seen_timestamp: '2024-06-05T10:34:40.810Z',
-          identity_fields: ['service.name'],
-          id: 'service-1:test',
-        },
+        'data_stream.type': [],
+        'agent.name': ['nodejs'],
+        'entity.last_seen_timestamp': '2024-12-13T14:52:35.461Z',
+        'service.name': 'service-1',
+        'entity.type': 'built_in_services_from_ecs_data',
+        'entity.id': 'service-1:test',
+        'entity.display_name': 'service-1',
       },
       {
-        service: {
-          name: 'service-1',
-        },
-        agent: { name: ['nodejs'] },
-        source_data_stream: { type: [] },
-        entity: {
-          last_seen_timestamp: '2024-06-05T10:34:40.810Z',
-          identity_fields: ['service.name'],
-          id: 'service-1:test',
-        },
+        'data_stream.type': [],
+        'agent.name': ['nodejs'],
+        'entity.last_seen_timestamp': '2024-12-13T14:52:35.461Z',
+        'service.name': 'service-1',
+        'entity.type': 'built_in_services_from_ecs_data',
+        'entity.id': 'service-1:test',
+        'entity.display_name': 'service-1',
       },
     ];
     const result = mergeEntities({ entities });
@@ -288,7 +248,7 @@ describe('mergeEntities', () => {
         agentName: 'nodejs',
         dataStreamTypes: [],
         environments: [],
-        lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
+        lastSeenTimestamp: '2024-12-13T14:52:35.461Z',
         serviceName: 'service-1',
       },
     ]);
@@ -297,17 +257,14 @@ describe('mergeEntities', () => {
   it('has no logs when log rate is not returned', () => {
     const entities: EntityLatestServiceRaw[] = [
       {
-        service: {
-          name: 'service-1',
-          environment: 'test',
-        },
-        agent: { name: ['nodejs'] },
-        source_data_stream: { type: ['metrics'] },
-        entity: {
-          last_seen_timestamp: '2024-06-05T10:34:40.810Z',
-          identity_fields: ['service.name', 'service.environment'],
-          id: 'service-1:test',
-        },
+        'data_stream.type': ['metrics'],
+        'agent.name': ['nodejs'],
+        'entity.last_seen_timestamp': '2024-12-13T14:52:35.461Z',
+        'service.name': 'service-1',
+        'service.environment': 'test',
+        'entity.type': 'built_in_services_from_ecs_data',
+        'entity.id': 'service-1:test',
+        'entity.display_name': 'service-1',
       },
     ];
     const result = mergeEntities({ entities });
@@ -316,7 +273,31 @@ describe('mergeEntities', () => {
         agentName: 'nodejs' as AgentName,
         dataStreamTypes: ['metrics'],
         environments: ['test'],
-        lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
+        lastSeenTimestamp: '2024-12-13T14:52:35.461Z',
+        serviceName: 'service-1',
+      },
+    ]);
+  });
+  it('has multiple duplicate environments and data stream types', () => {
+    const entities: EntityLatestServiceRaw[] = [
+      {
+        'data_stream.type': ['metrics', 'metrics', 'logs', 'logs'],
+        'agent.name': ['nodejs', 'nodejs'],
+        'entity.last_seen_timestamp': '2024-12-13T14:52:35.461Z',
+        'service.name': 'service-1',
+        'service.environment': ['test', 'test', 'test'],
+        'entity.type': 'built_in_services_from_ecs_data',
+        'entity.id': 'service-1:test',
+        'entity.display_name': 'service-1',
+      },
+    ];
+    const result = mergeEntities({ entities });
+    expect(result).toEqual([
+      {
+        agentName: 'nodejs' as AgentName,
+        dataStreamTypes: ['metrics', 'logs'],
+        environments: ['test'],
+        lastSeenTimestamp: '2024-12-13T14:52:35.461Z',
         serviceName: 'service-1',
       },
     ]);

@@ -39,6 +39,7 @@
       "uiActions",
       "logsDataAccess",
       "savedSearch",
+      "entityManager"
     ],
     "optionalPlugins": [
       "actions",
