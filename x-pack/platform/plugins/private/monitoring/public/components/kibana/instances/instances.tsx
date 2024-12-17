@@ -73,14 +73,12 @@ const getColumns = (
           };
 
           setupModeStatus = (
-            <div>
-              <SetupModeBadge
-                setupMode={setupMode}
-                status={status}
-                instance={instance}
-                productName={KIBANA_SYSTEM_ID}
-              />
-            </div>
+            <SetupModeBadge
+              setupMode={setupMode}
+              status={status}
+              instance={instance}
+              productName={KIBANA_SYSTEM_ID}
+            />
           );
           if (status.isNetNewUser) {
             return (

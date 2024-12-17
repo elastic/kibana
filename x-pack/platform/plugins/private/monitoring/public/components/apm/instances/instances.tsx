@@ -65,14 +65,12 @@ function getColumns(setupMode: SetupMode, cgroup: unknown) {
           };
 
           setupModeStatus = (
-            <div>
-              <SetupModeBadge
-                setupMode={setupMode}
-                status={status}
-                instance={instance}
-                productName={APM_SYSTEM_ID}
-              />
-            </div>
+            <SetupModeBadge
+              setupMode={setupMode}
+              status={status}
+              instance={instance}
+              productName={APM_SYSTEM_ID}
+            />
           );
         }
 

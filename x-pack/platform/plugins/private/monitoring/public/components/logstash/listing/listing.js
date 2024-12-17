@@ -52,14 +52,12 @@ export class Listing extends PureComponent {
             };
 
             setupModeStatus = (
-              <div>
-                <SetupModeBadge
-                  setupMode={setupMode}
-                  status={status}
-                  instance={instance}
-                  productName={LOGSTASH_SYSTEM_ID}
-                />
-              </div>
+              <SetupModeBadge
+                setupMode={setupMode}
+                status={status}
+                instance={instance}
+                productName={LOGSTASH_SYSTEM_ID}
+              />
             );
           }
 
