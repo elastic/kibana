@@ -147,26 +147,6 @@
           {
             "plugin": "observabilityAIAssistantApp",
             "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/components/rca/rca_callout/index.tsx"
-          },
-          {
-            "plugin": "observabilityAIAssistantApp",
-            "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/rule_connector/ai_assistant.tsx"
-          },
-          {
-            "plugin": "observabilityAIAssistantApp",
-            "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/rule_connector/ai_assistant.tsx"
-          },
-          {
-            "plugin": "observabilityAIAssistantApp",
-            "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/components/nav_control/index.tsx"
-          },
-          {
-            "plugin": "observabilityAIAssistantApp",
-            "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/components/nav_control/index.tsx"
-          },
-          {
-            "plugin": "observabilityAIAssistantApp",
-            "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/components/nav_control/index.tsx"
           }
         ],
         "children": [

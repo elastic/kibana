@@ -14,7 +14,7 @@
       "tags": [],
       "label": "SecuritySolutionServerlessPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/security_solution_serverless/public/types.ts",
+      "path": "x-pack/solutions/security/plugins/security_solution_serverless/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,7 +28,7 @@
       "tags": [],
       "label": "SecuritySolutionServerlessPluginStart",
       "description": [],
-      "path": "x-pack/plugins/security_solution_serverless/public/types.ts",
+      "path": "x-pack/solutions/security/plugins/security_solution_serverless/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -50,7 +50,7 @@
       "tags": [],
       "label": "SecuritySolutionServerlessPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/security_solution_serverless/server/types.ts",
+      "path": "x-pack/solutions/security/plugins/security_solution_serverless/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -64,7 +64,7 @@
       "tags": [],
       "label": "SecuritySolutionServerlessPluginStart",
       "description": [],
-      "path": "x-pack/plugins/security_solution_serverless/server/types.ts",
+      "path": "x-pack/solutions/security/plugins/security_solution_serverless/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -88,7 +88,7 @@
         "signature": [
           "\"securitySolutionServerless\""
         ],
-        "path": "x-pack/plugins/security_solution_serverless/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution_serverless/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -103,7 +103,7 @@
         "signature": [
           "\"securitySolutionServerless\""
         ],
-        "path": "x-pack/plugins/security_solution_serverless/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution_serverless/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -118,7 +118,7 @@
         "signature": [
           "\"security\""
         ],
-        "path": "x-pack/plugins/security_solution_serverless/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution_serverless/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

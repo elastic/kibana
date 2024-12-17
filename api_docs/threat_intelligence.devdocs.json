@@ -505,7 +505,7 @@
         "tags": [],
         "label": "TIPageId",
         "description": [
-          "\nAll the IDs for the threat intelligence pages.\nThis needs to match the threat intelligence page entries in SecurityPageName` (x-pack/plugins/security_solution/common/constants.ts).\n\nExample to add more IDs:\n  export type TIPageId = 'threat_intelligence' | 'threat_intelligence-feed';"
+          "\nAll the IDs for the threat intelligence pages.\nThis needs to match the threat intelligence page entries in SecurityPageName` (x-pack/solutions/security/plugins/security_solution/common/constants.ts).\n\nExample to add more IDs:\n  export type TIPageId = 'threat_intelligence' | 'threat_intelligence-feed';"
         ],
         "signature": [
           "\"threat_intelligence\""

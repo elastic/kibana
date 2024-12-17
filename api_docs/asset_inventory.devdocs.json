@@ -14,7 +14,7 @@
       "tags": [],
       "label": "AssetInventoryPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/asset_inventory/public/types.ts",
+      "path": "x-pack/solutions/security/plugins/asset_inventory/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,7 +28,7 @@
       "tags": [],
       "label": "AssetInventoryPluginStart",
       "description": [],
-      "path": "x-pack/plugins/asset_inventory/public/types.ts",
+      "path": "x-pack/solutions/security/plugins/asset_inventory/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -50,7 +50,7 @@
       "tags": [],
       "label": "AssetInventoryPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/asset_inventory/server/types.ts",
+      "path": "x-pack/solutions/security/plugins/asset_inventory/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -64,7 +64,7 @@
       "tags": [],
       "label": "AssetInventoryPluginStart",
       "description": [],
-      "path": "x-pack/plugins/asset_inventory/server/types.ts",
+      "path": "x-pack/solutions/security/plugins/asset_inventory/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -88,7 +88,7 @@
         "signature": [
           "\"assetInventory\""
         ],
-        "path": "x-pack/plugins/asset_inventory/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/asset_inventory/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -103,7 +103,7 @@
         "signature": [
           "\"assetInventory\""
         ],
-        "path": "x-pack/plugins/asset_inventory/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/asset_inventory/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

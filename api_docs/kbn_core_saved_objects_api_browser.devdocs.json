@@ -2849,11 +2849,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/hooks/types.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/hooks/types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/hooks/types.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/hooks/types.ts"
           },
           {
             "plugin": "eventAnnotation",
