@@ -49,7 +49,14 @@ export const hasUserDataView = async (
     return false;
   } else {
     // filter here data views that we know are not created by user during on-boarding for smoother on-boarding experience
-    // currently there is no such data views,
+
+    const nonDefaultDataViews = dataViews.saved_objects.filter(
+      (so) => so.id !== 'log_rules_data_view' && so.id !== 'infra_rules_data_view'
+    );
+
+    if (nonDefaultDataViews.length === 0) {
+      return false;
+    }
 
     return true;
   }
