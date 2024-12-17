@@ -73,6 +73,7 @@ export const PageHeader = React.memo<PageHeaderProps>(
   ({ showBackButton = false, title, description }) => {
     const { euiTheme } = useEuiTheme();
     const xsFontSize = useEuiFontSize('xs').fontSize;
+    const lineHeight = useEuiFontSize('xs').lineHeight;
     const { navigateToMaintenanceWindows } = useMaintenanceWindowsNavigation();
 
     const navigateToMaintenanceWindowsClick = useCallback(() => {
@@ -87,7 +88,7 @@ export const PageHeader = React.memo<PageHeaderProps>(
               data-test-subj="link-back"
               css={css`
                 font-size: ${xsFontSize};
-                line-height: ${euiTheme.font.lineHeightMultiplier};
+                line-height: ${lineHeight};
                 margin-bottom: ${euiTheme.size.s};
               `}
             >

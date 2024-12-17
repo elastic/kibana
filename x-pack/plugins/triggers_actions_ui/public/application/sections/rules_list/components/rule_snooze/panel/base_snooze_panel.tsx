@@ -226,7 +226,9 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                           color: isActive
                             ? euiTheme.colors.textAccent
                             : euiTheme.colors.textSubdued,
-                          backgroundColor: isActive ? 'rgba(240,78,152,0.2)' : euiTheme.colors.body,
+                          backgroundColor: isActive
+                            ? euiTheme.colors.backgroundLightAccent
+                            : euiTheme.colors.body,
                         }}
                         className="euiButton euiPanel euiPanel--borderRadiusMedium euiPanel--noShadow euiPanel--noBorder"
                         onClick={onClickEditScheduleFactory(schedule as SnoozeSchedule)}

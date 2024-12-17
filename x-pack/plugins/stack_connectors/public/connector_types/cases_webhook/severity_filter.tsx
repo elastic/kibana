@@ -30,22 +30,31 @@ interface Props {
 
 export const SeverityFilter: React.FC<Props> = ({ selectedSeverity, onSeverityChange }) => {
   const { euiTheme } = useEuiTheme();
+  const { hasVisColorAdjustment } = euiTheme;
 
   const severities = {
     [CaseSeverity.LOW]: {
-      color: euiTheme.colors.success,
+      color: hasVisColorAdjustment
+        ? euiTheme.colors.vis.euiColorVis0
+        : euiTheme.colors.vis.euiColorVisSuccess0,
       label: i18n.SEVERITY_LOW_LABEL,
     },
     [CaseSeverity.MEDIUM]: {
-      color: euiTheme.colors.warning,
+      color: hasVisColorAdjustment
+        ? euiTheme.colors.vis.euiColorVis5
+        : euiTheme.colors.vis.euiColorVisWarning0,
       label: i18n.SEVERITY_MEDIUM_LABEL,
     },
     [CaseSeverity.HIGH]: {
-      color: euiTheme.colors.accent,
+      color: hasVisColorAdjustment
+        ? euiTheme.colors.vis.euiColorVis7
+        : euiTheme.colors.vis.euiColorVisDanger1,
       label: i18n.SEVERITY_HIGH_LABEL,
     },
     [CaseSeverity.CRITICAL]: {
-      color: euiTheme.colors.danger,
+      color: hasVisColorAdjustment
+        ? euiTheme.colors.vis.euiColorVis9
+        : euiTheme.colors.vis.euiColorVisDanger0,
       label: i18n.SEVERITY_CRITICAL_LABEL,
     },
   };
