@@ -167,6 +167,7 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
   const intervalNumber = getDurationNumberInItsUnit(interval ?? 1);
 
   const intervalUnit = getDurationUnitValue(interval);
+
   const actionThrottle = action.frequency?.throttle
     ? getDurationNumberInItsUnit(action.frequency.throttle)
     : null;
