@@ -98,7 +98,6 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
     [activeRoute, overlays, pathname, startServices]
   );
 
-  // TODO: Remove this comment after testing
   useExecutionContext(executionContext, {
     name: PLUGIN_ID,
     type: 'application',

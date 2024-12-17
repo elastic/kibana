@@ -165,7 +165,6 @@ export function App({
     setIndicateNoData(true);
   }, [setIndicateNoData]);
 
-  // TODO: Remove this comment after testing
   useExecutionContext(executionContext, {
     type: 'application',
     id: savedObjectId || 'new', // TODO: this doesn't consider when lens is saved by value

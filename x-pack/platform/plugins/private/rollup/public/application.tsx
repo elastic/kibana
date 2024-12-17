@@ -30,7 +30,6 @@ const AppWithExecutionContext = ({
   history: ManagementAppMountParams['history'];
   executionContext: ExecutionContextStart;
 }) => {
-  // TODO: Remove this comment after testing
   useExecutionContext(executionContext, {
     type: 'application',
     page: 'rollup',

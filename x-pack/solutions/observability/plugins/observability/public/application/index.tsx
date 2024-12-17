@@ -28,7 +28,7 @@ import { HideableReactQueryDevTools } from './hideable_react_query_dev_tools';
 function App() {
   return (
     <>
-      <Routes enableExecutionContextTracking={true}>
+      <Routes enableExecutionContextTracking={false}>
         {Object.keys(routes).map((key) => {
           const path = key as keyof typeof routes;
           const { handler, exact } = routes[path];
