@@ -65,6 +65,7 @@ import {
 import { EqlQueryEdit } from '../../../rule_creation/components/eql_query_edit';
 import { DataViewSelectorField } from '../data_view_selector_field';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { ThreatMatchInput } from '../threatmatch_input';
 import { ThreatMatchIndexEdit } from '../../../rule_creation/components/threat_match_index_edit';
 import { ThreatMatchQueryEdit } from '../../../rule_creation/components/threat_match_query_edit';
@@ -72,6 +73,8 @@ import { ThreatMatchMappingEdit } from '../../../rule_creation/components/threat
 =======
 import { ThreatMatchEdit } from '../threat_match_edit/threat_match_edit';
 >>>>>>> 49853eaf618 (add threat mapping persistence functionality)
+=======
+>>>>>>> 81726efc647 (post-rebase conflicts resolving)
 import { useFetchIndex } from '../../../../common/containers/source';
 import { RequiredFields } from '../../../rule_creation/components/required_fields';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
@@ -95,11 +98,15 @@ import { AnomalyThresholdEdit } from '../../../rule_creation/components/anomaly_
 import { HistoryWindowStartEdit } from '../../../rule_creation/components/history_window_start_edit';
 import { NewTermsFieldsEdit } from '../../../rule_creation/components/new_terms_fields_edit';
 import { EsqlQueryEdit } from '../../../rule_creation/components/esql_query_edit';
+<<<<<<< HEAD
 import { CreateCustomMlJobButton } from '../../../rule_creation/components/create_ml_job_button/create_ml_job_button';
 import { ThreatMatchEdit } from '../threat_match_edit';
 import { usePersistentNewTermsState } from './use_persistent_new_terms_state';
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 import { usePersistentThresholdState } from './use_persistent_threshold_state';
+=======
+import { ThreatMatchEdit } from '../threat_match_edit';
+>>>>>>> 81726efc647 (post-rebase conflicts resolving)
 import { usePersistentQuery } from './use_persistent_query';
 <<<<<<< HEAD
 import { usePersistentMachineLearningState } from './use_persistent_machine_learning_state';
