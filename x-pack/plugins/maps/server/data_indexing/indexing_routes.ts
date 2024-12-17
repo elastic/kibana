@@ -49,7 +49,7 @@ export function initIndexingRoutes({
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason: 'This route is opted out from authorization because permissions will be checked by elasticsearch.',
           },
         },
         validate: {
@@ -107,7 +107,7 @@ export function initIndexingRoutes({
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason: 'This route is opted out from authorization because permissions will be checked by elasticsearch.',
           },
         },
         validate: {
@@ -149,7 +149,7 @@ export function initIndexingRoutes({
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason: 'This route is opted out from authorization because permissions will be checked by elasticsearch.',
           },
         },
         validate: {
@@ -217,7 +217,7 @@ export function initIndexingRoutes({
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason: 'This route is opted out from authorization because permissions will be checked by elasticsearch.',
           },
         },
         validate: {
@@ -250,7 +250,7 @@ export function initIndexingRoutes({
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason: 'This route is opted out from authorization because permissions will be checked by elasticsearch.',
           },
         },
         validate: {

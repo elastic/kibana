@@ -30,7 +30,7 @@ export function initRoutes(coreSetup: CoreSetup<StartDeps>, logger: Logger) {
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason: 'This route is opted out from authorization because it is only serving static files.',
           },
         },
         validate: {
@@ -75,7 +75,7 @@ export function initRoutes(coreSetup: CoreSetup<StartDeps>, logger: Logger) {
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason: 'This route is opted out from authorization because permissions will be checked by elasticsearch.',
           },
         },
         validate: {
