@@ -38,5 +38,6 @@
     "@kbn/apm-utils",
     "@kbn/features-plugin",
     "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/zod-helpers",
   ]
 }
