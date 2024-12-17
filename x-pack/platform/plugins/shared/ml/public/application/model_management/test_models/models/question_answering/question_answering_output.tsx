@@ -60,12 +60,23 @@ function insertHighlighting(result: FormattedQuestionAnsweringResult, inputText:
 const ResultBadge: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { euiTheme } = useEuiTheme();
   const euiFontSizeXS = useEuiFontSize('xs').fontSize;
+
+  // For Amsterdam, use a `_behindText` variant. Borealis doesn't need it because of updated contrasts.
+  const badgeColor = euiTheme.flags.hasVisColorAdjustment
+    ? // @ts-expect-error _behindText is not defined in EuiThemeComputed after Borealis update
+      euiTheme.colors.vis.euiColorVis5_behindText
+    : euiTheme.colors.vis.euiColorVis9;
+
   return (
     <EuiBadge
-      color={euiTheme.colors.vis.euiColorVis9}
+      color={badgeColor}
       style={{
         marginRight: ICON_PADDING,
         marginTop: `-${ICON_PADDING}`,
+        // For Amsterdam, add a border to the badge to improve contrast with the background.
+        ...(euiTheme.flags.hasVisColorAdjustment
+          ? { border: `1px solid ${euiTheme.colors.vis.euiColorVis5}` }
+          : {}),
         fontSize: euiFontSizeXS,
         padding: '0px 6px',
         pointerEvents: 'none',
