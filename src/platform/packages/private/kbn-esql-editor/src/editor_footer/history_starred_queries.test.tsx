@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { coreMock, securityServiceMock } from '@kbn/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen, waitFor } from '@testing-library/react';
 import {
   QueryHistoryAction,
@@ -219,10 +219,6 @@ describe('Starred and History queries components', () => {
     const services = {
       core: coreMock.createStart(),
     };
-
-    services.core.security.authc.getCurrentUser.mockResolvedValue(
-      securityServiceMock.createMockAuthenticatedUser()
-    );
 
     it('should render two tabs', () => {
       render(
