@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiFilePicker,
@@ -14,6 +14,10 @@ import {
   EuiFormRow,
   EuiText,
 } from '@elastic/eui';
+import type {
+  EuiFilePickerClass,
+  EuiFilePickerProps,
+} from '@elastic/eui/src/components/form/file_picker/file_picker';
 import type { RuleMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { FILE_UPLOAD_ERROR } from '../../../../translations';
 import * as i18n from './translations';
@@ -26,8 +30,10 @@ export interface LookupsFileUploadProps {
 export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
   ({ createResources, apiError, isLoading }) => {
     const [lookupResources, setLookupResources] = useState<RuleMigrationResourceData[]>([]);
+    const filePickerRef = useRef<EuiFilePickerClass>(null);
 
     const createLookups = useCallback(() => {
+      filePickerRef.current?.removeFiles();
       createResources(lookupResources);
     }, [createResources, lookupResources]);
 
@@ -39,12 +45,12 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
 
     const parseFile = useCallback(
       async (files: FileList | null) => {
-        if (!files) {
-          return;
-        }
-
         setErrors([]);
         setLookupResources([]);
+
+        if (!files?.length) {
+          return;
+        }
 
         const lookups = await Promise.all(
           Array.from(files).map((file) => {
@@ -120,6 +126,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
           >
             <EuiFilePicker
               id="lookupsFilePicker"
+              ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
               fullWidth
               initialPromptText={
                 <>

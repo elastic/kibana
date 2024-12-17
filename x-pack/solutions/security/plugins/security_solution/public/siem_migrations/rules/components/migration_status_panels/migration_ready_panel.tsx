@@ -34,43 +34,39 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="m">
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGroup direction="row" gutterSize="m" alignItems="flexEnd">
         <EuiFlexItem>
-          <PanelText size="s" semiBold>
-            <p>{i18n.RULE_MIGRATION_TITLE(migrationStats.number)}</p>
-          </PanelText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          {isLoading ? (
-            <CenteredLoadingSpinner />
-          ) : (
-            <EuiFlexGroup direction="row" alignItems="flexEnd" gutterSize="m">
-              <EuiFlexItem>
-                <PanelText size="s" subdued>
-                  {i18n.RULE_MIGRATION_READY_DESCRIPTION(
-                    migrationStats.rules.total,
-                    missingResources.length > 0 ? i18n.RULE_MIGRATION_READY_MISSING_RESOURCES : ''
-                  )}
-                </PanelText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {missingResources.length > 0 ? (
-                  <EuiButton
-                    fill
-                    iconType="download"
-                    iconSide="right"
-                    onClick={onOpenFlyout}
-                    size="s"
-                  >
-                    {i18n.RULE_MIGRATION_UPLOAD_BUTTON}
-                  </EuiButton>
-                ) : (
-                  <StartTranslationButton migrationId={migrationStats.id} />
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
+              <PanelText size="s" semiBold>
+                <p>{i18n.RULE_MIGRATION_TITLE(migrationStats.number)}</p>
+              </PanelText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <PanelText size="s" subdued>
+                {i18n.RULE_MIGRATION_READY_DESCRIPTION(
+                  migrationStats.rules.total,
+                  !isLoading && missingResources.length > 0
+                    ? i18n.RULE_MIGRATION_READY_MISSING_RESOURCES
+                    : ''
                 )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
+              </PanelText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
+        {isLoading ? (
+          <CenteredLoadingSpinner />
+        ) : (
+          <EuiFlexItem grow={false}>
+            {missingResources.length > 0 ? (
+              <EuiButton fill iconType="download" iconSide="right" onClick={onOpenFlyout} size="s">
+                {i18n.RULE_MIGRATION_UPLOAD_BUTTON}
+              </EuiButton>
+            ) : (
+              <StartTranslationButton migrationId={migrationStats.id} />
+            )}
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );

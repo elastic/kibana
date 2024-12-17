@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { type PropsWithChildren } from 'react';
+import { css, type CSSInterpolation } from '@emotion/css';
 import { EuiText, useEuiTheme, COLOR_MODES_STANDARD, type EuiTextProps } from '@elastic/eui';
 
 export interface PanelTextProps extends PropsWithChildren<EuiTextProps> {
@@ -20,13 +21,13 @@ export const PanelText = React.memo<PanelTextProps>(({ children, subdued, semiBo
     color = 'subdued';
   }
 
-  const style: React.CSSProperties = {};
+  const style: CSSInterpolation = {};
   if (semiBold) {
     style.fontWeight = euiTheme.font.weight.semiBold;
   }
 
   return (
-    <EuiText {...props} color={color} style={style}>
+    <EuiText {...props} color={color} className={css(style)}>
       {children}
     </EuiText>
   );
