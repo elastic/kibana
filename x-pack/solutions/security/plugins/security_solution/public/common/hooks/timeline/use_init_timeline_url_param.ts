@@ -28,6 +28,7 @@ export const useInitTimelineFromUrlParam = () => {
 
   const onInitialize = useCallback(
     (initialState: TimelineUrl | null) => {
+      console.log({ initialState });
       if (initialState != null) {
         queryTimelineById({
           activeTimelineTab:
@@ -39,6 +40,7 @@ export const useInitTimelineFromUrlParam = () => {
           timelineId: initialState.id,
           openTimeline: initialState.isOpen,
           savedSearchId: initialState.savedSearchId,
+          eventId: initialState.eventId,
         });
       }
     },
@@ -48,6 +50,8 @@ export const useInitTimelineFromUrlParam = () => {
   useEffect(() => {
     const listener = () => {
       const timelineState = new URLSearchParams(window.location.search).get(URL_PARAM_KEY.timeline);
+      console.log({ timelineState });
+      debugger;
 
       if (!timelineState) {
         return;
