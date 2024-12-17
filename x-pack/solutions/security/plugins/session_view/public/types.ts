@@ -89,7 +89,7 @@ export interface SessionViewDeps {
    * Allows to open the detailed panel outside of the SessionView component. This is necessary when the session view is rendered in the
    * expandable flyout, where the tree and the detailed panel are separated and need to communicate with each other.
    */
-  openDetails?: (selectedProcess: Process | null) => void;
+  openDetailsInExpandableFlyout?: (selectedProcess: Process | null) => void;
   /**
    * Allows to reset the view from an external component. This is necessary when the session view is rendered in the
    * expandable flyout, where the tree and the detailed panels are separated and need to communicate with each other.
