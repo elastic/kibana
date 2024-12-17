@@ -14,12 +14,11 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     before(
       "Check version to avoid failures during forward-compatibility tests where these don't make sense",
-      async () => {
+      async function () {
         const {
           version: { number: esVersion },
         } = await es.info();
-        if (esVersion !== kibanaVersion) {
-          // @ts-expect-error for some reason TS thinks it's jest and not mocha: https://mochajs.org/#inclusive-tests
+        if (esVersion.replace('-SNAPSHOT', '') !== kibanaVersion.replace('-SNAPSHOT', '')) {
           this.skip();
         }
       }
