@@ -8,6 +8,7 @@
 import type { PropsWithChildren } from 'react';
 import React, { useContext, useEffect, useMemo, useState, type FC } from 'react';
 import { useTimefilter } from '@kbn/ml-date-picker';
+import { useGlobalUrlState } from '@kbn/ml-url-state/src/url_state';
 import { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
 import { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
 import { useMlKibana } from '../contexts/kibana';
@@ -18,7 +19,6 @@ import { AnomalyChartsStateService } from './anomaly_charts_state_service';
 import { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
 import { useTableSeverity } from '../components/controls/select_severity';
 import { AnomalyDetectionAlertsStateService } from './alerts';
-import { explorerServiceFactory, type ExplorerService } from './explorer_dashboard_service';
 import { useMlJobService } from '../services/job_service';
 
 export interface AnomalyExplorerContextValue {
@@ -28,7 +28,6 @@ export interface AnomalyExplorerContextValue {
   anomalyTimelineStateService: AnomalyTimelineStateService;
   chartsStateService: AnomalyChartsStateService;
   anomalyDetectionAlertsStateService: AnomalyDetectionAlertsStateService;
-  explorerService: ExplorerService;
 }
 
 /**
@@ -57,11 +56,12 @@ export function useAnomalyExplorerContext() {
 export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const [, , anomalyExplorerUrlStateService] = useExplorerUrlState();
 
+  const [, , globalUrlStateService] = useGlobalUrlState();
   const timefilter = useTimefilter();
 
   const {
     services: {
-      mlServices: { mlApi, mlFieldFormatService },
+      mlServices: { mlApi },
       uiSettings,
       data,
     },
@@ -82,8 +82,6 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
   // updates so using `useEffect` is the right thing to do here to not get errors
   // related to React lifecycle methods.
   useEffect(() => {
-    const explorerService = explorerServiceFactory(mlJobService, mlFieldFormatService);
-
     const anomalyTimelineService = new AnomalyTimelineService(
       timefilter,
       uiSettings,
@@ -91,7 +89,9 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
     );
 
     const anomalyExplorerCommonStateService = new AnomalyExplorerCommonStateService(
-      anomalyExplorerUrlStateService
+      anomalyExplorerUrlStateService,
+      globalUrlStateService,
+      mlJobService
     );
 
     const anomalyTimelineStateService = new AnomalyTimelineStateService(
@@ -129,7 +129,6 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
       anomalyTimelineStateService,
       chartsStateService,
       anomalyDetectionAlertsStateService,
-      explorerService,
     });
 
     return () => {

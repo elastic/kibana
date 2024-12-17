@@ -42,7 +42,7 @@ export const openCustomizePanelFlyout = ({
           }}
         />
       </KibanaReactContextProvider>,
-      { theme: core.theme, i18n: core.i18n }
+      core
     ),
     {
       size: 's',

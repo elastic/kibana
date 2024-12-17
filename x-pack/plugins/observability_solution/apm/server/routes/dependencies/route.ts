@@ -47,9 +47,7 @@ const topDependenciesRoute = createApmServerRoute({
       query: offsetRt,
     }),
   ]),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<TopDependenciesResponse> => {
     const { request, core } = resources;
 
@@ -87,9 +85,7 @@ const upstreamServicesForDependencyRoute = createApmServerRoute({
       query: t.intersection([environmentRt, offsetRt, kueryRt]),
     }),
   ]),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<UpstreamServicesForDependencyResponse> => {
     const { request, core } = resources;
 
@@ -122,9 +118,7 @@ const dependencyMetadataRoute = createApmServerRoute({
   params: t.type({
     query: t.intersection([t.type({ dependencyName: t.string }), rangeRt]),
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -161,9 +155,7 @@ const dependencyLatencyChartsRoute = createApmServerRoute({
       offsetRt,
     ]),
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<LatencyChartsDependencyResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -207,9 +199,7 @@ const dependencyThroughputChartsRoute = createApmServerRoute({
       offsetRt,
     ]),
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ThroughputChartsForDependencyResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -253,9 +243,7 @@ const dependencyFailedTransactionRateChartsRoute = createApmServerRoute({
       offsetRt,
     ]),
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -291,9 +279,7 @@ const dependencyFailedTransactionRateChartsRoute = createApmServerRoute({
 
 const dependencyOperationsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/dependencies/operations',
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({
     query: t.intersection([
       rangeRt,
@@ -350,9 +336,7 @@ const dependencyLatencyDistributionChartsRoute = createApmServerRoute({
       environmentRt,
     ]),
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<DependencyLatencyDistributionResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -374,9 +358,7 @@ const dependencyLatencyDistributionChartsRoute = createApmServerRoute({
 
 const topDependencySpansRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/dependencies/operations/spans',
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({
     query: t.intersection([
       rangeRt,

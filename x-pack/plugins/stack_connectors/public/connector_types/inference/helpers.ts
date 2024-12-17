@@ -72,7 +72,7 @@ export const getNonEmptyValidator = (
           newSchema.push(field);
         });
 
-      validationEventHandler(newSchema.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
+      validationEventHandler(newSchema);
       if (hasErrors) {
         return {
           code: 'ERR_FIELD_MISSING',

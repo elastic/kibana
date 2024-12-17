@@ -34,7 +34,7 @@ import { isCrossClusterSearch } from './is_cross_cluster_search';
 
 const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({
     query: t.intersection([indexLifecyclePhaseRt, probabilityRt, environmentRt, kueryRt, rangeRt]),
   }),
@@ -81,7 +81,7 @@ const storageExplorerRoute = createApmServerRoute({
 
 const storageExplorerServiceDetailsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/storage_details',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -118,7 +118,7 @@ const storageExplorerServiceDetailsRoute = createApmServerRoute({
 
 const storageChartRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_chart',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({
     query: t.intersection([indexLifecyclePhaseRt, probabilityRt, environmentRt, kueryRt, rangeRt]),
   }),
@@ -163,7 +163,7 @@ const storageChartRoute = createApmServerRoute({
 
 const storageExplorerPrivilegesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer/privileges',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
 
   handler: async (resources): Promise<{ hasPrivileges: boolean }> => {
     const {
@@ -187,7 +187,7 @@ const storageExplorerPrivilegesRoute = createApmServerRoute({
 
 const storageExplorerSummaryStatsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer_summary_stats',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({
     query: t.intersection([indexLifecyclePhaseRt, probabilityRt, environmentRt, kueryRt, rangeRt]),
   }),
@@ -226,7 +226,7 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
 
 const storageExplorerIsCrossClusterSearchRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer/is_cross_cluster_search',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ isCrossClusterSearch: boolean }> => {
     const apmEventClient = await getApmEventClient(resources);
     return { isCrossClusterSearch: isCrossClusterSearch(apmEventClient) };
@@ -235,9 +235,7 @@ const storageExplorerIsCrossClusterSearchRoute = createApmServerRoute({
 
 const storageExplorerGetServices = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer/get_services',
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({
     query: t.intersection([indexLifecyclePhaseRt, environmentRt, kueryRt, rangeRt]),
   }),

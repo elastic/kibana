@@ -141,6 +141,35 @@ describe('commands', () => {
       ]);
     });
 
+    it('KEEP (with param)', () => {
+      const query = 'FROM index | KEEP abc, ?param';
+      const { ast } = parse(query);
+
+      expect(ast).toMatchObject([
+        {},
+        {
+          type: 'command',
+          name: 'keep',
+          args: [
+            {
+              type: 'column',
+              name: 'abc',
+            },
+            {
+              type: 'column',
+              args: [
+                {
+                  type: 'literal',
+                  literalType: 'param',
+                  value: 'param',
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+    });
+
     it('SORT', () => {
       const query = 'FROM index | SORT 1';
       const { ast } = parse(query);
@@ -257,7 +286,9 @@ describe('commands', () => {
             },
             {
               type: 'literal',
-              value: '"b"',
+              literalType: 'keyword',
+              name: '"b"',
+              valueUnquoted: 'b',
             },
             {
               type: 'option',
@@ -265,9 +296,36 @@ describe('commands', () => {
               args: [
                 {
                   type: 'literal',
-                  value: '"c"',
+                  literalType: 'keyword',
+                  name: '"c"',
+                  valueUnquoted: 'c',
                 },
               ],
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('DISSECT (no options)', () => {
+      const query = 'FROM index | DISSECT a "b"';
+      const { ast } = parse(query);
+
+      expect(ast).toMatchObject([
+        {},
+        {
+          type: 'command',
+          name: 'dissect',
+          args: [
+            {
+              type: 'column',
+              name: 'a',
+            },
+            {
+              type: 'literal',
+              literalType: 'keyword',
+              name: '"b"',
+              valueUnquoted: 'b',
             },
           ],
         },
@@ -290,7 +348,9 @@ describe('commands', () => {
             },
             {
               type: 'literal',
-              value: '"b"',
+              literalType: 'keyword',
+              name: '"b"',
+              valueUnquoted: 'b',
             },
           ],
         },

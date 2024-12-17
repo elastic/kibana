@@ -15,6 +15,7 @@ import { ILicenseState, RuleMutedError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { transformUnsnoozeBodyV1 } from './transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export type UnsnoozeRuleRequestParamsV1 = TypeOf<typeof unsnoozeParamsSchema>;
 
@@ -25,6 +26,7 @@ export const unsnoozeRuleRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_unsnooze`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
         params: unsnoozeParamsSchema,
