@@ -15,14 +15,17 @@ export class KubernetesEAFlowPage {
   }
 
   private readonly receivedDataIndicatorKubernetes = () =>
-    this.page.locator('xpath=//div[contains(text(), "We are monitoring your cluster")]');
+    this.page
+      .getByTestId('observabilityOnboardingKubernetesPanelDataProgressIndicator')
+      .getByText('We are monitoring your cluster');
 
   private readonly kubernetesAgentExploreDataActionLink = () =>
-    this.page.locator(
-      'xpath=//a[@data-test-subj="observabilityOnboardingDataIngestStatusActionLink-kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c"]'
+    this.page.getByTestId(
+      'observabilityOnboardingDataIngestStatusActionLink-kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c'
     );
 
-  private readonly codeBlock = () => this.page.locator('xpath=//code[@data-code-language="text"]');
+  private readonly codeBlock = () =>
+    this.page.getByTestId('observabilityOnboardingKubernetesPanelCodeSnippet');
 
   private readonly copyToClipboardButton = () =>
     this.page.getByTestId('observabilityOnboardingCopyToClipboardButton');

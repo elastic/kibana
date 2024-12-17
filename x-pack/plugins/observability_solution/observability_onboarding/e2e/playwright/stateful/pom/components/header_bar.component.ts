@@ -14,8 +14,7 @@ export class HeaderBar {
     this.page = page;
   }
 
-  public readonly helpMenuButton = () =>
-    this.page.locator('xpath=//div[@data-test-subj="helpMenuButton"]');
+  public readonly helpMenuButton = () => this.page.getByTestId('helpMenuButton');
 
   public async assertHelpMenuButton() {
     await expect(this.helpMenuButton(), 'Help menu button').toBeVisible();

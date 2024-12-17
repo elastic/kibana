@@ -18,14 +18,17 @@ export class AutoDetectFlowPage {
     this.page.getByTestId('observabilityOnboardingCopyToClipboardButton');
 
   private readonly receivedDataIndicator = () =>
-    this.page.locator('xpath=//div[contains(text(), "Your data is ready to explore!")]');
+    this.page
+      .getByTestId('observabilityOnboardingAutoDetectPanelDataReceivedProgressIndicator')
+      .getByText('Your data is ready to explore!');
 
   private readonly autoDetectSystemIntegrationActionLink = () =>
-    this.page.locator(
-      'xpath=//a[@data-test-subj="observabilityOnboardingDataIngestStatusActionLink-inventory-host-details"]'
+    this.page.getByTestId(
+      'observabilityOnboardingDataIngestStatusActionLink-inventory-host-details'
     );
 
-  private readonly codeBlock = () => this.page.locator('xpath=//code[@data-code-language="text"]');
+  private readonly codeBlock = () =>
+    this.page.getByTestId('observabilityOnboardingAutoDetectPanelCodeSnippet');
 
   public async copyToClipboard() {
     await this.copyToClipboardButton().click();

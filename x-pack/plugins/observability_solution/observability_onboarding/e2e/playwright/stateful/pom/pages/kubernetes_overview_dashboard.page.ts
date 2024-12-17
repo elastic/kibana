@@ -14,25 +14,22 @@ export class KubernetesOverviewDashboardPage {
     this.page = page;
   }
 
-  private readonly nodesNoResults = () =>
-    this.page.locator(
-      'xpath=//div[@data-test-subj="embeddablePanelHoverActions-Nodes"]//p[contains(text(), "No results found")]'
-    );
-  private readonly nodesPanelHeader = () =>
-    this.page.locator('xpath=//figcaption[@data-test-subj="embeddablePanelHeading-Nodes"]');
+  private readonly nodesPanelHeader = () => this.page.getByTestId('embeddablePanelHeading-Nodes');
 
   private readonly nodesInspectorButton = () =>
-    this.page.locator(
-      'xpath=//div[@data-test-subj="embeddablePanelHoverActions-Nodes"]//button[@data-test-subj="embeddablePanelAction-openInspector"]'
-    );
+    this.page
+      .getByTestId('embeddablePanelHoverActions-Nodes')
+      .getByTestId('embeddablePanelAction-openInspector');
+
+  private readonly nodesInspectorTableNoResults = () =>
+    this.page.getByTestId('inspectorTable').getByText('No items found');
+
   private readonly nodesInspectorTableStatusTableCells = () =>
-    this.page.locator(
-      'xpath=//div[@data-test-subj="inspectorTable"]//td//div[contains(text(), "Status")]'
-    );
+    this.page.getByTestId('inspectorTable').getByText('Status');
 
   public async assertNodesNoResultsNotVisible() {
     await expect(
-      this.nodesNoResults(),
+      this.nodesInspectorTableNoResults(),
       'Nodes "No results" message should not be visible'
     ).toBeHidden();
   }

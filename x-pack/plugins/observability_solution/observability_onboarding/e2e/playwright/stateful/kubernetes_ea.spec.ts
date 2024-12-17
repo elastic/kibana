@@ -47,6 +47,7 @@ test('Kubernetes EA', async ({
   await kubernetesEAFlowPage.assertReceivedDataIndicatorKubernetes();
   await kubernetesEAFlowPage.clickKubernetesAgentCTA();
 
+  await kubernetesOverviewDashboardPage.openNodesInspector();
   /**
    * There might be a case that dashboard still does not show
    * the data even though it was ingested already. This usually
@@ -61,7 +62,5 @@ test('Kubernetes EA', async ({
     await kubernetesOverviewDashboardPage.page.waitForTimeout(2000);
     await kubernetesOverviewDashboardPage.page.reload();
   }
-
-  await kubernetesOverviewDashboardPage.openNodesInspector();
   await kubernetesOverviewDashboardPage.assetNodesInspectorStatusTableCells();
 });

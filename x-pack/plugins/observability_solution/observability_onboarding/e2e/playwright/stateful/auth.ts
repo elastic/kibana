@@ -29,9 +29,9 @@ ess_auth('Authentication', async ({ page }) => {
   await page.getByRole('button', { name: 'Log in' }).click();
 
   const [index] = await waitForOneOf([
-    page.locator('xpath=//div[@data-test-subj="helpMenuButton"]'),
-    page.locator('xpath=//h1[contains(text(),"Select your space")]'),
-    page.locator('xpath=//div[@data-test-subj="loginErrorMessage"]'),
+    page.getByTestId('helpMenuButton'),
+    page.getByText('Select your space'),
+    page.getByTestId('loginErrorMessage'),
   ]);
 
   const spaceSelector = index === 1;
@@ -40,8 +40,8 @@ ess_auth('Authentication', async ({ page }) => {
   if (isAuthenticated) {
     await page.context().storageState({ path: STORAGE_STATE });
   } else if (spaceSelector) {
-    await page.locator('xpath=//a[contains(text(),"Default")]').click();
-    await expect(page.locator('xpath=//div[@data-test-subj="helpMenuButton"]')).toBeVisible();
+    await page.getByRole('link', { name: 'Default' }).click();
+    await expect(page.getByTestId('helpMenuButton')).toBeVisible();
     await page.context().storageState({ path: STORAGE_STATE });
   } else {
     log.error('Username or password is incorrect.');

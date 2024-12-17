@@ -10,11 +10,9 @@ import { expect, Page } from '@playwright/test';
 export class HostDetailsPage {
   page: Page;
 
-  public readonly hostDetailsLogsTab = () =>
-    this.page.locator('xpath=//button[@data-test-subj="infraAssetDetailsLogsTab"]');
+  public readonly hostDetailsLogsTab = () => this.page.getByTestId('infraAssetDetailsLogsTab');
 
-  private readonly hostDetailsLogsStream = () =>
-    this.page.locator('xpath=//div[@data-test-subj="logStream"]');
+  private readonly hostDetailsLogsStream = () => this.page.getByTestId('logStream');
 
   public readonly noData = () => this.page.getByTestId('kbnNoDataPage');
 
@@ -30,6 +28,11 @@ export class HostDetailsPage {
     await expect(
       this.hostDetailsLogsStream(),
       'Host details log stream should be visible'
-    ).toBeVisible();
+      /**
+       * Using toBeAttached() instead of toBeVisible() because the element
+       * we're selecting here has a bit weird layout with 0 height and
+       * overflowing child elements. 0 height makes toBeVisible() fail.
+       */
+    ).toBeAttached();
   }
 }

@@ -15,17 +15,13 @@ export class OnboardingHomePage {
   }
 
   private readonly useCaseKubernetes = () =>
-    this.page.locator(
-      'xpath=//div[@data-test-subj="observabilityOnboardingUseCaseCard-kubernetes"]//input[@type="radio"]'
-    );
+    this.page.getByTestId('observabilityOnboardingUseCaseCard-kubernetes').getByRole('radio');
 
   private readonly kubernetesQuickStartCard = () =>
-    this.page.locator('xpath=//div[@data-test-subj="integration-card:kubernetes-quick-start"]');
+    this.page.getByTestId('integration-card:kubernetes-quick-start');
 
   private readonly useCaseHost = () =>
-    this.page.locator(
-      'xpath=//div[@data-test-subj="observabilityOnboardingUseCaseCard-host"]//input[@type="radio"]'
-    );
+    this.page.getByTestId('observabilityOnboardingUseCaseCard-host').getByRole('radio');
 
   private readonly autoDetectElasticAgent = () =>
     this.page.getByTestId('integration-card:auto-detect-logs');

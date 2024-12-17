@@ -14,10 +14,8 @@ export class SpaceSelector {
     this.page = page;
   }
 
-  public readonly spaceSelector = () =>
-    this.page.locator('xpath=//h1[contains(text(),"Select your space")]');
-  private readonly spaceSelectorDefault = () =>
-    this.page.locator('xpath=//a[contains(text(),"Default")]');
+  public readonly spaceSelector = () => this.page.getByText('Select your space');
+  private readonly spaceSelectorDefault = () => this.page.getByRole('link', { name: 'Default' });
 
   public async selectDefault() {
     await this.spaceSelectorDefault().click();
