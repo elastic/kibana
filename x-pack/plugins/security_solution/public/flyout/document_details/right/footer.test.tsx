@@ -11,12 +11,20 @@ import { TestProviders } from '../../../common/mock';
 import { mockContextValue } from '../shared/mocks/mock_context';
 import { DocumentDetailsContext } from '../shared/context';
 import { FLYOUT_FOOTER_TEST_ID } from './test_ids';
+import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from '../shared/components/test_ids';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAlertExceptionActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+  return {
+    ...original,
+    useLocation: jest.fn().mockReturnValue({ search: '' }),
+  };
+});
 jest.mock('../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions');
 jest.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
@@ -39,14 +47,13 @@ describe('PanelFooter', () => {
   it('should render the take action dropdown', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        osquery: {
-          isOsqueryAvailable: jest.fn(),
-        },
+        osquery: { isOsqueryAvailable: jest.fn() },
+        cases: { hooks: { useIsAddToCaseOpen: jest.fn().mockReturnValue(false) } },
       },
     });
     (useAlertExceptionActions as jest.Mock).mockReturnValue({ exceptionActionItems: [] });
     (useInvestigateInTimeline as jest.Mock).mockReturnValue({
-      investigateInTimelineActionItems: [],
+      investigateInTimelineActionItems: [{ name: 'test', onClick: jest.fn() }],
     });
     (useAddToCaseActions as jest.Mock).mockReturnValue({ addToCaseActionItems: [] });
 
@@ -58,5 +65,6 @@ describe('PanelFooter', () => {
       </TestProviders>
     );
     expect(wrapper.getByTestId(FLYOUT_FOOTER_TEST_ID)).toBeInTheDocument();
+    expect(wrapper.getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 });
