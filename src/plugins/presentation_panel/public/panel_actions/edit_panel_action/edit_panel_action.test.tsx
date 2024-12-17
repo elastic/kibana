@@ -14,7 +14,7 @@ import { EditPanelAction, EditPanelActionApi } from './edit_panel_action';
 describe('Edit panel action', () => {
   let action: EditPanelAction;
   let context: { embeddable: EditPanelActionApi };
-  let updateViewMode: (viewMode: ViewMode) => void;
+  let updateViewMode: (viewMode$: ViewMode) => void;
 
   beforeEach(() => {
     const viewModeSubject = new BehaviorSubject<ViewMode>('edit');
@@ -23,7 +23,7 @@ describe('Edit panel action', () => {
     action = new EditPanelAction();
     context = {
       embeddable: {
-        viewMode: viewModeSubject,
+        viewMode$: viewModeSubject,
         onEdit: jest.fn(),
         isEditingEnabled: jest.fn().mockReturnValue(true),
         getTypeDisplayName: jest.fn().mockReturnValue('A very fun panel type'),
@@ -43,7 +43,7 @@ describe('Edit panel action', () => {
   });
 
   it('is incompatible when view mode is view', async () => {
-    (context.embeddable as PublishesViewMode).viewMode = new BehaviorSubject<ViewMode>('view');
+    (context.embeddable as PublishesViewMode).viewMode$ = new BehaviorSubject<ViewMode>('view');
     expect(await action.isCompatible(context)).toBe(false);
   });
 

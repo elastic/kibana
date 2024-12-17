@@ -40,11 +40,8 @@ export const PresentationPanelError = ({
     [api, isEditable]
   );
 
-  const panelTitle = useStateFromPublishingSubject(api?.panelTitle);
-  const ariaLabel = useMemo(
-    () => (panelTitle ? getErrorCallToAction(panelTitle) : label),
-    [label, panelTitle]
-  );
+  const title = useStateFromPublishingSubject(api?.title$);
+  const ariaLabel = useMemo(() => (title ? getErrorCallToAction(title) : label), [label, title]);
 
   // Get initial editable state from action and subscribe to changes.
   useEffect(() => {
