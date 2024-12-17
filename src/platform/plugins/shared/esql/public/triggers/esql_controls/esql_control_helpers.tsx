@@ -27,7 +27,7 @@ interface Context {
   core: CoreStart;
   search: ISearchGeneric;
   controlType: EsqlControlType;
-  onSaveControlCb?: (controlState: ESQLControlState) => Promise<void>;
+  onSaveControlCb?: (controlState: ESQLControlState, updatedQuery: string) => Promise<void>;
   onCancelControlCb?: () => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;

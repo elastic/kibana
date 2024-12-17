@@ -76,7 +76,7 @@ export interface ESQLEditorProps {
    **/
   supportsControls?: boolean;
   /** Function to be called after the control creation **/
-  onSaveControlCb?: (controlState: Record<string, unknown>) => Promise<void>;
+  onSaveControlCb?: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
   /** Function to be called after cancelling the control creation **/
   onCancelControlCb?: () => void;
 }

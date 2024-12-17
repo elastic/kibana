@@ -505,7 +505,7 @@ export type TypedLensByValueInput = Omit<LensRendererProps, 'savedObjectId'>;
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
 export type LensEmbeddableOutput = LensApi;
 
-interface ControlGroupApi {
+export interface ControlGroupApi {
   addNewPanel: (panelState: Record<string, unknown>) => void;
 }
 

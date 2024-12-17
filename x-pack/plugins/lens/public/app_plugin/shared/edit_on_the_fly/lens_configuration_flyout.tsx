@@ -108,34 +108,6 @@ export function LensEditConfigurationFlyout({
   const dashboardPanels = useStateFromPublishingSubject(dashboardApi?.children$);
   const controlGroupApi = useStateFromPublishingSubject(dashboardApi?.controlGroupApi$);
 
-  const onSaveControlCb = useCallback(
-    async (controlState: Record<string, unknown>) => {
-      if (!panelId) {
-        return;
-      }
-
-      // add a new control
-      controlGroupApi?.addNewPanel({
-        panelType: 'esqlControl',
-        initialState: {
-          ...controlState,
-          id: uuidv4(),
-        },
-      });
-
-      const panel = dashboardPanels?.[panelId];
-      if (panel) {
-        // open the edit flyout to continue editing
-        await (panel as { onEdit: () => Promise<void> }).onEdit();
-      }
-    },
-    [controlGroupApi, dashboardPanels, panelId]
-  );
-
-  const onCancelControlCb = useCallback(() => {
-    closeFlyout?.();
-  }, [closeFlyout]);
-
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
   // use the latest activeId, but fallback to attributes
@@ -161,6 +133,70 @@ export function LensEditConfigurationFlyout({
       setEsqlVariables(nextVariables);
     }
   });
+
+  const onSaveControlCb = useCallback(
+    async (controlState: Record<string, unknown>, updatedQuery: string) => {
+      if (!panelId) {
+        return;
+      }
+
+      // add a new control
+      controlGroupApi?.addNewPanel({
+        panelType: 'esqlControl',
+        initialState: {
+          ...controlState,
+          id: uuidv4(),
+        },
+      });
+
+      const panel = dashboardPanels?.[panelId] as {
+        updateAttributes: (attributes: TypedLensSerializedState['attributes']) => void;
+        onEdit: () => Promise<void>;
+      };
+      if (panel && updatedQuery) {
+        const abortController = new AbortController();
+        const newVariables = esqlVariablesService.getVariables();
+        const attrs = await getSuggestions(
+          { esql: updatedQuery },
+          startDependencies,
+          datasourceMap,
+          visualizationMap,
+          adHocDataViews,
+          setErrors,
+          abortController,
+          setDataGridAttrs,
+          newVariables
+        );
+        if (attrs) {
+          panel.updateAttributes(attrs);
+        } else {
+          panel.updateAttributes({
+            ...attributes,
+            state: {
+              ...attributes.state,
+              query: { esql: updatedQuery },
+            },
+          });
+        }
+        // open the edit flyout to continue editing
+        await panel.onEdit();
+      }
+    },
+    [
+      adHocDataViews,
+      attributes,
+      controlGroupApi,
+      dashboardPanels,
+      datasourceMap,
+      panelId,
+      startDependencies,
+      visualizationMap,
+    ]
+  );
+
+  const onCancelControlCb = useCallback(() => {
+    closeFlyout?.();
+  }, [closeFlyout]);
 
   const dispatch = useLensDispatch();
   useEffect(() => {
@@ -402,16 +438,6 @@ export function LensEditConfigurationFlyout({
       esqlVariables,
     ]
   );
-
-  useEffect(() => {
-    // runs the query from the variables service when the flyout is opened after the creation of the control
-    const queryWithVariables = esqlVariablesService.getEsqlQueryWithVariables();
-    if (queryWithVariables) {
-      setQuery({ esql: queryWithVariables });
-      runQuery({ esql: queryWithVariables });
-      esqlVariablesService.setEsqlQueryWithVariables('');
-    }
-  }, [runQuery]);
 
   const isSaveable = useMemo(() => {
     if (!attributesChanged) {

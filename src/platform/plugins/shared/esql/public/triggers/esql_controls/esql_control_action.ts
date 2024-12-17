@@ -20,7 +20,7 @@ const ACTION_CREATE_ESQL_CONTROL = 'ACTION_CREATE_ESQL_CONTROL';
 interface Context {
   queryString: string;
   controlType: EsqlControlType;
-  onSaveControlCb?: (controlState: ESQLControlState) => Promise<void>;
+  onSaveControlCb?: (controlState: ESQLControlState, updatedQuery: string) => Promise<void>;
   onCancelControlCb?: () => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;

@@ -22,7 +22,7 @@ interface ESQLControlsFlyoutProps {
   search: ISearchGeneric;
   controlType: EsqlControlType;
   queryString: string;
-  onSaveControlCb?: (controlState: ESQLControlState) => Promise<void>;
+  onSaveControlCb?: (controlState: ESQLControlState, updatedQuery: string) => Promise<void>;
   onCancelControlCb?: () => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
@@ -40,7 +40,7 @@ export function ESQLControlsFlyout({
   closeFlyout,
 }: ESQLControlsFlyoutProps) {
   const addToESQLVariablesService = useCallback(
-    (varName: string, variableValue: string, variableType: EsqlControlType, query: string) => {
+    (varName: string, variableValue: string, variableType: EsqlControlType) => {
       if (esqlVariablesService.variableExists(varName)) {
         esqlVariablesService.removeVariable(varName);
       }
@@ -49,7 +49,6 @@ export function ESQLControlsFlyout({
         value: variableValue,
         type: variableType,
       });
-      esqlVariablesService.setEsqlQueryWithVariables(query);
     },
     []
   );
@@ -58,9 +57,9 @@ export function ESQLControlsFlyout({
     async (state: ESQLControlState, variableName: string, variableValue: string) => {
       if (cursorPosition) {
         const query = updateQueryStringWithVariable(queryString, variableName, cursorPosition);
-        addToESQLVariablesService(variableName, variableValue, controlType, query);
+        addToESQLVariablesService(variableName, variableValue, controlType);
 
-        await onSaveControlCb?.(state);
+        await onSaveControlCb?.(state, query);
       }
     },
     [addToESQLVariablesService, controlType, cursorPosition, onSaveControlCb, queryString]
@@ -68,8 +67,8 @@ export function ESQLControlsFlyout({
 
   const onEditControl = useCallback(
     async (state: ESQLControlState, variableName: string, variableValue: string) => {
-      await onSaveControlCb?.(state);
-      addToESQLVariablesService(variableName, variableValue, controlType, '');
+      await onSaveControlCb?.(state, '');
+      addToESQLVariablesService(variableName, variableValue, controlType);
     },
     [addToESQLVariablesService, controlType, onSaveControlCb]
   );
