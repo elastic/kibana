@@ -33,8 +33,8 @@ async function evaluateEsqlQuery({
         ]
       : []),
     ...(execute
-      ? [`The query successfully executed without an error`]
-      : [`The query was not executed, it was only explained`]),
+      ? ['The query successfully executed without an error']
+      : ['The query was not executed, it was only explained']),
     ...criteria,
   ]);
 
@@ -44,6 +44,10 @@ async function evaluateEsqlQuery({
 }
 
 describe('ES|QL query generation', () => {
+  before(() => {
+    chatClient.setScopes(['all']);
+  });
+
   describe('other queries', () => {
     describe('with packetbeat data', () => {
       before(async () => {
@@ -348,6 +352,7 @@ describe('ES|QL query generation', () => {
         execute: false,
       });
     });
+
     it('prod_web length', async () => {
       await evaluateEsqlQuery({
         question: `can you convert this SPL query to ESQL? index=prod_web | eval length=len(message) | eval k255=if((length>255),1,0) | eval k2=if((length>2048),1,0) | eval k4=if((length>4096),1,0) |eval k16=if((length>16384),1,0) | stats count, sum(k255), sum(k2),sum(k4),sum(k16), sum(length)`,
@@ -360,6 +365,7 @@ describe('ES|QL query generation', () => {
         execute: false,
       });
     });
+
     it('prod_web filter message and host', async () => {
       await evaluateEsqlQuery({
         question: `can you convert this SPL query to ESQL? index=prod_web NOT "Connection reset" NOT "[acm-app] created a ThreadLocal" sourcetype!=prod_urlf_east_logs sourcetype!=prod_urlf_west_logs host!="dbs-tools-*" NOT "Public] in context with path [/global] " host!="*dev*" host!="*qa*" host!="*uat*"`,
@@ -376,5 +382,9 @@ describe('ES|QL query generation', () => {
         execute: false,
       });
     });
+  });
+
+  after(() => {
+    chatClient.setScopes(['observability']);
   });
 });
