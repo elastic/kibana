@@ -16,12 +16,17 @@ describe('updateAlertsStatus', () => {
   const alertsClient = alertsClientMock.create();
   let alertService: AlertService;
 
-  jest.useFakeTimers();
-  jest.setSystemTime(new Date('2022-02-21T17:35:00Z'));
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2022-02-21T17:35:00Z'));
 
-  beforeEach(async () => {
     alertService = new AlertService(esClient, logger, alertsClient);
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
   });
 
   describe('happy path', () => {
