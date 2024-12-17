@@ -42,6 +42,7 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
         <EuiPanel hasShadow={false} hasBorder className={scrollPanelCss}>
           <EuiFlexGroup direction="column" gutterSize="s">
             {missingLookups.map((lookupName) => {
+              const isMarkedAsEmpty = uploadedLookups[lookupName] === EMPTY_RESOURCE_PLACEHOLDER;
               return (
                 <EuiFlexItem key={lookupName}>
                   <EuiFlexGroup
@@ -60,11 +61,7 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
                     <EuiFlexItem grow={false}>
                       <EuiText
                         size="s"
-                        style={
-                          uploadedLookups[lookupName] === EMPTY_RESOURCE_PLACEHOLDER
-                            ? { textDecoration: 'line-through' }
-                            : {}
-                        }
+                        style={isMarkedAsEmpty ? { textDecoration: 'line-through' } : {}}
                       >
                         {lookupName}
                       </EuiText>
@@ -84,7 +81,7 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
                       <ClearLookupButton
                         lookupName={lookupName}
                         clearLookup={clearLookup}
-                        isDisabled={!!uploadedLookups[lookupName]}
+                        isDisabled={isMarkedAsEmpty}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
