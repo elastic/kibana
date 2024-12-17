@@ -11,6 +11,7 @@ import type { BehaviorSubject } from 'rxjs';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import { DiscoverAppState } from '../../..';
 import { FetchStatus } from '../../types';
 import type {
   DataDocuments$,
@@ -43,6 +44,7 @@ export function sendCompleteMsg(main$: DataMain$, foundDocuments = true) {
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments,
     error: undefined,
+    timeEnd: new Date().getTime(),
   });
 }
 
@@ -53,13 +55,17 @@ export function sendFetchStartMsg(
   main$: DataMain$,
   timeRange: TimeRange,
   timeRangeRelative: TimeRange,
-  query: AggregateQuery | Query | undefined
+  query: AggregateQuery | Query | undefined,
+  appState: DiscoverAppState
 ) {
   main$.next({
     ...main$.getValue(),
     timeRange,
     timeRangeRelative,
     query,
+    timeStart: new Date().getTime(),
+    timeEnd: undefined,
+    appState,
   });
 }
 
@@ -80,7 +86,11 @@ export function sendLoadingMsg<T extends DataMsg>(
   props?: Omit<T, 'fetchStatus'>
 ) {
   if (data$.getValue().fetchStatus !== FetchStatus.LOADING) {
-    data$.next({ ...data$.getValue(), ...props, fetchStatus: FetchStatus.LOADING } as T);
+    data$.next({
+      ...data$.getValue(),
+      ...props,
+      fetchStatus: FetchStatus.LOADING,
+    } as T);
   }
 }
 

@@ -20,7 +20,7 @@ import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
 import { getEsqlDataView } from './utils/get_esql_data_view';
-import type { DiscoverAppStateContainer } from './discover_app_state_container';
+import type { DiscoverAppState, DiscoverAppStateContainer } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
@@ -49,12 +49,15 @@ export interface DataMsg {
   fetchStatus: FetchStatus;
   error?: Error;
   query?: AggregateQuery | Query | undefined;
+  timeStart?: number;
+  timeEnd?: number;
 }
 
 export interface DataMainMsg extends DataMsg {
   foundDocuments?: boolean;
   timeRange?: TimeRange;
   timeRangeRelative?: TimeRange;
+  appState?: DiscoverAppState;
 }
 
 export interface DataDocumentsMsg extends DataMsg {
@@ -241,7 +244,8 @@ export function getDataStateContainer({
             dataSubjects.main$,
             timefilter.getAbsoluteTime(),
             timefilter.getTime(),
-            appStateContainer.getState().query
+            appStateContainer.getState().query,
+            appStateContainer.getState()
           );
 
           if (options.fetchMore) {

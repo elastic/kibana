@@ -47,7 +47,7 @@ import {
   useAppStateSelector,
   type DiscoverAppState,
 } from '../../state_management/discover_app_state_container';
-import { DataDocumentsMsg } from '../../state_management/discover_data_state_container';
+import { DataDocumentsMsg, DataMain$ } from '../../state_management/discover_data_state_container';
 import { useSavedSearch } from '../../state_management/discover_state_provider';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
@@ -133,22 +133,21 @@ export const useDiscoverHistogram = ({
    */
 
   useEffect(() => {
-    const subscription = createAppStateObservable(stateContainer.appState.state$).subscribe(
-      (changes) => {
-        if ('timeInterval' in changes && changes.timeInterval) {
-          unifiedHistogram?.setTimeInterval(changes.timeInterval);
-        }
-
-        if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
-          unifiedHistogram?.setChartHidden(changes.chartHidden);
-        }
+    const subscription = createAppStateObservable(main$).subscribe((changes) => {
+      if ('timeInterval' in changes && changes.timeInterval) {
+        unifiedHistogram?.setTimeInterval(changes.timeInterval);
       }
-    );
+
+      if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
+        skipRefetch.current = true;
+        unifiedHistogram?.setChartHidden(changes.chartHidden);
+      }
+    });
 
     return () => {
       subscription?.unsubscribe();
     };
-  }, [stateContainer.appState.state$, unifiedHistogram]);
+  }, [main$, unifiedHistogram]);
 
   /**
    * Total hits
@@ -303,11 +302,29 @@ export const useDiscoverHistogram = ({
       fetchChart$ = stateContainer.dataState.fetchChart$.pipe(map(() => 'discover'));
     }
 
+    const checkInTimeRange = () => {
+      const time = new Date().getTime();
+      const mainTimeStart = main$.getValue().timeStart;
+      const mainTimeEnd = main$.getValue().timeEnd;
+      if (!mainTimeStart) {
+        return false;
+      }
+      if (!mainTimeEnd) {
+        return true;
+      }
+      if (time >= mainTimeStart && time <= mainTimeEnd) {
+        return true;
+      }
+      return false;
+    };
+
     const subscription = fetchChart$.subscribe((source) => {
       if (!skipRefetch.current) {
         if (source === 'discover') addLog('Unified Histogram - Discover refetch');
         if (source === 'lens') addLog('Unified Histogram - Lens suggestion refetch');
-        unifiedHistogram.refetch();
+        if (source === 'discover' || checkInTimeRange()) {
+          unifiedHistogram.refetch();
+        }
       }
       skipRefetch.current = false;
     });
@@ -321,6 +338,7 @@ export const useDiscoverHistogram = ({
       subscription.unsubscribe();
     };
   }, [
+    main$,
     query,
     esqlQuery,
     isEsqlMode,
@@ -450,23 +468,24 @@ const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistog
   );
 };
 
-const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
+const createAppStateObservable = (state$: DataMain$) => {
   return state$.pipe(
+    filter((state) => state.fetchStatus === FetchStatus.LOADING),
     startWith(undefined),
     pairwise(),
     map(([prev, curr]) => {
       const changes: Partial<UnifiedHistogramState> = {};
 
-      if (!curr) {
+      if (!curr || !curr.appState) {
         return changes;
       }
 
-      if (prev?.interval !== curr.interval) {
-        changes.timeInterval = curr.interval;
+      if (prev?.appState?.interval !== curr.appState?.interval) {
+        changes.timeInterval = curr.appState.interval;
       }
 
-      if (prev?.hideChart !== curr.hideChart) {
-        changes.chartHidden = curr.hideChart;
+      if (prev?.appState?.hideChart !== curr.appState?.hideChart) {
+        changes.chartHidden = curr.appState.hideChart;
       }
 
       return changes;

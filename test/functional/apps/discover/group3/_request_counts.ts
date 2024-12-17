@@ -265,7 +265,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectSearches(type, 1, async () => {
           await discover.toggleChartVisibility();
         });
-        await expectSearches(type, 3, async () => {
+        await expectSearches(type, 2, async () => {
           await discover.toggleChartVisibility();
         });
       });
