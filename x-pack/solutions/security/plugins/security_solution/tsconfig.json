@@ -234,6 +234,7 @@
     "@kbn/react-hooks",
     "@kbn/index-adapter",
     "@kbn/core-http-server-utils",
-    "@kbn/llm-tasks-plugin"
+    "@kbn/llm-tasks-plugin",
+    "@kbn/ai-assistant-icon"
   ]
 }

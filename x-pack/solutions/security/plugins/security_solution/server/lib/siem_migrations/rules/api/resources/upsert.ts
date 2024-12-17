@@ -27,6 +27,7 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
       path: SIEM_RULE_MIGRATION_RESOURCES_PATH,
       access: 'internal',
       security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      options: { body: { maxBytes: 26214400 } }, // rise payload limit to 25MB
     })
     .addVersion(
       {

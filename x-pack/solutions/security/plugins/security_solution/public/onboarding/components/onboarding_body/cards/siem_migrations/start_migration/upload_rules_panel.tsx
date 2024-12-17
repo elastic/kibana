@@ -15,10 +15,11 @@ import {
   EuiButtonEmpty,
   EuiPanel,
 } from '@elastic/eui';
-import { SiemMigrationsIcon } from '../../../../../../../siem_migrations/common/icon';
-import * as i18n from '../translations';
-import { useStartMigrationContext } from '../context';
-import { TITLE_CLASS_NAME } from '../start_migration_card.styles';
+import { RuleMigrationsReadMore } from '../../../../../../siem_migrations/rules/components/migration_status_panels/read_more';
+import { SiemMigrationsIcon } from '../../../../../../siem_migrations/common/icon';
+import * as i18n from './translations';
+import { TITLE_CLASS_NAME } from './start_migration_card.styles';
+import { useRuleMigrationDataInputContext } from '../../../../../../siem_migrations/rules/components/data_input_flyout/context';
 import { useStyles } from './upload_rules_panel.styles';
 
 export interface UploadRulesPanelProps {
@@ -26,7 +27,7 @@ export interface UploadRulesPanelProps {
 }
 export const UploadRulesPanel = React.memo<UploadRulesPanelProps>(({ isUploadMore = false }) => {
   const styles = useStyles(isUploadMore);
-  const { openFlyout } = useStartMigrationContext();
+  const { openFlyout } = useRuleMigrationDataInputContext();
   const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
     openFlyout();
   }, [openFlyout]);
@@ -55,9 +56,7 @@ export const UploadRulesPanel = React.memo<UploadRulesPanelProps>(({ isUploadMor
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  <p>{i18n.START_MIGRATION_CARD_UPLOAD_READ_MORE}</p>
-                </EuiText>
+                <RuleMigrationsReadMore />
               </EuiFlexItem>
             </EuiFlexGroup>
           )}

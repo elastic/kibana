@@ -42,7 +42,7 @@ export const CopyExportQuery = React.memo<CopyExportQueryProps>(({ onCopied }) =
           id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.copyExportQuery.description"
           defaultMessage="From you admin Splunk account, go to the {section} app and run the above query. Export your results as {format}."
           values={{
-            section: <b>{i18n.RULES_DATA_INPUT_COPY_DESCRIPTION_SECTION}</b>,
+            section: <b>{i18n.MACROS_DATA_INPUT_COPY_DESCRIPTION_SECTION}</b>,
             format: <b>{'JSON'}</b>,
           }}
         />

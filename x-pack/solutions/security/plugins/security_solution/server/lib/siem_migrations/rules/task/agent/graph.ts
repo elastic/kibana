@@ -6,7 +6,7 @@
  */
 
 import { END, START, StateGraph } from '@langchain/langgraph';
-import { SiemMigrationRuleTranslationResult } from '../../../../../../common/siem_migrations/constants';
+import { RuleTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import { getCreateSemanticQueryNode } from './nodes/create_semantic_query';
 import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
 import { getProcessQueryNode } from './nodes/process_query';
@@ -62,7 +62,7 @@ const matchedPrebuiltRuleConditional = (state: MigrateRuleState) => {
   if (state.elastic_rule?.prebuilt_rule_id) {
     return END;
   }
-  if (state.translation_result === SiemMigrationRuleTranslationResult.UNTRANSLATABLE) {
+  if (state.translation_result === RuleTranslationResult.UNTRANSLATABLE) {
     return END;
   }
   return 'processQuery';
