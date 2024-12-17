@@ -8,10 +8,11 @@
 import React from 'react';
 import { BaseEdge, getSmoothStepPath } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
-import type { Color } from '@kbn/cloud-security-posture-common/types/graph/latest';
-import type { EdgeProps } from '../types';
-import { getMarker } from './styles';
+import type { EdgeProps, EdgeViewModel } from '../types';
 import { getShapeHandlePosition } from './utils';
+import { getMarkerStart, getMarkerEnd } from './markers';
+
+type EdgeColor = EdgeViewModel['color'];
 
 export function DefaultEdge({
   id,
@@ -25,7 +26,7 @@ export function DefaultEdge({
   data,
 }: EdgeProps) {
   const { euiTheme } = useEuiTheme();
-  const color: Color = data?.color ?? 'primary';
+  const color: EdgeColor = data?.color ?? 'primary';
 
   const [edgePath] = getSmoothStepPath({
     // sourceX and targetX are adjusted to account for the shape handle position
@@ -49,9 +50,14 @@ export function DefaultEdge({
         css={{
           strokeDasharray: '2,2',
         }}
+        markerStart={
+          data?.sourceShape !== 'label' && data?.sourceShape !== 'group'
+            ? getMarkerStart(data?.sourceColor ?? 'primary')
+            : undefined
+        }
         markerEnd={
           data?.targetShape !== 'label' && data?.targetShape !== 'group'
-            ? getMarker(color)
+            ? getMarkerEnd(color)
             : undefined
         }
       />

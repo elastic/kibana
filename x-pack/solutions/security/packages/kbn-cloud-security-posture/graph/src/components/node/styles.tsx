@@ -26,6 +26,7 @@ export const LABEL_BORDER_WIDTH = 1;
 export const NODE_WIDTH = 90;
 export const NODE_HEIGHT = 90;
 const NODE_LABEL_WIDTH = 120;
+type NodeColor = EntityNodeViewModel['color'] | LabelNodeViewModel['color'];
 
 export const LabelNodeContainer = styled.div`
   text-wrap: nowrap;
@@ -227,9 +228,7 @@ export const HandleStyleOverride: React.CSSProperties = {
   border: 'none',
 };
 
-export const useNodeFillColor = (
-  color: EntityNodeViewModel['color'] | LabelNodeViewModel['color'] | undefined
-) => {
+export const useNodeFillColor = (color: NodeColor | undefined) => {
   const fillColor = (color === 'danger' ? 'primary' : color) ?? 'primary';
   return useEuiBackgroundColor(fillColor);
 };

@@ -19,12 +19,12 @@ import {
   type NodeProps,
 } from '@xyflow/react';
 import { Story } from '@storybook/react';
-import { SvgDefsMarker } from './styles';
 import { DefaultEdge } from '.';
-
-import '@xyflow/react/dist/style.css';
 import { LabelNode } from '../node';
 import type { NodeViewModel } from '../types';
+import { SvgDefsMarker } from './markers';
+
+import '@xyflow/react/dist/style.css';
 
 export default {
   title: 'Components/Graph Components/Default Edge',
