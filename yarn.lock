@@ -6953,7 +6953,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/screenshotting-plugin@link:x-pack/plugins/screenshotting":
+"@kbn/screenshotting-plugin@link:x-pack/platform/plugins/shared/screenshotting":
   version "0.0.0"
   uid ""
 

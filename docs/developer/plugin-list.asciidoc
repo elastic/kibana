@@ -815,7 +815,7 @@ Elastic.
 |Add tagging capability to saved objects
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/screenshotting/README.md[screenshotting]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/screenshotting/README.md[screenshotting]
 |This plugin provides functionality to take screenshots of the Kibana pages.
 It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 
