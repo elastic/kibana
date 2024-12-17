@@ -61,13 +61,11 @@ export const AddFromLibraryFlyout = ({
       const libraryType = getAddFromLibraryType(type);
       if (!libraryType) {
         core.notifications.toasts.addWarning(
-          i18n.translate(
-            'embeddableApi.addPanel.typeNotFound',
-            { 
-              defaultMessage: 'Unable to load type: {type}',
-              values: { type }
-            },
-          ));
+          i18n.translate('embeddableApi.addPanel.typeNotFound', {
+            defaultMessage: 'Unable to load type: {type}',
+            values: { type },
+          })
+        );
         return;
       }
 

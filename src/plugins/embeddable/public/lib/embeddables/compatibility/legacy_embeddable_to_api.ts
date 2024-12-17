@@ -29,7 +29,6 @@ import {
   combineLatest,
   distinctUntilChanged,
 } from 'rxjs';
-import { embeddableStart } from '../../../kibana_services';
 import { isFilterableEmbeddable } from '../../filterable_embeddable';
 import {
   EmbeddableInput,
@@ -94,7 +93,6 @@ export const legacyEmbeddableToApi = (
     throw new Error('Edit legacy embeddable not supported');
   };
   const getTypeDisplayName = () =>
-    embeddableStart.getEmbeddableFactory(embeddable.type)?.getDisplayName() ??
     i18n.translate('embeddableApi.compatibility.defaultTypeDisplayName', {
       defaultMessage: 'chart',
     });

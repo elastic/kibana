@@ -64,10 +64,7 @@ export type {
   SelfStyledEmbeddable,
   ValueClickContext,
 } from './lib';
-export type {
-  EmbeddableSetup,
-  EmbeddableStart,
-} from './types';
+export type { EmbeddableSetup, EmbeddableStart } from './types';
 
 export {
   ReactEmbeddableRenderer,

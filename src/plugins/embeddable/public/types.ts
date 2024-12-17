@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EmbeddableStateTransfer } from './lib';
-import type { registerReactEmbeddableFactory } from './react_embeddable_system';
-import type { registerAddFromLibraryType } from './add_from_library/registry';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -17,6 +14,9 @@ import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-manag
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { registerAddFromLibraryType } from './add_from_library/registry';
+import type { registerReactEmbeddableFactory } from './react_embeddable_system';
+import type { EmbeddableStateTransfer } from './lib';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
