@@ -1371,6 +1371,33 @@
       "enabled": true
     },
     {
+      "groupName": "search-kibana dependencies",
+      "matchDepNames": [
+        "@elastic/react-search-ui",
+        "@elastic/react-search-ui-views",
+        "@elastic/search-ui",
+        "@elastic/search-ui-app-search-connector",
+        "@elastic/search-ui-engines-connector",
+        "ai",
+        "kea",
+        "swr"
+      ],
+      "reviewers": [
+        "team:search-kibana"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Search",
+        "Team:Enterprise Search",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "vinyl",
       "matchDepNames": [
         "vinyl",
