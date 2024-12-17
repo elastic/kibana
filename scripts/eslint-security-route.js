@@ -17,7 +17,7 @@ const path = require('path');
 const { findCodeOwnersEntryForPath, getCodeOwnersEntries } = require('@kbn/code-owners');
 
 process.env.ROUTE_TYPE = 'unauthorized';
-const DRY_RUN = true;
+const DRY_RUN = process.env.DRY_RUN === 'true';
 
 console.log('DRY_RUN:', DRY_RUN);
 
