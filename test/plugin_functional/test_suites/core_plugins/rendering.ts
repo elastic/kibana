@@ -330,6 +330,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.searchAssistant.ui.enabled (boolean?)',
         'xpack.searchInferenceEndpoints.ui.enabled (boolean?)',
         'xpack.searchPlayground.ui.enabled (boolean?)',
+        'xpack.searchSynonyms.ui.enabled (boolean?)',
         'xpack.security.loginAssistanceMessage (string?)',
         'xpack.security.sameSiteCookies (Strict?|Lax?|None?)',
         'xpack.security.showInsecureClusterWarning (boolean?)',
