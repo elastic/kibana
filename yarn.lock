@@ -5221,7 +5221,6 @@
   version "0.0.0"
   uid ""
 
-<<<<<<< HEAD
 "@kbn/data-definition-plugin@link:x-pack/plugins/data_definition":
   version "0.0.0"
   uid ""
@@ -5230,10 +5229,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-forge@link:x-pack/packages/kbn-data-forge":
-=======
 "@kbn/data-forge@link:x-pack/platform/packages/shared/kbn-data-forge":
->>>>>>> 4ea032eb48c8d458d802e5cd606217c1bc89f235
   version "0.0.0"
   uid ""
 

@@ -5,44 +5,43 @@
  * 2.0.
  */
 
-import type { PluginInitializer, PluginInitializerContext } from '@kbn/core-plugins-browser';
-import { Plugin } from '@kbn/core-plugins-browser';
-
-/* eslint-disable @typescript-eslint/no-empty-interface*/
-
-export interface DataDefinitionRegistryPublicSetupDependencies {}
-
-export interface DataDefinitionRegistryPublicStartDependencies {}
-
-export interface DataDefinitionRegistryPublicSetup {}
-
-export interface DataDefinitionRegistryPublicStart {}
-
-export interface DataDefinitionRegistryClient {}
-
-export type IDataDefinitionRegistryPublicPluginInitializer = PluginInitializer<
-  DataDefinitionRegistryPublicStart,
-  DataDefinitionRegistryPublicSetup,
-  DataDefinitionRegistryPublicStartDependencies,
-  DataDefinitionRegistryPublicSetupDependencies
->;
-
-export type IDataDefinitionRegistryPublicPlugin = Plugin<
-  DataDefinitionRegistryPublicStart,
-  DataDefinitionRegistryPublicSetup,
-  DataDefinitionRegistryPublicStartDependencies,
-  DataDefinitionRegistryPublicSetupDependencies
->;
+import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
+import { createRepositoryClient } from '@kbn/server-route-repository-client';
+import type { DataDefinitionRegistryServerRouteRepository } from '@kbn/data-definition-registry-plugin/server';
+import { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
+import { once } from 'lodash';
+import type { IDataDefinitionRegistryPublicPlugin } from './types';
 
 export function createPlugin(
   context: PluginInitializerContext
 ): IDataDefinitionRegistryPublicPlugin {
+  const getDataDefinitionRegistryClient = once((core: CoreSetup | CoreStart) => {
+    return createRepositoryClient<DataDefinitionRegistryServerRouteRepository>(core);
+  });
+
   return {
-    setup(coreSetup, pluginsSetup) {
+    setup() {
       return {};
     },
-    start() {
-      return {};
+    start(core) {
+      const client = getDataDefinitionRegistryClient(core);
+      return {
+        getQueries: (options) => {
+          return client
+            .fetch('GET /internal/data_definition/queries', {
+              signal: options.signal,
+              params: {
+                query: {
+                  start: options.start,
+                  end: options.end,
+                  index: options.index,
+                  kuery: options.kuery,
+                },
+              },
+            })
+            .then(({ queries }) => queries);
+        },
+      };
     },
   };
 }

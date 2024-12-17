@@ -15,6 +15,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { DataDefinitionRegistryPublicStart } from '@kbn/data-definition-registry-plugin/public';
 
 export let core: CoreStart;
 
@@ -26,6 +27,7 @@ interface ServiceDeps {
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
+  dataDefinitionRegistry?: DataDefinitionRegistryPublicStart;
 }
 
 const servicesReady$ = new BehaviorSubject<ServiceDeps | undefined>(undefined);
@@ -48,7 +50,8 @@ export const setKibanaServices = (
   storage: Storage,
   indexManagement?: IndexManagementPluginSetup,
   fieldsMetadata?: FieldsMetadataPublicStart,
-  usageCollection?: UsageCollectionStart
+  usageCollection?: UsageCollectionStart,
+  dataDefinitionRegistry?: DataDefinitionRegistryPublicStart
 ) => {
   core = kibanaCore;
   servicesReady$.next({
@@ -59,5 +62,6 @@ export const setKibanaServices = (
     indexManagementApiService: indexManagement?.apiService,
     fieldsMetadata,
     usageCollection,
+    dataDefinitionRegistry,
   });
 };

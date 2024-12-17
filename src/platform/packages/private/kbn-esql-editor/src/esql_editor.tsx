@@ -84,6 +84,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   hideQueryHistory,
   hasOutline,
   displayDocumentationAsFlyout,
+  timeRange,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -783,6 +784,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         resizableContainerButton={resizableContainerButton}
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
+        timeRange={timeRange}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (

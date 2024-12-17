@@ -55,19 +55,20 @@ type InternalDynamicGetQueriesOptions<TAsset extends DynamicDataAsset> = DataStr
   assets: TAsset[];
 };
 
-interface EsqlQueryTemplate {
-  query: string;
+interface EsqlQueryDefinition {
+  id: string;
   description: string;
+  query: string;
 }
 
 interface StaticDataDefinition extends DataDefinitionBase {
-  getQueries: (options: InternalGetQueriesOptions) => Promise<EsqlQueryTemplate[]>;
+  getQueries: (options: InternalGetQueriesOptions) => Promise<EsqlQueryDefinition[]>;
 }
 
 interface DynamicDataDefinition<TAsset extends DynamicDataAsset = DynamicDataAsset>
   extends DataDefinitionBase {
   getAssets: (options: InternalGetAssetsOptions) => Promise<TAsset[]>;
-  getQueries: (options: InternalDynamicGetQueriesOptions<TAsset>) => Promise<EsqlQueryTemplate[]>;
+  getQueries: (options: InternalDynamicGetQueriesOptions<TAsset>) => Promise<EsqlQueryDefinition[]>;
 }
 
 type DataDefinition = DynamicDataDefinition | StaticDataDefinition;
@@ -82,7 +83,7 @@ interface DataDefinitionRegistry {
 
 interface DataDefinitionRegistryClient {
   getAssets: (options: GetAssetOptions) => Promise<DynamicDataAsset[]>;
-  getQueries: (options: GetQueriesOptions) => Promise<EsqlQueryTemplate[]>;
+  getQueries: (options: GetQueriesOptions) => Promise<EsqlQueryDefinition[]>;
 }
 
 export type {
@@ -92,5 +93,5 @@ export type {
   DynamicDataAsset,
   DynamicDataDefinition,
   StaticDataDefinition,
-  EsqlQueryTemplate,
+  EsqlQueryDefinition,
 };

@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import datemath from '@elastic/datemath';
 import { createDataDefinitionRegistryServerRoute } from '../create_data_definition_registry_server_route';
+import type { DynamicDataAsset, EsqlQueryDefinition } from '../../data_definition_registry/types';
 
 const relativeOrAbsolute = (options?: { roundUp?: boolean }) =>
   z.union([z.string(), z.number()]).transform((value, context) => {
@@ -34,34 +35,36 @@ const getAssetsRoute = createDataDefinitionRegistryServerRoute({
   options: {
     tags: ['access:dataDefinitionRegistry'],
   },
-  handler: async ({ params, registry, request }) => {
+  handler: async ({ params, registry, request }): Promise<{ assets: DynamicDataAsset[] }> => {
     const client = await registry.getClientWithRequest(request);
 
     const {
       query: { start, end, index, kuery },
     } = params;
 
-    return client.getAssets({
-      start,
-      end,
-      index: index ?? ['*', '*:*'],
-      query: {
-        bool: {
-          filter: [
-            kuery ? { kql: { query: kuery } } : { match_all: {} },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis',
+    return {
+      assets: await client.getAssets({
+        start,
+        end,
+        index: index ?? ['*', '*:*'],
+        query: {
+          bool: {
+            filter: [
+              kuery ? { kql: { query: kuery } } : { match_all: {} },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: start,
+                    lte: end,
+                    format: 'epoch_millis',
+                  },
                 },
               },
-            },
-          ],
+            ],
+          },
         },
-      },
-    });
+      }),
+    };
   },
 });
 
@@ -78,7 +81,7 @@ const getQueriesRoute = createDataDefinitionRegistryServerRoute({
   options: {
     tags: ['access:dataDefinitionRegistry'],
   },
-  handler: async ({ params, registry, request }) => {
+  handler: async ({ params, registry, request }): Promise<{ queries: EsqlQueryDefinition[] }> => {
     const client = await registry.getClientWithRequest(request);
 
     const {
@@ -107,7 +110,7 @@ const getQueriesRoute = createDataDefinitionRegistryServerRoute({
       },
     });
 
-    return queries;
+    return { queries };
   },
 });
 

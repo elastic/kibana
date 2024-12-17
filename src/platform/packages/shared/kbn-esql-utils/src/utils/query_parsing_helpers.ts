@@ -14,7 +14,11 @@ import type {
   ESQLColumn,
   ESQLSingleAstItem,
   ESQLCommandOption,
+  ESQLAstItem,
+  ESQLLiteral,
 } from '@kbn/esql-ast';
+import { castArray, isArray } from 'lodash';
+import { isColumn, isLiteral } from '@kbn/esql-ast/src/ast/helpers';
 
 const DEFAULT_ESQL_LIMIT = 1000;
 
@@ -146,4 +150,125 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
   });
 
   return columns.map((column) => column.name);
+};
+
+export const getKqlFromESQLQuery = (esql: string): string => {
+  const { root } = parse(esql);
+
+  function handleLogicalExpression(node: ESQLFunction): string {
+    const [lhs, rhs] = node.args;
+    const kqlLhs = handleNode(lhs);
+    const kqlRhs = handleNode(rhs);
+
+    if (node.name === 'or' && kqlLhs && kqlRhs) {
+      return `(${kqlLhs}) OR (${kqlRhs})`;
+    }
+    if (node.name === 'and') {
+      return [kqlLhs, kqlRhs]
+        .filter((part) => !!part)
+        .map((part) => `(${part})`)
+        .join(' AND ');
+    }
+    return '';
+  }
+
+  function handleBinaryExpression(node: ESQLFunction): string {
+    const [lhs, rhs] = node.args;
+
+    if (!isColumn(lhs)) {
+      return '';
+    }
+
+    if (node.name === 'in') {
+      const nodes = castArray(rhs);
+      if (nodes.every(isLiteral)) {
+        return `${lhs.name}:(${(nodes as ESQLLiteral[])
+          .map((literal) => literal.value)
+          .join(' OR ')})`;
+      }
+    }
+
+    if (isLiteral(rhs)) {
+      switch (node.name) {
+        case '==':
+          return `${lhs.name}:${rhs.value}`;
+        case '>':
+        case '>=':
+        case '<':
+        case '<=':
+          return `${lhs.name} ${node.name} ${rhs.value}`;
+        case '!=':
+          return `NOT (${lhs.name}:${rhs.value})`;
+      }
+    }
+    return '';
+  }
+
+  function handleUnaryExpression(node: ESQLFunction): string {
+    switch (node.name) {
+      case 'not':
+        const inner = handleNode(node.args[0]);
+        if (inner) {
+          return `NOT (${inner})`;
+        }
+        break;
+    }
+
+    return '';
+  }
+
+  function handlePostfixUnaryExpression(node: ESQLFunction): string {
+    switch (node.name) {
+      case 'is null':
+      case 'is not null': {
+        if (isColumn(node.args[0])) {
+          const inner = `${node.args[0].name}:*`;
+          return node.name === 'is not null' ? inner : `NOT (${inner})`;
+        }
+      }
+    }
+    return '';
+  }
+
+  function handleNode(node: ESQLAstItem): string {
+    if (isArray(node)) {
+      return node.map(handleNode).join(' AND ');
+    }
+
+    if (node.type === 'function') {
+      if (node.subtype === 'binary-expression') {
+        if (node.name === 'and' || node.name === 'or') {
+          return handleLogicalExpression(node);
+        }
+        return handleBinaryExpression(node);
+      } else if (node.subtype === 'unary-expression') {
+        return handleUnaryExpression(node);
+      } else if (node.subtype === 'postfix-unary-expression') {
+        return handlePostfixUnaryExpression(node);
+      }
+    }
+
+    return '';
+  }
+
+  const kqlFragments: string[] = [];
+
+  for (const command of root.commands) {
+    if (command.name !== 'from' && command.name !== 'where') {
+      break;
+    }
+
+    if (command.name === 'from') {
+      continue;
+    }
+
+    if (command.args.length) {
+      kqlFragments.push(handleNode(command.args[0]));
+    }
+  }
+
+  return kqlFragments
+    .filter((kql) => !!kql)
+    .map((kql) => `(${kql})`)
+    .join(' AND ');
 };

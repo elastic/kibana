@@ -9,12 +9,13 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { DataDefinitionRegistryPublicStart } from '@kbn/data-definition-registry-plugin/public';
 
 export interface ESQLEditorProps {
   /** The aggregate type query */
@@ -66,6 +67,10 @@ export interface ESQLEditorProps {
 
   /** adds a documentation icon in the footer which opens the inline docs as a flyout **/
   displayDocumentationAsFlyout?: boolean;
+  /**
+   * The time range to use for the query.
+   */
+  timeRange?: TimeRange;
 }
 
 export interface ESQLEditorDeps {
@@ -76,4 +81,5 @@ export interface ESQLEditorDeps {
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
+  dataDefinitionRegistry?: DataDefinitionRegistryPublicStart;
 }

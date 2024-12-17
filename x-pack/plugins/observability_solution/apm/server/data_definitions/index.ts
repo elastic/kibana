@@ -7,7 +7,7 @@
 
 import { CoreSetup } from '@kbn/core/server';
 import { lastValueFrom } from 'rxjs';
-import { EsqlQueryTemplate } from '@kbn/data-definition-registry-plugin/server';
+import { EsqlQueryDefinition } from '@kbn/data-definition-registry-plugin/server';
 import { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { castArray } from 'lodash';
 import {
@@ -167,10 +167,10 @@ export function registerDataDefinitions({
 
       const options: QueryFactoryOptions = { availability, indices: apmIndices };
 
-      const queries: EsqlQueryTemplate[] = [
+      const queries: EsqlQueryDefinition[] = [
         ...getListServicesQuery(options),
         ...getTransactionQueries(options),
-        ...(hasDataForAgentMetrics ? getElasticJavaMetricQueries() : []),
+        ...(hasDataForAgentMetrics['elastic/java'] ? getElasticJavaMetricQueries() : []),
         ...getExitSpanQueries(options),
       ];
 
@@ -214,8 +214,6 @@ function getDocumentTypeForTransactions(availability: ApmDataAvailability) {
 }
 
 function getListServicesQuery({ availability, indices }: QueryFactoryOptions) {
-  const description = 'List of services';
-
   const type = availability.hasServiceSummaryMetrics
     ? ApmDocumentType.ServiceSummaryMetric
     : getDocumentTypeForTransactions(availability);
@@ -226,7 +224,8 @@ function getListServicesQuery({ availability, indices }: QueryFactoryOptions) {
 
   return [
     {
-      description,
+      id: 'apm:list_services',
+      description: 'List of services',
       query: `${getSourceCommandsForDocumentType({
         type,
         indices,
@@ -236,8 +235,7 @@ function getListServicesQuery({ availability, indices }: QueryFactoryOptions) {
 }
 
 function getSourceCommands(index: string | string[]) {
-  return `FROM ${castArray(index).join(',')}
-  | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend`;
+  return `FROM ${castArray(index).join(',')}`;
 }
 
 function getSourceCommandsForDocumentType({
@@ -287,30 +285,36 @@ function getTransactionQueries({ availability, indices }: QueryFactoryOptions) {
 
   return [
     {
+      id: 'apm:service_throughout',
       query: getTransactionThroughputQuery(type),
       description: 'Throughput per a service',
     },
     {
+      id: 'apm:service_latency_avg',
       query: getTransactionLatencyAvgQuery(type),
       description: 'Average latency (ms) per service',
     },
     {
-      query: getTransactionLatencyPercentilesQuery(type),
-      description: 'Latency (ms) per service as a percentile',
+      id: 'apm:service_latency_p95',
+      query: getTransactionLatencyP95Query(type),
+      description: 'Latency (ms) per service, 95th percentile',
     },
     {
+      id: 'apm:service_tx_failure_rate',
       query: getTransactionFailureRateQuery(type),
       description: `Failure rate (%) per service`,
     },
   ]
-    .map(({ query, description }) => {
+    .map(({ id, query, description }) => {
       return {
+        id,
         query: `${baseQuery}
           | ${query} BY service.name, service.environment, transaction.type`,
         description,
       };
     })
     .concat({
+      id: 'apm:service_tx_groups',
       query: getTransactionGroupsForServiceQuery({
         type:
           type === ApmDocumentType.TransactionEvent
@@ -330,7 +334,7 @@ function getTransactionThroughputQuery(type: ApmDocumentType) {
     return `STATS total_throughput = SUM(${TRANSACTION_DURATION_SUMMARY})`;
   }
 
-  return `STATS total_throughput = SUM(transaction.representative_count)`;
+  return `STATS total_throughput = SUM(COALESCE(transaction.representative_count, 1))`;
 }
 
 function getTransactionLatencyAvgQuery(type: ApmDocumentType) {
@@ -341,14 +345,14 @@ function getTransactionLatencyAvgQuery(type: ApmDocumentType) {
     return `STATS avg_latency_ms = AVG(${TRANSACTION_DURATION_SUMMARY}) * 1000`;
   }
 
-  return `STATS avg_latency_ms = WEIGHTED_AVG(${TRANSACTION_DURATION}, transaction.representative_count) * 1000`;
+  return `STATS avg_latency_ms = WEIGHTED_AVG(${TRANSACTION_DURATION}, COALESCE(transaction.representative_count, 1)) * 1000`;
 }
 
-function getTransactionLatencyPercentilesQuery(type: ApmDocumentType) {
+function getTransactionLatencyP95Query(type: ApmDocumentType) {
   if (type === ApmDocumentType.TransactionEvent) {
-    return `STATS percentile_latency_ms = PERCENTILES(${TRANSACTION_DURATION}, ?percentile)`;
+    return `STATS percentile_latency_ms = PERCENTILES(${TRANSACTION_DURATION}, 95)`;
   }
-  return `STATS percentile_latency_ms = PERCENTILES(${TRANSACTION_DURATION_HISTOGRAM}, ?percentile)`;
+  return `STATS percentile_latency_ms = PERCENTILES(${TRANSACTION_DURATION_HISTOGRAM}, 95)`;
 }
 
 function getTransactionFailureRateQuery(type: ApmDocumentType) {
@@ -389,27 +393,32 @@ function getExitSpanQueries({ availability, indices }: QueryFactoryOptions) {
 
   return [
     {
+      id: 'apm:service_dependency_throughput',
       description: 'Total throughput from service to upstream dependency',
       query: getExitSpanThroughputQuery(type),
     },
     {
+      id: 'apm:service_dependency_failure_rate',
       description: 'Failure rate from service to upstream dependency',
       query: getExitSpanFailureRateQuery(type),
     },
     {
+      id: 'apm:service_dependency_latency_avg',
       description: `Average latency (ms) from service to upstream dependency`,
       query: getExitSpanAvgLatencyQuery(type),
     },
   ]
-    .map(({ description, query }) => {
+    .map(({ id, description, query }) => {
       return {
+        id,
         description,
         query: `${baseQuery} | ${query} BY ${SPAN_DESTINATION_SERVICE_RESOURCE}, ${SERVICE_ENVIRONMENT}`,
       };
     })
     .concat({
+      id: 'apm:list_service_dependencies',
       description: 'List upstream dependencies for service',
-      query: `${baseQuery} | VALUES(${SPAN_DESTINATION_SERVICE_RESOURCE}) BY ${SERVICE_ENVIRONMENT}`,
+      query: `${baseQuery} | STATS VALUES(${SPAN_DESTINATION_SERVICE_RESOURCE}) BY ${SERVICE_ENVIRONMENT}`,
     });
 }
 
@@ -438,5 +447,5 @@ function getExitSpanAvgLatencyQuery(type: ApmDocumentType) {
     return `STATS avg_latency_ms = SUM(${SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM}) / SUM(${SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT}) * 1000`;
   }
 
-  return `STATS avg_latency_ms = WEIGHTED_AVG(${SPAN_DURATION}, span.representative_count) * 1000`;
+  return `STATS avg_latency_ms = WEIGHTED_AVG(${SPAN_DURATION}, COALESCE(span.representative_count, 1)) * 1000`;
 }

@@ -15,7 +15,7 @@ export type { DataDefinitionRegistryServerRouteRepository } from './routes';
 export type {
   DynamicDataAsset,
   DataDefinitionRegistryClient,
-  EsqlQueryTemplate,
+  EsqlQueryDefinition,
 } from './data_definition_registry/types';
 
 export type { DataDefinitionRegistryServerSetup, DataDefinitionRegistryServerStart };

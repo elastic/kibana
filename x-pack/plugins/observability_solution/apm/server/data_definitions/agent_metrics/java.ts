@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EsqlQueryTemplate } from '@kbn/data-definition-registry-plugin/server';
+import type { EsqlQueryDefinition } from '@kbn/data-definition-registry-plugin/server';
 
-export function getElasticJavaMetricQueries(): EsqlQueryTemplate[] {
+export function getElasticJavaMetricQueries(): EsqlQueryDefinition[] {
   return [];
 }

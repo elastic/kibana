@@ -8,6 +8,7 @@
 import { compact, uniq } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { errors } from '@elastic/elasticsearch';
 
 export async function getDataStreamsForQuery({
   esClient,
@@ -18,39 +19,47 @@ export async function getDataStreamsForQuery({
   index: string | string[];
   query: QueryDslQueryContainer;
 }) {
-  const response = await esClient.search({
-    track_total_hits: false,
-    index,
-    size: 0,
-    terminate_after: 1,
-    timeout: '1ms',
-    aggs: {
-      indices: {
-        terms: {
-          field: '_index',
-          size: 10000,
+  const response = await esClient
+    .search({
+      track_total_hits: false,
+      index,
+      size: 0,
+      terminate_after: 1,
+      timeout: '1ms',
+      allow_no_indices: true,
+      aggs: {
+        indices: {
+          terms: {
+            field: '_index',
+            size: 10000,
+          },
         },
       },
-    },
-    query: {
-      bool: {
-        filter: [
-          query,
-          {
-            bool: {
-              must_not: {
-                terms: {
-                  _tier: ['data_frozen'],
+      query: {
+        bool: {
+          filter: [
+            query,
+            {
+              bool: {
+                must_not: {
+                  terms: {
+                    _tier: ['data_frozen'],
+                  },
                 },
               },
             },
-          },
-        ],
+          ],
+        },
       },
-    },
-  });
+    })
+    .catch((error) => {
+      if (error instanceof errors.ResponseError && error.statusCode === 404) {
+        return undefined;
+      }
+      throw error;
+    });
 
-  if (!response.aggregations) {
+  if (!response?.aggregations) {
     return [];
   }
 
@@ -66,9 +75,7 @@ export async function getDataStreamsForQuery({
     name: allIndices,
   });
 
-  const dataStreams = uniq(
-    compact(await resolveIndexResponse.indices.flatMap((idx) => idx.data_stream))
-  );
+  const dataStreams = uniq(compact(resolveIndexResponse.indices.flatMap((idx) => idx.data_stream)));
 
   return dataStreams;
 }

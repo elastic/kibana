@@ -72,6 +72,10 @@ export function createDataDefinitionRegistry({
             esClient: esClient.asCurrentUser,
             query,
             index,
+          }).catch((error) => {
+            logger.error(`Failed to fetch data streams`);
+            logger.error(error);
+            return [];
           })
         ).pipe(
           map((dataStreams) => {
