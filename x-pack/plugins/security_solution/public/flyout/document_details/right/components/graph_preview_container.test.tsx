@@ -86,7 +86,6 @@ describe('<GraphPreviewContainer />', () => {
       timestamp,
       eventIds: [],
       hasGraphRepresentation: true,
-      isAlert: true,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();
@@ -112,109 +111,7 @@ describe('<GraphPreviewContainer />', () => {
     expect(mockUseFetchGraphData.mock.calls[0][0]).toEqual({
       req: {
         query: {
-          originEventIds: [],
-          start: `${timestamp}||-30m`,
-          end: `${timestamp}||+30m`,
-        },
-      },
-      options: {
-        enabled: true,
-        refetchOnWindowFocus: false,
-      },
-    });
-  });
-
-  it('should render component for alert', async () => {
-    mockUseFetchGraphData.mockReturnValue({
-      isLoading: false,
-      isError: false,
-      data: { nodes: DEFAULT_NODES, edges: [] },
-    });
-
-    const timestamp = new Date().toISOString();
-
-    (useGraphPreview as jest.Mock).mockReturnValue({
-      timestamp,
-      eventIds: ['eventId'],
-      isAlert: true,
-      hasGraphRepresentation: true,
-    });
-
-    const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();
-
-    // Using findByTestId to wait for the component to be rendered because it is a lazy loaded component
-    expect(await findByTestId(GRAPH_PREVIEW_TEST_ID)).toBeInTheDocument();
-    expect(
-      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
-    expect(
-      queryByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).not.toBeInTheDocument();
-    expect(
-      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
-    expect(
-      getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
-    expect(
-      queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).not.toBeInTheDocument();
-    expect(mockUseFetchGraphData).toHaveBeenCalled();
-    expect(mockUseFetchGraphData.mock.calls[0][0]).toEqual({
-      req: {
-        query: {
-          originEventIds: [{ id: 'eventId', isAlert: true }],
-          start: `${timestamp}||-30m`,
-          end: `${timestamp}||+30m`,
-        },
-      },
-      options: {
-        enabled: true,
-        refetchOnWindowFocus: false,
-      },
-    });
-  });
-
-  it('should render component for event', async () => {
-    mockUseFetchGraphData.mockReturnValue({
-      isLoading: false,
-      isError: false,
-      data: { nodes: DEFAULT_NODES, edges: [] },
-    });
-
-    const timestamp = new Date().toISOString();
-
-    (useGraphPreview as jest.Mock).mockReturnValue({
-      timestamp,
-      eventIds: ['eventId'],
-      isAlert: false,
-      hasGraphRepresentation: true,
-    });
-
-    const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();
-
-    // Using findByTestId to wait for the component to be rendered because it is a lazy loaded component
-    expect(await findByTestId(GRAPH_PREVIEW_TEST_ID)).toBeInTheDocument();
-    expect(
-      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
-    expect(
-      queryByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).not.toBeInTheDocument();
-    expect(
-      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
-    expect(
-      getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
-    expect(
-      queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).not.toBeInTheDocument();
-    expect(mockUseFetchGraphData).toHaveBeenCalled();
-    expect(mockUseFetchGraphData.mock.calls[0][0]).toEqual({
-      req: {
-        query: {
-          originEventIds: [{ id: 'eventId', isAlert: false }],
+          eventIds: [],
           start: `${timestamp}||-30m`,
           end: `${timestamp}||+30m`,
         },
@@ -239,7 +136,6 @@ describe('<GraphPreviewContainer />', () => {
       timestamp,
       eventIds: [],
       hasGraphRepresentation: true,
-      isAlert: true,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview({
@@ -268,7 +164,7 @@ describe('<GraphPreviewContainer />', () => {
     expect(mockUseFetchGraphData.mock.calls[0][0]).toEqual({
       req: {
         query: {
-          originEventIds: [],
+          eventIds: [],
           start: `${timestamp}||-30m`,
           end: `${timestamp}||+30m`,
         },
@@ -293,7 +189,6 @@ describe('<GraphPreviewContainer />', () => {
       timestamp,
       eventIds: [],
       hasGraphRepresentation: true,
-      isAlert: true,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview({
@@ -322,7 +217,7 @@ describe('<GraphPreviewContainer />', () => {
     expect(mockUseFetchGraphData.mock.calls[0][0]).toEqual({
       req: {
         query: {
-          originEventIds: [],
+          eventIds: [],
           start: `${timestamp}||-30m`,
           end: `${timestamp}||+30m`,
         },
@@ -348,7 +243,6 @@ describe('<GraphPreviewContainer />', () => {
       timestamp,
       eventIds: [],
       hasGraphRepresentation: true,
-      isAlert: true,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();
@@ -374,7 +268,7 @@ describe('<GraphPreviewContainer />', () => {
     expect(mockUseFetchGraphData.mock.calls[0][0]).toEqual({
       req: {
         query: {
-          originEventIds: [],
+          eventIds: [],
           start: `${timestamp}||-30m`,
           end: `${timestamp}||+30m`,
         },
@@ -399,7 +293,6 @@ describe('<GraphPreviewContainer />', () => {
       timestamp,
       eventIds: [],
       hasGraphRepresentation: false,
-      isAlert: true,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();
@@ -427,7 +320,7 @@ describe('<GraphPreviewContainer />', () => {
     expect(mockUseFetchGraphData.mock.calls[0][0]).toEqual({
       req: {
         query: {
-          originEventIds: [],
+          eventIds: [],
           start: `${timestamp}||-30m`,
           end: `${timestamp}||+30m`,
         },

@@ -88,8 +88,7 @@ const graphVisualizationButton: EuiButtonGroupOptionProps = {
  * Visualize view displayed in the document details expandable flyout left section
  */
 export const VisualizeTab = memo(() => {
-  const { scopeId, getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser } =
-    useDocumentDetailsContext();
+  const { scopeId, getFieldsData, dataAsNestedObject } = useDocumentDetailsContext();
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const panels = useExpandableFlyoutState();
   const [activeVisualizationId, setActiveVisualizationId] = useState(
@@ -124,7 +123,6 @@ export const VisualizeTab = memo(() => {
   const { hasGraphRepresentation } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
-    dataFormattedForFieldBrowser,
   });
 
   const isGraphFeatureEnabled = useIsExperimentalFeatureEnabled(

@@ -126,46 +126,21 @@ const useGraphPopovers = (
 };
 
 interface GraphInvestigationProps {
-  /**
-   * The initial state to use for the graph investigation view.
-   */
-  initialState: {
-    /**
-     * The data view to use for the graph investigation view.
-     */
-    dataView: DataView;
-
-    /**
-     * The origin events for the graph investigation view.
-     */
-    originEventIds: Array<{
-      /**
-       * The ID of the origin event.
-       */
-      id: string;
-
-      /**
-       * A flag indicating whether the origin event is an alert or not.
-       */
-      isAlert: boolean;
-    }>;
-
-    /**
-     * The initial timerange for the graph investigation view.
-     */
-    timeRange: TimeRange;
-  };
+  dataView: DataView;
+  eventIds: string[];
+  timestamp: string | null;
 }
 
 /**
  * Graph investigation view allows the user to expand nodes and view related entities.
  */
 export const GraphInvestigation: React.FC<GraphInvestigationProps> = memo(
-  ({
-    initialState: { dataView, originEventIds, timeRange: initialTimeRange },
-  }: GraphInvestigationProps) => {
+  ({ dataView, eventIds, timestamp = new Date().toISOString() }: GraphInvestigationProps) => {
     const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
-    const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
+    const [timeRange, setTimeRange] = useState<TimeRange>({
+      from: `${timestamp}||-30m`,
+      to: `${timestamp}||+30m`,
+    });
 
     const {
       services: { uiSettings },
@@ -178,7 +153,7 @@ export const GraphInvestigation: React.FC<GraphInvestigationProps> = memo(
           [...searchFilters],
           getEsQueryConfig(uiSettings as Parameters<typeof getEsQueryConfig>[0])
         ),
-      [dataView, searchFilters, uiSettings]
+      [searchFilters, dataView, uiSettings]
     );
 
     const { nodeExpandPopover, openPopoverCallback } = useGraphPopovers(
@@ -191,7 +166,7 @@ export const GraphInvestigation: React.FC<GraphInvestigationProps> = memo(
     const { data, refresh, isFetching } = useFetchGraphData({
       req: {
         query: {
-          originEventIds,
+          eventIds,
           esQuery: query,
           start: timeRange.from,
           end: timeRange.to,

@@ -106,7 +106,6 @@ describe('<VisualizationsSection />', () => {
     });
     mockUseGraphPreview.mockReturnValue({
       hasGraphRepresentation: true,
-      eventIds: [],
     });
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,

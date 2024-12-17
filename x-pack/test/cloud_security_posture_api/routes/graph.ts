@@ -48,7 +48,7 @@ export default function (providerContext: FtrProviderContext) {
           supertestWithoutAuth,
           {
             query: {
-              originEventIds: [],
+              eventIds: [],
               start: 'now-1d/d',
               end: 'now/d',
             },
@@ -88,7 +88,7 @@ export default function (providerContext: FtrProviderContext) {
         it('should return 400 when missing `esQuery` field is not of type bool', async () => {
           await postGraph(supertest, {
             query: {
-              originEventIds: [],
+              eventIds: [],
               start: 'now-1d/d',
               end: 'now/d',
               esQuery: {
@@ -102,7 +102,7 @@ export default function (providerContext: FtrProviderContext) {
         it('should return 400 with unsupported `esQuery`', async () => {
           await postGraph(supertest, {
             query: {
-              originEventIds: [],
+              eventIds: [],
               start: 'now-1d/d',
               end: 'now/d',
               esQuery: {
@@ -122,7 +122,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should return an empty graph / should return 200 when missing `esQuery` field', async () => {
         const response = await postGraph(supertest, {
           query: {
-            originEventIds: [],
+            eventIds: [],
             start: 'now-1d/d',
             end: 'now/d',
           },
@@ -136,7 +136,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should return a graph with nodes and edges by actor', async () => {
         const response = await postGraph(supertest, {
           query: {
-            originEventIds: [],
+            eventIds: [],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
             esQuery: {
@@ -177,7 +177,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should return a graph with nodes and edges by alert', async () => {
         const response = await postGraph(supertest, {
           query: {
-            originEventIds: [{ id: 'kabcd1234efgh5678', isAlert: true }],
+            eventIds: ['kabcd1234efgh5678'],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
           },
@@ -199,36 +199,6 @@ export default function (providerContext: FtrProviderContext) {
           expect(edge).to.have.property('color');
           expect(edge.color).equal(
             'danger',
-            `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
-          );
-        });
-      });
-
-      it('should return a graph with nodes and edges by origin event', async () => {
-        const response = await postGraph(supertest, {
-          query: {
-            originEventIds: [{ id: 'kabcd1234efgh5678', isAlert: false }],
-            start: '2024-09-01T00:00:00Z',
-            end: '2024-09-02T00:00:00Z',
-          },
-        }).expect(result(200));
-
-        expect(response.body).to.have.property('nodes').length(3);
-        expect(response.body).to.have.property('edges').length(2);
-        expect(response.body).not.to.have.property('messages');
-
-        response.body.nodes.forEach((node: any) => {
-          expect(node).to.have.property('color');
-          expect(node.color).equal(
-            'primary',
-            `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
-          );
-        });
-
-        response.body.edges.forEach((edge: any) => {
-          expect(edge).to.have.property('color');
-          expect(edge.color).equal(
-            'primary',
             `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
           );
         });
@@ -237,7 +207,7 @@ export default function (providerContext: FtrProviderContext) {
       it('color of alert of failed event should be danger', async () => {
         const response = await postGraph(supertest, {
           query: {
-            originEventIds: [{ id: 'failed-event', isAlert: true }],
+            eventIds: ['failed-event'],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
           },
@@ -267,7 +237,7 @@ export default function (providerContext: FtrProviderContext) {
       it('color of event of failed event should be warning', async () => {
         const response = await postGraph(supertest, {
           query: {
-            originEventIds: [],
+            eventIds: [],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
             esQuery: {
@@ -309,7 +279,7 @@ export default function (providerContext: FtrProviderContext) {
       it('2 grouped events, 1 failed, 1 success', async () => {
         const response = await postGraph(supertest, {
           query: {
-            originEventIds: [],
+            eventIds: [],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
             esQuery: {
@@ -357,10 +327,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should support more than 1 eventIds', async () => {
         const response = await postGraph(supertest, {
           query: {
-            originEventIds: [
-              { id: 'kabcd1234efgh5678', isAlert: true },
-              { id: 'failed-event', isAlert: true },
-            ],
+            eventIds: ['kabcd1234efgh5678', 'failed-event'],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
           },
@@ -390,7 +357,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should return a graph with nodes and edges by alert and actor', async () => {
         const response = await postGraph(supertest, {
           query: {
-            originEventIds: [{ id: 'kabcd1234efgh5678', isAlert: true }],
+            eventIds: ['kabcd1234efgh5678'],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
             esQuery: {
@@ -435,7 +402,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should filter unknown targets', async () => {
         const response = await postGraph(supertest, {
           query: {
-            originEventIds: [],
+            eventIds: [],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
             esQuery: {
@@ -461,7 +428,7 @@ export default function (providerContext: FtrProviderContext) {
         const response = await postGraph(supertest, {
           showUnknownTarget: true,
           query: {
-            originEventIds: [],
+            eventIds: [],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
             esQuery: {
@@ -487,7 +454,7 @@ export default function (providerContext: FtrProviderContext) {
         const response = await postGraph(supertest, {
           nodesLimit: 1,
           query: {
-            originEventIds: [],
+            eventIds: [],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
             esQuery: {
@@ -513,7 +480,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should support date math', async () => {
         const response = await postGraph(supertest, {
           query: {
-            originEventIds: [{ id: 'kabcd1234efgh5678', isAlert: true }],
+            eventIds: ['kabcd1234efgh5678'],
             start: '2024-09-01T12:30:00.000Z||-30m',
             end: '2024-09-01T12:30:00.000Z||+30m',
           },
