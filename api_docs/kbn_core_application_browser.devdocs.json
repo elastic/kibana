@@ -1202,16 +1202,16 @@
                 "path": "src/platform/plugins/shared/management/public/application.tsx"
               },
               {
-                "plugin": "assetInventory",
-                "path": "x-pack/plugins/asset_inventory/public/application.tsx"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/public/applications/integrations/index.tsx"
               },
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
+              },
+              {
+                "plugin": "assetInventory",
+                "path": "x-pack/solutions/security/plugins/asset_inventory/public/application.tsx"
               },
               {
                 "plugin": "kibanaOverview",
