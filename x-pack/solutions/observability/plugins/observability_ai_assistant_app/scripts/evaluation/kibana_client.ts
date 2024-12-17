@@ -89,18 +89,23 @@ export interface ChatClient {
 export class KibanaClient {
   axios: AxiosInstance;
   constructor(
-    private readonly log: ToolingLog,
-    private readonly url: string,
-    private readonly spaceId?: string
+    protected readonly log: ToolingLog,
+    protected readonly url: string,
+    protected readonly spaceId?: string
   ) {
     this.axios = axios.create({
       headers: {
         'kbn-xsrf': 'foo',
+        'x-elastic-internal-origin': 'observability-ai-assistant',
       },
     });
   }
 
-  private getUrl(props: { query?: UrlObject['query']; pathname: string; ignoreSpaceId?: boolean }) {
+  protected getUrl(props: {
+    query?: UrlObject['query'];
+    pathname: string;
+    ignoreSpaceId?: boolean;
+  }) {
     const parsed = parse(this.url);
 
     const baseUrl = parsed.pathname?.replaceAll('/', '') ?? '';

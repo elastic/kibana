@@ -10,6 +10,7 @@
     "typings/**/*",
     "public/**/*.json",
     "server/**/*",
+    "scripts/**/*",
     ".storybook/**/*"
   ],
   "exclude": [
