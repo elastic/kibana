@@ -6,24 +6,9 @@
  */
 
 import type OpenAI from 'openai';
-import {
-  filter,
-  from,
-  identity,
-  map,
-  mergeMap,
-  Observable,
-  switchMap,
-  tap,
-  throwError,
-} from 'rxjs';
+import { from, identity, switchMap, throwError } from 'rxjs';
 import { isReadable, Readable } from 'stream';
-import {
-  ChatCompletionChunkEvent,
-  ChatCompletionTokenCountEvent,
-  createInferenceInternalError,
-} from '@kbn/inference-common';
-import { createTokenLimitReachedError } from '../../errors';
+import { createInferenceInternalError } from '@kbn/inference-common';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import type { InferenceConnectorAdapter } from '../../types';
 import {
@@ -31,7 +16,7 @@ import {
   wrapWithSimulatedFunctionCalling,
 } from '../../simulated_function_calling';
 import { messagesToOpenAI, toolsToOpenAI, toolChoiceToOpenAI } from './to_openai';
-import { tokenCountFromOpenAI, chunkFromOpenAI } from './from_openai';
+import { processOpenAIStream } from './process_openai_stream';
 
 export const openAIAdapter: InferenceConnectorAdapter = {
   chatComplete: ({ executor, system, messages, toolChoice, tools, functionCalling, logger }) => {
@@ -76,35 +61,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
           createInferenceInternalError('Unexpected error', response.data as Record<string, any>)
         );
       }),
-      filter((line) => !!line && line !== '[DONE]'),
-      map(
-        (line) => JSON.parse(line) as OpenAI.ChatCompletionChunk | { error: { message: string } }
-      ),
-      tap((line) => {
-        if ('error' in line) {
-          throw createInferenceInternalError(line.error.message);
-        }
-        if (
-          'choices' in line &&
-          line.choices.length &&
-          line.choices[0].finish_reason === 'length'
-        ) {
-          throw createTokenLimitReachedError();
-        }
-      }),
-      filter((line): line is OpenAI.ChatCompletionChunk => {
-        return 'object' in line && line.object === 'chat.completion.chunk';
-      }),
-      mergeMap((chunk): Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent> => {
-        const events: Array<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent> = [];
-        if (chunk.usage) {
-          events.push(tokenCountFromOpenAI(chunk.usage));
-        }
-        if (chunk.choices?.length) {
-          events.push(chunkFromOpenAI(chunk));
-        }
-        return from(events);
-      }),
+      processOpenAIStream(),
       simulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
   },
