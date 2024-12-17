@@ -105,6 +105,11 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
       entityManagerStart.v2.getIdentityFields(entityType, clusterClient, logger),
     ]);
 
+    const alerts = await getLatestEntitiesAlerts({
+      identityFieldsBySource,
+      alertsClient,
+    });
+
     const entities: InventoryEntity[] = rawEntities.map((entity) => {
       return {
         entityId: entity['entity.id'],
@@ -113,11 +118,6 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
         entityLastSeenTimestamp: entity['entity.last_seen_timestamp'] as string,
         ...entity,
       };
-    });
-
-    const alerts = await getLatestEntitiesAlerts({
-      identityFieldsBySource,
-      alertsClient,
     });
 
     const joined = joinByKey(
