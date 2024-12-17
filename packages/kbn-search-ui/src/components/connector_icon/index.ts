@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './search_empty_prompt';
-export * from './decorative_horizontal_stepper';
 export * from './connector_icon';

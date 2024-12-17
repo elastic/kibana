@@ -7,6 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './search_empty_prompt';
-export * from './decorative_horizontal_stepper';
-export * from './connector_icon';
+import React from 'react';
+import { EuiToolTip, EuiIcon } from '@elastic/eui';
+
+export const ConnectorIcon: React.FC<{ name: string; serviceType: string; iconPath?: string }> = ({
+  name,
+  serviceType,
+  iconPath,
+}) => (
+  <EuiToolTip content={name}>
+    <EuiIcon size="l" title={name} id={serviceType} type={iconPath || 'defaultIcon'} />
+  </EuiToolTip>
+);
