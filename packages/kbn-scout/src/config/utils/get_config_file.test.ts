@@ -9,11 +9,15 @@
 
 import path from 'path';
 import { getConfigFilePath } from './get_config_file';
+import { REPO_ROOT } from '@kbn/repo-info';
+
+// Not mocking to validate the actual path to the config file
+const CONFIG_ROOT = path.join(REPO_ROOT, 'packages', 'kbn-scout', 'src', 'config');
 
 describe('getConfigFilePath', () => {
   it('should return the correct path for stateful config', () => {
     const config = 'stateful';
-    const expectedPath = path.join(__dirname, 'stateful', 'stateful.config.ts');
+    const expectedPath = path.join(CONFIG_ROOT, 'stateful', 'stateful.config.ts');
 
     const result = getConfigFilePath(config);
 
@@ -22,7 +26,7 @@ describe('getConfigFilePath', () => {
 
   it('should return the correct path for serverless config with a valid type', () => {
     const config = 'serverless=oblt';
-    const expectedPath = path.join(__dirname, 'serverless', 'oblt.serverless.config.ts');
+    const expectedPath = path.join(CONFIG_ROOT, 'serverless', 'oblt.serverless.config.ts');
 
     const result = getConfigFilePath(config);
 
