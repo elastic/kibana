@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IS_SERVERLESS, CLOUD_SERVERLESS } from '../env_var_names_constants';
 import { getDataTestSubjectSelector } from '../helpers/common';
 
 export const ADD_EXCEPTION_BTN = '[data-test-subj="add-exception-menu-item"]';
@@ -232,13 +230,7 @@ export const ALERT_ASSIGNEES_SELECTABLE_OPTIONS =
   '[data-test-subj="securitySolutionAssigneesSelectable"] .euiSelectableListItem[role="option"]';
 
 export const ALERT_USER_AVATAR = (assignee: string) => {
-  let expectedAssignee = assignee;
-
-  if (Cypress.env(IS_SERVERLESS) && !Cypress.env(CLOUD_SERVERLESS)) {
-    expectedAssignee = `test ${expectedAssignee}`;
-  }
-
-  return `[data-test-subj^="securitySolutionUsersAvatar-"][title='${expectedAssignee}']`;
+  return `[data-test-subj^="securitySolutionUsersAvatar-"][title*='${assignee}']`;
 };
 export const ALERT_AVATARS_PANEL = '[data-test-subj="securitySolutionUsersAvatarsPanel"]';
 
