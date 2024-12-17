@@ -74,7 +74,10 @@ export const toastAPIErrors = (response: HttpResponse<ErrorResponse>) => {
   const messages = getErrorsFromHttpResponse(response);
 
   for (const message of messages) {
-    flashErrorToast(message);
+    flashErrorToast(message, {
+      'aria-live': 'assertive',
+      role: 'alert',
+    });
   }
   // If this was a programming error or a failed request (such as a CORS) error,
   // we rethrow the error so it shows up in the developer console

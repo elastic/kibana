@@ -20,19 +20,25 @@ import type {
   DeprecationsClient,
 } from '@kbn/core-deprecations-server';
 import { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { DeprecationsFactory } from './deprecations_factory';
 import { registerRoutes } from './routes';
 import { config as deprecationConfig, DeprecationConfigType } from './deprecation_config';
 import { registerApiDeprecationsInfo, registerConfigDeprecationsInfo } from './deprecations';
 
+/**
+ * Deprecation Service: Internal Start contract
+ */
 export interface InternalDeprecationsServiceStart {
   /**
    * Creates a {@link DeprecationsClient} with provided SO client and ES client.
-   *
+   * @param esClient Scoped Elasticsearch client
+   * @param savedObjectsClient Scoped SO Client
    */
   asScopedToClient(
     esClient: IScopedClusterClient,
-    savedObjectsClient: SavedObjectsClientContract
+    savedObjectsClient: SavedObjectsClientContract,
+    request: KibanaRequest
   ): DeprecationsClient;
 }
 
@@ -113,13 +119,19 @@ export class DeprecationsService
 
   private createScopedDeprecations(): (
     esClient: IScopedClusterClient,
-    savedObjectsClient: SavedObjectsClientContract
+    savedObjectsClient: SavedObjectsClientContract,
+    request: KibanaRequest
   ) => DeprecationsClient {
-    return (esClient: IScopedClusterClient, savedObjectsClient: SavedObjectsClientContract) => {
+    return (
+      esClient: IScopedClusterClient,
+      savedObjectsClient: SavedObjectsClientContract,
+      request: KibanaRequest
+    ) => {
       return {
         getAllDeprecations: this.deprecationsFactory!.getAllDeprecations.bind(null, {
           savedObjectsClient,
           esClient,
+          request,
         }),
       };
     };

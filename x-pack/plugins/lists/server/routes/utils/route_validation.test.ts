@@ -11,7 +11,7 @@ import { RouteValidationResultFactory } from '@kbn/core/server';
 import { buildRouteValidation } from './route_validation';
 
 /**
- * Copied from x-pack/plugins/security_solution/server/utils/build_validation/route_validation.test.ts
+ * Copied from x-pack/solutions/security/plugins/security_solution/server/utils/build_validation/route_validation.test.ts
  * TODO: Once we can move this into a kbn package because the types such as RouteValidationResultFactory are in packages, then please do.
  */
 describe('Route Validation with ', () => {

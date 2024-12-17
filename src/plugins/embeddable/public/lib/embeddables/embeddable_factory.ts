@@ -13,7 +13,6 @@ import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import { UiActionsPresentableGrouping } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { ErrorEmbeddable } from './error_embeddable';
-import { IContainer } from '../containers/i_container';
 import { PropertySpec } from '../types';
 import { EmbeddableStateWithType } from '../../../common/types';
 
@@ -125,7 +124,7 @@ export interface EmbeddableFactory<
    */
   getExplicitInput(
     initialInput?: Partial<TEmbeddableInput>,
-    parent?: IContainer
+    parent?: unknown
   ): Promise<Partial<TEmbeddableInput> | ExplicitInputWithAttributes>;
 
   /**
@@ -138,7 +137,7 @@ export interface EmbeddableFactory<
   createFromSavedObject(
     savedObjectId: string,
     input: Partial<TEmbeddableInput>,
-    parent?: IContainer
+    parent?: unknown
   ): Promise<TEmbeddable | ErrorEmbeddable>;
 
   /**
@@ -147,7 +146,7 @@ export interface EmbeddableFactory<
    */
   create(
     initialInput: TEmbeddableInput,
-    parent?: IContainer
+    parent?: unknown
   ): Promise<TEmbeddable | ErrorEmbeddable | undefined>;
 
   order?: number;

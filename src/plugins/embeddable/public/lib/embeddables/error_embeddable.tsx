@@ -11,7 +11,6 @@ import React, { ReactNode } from 'react';
 
 import { PresentationPanelError } from '@kbn/presentation-panel-plugin/public';
 
-import { IContainer } from '../containers';
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 
@@ -23,8 +22,8 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
   public readonly type = ERROR_EMBEDDABLE_TYPE;
   public error: Error | string;
 
-  constructor(error: Error | string, input: EmbeddableInput, parent?: IContainer) {
-    super(input, {}, parent);
+  constructor(error: Error | string, input: EmbeddableInput) {
+    super(input, {});
     this.error = error;
   }
 

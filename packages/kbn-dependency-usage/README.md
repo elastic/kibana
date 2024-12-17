@@ -30,11 +30,11 @@ bash scripts/dependency_usage.sh --dependency-name <dependency> --paths <path_to
 
 **Example**:
 ```sh
-bash scripts/dependency_usage.sh -d rxjs -p x-pack/plugins/security_solution
+bash scripts/dependency_usage.sh -d rxjs -p x-pack/solutions/security/plugins/security_solution
 ```
 
 - `-d rxjs`: Specifies the dependency to look for (`rxjs`).
-- `-p x-pack/plugins/security_solution`: Sets the directory to search within (`x-pack/plugins/security_solution`).
+- `-p x-pack/solutions/security/plugins/security_solution`: Sets the directory to search within (`x-pack/solutions/security/plugins/security_solution`).
 
 ---
 
@@ -75,11 +75,11 @@ bash scripts/dependency_usage.sh --paths <path_to_directory>
 
 **Example**:
 ```sh
-bash scripts/dependency_usage.sh -p x-pack/plugins/security_solution
+bash scripts/dependency_usage.sh -p x-pack/solutions/security/plugins/security_solution
 ```
 
-- `-p x-pack/plugins/security_solution`: Specifies the package or directory for which to list all dependencies.
-- **Output**: Lists all dependencies for `x-pack/plugins/security_solution`.
+- `-p x-pack/solutions/security/plugins/security_solution`: Specifies the package or directory for which to list all dependencies.
+- **Output**: Lists all dependencies for `x-pack/solutions/security/plugins/security_solution`.
 
 ---
 
@@ -91,18 +91,18 @@ When a package or plugin has multiple subteams, use the `--collapse-depth` optio
 Shows all subteams within `security_solution`.
 
 ```sh
-bash scripts/dependency_usage.sh -p x-pack/plugins/security_solution -g owner --collapse-depth 4
+bash scripts/dependency_usage.sh -p x-pack/solutions/security/plugins/security_solution -g owner --collapse-depth 4
 ```
 
 #### Collapsed Grouping
 Groups the results under a higher-level owner (e.g., `security_solution` as a single group).
 
 ```sh
-bash scripts/dependency_usage.sh -p x-pack/plugins/security_solution -g owner --collapse-depth 1
+bash scripts/dependency_usage.sh -p x-pack/solutions/security/plugins/security_solution -g owner --collapse-depth 1
 ```
 
 **Explanation**:
-- `-p x-pack/plugins/security_solution`: Specifies the directory to scan.
+- `-p x-pack/solutions/security/plugins/security_solution`: Specifies the directory to scan.
 - `-g owner`: Groups results by code owner.
 - `--collapse-depth`: Defines the depth for grouping, where higher numbers show more granular subteams.
 - **Output**: Lists dependencies grouped by code owner at different levels of depth based on the `--collapse-depth` value.
@@ -119,13 +119,13 @@ bash scripts/dependency_usage.sh -p <path_to_directory> -d '<pattern>' -o <outpu
 
 **Example**:
 ```sh
-bash scripts/dependency_usage.sh -d 'react-*' -p x-pack/plugins/security_solution -o ./tmp/results.json
+bash scripts/dependency_usage.sh -d 'react-*' -p x-pack/solutions/security/plugins/security_solution -o ./tmp/results.json
 ```
 
-- `-p x-pack/plugins/security_solution`: Specifies the directory or package to search within.
+- `-p x-pack/solutions/security/plugins/security_solution`: Specifies the directory or package to search within.
 - `-d 'react-*'`: Searches for dependencies that match the pattern `react-*`.
 - `-o ./tmp/results.json`: Outputs the results to a specified file (`results.json` in the `./tmp` directory).
-- **Output**: Saves a list of all dependencies matching `react-*` in `x-pack/plugins/security_solution` to `./tmp/results.json`.
+- **Output**: Saves a list of all dependencies matching `react-*` in `x-pack/solutions/security/plugins/security_solution` to `./tmp/results.json`.
 
 ---
 
@@ -139,13 +139,13 @@ bash scripts/dependency_usage.sh -p <path_to_directory> -o <output_file> -v
 
 **Example**:
 ```sh
-bash scripts/dependency_usage.sh -p x-pack/plugins/security_solution -o ./tmp/results.json
+bash scripts/dependency_usage.sh -p x-pack/solutions/security/plugins/security_solution -o ./tmp/results.json
 ```
-- `-p x-pack/plugins/security_solution`: Specifies the target directory or package to analyze.
+- `-p x-pack/solutions/security/plugins/security_solution`: Specifies the target directory or package to analyze.
 - `-o ./tmp/results.json`: Saves the output to the `results.json` file in the `./tmp` directory.
 - `-v`: Enables verbose mode.
 
-**Output**: Saves a list of all dependencies in `x-pack/plugins/security_solution` to `./tmp/results.json`. Additionally, it logs a detailed, non aggregated dependency graph to `.dependency-graph-log.json` for debugging purposes.
+**Output**: Saves a list of all dependencies in `x-pack/solutions/security/plugins/security_solution` to `./tmp/results.json`. Additionally, it logs a detailed, non aggregated dependency graph to `.dependency-graph-log.json` for debugging purposes.
 
 ---
 

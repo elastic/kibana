@@ -565,7 +565,9 @@ all http requests to https over the port configured as <<server-port, `server.po
 
 [[server-ssl-supportedProtocols]] `server.ssl.supportedProtocols`::
 An array of supported protocols with versions.
-Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`. *Default: TLSv1.1, TLSv1.2, TLSv1.3*
+Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`. *Default: TLSv1.2, TLSv1.3*
+Enabling `TLSv1.1` would require both setting the `--tls-min-1.1` option in the `node.options` configuration and adding `TLSv1.1` to `server.ssl.supportedProtocols`.
+`HTTP/2` requires the use of minimum `TLSv1.2` for secure connections.
 
 [[server-uuid]] `server.uuid`::
 The unique identifier for this {kib} instance. It must be a valid UUIDv4. It gets automatically generated on the first startup if not specified and persisted in the `data` path.

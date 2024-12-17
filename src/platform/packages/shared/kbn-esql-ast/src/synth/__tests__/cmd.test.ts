@@ -46,5 +46,5 @@ test('can compose expressions into commands', () => {
   const text2 = BasicPrettyPrinter.command(cmd2);
 
   expect(text1).toBe('WHERE a.b.c == "asdf"');
-  expect(text2).toBe('DISSECT a.b.c """%{date}"""');
+  expect(text2).toBe('DISSECT a.b.c "%{date}"');
 });

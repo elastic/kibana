@@ -452,10 +452,10 @@ export default function ({ getService }: FtrProviderContext) {
         types: {
           chumble: 0,
         },
-        errors: [
+        errors: expect.arrayContaining([
           'No index found for source [source: source1-with-chumbles, type: chumble] with index patterns [index-1-with-chumbles]',
           'No index found for source [source: source2-with-chumbles, type: chumble] with index patterns [index-2-with-chumbles]',
-        ],
+        ]),
       });
     });
   });

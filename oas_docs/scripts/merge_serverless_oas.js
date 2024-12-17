@@ -21,10 +21,10 @@ const { REPO_ROOT } = require('@kbn/repo-info');
 
       // Observability Solution
       `${REPO_ROOT}/x-pack/plugins/observability_solution/apm/docs/openapi/apm/bundled.yaml`,
-      `${REPO_ROOT}/x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml`,
+      `${REPO_ROOT}/x-pack/solutions/observability/plugins/slo/docs/openapi/slo/bundled.yaml`,
 
       // Security solution
-      `${REPO_ROOT}/x-pack/plugins/security_solution/docs/openapi/serverless/*.schema.yaml`,
+      `${REPO_ROOT}/x-pack/solutions/security/plugins/security_solution/docs/openapi/serverless/*.schema.yaml`,
       `${REPO_ROOT}/packages/kbn-securitysolution-lists-common/docs/openapi/serverless/*.schema.yaml`,
       `${REPO_ROOT}/packages/kbn-securitysolution-exceptions-common/docs/openapi/serverless/*.schema.yaml`,
       `${REPO_ROOT}/packages/kbn-securitysolution-endpoint-exceptions-common/docs/openapi/serverless/*.schema.yaml`,
