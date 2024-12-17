@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { coreMock } from '@kbn/core/public/mocks';
-import { render, screen } from '@testing-library/react';
+import { coreMock, securityServiceMock } from '@kbn/core/public/mocks';
+import { render, screen, waitFor } from '@testing-library/react';
 import {
   QueryHistoryAction,
   getTableColumns,
@@ -218,6 +218,11 @@ describe('Starred and History queries components', () => {
     const services = {
       core: coreMock.createStart(),
     };
+
+    services.core.security.authc.getCurrentUser.mockResolvedValue(
+      securityServiceMock.createMockAuthenticatedUser()
+    );
+
     it('should render two tabs', () => {
       render(
         <KibanaContextProvider services={services}>
@@ -270,6 +275,32 @@ describe('Starred and History queries components', () => {
       expect(screen.getByTestId('ESQLEditor-history-starred-queries-helpText')).toHaveTextContent(
         'Showing 0 queries (max 100)'
       );
+    });
+
+    it('should hide starred tab if starred service failed to initialize', async () => {
+      services.core.security.authc.getCurrentUser.mockResolvedValue(
+        securityServiceMock.createMockAuthenticatedUser({ profile_uid: undefined })
+      );
+      render(
+        <KibanaContextProvider services={services}>
+          <HistoryAndStarredQueriesTabs
+            containerCSS={{}}
+            containerWidth={1024}
+            onUpdateAndSubmit={jest.fn()}
+            height={200}
+          />
+        </KibanaContextProvider>
+      );
+
+      // initial render two tabs are shown
+      expect(screen.getByTestId('history-queries-tab')).toBeInTheDocument();
+      expect(screen.getByTestId('history-queries-tab')).toHaveTextContent('Recent');
+      expect(screen.getByTestId('starred-queries-tab')).toBeInTheDocument();
+      expect(screen.getByTestId('starred-queries-tab')).toHaveTextContent('Starred');
+
+      await waitFor(() => {
+        expect(screen.queryByText('starred-queries-tab')).not.toBeInTheDocument();
+      });
     });
   });
 });

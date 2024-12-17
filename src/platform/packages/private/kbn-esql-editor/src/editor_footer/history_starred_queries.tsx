@@ -472,6 +472,8 @@ export function HistoryAndStarredQueriesTabs({
 
   const [starredQueriesService, setStarredQueriesService] = useState<EsqlStarredQueriesService>();
   const [starredQueries, setStarredQueries] = useState<StarredQueryItem[]>([]);
+  const [starredQueriesServiceFailedToInitilize, setStarredQueriesServiceFailedToInitialize] =
+    useState(false);
 
   useEffect(() => {
     const initializeService = async () => {
@@ -481,8 +483,11 @@ export function HistoryAndStarredQueriesTabs({
         usageCollection,
         storage,
       });
+
       if (starredService) {
         setStarredQueriesService(starredService);
+      } else {
+        setStarredQueriesServiceFailedToInitialize(true);
       }
     };
     if (!starredQueriesService) {
@@ -498,11 +503,11 @@ export function HistoryAndStarredQueriesTabs({
 
   const { euiTheme } = useEuiTheme();
   const tabs = useMemo(() => {
-    // use typed helper instead of .filter directly to remove undefined from result type
-    function filterUndefined<T>(array: Array<T | undefined>): T[] {
+    // use typed helper instead of .filter directly to remove falsy values from result type
+    function filterMissing<T>(array: Array<T | false>): T[] {
       return array.filter((item): item is T => item !== undefined);
     }
-    return filterUndefined([
+    return filterMissing([
       {
         id: 'history-queries-tab',
         name: i18n.translate('esqlEditor.query.historyQueriesTabLabel', {
@@ -524,7 +529,7 @@ export function HistoryAndStarredQueriesTabs({
           />
         ),
       },
-      starredQueriesService && {
+      !starredQueriesServiceFailedToInitilize && {
         id: 'starred-queries-tab',
         dataTestSubj: 'starred-queries-tab',
         name: i18n.translate('esqlEditor.query.starredQueriesTabLabel', {
@@ -559,6 +564,7 @@ export function HistoryAndStarredQueriesTabs({
     onUpdateAndSubmit,
     starredQueries,
     starredQueriesService,
+    starredQueriesServiceFailedToInitilize,
   ]);
 
   const [selectedTabId, setSelectedTabId] = useState('history-queries-tab');
