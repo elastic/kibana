@@ -11,10 +11,11 @@ import {
   INTERNAL_ALERTING_GAPS_FIND_API_PATH,
   INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH,
 } from '@kbn/alerting-plugin/common';
+import styled from 'styled-components';
 import React, { useCallback, useState } from 'react';
-import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
+import dateMath from '@kbn/datemath';
+import type { CriteriaWithPagination, EuiBasicTableColumn, OnTimeChangeProps } from '@elastic/eui';
 import {
-  EuiButton,
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,7 +25,12 @@ import {
   EuiText,
   EuiHealth,
   EuiButtonEmpty,
+  EuiSuperDatePicker,
 } from '@elastic/eui';
+
+const DatePickerEuiFlexItem = styled(EuiFlexItem)`
+  max-width: 582px;
+`;
 
 import type { FindGapsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/find';
 
@@ -62,6 +68,8 @@ export const findGapsForRule = async ({
   signal,
   sortField = 'createdAt',
   sortOrder = 'desc',
+  start,
+  end,
 }: {
   ruleId: string;
   page: number;
@@ -69,18 +77,27 @@ export const findGapsForRule = async ({
   signal?: AbortSignal;
   sortField?: string;
   sortOrder?: string;
-}): Promise<FindGapsResponseBody> =>
-  KibanaServices.get().http.fetch<FindGapsResponseBody>(INTERNAL_ALERTING_GAPS_FIND_API_PATH, {
-    method: 'GET',
-    query: {
-      rule_id: ruleId,
-      page,
-      per_page: perPage,
-      sort_field: sortField,
-      sort_order: sortOrder,
-    },
-    signal,
-  });
+}): Promise<FindGapsResponseBody> => {
+  const startDate = dateMath.parse(start);
+  const endDate = dateMath.parse(end, { roundUp: true });
+
+  return KibanaServices.get().http.fetch<FindGapsResponseBody>(
+    INTERNAL_ALERTING_GAPS_FIND_API_PATH,
+    {
+      method: 'GET',
+      query: {
+        rule_id: ruleId,
+        page,
+        per_page: perPage,
+        sort_field: sortField,
+        sort_order: sortOrder,
+        start: startDate?.utc().toISOString(),
+        end: endDate?.utc().toISOString(),
+      },
+      signal,
+    }
+  );
+};
 
 /**
  * Fill gap by Id for the given rule ID
@@ -122,17 +139,21 @@ export const useFindGapsForRule = (
     ruleId,
     page,
     perPage,
+    start,
+    end,
   }: {
     ruleId: string;
     page: number;
     perPage: number;
+    start: string;
+    end: string;
   },
   options?: UseQueryOptions<FindGapsResponseBody>
 ) => {
   return useQuery<FindGapsResponseBody>(
     [FIND_GAPS_FOR_RULE, ruleId, page, perPage],
     async ({ signal }) => {
-      const response = await findGapsForRule({ signal, ruleId, page, perPage });
+      const response = await findGapsForRule({ signal, ruleId, page, perPage, start, end });
 
       return response;
     },
@@ -312,14 +333,22 @@ const DEFAULT_PAGE_SIZE = 10;
 export const RuleGaps = ({ ruleId }: { ruleId: string }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [dateRange, setDateRange] = useState<{ start: string; end: string }>({
+    start: 'now-24h',
+    end: 'now',
+  });
   const [{ canUserCRUD }] = useUserData();
   const { timelines } = useKibana().services;
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
+  const [refreshInterval, setRefreshInterval] = useState(1000);
+  const [isPaused, setIsPaused] = useState(true);
 
-  const { data, isLoading, isError, refetch, dataUpdatedAt } = useFindGapsForRule({
+  const { data, isLoading, isError, isFetching, refetch, dataUpdatedAt } = useFindGapsForRule({
     ruleId,
     page: pageIndex + 1,
     perPage: pageSize,
+    start: dateRange.start,
+    end: dateRange.end,
   });
 
   const pagination = {
@@ -330,7 +359,7 @@ export const RuleGaps = ({ ruleId }: { ruleId: string }) => {
 
   const columns = getGapsTableColumns(hasCRUDPermissions, ruleId);
 
-  const handleRefresh = () => {
+  const onRefreshCallback = () => {
     refetch();
   };
 
@@ -340,6 +369,23 @@ export const RuleGaps = ({ ruleId }: { ruleId: string }) => {
       setPageSize(page.size);
     }
   };
+
+  const onTimeChangeCallback = useCallback(
+    (props: OnTimeChangeProps) => {
+      console.log('props', props);
+      setDateRange({ start: props.start, end: props.end });
+    },
+    [setDateRange]
+  );
+
+  const onRefreshChangeCallback = useCallback(
+    (props: OnRefreshChangeProps) => {
+      setIsPaused(props.isPaused);
+      // Only support auto-refresh >= 5s -- no current ability to limit within component
+      setRefreshInterval(props.refreshInterval > 5000 ? props.refreshInterval : 5000);
+    },
+    [setIsPaused, setRefreshInterval]
+  );
 
   return (
     <EuiPanel hasBorder>
@@ -351,10 +397,20 @@ export const RuleGaps = ({ ruleId }: { ruleId: string }) => {
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiButton iconType="refresh" fill onClick={handleRefresh}>
-            {'Refresh'}
-          </EuiButton>
+        <EuiFlexItem grow={true}>
+          <DatePickerEuiFlexItem>
+            <EuiSuperDatePicker
+              start={dateRange.start}
+              end={dateRange.end}
+              onTimeChange={onTimeChangeCallback}
+              onRefresh={onRefreshCallback}
+              isPaused={isPaused}
+              isLoading={isFetching}
+              refreshInterval={refreshInterval}
+              onRefreshChange={onRefreshChangeCallback}
+              width="full"
+            />
+          </DatePickerEuiFlexItem>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup justifyContent="flexEnd">
