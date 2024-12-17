@@ -6,7 +6,12 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ReadStreamDefinition, StreamDefinition } from '@kbn/streams-plugin/common';
+import {
+  isIngestStream,
+  isWiredReadStream,
+  ReadStreamDefinition,
+  StreamDefinition,
+} from '@kbn/streams-schema';
 import { css } from '@emotion/css';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiListGroup, EuiText } from '@elastic/eui';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
@@ -39,7 +44,7 @@ export function StreamDetailManagement({
     if (!definition) {
       return null;
     }
-    if (definition.managed) {
+    if (isWiredReadStream(definition)) {
       return (
         <RedirectTo path="/{key}/management/{subtab}" params={{ path: { key, subtab: 'route' } }} />
       );
@@ -80,7 +85,7 @@ export function StreamDetailManagement({
     );
   }
 
-  if (definition && !definition.managed) {
+  if (definition && isIngestStream(definition)) {
     return (
       <RedirectTo
         path="/{key}/management/{subtab}"
@@ -171,7 +176,7 @@ function UnmanagedStreamOverview({ definition }: { definition: StreamDefinition 
       http: { basePath },
     },
   } = useKibana();
-  const groupedAssets = (definition.unmanaged_elasticsearch_assets ?? []).reduce((acc, asset) => {
+  const groupedAssets = (definition.elasticsearch_assets ?? []).reduce((acc, asset) => {
     const title = assetToTitle(asset);
     if (title) {
       acc[title] = acc[title] ?? [];

@@ -21,7 +21,7 @@ import {
   Condition,
   FilterCondition,
   OrCondition,
-} from '@kbn/streams-plugin/common/types';
+} from '@kbn/streams-schema';
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';

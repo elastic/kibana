@@ -8,8 +8,16 @@
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
+import {
+  IngestStreamDefinition,
+  WiredStreamDefinition,
+  StreamDefinition,
+  ListStreamsResponse,
+  isWiredStream,
+  FieldDefinition,
+} from '@kbn/streams-schema';
+import { omit } from 'lodash';
 import { STREAMS_INDEX } from '../../../common/constants';
-import { FieldDefinition, StreamDefinition } from '../../../common/types';
 import { generateLayer } from './component_templates/generate_layer';
 import { deleteComponent, upsertComponent } from './component_templates/manage_component_templates';
 import { getComponentTemplateName } from './component_templates/name';
@@ -80,52 +88,50 @@ export async function deleteStreamObjects({ id, scopedClusterClient, logger }: D
 
 async function upsertInternalStream({ definition, scopedClusterClient }: BaseParamsWithDefinition) {
   return scopedClusterClient.asInternalUser.index({
-    id: definition.id,
+    id: definition.name,
     index: STREAMS_INDEX,
-    document: { ...definition, managed: true },
+    document: { ...omit(definition, 'elasticsearch_assets') },
     refresh: 'wait_for',
   });
 }
 
 type ListStreamsParams = BaseParams;
 
-export interface ListStreamResponse {
-  definitions: StreamDefinition[];
-}
-
 export async function listStreams({
   scopedClusterClient,
-}: ListStreamsParams): Promise<ListStreamResponse> {
-  const response = await scopedClusterClient.asInternalUser.search<StreamDefinition>({
+}: ListStreamsParams): Promise<ListStreamsResponse> {
+  const response = await scopedClusterClient.asInternalUser.search<WiredStreamDefinition>({
     index: STREAMS_INDEX,
     size: 10000,
-    sort: [{ id: 'asc' }],
+    sort: [{ name: 'asc' }],
   });
 
   const dataStreams = await listDataStreamsAsStreams({ scopedClusterClient });
   let definitions = response.hits.hits.map((hit) => ({ ...hit._source!, managed: true }));
   const hasAccess = await Promise.all(
-    definitions.map((definition) => checkReadAccess({ id: definition.id, scopedClusterClient }))
+    definitions.map((definition) => checkReadAccess({ id: definition.name, scopedClusterClient }))
   );
   definitions = definitions.filter((_, index) => hasAccess[index]);
 
   return {
-    definitions: [...definitions, ...dataStreams],
+    streams: [...definitions, ...dataStreams],
   };
 }
 
 export async function listDataStreamsAsStreams({
   scopedClusterClient,
-}: ListStreamsParams): Promise<StreamDefinition[]> {
+}: ListStreamsParams): Promise<IngestStreamDefinition[]> {
   const response = await scopedClusterClient.asInternalUser.indices.getDataStream();
   return response.data_streams
     .filter((dataStream) => dataStream.template.endsWith('@stream') === false)
     .map((dataStream) => ({
-      id: dataStream.name,
-      managed: false,
-      children: [],
-      fields: [],
-      processing: [],
+      name: dataStream.name,
+      stream: {
+        ingest: {
+          processing: [],
+        },
+        routing: [],
+      },
     }));
 }
 
@@ -134,15 +140,11 @@ interface ReadStreamParams extends BaseParams {
   skipAccessCheck?: boolean;
 }
 
-export interface ReadStreamResponse {
-  definition: StreamDefinition;
-}
-
 export async function readStream({
   id,
   scopedClusterClient,
   skipAccessCheck,
-}: ReadStreamParams): Promise<ReadStreamResponse> {
+}: ReadStreamParams): Promise<StreamDefinition> {
   try {
     const response = await scopedClusterClient.asInternalUser.get<StreamDefinition>({
       id,
@@ -155,12 +157,7 @@ export async function readStream({
         throw new DefinitionNotFound(`Stream definition for ${id} not found.`);
       }
     }
-    return {
-      definition: {
-        ...definition,
-        managed: true,
-      },
-    };
+    return definition;
   } catch (e) {
     if (e.meta?.statusCode === 404) {
       return readDataStreamAsStream({ id, scopedClusterClient, skipAccessCheck });
@@ -173,7 +170,7 @@ export async function readDataStreamAsStream({
   id,
   scopedClusterClient,
   skipAccessCheck,
-}: ReadStreamParams) {
+}: ReadStreamParams): Promise<IngestStreamDefinition> {
   let dataStream: IndicesDataStream;
   try {
     const response = await scopedClusterClient.asInternalUser.indices.getDataStream({ name: id });
@@ -186,12 +183,15 @@ export async function readDataStreamAsStream({
   }
 
   const definition: StreamDefinition = {
-    id,
-    managed: false,
-    children: [],
-    fields: [],
-    processing: [],
+    name: id,
+    stream: {
+      routing: [],
+      ingest: {
+        processing: [],
+      },
+    },
   };
+
   if (!skipAccessCheck) {
     const hasAccess = await checkReadAccess({ id, scopedClusterClient });
     if (!hasAccess) {
@@ -215,7 +215,7 @@ export async function readDataStreamAsStream({
   });
   const ingestPipelineId = currentIndex[writeIndexName].settings?.index?.default_pipeline!;
 
-  definition.unmanaged_elasticsearch_assets = [
+  definition.elasticsearch_assets = [
     {
       type: 'ingest_pipeline',
       id: ingestPipelineId,
@@ -234,7 +234,7 @@ export async function readDataStreamAsStream({
     },
   ];
 
-  return { definition };
+  return definition;
 }
 
 interface ReadAncestorsParams extends BaseParams {
@@ -242,19 +242,24 @@ interface ReadAncestorsParams extends BaseParams {
 }
 
 export interface ReadAncestorsResponse {
-  ancestors: Array<{ definition: StreamDefinition }>;
+  ancestors: StreamDefinition[];
 }
 
 export async function readAncestors({
   id,
   scopedClusterClient,
-}: ReadAncestorsParams): Promise<ReadAncestorsResponse> {
+}: ReadAncestorsParams): Promise<{ ancestors: WiredStreamDefinition[] }> {
   const ancestorIds = getAncestors(id);
 
   return {
     ancestors: await Promise.all(
-      ancestorIds.map((ancestorId) =>
-        readStream({ scopedClusterClient, id: ancestorId, skipAccessCheck: true })
+      ancestorIds.map(
+        (ancestorId) =>
+          readStream({
+            scopedClusterClient,
+            id: ancestorId,
+            skipAccessCheck: true,
+          }) as unknown as WiredStreamDefinition
       )
     ),
   };
@@ -265,7 +270,7 @@ interface ReadDescendantsParams extends BaseParams {
 }
 
 export async function readDescendants({ id, scopedClusterClient }: ReadDescendantsParams) {
-  const response = await scopedClusterClient.asInternalUser.search<StreamDefinition>({
+  const response = await scopedClusterClient.asInternalUser.search<WiredStreamDefinition>({
     index: STREAMS_INDEX,
     size: 10000,
     body: {
@@ -285,27 +290,30 @@ export async function readDescendants({ id, scopedClusterClient }: ReadDescendan
       },
     },
   });
-  return response.hits.hits.map((hit) => hit._source as StreamDefinition);
+  return response.hits.hits.map((hit) => hit._source as WiredStreamDefinition);
 }
 
 export async function validateAncestorFields(
   scopedClusterClient: IScopedClusterClient,
   id: string,
-  fields: FieldDefinition[]
+  fields: FieldDefinition
 ) {
   const { ancestors } = await readAncestors({
     id,
     scopedClusterClient,
   });
   for (const ancestor of ancestors) {
-    for (const field of fields) {
+    for (const name in fields) {
       if (
-        ancestor.definition.fields.some(
-          (ancestorField) => ancestorField.type !== field.type && ancestorField.name === field.name
+        Object.hasOwn(fields, name) &&
+        isWiredStream(ancestor) &&
+        Object.entries(ancestor.stream.wired.fields).some(
+          ([ancestorFieldName, attr]) =>
+            attr.type !== fields[name].type && ancestorFieldName === name
         )
       ) {
         throw new MalformedFields(
-          `Field ${field.name} is already defined with incompatible type in the parent stream ${ancestor.definition.id}`
+          `Field ${name} is already defined with incompatible type in the parent stream ${ancestor.name}`
         );
       }
     }
@@ -315,22 +323,23 @@ export async function validateAncestorFields(
 export async function validateDescendantFields(
   scopedClusterClient: IScopedClusterClient,
   id: string,
-  fields: FieldDefinition[]
+  fields: FieldDefinition
 ) {
   const descendants = await readDescendants({
     id,
     scopedClusterClient,
   });
   for (const descendant of descendants) {
-    for (const field of fields) {
+    for (const name in fields) {
       if (
-        descendant.fields.some(
-          (descendantField) =>
-            descendantField.type !== field.type && descendantField.name === field.name
+        Object.hasOwn(fields, name) &&
+        Object.entries(descendant.stream.wired.fields).some(
+          ([descendantFieldName, attr]) =>
+            attr.type !== fields[name].type && descendantFieldName === name
         )
       ) {
         throw new MalformedFields(
-          `Field ${field.name} is already defined with incompatible type in the child stream ${descendant.id}`
+          `Field ${name} is already defined with incompatible type in the child stream ${descendant.name}`
         );
       }
     }
@@ -377,11 +386,11 @@ export async function syncStream({
   rootDefinition,
   logger,
 }: SyncStreamParams) {
-  if (!definition.managed) {
+  if (!isWiredStream(definition)) {
     // TODO For now, we just don't allow reads at all - later on we will relax this to allow certain operations, but they will use a completely different syncing logic
     throw new Error('Cannot sync an unmanaged stream');
   }
-  const componentTemplate = generateLayer(definition.id, definition);
+  const componentTemplate = generateLayer(definition.name, definition);
   await upsertComponent({
     esClient: scopedClusterClient.asCurrentUser,
     logger,
@@ -390,7 +399,7 @@ export async function syncStream({
   await upsertIngestPipeline({
     esClient: scopedClusterClient.asCurrentUser,
     logger,
-    pipeline: generateIngestPipeline(definition.id, definition),
+    pipeline: generateIngestPipeline(definition.name, definition),
   });
   const reroutePipeline = await generateReroutePipeline({
     definition,
@@ -403,12 +412,13 @@ export async function syncStream({
   await upsertTemplate({
     esClient: scopedClusterClient.asCurrentUser,
     logger,
-    template: generateIndexTemplate(definition.id),
+    template: generateIndexTemplate(definition.name),
   });
   if (rootDefinition) {
     const parentReroutePipeline = await generateReroutePipeline({
       definition: rootDefinition,
     });
+
     await upsertIngestPipeline({
       esClient: scopedClusterClient.asCurrentUser,
       logger,
@@ -418,7 +428,7 @@ export async function syncStream({
   await upsertDataStream({
     esClient: scopedClusterClient.asCurrentUser,
     logger,
-    name: definition.id,
+    name: definition.name,
   });
   await upsertInternalStream({
     scopedClusterClient,
@@ -426,7 +436,7 @@ export async function syncStream({
   });
   await rolloverDataStreamIfNecessary({
     esClient: scopedClusterClient.asCurrentUser,
-    name: definition.id,
+    name: definition.name,
     logger,
     mappings: componentTemplate.template.mappings?.properties,
   });

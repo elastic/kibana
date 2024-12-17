@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StreamDefinition } from '@kbn/streams-plugin/common';
+import type { StreamDefinition } from '@kbn/streams-schema';
 
 interface EntityBase {
   type: string;

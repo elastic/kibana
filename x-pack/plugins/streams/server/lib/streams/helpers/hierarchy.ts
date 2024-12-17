@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { StreamDefinition } from '../../../../common/types';
+import { StreamDefinition } from '@kbn/streams-schema';
 
 export function isDescendandOf(parent: StreamDefinition, child: StreamDefinition) {
-  return child.id.startsWith(parent.id);
+  return child.name.startsWith(parent.name);
 }
 
 export function isChildOf(parent: StreamDefinition, child: StreamDefinition) {
   return (
-    isDescendandOf(parent, child) && child.id.split('.').length === parent.id.split('.').length + 1
+    isDescendandOf(parent, child) &&
+    child.name.split('.').length === parent.name.split('.').length + 1
   );
 }
 

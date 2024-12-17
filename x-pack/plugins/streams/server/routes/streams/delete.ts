@@ -38,7 +38,6 @@ export const deleteStreamRoute = createServerRoute({
     }),
   }),
   handler: async ({
-    response,
     params,
     logger,
     request,
@@ -82,9 +81,9 @@ export async function deleteStream(
   logger: Logger
 ) {
   try {
-    const { definition } = await readStream({ scopedClusterClient, id });
-    for (const child of definition.children) {
-      await deleteStream(scopedClusterClient, child.id, logger);
+    const definition = await readStream({ scopedClusterClient, id });
+    for (const child of definition.stream.routing) {
+      await deleteStream(scopedClusterClient, child.name, logger);
     }
     await deleteStreamObjects({ scopedClusterClient, id, logger });
   } catch (e) {
@@ -102,12 +101,14 @@ async function updateParentStream(
   parentId: string,
   logger: Logger
 ) {
-  const { definition: parentDefinition } = await readStream({
+  const parentDefinition = await readStream({
     scopedClusterClient,
     id: parentId,
   });
 
-  parentDefinition.children = parentDefinition.children.filter((child) => child.id !== id);
+  parentDefinition.stream.routing = parentDefinition.stream.routing.filter(
+    (child) => child.name !== id
+  );
 
   await syncStream({
     scopedClusterClient,

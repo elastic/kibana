@@ -14,47 +14,47 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
-import { StreamDefinition } from '@kbn/streams-plugin/common';
 import React, { useMemo } from 'react';
+import { isWiredStreamConfig, StreamDefinition } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
 export function StreamsTable({
   listFetch,
   query,
 }: {
-  listFetch: AbortableAsyncState<{ definitions: StreamDefinition[] }>;
+  listFetch: AbortableAsyncState<{ streams: StreamDefinition[] }>;
   query: string;
 }) {
   const router = useStreamsAppRouter();
 
   const items = useMemo(() => {
-    return listFetch.value?.definitions ?? [];
-  }, [listFetch.value?.definitions]);
+    return listFetch.value?.streams ?? [];
+  }, [listFetch.value?.streams]);
 
   const filteredItems = useMemo(() => {
     if (!query) {
       return items;
     }
 
-    return items.filter((item) => item.id.toLowerCase().includes(query.toLowerCase()));
+    return items.filter((item) => item.name.toLowerCase().includes(query.toLowerCase()));
   }, [query, items]);
 
   const columns = useMemo<Array<EuiBasicTableColumn<StreamDefinition>>>(() => {
     return [
       {
-        field: 'id',
+        field: 'name',
         name: i18n.translate('xpack.streams.streamsTable.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
-        render: (_, { id, managed }) => {
+        render: (_, { name, stream }) => {
           return (
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-              <EuiIcon type={managed ? 'branch' : 'bullseye'} />
+              <EuiIcon type={isWiredStreamConfig(stream) ? 'branch' : 'bullseye'} />
               <EuiLink
                 data-test-subj="logsaiColumnsLink"
-                href={router.link('/{key}', { path: { key: id } })}
+                href={router.link('/{key}', { path: { key: name } })}
               >
-                {id}
+                {name}
               </EuiLink>
             </EuiFlexGroup>
           );

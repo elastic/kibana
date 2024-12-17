@@ -26,12 +26,7 @@ export const enableStreamsRoute = createServerRoute({
         'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
-  handler: async ({
-    request,
-    response,
-    logger,
-    getScopedClients,
-  }): Promise<{ acknowledged: true }> => {
+  handler: async ({ request, logger, getScopedClients }): Promise<{ acknowledged: true }> => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
       const alreadyEnabled = await streamsEnabled({ scopedClusterClient });
