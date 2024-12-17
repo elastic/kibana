@@ -23,7 +23,8 @@ export const setupOptionsListClusterSettingsRoute = ({ http }: CoreSetup) => {
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization because it does not take a query, params, or a body, so there is no chance of leaking info.',
+            reason:
+              'This route is opted out from authorization because it does not take a query, params, or a body, so there is no chance of leaking info.',
           },
         },
         validate: false,
