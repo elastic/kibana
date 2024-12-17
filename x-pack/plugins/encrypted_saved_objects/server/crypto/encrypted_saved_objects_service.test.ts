@@ -185,6 +185,7 @@ describe('#stripOrDecryptAttributes', () => {
         attrTwo: 'two',
         attrThree: 'three',
         attrFour: 'four',
+        attrFive: 'five',
       };
       const encryptedAttributes = await service.encryptAttributes(
         { type: 'known-type-1', id: 'object-id' },
