@@ -35,7 +35,7 @@ const METRIC_ITEM_HEIGHT = 160;
 
 export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?: string) => {
   if (!isEnabled) {
-    return euiTheme.colors.backgroundBaseDisabled;
+    return euiTheme.colors.lightestShade;
   }
   switch (status) {
     case 'down':
@@ -43,7 +43,7 @@ export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?
     case 'up':
       return euiTheme.colors.success;
     case 'unknown':
-      return euiTheme.colors.backgroundBaseDisabled;
+      return euiTheme.colors.ghost;
     default:
       return euiTheme.colors.success;
   }
