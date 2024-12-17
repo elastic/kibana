@@ -343,12 +343,17 @@ And user should see <Y> rules available to install
 
 ```Gherkin
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 Given X prebuilt rule assets exist in Kibana
 And no prebuilt rules are installed
 =======
 Given no prebuilt rules are installed in Kibana
 And there are X prebuilt rules available to install
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+Given X prebuilt rule assets exist in Kibana
+And no prebuilt rules are installed
+>>>>>>> 142b4da45f1 (Apply suggestion for installation.md):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 When user opens the Add Rules page
 Then prebuilt rules available for installation should be displayed in the table
 When user installs one individual rule without previewing it
@@ -365,12 +370,17 @@ And user should see the number of rules available to install decreased by 1
 
 ```Gherkin
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 Given X prebuilt rule assets exist in Kibana
 And no prebuilt rules are installed
 =======
 Given no prebuilt rules are installed in Kibana
 And there are X prebuilt rules available to install
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+Given X prebuilt rule assets exist in Kibana
+And no prebuilt rules are installed
+>>>>>>> 142b4da45f1 (Apply suggestion for installation.md):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 When user opens the Add Rules page
 Then prebuilt rules available for installation should be displayed in the table
 When user selects <Y> rules
@@ -394,12 +404,17 @@ Examples:
 
 ```Gherkin
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 Given X prebuilt rule assets exist in Kibana
 And no prebuilt rules are installed
 =======
 Given no prebuilt rules are installed in Kibana
 And there are X prebuilt rules available to install
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+Given X prebuilt rule assets exist in Kibana
+And no prebuilt rules are installed
+>>>>>>> 142b4da45f1 (Apply suggestion for installation.md):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 When user opens the Add Rules page
 Then prebuilt rules available for installation should be displayed in the table
 When user installs all rules
@@ -430,12 +445,17 @@ And user should see a CTA that leads to the Rule Management page
 
 ```Gherkin
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 Given 2 prebuilt rule assets exist in Kibana
 And no prebuilt rules are installed
 =======
 Given no prebuilt rules are installed in Kibana
 And there are 2 rules available to install
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+Given 2 prebuilt rule assets exist in Kibana
+And no prebuilt rules are installed
+>>>>>>> 142b4da45f1 (Apply suggestion for installation.md):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 When user opens the Add Rules page
 Then all rules available for installation should be displayed in the table
 When user opens the rule preview for the 1st rule
@@ -450,12 +470,17 @@ Then it should disappear
 
 ```Gherkin
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 Given 2 prebuilt rule assets exist in Kibana
 And no prebuilt rules are installed
 =======
 Given no prebuilt rules are installed in Kibana
 And there are 2 rules available to install
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+Given 2 prebuilt rule assets exist in Kibana
+And no prebuilt rules are installed
+>>>>>>> 142b4da45f1 (Apply suggestion for installation.md):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 When user opens the Add Rules page
 Then all rules available for installation should be displayed in the table
 When user opens the rule preview for the rule
@@ -475,12 +500,17 @@ And user should see the number of rules available to install as initial number m
 
 ```Gherkin
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 Given X prebuilt rule assets exist in Kibana
 And no prebuilt rules are installed
 =======
 Given no prebuilt rules are installed in Kibana
 And there are X prebuilt rules of all types available to install
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+Given X prebuilt rule assets exist in Kibana
+And no prebuilt rules are installed
+>>>>>>> 142b4da45f1 (Apply suggestion for installation.md):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 When user opens the Add Rules page
 Then all X rules available for installation should be displayed in the table
 When user opens a rule preview for any rule
@@ -494,12 +524,17 @@ And all properties of a rule should be displayed in the correct tab and section 
 
 ```Gherkin
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 Given 1 prebuilt rule assets exist in Kibana
 And no prebuilt rules are installed
 =======
 Given no prebuilt rules are installed in Kibana
 And there is at least 1 rule available to install
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+Given 1 prebuilt rule assets exist in Kibana
+And no prebuilt rules are installed
+>>>>>>> 142b4da45f1 (Apply suggestion for installation.md):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 And this rule has neither Setup guide nor Investigation guide
 When user opens the Add Rules page
 Then all rules available for installation should be displayed in the table
@@ -548,10 +583,14 @@ Given the package <package_type> is installed
 And the package contains N rules
 When user installs all rules via install <api>
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 Then the endpoint should return success response (HTTP 200 code) with <install_response>
 =======
 Then the endpoint should return 200 with <install_response>
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+Then the endpoint should return success response (HTTP 200 code) with <install_response>
+>>>>>>> 142b4da45f1 (Apply suggestion for installation.md):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 And N rule objects should be created
 And each rule object should have correct id and version
 
@@ -581,6 +620,7 @@ When user installs all rules via install <api>
 And deletes one of the installed rules
 And gets prebuilt rules status via status <api>
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 Then the endpoint should return successful response (HTTP 200 code) with <status_response>
 When user installs all rules via install <api> again
 Then the endpoint should return successful response (HTTP 200 code) with <install_response>
@@ -589,6 +629,11 @@ Then the endpoint should return 200 with <status_response>
 When user installs all rules via install <api> again
 Then the endpoint should return 200 with <install_response>
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+Then the endpoint should return successful response (HTTP 200 code) with <status_response>
+When user installs all rules via install <api> again
+Then the endpoint should return successful response (HTTP 200 code) with <install_response>
+>>>>>>> 142b4da45f1 (Apply suggestion for installation.md):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 
 Examples:
   | package_type             | api    | status_response  | install_response         |
@@ -618,6 +663,7 @@ And the package contains N rules
 When user installs all rules via install <api>
 And user gets prebuilt rules status via status <api>
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 Then the endpoint should return successful response (HTTP 200 code) with <status_response>
 When user calls install <api>
 Then the endpoint should return successful response (HTTP 200 code) with <install_response>
@@ -625,11 +671,18 @@ When user calls upgrade <api>
 Then the endpoint should return successful response (HTTP 200 code) with <upgrade_response>
 =======
 Then the endpoint should return 200 with <status_response>
+=======
+Then the endpoint should return successful response (HTTP 200 code) with <status_response>
+>>>>>>> 142b4da45f1 (Apply suggestion for installation.md):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 When user calls install <api>
-Then the endpoint should return 200 with <install_response>
+Then the endpoint should return successful response (HTTP 200 code) with <install_response>
 When user calls upgrade <api>
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 Then the endpoint should return 200 with <upgrade_response>
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+Then the endpoint should return successful response (HTTP 200 code) with <upgrade_response>
+>>>>>>> 142b4da45f1 (Apply suggestion for installation.md):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 
 Examples:
   | package_type             | api    | status_response                  | install_response         | upgrade_response         |
@@ -694,12 +747,17 @@ Examples:
 ```Gherkin
 Given user with "Security: read" privileges on Security Solution
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 And prebuilt rule assets exist in Kibana
 And no prebuilt rules are installed
 =======
 And no prebuilt rules are installed in Kibana
 And there are prebuilt rules available to install
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+And prebuilt rule assets exist in Kibana
+And no prebuilt rules are installed
+>>>>>>> 142b4da45f1 (Apply suggestion for installation.md):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 When user opens the Add Rules page
 Then user should see prebuilt rules available to install
 But user should not be able to install them
