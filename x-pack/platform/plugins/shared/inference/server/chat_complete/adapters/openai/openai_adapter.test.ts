@@ -77,6 +77,7 @@ describe('openAIAdapter', () => {
         };
       });
     });
+
     it('correctly formats messages ', () => {
       openAIAdapter.chatComplete({
         ...defaultArgs,
@@ -253,6 +254,25 @@ describe('openAIAdapter', () => {
 
       expect(getRequest().stream).toBe(true);
       expect(getRequest().body.stream).toBe(true);
+    });
+
+    it('propagates the abort signal when provided', () => {
+      const abortController = new AbortController();
+
+      openAIAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        abortSignal: abortController.signal,
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'stream',
+        subActionParams: expect.objectContaining({
+          signal: abortController.signal,
+        }),
+      });
     });
   });
 

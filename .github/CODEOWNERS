@@ -1832,7 +1832,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 #CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
 
 # AppEx AI Infra
-/x-pack/plugins/inference @elastic/appex-ai-infra @elastic/obs-ai-assistant @elastic/security-generative-ai
+/x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra @elastic/obs-ai-assistant @elastic/security-generative-ai
 /x-pack/test/functional_gen_ai/inference @elastic/appex-ai-infra
 
 # AppEx Platform Services Security
