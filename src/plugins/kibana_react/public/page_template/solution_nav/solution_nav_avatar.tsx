@@ -40,6 +40,8 @@ export const KibanaPageTemplateSolutionNavAvatar: FunctionComponent<
     `,
     xxl: css`
       ${useEuiShadow('m')};
+      width: 100px;
+      height: 100px;
       line-height: 100px;
       border-radius: 100px;
       display: inline-block;
