@@ -31,6 +31,7 @@ export const GraphPreviewContainer: React.FC = () => {
     scopeId,
     isPreview,
     isPreviewMode,
+    dataFormattedForFieldBrowser,
   } = useDocumentDetailsContext();
 
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
@@ -53,6 +54,7 @@ export const GraphPreviewContainer: React.FC = () => {
   } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
+    dataFormattedForFieldBrowser,
   });
 
   // TODO: default start and end might not capture the original event

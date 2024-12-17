@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { renderHook } from '@testing-library/react';
 import type { UseGraphPreviewParams } from './use_graph_preview';
 import { useGraphPreview } from './use_graph_preview';
 import type { GetFieldsData } from './use_get_fields_data';
 import { mockFieldData } from '../mocks/mock_get_fields_data';
+import { mockDataFormattedForFieldBrowser } from '../mocks/mock_data_formatted_for_field_browser';
 
 const alertMockGetFieldsData: GetFieldsData = (field: string) => {
   if (field === 'kibana.alert.uuid') {
@@ -24,6 +26,8 @@ const alertMockGetFieldsData: GetFieldsData = (field: string) => {
 
   return mockFieldData[field];
 };
+
+const alertMockDataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
 
 const eventMockGetFieldsData: GetFieldsData = (field: string) => {
   if (field === 'kibana.alert.uuid') {
@@ -40,6 +44,8 @@ const eventMockGetFieldsData: GetFieldsData = (field: string) => {
 
   return mockFieldData[field];
 };
+
+const eventMockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [];
 
 describe('useGraphPreview', () => {
   it(`should return false when missing actor`, () => {
@@ -59,6 +65,7 @@ describe('useGraphPreview', () => {
             action: ['action'],
           },
         },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
       },
     });
 
@@ -80,6 +87,7 @@ describe('useGraphPreview', () => {
         ecsData: {
           _id: 'id',
         },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
       },
     });
 
@@ -108,6 +116,7 @@ describe('useGraphPreview', () => {
         ecsData: {
           _id: 'id',
         },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
       },
     });
 
@@ -140,6 +149,7 @@ describe('useGraphPreview', () => {
             action: ['action'],
           },
         },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
       },
     });
 
@@ -172,6 +182,7 @@ describe('useGraphPreview', () => {
             action: ['action'],
           },
         },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
       },
     });
 
@@ -196,6 +207,7 @@ describe('useGraphPreview', () => {
             action: ['action'],
           },
         },
+        dataFormattedForFieldBrowser: eventMockDataFormattedForFieldBrowser,
       },
     });
 
@@ -236,6 +248,7 @@ describe('useGraphPreview', () => {
             action: ['action1', 'action2'],
           },
         },
+        dataFormattedForFieldBrowser: eventMockDataFormattedForFieldBrowser,
       },
     });
 
@@ -260,6 +273,7 @@ describe('useGraphPreview', () => {
             action: ['action'],
           },
         },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
       },
     });
 
@@ -298,6 +312,7 @@ describe('useGraphPreview', () => {
             action: ['action1', 'action2'],
           },
         },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
       },
     });
 

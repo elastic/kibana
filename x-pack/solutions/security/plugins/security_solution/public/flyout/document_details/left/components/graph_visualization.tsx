@@ -29,7 +29,8 @@ export const GraphVisualization: React.FC = memo(() => {
   const dataView = useGetScopedSourcererDataView({
     sourcererScope: SourcererScopeName.default,
   });
-  const { getFieldsData, dataAsNestedObject } = useDocumentDetailsContext();
+  const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser } =
+    useDocumentDetailsContext();
   const {
     eventIds,
     timestamp = new Date().toISOString(),
@@ -37,6 +38,7 @@ export const GraphVisualization: React.FC = memo(() => {
   } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
+    dataFormattedForFieldBrowser,
   });
 
   const originEventIds = eventIds.map((id) => ({ id, isAlert }));

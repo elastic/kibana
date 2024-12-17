@@ -175,7 +175,7 @@ export const GraphInvestigation: React.FC<GraphInvestigationProps> = memo(
         buildEsQuery(
           dataView,
           [],
-          searchFilters,
+          [...searchFilters],
           getEsQueryConfig(uiSettings as Parameters<typeof getEsQueryConfig>[0])
         ),
       [dataView, searchFilters, uiSettings]
