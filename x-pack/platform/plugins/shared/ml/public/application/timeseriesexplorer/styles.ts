@@ -22,6 +22,12 @@ export const useTimeseriesExplorerStyles = () => {
   const { fontSize: euiFontSizeXS } = useEuiFontSize('xs', { unit: 'px' });
   const { fontSize: euiFontSizeS } = useEuiFontSize('s', { unit: 'px' });
 
+  // Amsterdam: euiTheme.colors.vis.euiColorVis5
+  // Borealis:  euiTheme.colors.vis.euiColorVis9
+  const forecastColor = euiTheme.flags.hasVisColorAdjustment
+    ? euiTheme.colors.vis.euiColorVis5
+    : euiTheme.colors.vis.euiColorVis9;
+
   return useMemo(
     () =>
       css({
@@ -75,7 +81,7 @@ export const useTimeseriesExplorerStyles = () => {
             },
 
             '&.forecast': {
-              fill: transparentize(euiTheme.colors.vis.euiColorVis5, 0.3),
+              fill: transparentize(forecastColor, 0.3),
               pointerEvents: 'none',
             },
           },
@@ -87,7 +93,7 @@ export const useTimeseriesExplorerStyles = () => {
             pointerEvents: 'none',
 
             '&.forecast': {
-              stroke: euiTheme.colors.vis.euiColorVis5,
+              stroke: forecastColor,
               pointerEvents: 'none',
             },
           },
@@ -147,7 +153,7 @@ export const useTimeseriesExplorerStyles = () => {
 
           '.forecast': {
             '.metric-value, .metric-value:hover': {
-              stroke: euiTheme.colors.vis.euiColorVis5,
+              stroke: forecastColor,
             },
           },
 
@@ -261,7 +267,7 @@ export const useTimeseriesExplorerStyles = () => {
           },
         },
       }),
-    [euiTheme, euiFontSizeS, euiFontSizeXS]
+    [euiTheme, euiFontSizeS, euiFontSizeXS, forecastColor]
   );
 };
 
