@@ -12,6 +12,12 @@ import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { chatClient, esClient } from '../../services';
 
 describe('elasticsearch functions', () => {
+  // using 'all' for elasticsearch scenarios enables the LLM correctly pick
+  // elasticsearch functions when querying for data
+  before(() => {
+    chatClient.setScopes(['all']);
+  });
+
   describe('health', () => {
     it('returns the cluster health state', async () => {
       const conversation = await chatClient.complete(
@@ -129,6 +135,7 @@ describe('elasticsearch functions', () => {
       });
     });
   });
+
   describe('other', () => {
     it('returns clusters license', async () => {
       const conversation = await chatClient.complete('What is my clusters license?');
@@ -140,5 +147,9 @@ describe('elasticsearch functions', () => {
 
       expect(result.passed).to.be(true);
     });
+  });
+
+  after(() => {
+    chatClient.setScopes(['observability']);
   });
 });
