@@ -10,7 +10,6 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
 const _allowedExperimentalValues = {
   createPackagePolicyMultiPageLayout: true,
   packageVerification: true,
-  showDevtoolsRequest: true,
   diagnosticFileUploadEnabled: true,
   displayAgentMetrics: true,
   showIntegrationsSubcategories: true,
