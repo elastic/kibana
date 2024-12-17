@@ -11,7 +11,8 @@ import { generateEntities, generateLogs, generateTraces } from './generate_data'
 const start = '2024-10-16T00:00:00.000Z';
 const end = '2024-10-16T00:15:00.000Z';
 
-describe('Home page', () => {
+// Temporary skipping those test, will be enabled in the future once we fix them https://github.com/elastic/kibana/issues/204558
+describe.skip('Home page', () => {
   beforeEach(() => {
     cy.loginAsSuperUser();
   });

@@ -40,11 +40,15 @@ import {
   READ_ENTITIES_PRIVILEGE,
 } from './lib/v2/constants';
 import { installBuiltInDefinitions } from './lib/v2/definitions/install_built_in_definitions';
+import { instanceAsFilter } from './lib/v2/definitions/instance_as_filter';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityManagerServerPluginSetup {}
 export interface EntityManagerServerPluginStart {
   getScopedClient: (options: { request: KibanaRequest }) => Promise<EntityClient>;
+  v2: {
+    instanceAsFilter: typeof instanceAsFilter;
+  };
 }
 
 export const config: PluginConfigDescriptor<EntityManagerConfig> = {
@@ -196,6 +200,9 @@ export class EntityManagerServerPlugin
     return {
       getScopedClient: async ({ request }: { request: KibanaRequest }) => {
         return this.getScopedClient({ request, coreStart: core });
+      },
+      v2: {
+        instanceAsFilter,
       },
     };
   }

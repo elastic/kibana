@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useContext, FC } from 'react';
-import { UptimeAppColors } from '../../app/uptime_app';
-import { UptimeThemeContext } from '../../contexts';
+import React, { FC } from 'react';
 
 interface StatusBadgeProps {
   isMobile?: boolean;
@@ -17,12 +15,18 @@ interface StatusBadgeProps {
   stepNo: number;
 }
 
-export function colorFromStatus(color: UptimeAppColors, status?: string) {
+export function colorFromStatus(
+  color: {
+    success: string;
+    danger: string;
+  },
+  status?: string
+) {
   switch (status) {
     case 'succeeded':
       return color.success;
     case 'failed':
-      return color.dangerBehindText;
+      return color.danger;
     default:
       return 'default';
   }
@@ -48,7 +52,8 @@ export function textFromStatus(status?: string) {
 }
 
 export const StatusBadge: FC<StatusBadgeProps> = ({ status, stepNo, isMobile }) => {
-  const theme = useContext(UptimeThemeContext);
+  const theme = useEuiTheme();
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       {!isMobile && (
@@ -59,7 +64,17 @@ export const StatusBadge: FC<StatusBadgeProps> = ({ status, stepNo, isMobile }) 
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiBadge color={colorFromStatus(theme.colors, status)}>{textFromStatus(status)}</EuiBadge>
+        <EuiBadge
+          color={colorFromStatus(
+            {
+              danger: theme.euiTheme.colors.danger,
+              success: theme.euiTheme.colors.success,
+            },
+            status
+          )}
+        >
+          {textFromStatus(status)}
+        </EuiBadge>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

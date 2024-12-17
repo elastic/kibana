@@ -292,7 +292,6 @@ describe('Search search provider', () => {
     it('does not return results for legacy app search', () => {
       const searchProvider = getSearchResultProvider(
         {
-          canDeployEntSearch: true,
           hasConnectors: false,
           hasWebCrawler: false,
         } as any,
@@ -315,7 +314,6 @@ describe('Search search provider', () => {
     it('does not return results for legacy workplace search', () => {
       const searchProvider = getSearchResultProvider(
         {
-          canDeployEntSearch: true,
           hasConnectors: false,
           hasWebCrawler: false,
         } as any,

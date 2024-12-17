@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiSteps, type EuiStepProps } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { PropsWithChildren } from 'react';
 import React from 'react';
 
 const style = css`
@@ -16,11 +15,11 @@ const style = css`
   }
 `;
 
-export const SubStepsWrapper = React.memo<PropsWithChildren<{}>>(({ children }) => {
+export const SubSteps = React.memo<{ steps: EuiStepProps[] }>(({ steps }) => {
   return (
     <EuiPanel hasShadow={false} paddingSize="xs" className={style}>
-      {children}
+      <EuiSteps titleSize="xxs" steps={steps} />
     </EuiPanel>
   );
 });
-SubStepsWrapper.displayName = 'SubStepsWrapper';
+SubSteps.displayName = 'SubSteps';

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { EuiBadge, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { Ping } from '../../../../../../common/runtime_types/ping';
 import { MONITOR_TYPES, STATUS } from '../../../../../../common/constants';
-import { UptimeThemeContext } from '../../../../contexts';
 import {
   STATUS_COMPLETE_LABEL,
   STATUS_DOWN_LABEL,
@@ -32,9 +31,8 @@ const getPingStatusLabel = (status: string, ping: Ping) => {
 };
 
 export const PingStatusColumn = ({ pingStatus, item }: Props) => {
-  const {
-    colors: { dangerBehindText },
-  } = useContext(UptimeThemeContext);
+  const theme = useEuiTheme();
+  const dangerBehindText = theme.euiTheme.colors.textDanger;
 
   const timeStamp = moment(item.timestamp);
 
