@@ -320,12 +320,12 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return {
           navLinks: {
-            appSearch: hasAppSearchAccess && config.canDeployEntSearch,
-            workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
+            appSearch: hasAppSearchAccess,
+            workplaceSearch: hasWorkplaceSearchAccess,
           },
           catalogue: {
-            appSearch: hasAppSearchAccess && config.canDeployEntSearch,
-            workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
+            appSearch: hasAppSearchAccess,
+            workplaceSearch: hasWorkplaceSearchAccess,
           },
         };
       },
