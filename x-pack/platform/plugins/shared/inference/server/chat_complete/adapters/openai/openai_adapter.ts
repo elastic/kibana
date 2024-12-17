@@ -43,7 +43,16 @@ import {
 } from '../../simulated_function_calling';
 
 export const openAIAdapter: InferenceConnectorAdapter = {
-  chatComplete: ({ executor, system, messages, toolChoice, tools, functionCalling, logger }) => {
+  chatComplete: ({
+    executor,
+    system,
+    messages,
+    toolChoice,
+    tools,
+    functionCalling,
+    logger,
+    abortSignal,
+  }) => {
     const stream = true;
     const simulatedFunctionCalling = functionCalling === 'simulated';
 
@@ -58,7 +67,6 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       request = {
         stream,
         messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
-        temperature: 0,
       };
     } else {
       request = {
@@ -66,7 +74,6 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         messages: messagesToOpenAI({ system, messages }),
         tool_choice: toolChoiceToOpenAI(toolChoice),
         tools: toolsToOpenAI(tools),
-        temperature: 0,
       };
     }
 
@@ -75,6 +82,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         subAction: 'stream',
         subActionParams: {
           body: JSON.stringify(request),
+          signal: abortSignal,
           stream,
         },
       })

@@ -13,6 +13,9 @@ export {
   type AssistantMessage,
   type ToolMessage,
   type UserMessage,
+  type MessageOf,
+  type AssistantMessageOf,
+  type ToolMessageOf,
   type ToolSchemaType,
   type FromToolSchema,
   type ToolSchema,
@@ -81,11 +84,14 @@ export {
   type InferenceTaskErrorEvent,
   type InferenceTaskInternalError,
   type InferenceTaskRequestError,
+  type InferenceTaskAbortedError,
   createInferenceInternalError,
   createInferenceRequestError,
+  createInferenceRequestAbortedError,
   isInferenceError,
   isInferenceInternalError,
   isInferenceRequestError,
+  isInferenceRequestAbortedError,
 } from './src/errors';
 
 export { truncateList } from './src/truncate_list';

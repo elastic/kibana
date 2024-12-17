@@ -10,25 +10,36 @@
 import {
   CanExpandPanels,
   HasRuntimeChildState,
+  HasSaveNotification,
   HasSerializedChildState,
   PresentationContainer,
+  PublishesSettings,
   SerializedPanelState,
+  TrackContentfulRender,
   TracksOverlays,
 } from '@kbn/presentation-containers';
 import {
   EmbeddableAppContext,
   HasAppContext,
+  HasExecutionContext,
   HasType,
+  HasUniqueId,
+  PublishesDataLoading,
   PublishesDataViews,
   PublishesPanelDescription,
   PublishesPanelTitle,
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
   PublishesViewMode,
+  PublishesWritableViewMode,
   PublishingSubject,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
+import {
+  ControlGroupApi,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+} from '@kbn/controls-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import {
   DefaultEmbeddableApi,
@@ -36,19 +47,24 @@ import {
   ErrorEmbeddable,
   IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { Observable } from 'rxjs';
-import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
+import { Observable, Subject } from 'rxjs';
+import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
+import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { DashboardPanelMap, DashboardPanelState } from '../../common';
+import type { DashboardAttributes, DashboardOptions } from '../../server/content_management';
 import {
   LoadDashboardReturn,
   SaveDashboardReturn,
-  SavedDashboardInput,
 } from '../services/dashboard_content_management_service/types';
-import { DashboardStateFromSettingsFlyout, UnsavedPanelState } from '../dashboard_container/types';
+import { DashboardLocatorParams } from '../dashboard_container/types';
+
+export const DASHBOARD_API_TYPE = 'dashboard';
 
 export interface DashboardCreationOptions {
-  getInitialInput?: () => Partial<SavedDashboardInput>;
+  getInitialInput?: () => Partial<DashboardState>;
 
   getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
 
@@ -74,57 +90,97 @@ export interface DashboardCreationOptions {
   getEmbeddableAppContext?: (dashboardId?: string) => EmbeddableAppContext;
 }
 
+export type DashboardSettings = DashboardOptions & {
+  description?: DashboardAttributes['description'];
+  tags: string[];
+  timeRestore: DashboardAttributes['timeRestore'];
+  title: DashboardAttributes['description'];
+};
+
+export interface DashboardState extends DashboardSettings {
+  query: Query;
+  filters: Filter[];
+  timeRange?: TimeRange;
+  refreshInterval?: RefreshInterval;
+  viewMode: ViewMode;
+  panels: DashboardPanelMap;
+
+  /**
+   * Serialized control group state.
+   * Contains state loaded from dashboard saved object
+   */
+  controlGroupInput?: ControlGroupSerializedState | undefined;
+  /**
+   * Runtime control group state.
+   * Contains state passed from dashboard locator
+   * Use runtime state when building input for portable dashboards
+   */
+  controlGroupState?: Partial<ControlGroupRuntimeState>;
+}
+
 export type DashboardApi = CanExpandPanels &
   HasAppContext &
+  HasExecutionContext &
   HasRuntimeChildState &
+  HasSaveNotification &
   HasSerializedChildState &
-  HasType<'dashboard'> &
+  HasType<typeof DASHBOARD_API_TYPE> &
+  HasUniqueId &
   PresentationContainer &
+  PublishesDataLoading &
   PublishesDataViews &
   PublishesPanelDescription &
   Pick<PublishesPanelTitle, 'panelTitle'> &
+  PublishesReload &
   PublishesSavedObjectId &
+  PublishesSearchSession &
+  PublishesSettings &
   PublishesUnifiedSearch &
   PublishesViewMode &
+  PublishesWritableViewMode &
+  TrackContentfulRender &
   TracksOverlays & {
-    addFromLibrary: () => void;
-    animatePanelTransforms$: PublishingSubject<boolean>;
     asyncResetToLastSavedState: () => Promise<void>;
     controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
     forceRefresh: () => void;
-    getRuntimeStateForControlGroup: () => UnsavedPanelState | undefined;
-    getSerializedStateForControlGroup: () => SerializedPanelState<ControlGroupSerializedState>;
-    getSettings: () => DashboardStateFromSettingsFlyout;
-    getDashboardPanelFromId: (id: string) => Promise<DashboardPanelState>;
+    getSettings: () => DashboardSettings;
+    getDashboardPanelFromId: (id: string) => DashboardPanelState;
     hasOverlays$: PublishingSubject<boolean>;
-    hasRunMigrations$: PublishingSubject<boolean>;
     hasUnsavedChanges$: PublishingSubject<boolean>;
     highlightPanel: (panelRef: HTMLDivElement) => void;
     highlightPanelId$: PublishingSubject<string | undefined>;
     isEmbeddedExternally: boolean;
-    managed$: PublishingSubject<boolean>;
+    isManaged: boolean;
+    locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
     panels$: PublishingSubject<DashboardPanelMap>;
-    registerChildApi: (api: DefaultEmbeddableApi) => void;
-    runInteractiveSave: (interactionMode: ViewMode) => Promise<SaveDashboardReturn | undefined>;
+    runInteractiveSave: () => Promise<SaveDashboardReturn | undefined>;
     runQuickSave: () => Promise<void>;
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;
     scrollToTop: () => void;
-    setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
-    setSettings: (settings: DashboardStateFromSettingsFlyout) => void;
     setFilters: (filters?: Filter[] | undefined) => void;
     setFullScreenMode: (fullScreenMode: boolean) => void;
+    setHighlightPanelId: (id: string | undefined) => void;
     setPanels: (panels: DashboardPanelMap) => void;
     setQuery: (query?: Query | undefined) => void;
+    setScrollToPanelId: (id: string | undefined) => void;
+    setSettings: (settings: DashboardSettings) => void;
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
-    setViewMode: (viewMode: ViewMode) => void;
-    useMargins$: PublishingSubject<boolean | undefined>;
-    // TODO replace with HasUniqueId once dashboard is refactored and navigateToDashboard is removed
-    uuid$: PublishingSubject<string>;
+    unifiedSearchFilters$: PublishesUnifiedSearch['filters$'];
 
     // TODO remove types below this line - from legacy embeddable system
     untilEmbeddableLoaded: (id: string) => Promise<IEmbeddable | ErrorEmbeddable>;
   };
+
+export interface DashboardInternalApi {
+  animatePanelTransforms$: PublishingSubject<boolean>;
+  controlGroupReload$: Subject<void>;
+  panelsReload$: Subject<void>;
+  getRuntimeStateForControlGroup: () => object | undefined;
+  getSerializedStateForControlGroup: () => SerializedPanelState<ControlGroupSerializedState>;
+  registerChildApi: (api: DefaultEmbeddableApi) => void;
+  setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
+}

@@ -44,7 +44,7 @@ export function createToolValidationError(
     name?: string;
     arguments?: string;
     errorsText?: string;
-    toolCalls?: UnvalidatedToolCall[];
+    toolCalls: UnvalidatedToolCall[];
   }
 ): ChatCompletionToolValidationError {
   return new InferenceTaskError(ChatCompletionErrorCode.ToolValidationError, message, meta);
