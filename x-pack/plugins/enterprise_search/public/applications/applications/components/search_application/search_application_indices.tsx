@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -15,6 +15,7 @@ import {
   EuiConfirmModal,
   EuiIcon,
   EuiInMemoryTable,
+  EuiLink,
   EuiSpacer,
   EuiTableActionsColumnType,
   EuiText,
@@ -22,15 +23,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 import { EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
 
-import { SEARCH_INDEX_PATH } from '../../../enterprise_search_content/routes';
 import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';
 import { indexHealthToHealthColor } from '../../../shared/constants/health_colors';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry/telemetry_logic';
 
 import { SearchApplicationIndicesLogic } from './search_application_indices_logic';
@@ -40,8 +38,40 @@ export const SearchApplicationIndices: React.FC = () => {
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const { searchApplicationData } = useValues(SearchApplicationIndicesLogic);
   const { removeIndexFromSearchApplication } = useActions(SearchApplicationIndicesLogic);
-  const { navigateToUrl } = useValues(KibanaLogic);
+  const { navigateToUrl, share } = useValues(KibanaLogic);
   const [removeIndexConfirm, setConfirmRemoveIndex] = useState<string | null>(null);
+  const searchIndicesLocator = useMemo(
+    () => share?.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID'),
+    [share]
+  );
+
+  const SearchIndicesLinkProps = useCallback(
+    (indexName: string) => {
+      const viewIndicesDefaultProps = {
+        'data-test-subj': 'search-application-index-link',
+      };
+      if (searchIndicesLocator) {
+        return {
+          ...viewIndicesDefaultProps,
+          href: generateEncodedPath(searchIndicesLocator.getRedirectUrl({}), { indexName }),
+          onClick: async (event: React.MouseEvent<HTMLAnchorElement>) => {
+            event.preventDefault();
+            const url = await searchIndicesLocator.getUrl({ indexName });
+            navigateToUrl(url, {
+              shouldNotCreateHref: true,
+              shouldNotPrepend: true,
+            });
+          },
+        };
+      } else {
+        return {
+          ...viewIndicesDefaultProps,
+          disabled: true,
+        };
+      }
+    },
+    [navigateToUrl, searchIndicesLocator]
+  );
 
   if (!searchApplicationData) return null;
   const { indices } = searchApplicationData;
@@ -91,19 +121,7 @@ export const SearchApplicationIndices: React.FC = () => {
         }
       ),
       render: ({ health, name }: EnterpriseSearchApplicationIndex) =>
-        health === 'unknown' ? (
-          name
-        ) : (
-          <EuiLinkTo
-            data-test-subj="search-application-index-link"
-            to={`${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}${generateEncodedPath(SEARCH_INDEX_PATH, {
-              indexName: name,
-            })}`}
-            shouldNotCreateHref
-          >
-            {name}
-          </EuiLinkTo>
-        ),
+        health === 'unknown' ? name : <EuiLink {...SearchIndicesLinkProps(name)}>{name}</EuiLink>,
       sortable: ({ name }: EnterpriseSearchApplicationIndex) => name,
       truncateText: true,
       width: '40%',
@@ -148,6 +166,7 @@ export const SearchApplicationIndices: React.FC = () => {
     {
       actions: [
         {
+          enabled: () => searchIndicesLocator !== undefined,
           available: (index) => index.health !== 'unknown',
           'data-test-subj': 'search-application-view-index-btn',
           description: i18n.translate(
@@ -168,15 +187,19 @@ export const SearchApplicationIndices: React.FC = () => {
                 },
               }
             ),
-          onClick: (index) =>
-            navigateToUrl(
-              `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/${generateEncodedPath(SEARCH_INDEX_PATH, {
-                indexName: index.name,
-              })}`,
-              {
+
+          onClick: async (index) => {
+            if (searchIndicesLocator) {
+              const url = await searchIndicesLocator.getUrl({ indexName: index.name });
+              navigateToUrl(url, {
                 shouldNotCreateHref: true,
-              }
-            ),
+                shouldNotPrepend: true,
+              });
+            } else {
+              return undefined;
+            }
+          },
+
           type: 'icon',
         },
         ...(indices.length > 1 ? [removeIndexAction] : []),
