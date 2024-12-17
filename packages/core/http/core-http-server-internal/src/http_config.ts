@@ -300,11 +300,12 @@ export const config: ServiceConfigDescriptor<HttpConfigType> = {
   schema: configSchema,
   deprecations: ({ rename }) => [
     rename('maxPayloadBytes', 'maxPayload', { level: 'warning' }),
-    (settings, fromPath, addDeprecation) => {
+    (settings, fromPath, addDeprecation, { docLinks }) => {
       const cfg = get(settings, fromPath);
       if (!cfg?.ssl?.enabled || cfg?.protocol === 'http1') {
         addDeprecation({
           level: 'warning',
+          title: `Consider enabling TLS and using HTTP/2 to improve security and performance.`,
           configPath: `${fromPath}.protocol,${fromPath}.ssl.enabled`,
           message: `TLS is not enabled, or the HTTP protocol is set to HTTP/1. Enabling TLS and using HTTP/2 improves security and performance.`,
           correctiveActions: {
@@ -313,6 +314,7 @@ export const config: ServiceConfigDescriptor<HttpConfigType> = {
               `Set the protocol to 'http2' by updating ${fromPath}.protocol to 'http2' in your configuration.`,
             ],
           },
+          documentationUrl: docLinks.settings + '#server-protocol'
         });
       }
     },
