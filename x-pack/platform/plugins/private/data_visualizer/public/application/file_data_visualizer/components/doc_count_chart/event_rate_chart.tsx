@@ -74,6 +74,7 @@ export const EventRateChart: FC<Props> = ({ eventRateChartData, height, width })
           xAccessor={'time'}
           yAccessors={['value']}
           data={eventRateChartData}
+          // Amsterdam + Borealis
           color={euiTheme.colors.vis.euiColorVis0}
         />
       </Chart>
