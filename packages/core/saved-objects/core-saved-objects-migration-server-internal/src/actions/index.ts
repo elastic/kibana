@@ -12,12 +12,7 @@ import { right } from 'fp-ts/lib/Either';
 import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
 import type { DocumentsTransformFailed } from '../core/migrate_raw_docs';
 
-export {
-  DEFAULT_TIMEOUT,
-  INDEX_AUTO_EXPAND_REPLICAS,
-  INDEX_NUMBER_OF_SHARDS,
-  WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
-} from './constants';
+export { DEFAULT_TIMEOUT, INDEX_AUTO_EXPAND_REPLICAS, INDEX_NUMBER_OF_SHARDS } from './constants';
 
 export type { RetryableEsClientError };
 

@@ -69,7 +69,6 @@ describe('cloneIndex', () => {
         },
         "target": "my_target_index",
         "timeout": "300s",
-        "wait_for_active_shards": "all",
       }
     `);
   });
