@@ -58,7 +58,8 @@ export function initializeBatchFunctionsRoute(deps: RouteInitializerDeps) {
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization because data source expressions that perform search operations use the Kibana search client which handles permission checking.',
+            reason:
+              'This route is opted out from authorization because data source expressions that perform search operations use the Kibana search client which handles permission checking.',
           },
         },
         validate: {
