@@ -33,7 +33,6 @@
     "@kbn/content-management-favorites-common",
     "@kbn/kibana-utils-plugin",
     "@kbn/shared-ux-table-persist",
-    "@kbn/core-security-browser-mocks",
   ],
   "exclude": [
     "target/**/*",
