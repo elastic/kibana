@@ -37,6 +37,7 @@ import {
 } from './lib/v2/constants';
 import { installBuiltInDefinitions } from './lib/v2/definitions/install_built_in_definitions';
 import { disableBuiltInEntityDiscovery } from './lib/entities/uninstall_entity_definition';
+import { installEntityManagerTemplates } from './lib/manage_index_templates';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityManagerServerPluginSetup {}
