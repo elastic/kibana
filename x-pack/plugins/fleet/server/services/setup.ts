@@ -57,6 +57,7 @@ import {
   ensureDeleteUnenrolledAgentsSetting,
   getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig,
 } from './preconfiguration/delete_unenrolled_agent_setting';
+import { backfillPackagePolicySupportsAgentless } from './backfill_agentless';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -299,6 +300,9 @@ async function createSetupSideEffects(
   );
   await ensureAgentPoliciesFleetServerKeysAndPolicies({ soClient, esClient, logger });
   stepSpan?.end();
+
+  logger.debug('Backfilling package policy supports_agentless field');
+  await backfillPackagePolicySupportsAgentless(esClient);
 
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,

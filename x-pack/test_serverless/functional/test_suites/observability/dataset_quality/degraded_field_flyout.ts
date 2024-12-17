@@ -9,11 +9,12 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { generateShortId, log, timerange } from '@kbn/apm-synthtrace-client';
 import {
+  ANOTHER_1024_CHARS,
+  CONSISTENT_TAGS,
+  MORE_THAN_1024_CHARS,
   createDegradedFieldsRecord,
   defaultNamespace,
   getInitialTestLogs,
-  ANOTHER_1024_CHARS,
-  MORE_THAN_1024_CHARS,
 } from './data';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { logsSynthMappings } from './custom_mappings/custom_synth_mappings';
@@ -54,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const apmAppDatasetName = 'apm.app.tug';
   const apmAppDataStreamName = `${type}-${apmAppDatasetName}-${defaultNamespace}`;
 
-  describe('Degraded fields flyout', () => {
+  describe('Degraded fields flyout', function () {
     describe('degraded field flyout open-close', () => {
       before(async () => {
         await synthtrace.index([
@@ -205,6 +206,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                       'service.name': serviceName,
                       'trace.id': generateShortId(),
                       test_field: [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
+                      // this works around a geoip limitation in CI
+                      tags: CONSISTENT_TAGS,
                     })
                     .timestamp(timestamp)
                 );
@@ -298,6 +301,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                       'trace.id': generateShortId(),
                       test_field: [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
                       'cloud.project.id': generateShortId(),
+                      // this works around a geoip limitation in CI
+                      tags: CONSISTENT_TAGS,
                     })
                     .timestamp(timestamp)
                 );
@@ -408,6 +413,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                       'trace.id': generateShortId(),
                       test_field: [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
                       'cloud.project.id': generateShortId(),
+                      // this works around a geoip limitation in CI
+                      tags: CONSISTENT_TAGS,
                     })
                     .timestamp(timestamp)
                 );

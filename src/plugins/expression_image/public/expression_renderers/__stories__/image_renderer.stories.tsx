@@ -23,7 +23,7 @@ const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
 
   return (
     <Render
-      renderer={getImageRenderer(coreMock.createStart().theme.theme$)}
+      renderer={getImageRenderer(coreMock.createStart())}
       config={config}
       width="500px"
       height="500px"

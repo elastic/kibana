@@ -39,11 +39,16 @@ import {
   READ_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
   READ_ENTITIES_PRIVILEGE,
 } from './lib/v2/constants';
+import { installBuiltInDefinitions } from './lib/v2/definitions/install_built_in_definitions';
+import { instanceAsFilter } from './lib/v2/definitions/instance_as_filter';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityManagerServerPluginSetup {}
 export interface EntityManagerServerPluginStart {
   getScopedClient: (options: { request: KibanaRequest }) => Promise<EntityClient>;
+  v2: {
+    instanceAsFilter: typeof instanceAsFilter;
+  };
 }
 
 export const config: PluginConfigDescriptor<EntityManagerConfig> = {
@@ -165,10 +170,11 @@ export class EntityManagerServerPlugin
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
     }
 
-    const esClient = core.elasticsearch.client.asInternalUser;
-
     // Setup v1 definitions index
-    installEntityManagerTemplates({ esClient, logger: this.logger })
+    installEntityManagerTemplates({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    })
       .then(async () => {
         // the api key validation requires a check against the cluster license
         // which is lazily loaded. we ensure it gets loaded before the update
@@ -185,13 +191,18 @@ export class EntityManagerServerPlugin
       .catch((err) => this.logger.error(err));
 
     // Setup v2 definitions index
-    setupEntityDefinitionsIndex(core.elasticsearch.client, this.logger).catch((error) => {
-      this.logger.error(error);
-    });
+    setupEntityDefinitionsIndex(core.elasticsearch.client, this.logger)
+      .then(() => installBuiltInDefinitions(core.elasticsearch.client, this.logger))
+      .catch((error) => {
+        this.logger.error(error);
+      });
 
     return {
       getScopedClient: async ({ request }: { request: KibanaRequest }) => {
         return this.getScopedClient({ request, coreStart: core });
+      },
+      v2: {
+        instanceAsFilter,
       },
     };
   }

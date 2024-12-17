@@ -50,6 +50,7 @@ describe('checkAccess', () => {
   const mockDependencies = {
     request: { auth: { isAuthenticated: true } },
     config: {
+      appsDisabled: false,
       canDeployEntSearch: true,
       host: 'http://localhost:3002',
     },
@@ -150,6 +151,31 @@ describe('checkAccess', () => {
         expect(await checkAccess({ ...mockDependencies, security })).toEqual({
           hasAppSearchAccess: true,
           hasWorkplaceSearchAccess: true,
+        });
+      });
+
+      it('should disables apps for superuser when config.appsDisabled set to true', async () => {
+        const security = {
+          ...mockSecurity,
+          authz: {
+            mode: { useRbacForRequest: () => true },
+            checkPrivilegesWithRequest: () => ({
+              globally: () => ({
+                hasAllRequested: true,
+              }),
+            }),
+            actions: { ui: { get: () => {} } },
+          },
+        };
+        expect(
+          await checkAccess({
+            ...mockDependencies,
+            config: { ...mockDependencies.config, appsDisabled: true },
+            security,
+          })
+        ).toEqual({
+          hasAppSearchAccess: false,
+          hasWorkplaceSearchAccess: false,
         });
       });
 

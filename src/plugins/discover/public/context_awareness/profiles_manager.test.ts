@@ -26,6 +26,7 @@ describe('ProfilesManager', () => {
     jest.clearAllMocks();
     mocks = createContextAwarenessMocks();
     jest.spyOn(mocks.ebtManagerMock, 'updateProfilesContextWith');
+    jest.spyOn(mocks.ebtManagerMock, 'trackContextualProfileResolvedEvent');
   });
 
   it('should return default profiles', () => {
@@ -74,6 +75,15 @@ describe('ProfilesManager', () => {
       'root-profile',
       'data-source-profile',
     ]);
+
+    expect(mocks.ebtManagerMock.trackContextualProfileResolvedEvent).toHaveBeenNthCalledWith(1, {
+      profileId: 'root-profile',
+      contextLevel: 'rootLevel',
+    });
+    expect(mocks.ebtManagerMock.trackContextualProfileResolvedEvent).toHaveBeenNthCalledWith(2, {
+      profileId: 'data-source-profile',
+      contextLevel: 'dataSourceLevel',
+    });
   });
 
   it('should expose profiles as an observable', async () => {
@@ -152,7 +162,7 @@ describe('ProfilesManager', () => {
     resolveSpy.mockRejectedValue(new Error('Failed to resolve'));
     await mocks.profilesManagerMock.resolveRootProfile({ solutionNavId: 'newSolutionNavId' });
     expect(addLog).toHaveBeenCalledWith(
-      '[ProfilesManager] root context resolution failed with params: {\n  "solutionNavId": "newSolutionNavId"\n}',
+      '[ProfilesManager] rootLevel context resolution failed with params: {\n  "solutionNavId": "newSolutionNavId"\n}',
       new Error('Failed to resolve')
     );
     profiles = mocks.profilesManagerMock.getProfiles();
@@ -177,7 +187,7 @@ describe('ProfilesManager', () => {
       query: { esql: 'from logs-*' },
     });
     expect(addLog).toHaveBeenCalledWith(
-      '[ProfilesManager] data source context resolution failed with params: {\n  "esqlQuery": "from logs-*"\n}',
+      '[ProfilesManager] dataSourceLevel context resolution failed with params: {\n  "esqlQuery": "from logs-*"\n}',
       new Error('Failed to resolve')
     );
     profiles = mocks.profilesManagerMock.getProfiles();
@@ -199,10 +209,14 @@ describe('ProfilesManager', () => {
     });
     profiles = mocks.profilesManagerMock.getProfiles({ record: record2 });
     expect(addLog).toHaveBeenCalledWith(
-      '[ProfilesManager] document context resolution failed with params: {\n  "recordId": "logstash-2014.09.09::388::"\n}',
+      '[ProfilesManager] documentLevel context resolution failed with params: {\n  "recordId": "logstash-2014.09.09::388::"\n}',
       new Error('Failed to resolve')
     );
     expect(profiles).toEqual([{}, {}, {}]);
+    expect(mocks.ebtManagerMock.trackContextualProfileResolvedEvent).toHaveBeenCalledWith({
+      profileId: 'document-profile',
+      contextLevel: 'documentLevel',
+    });
   });
 
   it('should cancel existing root profile resolution when another is triggered', async () => {
