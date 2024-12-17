@@ -36,7 +36,6 @@
     "@kbn/core-http-browser",
     "@kbn/es-query",
     "@kbn/data-views-plugin",
-    "@kbn/ui-theme",
     "@kbn/rule-data-utils",
     "@kbn/kibana-utils-plugin",
     "@kbn/data-plugin",
@@ -79,6 +78,7 @@
     "@kbn/deeplinks-observability",
     "@kbn/ebt-tools",
     "@kbn/core-rendering-browser",
+    "@kbn/charts-plugin",
   ],
   "exclude": ["target/**/*"]
 }

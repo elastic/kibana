@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,6 +19,7 @@ import {
   LegendItemListener,
 } from '@elastic/charts';
 import { useSelector } from 'react-redux';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getChartDateLabel } from '../../../lib/helper';
 import { LocationDurationLine } from '../../../../../common/types';
 import { DurationLineSeriesList } from './duration_line_series_list';
@@ -28,11 +29,11 @@ import { getTickFormat } from './get_tick_format';
 import { ChartEmptyState } from './chart_empty_state';
 import { DurationAnomaliesBar } from './duration_line_bar_list';
 import { AnomalyRecords } from '../../../state/actions';
-import { UptimeThemeContext } from '../../../contexts';
 import { MONITOR_CHART_HEIGHT } from '../../monitor';
 import { monitorStatusSelector } from '../../../state/selectors';
 import { microToMilli, microToSec } from '../../../lib/formatting';
 import { MS_LABEL, SECONDS_LABEL } from '../../../../../common/translations/translations';
+import { ClientPluginsStart } from '../../../../plugin';
 
 interface DurationChartProps {
   /**
@@ -66,7 +67,10 @@ export const DurationChartComponent = ({
 
   const [hiddenLegends, setHiddenLegends] = useState<string[]>([]);
 
-  const { chartTheme } = useContext(UptimeThemeContext);
+  const {
+    services: { charts },
+  } = useKibana<ClientPluginsStart>();
+  const baseTheme = charts.theme.useChartsBaseTheme();
 
   const onBrushEnd: BrushEndListener = ({ x }) => {
     if (!x) {
@@ -110,8 +114,7 @@ export const DurationChartComponent = ({
             onBrushEnd={onBrushEnd}
             onLegendItemClick={legendToggleVisibility}
             locale={i18n.getLocale()}
-            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-            {...chartTheme}
+            baseTheme={baseTheme}
           />
           <Axis
             id="bottom"
