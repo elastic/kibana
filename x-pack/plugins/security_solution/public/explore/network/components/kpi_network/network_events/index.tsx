@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { euiPaletteColorBlind } from '@elastic/eui';
 
 import type { StatItems } from '../../../../components/stat_items';
 import type { NetworkKpiProps } from '../types';
@@ -16,16 +15,13 @@ import { KpiBaseComponent } from '../../../../components/kpi';
 
 export const ID = 'networkKpiNetworkEventsQuery';
 
-const euiVisColorPalette = euiPaletteColorBlind();
-const euiColorVis1 = euiVisColorPalette[1];
-
 export const networkEventsStatsItems: Readonly<StatItems[]> = [
   {
     key: 'networkEvents',
     fields: [
       {
         key: 'networkEvents',
-        color: euiColorVis1,
+        color: 'euiColorVis1',
         lensAttributes: kpiNetworkEventsLensAttributes,
       },
     ],
@@ -33,8 +29,8 @@ export const networkEventsStatsItems: Readonly<StatItems[]> = [
   },
 ];
 
-const NetworkKpiNetworkEventsComponent: React.FC<NetworkKpiProps> = ({ from, to }) => {
-  return <KpiBaseComponent id={ID} statItems={networkEventsStatsItems} from={from} to={to} />;
-};
+const NetworkKpiNetworkEventsComponent: React.FC<NetworkKpiProps> = ({ from, to }) => (
+  <KpiBaseComponent id={ID} statItems={networkEventsStatsItems} from={from} to={to} />
+);
 
 export const NetworkKpiNetworkEvents = React.memo(NetworkKpiNetworkEventsComponent);

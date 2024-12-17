@@ -12,6 +12,7 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
   useIsWithinMaxBreakpoint,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
@@ -49,7 +50,7 @@ import {
 } from '../translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { VIEW_ALERTS } from '../../../pages/translations';
-import { SEVERITY_COLOR } from '../utils';
+import { getSeverityColor } from '../utils';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { ChartLabel } from './chart_label';
 import { Legend } from '../../../../common/components/charts/legend';
@@ -84,12 +85,20 @@ interface AlertsByStatusProps {
   signalIndexName: string | null;
 }
 
-const chartConfigs: Array<{ key: Severity; label: string; color: string }> = [
-  { key: 'critical', label: STATUS_CRITICAL_LABEL, color: SEVERITY_COLOR.critical },
-  { key: 'high', label: STATUS_HIGH_LABEL, color: SEVERITY_COLOR.high },
-  { key: 'medium', label: STATUS_MEDIUM_LABEL, color: SEVERITY_COLOR.medium },
-  { key: 'low', label: STATUS_LOW_LABEL, color: SEVERITY_COLOR.low },
-];
+const useGetChartConfigs: () => Array<{ key: Severity; label: string; color: string }> = () => {
+  const { euiTheme } = useEuiTheme();
+  const severityColor = useMemo(() => getSeverityColor(euiTheme), [euiTheme]);
+  const configs = useMemo(
+    () => [
+      { key: 'critical' as Severity, label: STATUS_CRITICAL_LABEL, color: severityColor.critical },
+      { key: 'high' as Severity, label: STATUS_HIGH_LABEL, color: severityColor.high },
+      { key: 'medium' as Severity, label: STATUS_MEDIUM_LABEL, color: severityColor.medium },
+      { key: 'low' as Severity, label: STATUS_LOW_LABEL, color: severityColor.low },
+    ],
+    [severityColor]
+  );
+  return configs;
+};
 
 const eventKindSignalFilter: EntityFilter = {
   field: 'event.kind',
@@ -149,6 +158,7 @@ export const AlertsByStatus = ({
     to,
     from,
   });
+  const chartConfigs = useGetChartConfigs();
   const legendItems: LegendItem[] = useMemo(
     () =>
       chartConfigs.map((d) => ({
@@ -156,7 +166,7 @@ export const AlertsByStatus = ({
         field: ALERT_SEVERITY,
         value: d.label,
       })),
-    []
+    [chartConfigs]
   );
 
   const navigateToAlertsWithStatus = useCallback(
@@ -214,9 +224,12 @@ export const AlertsByStatus = ({
 
   const totalAlertsCount = isDonutChartEmbeddablesEnabled ? visualizationTotalAlerts : totalAlerts;
 
-  const fillColor: FillColor = useCallback((dataName: string) => {
-    return chartConfigs.find((cfg) => cfg.label === dataName)?.color ?? emptyDonutColor;
-  }, []);
+  const fillColor: FillColor = useCallback(
+    (dataName: string) => {
+      return chartConfigs.find((cfg) => cfg.label === dataName)?.color ?? emptyDonutColor;
+    },
+    [chartConfigs]
+  );
 
   return (
     <>

@@ -70,6 +70,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   withActions = DEFAULT_ACTIONS,
   disableOnClickFilter = false,
   casesAttachmentMetadata,
+  colorSchemas,
 }) => {
   const style = useMemo(
     () => ({
@@ -90,6 +91,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   const attributes = useLensAttributes({
     applyGlobalQueriesAndFilters,
     applyPageAndTabsFilters,
+    colorSchemas,
     extraOptions,
     getLensAttributes,
     lensAttributes,
@@ -220,6 +222,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <VisualizationActions
+            colorSchemas={colorSchemas}
             extraActions={extraActions}
             getLensAttributes={getLensAttributes}
             inputId={inputsModelId}

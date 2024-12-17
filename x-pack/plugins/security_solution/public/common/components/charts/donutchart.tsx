@@ -22,10 +22,11 @@ import type { FlattenSimpleInterpolation } from 'styled-components';
 import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 import { useThemes } from './common';
 import { DraggableLegend } from './draggable_legend';
 import type { LegendItem } from './draggable_legend_item';
-import { DonutChartEmpty } from './donutchart_empty';
+import { DonutChartEmpty, getEmptyDonutColor } from './donutchart_empty';
 
 const donutTheme: PartialTheme = {
   chartMargins: { top: 0, bottom: 0, left: 0, right: 0 },

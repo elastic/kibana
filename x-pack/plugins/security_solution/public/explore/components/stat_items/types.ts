@@ -6,7 +6,10 @@
  */
 import type { IconType } from '@elastic/eui';
 
-import type { LensAttributes } from '../../../common/components/visualization_actions/types';
+import type {
+  GetLensAttributes,
+  LensAttributes,
+} from '../../../common/components/visualization_actions/types';
 
 export interface FieldConfigs {
   color?: string;
@@ -15,6 +18,7 @@ export interface FieldConfigs {
   key: string;
   lensAttributes?: LensAttributes;
   name?: string;
+  sourceField?: string;
 }
 
 export interface StatItems {
@@ -23,8 +27,8 @@ export interface StatItems {
   enableBarChart?: boolean;
   fields: FieldConfigs[];
   key: string;
-  barChartLensAttributes?: LensAttributes;
-  areaChartLensAttributes?: LensAttributes;
+  getBarChartLensAttributes?: GetLensAttributes;
+  getAreaChartLensAttributes?: GetLensAttributes;
 }
 
 export interface StatItemsProps {

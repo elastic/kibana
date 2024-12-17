@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText, useEuiTheme } from '@elastic/eui';
 import { ALERT_SEVERITY, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
@@ -79,6 +79,7 @@ export const ChartCollapse: React.FC<Props> = ({
   signalIndexName,
   runtimeMappings,
 }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_COLLAPSED_CHART_ID}-${uuid()}`, []);
   const aggregations = useMemo(() => combinedAggregations(groupBySelection), [groupBySelection]);
 
@@ -115,7 +116,7 @@ export const ChartCollapse: React.FC<Props> = ({
             <EuiFlexGroup data-test-subj="chart-collapse-severities">
               {severities.map((severity) => (
                 <EuiFlexItem key={severity.key} grow={false}>
-                  <EuiHealth color={getSeverityColor(severity.key)}>
+                  <EuiHealth color={getSeverityColor(severity.key, euiTheme)}>
                     <EuiText size="xs">
                       {`${severity.label}: `}
                       <FormattedCount count={severity.value || 0} />

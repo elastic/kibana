@@ -21,15 +21,19 @@ import type { InputsModelId } from '../../store/inputs/constants';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { Status } from '../../../../common/api/detection_engine';
 
+export type ColorSchemas = Record<string, string>;
+
 export type LensAttributes = TypedLensByValueInput['attributes'];
-export type GetLensAttributes = (
-  stackByField?: string,
-  extraOptions?: ExtraOptions
-) => LensAttributes;
+export type GetLensAttributes = (params: {
+  stackByField?: string;
+  colorSchemas?: ColorSchemas;
+  extraOptions?: ExtraOptions;
+}) => LensAttributes;
 
 export interface UseLensAttributesProps {
   applyGlobalQueriesAndFilters?: boolean;
   applyPageAndTabsFilters?: boolean;
+  colorSchemas?: ColorSchemas;
   extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
   lensAttributes?: LensAttributes | null;
@@ -48,6 +52,7 @@ export enum VisualizationContextMenuActions {
 
 export interface VisualizationActionsProps {
   applyGlobalQueriesAndFilters?: boolean;
+  colorSchemas?: ColorSchemas;
   className?: string;
   extraActions?: Action[];
   extraOptions?: ExtraOptions;
@@ -110,6 +115,11 @@ export interface LensEmbeddableComponentProps {
    * Metadata for cases Attachable visualization.
    */
   casesAttachmentMetadata?: LensProps['metadata'];
+
+  /**
+   * Color schemas for the visualization.
+   */
+  colorSchemas?: ColorSchemas;
 }
 
 export enum RequestStatus {

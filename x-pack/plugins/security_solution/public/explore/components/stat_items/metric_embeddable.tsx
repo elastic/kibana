@@ -9,12 +9,14 @@ import React from 'react';
 import { FlexItem, MetricItem, StatValue } from './utils';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import type { FieldConfigs } from './types';
+import type { ColorSchemas } from '../../../common/components/visualization_actions/types';
 
 export interface MetricEmbeddableProps {
   fields: FieldConfigs[];
   id: string;
   inspectTitle?: string;
   timerange: { from: string; to: string };
+  colorSchemas: ColorSchemas;
 }
 
 const CHART_HEIGHT = 36;
@@ -24,6 +26,7 @@ const MetricEmbeddableComponent = ({
   id,
   inspectTitle,
   timerange,
+  colorSchemas,
 }: MetricEmbeddableProps) => {
   return (
     <EuiFlexGroup gutterSize="none" className="metricEmbeddable">
@@ -34,7 +37,7 @@ const MetricEmbeddableComponent = ({
               <FlexItem grow={false}>
                 <EuiIcon
                   type={field.icon}
-                  color={field.color}
+                  color={field.sourceField && colorSchemas[field.sourceField]}
                   size="l"
                   data-test-subj="stat-icon"
                 />

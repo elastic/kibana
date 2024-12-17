@@ -29,9 +29,16 @@ export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from,
     enableAreaChart,
     enableBarChart,
     fields,
-    barChartLensAttributes,
-    areaChartLensAttributes,
+    getBarChartLensAttributes,
+    getAreaChartLensAttributes,
   } = statItems;
+
+  const colorSchemas = fields.reduce<Record<string, string>>((acc, { sourceField, color }) => {
+    if (color && sourceField) {
+      acc[sourceField] = color;
+    }
+    return acc;
+  }, {});
 
   const { isToggleExpanded, onToggle } = useToggleStatus({ id });
 
@@ -51,6 +58,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from,
               id={id}
               timerange={timerange}
               inspectTitle={description}
+              colorSchemas={colorSchemas}
             />
 
             {(enableAreaChart || enableBarChart) && <EuiHorizontalRule />}
@@ -59,11 +67,12 @@ export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from,
                 <FlexItem>
                   <VisualizationEmbeddable
                     data-test-subj="embeddable-bar-chart"
-                    lensAttributes={barChartLensAttributes}
+                    getLensAttributes={getBarChartLensAttributes}
                     timerange={timerange}
                     id={`${id}-bar-embeddable`}
                     height={ChartHeight}
                     inspectTitle={description}
+                    colorSchemas={colorSchemas}
                   />
                 </FlexItem>
               )}
@@ -73,11 +82,12 @@ export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from,
                   <FlexItem>
                     <VisualizationEmbeddable
                       data-test-subj="embeddable-area-chart"
-                      lensAttributes={areaChartLensAttributes}
+                      getLensAttributes={getAreaChartLensAttributes}
                       timerange={timerange}
                       id={`${id}-area-embeddable`}
                       height={ChartHeight}
                       inspectTitle={description}
+                      colorSchemas={colorSchemas}
                     />
                   </FlexItem>
                 </>

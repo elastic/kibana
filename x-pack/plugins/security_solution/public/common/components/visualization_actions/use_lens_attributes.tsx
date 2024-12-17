@@ -25,6 +25,7 @@ import {
 export const useLensAttributes = ({
   applyGlobalQueriesAndFilters = true,
   applyPageAndTabsFilters = true,
+  colorSchemas,
   extraOptions,
   getLensAttributes,
   lensAttributes,
@@ -73,8 +74,8 @@ export const useLensAttributes = ({
       lensAttributes ??
       ((getLensAttributes &&
         stackByField !== null &&
-        getLensAttributes(stackByField, extraOptions)) as LensAttributes),
-    [extraOptions, getLensAttributes, lensAttributes, stackByField]
+        getLensAttributes({ stackByField, colorSchemas, extraOptions })) as LensAttributes),
+    [colorSchemas, extraOptions, getLensAttributes, lensAttributes, stackByField]
   );
 
   const hasAdHocDataViews = Object.values(attrs?.state?.adHocDataViews ?? {}).length > 0;
