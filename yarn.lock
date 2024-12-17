@@ -5309,7 +5309,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-security@link:packages/deeplinks/security":
+"@kbn/deeplinks-security@link:src/platform/packages/shared/deeplinks/security":
   version "0.0.0"
   uid ""
 
