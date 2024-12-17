@@ -12,7 +12,7 @@ import { ChildDragDropProvider, Droppable, Draggable } from '@kbn/dom-drag-drop'
 import { FramePublicAPI, Visualization, VisualizationConfigProps } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { coreMock } from '@kbn/core/public/mocks';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { generateId } from '../../../id_generator';
 import {
   createMockVisualization,
@@ -144,7 +144,7 @@ describe('LayerPanel', () => {
   };
 
   beforeEach(() => {
-    mockVisualization = createMockVisualization(faker.random.alphaNumeric());
+    mockVisualization = createMockVisualization(faker.string.alphanumeric());
     mockVisualization.getLayerIds.mockReturnValue(['first']);
     mockDatasource = createMockDatasource();
   });

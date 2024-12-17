@@ -6,9 +6,6 @@
  */
 
 import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { css } from '@emotion/react';
-
 import {
   EuiFlexGroup,
   EuiPanel,
@@ -30,9 +27,12 @@ import {
   summaryPanelQualityTooltipText,
 } from '../../../../common/translations';
 import { mapPercentagesToQualityCounts } from '../../quality_indicator';
+import { useDatasetQualityFilters } from '../../../hooks/use_dataset_quality_filters';
+import { VerticalRule } from '../../common/vertical_rule';
 
 export function DatasetsQualityIndicators() {
   const { onPageReady } = usePerformanceContext();
+  const { timeRange } = useDatasetQualityFilters();
   const {
     datasetsQuality,
     isDatasetsQualityLoading,
@@ -46,10 +46,16 @@ export function DatasetsQualityIndicators() {
 
   if (!isDatasetsQualityLoading && (numberOfDatasets || numberOfDocuments)) {
     onPageReady({
-      key1: 'datasets',
-      value1: numberOfDatasets,
-      key2: 'documents',
-      value2: numberOfDocuments,
+      customMetrics: {
+        key1: 'datasets',
+        value1: numberOfDatasets,
+        key2: 'documents',
+        value2: numberOfDocuments,
+      },
+      meta: {
+        rangeFrom: timeRange.from,
+        rangeTo: timeRange.to,
+      },
     });
   }
 
@@ -71,14 +77,14 @@ export function DatasetsQualityIndicators() {
             description={summaryPanelQualityPoorText}
             isLoading={isDatasetsQualityLoading}
           />
-          <span css={verticalRule} />
+          <VerticalRule />
           <QualityIndicator
             value={qualityCounts.degraded}
             quality="warning"
             description={summaryPanelQualityDegradedText}
             isLoading={isDatasetsQualityLoading}
           />
-          <span css={verticalRule} />
+          <VerticalRule />
           <QualityIndicator
             value={qualityCounts.good + datasetsWithoutIgnoredField}
             quality="success"
@@ -125,9 +131,3 @@ const QualityIndicator = ({
     </EuiFlexGroup>
   );
 };
-
-const verticalRule = css`
-  width: 1px;
-  height: 63px;
-  background-color: ${euiThemeVars.euiColorLightShade};
-`;

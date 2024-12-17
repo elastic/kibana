@@ -35,6 +35,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-node-server",
     "@kbn/security-plugin-types-server",
+    "@kbn/core-user-profile-browser-mocks",
   ],
   "exclude": [
     "target/**/*",

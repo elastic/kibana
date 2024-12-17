@@ -10,19 +10,16 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
-export { openAddPanelFlyout } from './add_panel_flyout/open_add_panel_flyout';
-export { EmbeddablePanel } from './embeddable_panel';
+export { useAddFromLibraryTypes } from './add_from_library/registry';
+export { openAddFromLibraryFlyout } from './add_from_library/open_add_from_library_flyout';
 export {
   cellValueTrigger,
   CELL_VALUE_TRIGGER,
-  Container,
   contextMenuTrigger,
   CONTEXT_MENU_TRIGGER,
   defaultEmbeddableFactoryProvider,
   Embeddable,
   EmbeddableFactoryNotFoundError,
-  EmbeddableRenderer,
-  EmbeddableRoot,
   EmbeddableStateTransfer,
   ErrorEmbeddable,
   genericEmbeddableInputIsEqual,
@@ -51,7 +48,6 @@ export {
   SELECT_RANGE_TRIGGER,
   shouldFetch$,
   shouldRefreshFilterCompareOptions,
-  useEmbeddableFactory,
   VALUE_CLICK_TRIGGER,
   ViewMode,
   withEmbeddableSubscription,
@@ -60,9 +56,6 @@ export type {
   Adapters,
   CellValueContext,
   ChartActionContext,
-  ContainerInput,
-  ContainerOutput,
-  EmbeddableContainerSettings,
   EmbeddableContext,
   EmbeddableEditorState,
   EmbeddableFactory,
@@ -71,22 +64,17 @@ export type {
   EmbeddableInstanceConfiguration,
   EmbeddableOutput,
   EmbeddablePackageState,
-  EmbeddableRendererProps,
   FilterableEmbeddable,
-  IContainer,
   IEmbeddable,
   MultiValueClickContext,
   OutputSpec,
-  PanelState,
   PropertySpec,
   RangeSelectContext,
-  ReactEmbeddableSavedObject,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
   SelfStyledEmbeddable,
   ValueClickContext,
 } from './lib';
-export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
 export type {
   EmbeddableSetup,
   EmbeddableSetupDependencies,

@@ -17,14 +17,17 @@ import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { APP_FIXED_VIEWPORT_ID } from '@kbn/core-rendering-browser';
+import { GlobalAppStyle } from '@kbn/core-application-common';
 import { AppWrapper } from './app_containers';
 
 interface StartServices {
   analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
 }
 
 export interface StartDeps extends StartServices {
@@ -60,6 +63,9 @@ export class RenderingService {
     ReactDOM.render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
         <>
+          {/* Global Styles that apply across the entire app */}
+          <GlobalAppStyle />
+
           {/* Fixed headers */}
           {chromeHeader}
 

@@ -33,7 +33,7 @@ export function fetchDataFromAggregateQuery(
     filters,
     query,
     time: timeRange,
-    dataView,
+    timeFieldName: dataView.timeFieldName,
     inputQuery,
   })
     .then((ast) => {
