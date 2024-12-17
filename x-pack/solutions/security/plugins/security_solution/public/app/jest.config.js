@@ -12,6 +12,8 @@ module.exports = {
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/security_solution/public/app',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/solutions/security/plugins/security_solution/public/app/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/app/**/*.{ts,tsx}',
+  ],
   moduleNameMapper: require('../../server/__mocks__/module_name_map'),
 };
