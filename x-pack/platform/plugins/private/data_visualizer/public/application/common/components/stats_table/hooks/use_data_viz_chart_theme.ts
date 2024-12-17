@@ -14,6 +14,7 @@ export const useDataVizChartTheme = (): PartialTheme => {
   const { euiTheme } = useEuiTheme();
   const euiFontSizeXS = useEuiFontSize('xs', { unit: 'px' }).fontSize as string;
   const chartTheme = useMemo<PartialTheme>(() => {
+    // Amsterdam + Borealis
     const AREA_SERIES_COLOR = euiTheme.colors.vis.euiColorVis0;
     return {
       axes: {
