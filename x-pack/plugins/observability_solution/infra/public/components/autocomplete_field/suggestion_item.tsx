@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiThemeComputed } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { EuiIcon, EuiThemeComputed, useEuiTheme, useEuiFontSize } from '@elastic/eui';
+import styled from '@emotion/styled';
 import { QuerySuggestion, QuerySuggestionTypes } from '@kbn/unified-search-plugin/public';
 import { transparentize } from 'polished';
-import { useEuiTheme } from '@elastic/eui';
+
 interface Props {
   isSelected?: boolean;
   onClick?: React.MouseEventHandler<HTMLDivElement>;

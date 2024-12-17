@@ -115,7 +115,7 @@ function DiffColumn({ diff, setCellProps }: DiffColumnProps) {
 
   if (!diff) {
     return (
-      <EuiText size="xs" color={theme.euiTheme.colors.textPrimary}>
+      <EuiText size="xs" color={euiTheme.colors.textPrimary}>
         {i18n.translate('xpack.profiling.functionsView.newLabel', {
           defaultMessage: 'New',
         })}
