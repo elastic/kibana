@@ -17,6 +17,7 @@ import { apmErrorCountAIAssistant } from '../../alert_templates/templates';
 
 describe('apm', () => {
   const ruleIds: any[] = [];
+
   before(async () => {
     const responseApmRule = await kibanaClient.callKibana<RuleResponse>(
       'post',
