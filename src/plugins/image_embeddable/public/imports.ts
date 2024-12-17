@@ -18,11 +18,6 @@ export type {
 
 export type { FileImageMetadata } from '@kbn/shared-ux-file-types';
 
-export type {
-  IContainer,
-  EmbeddableInput,
-  EmbeddableFactoryDefinition,
-} from '@kbn/embeddable-plugin/public';
 export type { ApplicationStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 
 export type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';

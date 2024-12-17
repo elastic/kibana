@@ -15,23 +15,26 @@ import { orderBy } from 'lodash';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { Package } from './types';
-import {
-  DESCRIPTION,
-  EXCLUDED_MODULES,
-  KIBANA_FOLDER,
-  NEW_BRANCH,
-  TARGET_FOLDERS,
-} from './constants';
+import type { Package, PullRequest } from './types';
+import { DESCRIPTION, EXCLUDED_MODULES, KIBANA_FOLDER, NEW_BRANCH } from './constants';
 import {
   belongsTo,
   calculateModuleTargetFolder,
+  isInTargetFolder,
   replaceReferences,
   replaceRelativePaths,
-} from './utils.relocate';
-import { safeExec } from './utils.exec';
-import { relocatePlan, relocateSummary } from './utils.logging';
-import { checkoutBranch, checkoutResetPr } from './utils.git';
+} from './utils/relocate';
+import { safeExec } from './utils/exec';
+import { relocatePlan, relocateSummary } from './utils/logging';
+import {
+  checkoutBranch,
+  checkoutResetPr,
+  cherryPickManualCommits,
+  findGithubLogin,
+  findPr,
+  findRemoteName,
+  getManualCommits,
+} from './utils/git';
 
 const moveModule = async (module: Package, log: ToolingLog) => {
   const destination = calculateModuleTargetFolder(module);
@@ -52,11 +55,6 @@ const relocateModules = async (toMove: Package[], log: ToolingLog): Promise<numb
   for (let i = 0; i < toMove.length; ++i) {
     const module = toMove[i];
 
-    if (TARGET_FOLDERS.some((folder) => module.directory.includes(folder))) {
-      log.warning(`The module ${module.id} is already in a "sustainable" folder. Skipping`);
-      // skip modules that are already moved
-      continue;
-    }
     log.info('');
     log.info('--------------------------------------------------------------------------------');
     log.info(`\t${module.id} (${i + 1} of ${toMove.length})`);
@@ -93,10 +91,9 @@ export interface RelocateModulesParams {
   paths: string[];
   included: string[];
   excluded: string[];
-  log: ToolingLog;
 }
 
-const findModules = ({ teams, paths, included, excluded }: FindModulesParams) => {
+const findModules = ({ teams, paths, included, excluded }: FindModulesParams, log: ToolingLog) => {
   // get all modules
   const modules = getPackages(REPO_ROOT);
 
@@ -123,13 +120,14 @@ const findModules = ({ teams, paths, included, excluded }: FindModulesParams) =>
           paths.some((path) => module.directory.includes(path))
       )
       // the module is not explicitly excluded
-      .filter(({ id }) => !excluded.includes(id)),
-    'id'
+      .filter(({ id }) => !excluded.includes(id))
+      // exclude modules that are in the correct folder
+      .filter((module) => !isInTargetFolder(module, log))
   );
 };
 
 export const findAndMoveModule = async (moduleId: string, log: ToolingLog) => {
-  const modules = findModules({ teams: [], paths: [], included: [moduleId], excluded: [] });
+  const modules = findModules({ teams: [], paths: [], included: [moduleId], excluded: [] }, log);
   if (!modules.length) {
     log.warning(`Cannot move ${moduleId}, either not found or not allowed!`);
   } else {
@@ -137,10 +135,25 @@ export const findAndMoveModule = async (moduleId: string, log: ToolingLog) => {
   }
 };
 
-export const findAndRelocateModules = async (params: RelocateModulesParams) => {
-  const { prNumber, log, baseBranch, ...findParams } = params;
+export const findAndRelocateModules = async (params: RelocateModulesParams, log: ToolingLog) => {
+  const { prNumber, baseBranch, ...findParams } = params;
+  let pr: PullRequest | undefined;
 
-  const toMove = findModules(findParams);
+  const upstream = await findRemoteName('elastic/kibana');
+  if (!upstream) {
+    log.error(
+      'This repository does not have a remote pointing to the elastic/kibana repository. Aborting'
+    );
+    return;
+  }
+
+  const origin = await findRemoteName(`${await findGithubLogin()}/kibana`);
+  if (!origin) {
+    log.error('This repository does not have a remote pointing to your Kibana fork. Aborting');
+    return;
+  }
+
+  const toMove = findModules(findParams, log);
   if (!toMove.length) {
     log.info(
       `No packages match the specified filters. Please tune your '--path' and/or '--team' and/or '--include' flags`
@@ -149,39 +162,59 @@ export const findAndRelocateModules = async (params: RelocateModulesParams) => {
   }
 
   relocatePlan(toMove, log);
-  const res1 = await inquirer.prompt({
+
+  const resConfirmPlan = await inquirer.prompt({
     type: 'confirm',
     name: 'confirmPlan',
     message: `The script will RESET CHANGES in this repository, relocate the modules above and update references. Proceed?`,
   });
 
-  if (!res1.confirmPlan) {
+  if (!resConfirmPlan.confirmPlan) {
     log.info('Aborting');
     return;
+  }
+
+  if (prNumber) {
+    pr = await findPr(prNumber);
+
+    if (getManualCommits(pr.commits).length > 0) {
+      const resOverride = await inquirer.prompt({
+        type: 'confirm',
+        name: 'overrideManualCommits',
+        message: 'Detected manual commits in the PR, do you want to override them?',
+      });
+      if (!resOverride.overrideManualCommits) {
+        return;
+      }
+    }
   }
 
   // start with a clean repo
   await safeExec(`git restore --staged .`);
   await safeExec(`git restore .`);
   await safeExec(`git clean -f -d`);
-  await safeExec(`git checkout ${baseBranch} && git pull upstream ${baseBranch}`);
+  await safeExec(`git checkout ${baseBranch} && git pull ${upstream} ${baseBranch}`);
 
-  if (prNumber) {
+  if (pr) {
     // checkout existing PR, reset all commits, rebase from baseBranch
     try {
-      if (!(await checkoutResetPr(baseBranch, prNumber))) {
-        log.info('Aborting');
-        return;
-      }
+      await checkoutResetPr(pr, baseBranch);
     } catch (error) {
       log.error(`Error checking out / resetting PR #${prNumber}:`);
       log.error(error);
       return;
     }
   } else {
-    // checkout [new] branch
+    // checkout new branch
     await checkoutBranch(NEW_BRANCH);
   }
+
+  // push changes in the branch
+  await inquirer.prompt({
+    type: 'confirm',
+    name: 'readyRelocate',
+    message: `Ready to relocate! You can commit changes previous to the relocation at this point. Confirm to proceed with the relocation`,
+  });
 
   // relocate modules
   await safeExec(`yarn kbn bootstrap`);
@@ -193,10 +226,15 @@ export const findAndRelocateModules = async (params: RelocateModulesParams) => {
     );
     return;
   }
+
   relocateSummary(log);
 
+  if (pr) {
+    await cherryPickManualCommits(pr, log);
+  }
+
   // push changes in the branch
-  const res2 = await inquirer.prompt({
+  const resPushBranch = await inquirer.prompt({
     type: 'confirm',
     name: 'pushBranch',
     message: `Relocation finished! You can commit extra changes at this point. Confirm to proceed pushing the current branch`,
@@ -204,9 +242,9 @@ export const findAndRelocateModules = async (params: RelocateModulesParams) => {
 
   const pushCmd = prNumber
     ? `git push --force-with-lease`
-    : `git push --set-upstream origin ${NEW_BRANCH}`;
+    : `git push --set-upstream ${origin} ${NEW_BRANCH}`;
 
-  if (!res2.pushBranch) {
+  if (!resPushBranch.pushBranch) {
     log.info(`Remember to push changes with "${pushCmd}"`);
     return;
   }

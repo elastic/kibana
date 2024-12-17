@@ -14,6 +14,7 @@ export const BUILT_IN_ENTITY_TYPES = {
   HOST: 'host',
   CONTAINER: 'container',
   SERVICE: 'service',
+  SERVICE_V2: 'built_in_services_from_ecs_data',
   KUBERNETES: {
     CLUSTER: createKubernetesEntity('cluster'),
     CONTAINER: createKubernetesEntity('container'),
