@@ -6,6 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { isInterval } from '../../lib/intervals';
+
+export function validateDuration(duration: string) {
+  if (!isInterval(duration)) {
+    return 'string is not a valid duration: ' + duration;
+  }
+}
 
 export const taskSchemaV1 = schema.object({
   taskType: schema.string(),
@@ -15,7 +22,7 @@ export const taskSchemaV1 = schema.object({
   runAt: schema.string(),
   schedule: schema.maybe(
     schema.object({
-      interval: schema.duration(),
+      interval: schema.string({ validate: validateDuration }),
     })
   ),
   params: schema.string(),
