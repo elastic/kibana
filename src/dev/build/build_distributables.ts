@@ -40,6 +40,7 @@ export interface BuildOptions {
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
   targetServerlessPlatforms: boolean;
+  tarZstd: boolean;
   withExamplePlugins: boolean;
   withTestPlugins: boolean;
   eprRegistry: 'production' | 'snapshot';
