@@ -31,26 +31,18 @@ describe('alert function', () => {
     ruleIds.push(responseApmRule.data.id);
 
     logger.info('Creating dataview');
-    // TODO: consider spaceId when checking for existingDataView
-    const dataViewId = customThresholdAIAssistantLogCount.dataViewParams.options.id;
-    const existingDataView = await kibanaClient.callKibana(
-      'post',
-      { pathname: '/api/content_management/rpc/get' },
-      {
-        contentTypeId: customThresholdAIAssistantLogCount.dataViewParams.contentTypeId,
-        id: dataViewId,
-        version: 1,
-      }
-    );
-
-    if (!existingDataView) {
+    try {
       await kibanaClient.callKibana(
         'post',
         { pathname: '/api/content_management/rpc/create' },
         customThresholdAIAssistantLogCount.dataViewParams
       );
-    } else {
-      logger.info('Data view already exists, skipping creation');
+    } catch (error) {
+      if (error?.status === 409) {
+        logger.info('Data view already exists, skipping creation');
+      } else {
+        throw error;
+      }
     }
 
     logger.info('Creating logs rule');
