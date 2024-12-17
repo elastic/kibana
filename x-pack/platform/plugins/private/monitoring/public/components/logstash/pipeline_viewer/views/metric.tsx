@@ -7,42 +7,45 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexItem, EuiBadge, EuiText, UseEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, EuiBadge, EuiText, UseEuiTheme, logicalCSS } from '@elastic/eui';
 
 type Type = 'cpuTime' | 'events' | 'eventsEmitted' | 'eventMillis';
 
-const metricStyle = (type: Type) => (theme: UseEuiTheme) => {
-  let width: string;
+const metricStyle =
+  (type: Type) =>
+  ({ euiTheme }: UseEuiTheme) => {
+    let width: string;
 
-  switch (type) {
-    case 'cpuTime':
-      width = theme.euiTheme.size.xxl;
-      break;
-    case 'events':
-    case 'eventsEmitted':
-      width = `calc(${theme.euiTheme.size.xxl} * 4)`;
-      break;
-    case 'eventMillis':
-      width = `calc(${theme.euiTheme.size.xxl} * 2)`;
-      break;
-    default:
-      width = 'auto';
-  }
-
-  return css`
-    text-align: right;
-    width: ${width};
-
-    @media (min-width: ${theme.euiTheme.breakpoint.m}) {
-      text-align: left;
-      padding-left: ${theme.euiTheme.size.xl};
+    switch (type) {
+      case 'cpuTime':
+        width = euiTheme.size.xxl;
+        break;
+      case 'events':
+      case 'eventsEmitted':
+        width = `calc(${euiTheme.size.xxl} * 4)`;
+        break;
+      case 'eventMillis':
+        width = `calc(${euiTheme.size.xxl} * 2)`;
+        break;
+      default:
+        width = 'auto';
     }
-  `;
-};
 
-const metricFlexItemStyle = (theme: UseEuiTheme) => css`
-  @media (min-width: ${theme.euiTheme.breakpoint.m}) {
-    margin-bottom: ${theme.euiTheme.size.xs} !important;
+    return css`
+      text-align: right;
+      width: ${width};
+
+      @media (min-width: ${euiTheme.breakpoint.m}) {
+        text-align: left;
+        ${logicalCSS('padding-left', euiTheme.size.xl)}
+      }
+    `;
+  };
+
+// ${logicalCSS('margin-bottom', euiTheme.size.xs)}
+const metricFlexItemStyle = ({ euiTheme }: UseEuiTheme) => css`
+  @media (min-width: ${euiTheme.breakpoint.m}) {
+    margin-bottom: ${euiTheme.size.xs} !important;
   }
 `;
 

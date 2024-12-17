@@ -13,12 +13,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, euiFontSize, logicalCSS } 
 import { Shard } from './shard';
 import { getSafeForExternalLink } from '../../../../lib/get_safe_for_external_link';
 
-const assignedChildrenStyle = (theme) => css`
-  padding-top: ${theme.euiTheme.size.l};
+const assignedChildrenStyle = ({ euiTheme }) => css`
+  ${logicalCSS('padding-top', euiTheme.size.l)}
 `;
 
 const childTitleStyle = (theme) => css`
-  padding: ${theme.euiTheme.size.xs} ${theme.euiTheme.size.s};
+  ${logicalCSS('padding', `${theme.euiTheme.size.l} ${theme.euiTheme.size.s}`)}
   text-align: center;
   font-size: ${euiFontSize(theme, 'xs')};
   color: ${theme.euiTheme.colors.ghost};
@@ -29,7 +29,7 @@ const childTitleStyle = (theme) => css`
 
 const shardStyle = (theme) => css`
   align-self: center;
-  padding: ${theme.euiTheme.size.xs} ${theme.euiTheme.size.s};
+  ${logicalCSS('padding', `${theme.euiTheme.size.xs} ${theme.euiTheme.size.s}`)}
   font-size: ${euiFontSize(theme, 'xs')};
   position: relative;
   display: inline-block;
@@ -43,7 +43,7 @@ const childStyle = (data, shardStats) => (theme) =>
     margin: ${theme.euiTheme.size.s};
     border: 1px solid ${theme.euiTheme.colors.mediumShade};
     border-radius: ${theme.euiTheme.size.xs};
-    padding: calc(${theme.euiTheme.size.xs} / 2) 0;
+    ${logicalCSS('padding', `calc(${theme.euiTheme.size.xs} / 2) 0`)}
 
     ${data.type === 'index' &&
     logicalCSS(

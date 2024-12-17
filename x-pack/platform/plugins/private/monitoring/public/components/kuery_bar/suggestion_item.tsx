@@ -52,13 +52,13 @@ const suggestionItemContainerStyle = (isSelected?: boolean) => (theme: UseEuiThe
     background-color: ${isSelected ? theme.euiTheme.colors.lightestShade : 'transparent'};
   `;
 
-const suggestionItemFieldStyle = (theme: UseEuiTheme) => css`
+const suggestionItemFieldStyle = ({ euiTheme }: UseEuiTheme) => css`
   align-items: center;
   cursor: pointer;
   display: flex;
   flex-direction: row;
-  height: ${theme.euiTheme.size.xl};
-  padding: ${theme.euiTheme.size.xs};
+  height: ${euiTheme.size.xl};
+  padding: ${euiTheme.size.xs};
 `;
 
 const suggestionItemIconFieldStyle =

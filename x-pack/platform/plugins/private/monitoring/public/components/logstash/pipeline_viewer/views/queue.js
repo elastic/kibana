@@ -13,9 +13,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { StatementListHeading } from './statement_list_heading';
 
-const queueMessageStyle = (theme: UseEuiTheme) => css`
-  margin-left: ${theme.euiTheme.size.l};
-  color: ${theme.euiTheme.colors.darkShade};
+const queueMessageStyle = ({ euiTheme }: UseEuiTheme) => css`
+  ${logicalCSS('margin-left', euiTheme.size.l)}
+  color: ${euiTheme.colors.darkShade};
 `;
 
 export function Queue() {

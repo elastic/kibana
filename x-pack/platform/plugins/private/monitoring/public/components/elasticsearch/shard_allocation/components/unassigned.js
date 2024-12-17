@@ -8,19 +8,19 @@
 import React from 'react';
 import { sortBy } from 'lodash';
 import { css } from '@emotion/react';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, logicalCSS } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { Shard } from './shard';
 
-export const unassignedStyle = (theme) => css`
+export const unassignedStyle = ({ euiTheme }) => css`
   vertical-align: middle;
-  width: calc(${theme.euiTheme.size.l} * 10);
+  width: calc(${euiTheme.size.l} * 10);
 `;
 
-export const unassignedChildrenStyle = (theme) => css`
-  padding-top: ${theme.euiTheme.size.l};
+export const unassignedChildrenStyle = ({ euiTheme }) => css`
+  ${logicalCSS('padding-top', euiTheme.size.l)}
 `;
 
 export class Unassigned extends React.Component {

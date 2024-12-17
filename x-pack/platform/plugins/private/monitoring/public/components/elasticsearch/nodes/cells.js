@@ -22,8 +22,8 @@ import { i18n } from '@kbn/i18n';
 
 import { formatMetric } from '../../../lib/format_number';
 
-const offlineStyle = (theme) => css`
-  color: ${theme.euiTheme.colors.textParagraph};
+const offlineStyle = ({ euiTheme }) => css`
+  color: ${euiTheme.colors.textParagraph};
 `;
 
 const TRENDING_DOWN = i18n.translate('xpack.monitoring.elasticsearch.node.cells.trendingDownText', {

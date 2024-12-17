@@ -7,7 +7,7 @@
 
 import React, { MouseEventHandler } from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonEmpty, EuiCodeBlock, EuiFlexItem, UseEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCodeBlock, EuiFlexItem, logicalCSS, UseEuiTheme } from '@elastic/eui';
 
 import { PluginStatement as PluginStatementModel } from '../models/pipeline/plugin_statement';
 import { CollapsibleStatement } from './collapsible_statement';
@@ -15,19 +15,19 @@ import { IfElement } from '../models/list/if_element';
 import { PluginStatement } from './plugin_statement';
 import { Vertex } from './types';
 
-const spaceContainerStyle = (theme: UseEuiTheme) => css`
-  background-color: ${theme.euiTheme.colors.backgroundBasePlain};
+const spaceContainerStyle = ({ euiTheme }: UseEuiTheme) => css`
+  background-color: ${euiTheme.colors.backgroundBasePlain};
   align-self: stretch;
   display: flex;
   // Separates the left border spaces properly
-  border-bottom: solid 2px ${theme.euiTheme.colors.emptyShade};
+  ${logicalCSS('border-bottom', `solid 2px ${euiTheme.colors.emptyShade}`)}
 `;
 
-const spacerStyle = (theme: UseEuiTheme) => css`
-  width: ${theme.euiTheme.size.m};
+const spacerStyle = ({ euiTheme }: UseEuiTheme) => css`
+  width: ${euiTheme.size.m};
   align-self: stretch;
-  margin-left: ${theme.euiTheme.size.m};
-  border-left: 1px ${theme.euiTheme.border.color} dashed;
+  ${logicalCSS('margin-left', euiTheme.size.m)}
+  ${logicalCSS('border-left', `1px ${euiTheme.border.color} dashed`)}
 
   // This allows the border to be flush
   &:last-child {
@@ -36,27 +36,27 @@ const spacerStyle = (theme: UseEuiTheme) => css`
 
   &:first-child {
     // Odd number is because of the single pixel border
-    margin-left: calc(${theme.euiTheme.size.l}) - 1px);
+    ${logicalCSS('margin-left', `calc(${euiTheme.size.l}) - 1px)`)}
   }
 
-  @media (min-width: var(${theme.euiTheme.breakpoint.m})) {
+  @media (min-width: var(${euiTheme.breakpoint.m})) {
     border: none;
   }
 `;
 
-const listItemStyle = (theme: UseEuiTheme) => css`
+const listItemStyle = ({ euiTheme }: UseEuiTheme) => css`
   display: flex;
-  min-height: ${theme.euiTheme.size.xl};
+  min-height: ${euiTheme.size.xl};
   align-items: center;
-  padding-right: ${theme.euiTheme.size.m};
+  ${logicalCSS('padding-right', euiTheme.size.m)}
 
   &:nth-child(2n + 1) {
-    background: ${theme.euiTheme.colors.lightestShade};
+    background: ${euiTheme.colors.lightestShade};
   }
 `;
 
-const conditionalStyle = (theme: UseEuiTheme) => css`
-  font-weight: ${theme.euiTheme.font.weight.bold};
+const conditionalStyle = ({ euiTheme }: UseEuiTheme) => css`
+  font-weight: ${euiTheme.font.weight.bold};
 `;
 
 function renderStatementName(name: string, onVertexSelected: MouseEventHandler<HTMLButtonElement>) {

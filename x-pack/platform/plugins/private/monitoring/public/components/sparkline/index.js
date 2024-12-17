@@ -24,17 +24,17 @@ const sparklineTooltipStyle = (theme) => css`
   pointer-events: none;
 `;
 
-const tooltipXValueStyle = (theme) => css`
-  color: ${transparentize(0.3, theme.euiTheme.colors.ghost)};
+const tooltipXValueStyle = ({ euiTheme }) => css`
+  color: ${transparentize(0.3, euiTheme.colors.ghost)};
 `;
 
-const tooltipYValueStyle = (theme) => css`
-  color: ${theme.euiTheme.colors.ghost};
+const tooltipYValueStyle = ({ euiTheme }) => css`
+  color: ${euiTheme.colors.ghost};
 `;
 
-const tooltipContainerStyle = (theme) => css`
+const tooltipContainerStyle = ({ euiTheme }) => css`
   position: fixed;
-  z-index: ${theme.euiTheme.levels.menu};
+  z-index: ${euiTheme.levels.menu};
   display: flex;
   flex-direction: row;
   justify-content: center;
