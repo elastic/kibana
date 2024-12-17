@@ -42,10 +42,9 @@ const metricStyle =
     `;
   };
 
-// ${logicalCSS('margin-bottom', euiTheme.size.xs)}
 const metricFlexItemStyle = ({ euiTheme }: UseEuiTheme) => css`
   @media (min-width: ${euiTheme.breakpoint.m}) {
-    margin-bottom: ${euiTheme.size.xs} !important;
+    ${logicalCSS('margin-bottom', euiTheme.size.xs)}
   }
 `;
 
