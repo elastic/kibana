@@ -9,7 +9,7 @@ import { ProductFeatureTimelineFeatureKey } from '../product_features_keys';
 import type { ProductFeatureKibanaConfig } from '../types';
 
 /**
- * App features privileges configuration for the Attack discovery feature.
+ * App features privileges configuration for the timeline feature.
  * These are the configs that are shared between both offering types (ess and serverless).
  * They can be extended on each offering plugin to register privileges using different way on each offering type.
  *
@@ -25,12 +25,13 @@ export const timelineDefaultProductFeaturesConfig: Record<
   [ProductFeatureTimelineFeatureKey.timeline]: {
     privileges: {
       all: {
+        api: ['timeline_read', 'timeline_write'],
         ui: ['read', 'crud'],
       },
       read: {
+        api: ['timeline_read'],
         ui: ['read'],
       },
     },
   },
 };
-// console.log('figure out what to put into `ui`, `api` and others');
