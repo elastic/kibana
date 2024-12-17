@@ -14,7 +14,6 @@ import {
   ENTERPRISE_SEARCH_APP_ID,
   ENTERPRISE_SEARCH_CONTENT_APP_ID,
   ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
-  ENTERPRISE_SEARCH_SYNONYMS_APP_ID,
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
   ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID,
@@ -34,7 +33,6 @@ import {
 export type EnterpriseSearchApp = typeof ENTERPRISE_SEARCH_APP_ID;
 export type EnterpriseSearchContentApp = typeof ENTERPRISE_SEARCH_CONTENT_APP_ID;
 export type EnterpriseSearchApplicationsApp = typeof ENTERPRISE_SEARCH_APPLICATIONS_APP_ID;
-export type EnterpriseSearchSynonymsApp = typeof ENTERPRISE_SEARCH_SYNONYMS_APP_ID;
 export type EnterpriseSearchAnalyticsApp = typeof ENTERPRISE_SEARCH_ANALYTICS_APP_ID;
 export type EnterpriseSearchAppsearchApp = typeof ENTERPRISE_SEARCH_APPSEARCH_APP_ID;
 export type EnterpriseSearchWorkplaceSearchApp = typeof ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID;
@@ -68,7 +66,6 @@ export type DeepLinkId =
   | EnterpriseSearchApp
   | EnterpriseSearchContentApp
   | EnterpriseSearchApplicationsApp
-  | EnterpriseSearchSynonymsApp
   | EnterpriseSearchAnalyticsApp
   | EnterpriseSearchAppsearchApp
   | EnterpriseSearchWorkplaceSearchApp
@@ -83,7 +80,7 @@ export type DeepLinkId =
   | `${EnterpriseSearchApplicationsApp}:${ApplicationsLinkId}`
   | `${EnterpriseSearchAppsearchApp}:${AppsearchLinkId}`
   | `${SearchInferenceEndpointsId}:${SearchInferenceEndpointsLinkId}`
-  | `${EnterpriseSearchSynonymsApp}:${SynonymsLinkId}`
+  | `${SearchSynonymsId}:${SynonymsLinkId}`
   | SearchStart
   | SearchIndices
   | SearchElasticsearch

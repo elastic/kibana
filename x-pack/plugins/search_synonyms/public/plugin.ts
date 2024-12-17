@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import { BehaviorSubject, type Subscription } from 'rxjs';
+
+import { AppStatus } from '@kbn/core/public';
 import type {
+  AppUpdater,
   CoreSetup,
   Plugin,
   PluginInitializerContext,
   AppMountParameters,
+  CoreStart,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
@@ -26,6 +31,9 @@ export class SearchSynonymsPlugin
   implements Plugin<SearchSynonymsPluginSetup, SearchSynonymsPluginStart>
 {
   private config: SearchSynonymsConfigType;
+  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private licenseSubscription?: Subscription;
+
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<SearchSynonymsConfigType>();
   }
@@ -48,8 +56,11 @@ export class SearchSynonymsPlugin
           title: i18n.translate('xpack.searchSynonyms.appTitle', {
             defaultMessage: 'Synonyms',
           }),
+          visibleIn: ['globalSearch'],
         },
       ],
+      status: AppStatus.inaccessible,
+      updater$: this.appUpdater$,
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
@@ -61,16 +72,33 @@ export class SearchSynonymsPlugin
           history,
         };
 
+        depsStart.searchNavigation?.handleOnAppMount();
+
         return renderApp(coreStart, startDeps, element);
       },
+      visibleIn: [],
     });
 
     return {};
   }
 
-  public start(): SearchSynonymsPluginStart {
+  public start(_: CoreStart, deps: AppPluginStartDependencies): SearchSynonymsPluginStart {
+    const { licensing } = deps;
+    this.licenseSubscription = licensing.license$.subscribe((license) => {
+      const status: AppStatus =
+        license && license.isAvailable && license.isActive && license.hasAtLeast('enterprise')
+          ? AppStatus.accessible
+          : AppStatus.inaccessible;
+
+      this.appUpdater$.next(() => ({ status }));
+    });
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    if (this.licenseSubscription) {
+      this.licenseSubscription.unsubscribe();
+      this.licenseSubscription = undefined;
+    }
+  }
 }

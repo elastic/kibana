@@ -5,11 +5,24 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+  DEFAULT_APP_CATEGORIES,
+} from '@kbn/core/server';
 
-import { SearchSynonymsPluginSetup, SearchSynonymsPluginStart } from './types';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import {
+  SearchSynonymsPluginSetup,
+  SearchSynonymsPluginSetupDependencies,
+  SearchSynonymsPluginStart,
+} from './types';
 
 import { defineRoutes } from './routes';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 
 export class SearchSynonymsPlugin
   implements Plugin<SearchSynonymsPluginSetup, SearchSynonymsPluginStart, {}, {}>
@@ -20,11 +33,42 @@ export class SearchSynonymsPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: SearchSynonymsPluginSetupDependencies) {
     this.logger.debug('searchSynonyms: Setup');
     const router = core.http.createRouter();
 
     defineRoutes({ router, logger: this.logger });
+
+    plugins.features.registerKibanaFeature({
+      id: PLUGIN_ID,
+      minimumLicense: 'enterprise',
+      name: PLUGIN_NAME,
+      order: 0,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      app: ['kibana', PLUGIN_ID],
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+      catalogue: [PLUGIN_ID],
+      privileges: {
+        all: {
+          app: ['kibana', PLUGIN_ID],
+          api: [],
+          catalogue: [PLUGIN_ID],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+        read: {
+          disabled: true,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
+    });
 
     return {};
   }
