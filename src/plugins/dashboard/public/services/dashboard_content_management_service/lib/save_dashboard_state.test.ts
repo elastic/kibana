@@ -36,10 +36,6 @@ dataService.query.timefilter.timefilter.getTime = jest
   .fn()
   .mockReturnValue({ from: 'then', to: 'now' });
 
-embeddableService.extract = jest
-  .fn()
-  .mockImplementation((attributes) => ({ state: attributes, references: [] }));
-
 describe('Save dashboard state', () => {
   beforeEach(() => {
     jest.clearAllMocks();
