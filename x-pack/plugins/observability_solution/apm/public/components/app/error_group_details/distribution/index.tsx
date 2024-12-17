@@ -18,7 +18,7 @@ import {
   DARK_THEME,
   LegendValue,
 } from '@elastic/charts';
-import { EuiTitle } from '@elastic/eui';
+import { COLOR_MODES_STANDARD, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -97,7 +97,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
             showLegend
             legendValues={[LegendValue.CurrentAndLastValue]}
             legendPosition={Position.Bottom}
-            theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
+            theme={theme.colorMode === COLOR_MODES_STANDARD.dark ? DARK_THEME : LIGHT_THEME}
             locale={i18n.getLocale()}
           />
           <Axis

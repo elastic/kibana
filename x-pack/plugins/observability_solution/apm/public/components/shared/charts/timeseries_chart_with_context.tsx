@@ -69,8 +69,8 @@ export function TimeseriesChartWithContext({
   } = useAnyOfApmParams('/services', '/dependencies/*', '/services/{serviceName}');
   const { core } = useApmPluginContext();
   const timeZone = getTimeZone(core.uiSettings);
-  const theme = useTheme();
-  const annotationColor = theme.eui.euiColorSuccess;
+  const { euiTheme } = useTheme();
+  const annotationColor = euiTheme.colors.success;
   const { annotations } = useAnnotationsContext();
 
   const timeseriesAnnotations = [

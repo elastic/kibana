@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { COLOR_MODES_STANDARD, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   CloudProvider,
@@ -122,7 +122,8 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
     {
       key: 'service',
       icon: {
-        type: getAgentIcon(icons?.agentName, theme.darkMode) || 'node',
+        type:
+          getAgentIcon(icons?.agentName, theme.colorMode === COLOR_MODES_STANDARD.dark) || 'node',
       },
       isVisible: !!icons?.agentName,
       title: i18n.translate('xpack.apm.serviceIcons.service', {
@@ -133,7 +134,7 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
     {
       key: 'opentelemetry',
       icon: {
-        type: getAgentIcon('opentelemetry', theme.darkMode),
+        type: getAgentIcon('opentelemetry', theme.colorMode === COLOR_MODES_STANDARD.dark),
       },
       isVisible: !!icons?.agentName && isOpenTelemetryAgentName(icons.agentName),
       title: i18n.translate('xpack.apm.serviceIcons.opentelemetry', {

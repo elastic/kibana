@@ -36,7 +36,7 @@ interface TimelineAxisProps {
 }
 
 export function TimelineAxis({ plotValues, marks = [], topTraceDuration }: TimelineAxisProps) {
-  const theme = useTheme();
+  const { euiTheme } = useTheme();
   const { margins, tickValues, width, xMax, xScale } = plotValues;
   const tickFormatter = getDurationFormatter(xMax);
 
@@ -65,7 +65,7 @@ export function TimelineAxis({ plotValues, marks = [], topTraceDuration }: Timel
               x={position}
               y={0}
               textAnchor="middle"
-              fill={theme.eui.euiColorDarkShade}
+              fill={euiTheme.colors.darkShade}
               fontSize={11}
             >
               {label}
@@ -76,7 +76,7 @@ export function TimelineAxis({ plotValues, marks = [], topTraceDuration }: Timel
               key="topTrace"
               x={topTraceDurationPosition}
               y={0}
-              fill={theme.eui.euiTextColor}
+              fill={euiTheme.colors.textParagraph}
               textAnchor="middle"
             >
               {tickFormatter(topTraceDuration).formatted}

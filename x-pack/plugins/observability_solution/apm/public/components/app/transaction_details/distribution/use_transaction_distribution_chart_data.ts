@@ -20,7 +20,7 @@ import { useTheme } from '../../../../hooks/use_theme';
 
 export const useTransactionDistributionChartData = () => {
   const params = useFetchParams();
-  const euiTheme = useTheme();
+  const { euiTheme } = useTheme();
 
   const {
     core: { notifications },

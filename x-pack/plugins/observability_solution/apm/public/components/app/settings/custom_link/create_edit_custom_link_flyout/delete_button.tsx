@@ -21,7 +21,7 @@ interface Props {
 export function DeleteButton({ onDelete, customLinkId }: Props) {
   const [isDeleting, setIsDeleting] = useState(false);
   const { toasts } = useApmPluginContext().core.notifications;
-  const theme = useTheme();
+  const { euiTheme } = useTheme();
 
   return (
     <EuiButtonEmpty
@@ -35,7 +35,7 @@ export function DeleteButton({ onDelete, customLinkId }: Props) {
         setIsDeleting(false);
         onDelete();
       }}
-      style={{ marginRight: theme.eui.euiSize }}
+      style={{ marginRight: euiTheme.size.xs }}
     >
       {i18n.translate('xpack.apm.settings.customLink.delete', {
         defaultMessage: 'Delete',

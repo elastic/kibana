@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiEmptyPrompt, EuiImage } from '@elastic/eui';
+import { COLOR_MODES_STANDARD, EuiEmptyPrompt, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { dashboardsDark, dashboardsLight } from '@kbn/shared-svg';
 import { useTheme } from '../../../hooks/use_theme';
@@ -25,7 +25,7 @@ export function EmptyDashboards({ actions }: Props) {
         icon={
           <EuiImage
             size="fullWidth"
-            src={theme.darkMode ? dashboardsDark : dashboardsLight}
+            src={theme.colorMode === COLOR_MODES_STANDARD.dark ? dashboardsDark : dashboardsLight}
             alt=""
           />
         }

@@ -74,7 +74,7 @@ export function BreakdownChart({
   const {
     query: { rangeFrom, rangeTo },
   } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
-  const theme = useTheme();
+  const { euiTheme } = useTheme();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const min = moment.utc(start).valueOf();
@@ -82,7 +82,7 @@ export function BreakdownChart({
 
   const xFormatter = niceTimeFormatter([min, max]);
 
-  const annotationColor = theme.eui.euiColorSuccess;
+  const annotationColor = euiTheme.colors.success;
 
   const isEmpty = isTimeseriesEmpty(timeseries);
 

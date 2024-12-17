@@ -54,7 +54,7 @@ import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_
 import { TotalDocCountLabel } from '../../shared/charts/duration_distribution_chart/total_doc_count_label';
 
 export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => void }) {
-  const euiTheme = useTheme();
+  const { euiTheme } = useTheme();
 
   const {
     core: { notifications },
@@ -456,7 +456,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
           style={{
             display: 'flex',
             flexDirection: 'row',
-            paddingLeft: euiTheme.eui.euiSizeS,
+            paddingLeft: euiTheme.size.s,
           }}
         >
           <EuiSwitch
@@ -473,7 +473,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
           <EuiIconTip
             size="m"
             iconProps={{
-              style: { marginLeft: euiTheme.eui.euiSizeXS },
+              style: { marginLeft: euiTheme.size.xs },
             }}
             content={i18n.translate(
               'xpack.apm.correlations.latencyCorrelations.advancedStatisticsTooltipContent',

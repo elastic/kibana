@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiEmptyPrompt, EuiImage, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  COLOR_MODES_STANDARD,
+  EuiButtonEmpty,
+  EuiEmptyPrompt,
+  EuiImage,
+  EuiLink,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -65,7 +72,7 @@ export function EntityLink() {
           icon={
             <EuiImage
               size="fullWidth"
-              src={theme.darkMode ? dashboardsDark : dashboardsLight}
+              src={theme.colorMode === COLOR_MODES_STANDARD.dark ? dashboardsDark : dashboardsLight}
               alt=""
             />
           }

@@ -17,7 +17,7 @@ const ResetLineHeight = euiStyled.span`
 `;
 
 export function FailureBadge({ outcome }: { outcome?: EventOutcome }) {
-  const theme = useTheme();
+  const { euiTheme } = useTheme();
 
   if (outcome !== 'failure') {
     return null;
@@ -30,7 +30,11 @@ export function FailureBadge({ outcome }: { outcome?: EventOutcome }) {
           defaultMessage: 'event.outcome = failure',
         })}
       >
-        <EuiBadge color={theme.eui.euiColorDanger}>failure</EuiBadge>
+        <EuiBadge color={euiTheme.colors.danger}>
+          {i18n.translate('xpack.apm.failureBadge.failureBadgeLabel', {
+            defaultMessage: 'failure',
+          })}
+        </EuiBadge>
       </EuiToolTip>
     </ResetLineHeight>
   );

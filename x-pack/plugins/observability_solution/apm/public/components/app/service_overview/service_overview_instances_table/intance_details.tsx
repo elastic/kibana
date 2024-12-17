@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
+import { COLOR_MODES_STANDARD, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 import { CloudProvider, getAgentIcon, getCloudProviderIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -140,7 +140,7 @@ export function InstanceDetails({ serviceName, serviceNodeName, kuery }: Props) 
           title={i18n.translate('xpack.apm.serviceOverview.instanceTable.details.serviceTitle', {
             defaultMessage: 'Service',
           })}
-          icon={getAgentIcon(data.agent?.name, theme.darkMode)}
+          icon={getAgentIcon(data.agent?.name, theme.colorMode === COLOR_MODES_STANDARD.dark)}
           keyValueList={serviceDetailsKeyValuePairs}
           onClickFilter={addKueryBarFilter}
         />

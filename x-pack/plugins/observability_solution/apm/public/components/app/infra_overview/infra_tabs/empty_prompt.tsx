@@ -6,6 +6,7 @@
  */
 
 import {
+  COLOR_MODES_STANDARD,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -54,7 +55,10 @@ export function EmptyPrompt() {
 function NoResultsIllustration() {
   const theme = useTheme();
 
-  const illustration = theme.darkMode ? noResultsIllustrationDark : noResultsIllustrationLight;
+  const illustration =
+    theme.colorMode === COLOR_MODES_STANDARD.dark
+      ? noResultsIllustrationDark
+      : noResultsIllustrationLight;
 
   return (
     <EuiImage alt={noResultsIllustrationAlternativeText} size="fullWidth" src={illustration} />

@@ -29,7 +29,7 @@ export function AnomalyDetectionSetupLink() {
   const { core } = useApmPluginContext();
 
   const { basePath } = core.http;
-  const theme = useTheme();
+  const { euiTheme } = useTheme();
 
   const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
 
@@ -74,7 +74,7 @@ export function AnomalyDetectionSetupLink() {
       data-test-subj="apmAnomalyDetectionHeaderLink"
     >
       {pre}
-      <span style={{ marginInlineStart: theme.eui.euiSizeS }}>{ANOMALY_DETECTION_LINK_LABEL}</span>
+      <span style={{ marginInlineStart: euiTheme.size.s }}>{ANOMALY_DETECTION_LINK_LABEL}</span>
     </EuiHeaderLink>
   );
 

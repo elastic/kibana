@@ -93,7 +93,7 @@ export function SparkPlotItem({
   comparisonSeries?: Coordinate[];
   comparisonSeriesColor?: string;
 }) {
-  const theme = useTheme();
+  const { euiTheme } = useTheme();
   const defaultChartThemes = useChartThemes();
   const comparisonChartTheme = getComparisonChartTheme();
   const hasComparisonSeries = !!comparisonSeries?.length;
@@ -110,7 +110,7 @@ export function SparkPlotItem({
   };
 
   const chartSize = {
-    height: theme.eui.euiSizeL,
+    height: euiTheme.size.l,
     width: compact ? unit * 4 : unit * 5,
   };
 
@@ -201,7 +201,7 @@ export function SparkPlotItem({
         justifyContent: 'center',
       }}
     >
-      <EuiIcon type="visLine" color={theme.eui.euiColorMediumShade} />
+      <EuiIcon type="visLine" color={euiTheme.colors.mediumShade} />
     </div>
   );
 }

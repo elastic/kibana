@@ -176,7 +176,7 @@ const VirtualRow = React.memo(
 );
 
 const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
-  const theme = useTheme();
+  const { euiTheme } = useTheme();
   const { duration, waterfallItemId, onClickWaterfallItem, timelineMargins, node } = props;
   const { criticalPathSegmentsById, getErrorCount, updateTreeNode, showCriticalPath } =
     useWaterfallContext();
@@ -190,7 +190,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
     ?.filter((segment) => segment.self)
     .map((segment) => ({
       id: segment.item.id,
-      color: theme.eui.euiColorAccent,
+      color: euiTheme.colors.accent,
       left: (segment.offset - node.item.offset - node.item.skew) / node.item.duration,
       width: segment.duration / node.item.duration,
     }));

@@ -43,7 +43,7 @@ export function CorrelationsTable<T extends FieldValuePair>({
   sorting,
   rowHeader,
 }: CorrelationsTableProps<T>) {
-  const euiTheme = useTheme();
+  const { euiTheme } = useTheme();
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const trackSelectSignificantCorrelationTerm = useCallback(
     () => debounce(() => trackApmEvent({ metric: 'select_significant_term' }), 1000),
@@ -105,7 +105,7 @@ export function CorrelationsTable<T extends FieldValuePair>({
             selectedTerm.fieldValue === term.fieldValue &&
             selectedTerm.fieldName === term.fieldName
               ? {
-                  backgroundColor: euiTheme.eui.euiColorLightestShade,
+                  backgroundColor: euiTheme.colors.lightestShade,
                 }
               : null,
         };

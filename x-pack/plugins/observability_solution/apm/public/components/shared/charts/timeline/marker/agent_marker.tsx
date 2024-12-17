@@ -28,7 +28,7 @@ interface Props {
 }
 
 export function AgentMarker({ mark }: Props) {
-  const theme = useTheme();
+  const { euiTheme } = useTheme();
 
   return (
     <>
@@ -42,7 +42,7 @@ export function AgentMarker({ mark }: Props) {
           </div>
         }
       >
-        <Legend clickable color={theme.eui.euiColorMediumShade} />
+        <Legend clickable color={euiTheme.colors.mediumShade} />
       </EuiToolTip>
     </>
   );

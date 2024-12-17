@@ -92,7 +92,7 @@ function MultipleInstanceCustomTooltip({
   latencyFormatter,
   values,
 }: TooltipInfo & { latencyFormatter: TimeFormatter }) {
-  const theme = useTheme();
+  const { euiTheme } = useTheme();
 
   return (
     <>
@@ -127,10 +127,7 @@ function MultipleInstanceCustomTooltip({
               >
                 <div className="echTooltip__item--color" style={{ backgroundColor: color }} />
               </div>
-              <div
-                className="echTooltip__item--container"
-                style={{ paddingLeft: theme.eui.euiSizeS }}
-              >
+              <div className="echTooltip__item--container" style={{ paddingLeft: euiTheme.size.s }}>
                 <span className="echTooltip__label">{latencyLabel}</span>
                 <span className="echTooltip__value">{latencyFormatter(latency).formatted}</span>
               </div>
@@ -142,10 +139,7 @@ function MultipleInstanceCustomTooltip({
               >
                 <div className="echTooltip__item--color" style={{ backgroundColor: color }} />
               </div>
-              <div
-                className="echTooltip__item--container"
-                style={{ paddingLeft: theme.eui.euiSizeS }}
-              >
+              <div className="echTooltip__item--container" style={{ paddingLeft: euiTheme.size.s }}>
                 <span className="echTooltip__label">{throughputLabel}</span>
                 <span className="echTooltip__value">{asTransactionRate(throughput)}</span>
               </div>
@@ -166,7 +160,7 @@ function MultipleInstanceCustomTooltip({
  */
 export function CustomTooltip(props: TooltipInfo & { latencyFormatter: TimeFormatter }) {
   const { values } = props;
-  const theme = useTheme();
+  const { euiTheme } = useTheme();
 
   return (
     <div className="echTooltip">
@@ -175,7 +169,7 @@ export function CustomTooltip(props: TooltipInfo & { latencyFormatter: TimeForma
       ) : (
         <SingleInstanceCustomTooltip {...props} />
       )}
-      <div style={{ padding: theme.eui.euiSizeXS }}>
+      <div style={{ padding: euiTheme.size.xs }}>
         <EuiIcon type="filter" /> {clickToFilterDescription}
       </div>
     </div>
