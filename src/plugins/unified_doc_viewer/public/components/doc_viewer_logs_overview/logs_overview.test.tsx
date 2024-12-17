@@ -16,6 +16,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { merge } from 'lodash';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 const DATASET_NAME = 'logs.overview';
 const NAMESPACE = 'default';
@@ -131,11 +132,17 @@ setUnifiedDocViewerServices(
 
 const renderLogsOverview = (props: Partial<DocViewRenderProps> = {}) => {
   const { rerender: baseRerender, ...tools } = render(
-    <LogsOverview dataView={dataView} hit={fullHit} {...props} />
+    <IntlProvider locale="en">
+      <LogsOverview dataView={dataView} hit={fullHit} {...props} />
+    </IntlProvider>
   );
 
   const rerender = (rerenderProps: Partial<DocViewRenderProps>) =>
-    baseRerender(<LogsOverview dataView={dataView} hit={fullHit} {...props} {...rerenderProps} />);
+    baseRerender(
+      <IntlProvider locale="en">
+        <LogsOverview dataView={dataView} hit={fullHit} {...props} {...rerenderProps} />
+      </IntlProvider>
+    );
 
   return { rerender, ...tools };
 };
