@@ -14,7 +14,7 @@ export const pythonDefinition: LanguageDefinition = {
   apiReference: docLinks.pythonApiReference,
   basicConfig: docLinks.pythonBasicConfig,
   buildSearchQuery: `client.search(index="books", q="snow")`,
-  configureClient: ({ url, apiKey }) => `from elasticsearch_serverless import Elasticsearch
+  configureClient: ({ url, apiKey }) => `from elasticsearch import Elasticsearch
 
 client = Elasticsearch(
   "${url}",
@@ -22,9 +22,9 @@ client = Elasticsearch(
 )`,
   docLink: docLinks.pythonClient,
   github: {
-    link: 'https://github.com/elastic/elasticsearch-serverless-python',
+    link: 'https://github.com/elastic/elasticsearch-py',
     label: i18n.translate('xpack.serverlessSearch.languages.python.githubLabel', {
-      defaultMessage: 'elasticsearch-serverless-python',
+      defaultMessage: 'elasticsearch-py',
     }),
   },
   iconType: 'python.svg',
@@ -50,7 +50,7 @@ client.bulk(operations=documents${ingestPipeline ? `, pipeline="${ingestPipeline
     url,
     indexName,
     ingestPipeline,
-  }) => `from elasticsearch_serverless import Elasticsearch
+  }) => `from elasticsearch import Elasticsearch
 
 client = Elasticsearch(
   "${url}",
@@ -64,10 +64,10 @@ documents = [
 
 client.bulk(operations=documents${ingestPipeline ? `, pipeline="${ingestPipeline}"` : ''})
 `,
-  installClient: `python -m pip install elasticsearch-serverless
+  installClient: `python -m pip install elasticsearch
 
 # If your application uses async/await in Python you can install with the async extra
-# python -m pip install elasticsearch_serverless[async]
+# python -m pip install elasticsearch[async]
   `,
   name: i18n.translate('xpack.serverlessSearch.languages.python', {
     defaultMessage: 'Python',
