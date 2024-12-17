@@ -31,7 +31,6 @@
     "@kbn/logging-mocks",
     "@kbn/kibana-react-plugin",
     "@kbn/test-subj-selector",
-    "@kbn/observability-shared-plugin",
     "@kbn/datemath",
     "@kbn/core-http-browser",
     "@kbn/ui-actions-plugin",
@@ -56,5 +55,7 @@
     "@kbn/saved-search-plugin",
     "@kbn/discover-plugin",
     "@kbn/spaces-plugin",
+    "@kbn/analytics",
+    "@kbn/usage-collection-plugin",
   ]
 }
