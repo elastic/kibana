@@ -32,13 +32,16 @@ export const searchQuerySchema = schema.oneOf([
   ),
 ]);
 
-export const searchResultSchema = schema.object({
-  hits: schema.arrayOf(schema.any()),
-  pagination: schema.object({
-    total: schema.number(),
-    cursor: schema.maybe(schema.string()),
-  }),
-});
+export const searchResultSchema = schema.object(
+  {
+    hits: schema.arrayOf(schema.any()),
+    pagination: schema.object({
+      total: schema.number(),
+      cursor: schema.maybe(schema.string()),
+    }),
+  },
+  { unknowns: 'allow' }
+);
 
 export const searchSchemas: ProcedureSchemas = {
   in: schema.object(

@@ -74,8 +74,16 @@ export function initRpcRoutes(
 
         const result = await rpc.call(context, name, request.body);
 
+        // @ts-ignore
+        const header = result.result.result.header;
+
         return response.ok({
           body: result,
+          headers: header
+            ? {
+                'Server-Timing': header,
+              }
+            : {},
         });
       } catch (e) {
         return response.customError(wrapError(e));

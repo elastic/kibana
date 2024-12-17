@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { performance } from 'node:perf_hooks';
 import type { ProcedureSchemas } from '../../common';
 import { validate } from '../utils';
 
@@ -33,6 +34,8 @@ export class RpcService<Context extends object | void = void, Names extends stri
 
     const { fn, schemas } = procedure;
 
+    let tsValidateInput = performance.now();
+
     // 1. Validate input
     if (schemas?.in) {
       const error = validate(input, schemas.in);
@@ -45,8 +48,15 @@ export class RpcService<Context extends object | void = void, Names extends stri
       throw new Error(`Input schema missing for [${name}] procedure.`);
     }
 
+    tsValidateInput = performance.now() - tsValidateInput;
+    let tsExecuteProcedure = performance.now();
+
     // 2. Execute procedure
     const result = await fn(context, input);
+
+    tsExecuteProcedure = performance.now() - tsExecuteProcedure;
+
+    let tsValidateOutput = performance.now();
 
     // 3. Validate output
     if (schemas?.out) {
@@ -55,6 +65,13 @@ export class RpcService<Context extends object | void = void, Names extends stri
         // TODO: Improve error handling
         throw error;
       }
+    }
+
+    tsValidateOutput = performance.now() - tsValidateOutput;
+
+    // @ts-ignore
+    if (result.result.header) {
+      result.result.header = `${result.result.header}, tsValidateInput;dur=${tsValidateInput}, tsExecuteProcedure;dur=${tsExecuteProcedure}, tsValidateOutput;dur=${tsValidateOutput}`;
     }
 
     return { result };
