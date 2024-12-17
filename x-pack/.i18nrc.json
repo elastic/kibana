@@ -148,7 +148,7 @@
     "xpack.serverlessObservability": "solutions/observability/plugins/serverless_observability",
     "xpack.securitySolution": "solutions/security/plugins/security_solution",
     "xpack.securitySolutionEss": "solutions/security/plugins/security_solution_ess",
-    "xpack.securitySolutionServerless": "plugins/security_solution_serverless",
+    "xpack.securitySolutionServerless": "solutions/security/plugins/security_solution_serverless",
     "xpack.sessionView": "plugins/session_view",
     "xpack.streams": [
       "solutions/observability/plugins/streams_app"

@@ -818,7 +818,7 @@ x-pack/solutions/security/packages/features @elastic/security-threat-hunting-exp
 x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
 x-pack/solutions/security/packages/navigation @elastic/security-threat-hunting-explore
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
-x-pack/plugins/security_solution_serverless @elastic/security-solution
+x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
 x-pack/solutions/security/packages/side_nav @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-explore
@@ -1152,7 +1152,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 #CC# /src/plugins/home/server/services/ @elastic/appex-sharedux
 #CC# /src/plugins/home/ @elastic/appex-sharedux
 #CC# /x-pack/plugins/reporting/ @elastic/appex-sharedux
-#CC# /x-pack/plugins/security_solution_serverless/ @elastic/appex-sharedux
+#CC# /x-pack/solutions/security/plugins/security_solution_serverless/ @elastic/appex-sharedux
 
 ### Observability Plugins
 
@@ -1586,7 +1586,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 # Security Solution Offering plugins
 # TODO: assign sub directories to sub teams
 /x-pack/solutions/security/plugins/security_solution_ess/ @elastic/security-solution
-/x-pack/plugins/security_solution_serverless/ @elastic/security-solution
+/x-pack/solutions/security/plugins/security_solution_serverless/ @elastic/security-solution
 
 # GenAI in Security Solution
 /x-pack/solutions/security/plugins/security_solution/public/assistant @elastic/security-generative-ai
@@ -1842,15 +1842,15 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/test/security_solution_endpoint/ @elastic/security-defend-workflows
 /x-pack/test/security_solution_api_integration/test_suites/edr_workflows/ @elastic/security-defend-workflows
 /x-pack/test_serverless/shared/lib/security/kibana_roles/ @elastic/security-defend-workflows
-/x-pack/plugins/security_solution_serverless/public/upselling/sections/endpoint_management @elastic/security-defend-workflows
-/x-pack/plugins/security_solution_serverless/public/upselling/pages/endpoint_management @elastic/security-defend-workflows
-/x-pack/plugins/security_solution_serverless/server/endpoint @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/sections/endpoint_management @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/endpoint_management @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution_serverless/server/endpoint @elastic/security-defend-workflows
 x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/defend_insights @elastic/security-defend-workflows
 x-pack/plugins/elastic_assistant/server/__mocks__/defend_insights_schema.mock.ts @elastic/security-defend-workflows
 x-pack/plugins/elastic_assistant/server/ai_assistant_data_clients/defend_insights @elastic/security-defend-workflows
 x-pack/plugins/elastic_assistant/server/routes/defend_insights @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/common/components/response_actions @elastic/security-defend-workflows
-/x-pack/plugins/security_solution_serverless/public/upselling/pages/osquery_automated_response_actions.tsx @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/osquery_automated_response_actions.tsx @elastic/security-defend-workflows
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/solutions/security/plugins/security_solution/server/usage/ @elastic/security-data-analytics
@@ -1931,7 +1931,7 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 /x-pack/plugins/endpoint/**/*.scss @elastic/security-design
 /x-pack/solutions/security/plugins/security_solution/**/*.scss @elastic/security-design
 /x-pack/solutions/security/plugins/security_solution_ess/**/*.scss @elastic/security-design
-/x-pack/plugins/security_solution_serverless/**/*.scss @elastic/security-design
+/x-pack/solutions/security/plugins/security_solution_serverless/**/*.scss @elastic/security-design
 
 # Logstash
 #CC# /x-pack/plugins/logstash/ @elastic/logstash

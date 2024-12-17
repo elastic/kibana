@@ -7067,7 +7067,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-serverless@link:x-pack/plugins/security_solution_serverless":
+"@kbn/security-solution-serverless@link:x-pack/solutions/security/plugins/security_solution_serverless":
   version "0.0.0"
   uid ""
 
