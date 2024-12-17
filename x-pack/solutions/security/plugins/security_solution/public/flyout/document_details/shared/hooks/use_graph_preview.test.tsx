@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { renderHook } from '@testing-library/react';
-import type { UseGraphPreviewParams, UseGraphPreviewResult } from './use_graph_preview';
+import type { UseGraphPreviewParams } from './use_graph_preview';
 import { useGraphPreview } from './use_graph_preview';
 import type { GetFieldsData } from './use_get_fields_data';
 import { mockFieldData } from '../mocks/mock_get_fields_data';
+import { mockDataFormattedForFieldBrowser } from '../mocks/mock_data_formatted_for_field_browser';
 
-const mockGetFieldsData: GetFieldsData = (field: string) => {
-  if (field === 'kibana.alert.original_event.id') {
+const alertMockGetFieldsData: GetFieldsData = (field: string) => {
+  if (field === 'kibana.alert.uuid') {
+    return 'alertId';
+  } else if (field === 'kibana.alert.original_event.id') {
     return 'eventId';
   } else if (field === 'actor.entity.id') {
     return 'actorId';
@@ -24,18 +27,36 @@ const mockGetFieldsData: GetFieldsData = (field: string) => {
   return mockFieldData[field];
 };
 
-describe('useGraphPreview', () => {
-  let hookResult: RenderHookResult<UseGraphPreviewResult, UseGraphPreviewParams>;
+const alertMockDataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
 
+const eventMockGetFieldsData: GetFieldsData = (field: string) => {
+  if (field === 'kibana.alert.uuid') {
+    return;
+  } else if (field === 'kibana.alert.original_event.id') {
+    return;
+  } else if (field === 'event.id') {
+    return 'eventId';
+  } else if (field === 'actor.entity.id') {
+    return 'actorId';
+  } else if (field === 'target.entity.id') {
+    return 'targetId';
+  }
+
+  return mockFieldData[field];
+};
+
+const eventMockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [];
+
+describe('useGraphPreview', () => {
   it(`should return false when missing actor`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
       if (field === 'actor.entity.id') {
         return;
       }
-      return mockGetFieldsData(field);
+      return alertMockGetFieldsData(field);
     };
 
-    hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {
         getFieldsData,
         ecsData: {
@@ -44,37 +65,41 @@ describe('useGraphPreview', () => {
             action: ['action'],
           },
         },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
       },
     });
 
-    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
-      hookResult.result.current;
-    expect(hasGraphRepresentation).toEqual(false);
-    expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
-    expect(eventIds).toEqual(['eventId']);
-    expect(actorIds).toEqual([]);
-    expect(targetIds).toEqual(['targetId']);
-    expect(action).toEqual(['action']);
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: false,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: ['eventId'],
+      actorIds: [],
+      action: ['action'],
+      targetIds: ['targetId'],
+      isAlert: true,
+    });
   });
 
   it(`should return false when missing event.action`, () => {
-    hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {
-        getFieldsData: mockGetFieldsData,
+        getFieldsData: alertMockGetFieldsData,
         ecsData: {
           _id: 'id',
         },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
       },
     });
 
-    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
-      hookResult.result.current;
-    expect(hasGraphRepresentation).toEqual(false);
-    expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
-    expect(eventIds).toEqual(['eventId']);
-    expect(actorIds).toEqual(['actorId']);
-    expect(targetIds).toEqual(['targetId']);
-    expect(action).toEqual(undefined);
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: false,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: ['eventId'],
+      actorIds: ['actorId'],
+      action: undefined,
+      targetIds: ['targetId'],
+      isAlert: true,
+    });
   });
 
   it(`should return false when missing target`, () => {
@@ -82,26 +107,28 @@ describe('useGraphPreview', () => {
       if (field === 'target.entity.id') {
         return;
       }
-      return mockGetFieldsData(field);
+      return alertMockGetFieldsData(field);
     };
 
-    hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {
         getFieldsData,
         ecsData: {
           _id: 'id',
         },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
       },
     });
 
-    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
-      hookResult.result.current;
-    expect(hasGraphRepresentation).toEqual(false);
-    expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
-    expect(eventIds).toEqual(['eventId']);
-    expect(actorIds).toEqual(['actorId']);
-    expect(targetIds).toEqual([]);
-    expect(action).toEqual(undefined);
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: false,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: ['eventId'],
+      actorIds: ['actorId'],
+      action: undefined,
+      targetIds: [],
+      isAlert: true,
+    });
   });
 
   it(`should return false when missing original_event.id`, () => {
@@ -110,10 +137,10 @@ describe('useGraphPreview', () => {
         return;
       }
 
-      return mockGetFieldsData(field);
+      return alertMockGetFieldsData(field);
     };
 
-    hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {
         getFieldsData,
         ecsData: {
@@ -122,17 +149,19 @@ describe('useGraphPreview', () => {
             action: ['action'],
           },
         },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
       },
     });
 
-    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
-      hookResult.result.current;
-    expect(hasGraphRepresentation).toEqual(false);
-    expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
-    expect(eventIds).toEqual([]);
-    expect(actorIds).toEqual(['actorId']);
-    expect(targetIds).toEqual(['targetId']);
-    expect(action).toEqual(['action']);
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: false,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: [],
+      actorIds: ['actorId'],
+      action: ['action'],
+      targetIds: ['targetId'],
+      isAlert: true,
+    });
   });
 
   it(`should return false when timestamp is missing`, () => {
@@ -141,10 +170,10 @@ describe('useGraphPreview', () => {
         return;
       }
 
-      return mockGetFieldsData(field);
+      return alertMockGetFieldsData(field);
     };
 
-    hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {
         getFieldsData,
         ecsData: {
@@ -153,45 +182,53 @@ describe('useGraphPreview', () => {
             action: ['action'],
           },
         },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
       },
     });
 
-    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
-      hookResult.result.current;
-    expect(hasGraphRepresentation).toEqual(false);
-    expect(timestamp).toEqual(null);
-    expect(eventIds).toEqual(['eventId']);
-    expect(actorIds).toEqual(['actorId']);
-    expect(targetIds).toEqual(['targetId']);
-    expect(action).toEqual(['action']);
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: false,
+      timestamp: null,
+      eventIds: ['eventId'],
+      actorIds: ['actorId'],
+      action: ['action'],
+      targetIds: ['targetId'],
+      isAlert: true,
+    });
   });
 
-  it(`should return true when alert is has graph preview`, () => {
-    hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+  it(`should return true when event has graph graph preview`, () => {
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {
-        getFieldsData: mockGetFieldsData,
+        getFieldsData: eventMockGetFieldsData,
         ecsData: {
           _id: 'id',
           event: {
             action: ['action'],
           },
         },
+        dataFormattedForFieldBrowser: eventMockDataFormattedForFieldBrowser,
       },
     });
 
-    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
-      hookResult.result.current;
-    expect(hasGraphRepresentation).toEqual(true);
-    expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
-    expect(eventIds).toEqual(['eventId']);
-    expect(actorIds).toEqual(['actorId']);
-    expect(targetIds).toEqual(['targetId']);
-    expect(action).toEqual(['action']);
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: true,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: ['eventId'],
+      actorIds: ['actorId'],
+      action: ['action'],
+      targetIds: ['targetId'],
+      isAlert: false,
+    });
   });
 
-  it(`should return true when alert is has graph preview with multiple values`, () => {
+  it(`should return true when event has graph preview with multiple values`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
-      if (field === 'kibana.alert.original_event.id') {
+      if (field === 'kibana.alert.uuid') {
+        return;
+      } else if (field === 'kibana.alert.original_event.id') {
+        return;
+      } else if (field === 'event.id') {
         return ['id1', 'id2'];
       } else if (field === 'actor.entity.id') {
         return ['actorId1', 'actorId2'];
@@ -202,7 +239,7 @@ describe('useGraphPreview', () => {
       return mockFieldData[field];
     };
 
-    hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {
         getFieldsData,
         ecsData: {
@@ -211,16 +248,82 @@ describe('useGraphPreview', () => {
             action: ['action1', 'action2'],
           },
         },
+        dataFormattedForFieldBrowser: eventMockDataFormattedForFieldBrowser,
       },
     });
 
-    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
-      hookResult.result.current;
-    expect(hasGraphRepresentation).toEqual(true);
-    expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
-    expect(eventIds).toEqual(['id1', 'id2']);
-    expect(actorIds).toEqual(['actorId1', 'actorId2']);
-    expect(action).toEqual(['action1', 'action2']);
-    expect(targetIds).toEqual(['targetId1', 'targetId2']);
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: true,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: ['id1', 'id2'],
+      actorIds: ['actorId1', 'actorId2'],
+      action: ['action1', 'action2'],
+      targetIds: ['targetId1', 'targetId2'],
+      isAlert: false,
+    });
+  });
+
+  it(`should return true when alert has graph preview`, () => {
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+      initialProps: {
+        getFieldsData: alertMockGetFieldsData,
+        ecsData: {
+          _id: 'id',
+          event: {
+            action: ['action'],
+          },
+        },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
+      },
+    });
+
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: true,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: ['eventId'],
+      actorIds: ['actorId'],
+      action: ['action'],
+      targetIds: ['targetId'],
+      isAlert: true,
+    });
+  });
+
+  it(`should return true when alert has graph preview with multiple values`, () => {
+    const getFieldsData: GetFieldsData = (field: string) => {
+      if (field === 'kibana.alert.uuid') {
+        return 'alertId';
+      } else if (field === 'kibana.alert.original_event.id') {
+        return ['id1', 'id2'];
+      } else if (field === 'actor.entity.id') {
+        return ['actorId1', 'actorId2'];
+      } else if (field === 'target.entity.id') {
+        return ['targetId1', 'targetId2'];
+      }
+
+      return mockFieldData[field];
+    };
+
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+      initialProps: {
+        getFieldsData,
+        ecsData: {
+          _id: 'id',
+          event: {
+            action: ['action1', 'action2'],
+          },
+        },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
+      },
+    });
+
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: true,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: ['id1', 'id2'],
+      actorIds: ['actorId1', 'actorId2'],
+      action: ['action1', 'action2'],
+      targetIds: ['targetId1', 'targetId2'],
+      isAlert: true,
+    });
   });
 });
