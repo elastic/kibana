@@ -104,7 +104,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
         linear-gradient(to bottom, ${gridColor} 1px, transparent 1px)`;
               rowRef.style.backgroundColor = `${transparentize(
                 euiTheme.colors.backgroundLightAccentSecondary,
-	              0.25
+                0.25
               )}`;
             } else {
               // undo any "targetted row" styles
