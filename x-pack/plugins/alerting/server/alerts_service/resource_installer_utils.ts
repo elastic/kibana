@@ -15,10 +15,12 @@ interface GetComponentTemplateNameOpts {
 }
 export const VALID_ALERT_INDEX_PREFIXES = [
   '.ds-.alerts-',
-  '.internal.alerts-',
   '.alerts-',
-  '.internal.preview.alerts-',
+  '.internal.alerts-',
+  '.reindexed-v8-internal.alerts',
   '.preview.alerts-',
+  '.internal.preview.alerts-',
+  '.reindexed-v8-internal.preview.alerts',
 ];
 
 export const getComponentTemplateName = ({ context, name }: GetComponentTemplateNameOpts = {}) =>
@@ -27,6 +29,7 @@ export const getComponentTemplateName = ({ context, name }: GetComponentTemplate
 export interface IIndexPatternString {
   template: string;
   pattern: string;
+  reindexedPattern?: string;
   alias: string;
   name: string;
   basePattern: string;
@@ -51,6 +54,7 @@ export const getIndexTemplateAndPattern = ({
   return {
     template: `.alerts-${patternWithNamespace}-index-template`,
     pattern: `.internal.alerts-${patternWithNamespace}-*`,
+    reindexedPattern: `.reindexed-v8-internal.alerts-${patternWithNamespace}-*`,
     basePattern: `.alerts-${pattern}-*`,
     name: `.internal.alerts-${patternWithNamespace}-000001`,
     alias: `.alerts-${patternWithNamespace}`,
