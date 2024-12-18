@@ -17,7 +17,12 @@
 
 import fs from 'fs';
 import prConfigs from '../../../pull_requests.json';
-import { areChangesSkippable, doAnyChangesMatch, getAgentImageConfig, emitPipeline } from '#pipeline-utils';
+import {
+  areChangesSkippable,
+  doAnyChangesMatch,
+  getAgentImageConfig,
+  emitPipeline,
+} from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;
