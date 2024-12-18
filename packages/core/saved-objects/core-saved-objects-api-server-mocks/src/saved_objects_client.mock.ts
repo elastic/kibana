@@ -8,12 +8,10 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { savedObjectsPointInTimeFinderMock } from './point_in_time_finder.mock';
 
 const create = () => {
-  const mock = {
-    errors: SavedObjectsErrorHelpers,
+  const mock: jest.Mocked<SavedObjectsClientContract> = {
     create: jest.fn(),
     bulkCreate: jest.fn(),
     checkConflicts: jest.fn(),
@@ -33,7 +31,8 @@ const create = () => {
     collectMultiNamespaceReferences: jest.fn(),
     updateObjectsSpaces: jest.fn(),
     getCurrentNamespace: jest.fn(),
-  } as unknown as jest.Mocked<SavedObjectsClientContract>;
+    asScopedToNamespace: jest.fn().mockImplementation(create),
+  };
 
   mock.createPointInTimeFinder = savedObjectsPointInTimeFinderMock.create({
     savedObjectsMock: mock,

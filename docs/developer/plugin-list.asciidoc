@@ -470,7 +470,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/asset_inventory/README.md[assetInventory]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/asset_inventory/README.md[assetInventory]
 |Centralized asset inventory experience within the Elastic Security solution. A central place for users to view and manage all their assets from different environments.
 
 
@@ -499,7 +499,7 @@ It was removed, but the plugin was left behind to register no longer used config
 |Static migration page where self-managed users can see text/copy about migrating to Elastic Cloud
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_defend/README.md[cloudDefend]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/cloud_defend/README.md[cloudDefend]
 |This plugin currently only exists to provide custom fleet policy UX for a set of new BPF LSM features. The first feature being container "drift prevention".
 
 
@@ -516,7 +516,7 @@ This plugin no-longer exposes any evaluation APIs. Refer to <DocLink id="kibFeat
 |Adds all the links to the Elastic Cloud console.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_security_posture/README.md[cloudSecurityPosture]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/cloud_security_posture/README.md[cloudSecurityPosture]
 |Cloud Posture automates the identification and remediation of risks across cloud infrastructures
 
 
@@ -653,7 +653,7 @@ external LLM APIs. Its goals are:
 the infrastructure monitoring use-case within Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ingest_pipelines/README.md[ingestPipelines]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/ingest_pipelines/README.md[ingestPipelines]
 |The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines.
 
 
@@ -673,7 +673,7 @@ the infrastructure monitoring use-case within Kibana.
 |undefined
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/kubernetes_security/README.md[kubernetesSecurity]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/kubernetes_security/README.md[kubernetesSecurity]
 |This plugin provides interactive visualizations of your Kubernetes workload and session data.
 
 
@@ -693,7 +693,7 @@ the infrastructure monitoring use-case within Kibana.
 |The licensing plugin retrieves license data from Elasticsearch at regular configurable intervals.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/lists/README.md[lists]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/lists/README.md[lists]
 |README.md for developers working on the backend lists on how to get started
 using the CURL scripts in the scripts folder.
 
@@ -815,7 +815,7 @@ Elastic.
 |Add tagging capability to saved objects
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/screenshotting/README.md[screenshotting]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/screenshotting/README.md[screenshotting]
 |This plugin provides functionality to take screenshots of the Kibana pages.
 It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 
@@ -864,16 +864,16 @@ to understand why a search request might be slow.
 Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/security_solution/README.md[securitySolution]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/security_solution/README.md[securitySolution]
 |Welcome to the Kibana Security Solution plugin! This README will go over getting started with development and testing.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/security_solution_ess/README.md[securitySolutionEss]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/security_solution_ess/README.md[securitySolutionEss]
 |The security_solution_ess plugin is an internal plugin for Kibana's Security Solution, designed to encapsulate ESS-specific logic.
 This plugin is only enabled when the application is built for stateful deployments (ESS or on-prem), keeping the main security_solution plugin clean and agnostic of the offering model.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/security_solution_serverless/README.md[securitySolutionServerless]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/security_solution_serverless/README.md[securitySolutionServerless]
 |The security_solution_serverless plugin is an internal plugin for Kibana's Security Solution, designed to encapsulate serverless-specific logic.
 This plugin is only enabled when the application is built for serverless project, keeping the main security_solution plugin clean and agnostic of the offering model.
 
@@ -890,11 +890,11 @@ This plugin is only enabled when the application is built for serverless project
 |This plugin contains configuration and code used to create a Serverless Search project. It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/session_view/README.md[sessionView]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/session_view/README.md[sessionView]
 |Session View is meant to provide a visualization into what is going on in a particular Linux environment where the agent is running. It looks likes a terminal emulator; however, it is a tool for introspecting process activity and understanding user and service behaviour in your Linux servers and infrastructure. It is a time-ordered series of process executions displayed in a tree over time.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/slo/README.md[slo]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/slo/README.md[slo]
 |A Kibana plugin
 
 
