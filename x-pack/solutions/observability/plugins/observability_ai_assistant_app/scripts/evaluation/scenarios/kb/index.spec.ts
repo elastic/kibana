@@ -13,7 +13,7 @@ import { chatClient, esClient, kibanaClient } from '../../services';
 
 const KB_INDEX = '.kibana-observability-ai-assistant-kb-*';
 
-describe('knowledge base', () => {
+describe('Knowledge base', () => {
   describe('kb functions', () => {
     it('summarizes and recalls information', async () => {
       let conversation = await chatClient.complete(
