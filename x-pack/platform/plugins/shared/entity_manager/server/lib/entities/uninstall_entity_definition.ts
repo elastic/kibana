@@ -64,7 +64,7 @@ export async function uninstallBuiltInEntityDefinitions({
   return definitions;
 }
 
-export async function disableBuiltInEntityDiscovery({
+export async function disableManagedEntityDiscovery({
   server,
 }: {
   server: EntityManagerServerSetup;

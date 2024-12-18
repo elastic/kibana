@@ -36,7 +36,7 @@ import {
   READ_ENTITIES_PRIVILEGE,
 } from './lib/v2/constants';
 import { installBuiltInDefinitions } from './lib/v2/definitions/install_built_in_definitions';
-import { disableBuiltInEntityDiscovery } from './lib/entities/uninstall_entity_definition';
+import { disableManagedEntityDiscovery } from './lib/entities/uninstall_entity_definition';
 import { installEntityManagerTemplates } from './lib/manage_index_templates';
 import { instanceAsFilter } from './lib/v2/definitions/instance_as_filter';
 
@@ -175,9 +175,9 @@ export class EntityManagerServerPlugin
     }).catch((err) => this.logger.error(err));
 
     // Disable v1 built-in definitions
-    disableBuiltInEntityDiscovery({ server: this.server! })
-      .then(() => this.logger.info(`Disabled built-in entity discovery`))
-      .catch((err) => this.logger.error(`Failed to disable built-in entity discovery: ${err}`));
+    disableManagedEntityDiscovery({ server: this.server! })
+      .then(() => this.logger.info(`Disabled managed entity discovery`))
+      .catch((err) => this.logger.error(`Failed to disable managed entity discovery: ${err}`));
 
     // Setup v2 definitions index
     setupEntityDefinitionsIndex(core.elasticsearch.client, this.logger)
