@@ -25,6 +25,7 @@ export class GisPage {
   }
 
   async waitForRenderCompletion(selector: string = RENDER_COMPLETE_SELECTOR) {
+    // This is my first attempt at a simple solution for test/functional/services/renderable.ts#waitForRender()
     await this.page.locator(selector).waitFor();
   }
 }

@@ -38,6 +38,15 @@ test.describe('Maps full screen mode', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
       `Could not find the exit full screen button, using selector ${sel}`
     ).toBeVisible();
   });
-  // test('exits when the text button is clicked on', async ({ page }) => {
-  // });
+  // Note: The following test seems superfluous due to the it block named "full screen mode hides the kbn app wrapper" above.
+  test('the kbn app wrapper is visible when full screen mode is exited', async ({
+    page,
+    pageObjects,
+  }) => {
+    await pageObjects.gis.clickFullScreenMode();
+    await pageObjects.gis.clickExitFullScreenTextButton();
+    expect(
+      await page.testSubj.locator('kbnAppWrapper visibleChrome').waitFor({ state: 'visible' })
+    );
+  });
 });
