@@ -5657,7 +5657,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-reveal-image-plugin@link:src/plugins/expression_reveal_image":
+"@kbn/expression-reveal-image-plugin@link:src/platform/plugins/shared/expression_reveal_image":
   version "0.0.0"
   uid ""
 
