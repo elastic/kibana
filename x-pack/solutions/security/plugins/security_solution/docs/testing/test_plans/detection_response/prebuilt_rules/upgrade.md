@@ -194,7 +194,7 @@ Examples:
 
 ## Scenarios
 
-### Rule installation and upgrade notifications on the Rule Management page
+### Rule upgrade notifications on the Rule Management page
 
 #### **Scenario: User is NOT notified when all installed prebuilt rules are up to date**
 
@@ -247,8 +247,7 @@ And user should see the number of rules available to upgrade (Z)
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
 And for Y of the installed rules there are new versions available
-And user is on the Rule Management page
-When user opens the Rule Updates table
+When user is on the Rule Updates table
 Then Y rules available for upgrade should be displayed in the table
 When user upgrades one individual rule without previewing it
 Then success message should be displayed after upgrade
@@ -304,8 +303,7 @@ Given X prebuilt rules are installed in Kibana
 And for Y of the installed rules there are new versions available
 And all of those Y new versions have conflicts with the current versions
 And user is on the Rule Management page
-When user opens the Rule Updates table
-Then Y rules available for upgrade should be displayed in the table
+When user is on the Rule Updates table
 When user selects <Z> rules, all of which have upgrade conflicts
 Then user should see a CTA to upgrade <Z> number of rules, which should be disabled
 When user hovers on the CTA to upgrade multiple rules
@@ -325,8 +323,7 @@ Examples:
 Given X prebuilt rules are installed in Kibana
 And for Y of the installed rules there are new versions available
 And those Y new versions don't have conflicts with the current versions
-And user is on the Rule Management page
-When user opens the Rule Updates table
+When user is on the Rule Updates table
 Then Y rules available for upgrade should be displayed in the table
 When user upgrades all rules
 Then success message should be displayed after upgrade
@@ -342,8 +339,7 @@ And user should NOT see a number of rules available to upgrade
 Given X prebuilt rules are installed in Kibana
 And for Y of the installed rules there are new versions available
 And all Y new versions have conflicts with the current versions
-And user is on the Rule Management page
-When user opens the Rule Updates table
+When user opens the Rule Updates table  
 Then Y rules available for upgrade should be displayed in the table
 Then user should see a CTA to upgrade all rules
 And the CTA to upgrade all rules should be disabled
@@ -351,7 +347,7 @@ When user hovers on the CTA to upgrade all rules
 Then a message should be displayed that informs the user why the rules cannot be updated
 ```
 
-#### **Scenario: User can upgrade only conflict-free rules when a mix of rules with and without conflicts are selected for upgrade in the Rules Table**
+#### **Scenario: User can upgrade only conflict-free rules when a mix of rules with and without conflicts are selected for upgrade**
 
 **Automation**: 1 e2e test with mock rules
 
@@ -409,11 +405,9 @@ Given a prebuilt rule is installed in Kibana
 And this rule has an update available that changes its rule type
 When user opens the Rule Updates table
 Then this rule should be displayed in the table
-And the Upgrade Rule button should be enabled
-When user upgrades the rule
-Then success message should be displayed after upgrade
-And the upgraded rule should be removed from the table
-And user should see the number of rules available to upgrade decreased by 1
+And the Upgrade Rule button should be disabled
+And the user should not be able to upgrade them directly from the table
+And there should be a message/tooltip indicating why the rule cannot be upgraded directly
 ```
 
 #### **Scenario: User can bulk upgrade selected rules with rule type changes**
@@ -427,11 +421,9 @@ And Y of these rules have updates available that change their rule types
 When user opens the Rule Updates table
 Then Y rules should be displayed in the table
 When user selects Z rules (where Z < Y) with rule type changes
-Then user should see an enabled CTA to upgrade Z rules
-When user clicks the CTA
-Then success message should be displayed after upgrade
-And all Z upgraded rules should be removed from the table
-And user should see the number of rules available to upgrade decreased by Z
+The button to upgrade the Z selected rules should be disabled
+And the user should not be able to upgrade them directly from the table
+And there should be a message/tooltip indicating why the rule cannot be upgraded directly
 ```
 
 #### **Scenario: User can bulk upgrade all rules with rule type changes**
@@ -443,10 +435,9 @@ Given X prebuilt rules are installed in Kibana
 And all X rules have updates available that change their rule types
 When user opens the Rule Updates table
 Then X rules should be displayed in the table
-And user should see an enabled CTA to upgrade all rules
-When user clicks the CTA to upgrade all rules
-Then success message should be displayed after upgrade
-And all X upgraded rules should be removed from the table
+The button to upgrade all rules with should be disabled
+And the user should not be able to upgrade them directly from the table
+And there should be a message/tooltip indicating why the rule cannot be upgraded directly
 ```
 
 ### Rule upgrade workflow: rule previews

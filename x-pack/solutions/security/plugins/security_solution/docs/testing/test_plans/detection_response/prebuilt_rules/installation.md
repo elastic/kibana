@@ -386,7 +386,7 @@ Then the preview should appear
 And all properties of a rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
 ```
 
-#### **Scenario: Tabs and sections without content should be hidden in preview before installing**
+#### **Scenario: Optional tabs and sections without content should be hidden in preview before installing**
 
 **Automation**: 1 e2e test
 
