@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getPrebuiltRuleMockOfType } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import {
   MODIFIED_RULE_BADGE,
@@ -348,6 +349,92 @@ describe(
 
         // Verify conflicting rule remains in the table
         cy.get(RULES_UPDATES_TABLE).contains(patchedName);
+      });
+    });
+
+    describe('Upgrade of prebuilt rules with rule type changes from Rule Updates Table', () => {
+      const RULE_1_ID = 'rule_1';
+      const RULE_2_ID = 'rule_2';
+      const OUTDATED_QUERY_RULE_1 = createRuleAssetSavedObject({
+        name: 'Outdated query rule 1',
+        rule_id: RULE_1_ID,
+        version: 1,
+      });
+      const UPDATED_NEW_TERMS_RULE_1 = createRuleAssetSavedObject({
+        ...getPrebuiltRuleMockOfType('esql'),
+        name: 'Updated rule 1',
+        rule_id: RULE_1_ID,
+        version: 2,
+      });
+      const OUTDATED_QUERY_RULE_2 = createRuleAssetSavedObject({
+        name: 'Outdated query rule 2',
+        rule_id: RULE_2_ID,
+        version: 1,
+      });
+      const UPDATED_ESQL_RULE_2 = createRuleAssetSavedObject({
+        ...getPrebuiltRuleMockOfType('esql'),
+        name: 'Updated rule 2',
+        rule_id: RULE_2_ID,
+        version: 2,
+      });
+      beforeEach(() => {
+        login();
+        resetRulesTableState();
+        deleteAlertsAndRules();
+        cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/upgrade/_perform').as(
+          'updatePrebuiltRules'
+        );
+        /* Create a new rule and install it */
+        createAndInstallMockedPrebuiltRules([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
+        /* Create a second version of the rule, of different type, making it available for update */
+        installPrebuiltRuleAssets([UPDATED_NEW_TERMS_RULE_1, UPDATED_ESQL_RULE_2]);
+
+        visitRulesManagementTable();
+        clickRuleUpdatesTab();
+      });
+
+      it('should upgrade prebuilt rules one by one', () => {
+        // Attempt to upgrade rule
+        cy.get(
+          getUpgradeSingleRuleButtonByRuleId(OUTDATED_QUERY_RULE_1['security-rule'].rule_id)
+        ).click();
+        // Wait for request to complete
+        assertUpgradeRequestIsComplete([OUTDATED_QUERY_RULE_1]);
+
+        assertRuleUpgradeSuccessToastShown([OUTDATED_QUERY_RULE_1]);
+        assertRulesNotPresentInRuleUpdatesTable([OUTDATED_QUERY_RULE_1]);
+      });
+
+      it('should upgrade multiple selected prebuilt rules by selecting them individually', () => {
+        selectRulesByName([
+          OUTDATED_QUERY_RULE_1['security-rule'].name,
+          OUTDATED_QUERY_RULE_2['security-rule'].name,
+        ]);
+        cy.get(UPGRADE_SELECTED_RULES_BUTTON).click();
+        assertUpgradeRequestIsComplete([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
+        assertRuleUpgradeSuccessToastShown([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
+        assertRulesNotPresentInRuleUpdatesTable([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
+      });
+
+      it('should upgrade multiple selected prebuilt rules by selecting all in page', () => {
+        cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
+        cy.get(UPGRADE_SELECTED_RULES_BUTTON).click();
+        assertUpgradeRequestIsComplete([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
+        assertRuleUpgradeSuccessToastShown([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
+        assertRulesNotPresentInRuleUpdatesTable([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
+      });
+
+      it('should upgrade all rules with available upgrades at once', () => {
+        cy.get(UPGRADE_ALL_RULES_BUTTON).click();
+        assertUpgradeRequestIsComplete([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
+        assertRuleUpgradeSuccessToastShown([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
+        assertRulesNotPresentInRuleUpdatesTable([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
+      });
+
+      it('should display an empty screen when all rules with available updates have been upgraded', () => {
+        cy.get(UPGRADE_ALL_RULES_BUTTON).click();
+        cy.get(RULES_UPDATES_TAB).should('not.exist');
+        cy.get(NO_RULES_AVAILABLE_FOR_UPGRADE_MESSAGE).should('exist');
       });
     });
   }
