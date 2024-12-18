@@ -58,6 +58,7 @@
     "@kbn/react-hooks",
     "@kbn/observability-utils-browser",
     "@kbn/kibana-utils-plugin",
-    "@kbn/dataset-quality-plugin"
+    "@kbn/dataset-quality-plugin",
+    "@kbn/observability-utils-common"
   ]
 }
