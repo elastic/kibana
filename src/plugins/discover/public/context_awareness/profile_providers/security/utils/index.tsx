@@ -9,13 +9,25 @@
 
 import { encode } from '@kbn/rison';
 
+export interface CustomQuery {
+  kind: 'kuery' | 'lucene';
+  expression: string;
+}
+
 export interface TimelineRedirectArgs {
   from?: string;
   to?: string;
-  query?: string;
+  eventId?: string;
+  index: string;
 }
-export const getSecurityTimelineRedirectUrl = ({ from, to, query }: TimelineRedirectArgs) => {
-  const BASE_PATH = '/app/security/timelines';
+
+export const getSecurityTimelineRedirectUrl = ({
+  from,
+  to,
+  index,
+  eventId,
+}: TimelineRedirectArgs) => {
+  const BASE_PATH = '/app/security/alerts';
 
   let timelineTimerangeSearchParam = {};
   if (from && to) {
@@ -28,14 +40,31 @@ export const getSecurityTimelineRedirectUrl = ({ from, to, query }: TimelineRedi
     };
   }
 
+  const query: CustomQuery = {
+    kind: 'kuery',
+    expression: `_id: ${eventId}`,
+  };
+
   const timelineSearchParam = {
     activeTab: 'query',
     query,
-    open: true,
+    isOpen: true,
+  };
+
+  const timelineFlyoutSearchParam = {
+    right: {
+      id: 'document-details-right',
+      params: {
+        id: eventId,
+        indexName: index,
+        scopeId: 'timeline-1',
+      },
+    },
   };
 
   const encodedTimelineParam = encode(timelineSearchParam);
   const encodedTimelineTimerangeParam = encode(timelineTimerangeSearchParam);
+  const encodedTimelineFlyoutParam = encode(timelineFlyoutSearchParam);
 
-  return `${BASE_PATH}?timeline=${encodedTimelineParam}&timeRange=${encodedTimelineTimerangeParam}`;
+  return `${BASE_PATH}?timeline=${encodedTimelineParam}&timeRange=${encodedTimelineTimerangeParam}&timelineFlyout=${encodedTimelineFlyoutParam}`;
 };

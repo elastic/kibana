@@ -330,7 +330,12 @@ export const useQueryTimelineById = () => {
           ...timelineDefaults,
           columns: defaultUdtHeaders,
           id: TimelineId.active,
-          kqlQuery: query,
+          kqlQuery: {
+            filterQuery: {
+              kuery: query ?? null,
+              serializedQuery: query?.expression ?? '',
+            },
+          },
           activeTab: activeTimelineTab,
           show: openTimeline,
           initialized: true,
