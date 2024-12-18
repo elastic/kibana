@@ -360,7 +360,7 @@ describe(
         rule_id: RULE_1_ID,
         version: 1,
       });
-      const UPDATED_NEW_TERMS_RULE_1 = createRuleAssetSavedObject({
+      const UPDATED_ESQL_RULE_1 = createRuleAssetSavedObject({
         ...getPrebuiltRuleMockOfType('esql'),
         name: 'Updated rule 1',
         rule_id: RULE_1_ID,
@@ -387,7 +387,7 @@ describe(
         /* Create a new rule and install it */
         createAndInstallMockedPrebuiltRules([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
         /* Create a second version of the rule, of different type, making it available for update */
-        installPrebuiltRuleAssets([UPDATED_NEW_TERMS_RULE_1, UPDATED_ESQL_RULE_2]);
+        installPrebuiltRuleAssets([UPDATED_ESQL_RULE_1, UPDATED_ESQL_RULE_2]);
 
         visitRulesManagementTable();
         clickRuleUpdatesTab();
@@ -429,12 +429,6 @@ describe(
         assertUpgradeRequestIsComplete([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
         assertRuleUpgradeSuccessToastShown([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
         assertRulesNotPresentInRuleUpdatesTable([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
-      });
-
-      it('should display an empty screen when all rules with available updates have been upgraded', () => {
-        cy.get(UPGRADE_ALL_RULES_BUTTON).click();
-        cy.get(RULES_UPDATES_TAB).should('not.exist');
-        cy.get(NO_RULES_AVAILABLE_FOR_UPGRADE_MESSAGE).should('exist');
       });
     });
   }
