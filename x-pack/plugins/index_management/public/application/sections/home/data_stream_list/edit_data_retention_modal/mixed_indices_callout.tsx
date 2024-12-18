@@ -16,7 +16,7 @@ import { useAppContext } from '../../../../app_context';
 
 interface MixedIndicesCalloutProps {
   history: ScopedHistory;
-  ilmPolicyLink: string;
+  ilmPolicyLink?: string;
   ilmPolicyName?: string;
   dataStreamName: string;
 }
@@ -42,14 +42,14 @@ export const MixedIndicesCallout = ({
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.someManagedByILMBody"
-          defaultMessage="One or more indices are managed by an ILM policy ({viewAllIndicesLink}). Updating data retention for this data stream won't affect these indices. Instead you will have to update the {ilmPolicyLink} policy."
+          defaultMessage="One or more indices are managed by an ILM policy{viewAllIndicesLink}. Updating data retention for this data stream won't affect these indices. Instead you will have to update the {ilmPolicyLink} policy."
           values={{
-            ilmPolicyLink: (
+            ilmPolicyLink: ilmPolicyLink && ilmPolicyName && (
               <EuiLink
                 data-test-subj="viewIlmPolicyLink"
                 onClick={() => core.application.navigateToUrl(ilmPolicyLink)}
               >
-                {ilmPolicyName}
+                {` (${ilmPolicyName})`}
               </EuiLink>
             ),
             viewAllIndicesLink: (
