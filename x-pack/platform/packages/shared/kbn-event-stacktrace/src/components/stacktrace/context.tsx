@@ -13,15 +13,84 @@ import javascript from 'react-syntax-highlighter/dist/cjs/languages/hljs/javascr
 import python from 'react-syntax-highlighter/dist/cjs/languages/hljs/python';
 import ruby from 'react-syntax-highlighter/dist/cjs/languages/hljs/ruby';
 import xcode from 'react-syntax-highlighter/dist/cjs/styles/hljs/xcode';
-import { StackframeWithLineContext } from '@kbn/apm-types/src/es_schemas/raw/fields/stackframe';
-import { useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { StackframeWithLineContext } from '@kbn/apm-types';
 
 SyntaxHighlighter.registerLanguage('javascript', javascript);
 SyntaxHighlighter.registerLanguage('python', python);
 SyntaxHighlighter.registerLanguage('ruby', ruby);
 
+const ContextContainer = styled.div`
+  position: relative;
+  border-radius: ${({ theme }) => theme.euiTheme.border.radius.small};
+`;
+
 const LINE_HEIGHT = 18;
+const LineHighlight = styled.div<{ lineNumber: number }>`
+  position: absolute;
+  width: 100%;
+  height: ${LINE_HEIGHT}px;
+  top: ${(props) => props.lineNumber * LINE_HEIGHT}px;
+  pointer-events: none;
+  background-color: ${({ theme }) => tint(0.9, theme.euiTheme.colors.warning)};
+`;
+
+const LineNumberContainer = styled.div<{ isLibraryFrame: boolean }>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: ${({ theme }) => theme.euiTheme.border.radius.small};
+  background: ${({ isLibraryFrame, theme }) =>
+    isLibraryFrame ? theme.euiTheme.colors.emptyShade : theme.euiTheme.colors.lightestShade};
+`;
+
+const LineNumber = styled.div<{ highlight: boolean }>`
+  position: relative;
+  min-width: 42px;
+  padding-left: ${({ theme }) => theme.euiTheme.size.s};
+  padding-right: ${({ theme }) => theme.euiTheme.size.xs};
+  color: ${({ theme }) => theme.euiTheme.colors.mediumShade};
+  line-height: ${LINE_HEIGHT}px;
+  text-align: right;
+  border-right: ${({ theme }) => theme.euiTheme.border.thin};
+  background-color: ${({ highlight, theme }) =>
+    highlight ? tint(0.9, theme.euiTheme.colors.warning) : null};
+
+  &:last-of-type {
+    border-radius: 0 0 0 ${({ theme }) => theme.euiTheme.border.radius.small};
+  }
+`;
+
+const LineContainer = styled.div`
+  overflow: auto;
+  margin: 0 0 0 42px;
+  padding: 0;
+  background-color: ${({ theme }) => theme.euiTheme.colors.emptyShade};
+
+  &:last-of-type {
+    border-radius: 0 0 ${({ theme }) => theme.euiTheme.border.radius.small} 0;
+  }
+`;
+
+const Line = styled.pre`
+  // Override all styles
+  margin: 0;
+  color: inherit;
+  background: inherit;
+  border: 0;
+  border-radius: 0;
+  overflow: initial;
+  padding: 0 ${LINE_HEIGHT}px;
+  line-height: ${LINE_HEIGHT}px;
+`;
+
+const Code = styled.code`
+  position: relative;
+  padding: 0;
+  margin: 0;
+  white-space: pre;
+  z-index: 2;
+`;
 
 function getStackframeLines(stackframe: StackframeWithLineContext) {
   const line = stackframe.line.context;
@@ -43,111 +112,23 @@ interface Props {
   isLibraryFrame: boolean;
 }
 
-function Line({ children }: { children?: React.ReactNode }) {
-  return (
-    <pre
-      css={css`
-        margin: 0;
-        color: inherit;
-        background: inherit;
-        border: 0;
-        border-radius: 0;
-        overflow: initial;
-        padding: 0 ${LINE_HEIGHT}px;
-        line-height: ${LINE_HEIGHT}px;
-      `}
-    >
-      {children}
-    </pre>
-  );
-}
-
-function Code({ children }: { children?: React.ReactNode }) {
-  return (
-    <code
-      css={css`
-        position: relative;
-        padding: 0;
-        margin: 0;
-        white-space: pre;
-        z-index: 2;
-      `}
-    >
-      {children}
-    </code>
-  );
-}
-
 export function Context({ stackframe, codeLanguage, isLibraryFrame }: Props) {
-  const { euiTheme } = useEuiTheme();
   const lines = getStackframeLines(stackframe);
   const startLineNumber = getStartLineNumber(stackframe);
   const highlightedLineIndex = size(stackframe.context?.pre || []);
   const language = codeLanguage || 'javascript'; // TODO: Add support for more languages
 
   return (
-    <div
-      css={css`
-        position: relative;
-        border-radius: ${euiTheme.border.radius.small};
-      `}
-    >
-      <div
-        css={css`
-          position: absolute;
-          width: 100%;
-          height: ${LINE_HEIGHT}px;
-          top: ${highlightedLineIndex * LINE_HEIGHT}px;
-          pointer-events: none;
-          background-color: ${tint(0.9, euiTheme.colors.warning)};
-        `}
-      />
-      <div
-        css={css`
-          position: absolute;
-          top: 0;
-          left: 0;
-          border-radius: ${euiTheme.border.radius.small};
-          background: ${isLibraryFrame
-            ? euiTheme.colors.emptyShade
-            : euiTheme.colors.lightestShade};
-        `}
-      >
+    <ContextContainer>
+      <LineHighlight lineNumber={highlightedLineIndex} />
+      <LineNumberContainer isLibraryFrame={isLibraryFrame}>
         {lines.map((line, i) => (
-          <div
-            key={line + i}
-            css={css`
-              position: relative;
-              min-width: 42px;
-              padding-left: ${euiTheme.size.s};
-              padding-right: ${euiTheme.size.xs};
-              color: ${euiTheme.colors.mediumShade};
-              line-height: ${LINE_HEIGHT}px;
-              text-align: right;
-              border-right: 1px solid ${euiTheme.colors.lightShade};
-              background-color: ${highlightedLineIndex === i
-                ? tint(0.9, euiTheme.colors.warning)
-                : null};
-              &:last-of-type {
-                border-radius: 0 0 0 ${euiTheme.border.radius.small};
-              }
-            `}
-          >
+          <LineNumber key={line + i} highlight={highlightedLineIndex === i}>
             {i + startLineNumber}.
-          </div>
+          </LineNumber>
         ))}
-      </div>
-      <div
-        css={css`
-          overflow: auto;
-          margin: 0 0 0 42px;
-          padding: 0;
-          background-color: ${euiTheme.colors.emptyShade};
-          &:last-of-type {
-            border-radius: 0 0 ${euiTheme.border.radius.small} 0;
-          }
-        `}
-      >
+      </LineNumberContainer>
+      <LineContainer>
         {lines.map((line, i) => (
           <SyntaxHighlighter
             key={line + i}
@@ -160,7 +141,7 @@ export function Context({ stackframe, codeLanguage, isLibraryFrame }: Props) {
             {line}
           </SyntaxHighlighter>
         ))}
-      </div>
-    </div>
+      </LineContainer>
+    </ContextContainer>
   );
 }

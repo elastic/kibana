@@ -13,7 +13,8 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "src/**/*.json"
+    "src/**/*.json",
+    "emotion.d.ts"
   ],
   "exclude": [
     "target/**/*"

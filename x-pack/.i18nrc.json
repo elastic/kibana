@@ -75,7 +75,7 @@
     "xpack.licenseApiGuard": "platform/plugins/private/license_api_guard",
     "xpack.licenseMgmt": "platform/plugins/shared/license_management",
     "xpack.licensing": "plugins/licensing",
-    "xpack.lists": "plugins/lists",
+    "xpack.lists": "solutions/security/plugins/lists",
     "xpack.logstash": [
       "plugins/logstash"
     ],
@@ -128,7 +128,7 @@
       "platform/plugins/private/rollup"
     ],
     "xpack.runtimeFields": "platform/plugins/private/runtime_fields",
-    "xpack.screenshotting": "plugins/screenshotting",
+    "xpack.screenshotting": "platform/plugins/shared/screenshotting",
     "xpack.searchSharedUI": "packages/search/shared_ui",
     "xpack.searchHomepage": "plugins/search_homepage",
     "xpack.searchIndices": "plugins/search_indices",

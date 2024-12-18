@@ -5,33 +5,32 @@
  * 2.0.
  */
 
-import { EuiAccordion, useEuiTheme } from '@elastic/eui';
+import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { KeyValueTable, flattenObject } from '@kbn/key-value-metadata-table';
 import { Stackframe } from '@kbn/apm-types';
-import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+
+const VariablesContainer = styled.div`
+  background: ${({ theme }) => theme.euiTheme.colors.emptyShade};
+  border-radius: 0 0
+    ${({ theme }) => `${theme.euiTheme.border.radius.small} ${theme.euiTheme.border.radius.small}`};
+  padding: ${({ theme }) => `${theme.euiTheme.size.s} ${theme.euiTheme.size.m}`};
+`;
 
 interface Props {
   vars: Stackframe['vars'];
 }
 
 export function Variables({ vars }: Props) {
-  const { euiTheme } = useEuiTheme();
-
   if (!vars) {
     return null;
   }
   const flattenedVariables = flattenObject(vars);
   return (
     <React.Fragment>
-      <div
-        css={css`
-          background: ${euiTheme.colors.emptyShade};
-          border-radius: 0 0 ${euiTheme.border.radius.small} ${euiTheme.border.radius.small};
-          padding: ${euiTheme.size.s} ${euiTheme.size.m};
-        `}
-      >
+      <VariablesContainer>
         <EuiAccordion
           id="local-variables"
           className="euiAccordion"
@@ -46,7 +45,7 @@ export function Variables({ vars }: Props) {
             <KeyValueTable keyValuePairs={flattenedVariables} />
           </React.Fragment>
         </EuiAccordion>
-      </div>
+      </VariablesContainer>
     </React.Fragment>
   );
 }

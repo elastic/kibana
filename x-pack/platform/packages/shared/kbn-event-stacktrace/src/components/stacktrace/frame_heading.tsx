@@ -6,9 +6,9 @@
  */
 
 import React, { ComponentType } from 'react';
-import type { Stackframe } from '@kbn/apm-types';
-import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { useEuiFontSize } from '@elastic/eui';
+import { Stackframe } from '@kbn/apm-types';
 import {
   CSharpFrameHeadingRenderer,
   DefaultFrameHeadingRenderer,
@@ -19,33 +19,23 @@ import {
   PhpFrameHeadingRenderer,
 } from './frame_heading_renderers';
 
-function LibraryFrameFileDetail({ children }: { children?: React.ReactNode }) {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <span
-      css={css`
-        color: ${euiTheme.colors.darkShade};
-        word-break: break-word;
-      `}
-    >
-      {children}
-    </span>
-  );
-}
+const FileDetails = styled.div`
+  color: ${({ theme }) => theme.euiTheme.colors.darkShade};
+  line-height: 1.5; /* matches the line-hight of the accordion container button */
+  padding: 2px 0;
+  font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
+  font-size: ${({ theme }) => useEuiFontSize('s').fontSize};
+`;
 
-function AppFrameFileDetail({ children }: { children?: React.ReactNode }) {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <span
-      css={css`
-        color: ${euiTheme.colors.fullShade};
-        word-break: break-word;
-      `}
-    >
-      {children}
-    </span>
-  );
-}
+const LibraryFrameFileDetail = styled.span`
+  color: ${({ theme }) => theme.euiTheme.colors.darkShade};
+  word-break: break-word;
+`;
+
+const AppFrameFileDetail = styled.span`
+  color: ${({ theme }) => theme.euiTheme.colors.fullShade};
+  word-break: break-word;
+`;
 
 interface Props {
   codeLanguage?: string;
@@ -55,8 +45,6 @@ interface Props {
 }
 
 function FrameHeading({ codeLanguage, stackframe, isLibraryFrame, idx }: Props) {
-  const { euiTheme } = useEuiTheme();
-
   const FileDetail: ComponentType = isLibraryFrame ? LibraryFrameFileDetail : AppFrameFileDetail;
   let Renderer: ComponentType<FrameHeadingRendererProps>;
   switch (codeLanguage?.toString().toLowerCase()) {
@@ -81,18 +69,9 @@ function FrameHeading({ codeLanguage, stackframe, isLibraryFrame, idx }: Props) 
   }
 
   return (
-    <div
-      data-test-subj="FrameHeading"
-      css={css`
-        color: ${euiTheme.colors.darkShade};
-        line-height: 1.5; /* matches the line-hight of the accordion container button */
-        padding: 2px 0;
-        font-family: ${euiTheme.font.familyCode};
-        font-size: ${useEuiFontSize('s').fontSize};
-      `}
-    >
+    <FileDetails data-test-subj="FrameHeading">
       <Renderer fileDetailComponent={FileDetail} stackframe={stackframe} idx={idx} />
-    </div>
+    </FileDetails>
   );
 }
 
