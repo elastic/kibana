@@ -2,7 +2,7 @@
 
 This is a test plan for the workflow of upgrading prebuilt rules.
 
-Status: `in progress`. The current test plan matches `Milestone 3` of the [Rule Immutability/Customization](https://github.com/elastic/kibana/issues/174168) epic.
+Status: `in progress`. The current test plan matches [Rule Immutability/Customization Milestone 3 epic](https://github.com/elastic/kibana/issues/174168).
 
 ## Table of Contents
 
@@ -261,7 +261,7 @@ And for Y of the installed rules there are new versions available
 And user is on the Rule Management page
 When user opens the Rule Updates table
 Then Y rules available for upgrade should be displayed in the table
-And for Z of the rules with upgrades there are upgrade conflicts
+And for Z (where Z < Y) of the rules with upgrades there are upgrade conflicts
 Then for those Z rules the Upgrade Rule button should be disabled
 And the user should not be able to upgrade them directly from the table
 And there should be a message/tooltip indicating why the rule cannot be updated directly
@@ -274,11 +274,10 @@ And there should be a message/tooltip indicating why the rule cannot be updated 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
 And for Y of the installed rules there are new versions available
-And user is on the Rule Management page
-When user opens the Rule Updates table
+And user opens the Rule Updates table
 Then Y rules available for upgrade should be displayed in the table
-When user selects <Z> rules, which have no upgrade conflicts
-Then user should see a CTA to upgrade <Z> number of rules
+When user selects Z (where Z < Y) rules, which have no upgrade conflicts
+Then user should see a CTA to upgrade <Z> rules
 When user clicks the CTA
 Then success message should be displayed after upgrade
 And all the <Z> upgraded rules should be removed from the table
