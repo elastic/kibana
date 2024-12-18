@@ -39,5 +39,6 @@
     "@kbn/share-plugin",
     "@kbn/ai-assistant-common",
     "@kbn/storybook",
+    "@kbn/ai-assistant-icon",
   ]
 }
