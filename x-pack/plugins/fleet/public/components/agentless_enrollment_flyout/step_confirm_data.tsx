@@ -12,20 +12,24 @@ import type { EuiStepStatus } from '@elastic/eui';
 import { EuiText, EuiLink, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import { useStartServices } from '../../hooks';
-import type { Agent, PackagePolicy } from '../../types';
+import type { Agent, PackagePolicy, RegistryPolicyTemplate } from '../../types';
 import {
   usePollingIncomingData,
   POLLING_TIMEOUT_MS,
 } from '../agent_enrollment_flyout/use_get_agent_incoming_data';
 
+import { NextSteps } from './next_steps';
+
 export const AgentlessStepConfirmData = ({
   agent,
   packagePolicy,
   setConfirmDataStatus,
+  policyTemplates,
 }: {
   agent: Agent;
   packagePolicy: PackagePolicy;
   setConfirmDataStatus: (status: EuiStepStatus) => void;
+  policyTemplates?: RegistryPolicyTemplate[];
 }) => {
   const { docLinks } = useStartServices();
   const [overallState, setOverallState] = useState<'pending' | 'success' | 'failure'>('pending');
@@ -53,13 +57,17 @@ export const AgentlessStepConfirmData = ({
 
   if (overallState === 'success') {
     return (
-      <EuiCallOut
-        color="success"
-        title={i18n.translate('xpack.fleet.agentlessEnrollmentFlyout.confirmData.successText', {
-          defaultMessage: 'Incoming data received from agentless integration',
-        })}
-        iconType="check"
-      />
+      <>
+        <EuiCallOut
+          color="success"
+          title={i18n.translate('xpack.fleet.agentlessEnrollmentFlyout.confirmData.successText', {
+            defaultMessage: 'Incoming data received from agentless integration',
+          })}
+          iconType="check"
+        />
+        <EuiSpacer size="m" />
+        <NextSteps packagePolicy={packagePolicy} policyTemplates={policyTemplates} />
+      </>
     );
   } else if (overallState === 'failure') {
     return (
