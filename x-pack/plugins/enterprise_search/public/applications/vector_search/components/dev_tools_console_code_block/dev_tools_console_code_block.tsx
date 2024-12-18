@@ -39,7 +39,7 @@ export const DevToolsConsoleCodeBlock: React.FC<DevToolsConsoleCodeBlockProps> =
 
   return (
     <EuiThemeProvider colorMode="dark">
-      <EuiPanel hasShadow={false}>
+      <EuiPanel hasShadow={false} hasBorder>
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexGroup
             direction="rowReverse"

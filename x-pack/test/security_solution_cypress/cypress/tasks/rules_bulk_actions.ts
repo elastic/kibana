@@ -417,20 +417,20 @@ export const checkPrebuiltRulesCannotBeModified = (rulesCount: number) => {
 
 export const checkMachineLearningRulesCannotBeModified = (rulesCount: number) => {
   cy.get(MODAL_CONFIRMATION_BODY).contains(
-    `${rulesCount} custom machine learning rule (these rules don't have index patterns)`
+    `${rulesCount} machine learning rule (these rules don't have index patterns)`
   );
 };
 
 export const checkEsqlRulesCannotBeModified = (rulesCount: number) => {
   cy.get(MODAL_CONFIRMATION_BODY).contains(
-    `${rulesCount} custom ES|QL rule (these rules don't have index patterns)`
+    `${rulesCount} ES|QL rule (these rules don't have index patterns)`
   );
 };
 
-export const waitForMixedRulesBulkEditModal = (customRulesCount: number) => {
+export const waitForMixedRulesBulkEditModal = (rulesCount: number) => {
   cy.get(MODAL_CONFIRMATION_TITLE).should(
     'have.text',
-    `This action can only be applied to ${customRulesCount} custom rules`
+    `This action can only be applied to ${rulesCount} rules`
   );
 };
 
@@ -445,7 +445,7 @@ export const scheduleManualRuleRunForSelectedRules = (
   if (disabledCount > 0) {
     cy.get(BULK_MANUAL_RULE_RUN_WARNING_MODAL).should(
       'have.text',
-      `This action can only be applied to ${enabledCount} custom rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot schedule manual rule run for disabled rules)CancelSchedule ${enabledCount} custom rules`
+      `This action can only be applied to ${enabledCount} rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot schedule manual rule run for disabled rules)CancelSchedule ${enabledCount} rules`
     );
     cy.get(CONFIRM_MANUAL_RULE_RUN_WARNING_BTN).click();
   }
