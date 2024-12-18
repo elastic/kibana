@@ -638,12 +638,7 @@ describe('reindexService', () => {
             index: '.tasks',
             id: 'xyz',
           });
-          expect(log.warn).toHaveBeenCalledTimes(1);
-          expect(log.warn).toHaveBeenCalledWith(
-            error.reindexTaskCannotBeDeleted(
-              `Could not delete reindexing task xyz, got response "!?"`
-            )
-          );
+          expect(log.warn).toHaveBeenCalledTimes(0); // Do not log anything in this case
         });
 
         it('does not throw if task doc deletion throws', async () => {
@@ -672,6 +667,32 @@ describe('reindexService', () => {
           expect(log.warn).toHaveBeenCalledTimes(1);
           expect(log.warn).toHaveBeenCalledWith(new Error('FAILED!'));
         });
+
+        it.each([401, 403])(
+          'does not throw if task doc deletion throws AND does not log due to missing access permission: %d',
+          async (statusCode) => {
+            clusterClient.asCurrentUser.tasks.get.mockResponseOnce({
+              completed: true,
+              // @ts-expect-error not full interface
+              task: { status: { created: 100, total: 100 } },
+            });
+
+            clusterClient.asCurrentUser.count.mockResponseOnce(
+              // @ts-expect-error not full interface
+              {
+                count: 100,
+              }
+            );
+            const e = new Error();
+            Object.defineProperty(e, 'statusCode', { value: statusCode });
+            clusterClient.asCurrentUser.delete.mockRejectedValue(e);
+
+            const updatedOp = await service.processNextStep(reindexOp);
+            expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexCompleted);
+            expect(updatedOp.attributes.reindexTaskPercComplete).toEqual(1);
+            expect(log.warn).toHaveBeenCalledTimes(0);
+          }
+        );
       });
 
       describe('reindex task is cancelled', () => {
