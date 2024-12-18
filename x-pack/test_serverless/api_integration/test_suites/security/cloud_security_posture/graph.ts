@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return an empty graph', async () => {
         const response = await postGraph(supertestViewer, {
           query: {
-            eventIds: [],
+            originEventIds: [],
             start: 'now-1d/d',
             end: 'now/d',
           },
@@ -63,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return a graph with nodes and edges by actor', async () => {
         const response = await postGraph(supertestViewer, {
           query: {
-            eventIds: [],
+            originEventIds: [],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
             esQuery: {
