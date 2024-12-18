@@ -160,6 +160,7 @@ function toolsToOpenAI(tools: ToolOptions['tools']): OpenAI.ChatCompletionCreate
           function: {
             name: toolName,
             description,
+            strict: true,
             parameters: (schema ?? {
               type: 'object' as const,
               properties: {},

@@ -80,6 +80,7 @@ import {
 } from '../task_manager_definitions/register_migrate_knowledge_base_entries_task';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
+import { UserPromptAndFiltersForSearchConnector } from '../../utils/recall/rewrite_user_prompt';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -637,11 +638,15 @@ export class ObservabilityAIAssistantClient {
   };
 
   recall = async ({
-    queries,
+    userPrompt,
+    screenDescription,
+    userPromptAndFiltersForSearchConnectors,
     categories,
     limit,
   }: {
-    queries: Array<{ text: string; boost?: number }>;
+    userPrompt: string;
+    screenDescription: string | undefined;
+    userPromptAndFiltersForSearchConnectors: UserPromptAndFiltersForSearchConnector[];
     categories?: string[];
     limit?: { size?: number; tokenCount?: number };
   }): Promise<RecalledEntry[]> => {
@@ -649,7 +654,9 @@ export class ObservabilityAIAssistantClient {
       this.dependencies.knowledgeBaseService?.recall({
         namespace: this.dependencies.namespace,
         user: this.dependencies.user,
-        queries,
+        userPrompt,
+        screenDescription,
+        userPromptAndFiltersForSearchConnectors,
         categories,
         esClient: this.dependencies.esClient,
         uiSettingsClient: this.dependencies.uiSettingsClient,

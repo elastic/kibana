@@ -8,55 +8,84 @@
 import { Logger } from '@kbn/logging';
 import dedent from 'dedent';
 import { lastValueFrom } from 'rxjs';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import { compact } from 'lodash';
+import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { concatenateChatCompletionChunks, Message, MessageRole } from '../../../common';
 import type { FunctionCallChatFunction } from '../../service/types';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { getConnectorIndices } from '../../service/knowledge_base_service/recall_from_search_connectors';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 
-const REWRITE_USER_PROMPT_FUNCTION_NAME = 'rewrite_user_prompt';
+export interface UserPromptAndFiltersForSearchConnector {
+  userPrompt: string;
+  indexPattern: string;
+  filters: QueryDslQueryContainer[];
+}
 
-export async function rewriteUserPrompt({
+export async function rewriteUserPromptForSearchConnectors({
   esClient,
   uiSettingsClient,
   messages,
   userPrompt,
-  context,
+  screenDescription,
   chat,
   signal,
   logger,
 }: {
-  esClient: IScopedClusterClient;
+  esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
   uiSettingsClient: IUiSettingsClient;
   messages: Message[];
   userPrompt: string;
-  context: string;
+  screenDescription: string | undefined;
   chat: FunctionCallChatFunction;
   signal: AbortSignal;
   logger: Logger;
-}): Promise<{
-  rewrittenUserPrompt: string;
-  keywordFilters?: Array<{ field: string; value: string }>;
-  timestampFilter?: { field: string; gte: string; lte: string };
-}> {
-  const newUserMessage: Message = {
-    '@timestamp': new Date().toISOString(),
-    message: {
-      role: MessageRole.User,
-      content: dedent(
-        `Given the following user prompt, the preceeding message history and context, rewrite the user prompt. 
-        
-        User prompt: ${userPrompt}`
-      ),
-    },
-  };
-
+}): Promise<UserPromptAndFiltersForSearchConnector[]> {
   const connectorIndices = await getConnectorIndices({ esClient, uiSettingsClient, logger });
-  const timestampFields = await getTimestampFields(esClient, connectorIndices);
-  const lowCardinalityKeywordFields = await getLowCardinalityKeywordFields(
-    esClient,
-    connectorIndices
+
+  const values = await Promise.all(
+    connectorIndices.map((indexPattern) => {
+      return rewritePromptForConnector({
+        indexPattern,
+        esClient,
+        messages,
+        userPrompt,
+        screenDescription,
+        chat,
+        signal,
+        logger,
+      });
+    })
   );
+
+  return values;
+}
+
+async function rewritePromptForConnector({
+  indexPattern,
+  esClient,
+  messages,
+  userPrompt,
+  screenDescription,
+  chat,
+  signal,
+  logger,
+}: {
+  indexPattern: string;
+  esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
+  messages: Message[];
+  userPrompt: string;
+  screenDescription: string | undefined;
+  chat: FunctionCallChatFunction;
+  signal: AbortSignal;
+  logger: Logger;
+}): Promise<UserPromptAndFiltersForSearchConnector> {
+  const timestampFields = await getTimestampFields({ esClient, indexPattern, logger });
+  const lowCardinalityKeywordFields = await getLowCardinalityKeywordFields({
+    esClient,
+    indexPattern,
+    logger,
+  });
   const keywordFieldSchema = lowCardinalityKeywordFields.map(({ field, values }) => ({
     properties: {
       field: { const: field },
@@ -65,45 +94,28 @@ export async function rewriteUserPrompt({
     required: ['field', 'value'],
   }));
 
-  // const keywordFieldSchema = [
-  //   {
-  //     properties: {
-  //       field: { const: 'serviceName' },
-  //       value: { enum: ['frontend', 'backend', 'api'] },
-  //     },
-  //     required: ['field', 'value'],
-  //   },
-  //   {
-  //     properties: {
-  //       field: { const: 'environment' },
-  //       value: { enum: ['production', 'staging', 'development'] },
-  //     },
-  //     required: ['field', 'value'],
-  //   },
-  // ];
+  const REWRITE_USER_PROMPT_FUNCTION_NAME = `rewrite_user_prompt-${indexPattern}`;
 
   const rewriteUserPromptFunction = {
     strict: true,
     name: REWRITE_USER_PROMPT_FUNCTION_NAME,
-    description: `Rewrites the user prompt into a concise search query and generates Elasticsearch boolean query filters based on user intent. Any mention of time or date range should be removed from the rewritten user prompt if added as a filter.
+    description: `Rewrites the user prompt into a concise search query and infers term filters and date range filter to be used for filtering the dataset in Elasticsearch.
 
-          ## Example        
+          ## Example
           User prompt: "List all the bug reports that were opened for the front page this week?" 
+          Screen description: "User is looking at the front page of the website"
 
+          """
           {
             "rewrittenUserPrompt": "front page bugs",
             "keywordFilters": [
-              { "term": { "type": "issue" } }
+              { "field": "type", "value": "issue" }
             ],
             "timestampFilter": {
-              "range": {
-                "created_at": {
-                  "gte": "now-7d/d",
-                  "lte": "now/d",
-                },
-              },
-            },
+              { "field": "@timestamp", "gte": "now-7d/d", "lte": "now/d" }
+            }
           }
+          """
         `,
     parameters: {
       type: 'object',
@@ -150,15 +162,42 @@ export async function rewriteUserPrompt({
                   },
                 },
                 required: ['field', 'gte', 'lte'],
+                additionalProperties: false,
               } as const,
             }
           : {}),
       },
-      required: ['rewrittenUserPrompt'],
+      additionalProperties: false,
+      required: ['rewrittenUserPrompt', 'timestampFilter'],
     } as const,
   };
 
-  console.log('schema', JSON.stringify(rewriteUserPromptFunction, null, 2));
+  logger.debug(
+    `Rewrite user prompt function schema: ${JSON.stringify(rewriteUserPromptFunction, null, 2)}`
+  );
+
+  const newUserMessage: Message = {
+    '@timestamp': new Date().toISOString(),
+    message: {
+      role: MessageRole.User,
+      content: dedent(
+        `Given the following user prompt, screen description and the preceeding message history, please rewrite the user prompt. 
+        
+        User prompt: 
+        ${userPrompt}
+
+        Screen description:
+        ${screenDescription}
+
+        Keyword fields that can be used to filter the dataset:
+        ${lowCardinalityKeywordFields}
+
+        Available date fields that can be used to filter the dataset:
+        ${timestampFields}
+        `
+      ),
+    },
+  };
 
   const response = await lastValueFrom(
     chat(`function call: ${REWRITE_USER_PROMPT_FUNCTION_NAME}`, {
@@ -169,31 +208,60 @@ export async function rewriteUserPrompt({
     }).pipe(concatenateChatCompletionChunks())
   );
 
-  console.log('response', JSON.stringify(response, null, 2));
+  logger.debug(`response ${JSON.stringify(response, null, 2)}`);
 
-  return JSON.parse(response.message.function_call.arguments);
+  const parsedArgs = JSON.parse(response.message.function_call.arguments) as {
+    rewrittenUserPrompt: string;
+    keywordFilters?: Array<{ field: string; value: string }>;
+    timestampFilter?: { field: string; gte: string; lte: string };
+  };
+
+  return {
+    userPrompt: parsedArgs.rewrittenUserPrompt,
+    indexPattern,
+    filters: compact([
+      ...(parsedArgs.keywordFilters ?? []).map(({ field, value }) => ({
+        term: { [field]: value },
+      })),
+      parsedArgs.timestampFilter
+        ? {
+            range: {
+              [parsedArgs.timestampFilter.field]: {
+                gte: parsedArgs.timestampFilter.gte,
+                lte: parsedArgs.timestampFilter.lte,
+              },
+            },
+          }
+        : undefined,
+    ]),
+  };
 }
 
-async function getLowCardinalityKeywordFields(
-  esClient: IScopedClusterClient,
-  connectorIndices: string[]
-): Promise<Array<{ field: string; values: string[] }>> {
+async function getLowCardinalityKeywordFields({
+  esClient,
+  indexPattern,
+  logger,
+}: {
+  esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
+  indexPattern: string;
+  logger: Logger;
+}): Promise<Array<{ field: string; values: string[] }>> {
   try {
-    // Step 1: Get all keyword fields using field_caps
+    // Get all keyword fields using field_caps
     const fieldCapsResponse = await esClient.asCurrentUser.fieldCaps({
-      index: connectorIndices,
+      index: indexPattern,
       fields: '*',
       types: ['keyword'],
       allow_no_indices: true,
       filters: '-nested,-metadata,-parent',
     });
 
-    // Step 2: For each keyword field, get its unique values using _terms_enum
+    // For each keyword field, get its unique values using _terms_enum
     const keywordItems = await Promise.all(
       Object.keys(fieldCapsResponse.fields).map(async (field) => {
         const termsEnumResponse = await esClient.asCurrentUser.termsEnum({
-          index: connectorIndices.join(','),
-          field: field,
+          index: indexPattern,
+          field,
           size: 10,
         });
 
@@ -201,21 +269,26 @@ async function getLowCardinalityKeywordFields(
       })
     );
 
-    // Step 3: Return the low-cardinality fields
+    // Return the low-cardinality fields
     return keywordItems.filter(({ values }) => values.length < 10);
   } catch (error) {
-    console.error('Error retrieving low-cardinality fields:', error);
+    logger.error(`Error retrieving low-cardinality fields: ${error.message}`);
     return [];
   }
 }
 
-async function getTimestampFields(
-  esClient: IScopedClusterClient,
-  connectorIndices: string[]
-): Promise<string[]> {
+async function getTimestampFields({
+  esClient,
+  indexPattern,
+  logger,
+}: {
+  esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
+  indexPattern: string;
+  logger: Logger;
+}): Promise<string[]> {
   try {
     const fieldCapsResponse = await esClient.asCurrentUser.fieldCaps({
-      index: connectorIndices,
+      index: indexPattern,
       fields: '*',
       types: ['date'],
       allow_no_indices: true,
@@ -224,7 +297,7 @@ async function getTimestampFields(
 
     return Object.keys(fieldCapsResponse.fields);
   } catch (error) {
-    console.error('Error retrieving timestamp fields:', error);
+    logger.error(`Error retrieving timestamp fields: ${error.message}`);
     return [];
   }
 }

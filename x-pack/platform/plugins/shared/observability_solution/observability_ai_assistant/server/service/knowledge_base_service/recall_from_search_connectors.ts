@@ -14,40 +14,43 @@ import { firstValueFrom } from 'rxjs';
 import { RecalledEntry } from '.';
 import { aiAssistantSearchConnectorIndexPattern } from '../../../common';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import { UserPromptAndFiltersForSearchConnector } from '../../utils/recall/rewrite_user_prompt';
 
 export async function recallFromSearchConnectors({
-  queries,
   esClient,
   uiSettingsClient,
   logger,
   core,
+  userPromptAndFiltersForSearchConnector,
 }: {
-  queries: Array<{ text: string; boost?: number }>;
   esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
   uiSettingsClient: IUiSettingsClient;
   logger: Logger;
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
+  userPromptAndFiltersForSearchConnector: UserPromptAndFiltersForSearchConnector;
 }): Promise<RecalledEntry[]> {
-  const connectorIndices = await getConnectorIndices({ esClient, uiSettingsClient, logger });
-  logger.debug(`Found connector indices: ${connectorIndices}`);
+  logger.debug(
+    `Querying connector with index: ${
+      userPromptAndFiltersForSearchConnector.indexPattern
+    } user prompt: ${userPromptAndFiltersForSearchConnector.userPrompt} filters: ${JSON.stringify(
+      userPromptAndFiltersForSearchConnector.filters
+    )}`
+  );
 
   const [semanticTextConnectors, legacyConnectors] = await Promise.all([
     recallFromSemanticTextConnectors({
-      queries,
+      userPromptAndFiltersForSearchConnector,
       esClient,
       uiSettingsClient,
       logger,
-      core,
-      connectorIndices,
     }),
 
     recallFromLegacyConnectors({
-      queries,
+      userPromptAndFiltersForSearchConnector,
       esClient,
       uiSettingsClient,
       logger,
       core,
-      connectorIndices,
     }),
   ]);
 
@@ -55,21 +58,17 @@ export async function recallFromSearchConnectors({
 }
 
 async function recallFromSemanticTextConnectors({
-  queries,
+  userPromptAndFiltersForSearchConnector,
   esClient,
   logger,
-  core,
-  connectorIndices,
 }: {
-  queries: Array<{ text: string; boost?: number }>;
+  userPromptAndFiltersForSearchConnector: UserPromptAndFiltersForSearchConnector;
   esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
   uiSettingsClient: IUiSettingsClient;
   logger: Logger;
-  core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
-  connectorIndices: string[] | undefined;
 }): Promise<RecalledEntry[]> {
   const fieldCaps = await esClient.asCurrentUser.fieldCaps({
-    index: connectorIndices,
+    index: userPromptAndFiltersForSearchConnector.indexPattern,
     fields: `*`,
     allow_no_indices: true,
     types: ['semantic_text'],
@@ -82,25 +81,26 @@ async function recallFromSemanticTextConnectors({
   }
   logger.debug(`Semantic text field for search connectors: ${semanticTextFields}`);
 
-  const params = {
-    index: connectorIndices,
+  const response = await esClient.asCurrentUser.search<unknown>({
+    index: userPromptAndFiltersForSearchConnector.indexPattern,
     size: 20,
     _source: {
       excludes: semanticTextFields.map((field) => `${field}.inference`),
     },
     query: {
       bool: {
-        should: semanticTextFields.flatMap((field) => {
-          return queries.map(({ text, boost = 1 }) => ({
-            bool: { filter: [{ semantic: { field, query: text, boost } }] },
-          }));
-        }),
+        should: semanticTextFields.flatMap((field) => ({
+          bool: {
+            filter: [
+              { semantic: { field, query: userPromptAndFiltersForSearchConnector.userPrompt } },
+              ...userPromptAndFiltersForSearchConnector.filters,
+            ],
+          },
+        })),
         minimum_should_match: 1,
       },
     },
-  };
-
-  const response = await esClient.asCurrentUser.search<unknown>(params);
+  });
 
   const results = response.hits.hits.map((hit) => ({
     text: JSON.stringify(hit._source),
@@ -113,24 +113,22 @@ async function recallFromSemanticTextConnectors({
 }
 
 async function recallFromLegacyConnectors({
-  queries,
+  userPromptAndFiltersForSearchConnector,
   esClient,
   logger,
   core,
-  connectorIndices,
 }: {
-  queries: Array<{ text: string; boost?: number }>;
+  userPromptAndFiltersForSearchConnector: UserPromptAndFiltersForSearchConnector;
   esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
   uiSettingsClient: IUiSettingsClient;
   logger: Logger;
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
-  connectorIndices: string[] | undefined;
 }): Promise<RecalledEntry[]> {
   const ML_INFERENCE_PREFIX = 'ml.inference.';
 
   const modelIdPromise = getElserModelId(core, logger); // pre-fetch modelId in parallel with fieldCaps
   const fieldCaps = await esClient.asCurrentUser.fieldCaps({
-    index: connectorIndices,
+    index: userPromptAndFiltersForSearchConnector.indexPattern,
     fields: `${ML_INFERENCE_PREFIX}*`,
     allow_no_indices: true,
     types: ['sparse_vector'],
@@ -150,34 +148,25 @@ async function recallFromLegacyConnectors({
     const vectorField = `${ML_INFERENCE_PREFIX}${field}_expanded.predicted_value`;
     const modelField = `${ML_INFERENCE_PREFIX}${field}_expanded.model_id`;
 
-    return queries.map(({ text, boost = 1 }) => {
-      return {
-        bool: {
-          should: [
-            {
-              text_expansion: {
-                [vectorField]: {
-                  model_text: text,
-                  model_id: modelId,
-                  boost,
-                },
+    return {
+      bool: {
+        should: [
+          {
+            text_expansion: {
+              [vectorField]: {
+                model_text: userPromptAndFiltersForSearchConnector.userPrompt,
+                model_id: modelId,
               },
             },
-          ],
-          filter: [
-            {
-              term: {
-                [modelField]: modelId,
-              },
-            },
-          ],
-        },
-      };
-    });
+          },
+        ],
+        filter: [{ term: { [modelField]: modelId } }],
+      },
+    };
   });
 
   const response = await esClient.asCurrentUser.search<unknown>({
-    index: connectorIndices,
+    index: userPromptAndFiltersForSearchConnector.indexPattern,
     size: 20,
     _source: {
       exclude: ['_*', 'ml*'],
@@ -185,6 +174,7 @@ async function recallFromLegacyConnectors({
     query: {
       bool: {
         should: esQueries,
+        filter: [...userPromptAndFiltersForSearchConnector.filters],
       },
     },
   });
@@ -210,7 +200,7 @@ export async function getConnectorIndices({
 }) {
   // improve performance by running this in parallel with the `uiSettingsClient` request
   const responsePromise = esClient.asInternalUser.connector
-    .list({ filter_path: 'results.index_name' })
+    .list({ filter_path: 'results.service_type,results.index_name' }) // get service type and index name for each connector. TODO: Ask enterprise search to add a description for each connector. This should help the LLM
     .catch((e) => {
       logger.warn(`Failed to fetch connector indices due to ${e.message}`);
       return { results: [] };
@@ -226,7 +216,7 @@ export async function getConnectorIndices({
 
   const response = await responsePromise;
 
-  const connectorIndices = compact(response.results?.map((result) => result.index_name));
+  const connectorIndices = compact(response.results?.map((result) => result.index_name)); //  TODO: add `service_type` to output
 
   // preserve backwards compatibility with 8.14 (may not be needed in the future)
   if (isEmpty(connectorIndices)) {

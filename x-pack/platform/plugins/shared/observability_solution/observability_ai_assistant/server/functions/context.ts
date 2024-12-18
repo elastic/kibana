@@ -76,7 +76,7 @@ export function registerContextFunction({
           chat,
           logger: resources.logger,
           userPrompt,
-          context: screenDescription,
+          screenDescription,
           messages,
           signal,
           analytics,

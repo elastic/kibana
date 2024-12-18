@@ -181,10 +181,11 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
       requiredPrivileges: ['ai_assistant'],
     },
   },
+
   params: t.type({
     body: t.type({
       prompt: t.string,
-      context: t.string,
+      screenDescription: t.string,
       connectorId: t.string,
       scopes: t.array(assistantScopeType),
     }),
@@ -194,12 +195,13 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
       resources
     );
 
-    const { connectorId, prompt, context } = resources.params.body;
+    const { connectorId, prompt, screenDescription } = resources.params.body;
 
+    const coreContext = await resources.context.core;
     const response$ = from(
       recallAndScore({
-        esClient: (await resources.context.core).elasticsearch.client,
-        uiSettingsClient: (await resources.context.core).uiSettings.client,
+        esClient: coreContext.elasticsearch.client,
+        uiSettingsClient: coreContext.uiSettings.client,
         analytics: (await resources.plugins.core.start()).analytics,
         chat: (name, params) =>
           client
@@ -211,7 +213,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
               tracer: new LangTracer(otelContext.active()),
             })
             .pipe(withoutTokenCountEvents()),
-        context,
+        screenDescription,
         logger: resources.logger,
         messages: [],
         userPrompt: prompt,
