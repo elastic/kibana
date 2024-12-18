@@ -13,6 +13,12 @@ export function registerRemoteClustersRoute({ router, lib: { handleEsError } }: 
   router.get(
     {
       path: `${API_BASE_PATH}/remote_clusters`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {

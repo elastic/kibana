@@ -31,6 +31,12 @@ export function registerPutDataRetention({ router, lib: { handleEsError } }: Rou
   router.put(
     {
       path: addBasePath('/data_streams/{name}/data_retention'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { params: paramsSchema, body: bodySchema },
     },
     async (context, request, response) => {

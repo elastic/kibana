@@ -20,6 +20,12 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
   router.put(
     {
       path: addBasePath('/settings/{indexName}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { body: bodySchema, params: paramsSchema },
     },
     async (context, request, response) => {

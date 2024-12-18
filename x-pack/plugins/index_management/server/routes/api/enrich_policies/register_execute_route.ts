@@ -20,6 +20,12 @@ export function registerExecuteRoute({ router, lib: { handleEsError } }: RouteDe
   router.put(
     {
       path: addInternalBasePath('/enrich_policies/{name}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { params: paramsSchema },
     },
     async (context, request, response) => {

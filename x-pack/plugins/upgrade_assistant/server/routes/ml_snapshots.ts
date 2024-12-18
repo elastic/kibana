@@ -145,6 +145,12 @@ export function registerMlSnapshotRoutes({
   router.post(
     {
       path: `${API_BASE_PATH}/ml_snapshots`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           snapshotId: schema.string(),
@@ -195,6 +201,12 @@ export function registerMlSnapshotRoutes({
   router.get(
     {
       path: `${API_BASE_PATH}/ml_snapshots/{jobId}/{snapshotId}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           snapshotId: schema.string(),
@@ -333,6 +345,12 @@ export function registerMlSnapshotRoutes({
   router.get(
     {
       path: `${API_BASE_PATH}/ml_upgrade_mode`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
@@ -375,6 +393,12 @@ export function registerMlSnapshotRoutes({
   router.delete(
     {
       path: `${API_BASE_PATH}/ml_snapshots/{jobId}/{snapshotId}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           snapshotId: schema.string(),

@@ -20,6 +20,12 @@ export function registerForcemergeRoute({ router, lib: { handleEsError } }: Rout
   router.post(
     {
       path: addBasePath('/indices/forcemerge'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },
