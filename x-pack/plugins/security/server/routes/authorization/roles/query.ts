@@ -84,7 +84,7 @@ export function defineQueryRolesRoutes({
         }
 
         if (showReservedRoles) {
-          queryPayload.bool.must.push({ term: { 'metadata._reserved': true } });
+          queryPayload.bool.should.push({ term: { 'metadata._reserved': true } });
         } else if (showReservedRoles === false) {
           queryPayload.bool.should.push({
             term: {
