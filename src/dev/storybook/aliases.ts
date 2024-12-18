@@ -17,7 +17,8 @@ export const storybookAliases = {
   canvas: 'x-pack/plugins/canvas/storybook',
   cases: 'packages/kbn-cases-components/.storybook',
   cell_actions: 'src/platform/packages/shared/kbn-cell-actions/.storybook',
-  cloud_security_posture_packages: 'x-pack/packages/kbn-cloud-security-posture/storybook/config',
+  cloud_security_posture_packages:
+    'x-pack/solutions/security/packages/kbn-cloud-security-posture/.storybook',
   cloud: 'packages/cloud/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',
   language_documentation_popover:
