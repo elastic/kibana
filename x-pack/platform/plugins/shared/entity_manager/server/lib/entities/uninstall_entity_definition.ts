@@ -55,7 +55,7 @@ export async function uninstallBuiltInEntityDefinitions({
     perPage: 1000,
   });
 
-  await Promise.all(
+  await Promise.allSettled(
     definitions.map(async ({ id }) => {
       await entityClient.deleteEntityDefinition({ id, deleteData });
     })
@@ -75,8 +75,8 @@ export async function disableBuiltInEntityDiscovery({
   }
 
   const { clusterClient, soClient } = getClientsFromAPIKey({ apiKey, server });
-
   const entityClient = new EntityClient({ clusterClient, soClient, logger: server.logger });
+
   await uninstallBuiltInEntityDefinitions({ entityClient, deleteData: true });
 
   await deleteEntityDiscoveryAPIKey(soClient);
