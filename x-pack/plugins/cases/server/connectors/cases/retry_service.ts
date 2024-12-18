@@ -17,7 +17,7 @@ export class CaseConnectorRetryService {
    * 429 - Too Many Requests
    * 503 - ES Unavailable
    *
-   * Full list of errors: packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts
+   * Full list of errors: src/core/packages/saved-objects/server/src/saved_objects_error_helpers.ts
    */
   private readonly RETRY_ERROR_STATUS_CODES: number[] = [409, 429, 503];
   private readonly backOffStrategy: BackoffStrategy;
