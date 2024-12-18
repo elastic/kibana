@@ -23,6 +23,7 @@ import {
   isExecuteAction,
   isGetFileAction,
   isProcessesAction,
+  isRunScriptAction,
   isUploadAction,
 } from '../../../../../common/endpoint/service/response_actions/type_guards';
 import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
@@ -209,6 +210,30 @@ const OutputContent = memo<{
     );
   }
 
+  if (isRunScriptAction(action)) {
+    return (
+      <EuiFlexGroup direction="column" data-test-subj={getTestId('runScriptDetails')}>
+        {action.agents.map((agentId) => (
+          <div key={agentId}>
+            {OUTPUT_MESSAGES.wasSuccessful(command)}
+            <ExecuteActionHostResponse
+              action={action}
+              agentId={agentId}
+              canAccessFileDownloadLink={
+                canAccessEndpointActionsLogManagement || canReadActionsLogManagement
+              }
+              textSize="xs"
+              data-test-subj={getTestId('actionsLogTray')}
+              hideFile={true}
+              hideContext={true}
+            />
+          </div>
+        ))}
+      </EuiFlexGroup>
+    );
+  }
+
+  // CrowdStrike Isolate/Release actions
   if (action.agentType === 'crowdstrike') {
     return <>{OUTPUT_MESSAGES.submittedSuccessfully(command)}</>;
   }
