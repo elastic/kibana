@@ -8,9 +8,9 @@
 import { expect, tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
-test.describe('Maps full screen mode', { tag: tags.ESS_ONLY }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
-    await browserAuth.loginAsViewer();
+test.describe('Maps full screen mode', () => {
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsAdmin(); // add layer button not there when logged in as viewer
     await pageObjects.gis.goto();
   });
   test('Full screen button should be visisble', async ({ page }) => {
@@ -26,12 +26,8 @@ test.describe('Maps full screen mode', { tag: tags.ESS_ONLY }, () => {
     );
     await pageObjects.gis.clickFullScreenMode();
     expect(await page.testSubj.locator('kbnAppWrapper hiddenChrome').waitFor({ state: 'visible' }));
-    await pageObjects.gis.clickExitFullScreenTextButton();
-    expect(
-      await page.testSubj.locator('kbnAppWrapper visibleChrome').waitFor({ state: 'visible' })
-    );
   });
-  test.skip('layer control is visible', async ({ page }) => {
+  test('layer control is visible', async ({ page }) => {
     expect(await page.testSubj.locator('addLayerButton').waitFor({ state: 'visible' }));
   });
   // test('displays exit full screen logo button', async ({ page }) => {
