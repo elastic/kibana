@@ -57,7 +57,11 @@ export const loadTests = ({
     updateBaselines,
   };
 
-  decorateSnapshotUi({ lifecycle, updateSnapshots, isCi: !!process.env.CI });
+  decorateSnapshotUi({
+    lifecycle,
+    updateSnapshots,
+    isCi: !!process.env.CI,
+  });
 
   function loadTestFile(path: string) {
     if (typeof path !== 'string' || !isAbsolute(path)) {

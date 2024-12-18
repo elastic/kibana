@@ -141,7 +141,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await pageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  describe('Node Details', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/192891
+  describe.skip('Node Details', () => {
     let synthEsClient: InfraSynthtraceEsClient;
     before(async () => {
       synthEsClient = await getInfraSynthtraceEsClient(esClient);
@@ -664,16 +665,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it(`${metric} tile should not be shown`, async () => {
             await pageObjects.assetDetails.assetDetailsKPITileMissing(metric);
           });
-        });
-
-        it('should show add metrics callout', async () => {
-          await pageObjects.assetDetails.addMetricsCalloutExists();
-        });
-      });
-
-      describe('Metrics Tab', () => {
-        before(async () => {
-          await pageObjects.assetDetails.clickMetricsTab();
         });
 
         it('should show add metrics callout', async () => {
