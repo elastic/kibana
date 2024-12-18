@@ -14,11 +14,12 @@ import {
 } from '@langchain/core/prompts';
 import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { createDataStream } from 'ai';
+import { DataStreamWriter, createDataStream } from 'ai';
 import { BaseLanguageModel } from '@langchain/core/language_models/base';
 import { BaseMessage } from '@langchain/core/messages';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';
 import { LangChainAdapter } from 'ai';
+import type { DataStreamString } from '@ai-sdk/ui-utils';
 import { ChatMessage } from '../types';
 import { ElasticsearchRetriever } from './elasticsearch_retriever';
 import { renderTemplate } from '../utils/render_template';
@@ -113,7 +114,7 @@ export function contextLimitCheck(
   };
 }
 
-export function registerContextTokenCounts(data: experimental_StreamData) {
+export function registerContextTokenCounts(data: DataStreamWriter) {
   return (input: ContextInputs) => {
     data.writeMessageAnnotation({
       type: 'context_token_count',
@@ -131,7 +132,10 @@ class ConversationalChainFn {
     this.options = options;
   }
 
-  async stream(client: AssistClient, msgs: ChatMessage[]) {
+  async stream(
+    client: AssistClient,
+    msgs: ChatMessage[]
+  ): Promise<ReadableStream<DataStreamString>> {
     return createDataStream({
       execute: async (dataStream) => {
         const messages = msgs ?? [];

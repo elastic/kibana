@@ -109,7 +109,6 @@ describe('conversational chain', () => {
 
       const streamToValue: string[] = await new Promise((resolve, reject) => {
         const reader = stream.getReader();
-        const textDecoder = new TextDecoder();
         const chunks: string[] = [];
 
         const read = () => {
@@ -117,7 +116,7 @@ describe('conversational chain', () => {
             if (done) {
               resolve(chunks);
             } else {
-              chunks.push(textDecoder.decode(value));
+              chunks.push(value);
               read();
             }
           }, reject);
