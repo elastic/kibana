@@ -107,7 +107,7 @@ export const getIsRulePreviewDisabled = ({
   threatMapping,
   machineLearningJobId,
   queryBar,
-  newTermsFields,
+  newTermsFields = [],
 }: {
   ruleType: Type;
   isQueryBarValid: boolean;

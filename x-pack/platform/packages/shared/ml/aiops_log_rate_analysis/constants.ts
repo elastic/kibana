@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { useEuiTheme } from '@elastic/eui';
+
 /** Log rate analysis settings */
 export const LOG_RATE_ANALYSIS_SETTINGS = {
   /**
@@ -32,7 +34,17 @@ export const LOG_RATE_ANALYSIS_SETTINGS = {
 export const RANDOM_SAMPLER_SEED = 3867412;
 
 /** Highlighting color for charts */
-export const LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR = 'orange';
+export const useLogRateAnalysisBarColors = () => {
+  const { euiTheme } = useEuiTheme();
+  return {
+    barColor: euiTheme.flags.hasVisColorAdjustment
+      ? euiTheme.colors.vis.euiColorVis0
+      : euiTheme.colors.vis.euiColorVis0,
+    barHighlightColor: euiTheme.flags.hasVisColorAdjustment
+      ? 'orange'
+      : euiTheme.colors.vis.euiColorVis8,
+  };
+};
 
 /**  */
 export const EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE = 'aiopsLogRateAnalysisEmbeddable' as const;

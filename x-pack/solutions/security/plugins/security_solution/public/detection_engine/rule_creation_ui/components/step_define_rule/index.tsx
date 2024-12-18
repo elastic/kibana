@@ -51,7 +51,6 @@ import {
 } from '../../../../shared_imports';
 import type { FormHook, FieldHook } from '../../../../shared_imports';
 import { schema } from './schema';
-import { getTermsAggregationFields } from './utils';
 import { useExperimentalFeatureFieldsTransform } from './use_experimental_feature_fields_transform';
 import * as i18n from './translations';
 import {
@@ -68,8 +67,6 @@ import { EqlQueryEdit } from '../../../rule_creation/components/eql_query_edit';
 import { DataViewSelectorField } from '../data_view_selector_field';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { NewTermsFields } from '../new_terms_fields';
-import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
 import { RequiredFields } from '../../../rule_creation/components/required_fields';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 import { useLicense } from '../../../../common/hooks/use_license';
@@ -80,20 +77,24 @@ import { useAlertSuppression } from '../../../rule_management/logic/use_alert_su
 import { AiAssistant } from '../ai_assistant';
 import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
 import { useMLRuleConfig } from '../../../../common/components/ml/hooks/use_ml_rule_config';
+import { useTermsAggregationFields } from '../../../../common/hooks/use_terms_aggregation_fields';
 import {
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
   AlertSuppressionEdit,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components/threshold_alert_suppression_edit';
-import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 import { MachineLearningJobIdEdit } from '../../../rule_creation/components/machine_learning_job_id_edit';
 import { ThresholdEdit } from '../../../rule_creation/components/threshold_edit';
-import { usePersistentThresholdState } from './use_persistent_threshold_state';
 import { AnomalyThresholdEdit } from '../../../rule_creation/components/anomaly_threshold_edit/anomaly_threshold_edit';
-import { CreateCustomMlJobButton } from '../../../rule_creation/components/create_ml_job_button/create_ml_job_button';
+import { HistoryWindowStartEdit } from '../../../rule_creation/components/history_window_start_edit';
+import { NewTermsFieldsEdit } from '../../../rule_creation/components/new_terms_fields_edit';
 import { EsqlQueryEdit } from '../../../rule_creation/components/esql_query_edit';
+import { usePersistentNewTermsState } from './use_persistent_new_terms_state';
+import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
+import { usePersistentThresholdState } from './use_persistent_threshold_state';
 import { usePersistentQuery } from './use_persistent_query';
 import { usePersistentMachineLearningState } from './use_persistent_machine_learning_state';
+import { CreateCustomMlJobButton } from '../../../rule_creation/components/create_ml_job_button/create_ml_job_button';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -210,18 +211,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [form]
   );
 
-  const termsAggregationFields = useMemo(
-    /**
-     * Typecasting to FieldSpec because fields is
-     * typed as DataViewFieldBase[] which does not have
-     * the 'aggregatable' property, however the type is incorrect
-     *
-     * fields does contain elements with the aggregatable property.
-     * We will need to determine where these types are defined and
-     * figure out where the discrepancy is.
-     */
-    () => getTermsAggregationFields(indexPattern.fields as FieldSpec[]),
-    [indexPattern.fields]
+  const termsAggregationFields = useTermsAggregationFields(indexPattern.fields);
+  const termsAggregationFieldNames = useMemo(
+    () => termsAggregationFields.map((field) => field.name),
+    [termsAggregationFields]
   );
 
   const [threatIndexPatternsLoading, { indexPatterns: threatIndexPatterns }] =
@@ -250,6 +243,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ruleTypePath: 'ruleType',
     machineLearningJobIdPath: 'machineLearningJobId',
     anomalyThresholdPath: 'anomalyThreshold',
+  });
+  usePersistentNewTermsState({
+    form,
+    ruleTypePath: 'ruleType',
+    newTermsFieldsPath: 'newTermsFields',
+    historyWindowStartPath: 'historyWindowSize',
   });
 
   const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
@@ -696,30 +695,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </UseMultiFields>
             </>
           </RuleTypeEuiFormRow>
-          <RuleTypeEuiFormRow
-            $isVisible={isNewTermsRule(ruleType)}
-            data-test-subj="newTermsInput"
-            fullWidth
-          >
-            <>
-              <UseField
-                path="newTermsFields"
-                component={NewTermsFields}
-                componentProps={{
-                  browserFields: termsAggregationFields,
-                }}
-              />
-              <UseField
-                path="historyWindowSize"
-                component={ScheduleItem}
-                componentProps={{
-                  idAria: 'detectionEngineStepDefineRuleHistoryWindowSize',
-                  dataTestSubj: 'detectionEngineStepDefineRuleHistoryWindowSize',
-                  timeTypes: ['m', 'h', 'd'],
-                }}
-              />
-            </>
-          </RuleTypeEuiFormRow>
+          {isNewTermsRule(ruleType) && (
+            <EuiFormRow data-test-subj="newTermsInput" fullWidth>
+              <>
+                <NewTermsFieldsEdit path="newTermsFields" fieldNames={termsAggregationFieldNames} />
+                <HistoryWindowStartEdit path="historyWindowSize" />
+              </>
+            </EuiFormRow>
+          )}
           <EuiSpacer size="m" />
 
           <RuleTypeEuiFormRow $isVisible={isAlertSuppressionEnabled} fullWidth>

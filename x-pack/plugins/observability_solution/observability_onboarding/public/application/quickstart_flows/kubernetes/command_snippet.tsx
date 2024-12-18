@@ -63,7 +63,12 @@ export function CommandSnippet({
 
       <EuiSpacer />
 
-      <EuiCodeBlock language="text" paddingSize="m" fontSize="m">
+      <EuiCodeBlock
+        language="text"
+        paddingSize="m"
+        fontSize="m"
+        data-test-subj="observabilityOnboardingKubernetesPanelCodeSnippet"
+      >
         {command}
       </EuiCodeBlock>
 
