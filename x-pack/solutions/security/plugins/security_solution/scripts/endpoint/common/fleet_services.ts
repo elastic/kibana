@@ -966,6 +966,179 @@ export const fetchPackageInfo = async (
     .catch(catchAxiosErrorFormatAndThrow);
 };
 
+interface AddMicrosoftDefenderForEndpointToAgentPolicyOptions {
+  kbnClient: KbnClient;
+  log: ToolingLog;
+  agentPolicyId: string;
+  tenantId: string;
+  clientId: string;
+  clientSecret: string;
+  integrationPolicyName?: string;
+  /** Set to `true` if wanting to add the integration to the agent policy even if that agent policy already has one  */
+  force?: boolean;
+}
+
+export const addMicrosoftDefenderForEndpointIntegrationToAgentPolicy = async ({
+  kbnClient,
+  log,
+  agentPolicyId,
+  tenantId,
+  clientId,
+  clientSecret,
+  integrationPolicyName = `MS Defender for Endpoint policy (${Math.random()
+    .toString()
+    .substring(2, 6)})`,
+  force,
+}: AddMicrosoftDefenderForEndpointToAgentPolicyOptions): Promise<PackagePolicy> => {
+  const msPackageName = 'microsoft_defender_endpoint';
+
+  // If `force` is `false and agent policy already has a MS integration, exit here
+  if (!force) {
+    log.debug(
+      `Checking to see if agent policy [${agentPolicyId}] already includes a Microsoft Defender for Endpoint integration policy`
+    );
+
+    const agentPolicy = await fetchAgentPolicy(kbnClient, agentPolicyId);
+
+    log.verbose(agentPolicy);
+
+    const integrationPolicies = agentPolicy.package_policies ?? [];
+
+    for (const integrationPolicy of integrationPolicies) {
+      if (integrationPolicy.package?.name === msPackageName) {
+        log.debug(
+          `Returning existing Microsoft Defender for Endpoint Integration Policy included in agent policy [${agentPolicyId}]`
+        );
+        return integrationPolicy;
+      }
+    }
+  }
+
+  const {
+    version: packageVersion,
+    name: packageName,
+    title: packageTitle,
+  } = await fetchPackageInfo(kbnClient, msPackageName);
+
+  log.debug(
+    `Creating new Microsoft Defender for Endpoint integration policy [package v${packageVersion}] and adding it to agent policy [${agentPolicyId}]`
+  );
+
+  return createIntegrationPolicy(kbnClient, {
+    name: integrationPolicyName,
+    description: `Created by script: ${__filename}`,
+    policy_ids: [agentPolicyId],
+    enabled: true,
+    inputs: [
+      {
+        type: 'httpjson',
+        policy_template: 'microsoft_defender_endpoint',
+        enabled: true,
+        streams: [
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'microsoft_defender_endpoint.log',
+            },
+            vars: {
+              client_id: {
+                type: 'text',
+                value: clientId,
+              },
+              enable_request_tracer: {
+                type: 'bool',
+              },
+              client_secret: {
+                type: 'password',
+                value: clientSecret,
+              },
+              tenant_id: {
+                type: 'text',
+                value: tenantId,
+              },
+              interval: {
+                type: 'text',
+                value: '30s',
+              },
+              scopes: {
+                value: [],
+                type: 'text',
+              },
+              azure_resource: {
+                value: 'https://api.securitycenter.windows.com/',
+                type: 'text',
+              },
+              proxy_url: {
+                type: 'text',
+              },
+              login_url: {
+                value: 'https://login.microsoftonline.com/',
+                type: 'text',
+              },
+              token_url: {
+                value: 'oauth2/token',
+                type: 'text',
+              },
+              request_url: {
+                value: 'https://api.securitycenter.windows.com/api/alerts',
+                type: 'text',
+              },
+              tags: {
+                value: ['microsoft-defender-endpoint', 'forwarded'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+        ],
+      },
+      {
+        type: 'logfile',
+        policy_template: 'microsoft_defender_endpoint',
+        enabled: false,
+        streams: [
+          {
+            enabled: false,
+            data_stream: {
+              type: 'logs',
+              dataset: 'microsoft_defender_endpoint.log',
+            },
+            vars: {
+              paths: {
+                value: [],
+                type: 'text',
+              },
+              tags: {
+                value: ['microsoft-defender-endpoint', 'forwarded'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+        ],
+      },
+    ],
+    package: {
+      name: packageName,
+      title: packageTitle,
+      version: packageVersion,
+    },
+  });
+};
+
 interface AddSentinelOneIntegrationToAgentPolicyOptions {
   kbnClient: KbnClient;
   log: ToolingLog;

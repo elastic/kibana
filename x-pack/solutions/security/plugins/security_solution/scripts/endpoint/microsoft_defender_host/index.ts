@@ -8,17 +8,26 @@
 import { run, type RunFn } from '@kbn/dev-cli-runner';
 import { ok } from 'assert';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { createDetectionEngineMicrosoftDefenderRuleIfNeeded } from './services/create_detection_engine_microsoft_defend_rule';
+import type { HostVm } from '../common/types';
 import { onboardVmHostWithMicrosoftDefender } from './services/onboard_microsoft_vm';
-import { generateVmName } from '../common/vm_services';
+import { createVm, generateVmName, getMultipassVmCountNotice } from '../common/vm_services';
 import { createKbnClient } from '../common/stack_services';
 import { ensureSpaceIdExists, fetchActiveSpace } from '../common/spaces';
 import {
+  addMicrosoftDefenderForEndpointIntegrationToAgentPolicy,
   DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME,
   enableFleetSpaceAwareness,
+  enrollHostVmWithFleet,
   fetchAgentPolicy,
   getOrCreateDefaultAgentPolicy,
 } from '../common/fleet_services';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
+import {
+  isFleetServerRunning,
+  startFleetServer,
+} from '../common/fleet_server/fleet_server_services';
+import { createMicrosoftDefenderForEndpointConnectorIfNeeded } from './services/create_microsoft_defender_connector';
 
 export const cli = async () => {
   return run(runCli, {
@@ -148,4 +157,59 @@ const runCli: RunFn = async ({ log, flags }) => {
         log,
         policyName: `${DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME} - ${activeSpaceId}`,
       });
+
+  await addMicrosoftDefenderForEndpointIntegrationToAgentPolicy({
+    kbnClient,
+    log,
+    clientSecret,
+    clientId,
+    tenantId,
+    agentPolicyId,
+  });
+
+  let agentPolicyVm: HostVm | undefined;
+
+  // If no agents are running against the given Agent policy for agentless integrations, then add one now
+  if (!agents) {
+    log.info(`Creating VM and enrolling it with Fleet using policy [${agentPolicyName}]`);
+
+    agentPolicyVm = await createVm({
+      type: 'multipass',
+      name: generateVmName(`agentless-integrations-${activeSpaceId}`),
+    });
+
+    if (forceFleetServer || !(await isFleetServerRunning(kbnClient, log))) {
+      await startFleetServer({
+        kbnClient,
+        logger: log,
+        force: forceFleetServer,
+      });
+    }
+
+    await enrollHostVmWithFleet({
+      hostVm: agentPolicyVm,
+      kbnClient,
+      log,
+      agentPolicyId,
+    });
+  } else {
+    log.debug(
+      `No host VM created for Fleet agent policy [${agentPolicyName}]. It already shows to have [${agents}] enrolled`
+    );
+  }
+
+  await Promise.all([
+    createMicrosoftDefenderForEndpointConnectorIfNeeded(),
+    createDetectionEngineMicrosoftDefenderRuleIfNeeded(),
+  ]);
+
+  // FIXME:PT trigger alert in VM whenever that is implemented
+
+  // FIXME:PT add VM output (.info()) to the message below
+
+  log.info(`Done!
+
+${agentPolicyVm ? `${agentPolicyVm.info()}\n` : ''}
+${await getMultipassVmCountNotice(2)}
+`);
 };
