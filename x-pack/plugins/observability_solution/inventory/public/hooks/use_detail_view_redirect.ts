@@ -19,18 +19,20 @@ import type { InventoryEntity } from '../../common/entities';
 import { useKibana } from './use_kibana';
 
 const KUBERNETES_DASHBOARDS_IDS: Record<string, string> = {
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.CLUSTER.ecs]: 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.CLUSTER.semconv]: 'kubernetes_otel-cluster-overview',
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.CRONJOB.ecs]: 'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.DAEMONSET.ecs]:
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.CLUSTER.ecs]:
+    'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.CLUSTER.semconv]: 'kubernetes_otel-cluster-overview',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.CRON_JOB.ecs]:
+    'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.DAEMON_SET.ecs]:
     'kubernetes-85879010-bcb1-11ec-b64f-7dd6e8e82013',
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.DEPLOYMENT.ecs]:
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.DEPLOYMENT.ecs]:
     'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013',
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.JOB.ecs]: 'kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013',
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.NODE.ecs]: 'kubernetes-b945b7b0-bcb1-11ec-b64f-7dd6e8e82013',
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.POD.ecs]: 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.SERVICE.ecs]: 'kubernetes-ff1b3850-bcb1-11ec-b64f-7dd6e8e82013',
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.STATEFULSET.ecs]:
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.JOB.ecs]: 'kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.NODE.ecs]: 'kubernetes-b945b7b0-bcb1-11ec-b64f-7dd6e8e82013',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.POD.ecs]: 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.SERVICE]: 'kubernetes-ff1b3850-bcb1-11ec-b64f-7dd6e8e82013',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.STATEFUL_SET.ecs]:
     'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',
 };
 

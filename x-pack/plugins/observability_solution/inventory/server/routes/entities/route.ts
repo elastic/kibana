@@ -10,6 +10,7 @@ import { orderBy } from 'lodash';
 import moment from 'moment';
 import { DATA_STREAM_TYPE } from '@kbn/dataset-quality-plugin/common/es_fields';
 import { joinByKey } from '@kbn/observability-utils-common/array/join_by_key';
+import { BUILT_IN_ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
 import { InventoryEntity, entityColumnIdsRt } from '../../../common/entities';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
 import { createAlertsClient } from '../../lib/create_alerts_client/create_alerts_client';
@@ -93,16 +94,24 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
       entityManagerStart.getScopedClient({ request }),
       createAlertsClient({ plugins, request }),
     ]);
+
+    const METADATA_BY_TYPE: { [key: string]: string[] } = {
+      default: [DATA_STREAM_TYPE],
+      [BUILT_IN_ENTITY_TYPES.CONTAINER_V2]: [DATA_STREAM_TYPE, 'cloud.provider'],
+      [BUILT_IN_ENTITY_TYPES.HOST_V2]: [DATA_STREAM_TYPE, 'cloud.provider'],
+      [BUILT_IN_ENTITY_TYPES.SERVICE_V2]: [DATA_STREAM_TYPE, 'agent.name'],
+    };
+
     const [{ entities: rawEntities }, identityFieldsBySource] = await Promise.all([
       entityManagerClient.v2.searchEntities({
         start: moment().subtract(15, 'm').toISOString(),
         end: moment().toISOString(),
         limit: 500,
         type: entityType,
-        metadata_fields: [DATA_STREAM_TYPE],
+        metadata_fields: METADATA_BY_TYPE[entityType] || METADATA_BY_TYPE.default,
         filters: kuery ? [kuery] : [],
       }),
-      entityManagerStart.v2.getIdentityFields(entityType, clusterClient, logger),
+      entityManagerStart.v2.identityFieldsBySource(entityType, clusterClient, logger),
     ]);
 
     const alerts = await getLatestEntitiesAlerts({

@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { castArray } from 'lodash';
 import { BUILT_IN_ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { InventoryEntity } from '../../../common/entities';
 import { isBuiltinEntityOfType } from '../../../common/utils/entity_type_guards';
 
@@ -25,7 +26,7 @@ export function EntityIcon({ entity }: EntityIconProps) {
     isBuiltinEntityOfType(BUILT_IN_ENTITY_TYPES.HOST_V2, entity) ||
     isBuiltinEntityOfType(BUILT_IN_ENTITY_TYPES.CONTAINER_V2, entity)
   ) {
-    const cloudProvider = castArray(entity.cloud?.provider)[0];
+    const cloudProvider = castArray(entity['cloud.provider'] as string)[0];
 
     return (
       <EuiFlexGroup
@@ -46,7 +47,9 @@ export function EntityIcon({ entity }: EntityIconProps) {
   }
 
   if (isBuiltinEntityOfType(BUILT_IN_ENTITY_TYPES.SERVICE_V2, entity)) {
-    return <AgentIcon agentName={castArray(entity.agent?.name)[0]} role="presentation" />;
+    return (
+      <AgentIcon agentName={castArray(entity['agent.name'] as AgentName)[0]} role="presentation" />
+    );
   }
 
   if (entity.entityType.startsWith('k8s')) {
