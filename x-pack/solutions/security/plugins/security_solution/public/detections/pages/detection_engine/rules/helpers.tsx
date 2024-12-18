@@ -47,6 +47,8 @@ import { DataSourceType, AlertSuppressionDurationType } from './types';
 import { severityOptions } from '../../../../detection_engine/rule_creation_ui/components/step_about_rule/data';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import type { RuleAction, RuleResponse } from '../../../../../common/api/detection_engine';
+import { convertDateMathToDuration } from '../../../../common/utils/date_math';
+import { DEFAULT_HISTORY_WINDOW_SIZE } from '../../../../common/constants';
 
 export interface GetStepsData {
   aboutRuleData: AboutStepRule;
@@ -160,8 +162,8 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
   newTermsFields: ('new_terms_fields' in rule && rule.new_terms_fields) || [],
   historyWindowSize:
     'history_window_start' in rule && rule.history_window_start
-      ? convertHistoryStartToSize(rule.history_window_start)
-      : '7d',
+      ? convertDateMathToDuration(rule.history_window_start)
+      : DEFAULT_HISTORY_WINDOW_SIZE,
   shouldLoadQueryDynamically: Boolean(rule.type === 'saved_query' && rule.saved_id),
   [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]:
     ('alert_suppression' in rule &&
@@ -188,14 +190,6 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
     'alert_suppression' in rule && rule.alert_suppression?.duration
   ),
 });
-
-export const convertHistoryStartToSize = (relativeTime: string) => {
-  if (relativeTime.startsWith('now-')) {
-    return relativeTime.substring(4);
-  } else {
-    return relativeTime;
-  }
-};
 
 export const getScheduleStepsData = (rule: RuleResponse): ScheduleStepRule => {
   const { interval, from } = rule;
