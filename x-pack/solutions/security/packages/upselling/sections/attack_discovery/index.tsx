@@ -30,7 +30,7 @@ const AttackDiscoveryUpsellingSectionComponent: React.FC<Props> = ({
     () => (
       <EuiFlexGroup alignItems="center" direction="column" gutterSize="none">
         <EuiFlexItem data-test-subj="assistantAvatar" grow={false}>
-          <AssistantBeacon />
+          <AssistantBeacon backgroundColor="emptyShade" />
           <EuiSpacer size="m" />
         </EuiFlexItem>
 
