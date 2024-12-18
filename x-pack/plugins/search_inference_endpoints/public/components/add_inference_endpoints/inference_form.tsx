@@ -9,8 +9,7 @@ import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_l
 import React, { useCallback } from 'react';
 import { InferenceServices } from '@kbn/inference-endpoint-ui-common';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { useKibana } from '../../hooks/use_kibana';
-import { useProviders } from '../../hooks/user_providers';
+import { useProviders } from '../../hooks/use_providers';
 import * as i18n from './translations';
 import { useAddEndpoint } from '../../hooks/use_add_endpoint';
 import { InferenceEndpoint } from '../../types';
@@ -19,11 +18,8 @@ interface InferenceFormProps {
   onSubmitSuccess: (state: boolean) => void;
 }
 export const InferenceForm: React.FC<InferenceFormProps> = ({ onSubmitSuccess }) => {
-  const {
-    services: { http },
-  } = useKibana();
   const { mutate: addEndpoint } = useAddEndpoint(() => onSubmitSuccess(false));
-  const { data: providers } = useProviders(http);
+  const { data: providers } = useProviders();
   const { form } = useForm();
   const handleSubmit = useCallback(async () => {
     const { isValid, data } = await form.submit();

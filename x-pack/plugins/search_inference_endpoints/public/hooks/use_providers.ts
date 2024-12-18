@@ -668,8 +668,7 @@ const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
   );
 };
 
-/* FIX ME: ToastsStart */
-export const useProviders = (http: HttpSetup) => {
+export const useProviders = () => {
   const { services } = useKibana();
   const toasts = services.notifications?.toasts;
   const onErrorFn = (error: { body: KibanaServerError }) => {
@@ -680,7 +679,7 @@ export const useProviders = (http: HttpSetup) => {
   };
 
   const query = useQuery(['user-profile'], {
-    queryFn: () => getProviders(http),
+    queryFn: () => getProviders(services.http),
     staleTime: Infinity,
     refetchOnWindowFocus: false,
     onError: onErrorFn,

@@ -22,36 +22,37 @@ import { InferenceForm } from './inference_form';
 import * as i18n from './translations';
 
 interface AddInferenceFlyoutWrapperProps {
-  setIsAddInferenceFlyoutOpen: (state: boolean) => void;
+  onClose: (state: boolean) => void;
 }
 
 export const AddInferenceFlyoutWrapper: React.FC<AddInferenceFlyoutWrapperProps> = ({
-  setIsAddInferenceFlyoutOpen,
+  onClose,
 }) => {
   const inferenceCreationFlyoutId = useGeneratedHtmlId({
     prefix: 'addInferenceFlyoutId',
   });
-  const closeFlyout = () => setIsAddInferenceFlyoutOpen(false);
+  const closeFlyout = () => onClose(false);
 
   return (
     <EuiFlyout
       ownFocus
-      onClose={() => setIsAddInferenceFlyoutOpen(false)}
+      onClose={() => onClose(false)}
       aria-labelledby={inferenceCreationFlyoutId}
+      data-test-subj="create-inference-flyout"
     >
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader hasBorder data-test-subj="create-inference-flyout-header">
         <EuiTitle size="m">
           <h2 id={inferenceCreationFlyoutId}>{i18n.CREATE_ENDPOINT_TITLE}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <InferenceForm onSubmitSuccess={setIsAddInferenceFlyoutOpen} />
+        <InferenceForm onSubmitSuccess={onClose} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="searchInferenceEndpointsAddInferenceFlyoutWrapperCloseButton"
+              data-test-subj="create-inference-flyout-close-button"
               onClick={closeFlyout}
               flush="left"
             >

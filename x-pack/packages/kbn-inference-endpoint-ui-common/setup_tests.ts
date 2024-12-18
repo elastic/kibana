@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/packages/kbn-inference-endpoint-ui-common'],
-};
+// eslint-disable-next-line import/no-extraneous-dependencies
+import '@testing-library/jest-dom';

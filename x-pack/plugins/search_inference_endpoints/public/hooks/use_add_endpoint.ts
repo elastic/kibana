@@ -35,7 +35,7 @@ export const useAddEndpoint = (onSuccess?: () => void) => {
       onSuccess: () => {
         queryClient.invalidateQueries([INFERENCE_ENDPOINTS_QUERY_KEY]);
         toasts?.addSuccess({
-          title: i18n.DELETE_SUCCESS,
+          title: i18n.ENDPOINT_ADDED_SUCCESS,
         });
         if (onSuccess) {
           onSuccess();

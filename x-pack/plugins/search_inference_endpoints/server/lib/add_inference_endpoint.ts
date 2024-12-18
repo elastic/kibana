@@ -20,11 +20,10 @@ export const addInferenceEndpoint = async (
   logger: Logger
 ) => {
   try {
-    const taskSettings = config?.taskTypeConfig
-      ? {
-          ...unflattenObject(config?.taskTypeConfig),
-        }
-      : {};
+    /* task settings property is required in the API call 
+    but no needed for inference or connector creation
+    */
+    const taskSettings = {};
     const serviceSettings = {
       ...unflattenObject(config?.providerConfig ?? {}),
       ...unflattenObject(secrets?.providerSecrets ?? {}),

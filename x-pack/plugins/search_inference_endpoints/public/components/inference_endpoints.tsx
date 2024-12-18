@@ -27,7 +27,7 @@ export const InferenceEndpoints: React.FC = () => {
         <TabularPage inferenceEndpoints={inferenceEndpoints} />
       </EuiPageTemplate.Section>
       {isAddInferenceFlyoutOpen && (
-        <AddInferenceFlyoutWrapper setIsAddInferenceFlyoutOpen={setIsAddInferenceFlyoutOpen} />
+        <AddInferenceFlyoutWrapper onClose={setIsAddInferenceFlyoutOpen} />
       )}
     </>
   );
