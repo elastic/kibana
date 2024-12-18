@@ -10,7 +10,8 @@ module.exports = {
   rootDir: '../../../..',
   /** all nested directories have their own Jest config file */
   testMatch: [
-    '<rootDir>/x-pack/plugins/enterprise_search/public/applications/**/*.test.{js,mjs,ts,tsx}',
+    '<rootDir>/x-pack/plugins/enterprise_search/public/applications/*.test.{js,mjs,ts,tsx}',
+    '<rootDir>/x-pack/plugins/enterprise_search/public/applications/shared/**/*.test.{js,mjs,ts,tsx}',
   ],
   roots: ['<rootDir>/x-pack/plugins/enterprise_search/public'],
   collectCoverage: true,
