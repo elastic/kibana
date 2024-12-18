@@ -389,7 +389,7 @@ A modal window should inform the user that only K (where K < Y) rules without co
 When user confirms the action in the modal
 Then success message should be displayed after upgrade informing that K rules were updated
 And the K upgraded rules should be removed from the table
-And the remaining Y - K rules should still be present in the table
+And the remaining M = Y - K rules should still be present in the table
 And user should see the number of rules available to upgrade decreased by K number of upgraded rules
 ```
 
