@@ -33,7 +33,7 @@ export function defineQueryRolesRoutes({
       },
       validate: {
         body: schema.object({
-          query: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+          query: schema.maybe(schema.string()),
           from: schema.maybe(schema.number()),
           size: schema.maybe(schema.number()),
           sort: schema.maybe(
@@ -65,15 +65,42 @@ export function defineQueryRolesRoutes({
         }
 
         const queryPayload: {
-          bool: { must: QueryClause[]; should: QueryClause[]; must_not: QueryClause[] };
+          bool: {
+            must: QueryClause[];
+            should: QueryClause[];
+            must_not: QueryClause[];
+            minimum_should_match?: number;
+          };
         } = { bool: { must: [], should: [], must_not: [] } };
 
         if (query) {
-          queryPayload.bool.must.push(query);
+          queryPayload.bool.must.push({
+            wildcard: {
+              name: {
+                value: `*${query}*`,
+              },
+            },
+          });
         }
 
         if (showReservedRoles) {
-          queryPayload.bool.should.push({ term: { 'metadata._reserved': true } });
+          queryPayload.bool.must.push({ term: { 'metadata._reserved': true } });
+        } else if (showReservedRoles === false) {
+          queryPayload.bool.should.push({
+            term: {
+              'metadata._reserved': false,
+            },
+          });
+          queryPayload.bool.should.push({
+            bool: {
+              must_not: {
+                exists: {
+                  field: 'metadata._reserved',
+                },
+              },
+            },
+          });
+          queryPayload.bool.minimum_should_match = 1;
         }
 
         if (filters?.spaceId) {

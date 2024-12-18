@@ -108,12 +108,12 @@ export const RolesGridPage: FC<Props> = ({
   const [tableState, setTableState] = useState<RolesTableState>(DEFAULT_TABLE_STATE);
 
   const loadRoles = async (tableStateArgs: RolesTableState) => {
-    const queryContainer = EuiSearchBar.Query.toESQuery(tableStateArgs.query);
+    const queryText = tableStateArgs.query.text;
 
     const requestBody = {
       ...tableStateArgs,
       ...(tableStateArgs.sort ? { sort: tableStateArgs.sort } : DEFAULT_TABLE_STATE.sort),
-      query: queryContainer,
+      query: queryText,
     };
 
     try {
