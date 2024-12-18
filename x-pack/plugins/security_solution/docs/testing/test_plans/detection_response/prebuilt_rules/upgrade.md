@@ -17,16 +17,20 @@ Status: `in progress`. The current test plan matches [Rule Immutability/Customiz
           - [**Scenario: User is NOT notified when all installed prebuilt rules are up to date**](#scenario-user-is-not-notified-when-all-installed-prebuilt-rules-are-up-to-date)
           - [**Scenario: User is notified when some prebuilt rules can be upgraded**](#scenario-user-is-notified-when-some-prebuilt-rules-can-be-upgraded)
           - [**Scenario: User is notified when both rules to install and upgrade are available**](#scenario-user-is-notified-when-both-rules-to-install-and-upgrade-are-available)
-      - [Rule upgrade workflow: individual updates from Rule Updates table](#rule-upgrade-workflow-individual-and-bulk-updates-from-rule-updates-table)
+      - [Rule upgrade workflow: individual upgrade from Rule Updates table](#rule-upgrade-workflow-individual-and-bulk-updates-from-rule-updates-table)
           - [**Scenario: User can upgrade conflict-free prebuilt rules one by one**](#scenario-user-can-upgrade-conflict-free-prebuilt-rules-one-by-one)
           - [**Scenario: User cannot upgrade prebuilt rules one by one from Rules Update table if they have conflicts**](#scenario-user-cannot-upgrade-prebuilt-rules-one-by-one-from-rules-update-table-if-they-have-conflicts)
-      - [Rule upgrade workflow: bulk updates from Rule Updates table](#rule-upgrade-workflow-individual-and-bulk-updates-from-rule-updates-table)
+      - [Rule upgrade workflow: bulk upgrade from Rule Updates table](#rule-upgrade-workflow-individual-and-bulk-updates-from-rule-updates-table)
           - [**Scenario: User can upgrade multiple conflict-free prebuilt rules selected on the page**](#scenario-user-can-upgrade-multiple-conflict-free-prebuilt-rules-selected-on-the-page)
           - [**Scenario: User cannot upgrade multiple prebuilt rules selected on the page when they have upgrade conflicts**](#scenario-user-cannot-upgrade-multiple-prebuilt-rules-selected-on-the-page-when-they-have-upgrade-conflicts)
           - [**Scenario: User can upgrade all available conflict-free prebuilt rules at once**](#scenario-user-can-upgrade-all-available-conflict-free-prebuilt-rules-at-once)
           - [**Scenario: User cannot upgrade all prebuilt rules at once if they have upgrade conflicts**](#scenario-user-cannot-upgrade-all-prebuilt-rules-at-once-if-they-have-upgrade-conflicts)
           - [**Scenario: User can upgrade only conflict-free rules when a mix of rules with and without conflicts are selected for upgrade in the Rules Table**](#scenario-user-can-upgrade-only-conflict-free-rules-when-a-mix-of-rules-with-and-without-conflicts-are-selected-for-upgrade-in-the-rules-table)
           - [**Scenario: User can upgrade only conflict-free rules when user attempts to upgrade all rules and only a subset contains upgrade conflicts**](#scenario-user-can-upgrade-only-conflict-free-rules-when-user-attempts-to-upgrade-all-rules-and-only-a-subset-contains-upgrade-conflicts)
+      - [Rule upgrade workflow: upgrading rules with rule type change](#rule-upgrade-workflow-upgrading-rules-with-rule-type-change)
+          - [**Scenario: User can upgrade rule with rule type change individually**](#scenario-user-can-upgrade-rule-with-rule-type-change-individually)
+          - [**Scenario: User can bulk upgrade selected rules with rule type changes**](#scenario-user-can-bulk-upgrade-selected-rules-with-rule-type-changes)
+          - [**Scenario: User can bulk upgrade all rules with rule type changes**](#scenario-user-can-bulk-upgrade-all-rules-with-rule-type-changes)
       - [Rule upgrade workflow: rule previews](#rule-upgrade-workflow-rule-previews)
           - [**Scenario: User can preview rules available for upgrade**](#scenario-user-can-preview-rules-available-for-upgrade)
           - [**Scenario: User can upgrade a rule using the rule preview**](#scenario-user-can-upgrade-a-rule-using-the-rule-preview)
@@ -391,6 +395,58 @@ Then success message should be displayed after upgrade informing that K rules we
 And the K upgraded rules should be removed from the table
 And the remaining M = Y - K rules should still be present in the table
 And user should see the number of rules available to upgrade decreased by K number of upgraded rules
+```
+
+
+### Rule upgrade workflow: upgrading rules with rule type change
+
+#### **Scenario: User can upgrade rule with rule type change individually**
+
+**Automation**: 1 e2e test with mock rules
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has an update available that changes its rule type
+When user opens the Rule Updates table
+Then this rule should be displayed in the table
+And the Upgrade Rule button should be enabled
+When user upgrades the rule
+Then success message should be displayed after upgrade
+And the upgraded rule should be removed from the table
+And user should see the number of rules available to upgrade decreased by 1
+```
+
+#### **Scenario: User can bulk upgrade selected rules with rule type changes**
+
+
+**Automation**: 1 e2e test with mock rules
+
+```Gherkin
+Given X prebuilt rules are installed in Kibana
+And Y of these rules have updates available that change their rule types
+When user opens the Rule Updates table
+Then Y rules should be displayed in the table
+When user selects Z rules (where Z < Y) with rule type changes
+Then user should see an enabled CTA to upgrade Z rules
+When user clicks the CTA
+Then success message should be displayed after upgrade
+And all Z upgraded rules should be removed from the table
+And user should see the number of rules available to upgrade decreased by Z
+```
+
+#### **Scenario: User can bulk upgrade all rules with rule type changes**
+
+**Automation**: 1 e2e test with mock rules
+
+```Gherkin
+Given X prebuilt rules are installed in Kibana
+And all X rules have updates available that change their rule types
+When user opens the Rule Updates table
+Then X rules should be displayed in the table
+And user should see an enabled CTA to upgrade all rules
+When user clicks the CTA to upgrade all rules
+Then success message should be displayed after upgrade
+And all X upgraded rules should be removed from the table
 ```
 
 ### Rule upgrade workflow: rule previews
