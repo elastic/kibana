@@ -9,41 +9,48 @@
 
 import { getFieldValue } from '@kbn/discover-utils';
 import { DocumentProfileProvider, DocumentType, SolutionType } from '../../../profiles';
+import { ProfileProviderServices } from '../../profile_provider_services';
+import { SecurityProfileProviderFactory } from '../types';
+import { SECURITY_PROFILE_ID } from '../constants';
 import { AlertEventOverview } from '../accessors/get_alert_event_overview';
 import * as i18n from '../translations';
 
-export const createSecurityDocumentProfileProvider = (): DocumentProfileProvider => ({
-  profileId: 'security-document-profile',
-  profile: {
-    getDocViewer: (prev) => (params) => {
-      const prevDocViewer = prev(params);
-      const isAlert = getFieldValue(params.record, 'event.kind') === 'signal';
+export const createSecurityDocumentProfileProvider: SecurityProfileProviderFactory<
+  DocumentProfileProvider
+> = (services: ProfileProviderServices) => {
+  return {
+    profileId: SECURITY_PROFILE_ID.document,
+    profile: {
+      getDocViewer: (prev) => (params) => {
+        const prevDocViewer = prev(params);
+        const isAlert = getFieldValue(params.record, 'event.kind') === 'signal';
+
+        return {
+          ...prevDocViewer,
+          docViewsRegistry: (registry) => {
+            registry.add({
+              id: 'doc_view_alerts_overview',
+              title: i18n.overviewTabTitle(isAlert),
+              order: 0,
+              component: AlertEventOverview,
+            });
+
+            return prevDocViewer.docViewsRegistry(registry);
+          },
+        };
+      },
+    },
+    resolve: ({ record, rootContext }) => {
+      if (rootContext.solutionType !== SolutionType.Security) {
+        return { isMatch: false };
+      }
 
       return {
-        ...prevDocViewer,
-        docViewsRegistry: (registry) => {
-          registry.add({
-            id: 'doc_view_alerts_overview',
-            title: i18n.overviewTabTitle(isAlert),
-            order: 0,
-            component: AlertEventOverview,
-          });
-
-          return prevDocViewer.docViewsRegistry(registry);
+        isMatch: true,
+        context: {
+          type: DocumentType.Default,
         },
       };
     },
-  },
-  resolve: (params) => {
-    if (params.rootContext.solutionType !== SolutionType.Security) {
-      return { isMatch: false };
-    }
-
-    return {
-      isMatch: true,
-      context: {
-        type: DocumentType.Default,
-      },
-    };
-  },
-});
+  };
+};
