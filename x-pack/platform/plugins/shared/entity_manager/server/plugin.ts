@@ -41,7 +41,7 @@ import {
 } from './lib/v2/constants';
 import { installBuiltInDefinitions } from './lib/v2/definitions/install_built_in_definitions';
 import { instanceAsFilter } from './lib/v2/definitions/instance_as_filter';
-import { getIdentityFields } from './lib/v2/definitions/get_identity_fields';
+import { identityFieldsBySource } from './lib/v2/definitions/identity_fields_by_source';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityManagerServerPluginSetup {}
@@ -49,7 +49,7 @@ export interface EntityManagerServerPluginStart {
   getScopedClient: (options: { request: KibanaRequest }) => Promise<EntityClient>;
   v2: {
     instanceAsFilter: typeof instanceAsFilter;
-    getIdentityFields: typeof getIdentityFields;
+    identityFieldsBySource: typeof identityFieldsBySource;
   };
 }
 
@@ -205,7 +205,7 @@ export class EntityManagerServerPlugin
       },
       v2: {
         instanceAsFilter,
-        getIdentityFields,
+        identityFieldsBySource,
       },
     };
   }

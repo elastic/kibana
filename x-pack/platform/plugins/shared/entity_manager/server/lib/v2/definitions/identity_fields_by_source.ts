@@ -10,9 +10,8 @@ import { Logger } from '@kbn/core/server';
 import { readSourceDefinitions } from './source_definition';
 import { InternalClusterClient } from '../types';
 import { UnknownEntityType } from '../errors/unknown_entity_type';
-import { InvalidEntityInstance } from '../errors/invalid_entity_instance';
 
-export async function getIdentityFields(
+export async function identityFieldsBySource(
   type: EntityV2['entity.type'],
   clusterClient: InternalClusterClient,
   logger: Logger
@@ -25,19 +24,13 @@ export async function getIdentityFields(
     throw new UnknownEntityType(`No sources found for type ${type}`);
   }
 
-  const identityFieldsBySource: { [key: string]: string[] } = {};
+  const identityFields: { [key: string]: string[] } = {};
 
   sources.forEach((source) => {
-    const { id, identity_fields: identityFields } = source;
+    const { id, identity_fields: fields } = source;
 
-    identityFieldsBySource[id] = identityFields;
+    identityFields[id] = fields;
   });
 
-  if (Object.keys(identityFieldsBySource).length === 0) {
-    throw new InvalidEntityInstance(
-      `Type ${type} is missing some identity fields, no sources could match`
-    );
-  }
-
-  return identityFieldsBySource;
+  return identityFields;
 }

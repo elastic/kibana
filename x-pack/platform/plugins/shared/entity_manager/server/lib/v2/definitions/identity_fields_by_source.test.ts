@@ -11,7 +11,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { EntitySourceDefinition } from '../types';
 import { UnknownEntityType } from '../errors/unknown_entity_type';
-import { getIdentityFields } from './get_identity_fields';
+import { identityFieldsBySource } from './identity_fields_by_source';
 
 const readSourceDefinitionsMock = readSourceDefinitions as jest.Mock;
 jest.mock('./source_definition', () => ({
@@ -20,7 +20,7 @@ jest.mock('./source_definition', () => ({
 const esClientMock = elasticsearchServiceMock.createClusterClient();
 const logger = loggerMock.create();
 
-describe('getIdentityFields', () => {
+describe('identityFieldsBySource', () => {
   it('throws if no sources are found for the type', async () => {
     const instance: EntityV2 = {
       'entity.type': 'my_type',
@@ -32,7 +32,7 @@ describe('getIdentityFields', () => {
     readSourceDefinitionsMock.mockResolvedValue(sources);
 
     await expect(
-      getIdentityFields(instance['entity.type'], esClientMock, logger)
+      identityFieldsBySource(instance['entity.type'], esClientMock, logger)
     ).rejects.toThrowError(UnknownEntityType);
   });
 
@@ -56,11 +56,11 @@ describe('getIdentityFields', () => {
     ];
     readSourceDefinitionsMock.mockResolvedValue(sources);
 
-    await expect(getIdentityFields(instance['entity.type'], esClientMock, logger)).resolves.toEqual(
-      {
-        my_source: ['host.name'],
-      }
-    );
+    await expect(
+      identityFieldsBySource(instance['entity.type'], esClientMock, logger)
+    ).resolves.toEqual({
+      my_source: ['host.name'],
+    });
   });
 
   it('returns the correct identity fields for multiple identity field with a single source', async () => {
@@ -84,11 +84,11 @@ describe('getIdentityFields', () => {
     ];
     readSourceDefinitionsMock.mockResolvedValue(sources);
 
-    await expect(getIdentityFields(instance['entity.type'], esClientMock, logger)).resolves.toEqual(
-      {
-        my_source: ['host.name', 'host.os'],
-      }
-    );
+    await expect(
+      identityFieldsBySource(instance['entity.type'], esClientMock, logger)
+    ).resolves.toEqual({
+      my_source: ['host.name', 'host.os'],
+    });
   });
 
   it('returns the correct identity fields for a single identity field with multiple sources', async () => {
@@ -120,12 +120,12 @@ describe('getIdentityFields', () => {
     ];
     readSourceDefinitionsMock.mockResolvedValue(sources);
 
-    await expect(getIdentityFields(instance['entity.type'], esClientMock, logger)).resolves.toEqual(
-      {
-        my_source_host: ['host.name'],
-        my_source_os: ['host.os'],
-      }
-    );
+    await expect(
+      identityFieldsBySource(instance['entity.type'], esClientMock, logger)
+    ).resolves.toEqual({
+      my_source_host: ['host.name'],
+      my_source_os: ['host.os'],
+    });
   });
 
   it('returns the correct identity fields for multiple identity field with multiple sources', async () => {
@@ -158,11 +158,11 @@ describe('getIdentityFields', () => {
     ];
     readSourceDefinitionsMock.mockResolvedValue(sources);
 
-    await expect(getIdentityFields(instance['entity.type'], esClientMock, logger)).resolves.toEqual(
-      {
-        my_source_host: ['host.name', 'host.arch'],
-        my_source_os: ['host.os', 'host.arch'],
-      }
-    );
+    await expect(
+      identityFieldsBySource(instance['entity.type'], esClientMock, logger)
+    ).resolves.toEqual({
+      my_source_host: ['host.name', 'host.arch'],
+      my_source_os: ['host.os', 'host.arch'],
+    });
   });
 });
