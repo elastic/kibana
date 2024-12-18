@@ -13,14 +13,12 @@ import {
 } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
+import { FLEET_INSTALL_FORMAT_VERSION } from '../../../../../constants';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../../common/constants';
-
 import { appContextService } from '../../../../app_context';
 import { createAppContextStartContractMock } from '../../../../../mocks';
-
 import { auditLoggingService } from '../../../../audit_logging';
 import { packagePolicyService } from '../../../../package_policy';
-
 import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
 
 import { stepSaveSystemObject } from './step_save_system_object';
@@ -94,7 +92,7 @@ describe('updateLatestExecutedState', () => {
         'epm-packages',
         'test-integration',
         {
-          install_format_schema_version: '1.3.0',
+          install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
           install_status: 'installed',
           install_version: '1.0.0',
           latest_install_failed_attempts: [],
@@ -161,7 +159,7 @@ describe('updateLatestExecutedState', () => {
         'epm-packages',
         'test-integration',
         {
-          install_format_schema_version: '1.3.0',
+          install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
           install_status: 'installed',
           install_version: '1.0.0',
           latest_install_failed_attempts: [],
