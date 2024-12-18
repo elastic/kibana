@@ -5653,7 +5653,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-repeat-image-plugin@link:src/plugins/expression_repeat_image":
+"@kbn/expression-repeat-image-plugin@link:src/platform/plugins/shared/expression_repeat_image":
   version "0.0.0"
   uid ""
 
