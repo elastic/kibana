@@ -3,9 +3,10 @@ First start the servers with
 
 ```bash
 // ESS
-node scripts/scout_start_servers.js --stateful
+node scripts/scout.js start-server --stateful
+
 // Serverless
-node scripts/scout_start_servers.js --serverless=es
+node scripts/scout.js start-server --serverless=[es|oblt|security]
 ```
 
 Then you can run the tests multiple times in another terminal with:
