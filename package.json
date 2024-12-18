@@ -255,7 +255,7 @@
     "@kbn/core-application-common": "link:src/core/packages/application/common",
     "@kbn/core-apps-browser-internal": "link:src/core/packages/apps/browser-internal",
     "@kbn/core-apps-server-internal": "link:src/core/packages/apps/server-internal",
-    "@kbn/core-base-browser-internal": "link:packages/core/base/core-base-browser-internal",
+    "@kbn/core-base-browser-internal": "link:src/core/packages/base/browser-internal",
     "@kbn/core-base-common": "link:packages/core/base/core-base-common",
     "@kbn/core-base-common-internal": "link:packages/core/base/core-base-common-internal",
     "@kbn/core-base-server-internal": "link:packages/core/base/core-base-server-internal",

@@ -4333,7 +4333,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-browser-internal@link:packages/core/base/core-base-browser-internal":
+"@kbn/core-base-browser-internal@link:src/core/packages/base/browser-internal":
   version "0.0.0"
   uid ""
 
