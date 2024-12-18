@@ -9,45 +9,43 @@
 
 import { identity } from 'lodash';
 import { SerializableRecord } from '@kbn/utility-types';
-import {
-  EnhancementRegistryDefinition,
-  EnhancementRegistryItem,
-  EnhancementsRegistry,
-} from './types';
+import { EnhancementRegistryDefinition, EnhancementRegistryItem } from './types';
 
-const registry: EnhancementsRegistry = new Map();
+export class EnhancementsRegistry {
+  private registry: Map<string, EnhancementRegistryItem> = new Map();
 
-export function registerEnhancement(enhancement: EnhancementRegistryDefinition) {
-  if (registry.has(enhancement.id)) {
-    throw new Error(`enhancement with id ${enhancement.id} already exists in the registry`);
-  }
-  registry.set(enhancement.id, {
-    id: enhancement.id,
-    telemetry: enhancement.telemetry || ((state, stats) => stats),
-    inject: enhancement.inject || identity,
-    extract:
-      enhancement.extract ||
-      ((state: SerializableRecord) => {
-        return { state, references: [] };
-      }),
-    migrations: enhancement.migrations || {},
-  });
-}
-
-export function getEnhancements(): EnhancementRegistryItem[] {
-  return Array.from(registry.values());
-}
-
-export function getEnhancement(id: string): EnhancementRegistryItem {
-  return (
-    registry.get(id) || {
-      id: 'unknown',
-      telemetry: (state, stats) => stats,
-      inject: identity,
-      extract: (state: SerializableRecord) => {
-        return { state, references: [] };
-      },
-      migrations: {},
+  public registerEnhancement = (enhancement: EnhancementRegistryDefinition) => {
+    if (this.registry.has(enhancement.id)) {
+      throw new Error(`enhancement with id ${enhancement.id} already exists in the registry`);
     }
-  );
+    this.registry.set(enhancement.id, {
+      id: enhancement.id,
+      telemetry: enhancement.telemetry || ((state, stats) => stats),
+      inject: enhancement.inject || identity,
+      extract:
+        enhancement.extract ||
+        ((state: SerializableRecord) => {
+          return { state, references: [] };
+        }),
+      migrations: enhancement.migrations || {},
+    });
+  };
+
+  public getEnhancements = (): EnhancementRegistryItem[] => {
+    return Array.from(this.registry.values());
+  };
+
+  public getEnhancement = (id: string): EnhancementRegistryItem => {
+    return (
+      this.registry.get(id) || {
+        id: 'unknown',
+        telemetry: (state, stats) => stats,
+        inject: identity,
+        extract: (state: SerializableRecord) => {
+          return { state, references: [] };
+        },
+        migrations: {},
+      }
+    );
+  };
 }

@@ -30,7 +30,7 @@ import { getAllMigrations } from '../common/lib/get_all_migrations';
 import { setKibanaServices } from './kibana_services';
 import { registerReactEmbeddableFactory } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
-import { getEnhancement, getEnhancements, registerEnhancement } from './enhancements/registry';
+import { EnhancementsRegistry } from './enhancements/registry';
 import {
   EmbeddableSetup,
   EmbeddableSetupDependencies,
@@ -42,6 +42,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
   private appList?: ReadonlyMap<string, PublicAppInfo>;
   private appListSubscription?: Subscription;
+  private enhancementsRegistry = new EnhancementsRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -51,7 +52,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       registerReactEmbeddableFactory,
       registerAddFromLibraryType,
-      registerEnhancement,
+      registerEnhancement: this.enhancementsRegistry.registerEnhancement,
     };
   }
 
@@ -67,11 +68,15 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     );
 
     const commonContract: CommonEmbeddableStartContract = {
-      getEnhancement,
+      getEnhancement: this.enhancementsRegistry.getEnhancement,
     };
 
     const getAllMigrationsFn = () =>
-      getAllMigrations([], getEnhancements(), getMigrateFunction(commonContract));
+      getAllMigrations(
+        [],
+        this.enhancementsRegistry.getEnhancements(),
+        getMigrateFunction(commonContract)
+      );
 
     const embeddableStart: EmbeddableStart = {
       getStateTransfer: (storage?: Storage) =>
