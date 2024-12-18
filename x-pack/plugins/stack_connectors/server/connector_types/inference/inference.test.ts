@@ -60,11 +60,15 @@ describe('InferenceConnector', () => {
     });
 
     it('uses the completion task_type is supplied', async () => {
-      const response = await connector.performApiCompletion({
-        input: 'What is Elastic?',
+      mockEsClient.transport.request.mockImplementationOnce(() =>
+        Promise.resolve(new PassThrough())
+      );
+
+      const response = await connector.performApiUnifiedCompletion({
+        body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
       });
-      expect(mockEsClient.inference.inference).toBeCalledTimes(1);
-      expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
+      expect(mockEsClient.transport.request).toBeCalledTimes(1);
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
         {
           inference_id: 'test',
           input: 'What is Elastic?',
@@ -77,11 +81,13 @@ describe('InferenceConnector', () => {
 
     it('errors during API calls are properly handled', async () => {
       // @ts-ignore
-      mockEsClient.inference.inference = mockError;
+      mockEsClient.transport.request = mockError;
 
-      await expect(connector.performApiCompletion({ input: 'What is Elastic?' })).rejects.toThrow(
-        'API Error'
-      );
+      await expect(
+        connector.performApiUnifiedCompletion({
+          body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
+        })
+      ).rejects.toThrow('API Error');
     });
   });
 
@@ -247,7 +253,9 @@ describe('InferenceConnector', () => {
     });
 
     it('the API call is successful with correct request parameters', async () => {
-      await connector.performApiCompletionStream({ input: 'Hello world' });
+      await connector.performApiUnifiedCompletionStream({
+        body: { messages: [{ content: 'Hello world', role: 'user' }] },
+      });
       expect(mockEsClient.inference.inference).toBeCalledTimes(1);
       expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
         {
@@ -261,7 +269,10 @@ describe('InferenceConnector', () => {
 
     it('signal is properly passed to streamApi', async () => {
       const signal = jest.fn() as unknown as AbortSignal;
-      await connector.performApiCompletionStream({ input: 'Hello world', signal });
+      await connector.performApiUnifiedCompletionStream({
+        body: { messages: [{ content: 'Hello world', role: 'user' }] },
+        signal,
+      });
 
       expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
         {
@@ -278,15 +289,17 @@ describe('InferenceConnector', () => {
       mockEsClient.inference.inference = mockError;
 
       await expect(
-        connector.performApiCompletionStream({ input: 'What is Elastic?' })
+        connector.performApiUnifiedCompletionStream({
+          body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
+        })
       ).rejects.toThrow('API Error');
     });
 
     it('responds with a readable stream', async () => {
-      const response = await connector.performApiCompletionStream({
-        input: 'What is Elastic?',
+      const response = await connector.performApiUnifiedCompletion({
+        body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
       });
-      expect(response instanceof PassThrough).toEqual(true);
+      expect(response).toEqual(true);
     });
   });
 });

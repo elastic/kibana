@@ -27,11 +27,7 @@ export interface Props {
   toasts?: IToasts;
 }
 
-const actionTypeKey = {
-  bedrock: '.bedrock',
-  openai: '.gen-ai',
-  gemini: '.gemini',
-};
+const actionTypes = ['.bedrock', '.gen-ai', '.gemini', '.inference'];
 
 export const useLoadConnectors = ({
   http,
@@ -44,10 +40,7 @@ export const useLoadConnectors = ({
       return queryResult.reduce(
         (acc: AIConnector[], connector) => [
           ...acc,
-          ...(!connector.isMissingSecrets &&
-          [actionTypeKey.bedrock, actionTypeKey.openai, actionTypeKey.gemini].includes(
-            connector.actionTypeId
-          )
+          ...(!connector.isMissingSecrets && actionTypes.includes(connector.actionTypeId)
             ? [
                 {
                   ...connector,

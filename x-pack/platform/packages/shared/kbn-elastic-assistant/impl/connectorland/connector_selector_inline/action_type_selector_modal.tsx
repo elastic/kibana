@@ -29,7 +29,7 @@ interface Props {
   actionTypeSelectorInline: boolean;
 }
 const itemClassName = css`
-  inline-size: 220px;
+  inline-size: 150px;
 
   .euiKeyPadMenuItem__label {
     white-space: nowrap;

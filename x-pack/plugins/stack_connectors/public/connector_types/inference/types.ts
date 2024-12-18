@@ -9,14 +9,19 @@ import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/p
 import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { SUB_ACTION } from '../../../common/inference/constants';
 import {
-  ChatCompleteParams,
   RerankParams,
   SparseEmbeddingParams,
   TextEmbeddingParams,
+  UnifiedChatCompleteParams,
 } from '../../../common/inference/types';
 
 export type InferenceActionParams =
-  | { subAction: SUB_ACTION.COMPLETION; subActionParams: ChatCompleteParams }
+  | { subAction: SUB_ACTION.UNIFIED_COMPLETION_STREAM; subActionParams: UnifiedChatCompleteParams }
+  | { subAction: SUB_ACTION.UNIFIED_COMPLETION; subActionParams: UnifiedChatCompleteParams }
+  | {
+      subAction: SUB_ACTION.UNIFIED_COMPLETION_ASYNC_ITERATOR;
+      subActionParams: UnifiedChatCompleteParams;
+    }
   | { subAction: SUB_ACTION.RERANK; subActionParams: RerankParams }
   | { subAction: SUB_ACTION.SPARSE_EMBEDDING; subActionParams: SparseEmbeddingParams }
   | { subAction: SUB_ACTION.TEXT_EMBEDDING; subActionParams: TextEmbeddingParams };

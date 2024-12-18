@@ -15,8 +15,8 @@ describe('Inference Params Fields renders', () => {
     const { getByTestId } = render(
       <ParamsFields
         actionParams={{
-          subAction: SUB_ACTION.COMPLETION,
-          subActionParams: { input: 'What is Elastic?' },
+          subAction: SUB_ACTION.UNIFIED_COMPLETION,
+          subActionParams: { body: { messages: [{ role: 'user', content: 'What is Elastic?' }] } },
         }}
         actionConnector={{
           actionTypeId: '.inference',
@@ -76,7 +76,7 @@ describe('Inference Params Fields renders', () => {
         />
       );
       expect(editAction).toHaveBeenCalledTimes(2);
-      expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.COMPLETION, 0);
+      expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.UNIFIED_COMPLETION, 0);
       if (provider === 'openai') {
         expect(editAction).toHaveBeenCalledWith(
           'subActionParams',
@@ -124,7 +124,7 @@ describe('Inference Params Fields renders', () => {
       />
     );
     expect(editAction).toHaveBeenCalledTimes(1);
-    expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.COMPLETION, 0);
+    expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.UNIFIED_COMPLETION, 0);
   });
 
   it('calls editAction function with the correct arguments ', () => {
