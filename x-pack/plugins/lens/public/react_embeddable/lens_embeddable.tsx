@@ -22,7 +22,6 @@ import { initializeInspector } from './initializers/initialize_inspector';
 import { initializeDashboardServices } from './initializers/initialize_dashboard_services';
 import { initializeInternalApi } from './initializers/initialize_internal_api';
 import { initializeSearchContext } from './initializers/initialize_search_context';
-import { initializeVisualizationContext } from './initializers/initialize_visualization_context';
 import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
@@ -60,8 +59,6 @@ export const createLensEmbeddableFactory = (
        * This is an internal API not exposed outside of the embeddable.
        */
       const internalApi = initializeInternalApi(initialState, parentApi, services);
-
-      const visualizationContextHelper = initializeVisualizationContext(internalApi);
 
       /**
        * Initialize various configurations required to build all the required
@@ -108,7 +105,7 @@ export const createLensEmbeddableFactory = (
         parentApi,
         searchContextConfig.api,
         dashboardConfig.api,
-        visualizationContextHelper,
+        internalApi,
         services
       );
 
@@ -165,8 +162,7 @@ export const createLensEmbeddableFactory = (
         api,
         parentApi,
         internalApi,
-        services,
-        visualizationContextHelper
+        services
       );
 
       const onUnmount = () => {
