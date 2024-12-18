@@ -15,11 +15,13 @@ describe('EntityGroupAccordion', () => {
       groups: [
         {
           count: 5999,
-          'entity.type': 'host',
+          'entity.type': 'built_in_hosts_from_ecs_data',
+          label: 'Hosts',
         },
         {
           count: 2001,
-          'entity.type': 'service',
+          'entity.type': 'built_in_services_from_ecs_data',
+          label: 'Services',
         },
       ],
     };
@@ -27,10 +29,13 @@ describe('EntityGroupAccordion', () => {
       <EntityGroupAccordion
         groupValue={props.groups[0]['entity.type']}
         groupCount={props.groups[0].count}
+        groupLabel={props.groups[0].label}
       />
     );
-    expect(screen.getByText(props.groups[0]['entity.type'])).toBeInTheDocument();
-    const container = screen.getByTestId('entityCountBadge_entity.type_host');
+    expect(screen.getByText(props.groups[0].label)).toBeInTheDocument();
+    const container = screen.getByTestId(
+      'entityCountBadge_entity.type_built_in_hosts_from_ecs_data'
+    );
     expect(within(container).getByText('Entities:')).toBeInTheDocument();
     expect(within(container).getByText(props.groups[0].count)).toBeInTheDocument();
   });
