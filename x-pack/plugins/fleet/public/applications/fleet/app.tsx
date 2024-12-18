@@ -247,7 +247,7 @@ const FleetTopNav = memo(
 
     const readOnlyBtnClass = React.useMemo(() => {
       return css`
-        color: ${euiTheme.colors.text};
+        color: ${euiTheme.colors.textParagraph};
       `;
     }, [euiTheme]);
 
