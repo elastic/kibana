@@ -14,4 +14,7 @@ export enum SUB_ACTION {
   HOST_ACTIONS = 'hostActions',
   GET_AGENT_ONLINE_STATUS = 'getAgentOnlineStatus',
   EXECUTE_RTR_COMMAND = 'executeRTRCommand',
+  EXECUTE_ACTIVE_RESPONDER_RTR = 'batchActiveResponderExecuteRTR',
+  EXECUTE_ADMIN_RTR = 'batchAdminExecuteRTR',
+  GET_RTR_CLOUD_SCRIPTS = 'getRTRCloudScripts',
 }

@@ -9,7 +9,7 @@ import { JsonObject } from '@kbn/utility-types';
 import { Agent } from 'supertest';
 import expect from '@kbn/expect';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { WiredStreamConfigDefinition } from '@kbn/streams-schema';
+import { StreamConfigDefinition } from '@kbn/streams-schema';
 
 export async function enableStreams(supertest: Agent) {
   const req = supertest.post('/api/streams/_enable').set('kbn-xsrf', 'xxx');
@@ -37,9 +37,21 @@ export async function forkStream(supertest: Agent, root: string, body: JsonObjec
   return response.body;
 }
 
-export async function putStream(supertest: Agent, name: string, body: WiredStreamConfigDefinition) {
+export async function putStream(supertest: Agent, name: string, body: StreamConfigDefinition) {
   const req = supertest.put(`/api/streams/${name}`).set('kbn-xsrf', 'xxx');
   const response = await req.send(body).expect(200);
+  return response.body;
+}
+
+export async function getStream(supertest: Agent, name: string) {
+  const req = supertest.get(`/api/streams/${name}`).set('kbn-xsrf', 'xxx');
+  const response = await req.send().expect(200);
+  return response.body;
+}
+
+export async function listStreams(supertest: Agent) {
+  const req = supertest.get(`/api/streams`).set('kbn-xsrf', 'xxx');
+  const response = await req.send().expect(200);
   return response.body;
 }
 
