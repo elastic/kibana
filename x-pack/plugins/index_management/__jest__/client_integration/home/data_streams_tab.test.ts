@@ -594,7 +594,9 @@ describe('Data Streams tab', () => {
 
         expect(httpSetup.put).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}/data_streams/data_retention`,
-          expect.objectContaining({ body: JSON.stringify({ dataStreams: ['dataStream1', 'dataStream2'] }) })
+          expect.objectContaining({
+            body: JSON.stringify({ dataStreams: ['dataStream1', 'dataStream2'] }),
+          })
         );
       });
     });

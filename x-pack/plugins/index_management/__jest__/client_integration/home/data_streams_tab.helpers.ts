@@ -269,7 +269,7 @@ export const setup = async (
       clickEditDataRetentionButton,
       clickDetailPanelIndexTemplateLink,
       clickManageDataStreamsButton,
-      clickBulkEditDataRetentionButton
+      clickBulkEditDataRetentionButton,
     },
     findDeleteActionAt,
     findDeleteConfirmationModal,
