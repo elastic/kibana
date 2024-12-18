@@ -31,7 +31,7 @@ export const useMigrationRulesTableColumns = ({
   installMigrationRule: (migrationRule: RuleMigration, enable?: boolean) => void;
   getMigrationRuleData: (
     ruleId: string
-  ) => { relatedIntegrations?: RelatedIntegration[] } | undefined;
+  ) => { relatedIntegrations?: RelatedIntegration[]; isIntegrationsLoading?: boolean } | undefined;
 }): TableColumn[] => {
   return useMemo(
     () => [

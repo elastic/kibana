@@ -9,6 +9,7 @@ import React, { useEffect, useMemo } from 'react';
 
 import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle } from '@elastic/eui';
 import type { RouteComponentProps } from 'react-router-dom';
+import type { RelatedIntegration } from '../../../../common/api/detection_engine';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import { useNavigation } from '../../../common/lib/kibana';
 import { HeaderPage } from '../../../common/components/header_page';
@@ -22,6 +23,7 @@ import { MissingPrivilegesCallOut } from '../../../detections/components/callout
 import { HeaderButtons } from '../components/header_buttons';
 import { UnknownMigration } from '../components/unknown_migration';
 import { useLatestStats } from '../service/hooks/use_latest_stats';
+import { useGetIntegrations } from '../service/hooks/use_get_integrations';
 
 type MigrationRulesPageProps = RouteComponentProps<{ migrationId?: string }>;
 
@@ -34,6 +36,16 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
     const { navigateTo } = useNavigation();
 
     const { data: ruleMigrationsStatsAll, isLoading: isLoadingMigrationsStats } = useLatestStats();
+
+    const [integrations, setIntegrations] = React.useState<
+      Record<string, RelatedIntegration> | undefined
+    >();
+    const { getIntegrations, isLoading: isIntegrationsLoading } =
+      useGetIntegrations(setIntegrations);
+
+    useEffect(() => {
+      getIntegrations();
+    }, [getIntegrations]);
 
     const finishedRuleMigrationsStats = useMemo(() => {
       if (isLoadingMigrationsStats || !ruleMigrationsStatsAll?.length) {
@@ -72,8 +84,14 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       if (!migrationId || !finishedRuleMigrationsStats.some((stats) => stats.id === migrationId)) {
         return <UnknownMigration />;
       }
-      return <MigrationRulesTable migrationId={migrationId} />;
-    }, [migrationId, finishedRuleMigrationsStats]);
+      return (
+        <MigrationRulesTable
+          migrationId={migrationId}
+          integrations={integrations}
+          isIntegrationsLoading={isIntegrationsLoading}
+        />
+      );
+    }, [migrationId, finishedRuleMigrationsStats, integrations, isIntegrationsLoading]);
 
     return (
       <>

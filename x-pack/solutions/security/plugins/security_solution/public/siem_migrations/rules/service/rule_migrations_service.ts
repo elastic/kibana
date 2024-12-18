@@ -36,7 +36,7 @@ import {
   type GetRuleMigrationsStatsAllParams,
   getMissingResources,
   upsertMigrationResources,
-  getRelatedIntegrations,
+  getIntegrations,
 } from '../api';
 import type { RuleMigrationStats } from '../types';
 import { getSuccessToast } from './success_notification';
@@ -183,10 +183,8 @@ export class SiemRulesMigrationsService {
     });
   }
 
-  public async getRelatedIntegrations(
-    migrationId: string
-  ): Promise<Record<string, RelatedIntegration>> {
-    return getRelatedIntegrations({ migrationId });
+  public async getIntegrations(): Promise<Record<string, RelatedIntegration>> {
+    return getIntegrations({});
   }
 
   private async startTaskStatsPolling(): Promise<void> {

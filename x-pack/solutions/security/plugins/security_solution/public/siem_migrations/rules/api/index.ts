@@ -281,19 +281,16 @@ export const getRuleMigrationsPrebuiltRules = async ({
   );
 };
 
-export interface GetRelatedIntegrationsParams {
-  /** `id` of the migration to get related integrations for */
-  migrationId: string;
+export interface GetIntegrationsParams {
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
 }
-/** Retrieves related integrations for a specific migration. */
-export const getRelatedIntegrations = async ({
-  migrationId,
+/** Retrieves existing integrations. */
+export const getIntegrations = async ({
   signal,
-}: GetRelatedIntegrationsParams): Promise<GetRuleMigrationIntegrationsResponse> => {
+}: GetIntegrationsParams): Promise<GetRuleMigrationIntegrationsResponse> => {
   return KibanaServices.get().http.get<GetRuleMigrationIntegrationsResponse>(
-    replaceParams(SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH, { migration_id: migrationId }),
+    SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH,
     { version: '1', signal }
   );
 };

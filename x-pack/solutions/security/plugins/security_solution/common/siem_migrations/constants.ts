@@ -11,6 +11,8 @@ export const SIEM_MIGRATIONS_PATH = '/internal/siem_migrations' as const;
 export const SIEM_RULE_MIGRATIONS_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as const;
 
 export const SIEM_RULE_MIGRATIONS_ALL_STATS_PATH = `${SIEM_RULE_MIGRATIONS_PATH}/stats` as const;
+export const SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH =
+  `${SIEM_RULE_MIGRATIONS_PATH}/integrations` as const;
 export const SIEM_RULE_MIGRATION_CREATE_PATH =
   `${SIEM_RULE_MIGRATIONS_PATH}/{migration_id?}` as const;
 export const SIEM_RULE_MIGRATION_PATH = `${SIEM_RULE_MIGRATIONS_PATH}/{migration_id}` as const;
@@ -25,8 +27,6 @@ export const SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH =
   `${SIEM_RULE_MIGRATION_PATH}/install_translated` as const;
 export const SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH =
   `${SIEM_RULE_MIGRATION_PATH}/prebuilt_rules` as const;
-export const SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH =
-  `${SIEM_RULE_MIGRATION_PATH}/integrations` as const;
 
 export const SIEM_RULE_MIGRATION_RESOURCES_PATH = `${SIEM_RULE_MIGRATION_PATH}/resources` as const;
 export const SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH =

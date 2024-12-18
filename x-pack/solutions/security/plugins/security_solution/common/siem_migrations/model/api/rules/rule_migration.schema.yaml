@@ -405,13 +405,6 @@ paths:
       description: Retrieves all related integrations
       tags:
         - SIEM Rule Migrations
-      parameters:
-        - name: migration_id
-          in: path
-          required: true
-          schema:
-            description: The migration id to retrieve related integrations for
-            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates that related integrations have been retrieved correctly.

@@ -34,7 +34,6 @@ import { BulkActions } from './bulk_actions';
 import { SearchField } from './search_field';
 import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
-import { useGetRelatedIntegrations } from '../../service/hooks/use_get_integrations';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -45,13 +44,23 @@ export interface MigrationRulesTableProps {
    * Selected rule migration id
    */
   migrationId: string;
+
+  /**
+   * Existing integrations.
+   */
+  integrations?: Record<string, RelatedIntegration>;
+
+  /**
+   * Indicates whether the integrations loading is in progress.
+   */
+  isIntegrationsLoading?: boolean;
 }
 
 /**
  * Table Component for displaying SIEM rules migrations
  */
 export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.memo(
-  ({ migrationId }) => {
+  ({ migrationId, integrations, isIntegrationsLoading }) => {
     const { addError } = useAppToasts();
 
     const [pageIndex, setPageIndex] = useState(0);
@@ -65,9 +74,6 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     const { data: prebuiltRules = {}, isLoading: isPrebuiltRulesLoading } =
       useGetMigrationPrebuiltRules(migrationId);
-
-    const { integrations, isLoading: isIntegrationsLoading } =
-      useGetRelatedIntegrations(migrationId);
 
     const {
       data: { ruleMigrations, total } = { ruleMigrations: [], total: 0 },
@@ -185,12 +191,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [addError, installTranslatedMigrationRules]
     );
 
-    const isLoading =
-      isStatsLoading ||
-      isPrebuiltRulesLoading ||
-      isIntegrationsLoading ||
-      isDataLoading ||
-      isTableLoading;
+    const isLoading = isStatsLoading || isPrebuiltRulesLoading || isDataLoading || isTableLoading;
 
     const ruleActionsFactory = useCallback(
       (ruleMigration: RuleMigration, closeRulePreview: () => void) => {
@@ -233,7 +234,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     const getMigrationRuleData = useCallback(
       (ruleId: string) => {
-        if (!isLoading && ruleMigrations.length && integrations) {
+        if (!isLoading && ruleMigrations.length) {
           const ruleMigration = ruleMigrations.find((item) => item.id === ruleId);
           let matchedPrebuiltRule: RuleResponse | undefined;
           const relatedIntegrations: RelatedIntegration[] = [];
@@ -245,19 +246,21 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
             matchedPrebuiltRule =
               matchedPrebuiltRuleVersion?.current ?? matchedPrebuiltRuleVersion?.target;
 
-            if (matchedPrebuiltRule?.related_integrations) {
-              relatedIntegrations.push(...matchedPrebuiltRule.related_integrations);
-            } else if (ruleMigration.elastic_rule?.integration_id) {
-              const integration = integrations[ruleMigration.elastic_rule.integration_id];
-              if (integration) {
-                relatedIntegrations.push(integration);
+            if (integrations) {
+              if (matchedPrebuiltRule?.related_integrations) {
+                relatedIntegrations.push(...matchedPrebuiltRule.related_integrations);
+              } else if (ruleMigration.elastic_rule?.integration_id) {
+                const integration = integrations[ruleMigration.elastic_rule.integration_id];
+                if (integration) {
+                  relatedIntegrations.push(integration);
+                }
               }
             }
           }
-          return { ruleMigration, matchedPrebuiltRule, relatedIntegrations };
+          return { ruleMigration, matchedPrebuiltRule, relatedIntegrations, isIntegrationsLoading };
         }
       },
-      [integrations, isLoading, prebuiltRules, ruleMigrations]
+      [integrations, isIntegrationsLoading, isLoading, prebuiltRules, ruleMigrations]
     );
 
     const {

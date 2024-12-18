@@ -7,7 +7,6 @@
 
 import type { LoggerFactory } from '@kbn/core/server';
 import { ReplaySubject, type Subject } from 'rxjs';
-import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { ConfigType } from '../../config';
 import {
   SiemRuleMigrationsService,
@@ -19,7 +18,6 @@ import type { SiemMigrationsSetupParams } from './types';
 export class SiemMigrationsService {
   private pluginStop$: Subject<void>;
   private rules: SiemRuleMigrationsService;
-  private packageService?: PackageService;
 
   constructor(private config: ConfigType, logger: LoggerFactory, kibanaVersion: string) {
     this.pluginStop$ = new ReplaySubject(1);
@@ -33,11 +31,7 @@ export class SiemMigrationsService {
   }
 
   createRulesClient(params: SiemRuleMigrationsCreateClientParams): SiemRuleMigrationsClient {
-    return this.rules.createClient({ ...params, packageService: this.packageService });
-  }
-
-  public start(packageService?: PackageService) {
-    this.packageService = packageService;
+    return this.rules.createClient({ ...params });
   }
 
   stop() {

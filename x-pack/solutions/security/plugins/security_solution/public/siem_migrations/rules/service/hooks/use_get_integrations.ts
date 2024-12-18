@@ -5,44 +5,38 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useReducer, useState } from 'react';
+import { useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { RelatedIntegration } from '../../../../../common/api/detection_engine';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { reducer, initialState } from './common/api_request_reducer';
 
-export const GET_RELATED_INTEGRATIONS_ERROR = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.service.getRelatedIntegrationsError',
-  { defaultMessage: 'Failed to fetch related integrations' }
+export const GET_INTEGRATIONS_ERROR = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.service.getIntegrationsError',
+  { defaultMessage: 'Failed to fetch integrations' }
 );
 
-export const useGetRelatedIntegrations = (migrationId: string) => {
+export type OnSuccess = (integrations: Record<string, RelatedIntegration>) => void;
+
+export const useGetIntegrations = (onSuccess: OnSuccess) => {
   const { siemMigrations, notifications } = useKibana().services;
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [integrations, setIntegrations] = useState<
-    Record<string, RelatedIntegration> | undefined
-  >();
 
-  const getRelatedIntegrations = useCallback(() => {
+  const getIntegrations = useCallback(() => {
     (async () => {
       try {
         dispatch({ type: 'start' });
-        const results = await siemMigrations.rules.getRelatedIntegrations(migrationId);
+        const integrations = await siemMigrations.rules.getIntegrations();
 
-        setIntegrations(results);
+        onSuccess(integrations);
         dispatch({ type: 'success' });
       } catch (err) {
-        setIntegrations(undefined);
         const apiError = err.body ?? err;
-        notifications.toasts.addError(apiError, { title: GET_RELATED_INTEGRATIONS_ERROR });
+        notifications.toasts.addError(apiError, { title: GET_INTEGRATIONS_ERROR });
         dispatch({ type: 'error', error: apiError });
       }
     })();
-  }, [siemMigrations.rules, migrationId, notifications.toasts]);
+  }, [siemMigrations.rules, notifications.toasts, onSuccess]);
 
-  useEffect(() => {
-    getRelatedIntegrations();
-  }, [getRelatedIntegrations]);
-
-  return { isLoading: state.loading, error: state.error, integrations };
+  return { isLoading: state.loading, error: state.error, getIntegrations };
 };

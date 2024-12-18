@@ -80,16 +80,6 @@ export const GetRuleMigrationResponse = z.object({
   data: z.array(RuleMigration),
 });
 
-export type GetRuleMigrationIntegrationsRequestParams = z.infer<
-  typeof GetRuleMigrationIntegrationsRequestParams
->;
-export const GetRuleMigrationIntegrationsRequestParams = z.object({
-  migration_id: NonEmptyString,
-});
-export type GetRuleMigrationIntegrationsRequestParamsInput = z.input<
-  typeof GetRuleMigrationIntegrationsRequestParams
->;
-
 /**
  * The map of related integrations, with the integration id as a key
  */
