@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
-import { useMlKibana } from './kibana_context';
-
-export function useCurrentThemeVars() {
-  const {
-    services: { theme },
-  } = useMlKibana();
-  return useCurrentEuiThemeVars(theme);
-}
+module.exports = {
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/screenshotting'],
+};
