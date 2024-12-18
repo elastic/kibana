@@ -11,10 +11,6 @@ import React from 'react';
 import { DiscoverServicesProvider } from '../../__mocks__/__storybook_mocks__/with_discover_services';
 import { ErrorCallout } from './error_callout';
 
-export default {
-  title: 'components/common/ErrorCallout',
-};
-
 export const _ErrorCallout = () => {
   const sampleError = new Error('This is a sample error message');
   return (
