@@ -1,6 +1,6 @@
 {
   "author": "Elastic",
-  "name": "@kbn/apm-ftr-e2e-tests",
+  "name": "@kbn/apm-ftr-e2e",
   "version": "1.0.0",
   "private": true,
   "license": "Elastic License 2.0",
