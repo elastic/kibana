@@ -3835,7 +3835,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ai-assistant-common@link:x-pack/packages/kbn-ai-assistant-common":
+"@kbn/ai-assistant-common@link:x-pack/platform/packages/shared/ai-assistant/common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ai-assistant-icon@link:x-pack/platform/packages/shared/ai-assistant/icon":
   version "0.0.0"
   uid ""
 
@@ -6119,7 +6123,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lists-plugin@link:x-pack/plugins/lists":
+"@kbn/lists-plugin@link:x-pack/solutions/security/plugins/lists":
   version "0.0.0"
   uid ""
 
@@ -7107,7 +7111,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-autocomplete@link:packages/kbn-securitysolution-autocomplete":
+"@kbn/securitysolution-autocomplete@link:x-pack/solutions/security/packages/kbn-securitysolution-autocomplete":
   version "0.0.0"
   uid ""
 
@@ -7119,71 +7123,71 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-endpoint-exceptions-common@link:packages/kbn-securitysolution-endpoint-exceptions-common":
+"@kbn/securitysolution-endpoint-exceptions-common@link:x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-es-utils@link:packages/kbn-securitysolution-es-utils":
+"@kbn/securitysolution-es-utils@link:src/platform/packages/shared/kbn-securitysolution-es-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-exception-list-components@link:packages/kbn-securitysolution-exception-list-components":
+"@kbn/securitysolution-exception-list-components@link:x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-exceptions-common@link:packages/kbn-securitysolution-exceptions-common":
+"@kbn/securitysolution-exceptions-common@link:x-pack/solutions/security/packages/kbn-securitysolution-exceptions-common":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-hook-utils@link:packages/kbn-securitysolution-hook-utils":
+"@kbn/securitysolution-hook-utils@link:x-pack/solutions/security/packages/kbn-securitysolution-hook-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-io-ts-alerting-types@link:packages/kbn-securitysolution-io-ts-alerting-types":
+"@kbn/securitysolution-io-ts-alerting-types@link:x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-io-ts-list-types@link:packages/kbn-securitysolution-io-ts-list-types":
+"@kbn/securitysolution-io-ts-list-types@link:x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-io-ts-types@link:packages/kbn-securitysolution-io-ts-types":
+"@kbn/securitysolution-io-ts-types@link:src/platform/packages/shared/kbn-securitysolution-io-ts-types":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-io-ts-utils@link:packages/kbn-securitysolution-io-ts-utils":
+"@kbn/securitysolution-io-ts-utils@link:src/platform/packages/shared/kbn-securitysolution-io-ts-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-list-api@link:packages/kbn-securitysolution-list-api":
+"@kbn/securitysolution-list-api@link:x-pack/solutions/security/packages/kbn-securitysolution-list-api":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-list-constants@link:packages/kbn-securitysolution-list-constants":
+"@kbn/securitysolution-list-constants@link:x-pack/solutions/security/packages/kbn-securitysolution-list-constants":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-list-hooks@link:packages/kbn-securitysolution-list-hooks":
+"@kbn/securitysolution-list-hooks@link:x-pack/solutions/security/packages/kbn-securitysolution-list-hooks":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-list-utils@link:packages/kbn-securitysolution-list-utils":
+"@kbn/securitysolution-list-utils@link:x-pack/solutions/security/packages/kbn-securitysolution-list-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-lists-common@link:packages/kbn-securitysolution-lists-common":
+"@kbn/securitysolution-lists-common@link:x-pack/solutions/security/packages/kbn-securitysolution-lists-common":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-rules@link:packages/kbn-securitysolution-rules":
+"@kbn/securitysolution-rules@link:src/platform/packages/shared/kbn-securitysolution-rules":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-t-grid@link:packages/kbn-securitysolution-t-grid":
+"@kbn/securitysolution-t-grid@link:x-pack/solutions/security/packages/kbn-securitysolution-t-grid":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-utils@link:packages/kbn-securitysolution-utils":
+"@kbn/securitysolution-utils@link:x-pack/solutions/security/packages/kbn-securitysolution-utils":
   version "0.0.0"
   uid ""
 
@@ -17721,10 +17725,10 @@ elastic-apm-node@3.46.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^4.7.3:
-  version "4.7.3"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.7.3.tgz#d819a9030f7321cc858c788f60b383de85461f24"
-  integrity sha512-x+cQKrXSCz6JgoTFAiBpLlC85ruqZ7sAl+jAS3+DeSmc6ZXLRTwTa2ay2PCGv3DxGLZjVZ+ItzGdHTj5B7PYKg==
+elastic-apm-node@^4.9.0:
+  version "4.9.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.9.0.tgz#8ca807fdf64404b615b60c4090bd9c9aad5b78ed"
+  integrity sha512-VUbrahqHmqpfwGHtUysWJ7aeCIUm61hAw8tSu0gE9AYdriVSPod4Ki11X4K8sBri0bIc/FTHxOrg7kudhGoqHQ==
   dependencies:
     "@elastic/ecs-pino-format" "^1.5.0"
     "@opentelemetry/api" "^1.4.1"
@@ -17744,7 +17748,7 @@ elastic-apm-node@^4.7.3:
     fast-safe-stringify "^2.0.7"
     fast-stream-to-buffer "^1.0.0"
     http-headers "^3.0.2"
-    import-in-the-middle "1.11.0"
+    import-in-the-middle "1.11.3"
     json-bigint "^1.0.0"
     lru-cache "10.2.0"
     measured-reporting "^1.51.1"
@@ -21110,10 +21114,10 @@ import-fresh@^3.1.0, import-fresh@^3.2.1, import-fresh@^3.3.0:
     parent-module "^1.0.0"
     resolve-from "^4.0.0"
 
-import-in-the-middle@1.11.0:
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.11.0.tgz#a94c4925b8da18256cde3b3b7b38253e6ca5e708"
-  integrity sha512-5DimNQGoe0pLUHbR9qK84iWaWjjbsxiqXnw6Qz64+azRgleqv9k2kTt5fw7QsOpmaGYtuxxursnPPsnTKEx10Q==
+import-in-the-middle@1.11.3:
+  version "1.11.3"
+  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.11.3.tgz#08559f2c05fd65ba7062e747af056ed18a80120c"
+  integrity sha512-tNpKEb4AjZrCyrxi+Eyu43h5ig0O8ZRFSXPHh/00/o+4P4pKzVEW/m5lsVtsAT7fCIgmQOAPjdqecGDsBXRxsw==
   dependencies:
     acorn "^8.8.2"
     acorn-import-attributes "^1.9.5"
