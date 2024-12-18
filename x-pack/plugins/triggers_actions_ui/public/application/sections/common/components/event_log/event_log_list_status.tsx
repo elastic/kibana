@@ -43,7 +43,7 @@ export const EventLogListStatus = (props: EventLogListStatusProps) => {
   const STATUS_TO_COLOR: Record<RuleAlertingOutcome, string> = {
     success: euiTheme.colors.success,
     failure: euiTheme.colors.danger,
-    unknown: euiTheme.colors.gray,
+    unknown: euiTheme.colors.mediumShade,
     warning: euiTheme.colors.warning,
   };
   const color = STATUS_TO_COLOR[status] || 'gray';

@@ -47,7 +47,6 @@ export const getExecutionStatusHealthColor = (
 };
 
 export const getRuleHealthColor = (rule: Rule, euiTheme: EuiThemeComputed) => {
-  console.log('colors: ', euiTheme.colors);
   const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
   if (isRuleUsingExecutionStatus) {
     return getExecutionStatusHealthColor(rule.executionStatus.status, euiTheme);
