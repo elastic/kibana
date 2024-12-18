@@ -26,7 +26,6 @@
     "@kbn/i18n-react",
     "@kbn/datemath",
     "@kbn/config-schema",
-    "@kbn/ui-theme",
     "@kbn/safer-lodash-set",
     "@kbn/ui-actions-plugin",
     "@kbn/core-mount-utils-browser",
