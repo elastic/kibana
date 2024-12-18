@@ -33,6 +33,8 @@ Use one of the editors to create visualizations of your data. Each editor offers
 | <<add-image,Image>>
 | Personalize your dashboard with custom images
 
+`Important: 10MiB is hardcoded limit for image upload.` <<<<<<<<<<<<<<< It's good to have this explicitely mentioned in the documentation. See https://github.com/elastic/kibana/blob/ed6a1a4e45e95b775bc3861c8cdbf06804c0e4af/src/plugins/files/common/default_image_file_kind.ts#L15
+
 | <<dashboard-links,Links>>
 | Add links to other dashboards or to external websites
 
