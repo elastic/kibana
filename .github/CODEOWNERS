@@ -764,7 +764,7 @@ x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
 x-pack/packages/kbn-ai-assistant @elastic/search-kibana
 x-pack/packages/kbn-alerting-comparators @elastic/response-ops
 x-pack/packages/kbn-alerting-state-types @elastic/response-ops
-x-pack/packages/kbn-inference-endpoint-ui-common @elastic/response-ops @elastic/appex-ai-infra @elastic/obs-ai-assistant @elastic/security-generative-ai @elastic/search-kibana
+x-pack/packages/kbn-inference-endpoint-ui-common @elastic/response-ops @elastic/appex-ai-infra @elastic/obs-ai-assistant @elastic/security-generative-ai
 x-pack/packages/kbn-random-sampling @elastic/kibana-visualizations
 x-pack/packages/kbn-synthetics-private-location @elastic/obs-ux-management-team
 x-pack/packages/maps/vector_tile_utils @elastic/kibana-presentation
