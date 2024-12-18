@@ -122,45 +122,6 @@ class DocLinks {
   public syncRulesAdvanced: string;
   public trainedModels: string;
   public textEmbedding: string;
-  public workplaceSearchApiKeys: string;
-  public workplaceSearchBox: string;
-  public workplaceSearchConfluenceCloud: string;
-  public workplaceSearchConfluenceCloudConnectorPackage: string;
-  public workplaceSearchConfluenceServer: string;
-  public workplaceSearchContentSources: string;
-  public workplaceSearchCustomConnectorPackage: string;
-  public workplaceSearchCustomSourcePermissions: string;
-  public workplaceSearchCustomSources: string;
-  public workplaceSearchDocumentPermissions: string;
-  public workplaceSearchDropbox: string;
-  public workplaceSearchExternalIdentities: string;
-  public workplaceSearchExternalSharePointOnline: string;
-  public workplaceSearchGatedFormBlog: string;
-  public workplaceSearchGatedFormDataUse: string;
-  public workplaceSearchGatedFormPrivacyStatement: string;
-  public workplaceSearchGatedFormTermsOfService: string;
-  public workplaceSearchGettingStarted: string;
-  public workplaceSearchGitHub: string;
-  public workplaceSearchGmail: string;
-  public workplaceSearchGoogleDrive: string;
-  public workplaceSearchIndexingSchedule: string;
-  public workplaceSearchJiraCloud: string;
-  public workplaceSearchJiraServer: string;
-  public workplaceSearchNetworkDrive: string;
-  public workplaceSearchOneDrive: string;
-  public workplaceSearchOutlook: string;
-  public workplaceSearchPermissions: string;
-  public workplaceSearchPrivateSourcePermissions: string;
-  public workplaceSearchSalesforce: string;
-  public workplaceSearchSecurity: string;
-  public workplaceSearchServiceNow: string;
-  public workplaceSearchSharePoint: string;
-  public workplaceSearchSharePointServer: string;
-  public workplaceSearchSlack: string;
-  public workplaceSearchSynch: string;
-  public workplaceSearchTeams: string;
-  public workplaceSearchZendesk: string;
-  public workplaceSearchZoom: string;
 
   constructor() {
     this.aiSearchDoc = '';
@@ -277,45 +238,6 @@ class DocLinks {
     this.syncRulesAdvanced = '';
     this.trainedModels = '';
     this.textEmbedding = '';
-    this.workplaceSearchApiKeys = '';
-    this.workplaceSearchBox = '';
-    this.workplaceSearchConfluenceCloud = '';
-    this.workplaceSearchConfluenceCloudConnectorPackage = '';
-    this.workplaceSearchConfluenceServer = '';
-    this.workplaceSearchContentSources = '';
-    this.workplaceSearchCustomConnectorPackage = '';
-    this.workplaceSearchCustomSources = '';
-    this.workplaceSearchCustomSourcePermissions = '';
-    this.workplaceSearchDocumentPermissions = '';
-    this.workplaceSearchDropbox = '';
-    this.workplaceSearchExternalSharePointOnline = '';
-    this.workplaceSearchExternalIdentities = '';
-    this.workplaceSearchGatedFormBlog = '';
-    this.workplaceSearchGatedFormDataUse = '';
-    this.workplaceSearchGatedFormPrivacyStatement = '';
-    this.workplaceSearchGatedFormTermsOfService = '';
-    this.workplaceSearchGettingStarted = '';
-    this.workplaceSearchGitHub = '';
-    this.workplaceSearchGmail = '';
-    this.workplaceSearchGoogleDrive = '';
-    this.workplaceSearchIndexingSchedule = '';
-    this.workplaceSearchJiraCloud = '';
-    this.workplaceSearchJiraServer = '';
-    this.workplaceSearchNetworkDrive = '';
-    this.workplaceSearchOneDrive = '';
-    this.workplaceSearchOutlook = '';
-    this.workplaceSearchPermissions = '';
-    this.workplaceSearchPrivateSourcePermissions = '';
-    this.workplaceSearchSalesforce = '';
-    this.workplaceSearchSecurity = '';
-    this.workplaceSearchServiceNow = '';
-    this.workplaceSearchSharePoint = '';
-    this.workplaceSearchSharePointServer = '';
-    this.workplaceSearchSlack = '';
-    this.workplaceSearchSynch = '';
-    this.workplaceSearchTeams = '';
-    this.workplaceSearchZendesk = '';
-    this.workplaceSearchZoom = '';
   }
 
   public setDocLinks(docLinks: DocLinksStart): void {
@@ -433,47 +355,6 @@ class DocLinks {
     this.syncRulesAdvanced = docLinks.links.enterpriseSearch.syncRulesAdvanced;
     this.trainedModels = docLinks.links.enterpriseSearch.trainedModels;
     this.textEmbedding = docLinks.links.enterpriseSearch.textEmbedding;
-    this.workplaceSearchGatedFormBlog = docLinks.links.workplaceSearch.gatedFormBlog;
-    this.workplaceSearchApiKeys = docLinks.links.workplaceSearch.apiKeys;
-    this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
-    this.workplaceSearchConfluenceCloud = docLinks.links.workplaceSearch.confluenceCloud;
-    this.workplaceSearchConfluenceCloudConnectorPackage =
-      docLinks.links.workplaceSearch.confluenceCloudConnectorPackage;
-    this.workplaceSearchConfluenceServer = docLinks.links.workplaceSearch.confluenceServer;
-    this.workplaceSearchContentSources = docLinks.links.workplaceSearch.contentSources;
-    this.workplaceSearchCustomConnectorPackage =
-      docLinks.links.workplaceSearch.customConnectorPackage;
-    this.workplaceSearchCustomSources = docLinks.links.workplaceSearch.customSources;
-    this.workplaceSearchCustomSourcePermissions =
-      docLinks.links.workplaceSearch.customSourcePermissions;
-    this.workplaceSearchDocumentPermissions = docLinks.links.workplaceSearch.documentPermissions;
-    this.workplaceSearchDropbox = docLinks.links.workplaceSearch.dropbox;
-    this.workplaceSearchExternalSharePointOnline =
-      docLinks.links.workplaceSearch.externalSharePointOnline;
-    this.workplaceSearchExternalIdentities = docLinks.links.workplaceSearch.externalIdentities;
-    this.workplaceSearchGatedFormDataUse = docLinks.links.legal.dataUse;
-    this.workplaceSearchGatedFormPrivacyStatement = docLinks.links.legal.generalPrivacyStatement;
-    this.workplaceSearchGatedFormTermsOfService = docLinks.links.legal.termsOfService;
-    this.workplaceSearchGettingStarted = docLinks.links.workplaceSearch.gettingStarted;
-    this.workplaceSearchGitHub = docLinks.links.workplaceSearch.gitHub;
-    this.workplaceSearchGmail = docLinks.links.workplaceSearch.gmail;
-    this.workplaceSearchGoogleDrive = docLinks.links.workplaceSearch.googleDrive;
-    this.workplaceSearchIndexingSchedule = docLinks.links.workplaceSearch.indexingSchedule;
-    this.workplaceSearchJiraCloud = docLinks.links.workplaceSearch.jiraCloud;
-    this.workplaceSearchJiraServer = docLinks.links.workplaceSearch.jiraServer;
-    this.workplaceSearchNetworkDrive = docLinks.links.workplaceSearch.networkDrive;
-    this.workplaceSearchOneDrive = docLinks.links.workplaceSearch.oneDrive;
-    this.workplaceSearchPermissions = docLinks.links.workplaceSearch.permissions;
-    this.workplaceSearchPrivateSourcePermissions =
-      docLinks.links.workplaceSearch.privateSourcePermissions;
-    this.workplaceSearchSalesforce = docLinks.links.workplaceSearch.salesforce;
-    this.workplaceSearchSecurity = docLinks.links.workplaceSearch.security;
-    this.workplaceSearchServiceNow = docLinks.links.workplaceSearch.serviceNow;
-    this.workplaceSearchSharePoint = docLinks.links.workplaceSearch.sharePoint;
-    this.workplaceSearchSharePointServer = docLinks.links.workplaceSearch.sharePointServer;
-    this.workplaceSearchSlack = docLinks.links.workplaceSearch.slack;
-    this.workplaceSearchSynch = docLinks.links.workplaceSearch.synch;
-    this.workplaceSearchZendesk = docLinks.links.workplaceSearch.zendesk;
   }
 }
 

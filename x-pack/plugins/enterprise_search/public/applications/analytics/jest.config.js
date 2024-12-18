@@ -19,7 +19,4 @@ module.exports = {
   ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/enterprise_search/public/applications/analytics',
-  modulePathIgnorePatterns: [
-    '<rootDir>/x-pack/plugins/enterprise_search/public/applications/workplace_search/cypress',
-  ],
 };

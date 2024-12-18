@@ -30,6 +30,3 @@ export const externalUrl = {
 export const getEnterpriseSearchUrl = (path: string = ''): string => {
   return externalUrl.enterpriseSearchUrl + path;
 };
-export const getWorkplaceSearchUrl = (path: string = ''): string => {
-  return getEnterpriseSearchUrl('/ws' + path);
-};

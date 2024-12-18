@@ -20,7 +20,6 @@ import {
   useEuiBreadcrumbs,
   useEnterpriseSearchBreadcrumbs,
   useSearchBreadcrumbs,
-  useWorkplaceSearchBreadcrumbs,
 } from './generate_breadcrumbs';
 
 describe('useGenerateBreadcrumbs', () => {
@@ -223,62 +222,6 @@ describe('useEnterpriseSearchBreadcrumbs', () => {
     expect(useEnterpriseSearchBreadcrumbs()).toEqual([
       {
         text: 'Enterprise Search',
-      },
-    ]);
-  });
-});
-
-describe('useWorkplaceSearchBreadcrumbs', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockHistory.createHref.mockImplementation(
-      ({ pathname }: any) => `/app/enterprise_search/workplace_search${pathname}`
-    );
-  });
-
-  it('Builds a chain of breadcrumbs with Enterprise Search and Workplace Search at the root', () => {
-    const breadcrumbs = [
-      {
-        text: 'Page 1',
-        path: '/page1',
-      },
-      {
-        text: 'Page 2',
-        path: '/page2',
-      },
-    ];
-
-    expect(useWorkplaceSearchBreadcrumbs(breadcrumbs)).toEqual([
-      {
-        text: 'Enterprise Search',
-        href: '/app/elasticsearch/overview',
-        onClick: expect.any(Function),
-      },
-      {
-        text: 'Workplace Search',
-        href: '/app/enterprise_search/workplace_search/',
-        onClick: expect.any(Function),
-      },
-      {
-        text: 'Page 1',
-        href: '/app/enterprise_search/workplace_search/page1',
-        onClick: expect.any(Function),
-      },
-      {
-        text: 'Page 2',
-      },
-    ]);
-  });
-
-  it('shows just the root if breadcrumbs is empty', () => {
-    expect(useWorkplaceSearchBreadcrumbs()).toEqual([
-      {
-        text: 'Enterprise Search',
-        href: '/app/elasticsearch/overview',
-        onClick: expect.any(Function),
-      },
-      {
-        text: 'Workplace Search',
       },
     ]);
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { externalUrl, getEnterpriseSearchUrl, getAppSearchUrl, getWorkplaceSearchUrl } from '.';
+import { externalUrl, getEnterpriseSearchUrl } from '.';
 
 describe('Enterprise Search external URL helpers', () => {
   describe('getter/setter tests', () => {
@@ -28,16 +28,6 @@ describe('Enterprise Search external URL helpers', () => {
     it('generates a public Enterprise Search URL', () => {
       expect(getEnterpriseSearchUrl()).toEqual('http://localhost:3002');
       expect(getEnterpriseSearchUrl('/login')).toEqual('http://localhost:3002/login');
-    });
-
-    it('generates a public App Search URL', () => {
-      expect(getAppSearchUrl()).toEqual('http://localhost:3002/as');
-      expect(getAppSearchUrl('/path')).toEqual('http://localhost:3002/as/path');
-    });
-
-    it('generates a public Workplace Search URL', () => {
-      expect(getWorkplaceSearchUrl()).toEqual('http://localhost:3002/ws');
-      expect(getWorkplaceSearchUrl('/path')).toEqual('http://localhost:3002/ws/path');
     });
   });
 });

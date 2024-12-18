@@ -18,7 +18,6 @@ import {
   SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
   VECTOR_SEARCH_PLUGIN,
-  WORKPLACE_SEARCH_PLUGIN,
   SEMANTIC_SEARCH_PLUGIN,
   APPLICATIONS_PLUGIN,
   GETTING_STARTED_TITLE,
@@ -140,12 +139,6 @@ export const useElasticsearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
       }),
       path: '/',
     },
-    ...breadcrumbs,
-  ]);
-
-export const useWorkplaceSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useEnterpriseSearchBreadcrumbs([
-    { text: WORKPLACE_SEARCH_PLUGIN.NAME, path: '/' },
     ...breadcrumbs,
   ]);
 

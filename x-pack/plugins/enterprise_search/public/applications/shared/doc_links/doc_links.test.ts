@@ -21,6 +21,5 @@ describe('DocLinks', () => {
 
     expect(docLinks.cloudIndexManagement).toEqual(links.links.cloud.indexManagement);
     expect(docLinks.enterpriseSearchConfig).toEqual(links.links.enterpriseSearch.configuration);
-    expect(docLinks.workplaceSearchZendesk).toEqual(links.links.workplaceSearch.zendesk);
   });
 });

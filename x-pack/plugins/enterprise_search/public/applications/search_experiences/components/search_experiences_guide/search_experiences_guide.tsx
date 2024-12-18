@@ -61,7 +61,7 @@ export const SearchExperiencesGuide: React.FC = () => {
                   <p>
                     <FormattedMessage
                       id="xpack.enterpriseSearch.searchExperiences.guide.description"
-                      defaultMessage="Search UI is a JavaScript library for implementing world-class search experiences without reinventing the wheel. It works out of the box with Elasticsearch, App Search, and Workplace Search, so you can focus on building the best experience for your users, customers, and employees."
+                      defaultMessage="Search UI is a JavaScript library for implementing world-class search experiences without reinventing the wheel. It works out of the box with Elasticsearch so you can focus on building the best experience for your users, customers, and employees."
                     />
                   </p>
                 </EuiText>
@@ -176,20 +176,6 @@ export const SearchExperiencesGuide: React.FC = () => {
                 }
               )}
               href={SEARCH_EXPERIENCES_PLUGIN.ELASTICSEARCH_TUTORIAL_URL}
-              target="_blank"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiCard
-              icon={<EuiIcon size="xl" type="logoWorkplaceSearch" />}
-              title="Workplace Search"
-              description={i18n.translate(
-                'xpack.enterpriseSearch.searchExperiences.guide.tutorials.workplaceSearch.description',
-                {
-                  defaultMessage: 'Build a search experience with Workplace Search and Search UI.',
-                }
-              )}
-              href={SEARCH_EXPERIENCES_PLUGIN.WORKPLACE_SEARCH_TUTORIAL_URL}
               target="_blank"
             />
           </EuiFlexItem>

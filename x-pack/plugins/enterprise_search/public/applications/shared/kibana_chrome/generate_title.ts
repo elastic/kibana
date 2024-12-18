@@ -15,7 +15,6 @@ import {
   SEARCH_PRODUCT_NAME,
   SEMANTIC_SEARCH_PLUGIN,
   VECTOR_SEARCH_PLUGIN,
-  WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 
 /**
@@ -47,9 +46,6 @@ export const elasticsearchTitle = (page: Title = []) =>
       defaultMessage: 'Getting started with Elasticsearch',
     }),
   ]);
-
-export const workplaceSearchTitle = (page: Title = []) =>
-  generateTitle([...page, WORKPLACE_SEARCH_PLUGIN.NAME]);
 
 export const searchExperiencesTitle = (page: Title = []) =>
   generateTitle([...page, SEARCH_EXPERIENCES_PLUGIN.NAME]);

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { externalUrl, getEnterpriseSearchUrl, getWorkplaceSearchUrl } from './external_url';
+export { externalUrl, getEnterpriseSearchUrl } from './external_url';

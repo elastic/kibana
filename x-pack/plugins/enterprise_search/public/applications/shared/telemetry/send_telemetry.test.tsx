@@ -12,7 +12,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { SendEnterpriseSearchTelemetry, SendWorkplaceSearchTelemetry } from '.';
+import { SendEnterpriseSearchTelemetry } from '.';
 
 describe('Telemetry component helpers', () => {
   beforeEach(() => {
@@ -26,16 +26,6 @@ describe('Telemetry component helpers', () => {
       action: 'viewed',
       metric: 'page',
       product: 'enterprise_search',
-    });
-  });
-
-  it('SendWorkplaceSearchTelemetry', () => {
-    shallow(<SendWorkplaceSearchTelemetry action="error" metric="not_found" />);
-
-    expect(mockTelemetryActions.sendTelemetry).toHaveBeenCalledWith({
-      action: 'error',
-      metric: 'not_found',
-      product: 'workplace_search',
     });
   });
 });

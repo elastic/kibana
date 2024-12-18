@@ -11,7 +11,6 @@ export {
   SetEnterpriseSearchContentChrome,
   SetElasticsearchChrome,
   SetAiSearchChrome,
-  SetWorkplaceSearchChrome,
   SetSearchExperiencesChrome,
   SetEnterpriseSearchApplicationsChrome,
   SetSemanticSearchChrome,

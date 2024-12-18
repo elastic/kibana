@@ -36,7 +36,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
   const ENTERPRISE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/`;
   const ESRE_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/esre/${DOC_LINK_VERSION}/`;
-  const WORKPLACE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/`;
   const SEARCH_UI_DOCS = `${DOCS_WEBSITE_URL}search-ui/`;
   const MACHINE_LEARNING_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/`;
   const SERVERLESS_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/serverless/current/`;
@@ -200,41 +199,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       textEmbedding: `${MACHINE_LEARNING_DOCS}ml-nlp-model-ref.html#ml-nlp-model-ref-text-embedding`,
       troubleshootSetup: `${ENTERPRISE_SEARCH_DOCS}troubleshoot-setup.html`,
       usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
-    },
-    workplaceSearch: {
-      apiKeys: `${WORKPLACE_SEARCH_DOCS}workplace-search-api-authentication.html`,
-      box: `${WORKPLACE_SEARCH_DOCS}workplace-search-box-connector.html`,
-      confluenceCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-cloud-connector.html`,
-      confluenceCloudConnectorPackage: `${WORKPLACE_SEARCH_DOCS}confluence-cloud.html`,
-      confluenceServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-server-connector.html`,
-      contentSources: `${WORKPLACE_SEARCH_DOCS}workplace-search-content-sources.html`,
-      customConnectorPackage: `${WORKPLACE_SEARCH_DOCS}custom-connector-package.html`,
-      customSources: `${WORKPLACE_SEARCH_DOCS}workplace-search-custom-api-sources.html`,
-      customSourcePermissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-custom-api-sources.html#custom-api-source-document-level-access-control`,
-      documentPermissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-sources-document-permissions.html`,
-      dropbox: `${WORKPLACE_SEARCH_DOCS}workplace-search-dropbox-connector.html`,
-      externalSharePointOnline: `${WORKPLACE_SEARCH_DOCS}sharepoint-online-external.html`,
-      externalIdentities: `${WORKPLACE_SEARCH_DOCS}workplace-search-external-identities-api.html`,
-      gatedFormBlog: `${ELASTIC_WEBSITE_URL}blog/evolution-workplace-search-private-data-elasticsearch`,
-      gettingStarted: `${WORKPLACE_SEARCH_DOCS}workplace-search-getting-started.html`,
-      gitHub: `${WORKPLACE_SEARCH_DOCS}workplace-search-github-connector.html`,
-      gmail: `${WORKPLACE_SEARCH_DOCS}workplace-search-gmail-connector.html`,
-      googleDrive: `${WORKPLACE_SEARCH_DOCS}workplace-search-google-drive-connector.html`,
-      indexingSchedule: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html#_indexing_schedule`,
-      jiraCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-cloud-connector.html`,
-      jiraServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-server-connector.html`,
-      networkDrive: `${WORKPLACE_SEARCH_DOCS}network-drives.html`,
-      oneDrive: `${WORKPLACE_SEARCH_DOCS}workplace-search-onedrive-connector.html`,
-      permissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-permissions.html`,
-      privateSourcePermissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-permissions.html#organizational-sources-private-sources`,
-      salesforce: `${WORKPLACE_SEARCH_DOCS}workplace-search-salesforce-connector.html`,
-      security: `${WORKPLACE_SEARCH_DOCS}workplace-search-security.html`,
-      serviceNow: `${WORKPLACE_SEARCH_DOCS}workplace-search-servicenow-connector.html`,
-      sharePoint: `${WORKPLACE_SEARCH_DOCS}workplace-search-sharepoint-online-connector.html`,
-      sharePointServer: `${WORKPLACE_SEARCH_DOCS}sharepoint-server.html`,
-      slack: `${WORKPLACE_SEARCH_DOCS}workplace-search-slack-connector.html`,
-      synch: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html`,
-      zendesk: `${WORKPLACE_SEARCH_DOCS}workplace-search-zendesk-connector.html`,
     },
     metricbeat: {
       base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`,

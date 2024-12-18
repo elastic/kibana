@@ -12,7 +12,6 @@ import {
   ENTERPRISE_SEARCH_CONTENT_APP_ID,
   ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
-  ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID,
   SEARCH_ELASTICSEARCH,
   SEARCH_VECTOR_SEARCH,
   SEARCH_SEMANTIC_SEARCH,
@@ -104,20 +103,6 @@ export const ELASTICSEARCH_PLUGIN = {
   SUPPORT_URL: 'https://discuss.elastic.co/c/elastic-stack/elasticsearch/',
 };
 
-export const WORKPLACE_SEARCH_PLUGIN = {
-  ID: ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID,
-  NAME: i18n.translate('xpack.enterpriseSearch.workplaceSearch.productName', {
-    defaultMessage: 'Workplace Search',
-  }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.workplaceSearch.productDescription', {
-    defaultMessage:
-      'Search all documents, files, and sources available across your virtual workplace.',
-  }),
-  URL: '/app/enterprise_search/workplace_search',
-  NON_ADMIN_URL: '/app/enterprise_search/workplace_search/p',
-  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/workplace-search/',
-};
-
 export const SEARCH_EXPERIENCES_PLUGIN = {
   ID: 'searchExperiences',
   NAME: i18n.translate('xpack.enterpriseSearch.searchExperiences.productName', {
@@ -134,8 +119,6 @@ export const SEARCH_EXPERIENCES_PLUGIN = {
   GITHUB_URL: 'https://github.com/elastic/search-ui/',
   DOCUMENTATION_URL: 'https://docs.elastic.co/search-ui/',
   ELASTICSEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/elasticsearch',
-  APP_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/app-search',
-  WORKPLACE_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/workplace-search',
 };
 
 export const APPLICATIONS_PLUGIN = {

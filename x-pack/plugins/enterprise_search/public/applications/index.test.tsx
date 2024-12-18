@@ -30,7 +30,6 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
 import { EnterpriseSearchOverview } from './enterprise_search_overview';
 import { KibanaLogic } from './shared/kibana';
-import { WorkplaceSearch } from './workplace_search';
 
 import { renderApp, renderHeaderActions } from '.';
 
@@ -103,13 +102,6 @@ describe('renderApp', () => {
         mount(EnterpriseSearchOverview);
       });
       expect(mockContainer.querySelector('.kbnPageTemplate')).not.toBeNull();
-    });
-
-    it('renders WorkplaceSearch', () => {
-      act(() => {
-        mount(WorkplaceSearch);
-      });
-      expect(mockContainer.querySelector('.setupGuide')).not.toBeNull();
     });
   });
 

@@ -17,11 +17,6 @@ context('Enterprise Search Overview', () => {
     cy.visit(overviewPath);
     cy.contains('Welcome to Elastic Enterprise Search');
 
-    cy.get('[data-test-subj="workplaceSearchProductCard"]')
-      .contains('Open Workplace Search')
-      .should('have.attr', 'href')
-      .and('match', /workplace_search/);
-
     checkA11y();
   });
 

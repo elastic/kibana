@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { generateTitle, searchTitle, workplaceSearchTitle } from './generate_title';
+import { generateTitle, searchTitle } from './generate_title';
 
 describe('generateTitle', () => {
   it('creates a hyphen separated string from an array of page titles', () => {
@@ -23,17 +23,5 @@ describe('searchTitle', () => {
   it('falls back to product name', () => {
     const title = searchTitle();
     expect(title).toEqual('Elasticsearch');
-  });
-});
-
-describe('workplaceSearchTitle', () => {
-  it('automatically appends the Workplace Search product onto the pages array', () => {
-    const title = workplaceSearchTitle(['Sources']);
-    expect(title).toEqual('Sources - Workplace Search');
-  });
-
-  it('falls back to product name', () => {
-    const title = workplaceSearchTitle();
-    expect(title).toEqual('Workplace Search');
   });
 });

@@ -187,11 +187,6 @@ const mockNavLinks = [
     url: '/app/elasticsearch/relevance/inference_endpoints',
   },
   {
-    id: 'workplaceSearch',
-    title: 'Workplace Search',
-    url: '/app/enterprise_search/workplace_search',
-  },
-  {
     id: 'enterpriseSearchElasticsearch',
     title: 'Elasticsearch',
     url: '/app/elasticsearch/elasticsearch',

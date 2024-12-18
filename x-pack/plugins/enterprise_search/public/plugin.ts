@@ -49,7 +49,6 @@ import {
   SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
   VECTOR_SEARCH_PLUGIN,
-  WORKPLACE_SEARCH_PLUGIN,
   SEMANTIC_SEARCH_PLUGIN,
 } from '../common/constants';
 import { registerLocators } from '../common/locators';
@@ -429,31 +428,6 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     registerLocators(share!);
 
-    core.application.register({
-      appRoute: WORKPLACE_SEARCH_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
-      id: WORKPLACE_SEARCH_PLUGIN.ID,
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(WORKPLACE_SEARCH_PLUGIN.NAME);
-
-        // The Workplace Search Personal dashboard needs the chrome hidden. We hide it globally
-        // here first to prevent a flash of chrome on the Personal dashboard and unhide it for admin routes.
-        if (this.config.host) chrome.setIsVisible(false);
-        await this.getInitialData(http);
-        const pluginData = this.getPluginData();
-
-        const { renderApp } = await import('./applications');
-        const { WorkplaceSearch } = await import('./applications/workplace_search');
-
-        return renderApp(WorkplaceSearch, kibanaDeps, pluginData);
-      },
-      title: WORKPLACE_SEARCH_PLUGIN.NAME,
-      visibleIn: [],
-    });
-
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
         description: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.DESCRIPTION,
@@ -472,16 +446,6 @@ export class EnterpriseSearchPlugin implements Plugin {
         path: ANALYTICS_PLUGIN.URL,
         showOnHomePage: false,
         title: ANALYTICS_PLUGIN.NAME,
-      });
-
-      plugins.home.featureCatalogue.register({
-        category: 'data',
-        description: WORKPLACE_SEARCH_PLUGIN.DESCRIPTION,
-        icon: 'workplaceSearchApp',
-        id: WORKPLACE_SEARCH_PLUGIN.ID,
-        path: WORKPLACE_SEARCH_PLUGIN.URL,
-        showOnHomePage: false,
-        title: WORKPLACE_SEARCH_PLUGIN.NAME,
       });
 
       plugins.home.featureCatalogue.register({
