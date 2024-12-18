@@ -21,10 +21,6 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
 import {
   EmbeddableInput,
-  EmbeddableSetup,
-  EmbeddableSetupDependencies,
-  EmbeddableStart,
-  EmbeddableStartDependencies,
   EmbeddableStateTransfer,
   FilterableEmbeddable,
   IEmbeddable,
@@ -37,6 +33,7 @@ import { SelfStyledOptions } from './lib/self_styled_embeddable/types';
 import { EmbeddablePublicPlugin } from './plugin';
 import { registerReactEmbeddableFactory } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
+import { EmbeddableSetup, EmbeddableSetupDependencies, EmbeddableStart, EmbeddableStartDependencies } from './types';
 
 export type Setup = jest.Mocked<EmbeddableSetup>;
 export type Start = jest.Mocked<EmbeddableStart>;
@@ -97,7 +94,6 @@ const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerAddFromLibraryType: jest.fn().mockImplementation(registerAddFromLibraryType),
     registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
-    registerEmbeddableFactory: jest.fn(),
     registerEnhancement: jest.fn(),
   };
   return setupContract;
@@ -105,8 +101,6 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    getEmbeddableFactories: jest.fn(),
-    getEmbeddableFactory: jest.fn(),
     telemetry: jest.fn(),
     extract: jest.fn(),
     inject: jest.fn(),

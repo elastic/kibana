@@ -17,16 +17,13 @@ export {
   CELL_VALUE_TRIGGER,
   contextMenuTrigger,
   CONTEXT_MENU_TRIGGER,
-  defaultEmbeddableFactoryProvider,
   Embeddable,
-  EmbeddableFactoryNotFoundError,
   EmbeddableStateTransfer,
   ErrorEmbeddable,
   genericEmbeddableInputIsEqual,
   isContextMenuTriggerContext,
   isEmbeddable,
   isErrorEmbeddable,
-  isExplicitInputWithAttributes,
   isFilterableEmbeddable,
   isMultiValueClickTriggerContext,
   isRangeSelectTriggerContext,
@@ -44,7 +41,6 @@ export {
   PANEL_BADGE_TRIGGER,
   PANEL_HOVER_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
-  runEmbeddableFactoryMigrations,
   SELECT_RANGE_TRIGGER,
   shouldFetch$,
   shouldRefreshFilterCompareOptions,
@@ -58,16 +54,12 @@ export type {
   ChartActionContext,
   EmbeddableContext,
   EmbeddableEditorState,
-  EmbeddableFactory,
-  EmbeddableFactoryDefinition,
   EmbeddableInput,
-  EmbeddableInstanceConfiguration,
   EmbeddableOutput,
   EmbeddablePackageState,
   FilterableEmbeddable,
   IEmbeddable,
   MultiValueClickContext,
-  OutputSpec,
   PropertySpec,
   RangeSelectContext,
   ReferenceOrValueEmbeddable,
@@ -77,10 +69,8 @@ export type {
 } from './lib';
 export type {
   EmbeddableSetup,
-  EmbeddableSetupDependencies,
   EmbeddableStart,
-  EmbeddableStartDependencies,
-} from './plugin';
+} from './types';
 export type { EnhancementRegistryDefinition } from './enhancements/types';
 
 export {

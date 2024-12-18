@@ -8,12 +8,9 @@
  */
 
 export * from '../../../common/lib/saved_object_embeddable';
-export * from './default_embeddable_factory_provider';
 export { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
 export { Embeddable } from './embeddable';
 export { EmbeddableErrorHandler } from './embeddable_error_handler';
-export * from './embeddable_factory';
-export * from './embeddable_factory_definition';
 export { ErrorEmbeddable } from './error_embeddable';
 export { isErrorEmbeddable } from './is_error_embeddable';
 export { isEmbeddable } from './is_embeddable';
