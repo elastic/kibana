@@ -12,9 +12,9 @@ const ArrowMarker = ({ id, color }: { id: string; color: string }) => {
   return (
     <marker
       id={id}
-      markerWidth="12"
-      markerHeight="12"
-      viewBox="-10 -10 20 20"
+      markerWidth="14.4" // Increased by 20% from 12 to 14.4
+      markerHeight="14.4" // Increased by 20% from 12 to 14.4
+      viewBox="-12 -12 24 24" // Increased by 20% from "-10 -10 20 20" to "-12 -12 24 24"
       markerUnits="strokeWidth"
       orient="auto-start-reverse"
       refX="0"
@@ -23,8 +23,8 @@ const ArrowMarker = ({ id, color }: { id: string; color: string }) => {
       <polyline
         strokeLinecap="round"
         strokeLinejoin="round"
-        points="-5,-4 0,0 -5,4 -5,-4"
-        strokeWidth="1"
+        points="-6,-4.8 0,0 -6,4.8 -6,-4.8" // Adjusted by 20%
+        strokeWidth="1.2" // Increased by 20%
         stroke={color}
         fill={color}
       />

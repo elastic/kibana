@@ -47,9 +47,11 @@ export function DefaultEdge({
         style={{
           stroke: euiTheme.colors[color],
         }}
-        css={{
-          strokeDasharray: '2,2',
-        }}
+        css={
+          data?.type === 'dashed' && {
+            strokeDasharray: '2,2',
+          }
+        }
         markerStart={
           data?.sourceShape !== 'label' && data?.sourceShape !== 'group'
             ? getMarkerStart(color)
