@@ -33,7 +33,6 @@ export const useGetUniqueIpsStatItems: () => Readonly<StatItems[]> = () => {
             color: euiTheme.colors.vis.euiColorVis2,
             icon: 'visMapCoordinate',
             lensAttributes: kpiUniqueIpsSourceMetricLensAttributes,
-            sourceField: 'source.ip',
           },
           {
             key: 'uniqueDestinationIps',
@@ -42,7 +41,6 @@ export const useGetUniqueIpsStatItems: () => Readonly<StatItems[]> = () => {
             color: euiTheme.colors.vis.euiColorVis3,
             icon: 'visMapCoordinate',
             lensAttributes: kpiUniqueIpsDestinationMetricLensAttributes,
-            sourceField: 'destination.ip',
           },
         ],
         enableAreaChart: true,

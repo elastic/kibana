@@ -33,13 +33,6 @@ export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from,
     getAreaChartLensAttributes,
   } = statItems;
 
-  const colorSchemas = fields.reduce<Record<string, string>>((acc, { sourceField, color }) => {
-    if (color && sourceField) {
-      acc[sourceField] = color;
-    }
-    return acc;
-  }, {});
-
   const { isToggleExpanded, onToggle } = useToggleStatus({ id });
 
   return (
@@ -58,7 +51,6 @@ export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from,
               id={id}
               timerange={timerange}
               inspectTitle={description}
-              colorSchemas={colorSchemas}
             />
 
             {(enableAreaChart || enableBarChart) && <EuiHorizontalRule />}
@@ -72,7 +64,6 @@ export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from,
                     id={`${id}-bar-embeddable`}
                     height={ChartHeight}
                     inspectTitle={description}
-                    colorSchemas={colorSchemas}
                   />
                 </FlexItem>
               )}
@@ -87,7 +78,6 @@ export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from,
                       id={`${id}-area-embeddable`}
                       height={ChartHeight}
                       inspectTitle={description}
-                      colorSchemas={colorSchemas}
                     />
                   </FlexItem>
                 </>

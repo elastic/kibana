@@ -9,10 +9,10 @@ import { TOP_VALUE, UNIQUE_COUNT } from '../../translations';
 import type { LensAttributes, GetLensAttributes } from '../../types';
 
 /* Exported from Kibana Saved Object */
-export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
+export const getDnsTopDomainsLensAttributes: GetLensAttributes = ({
   stackByField = 'dns.question.registered_domain',
-  extraOptions
-) =>
+  extraOptions,
+}) =>
   ({
     title: 'Top domains by dns.question.registered_domain',
     visualizationType: 'lnsXY',

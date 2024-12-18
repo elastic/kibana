@@ -18,7 +18,6 @@ export interface FieldConfigs {
   key: string;
   lensAttributes?: LensAttributes;
   name?: string;
-  sourceField?: string;
 }
 
 export interface StatItems {

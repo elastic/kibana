@@ -32,7 +32,6 @@ export const useGetUniquePrivateIpsStatItems: () => Readonly<StatItems[]> = () =
           color: euiTheme.colors.vis.euiColorVis2,
           icon: 'visMapCoordinate',
           lensAttributes: kpiUniquePrivateIpsSourceMetricLensAttributes,
-          sourceField: 'source.ip',
         },
         {
           key: 'uniqueDestinationPrivateIps',
@@ -41,7 +40,6 @@ export const useGetUniquePrivateIpsStatItems: () => Readonly<StatItems[]> = () =
           color: euiTheme.colors.vis.euiColorVis3,
           icon: 'visMapCoordinate',
           lensAttributes: kpiUniquePrivateIpsDestinationMetricLensAttributes,
-          sourceField: 'destination.ip',
         },
       ],
       description: i18n.UNIQUE_PRIVATE_IPS,

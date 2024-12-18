@@ -28,8 +28,7 @@ const layer = {
   },
 };
 
-export const getKpiUniqueIpsAreaLensAttributes: GetLensAttributes = (props) => {
-  const colorSchemas = props?.colorSchemas;
+export const getKpiUniqueIpsAreaLensAttributes: GetLensAttributes = ({ euiTheme }) => {
   return {
     description: '',
     state: {
@@ -101,7 +100,9 @@ export const getKpiUniqueIpsAreaLensAttributes: GetLensAttributes = (props) => {
             layerType: 'data',
             seriesType: 'area',
             xAccessor: columnSourceTimestamp,
-            yConfig: [{ color: colorSchemas?.[`source.ip`], forAccessor: columnSourceUniqueIp }],
+            yConfig: [
+              { color: euiTheme.colors.vis.euiColorVis2, forAccessor: columnSourceUniqueIp },
+            ],
           },
           {
             accessors: [columnDestinationIp],
@@ -110,7 +111,7 @@ export const getKpiUniqueIpsAreaLensAttributes: GetLensAttributes = (props) => {
             seriesType: 'area',
             xAccessor: columnDestinationTimestamp,
             yConfig: [
-              { color: colorSchemas?.[`destination.ip`], forAccessor: columnDestinationIp },
+              { color: euiTheme.colors.vis.euiColorVis3, forAccessor: columnDestinationIp },
             ],
           },
         ],

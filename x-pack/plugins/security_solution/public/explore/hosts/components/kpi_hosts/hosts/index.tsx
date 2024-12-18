@@ -29,7 +29,6 @@ export const useGetHostsStatItems: () => Readonly<StatItems[]> = () => {
             color: euiTheme.colors.vis.euiColorVis1,
             icon: 'storage',
             lensAttributes: kpiHostMetricLensAttributes,
-            sourceField: 'host.name',
           },
         ],
         enableAreaChart: true,

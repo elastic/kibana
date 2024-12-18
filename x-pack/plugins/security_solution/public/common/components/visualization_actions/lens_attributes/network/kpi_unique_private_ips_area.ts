@@ -15,7 +15,7 @@ const columnDestinationIp = 'ac1eb80c-ddde-46c4-a90c-400261926762';
 const layerSourceIp = '38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7';
 const layerDestinationIp = '72dc4b99-b07d-4dc9-958b-081d259e11fa';
 
-export const getKpiUniquePrivateIpsAreaLensAttributes: GetLensAttributes = ({ colorSchemas }) => {
+export const getKpiUniquePrivateIpsAreaLensAttributes: GetLensAttributes = ({ euiTheme }) => {
   return {
     title: '[Network] Unique private IPs - area chart',
     description: '',
@@ -66,7 +66,7 @@ export const getKpiUniquePrivateIpsAreaLensAttributes: GetLensAttributes = ({ co
             yConfig: [
               {
                 forAccessor: columnSourceIp,
-                color: colorSchemas?.['source.ip'],
+                color: euiTheme.colors.vis.euiColorVis2,
               },
             ],
           },
@@ -79,7 +79,7 @@ export const getKpiUniquePrivateIpsAreaLensAttributes: GetLensAttributes = ({ co
             yConfig: [
               {
                 forAccessor: columnDestinationIp,
-                color: colorSchemas?.['destination.ip'],
+                color: euiTheme.colors.vis.euiColorVis3,
               },
             ],
           },

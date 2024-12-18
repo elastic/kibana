@@ -16,7 +16,7 @@ const columnEventOutcomeSuccessTimestamp = '49a42fe6-ebe8-4adb-8eed-1966a5297b7e
 const layoutEventOutcomeSuccess = '4590dafb-4ac7-45aa-8641-47a3ff0b817c';
 const layoutEventOutcomeFailure = '31213ae3-905b-4e88-b987-0cccb1f3209f';
 
-export const getKpiUserAuthenticationsAreaLensAttributes: GetLensAttributes = ({ colorSchemas }) =>
+export const getKpiUserAuthenticationsAreaLensAttributes: GetLensAttributes = ({ euiTheme }) =>
   ({
     title: '[Host] User authentications - area ',
     description: '',
@@ -48,7 +48,7 @@ export const getKpiUserAuthenticationsAreaLensAttributes: GetLensAttributes = ({
             xAccessor: columnEventOutcomeSuccessTimestamp,
             yConfig: [
               {
-                color: colorSchemas?.['event.outcome.success'],
+                color: euiTheme.colors.vis.euiColorVis0,
                 forAccessor: columnEventOutcomeSuccess,
               },
             ],
@@ -61,7 +61,7 @@ export const getKpiUserAuthenticationsAreaLensAttributes: GetLensAttributes = ({
             xAccessor: columnEventOutcomeFailureTimestamp,
             yConfig: [
               {
-                color: colorSchemas?.['event.outcome.failure'],
+                color: euiTheme.colors.vis.euiColorVis9,
                 forAccessor: columnEventOutcomeFailure,
               },
             ],

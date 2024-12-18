@@ -33,7 +33,6 @@ export const useGetAuthenticationsStatItems: () => Readonly<StatItems[]> = () =>
             color: euiTheme.colors.vis.euiColorVis0,
             icon: 'check',
             lensAttributes: kpiUserAuthenticationsMetricSuccessLensAttributes,
-            sourceField: 'event.outcome.success',
           },
           {
             key: 'authenticationsFailure',
@@ -42,7 +41,6 @@ export const useGetAuthenticationsStatItems: () => Readonly<StatItems[]> = () =>
             color: euiTheme.colors.vis.euiColorVis9,
             icon: 'cross',
             lensAttributes: kpiUserAuthenticationsMetricFailureLensAttributes,
-            sourceField: 'event.outcome.failure',
           },
         ],
         enableAreaChart: true,

@@ -17,6 +17,7 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 
 import type { LensProps } from '@kbn/cases-plugin/public/types';
+import type { EuiThemeComputed } from '@elastic/eui';
 import type { InputsModelId } from '../../store/inputs/constants';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { Status } from '../../../../common/api/detection_engine';
@@ -26,14 +27,13 @@ export type ColorSchemas = Record<string, string>;
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export type GetLensAttributes = (params: {
   stackByField?: string;
-  colorSchemas?: ColorSchemas;
+  euiTheme: EuiThemeComputed;
   extraOptions?: ExtraOptions;
 }) => LensAttributes;
 
 export interface UseLensAttributesProps {
   applyGlobalQueriesAndFilters?: boolean;
   applyPageAndTabsFilters?: boolean;
-  colorSchemas?: ColorSchemas;
   extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
   lensAttributes?: LensAttributes | null;
