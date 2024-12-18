@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import {
   TINY_ELSER,
