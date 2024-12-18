@@ -147,7 +147,7 @@ The following fields are defined in the technical field component template and s
 
 # Alerts as data
 
-Alerts as data can be interacted with using the AlertsClient api found in `x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts`
+Alerts as data can be interacted with using the AlertsClient api found in `x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts`
 
 This api includes public methods such as
 

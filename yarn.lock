@@ -6853,7 +6853,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rule-registry-plugin@link:x-pack/plugins/rule_registry":
+"@kbn/rule-registry-plugin@link:x-pack/platform/plugins/shared/rule_registry":
   version "0.0.0"
   uid ""
 
