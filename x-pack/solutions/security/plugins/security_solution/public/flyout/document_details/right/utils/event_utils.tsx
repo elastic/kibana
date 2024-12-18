@@ -41,10 +41,11 @@ export const isEcsAllowedValue = (
  */
 export const getEcsAllowedValueDescription = (fieldName: FieldName, value: string): string => {
   const allowedValues: AllowedValue[] = EcsFlat[fieldName]?.allowed_values ?? [];
-  return (
+  const result =
     allowedValues?.find((item) => item.name === value)?.description ??
     i18n.translate('xpack.securitySolution.flyout.right.about.noEventKindDescriptionMessage', {
       defaultMessage: "This field doesn't have a description because it's not part of ECS.",
-    })
-  );
+    });
+
+  return result;
 };
