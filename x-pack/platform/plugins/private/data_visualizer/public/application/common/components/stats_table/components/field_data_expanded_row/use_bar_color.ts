@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import { useEuiTheme } from '@elastic/eui';
 
-module.exports = {
-  ...defaultConfig,
-  stories: ['../../**/*.stories.+(tsx|mdx)'],
-  reactOptions: {
-    strictMode: true,
-  },
+export const useBarColor = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return euiTheme.flags.hasVisColorAdjustment ? 'success' : 'vis0';
 };
