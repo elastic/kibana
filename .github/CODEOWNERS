@@ -436,7 +436,6 @@ packages/kbn-rison @elastic/kibana-operations
 packages/kbn-router-to-openapispec @elastic/kibana-core
 packages/kbn-router-utils @elastic/obs-ux-logs-team
 packages/kbn-rrule @elastic/response-ops
-packages/kbn-rule-data-utils @elastic/security-detections-response @elastic/response-ops @elastic/obs-ux-management-team
 packages/kbn-safer-lodash-set @elastic/kibana-security
 packages/kbn-saved-objects-settings @elastic/appex-sharedux
 packages/kbn-saved-search-component @elastic/obs-ux-logs-team
@@ -595,6 +594,7 @@ src/platform/packages/shared/kbn-management/settings/types @elastic/kibana-manag
 src/platform/packages/shared/kbn-management/settings/utilities @elastic/kibana-management
 src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
+src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detections-response @elastic/response-ops @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
 src/platform/packages/shared/kbn-securitysolution-es-utils @elastic/security-detection-engine
 src/platform/packages/shared/kbn-securitysolution-io-ts-types @elastic/security-detection-engine

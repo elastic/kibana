@@ -6849,7 +6849,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rule-data-utils@link:packages/kbn-rule-data-utils":
+"@kbn/rule-data-utils@link:src/platform/packages/shared/kbn-rule-data-utils":
   version "0.0.0"
   uid ""
 
