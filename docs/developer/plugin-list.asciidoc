@@ -254,7 +254,7 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |Utilities for building Kibana plugins.
 
 
-|{kib-repo}blob/{branch}/src/plugins/links/README.md[links]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/links/README.md[links]
 |This plugin adds the Links panel which allows authors to create hard links to navigate on click and bring all context from the source dashboard to the destination dashboard.
 
 
