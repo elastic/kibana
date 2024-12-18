@@ -15,7 +15,7 @@ export const useDiscoverRedirect = (entity: InventoryEntity) => {
     services: { share, application, entityManager },
   } = useKibana();
   const { entityDefinitions, isEntityDefinitionLoading } = useFetchEntityDefinition(
-    entity.entityDefinitionId
+    entity.entityDefinitionId as string
   );
 
   const title = useMemo(
