@@ -216,7 +216,7 @@ connector.
 ## Event Log index - associated resources
 
 The index template and ILM policy are defined in the file
-[`x-pack/plugins/event_log/server/es/documents.ts`](server/es/documents.ts).
+[`x-pack/platform/plugins/shared/event_log/server/es/documents.ts`](server/es/documents.ts).
 
 See [ILM rollover action docs][] for more information on the `is_write_index`
 and `index.lifecycle.*` properties.
@@ -305,7 +305,7 @@ See `QueryEventsBySavedObjectResult` in the Plugin Client APIs below.
 ## Plugin Client APIs for querying
 
 All APIs available for querying the event log are described in
-[`x-pack/plugins/event_log/server/types.ts`](server/types.ts), via the 
+[`x-pack/platform/plugins/shared/event_log/server/types.ts`](server/types.ts), via the 
 `IEventLogClient` interface, which is obtained at plugin start.
 
 ## Generating Events
@@ -327,7 +327,7 @@ service API provided in the `setup` stage:
 
 ```typescript
 ...
-import { IEventLogger, IEventLogService } from '../../event_log/server';
+import { IEventLogger, IEventLogService } from '../../../../event_log/server';
 interface PluginSetupDependencies {
   eventLog: IEventLogService;
 }
@@ -436,7 +436,7 @@ These plugins must call `getClient(request)` to get the event log client.
 Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
 
 ```
-yarn test:jest x-pack/plugins/event_log --watch
+yarn test:jest x-pack/platform/plugins/shared/event_log --watch
 ```
 
 ### API Integration tests

@@ -11,7 +11,7 @@
     ],
     "xpack.aiAssistant": "packages/kbn-ai-assistant",
     "xpack.alerting": "platform/plugins/shared/alerting",
-    "xpack.eventLog": "plugins/event_log",
+    "xpack.eventLog": "platform/plugins/shared/event_log",
     "xpack.stackAlerts": "plugins/stack_alerts",
     "xpack.stackConnectors": "plugins/stack_connectors",
     "xpack.apm": "plugins/observability_solution/apm",

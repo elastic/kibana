@@ -254,7 +254,7 @@ function getEcsVersion(ecsDir) {
 }
 
 function getEcsDir() {
-  const ecsDir = path.resolve(path.join(__dirname, '../../../../../ecs'));
+  const ecsDir = path.resolve(path.join(__dirname, '../../../../../../../ecs'));
 
   let stats;
   let error;
