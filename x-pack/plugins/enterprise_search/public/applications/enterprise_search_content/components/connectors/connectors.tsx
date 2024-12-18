@@ -41,7 +41,8 @@ import { DefaultSettingsFlyout } from '../settings/default_settings_flyout';
 import { ConnectorStats } from './connector_stats';
 import { ConnectorsLogic } from './connectors_logic';
 import { ConnectorsTable } from './connectors_table';
-import { CrawlerEmptyState } from './crawler_empty_state';
+import { SelfManagedWebCrawlerEmptyPrompt } from './self_managed_web_crawler_empty_prompt';
+import { ElasticManagedWebCrawlerEmptyPrompt } from './elastic_managed_web_crawler_empty_prompt';
 import { CreateConnector } from './create_connector';
 import { DeleteConnectorModal } from './delete_connector_modal';
 
@@ -59,8 +60,9 @@ export const crawlersBreadcrumbs = [
 
 export interface ConnectorsProps {
   isCrawler: boolean;
+  isCrawlerSelfManaged: boolean;
 }
-export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
+export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged }) => {
   const { fetchConnectors, onPaginate, setIsFirstRequest, openDeleteModal } =
     useActions(ConnectorsLogic);
   const { data, isLoading, searchParams, isEmpty, connectors } = useValues(ConnectorsLogic);
@@ -199,52 +201,26 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
                     ]
                   : []),
               ]
-            : [
-                <EuiButton
-                  data-test-subj="entSearchContent-crawlers-newCrawlerButton"
-                  data-telemetry-id="entSearchContent-crawlers-newCrawlerButton"
-                  disabled={Boolean(errorConnectingMessage)}
-                  key="newCrawler"
-                  color="primary"
-                  iconType="plusInCircle"
-                  fill
-                  onClick={() => {
-                    KibanaLogic.values.navigateToUrl(NEW_CRAWLER_PATH);
-                  }}
-                >
-                  {i18n.translate('xpack.enterpriseSearch.connectors.newCrawlerButtonLabel', {
-                    defaultMessage: 'New web crawler',
-                  })}
-                </EuiButton>,
-                ...(productFeatures.hasDefaultIngestPipeline
-                  ? [
-                      <EuiButton
-                        color="primary"
-                        data-test-subj="entSearchContent-connectors-defaultSettingsPopover"
-                        data-telemetry-id="entSearchContent-connectors-defaultSettingsPopover"
-                        onClick={() => setShowDefaultSettingsFlyout(true)}
-                      >
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.content.searchIndices.defaultSettings',
-                          {
-                            defaultMessage: 'Default settings',
-                          }
-                        )}
-                      </EuiButton>,
-                    ]
-                  : []),
-              ],
+            : undefined,
         }}
       >
         {productFeatures.hasDefaultIngestPipeline && showDefaultSettingsFlyout && (
           <DefaultSettingsFlyout closeFlyout={() => setShowDefaultSettingsFlyout(false)} />
         )}
-        <ConnectorStats isCrawler={isCrawler} />
-        <EuiSpacer />
+        {!isCrawler && (
+          <>
+            <ConnectorStats isCrawler={isCrawler} />
+            <EuiSpacer />
+          </>
+        )}
 
         <EuiFlexGroup direction="column">
           {isEmpty && isCrawler ? (
-            <CrawlerEmptyState />
+            isCrawlerSelfManaged ? (
+              <SelfManagedWebCrawlerEmptyPrompt />
+            ) : (
+              <ElasticManagedWebCrawlerEmptyPrompt />
+            )
           ) : (
             <>
               <EuiFlexItem>
