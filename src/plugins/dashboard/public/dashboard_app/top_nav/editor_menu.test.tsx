@@ -14,12 +14,10 @@ import { EditorMenu } from './editor_menu';
 
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import {
-  embeddableService,
   uiActionsService,
   visualizationsService,
 } from '../../services/kibana_services';
 
-jest.spyOn(embeddableService, 'getEmbeddableFactories').mockReturnValue(new Map().values());
 jest.spyOn(uiActionsService, 'getTriggerCompatibleActions').mockResolvedValue([]);
 jest.spyOn(visualizationsService, 'getByGroup').mockReturnValue([]);
 jest.spyOn(visualizationsService, 'getAliases').mockReturnValue([]);

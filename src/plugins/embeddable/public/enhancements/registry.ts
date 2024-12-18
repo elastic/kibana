@@ -9,7 +9,11 @@
 
 import { identity } from 'lodash';
 import { SerializableRecord } from '@kbn/utility-types';
-import { EnhancementRegistryDefinition, EnhancementRegistryItem, EnhancementsRegistry } from './types';
+import {
+  EnhancementRegistryDefinition,
+  EnhancementRegistryItem,
+  EnhancementsRegistry,
+} from './types';
 
 const registry: EnhancementsRegistry = new Map();
 
@@ -28,9 +32,9 @@ export function registerEnhancement(enhancement: EnhancementRegistryDefinition) 
       }),
     migrations: enhancement.migrations || {},
   });
-};
+}
 
-export function getEnhancements(): Array<EnhancementRegistryItem> {
+export function getEnhancements(): EnhancementRegistryItem[] {
   return Array.from(registry.values());
 }
 
@@ -46,6 +50,4 @@ export function getEnhancement(id: string): EnhancementRegistryItem {
       migrations: {},
     }
   );
-};
-
-
+}
