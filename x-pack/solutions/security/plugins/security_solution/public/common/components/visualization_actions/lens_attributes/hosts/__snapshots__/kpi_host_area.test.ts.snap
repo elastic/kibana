@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`kpiHostAreaLensAttributes should render 1`] = `
+exports[`getKpiHostAreaLensAttributes should render 1`] = `
 Object {
   "description": "",
   "references": Array [

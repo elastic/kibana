@@ -10,7 +10,7 @@ import { wrapper } from '../../mocks';
 
 import { useLensAttributes } from '../../use_lens_attributes';
 
-import { kpiUniquePrivateIpsAreaLensAttributes } from './kpi_unique_private_ips_area';
+import { getKpiUniquePrivateIpsAreaLensAttributes } from './kpi_unique_private_ips_area';
 
 jest.mock('../../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
@@ -31,12 +31,12 @@ jest.mock('../../../../utils/route/use_route_spy', () => ({
   ]),
 }));
 
-describe('kpiUniquePrivateIpsAreaLensAttributes', () => {
+describe('getKpiUniquePrivateIpsAreaLensAttributes', () => {
   it('should render', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
-          lensAttributes: kpiUniquePrivateIpsAreaLensAttributes,
+          getLensAttributes: getKpiUniquePrivateIpsAreaLensAttributes,
           stackByField: 'event.dataset',
         }),
       { wrapper }

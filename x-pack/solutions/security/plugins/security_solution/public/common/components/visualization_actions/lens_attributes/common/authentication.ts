@@ -38,7 +38,7 @@ export const getAuthenticationLensAttributes: GetLensAttributes = ({ euiTheme })
             yConfig: [
               {
                 forAccessor: '5417777d-d9d9-4268-9cdc-eb29b873bd65',
-                color: euiTheme.colors.vis.euiColorVis1,
+                color: euiTheme.colors.vis.euiColorVis0,
               },
             ],
           },

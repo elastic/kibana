@@ -24,12 +24,15 @@ import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { SecurityPageName } from '../../../app/types';
 import type { Query } from '@kbn/es-query';
 import { getEventsHistogramLensAttributes } from './lens_attributes/common/events';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 jest.mock('../../../sourcerer/containers');
 jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn(),
 }));
-
+const params = {
+  euiTheme: {} as EuiThemeComputed,
+};
 describe('useLensAttributes', () => {
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
@@ -71,7 +74,7 @@ describe('useLensAttributes', () => {
     );
 
     expect(result?.current?.state.filters).toEqual([
-      ...getExternalAlertLensAttributes().state.filters,
+      ...getExternalAlertLensAttributes(params).state.filters,
       ...getDetailsPageFilter('hosts', 'mockHost'),
       ...fieldNameExistsFilter('hosts'),
       ...getIndexFilters(['auditbeat-*']),
@@ -97,7 +100,7 @@ describe('useLensAttributes', () => {
     );
 
     expect(result?.current?.state.filters).toEqual([
-      ...getExternalAlertLensAttributes().state.filters,
+      ...getExternalAlertLensAttributes(params).state.filters,
       ...getNetworkDetailsPageFilter('192.168.1.1'),
       ...sourceOrDestinationIpExistsFilter,
       ...getIndexFilters(['auditbeat-*']),
@@ -123,7 +126,7 @@ describe('useLensAttributes', () => {
     );
 
     expect(result?.current?.state.filters).toEqual([
-      ...getExternalAlertLensAttributes().state.filters,
+      ...getExternalAlertLensAttributes(params).state.filters,
       ...getDetailsPageFilter('user', 'elastic'),
       ...getIndexFilters(['auditbeat-*']),
       ...filterFromSearchBar,
@@ -151,7 +154,7 @@ describe('useLensAttributes', () => {
     expect((result?.current?.state.query as Query).query).toEqual('');
 
     expect(result?.current?.state.filters).toEqual([
-      ...getExternalAlertLensAttributes().state.filters,
+      ...getExternalAlertLensAttributes(params).state.filters,
       ...getIndexFilters(['auditbeat-*']),
     ]);
   });
@@ -175,7 +178,7 @@ describe('useLensAttributes', () => {
     );
 
     expect(result?.current?.state.filters).toEqual([
-      ...getExternalAlertLensAttributes().state.filters,
+      ...getExternalAlertLensAttributes(params).state.filters,
       ...getIndexFilters(['auditbeat-*']),
       ...filterFromSearchBar,
     ]);
