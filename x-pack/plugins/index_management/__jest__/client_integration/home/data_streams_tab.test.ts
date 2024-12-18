@@ -668,6 +668,7 @@ describe('Data Streams tab', () => {
           enabled: true,
           data_retention: '7d',
         },
+        ilmPolicyName: 'testILM',
         indices: [
           {
             managedBy: 'Index Lifecycle Management',
