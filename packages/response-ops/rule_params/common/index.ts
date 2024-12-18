@@ -7,8 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { transactionDurationParamsSchema } from './latest';
-export { transactionDurationParamsSchema as transactionDurationParamsSchemaV1 } from './v1';
-
-export type { TransactionDurationRuleTypeParams } from './latest';
-export type { TransactionDurationRuleTypeParams as TransactionDurationRuleTypeParamsV1 } from './v1';
+export * from './search_configuration_schema';

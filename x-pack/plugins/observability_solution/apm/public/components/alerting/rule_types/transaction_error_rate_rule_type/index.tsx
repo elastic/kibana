@@ -14,7 +14,7 @@ import { ForLastExpression, TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/p
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiSwitchEvent } from '@elastic/eui';
-import { SearchConfigurationType } from '@kbn/response-ops-rule-params/common/search_configuration_schema';
+import { SearchConfigurationType } from '@kbn/response-ops-rule-params/common';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
