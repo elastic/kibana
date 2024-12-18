@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 import { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
 import { AgentMarker } from './agent_marker';
@@ -17,7 +17,7 @@ interface Props {
   x: number;
 }
 
-const MarkerContainer = euiStyled.div`
+const MarkerContainer = styled.div`
   position: absolute;
   bottom: 0;
 `;

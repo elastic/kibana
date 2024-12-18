@@ -9,7 +9,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { getRedirectToTransactionDetailPageUrl } from './get_redirect_to_transaction_detail_page_url';
@@ -18,7 +18,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { ApmPluginStartDeps } from '../../../plugin';
 
-const CentralizedContainer = euiStyled.div`
+const CentralizedContainer = styled.div`
   height: 100%;
   display: flex;
 `;
