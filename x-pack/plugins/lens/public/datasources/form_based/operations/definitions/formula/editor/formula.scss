@@ -36,7 +36,6 @@
 .lnsFormula__editorFooter {
   // make sure docs are rendered in front of monaco
   z-index: 1;
-  background-color: $euiColorLightestShade;
   border-bottom-right-radius: $euiBorderRadius;
   border-bottom-left-radius: $euiBorderRadius;
 }
@@ -47,6 +46,7 @@
 }
 
 .lnsFormula__editorContent {
+  background-color: $euiColorBackgroundBasePlain;
   min-height: 0;
   position: relative;
 
