@@ -387,7 +387,6 @@ packages/kbn-management/settings/section_registry @elastic/appex-sharedux @elast
 packages/kbn-management/settings/setting_ids @elastic/appex-sharedux @elastic/kibana-management
 packages/kbn-management/storybook/config @elastic/kibana-management
 packages/kbn-manifest @elastic/kibana-core
-packages/kbn-mapbox-gl @elastic/kibana-presentation
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-mock-idp-utils @elastic/kibana-security
 packages/kbn-monaco @elastic/appex-sharedux
@@ -576,6 +575,7 @@ src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
 src/platform/packages/private/kbn-management/settings/application @elastic/kibana-management
 src/platform/packages/private/kbn-management/settings/components/field_category @elastic/kibana-management
 src/platform/packages/private/kbn-management/settings/components/form @elastic/kibana-management
+src/platform/packages/private/kbn-mapbox-gl @elastic/kibana-presentation
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
 src/platform/packages/shared/deeplinks/management @elastic/kibana-management
 src/platform/packages/shared/deeplinks/ml @elastic/ml-ui
