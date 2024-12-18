@@ -44,7 +44,7 @@ const Animation = styled.div`
     top: 0;
     left: 0;
     z-index: 0;
-    border: 1px solid ${(props) => props.theme.euiTheme.colors.borderBasePlain};
+    border: 1px solid ${(props) => props.theme.euiTheme.border.color};
     border-radius: inherit;
     animation: 4s cubic-bezier(0.42, 0, 0.37, 1) 0.5s infinite normal none running pulsing;
   }
