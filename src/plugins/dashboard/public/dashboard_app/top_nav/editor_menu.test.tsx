@@ -13,10 +13,7 @@ import { buildMockDashboardApi } from '../../mocks';
 import { EditorMenu } from './editor_menu';
 
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
-import {
-  uiActionsService,
-  visualizationsService,
-} from '../../services/kibana_services';
+import { uiActionsService, visualizationsService } from '../../services/kibana_services';
 
 jest.spyOn(uiActionsService, 'getTriggerCompatibleActions').mockResolvedValue([]);
 jest.spyOn(visualizationsService, 'getByGroup').mockReturnValue([]);
