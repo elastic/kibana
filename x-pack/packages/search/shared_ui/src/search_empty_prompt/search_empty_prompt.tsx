@@ -26,7 +26,7 @@ interface SearchEmptyPromptProps {
   backButton?: BackButtonProps;
   body?: React.ReactNode;
   description?: string;
-  icon?: string;
+  icon?: string | React.JSXElementConstructor<any>;
   isComingSoon?: boolean;
   title: string;
 }
