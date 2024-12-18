@@ -249,7 +249,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.only('ES|QL mode', () => {
+    describe('ES|QL mode', () => {
       const type = 'esql';
 
       beforeEach(async () => {
