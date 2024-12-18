@@ -40,6 +40,6 @@ export const getSeverityColor = (normalizedScore: number): string => {
   } else if (normalizedScore >= 0) {
     return ML_SEVERITY_COLORS.LOW;
   } else {
-    return ML_SEVERITY_COLORS.BLANK;
+    return ML_SEVERITY_COLORS.UNKNOWN;
   }
 };

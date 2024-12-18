@@ -38,10 +38,5 @@ export const ML_SEVERITY_COLORS = {
   /**
    * Color used in the UI to indicate an anomaly for which the score is unknown.
    */
-  UNKNOWN: '#c0c0c0',
-
-  /**
-   * Color used in the UI to indicate an anomaly for which the score is unknown and should be blank.
-   */
-  BLANK: '#ffffff',
+  UNKNOWN: '#ffffff',
 };

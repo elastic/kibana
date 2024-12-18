@@ -25,6 +25,6 @@ export function getSeverityColor(normalizedScore: number): string {
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.LOW) {
     return ML_SEVERITY_COLORS.LOW;
   } else {
-    return ML_SEVERITY_COLORS.BLANK;
+    return ML_SEVERITY_COLORS.UNKNOWN;
   }
 }

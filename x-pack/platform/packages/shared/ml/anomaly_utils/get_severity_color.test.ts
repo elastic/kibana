@@ -37,6 +37,6 @@ describe('getSeverityColor', () => {
   });
 
   test('returns correct hex code for unknown for scores less than 0', () => {
-    expect(getSeverityColor(-10)).toBe(ML_SEVERITY_COLORS.BLANK);
+    expect(getSeverityColor(-10)).toBe(ML_SEVERITY_COLORS.UNKNOWN);
   });
 });
