@@ -31,7 +31,7 @@ webpack_cli(
     "//packages/kbn-analytics",
     "//packages/kbn-crypto-browser",
     "//src/platform/packages/shared/kbn-es-query",
-    "//packages/kbn-search-errors",
+    "//src/platform/packages/shared/kbn-search-errors",
     "//packages/kbn-std",
     "//packages/kbn-safer-lodash-set",
     "//packages/kbn-peggy",
