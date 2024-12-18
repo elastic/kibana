@@ -7,6 +7,7 @@
 
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type {
