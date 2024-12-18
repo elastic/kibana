@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect, tags } from '@kbn/scout';
 import { test, testData, assertionMessages } from '../fixtures';
 
 test.describe(
   'Discover app - value suggestions: useTimeRange disabled',
-  { tag: ['@ess', '@svlSecurity', '@svlOblt', '@svlSearch'] },
+  { tag: tags.DEPLOYMENT_AGNOSTIC },
   () => {
     test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
       await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);

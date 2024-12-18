@@ -7,15 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mergeTests } from '@playwright/test';
-import { browserAuthFixture } from './browser_auth';
-import { scoutPageFixture } from './page';
-import { pageObjectsFixture } from './page_objects';
-import { validateTagsFixture } from './validate_tags';
+const SERVERLESS_ONLY = ['@svlSecurity', '@svlOblt', '@svlSearch'];
+const ESS_ONLY = ['@ess'];
+const DEPLOYMENT_AGNOSTIC = SERVERLESS_ONLY.concat(ESS_ONLY);
 
-export const scoutTestFixtures = mergeTests(
-  browserAuthFixture,
-  scoutPageFixture,
-  pageObjectsFixture,
-  validateTagsFixture
-);
+export const tags = {
+  ESS_ONLY,
+  SERVERLESS_ONLY,
+  DEPLOYMENT_AGNOSTIC,
+};
+
+export const tagsByMode = {
+  stateful: '@ess',
+  serverless: {
+    es: '@svlSearch',
+    oblt: '@svlOblt',
+    security: '@svlSecurity',
+  },
+};
