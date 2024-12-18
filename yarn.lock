@@ -6925,7 +6925,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-search-plugin@link:src/plugins/saved_search":
+"@kbn/saved-search-plugin@link:src/platform/plugins/shared/saved_search":
   version "0.0.0"
   uid ""
 

@@ -9,11 +9,11 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/saved_search'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/saved_search',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/shared/saved_search'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/saved_search',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/saved_search/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/src/platform/plugins/shared/saved_search/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };
