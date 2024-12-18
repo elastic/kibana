@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { SettingsProps } from '@elastic/charts';
