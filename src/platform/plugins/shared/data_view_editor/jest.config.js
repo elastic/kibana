@@ -9,9 +9,9 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/data_view_editor'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/data_view_editor',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/shared/data_view_editor'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/data_view_editor',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/plugins/data_view_editor/public/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/src/platform/plugins/shared/data_view_editor/public/**/*.{ts,tsx}'],
 };
