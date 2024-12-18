@@ -56,7 +56,6 @@ packages/content-management/table_list_view_table @elastic/appex-sharedux
 packages/content-management/user_profiles @elastic/appex-sharedux
 packages/core/analytics/core-analytics-browser-mocks @elastic/kibana-core
 packages/core/analytics/core-analytics-server-mocks @elastic/kibana-core
-packages/core/application/core-application-browser @elastic/kibana-core
 packages/core/application/core-application-browser-internal @elastic/kibana-core
 packages/core/application/core-application-browser-mocks @elastic/kibana-core
 packages/core/application/core-application-common @elastic/kibana-core
@@ -558,6 +557,7 @@ src/core/packages/analytics/browser @elastic/kibana-core
 src/core/packages/analytics/browser-internal @elastic/kibana-core
 src/core/packages/analytics/server @elastic/kibana-core
 src/core/packages/analytics/server-internal @elastic/kibana-core
+src/core/packages/application/browser @elastic/kibana-core
 src/platform/packages/private/default-nav/devtools @elastic/kibana-management
 src/platform/packages/private/default-nav/management @elastic/kibana-management
 src/platform/packages/private/default-nav/ml @elastic/ml-ui
