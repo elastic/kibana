@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { correctCommonEsqlMistakes } from './correct_esql_query';
-export { splitIntoCommands } from './non_ast';
-export { extractEsqlQueries } from './extract_esql_queries';
+import { INLINE_ESQL_QUERY_REGEX } from './constants';
+
+export function extractEsqlQueries(text: string): string[] {
+  return Array.from(text.matchAll(INLINE_ESQL_QUERY_REGEX)).map((match) => match[1].trim());
+}

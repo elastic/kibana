@@ -157,8 +157,8 @@ export const getKqlFromESQLQuery = (esql: string): string => {
 
   function handleLogicalExpression(node: ESQLFunction): string {
     const [lhs, rhs] = node.args;
-    const kqlLhs = handleNode(lhs);
-    const kqlRhs = handleNode(rhs);
+    const kqlLhs = lhs ? handleNode(lhs) : '';
+    const kqlRhs = rhs ? handleNode(rhs) : '';
 
     if (node.name === 'or' && kqlLhs && kqlRhs) {
       return `(${kqlLhs}) OR (${kqlRhs})`;

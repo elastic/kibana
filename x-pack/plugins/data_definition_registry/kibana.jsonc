@@ -8,7 +8,7 @@
     "browser": true,
     "configPath": ["xpack", "dataDefinitionRegistry"],
     "requiredPlugins": [
-      
+      "inference"
     ],
     "requiredBundles": [],
     "optionalPlugins": [],

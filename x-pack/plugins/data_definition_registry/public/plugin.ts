@@ -10,6 +10,7 @@ import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import type { DataDefinitionRegistryServerRouteRepository } from '@kbn/data-definition-registry-plugin/server';
 import { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
 import { once } from 'lodash';
+import { lastValueFrom, map } from 'rxjs';
 import type { IDataDefinitionRegistryPublicPlugin } from './types';
 
 export function createPlugin(
@@ -23,9 +24,32 @@ export function createPlugin(
     setup() {
       return {};
     },
-    start(core) {
+    start(core, plugins) {
       const client = getDataDefinitionRegistryClient(core);
       return {
+        suggestQuery: async (options) => {
+          return lastValueFrom(
+            client
+              .stream('GET /internal/data_definition/suggest_query', {
+                signal: options.signal,
+                params: {
+                  query: {
+                    start: options.start,
+                    end: options.end,
+                    index: options.index,
+                    kuery: options.kuery,
+                    query: options.query,
+                    connectorId: options.connectorId,
+                  },
+                },
+              })
+              .pipe(
+                map(({ output }) => {
+                  return output;
+                })
+              )
+          );
+        },
         getQueries: (options) => {
           return client
             .fetch('GET /internal/data_definition/queries', {

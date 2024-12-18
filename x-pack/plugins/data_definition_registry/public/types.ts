@@ -25,6 +25,15 @@ export interface DataDefinitionRegistryPublicStart {
     kuery?: string;
     signal: AbortSignal;
   }) => Promise<EsqlQueryDefinition[]>;
+  suggestQuery: (options: {
+    query: string;
+    start: number | string;
+    end: number | string;
+    index?: string | string[];
+    kuery?: string;
+    signal: AbortSignal;
+    connectorId?: string;
+  }) => Promise<string>;
 }
 
 export interface DataDefinitionRegistryClient {}

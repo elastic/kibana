@@ -17,7 +17,6 @@ import {
   EuiSelectable,
   EuiText,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
@@ -54,15 +53,17 @@ export function EsqlSuggestedQueries({
 
   const controllerRef = useRef(new AbortController());
 
-  const { euiTheme } = useEuiTheme();
+  const { index, kql } = useMemo(() => {
+    return {
+      index: getIndexPatternFromESQLQuery(query),
+      kql: getKqlFromESQLQuery(query),
+    };
+  }, [query]);
 
   const updateSuggestedQueriesDebounced = useMemo(() => {
-    return debounce((options: { query: string; timeRange?: TimeRange }) => {
+    return debounce((options: { index: string; kql: string; timeRange?: TimeRange }) => {
       controllerRef.current.abort();
       controllerRef.current = new AbortController();
-
-      const index = getIndexPatternFromESQLQuery(options.query);
-      const kql = getKqlFromESQLQuery(options.query);
 
       setLoading(true);
 
@@ -70,9 +71,9 @@ export function EsqlSuggestedQueries({
         .getQueries({
           start: options.timeRange?.from || 'now-15m',
           end: options.timeRange?.to || 'now',
-          index,
+          index: options.index,
           signal: controllerRef.current.signal,
-          kuery: kql,
+          kuery: options.kql,
         })
         .then((definitions) => {
           setSuggestedQueries(definitions);
@@ -89,10 +90,11 @@ export function EsqlSuggestedQueries({
 
   useEffect(() => {
     updateSuggestedQueriesDebounced({
-      query,
+      index,
+      kql,
       timeRange,
     });
-  }, [query, timeRange, updateSuggestedQueriesDebounced]);
+  }, [index, kql, timeRange, updateSuggestedQueriesDebounced]);
 
   const displayMax = 3;
 

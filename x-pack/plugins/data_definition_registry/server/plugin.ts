@@ -8,6 +8,7 @@
 import { schema, type TypeOf } from '@kbn/config-schema';
 import { Plugin } from '@kbn/core-plugins-server';
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/server';
+import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import { mapValues, pick } from 'lodash';
 import { createDataDefinitionRegistry } from './data_definition_registry';
 import { DataDefinitionRegistry } from './data_definition_registry/types';
@@ -23,9 +24,13 @@ export type DataDefinitionRegistryConfig = TypeOf<typeof config>;
 
 export interface ConfigSchema {}
 
-export interface DataDefinitionRegistryServerSetupDependencies {}
+export interface DataDefinitionRegistryServerSetupDependencies {
+  inference: InferenceServerSetup;
+}
 
-export interface DataDefinitionRegistryServerStartDependencies {}
+export interface DataDefinitionRegistryServerStartDependencies {
+  inference: InferenceServerStart;
+}
 
 export type DataDefinitionRegistryServerSetup = Pick<
   DataDefinitionRegistry,

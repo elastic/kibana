@@ -39,6 +39,10 @@ import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import {
+  getIndexPatternFromESQLQuery,
+  getKqlFromESQLQuery,
+} from '@kbn/esql-utils/src/utils/query_parsing_helpers';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -98,6 +102,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     core,
     fieldsMetadata,
     uiSettings,
+    dataDefinitionRegistry,
   } = kibana.services;
   const darkMode = core.theme?.getTheme().darkMode;
 
@@ -124,6 +129,8 @@ export const ESQLEditor = memo(function ESQLEditor({
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
+
+  const [isSuggestionLoading, setIsSuggestionLoading] = useState(false);
 
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -165,6 +172,29 @@ export const ESQLEditor = memo(function ESQLEditor({
       onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
     }
   }, [isQueryLoading, isLoading, allowQueryCancellation, abortController, onTextLangQuerySubmit]);
+
+  const onQueryAutocompleteRef = useRef<() => void>();
+
+  onQueryAutocompleteRef.current = () => {
+    if (dataDefinitionRegistry) {
+      setIsSuggestionLoading(true);
+      dataDefinitionRegistry
+        .suggestQuery({
+          start: timeRange?.from ?? 'now-15m',
+          end: timeRange?.to ?? 'now',
+          query: code,
+          signal: abortController.signal,
+          index: getIndexPatternFromESQLQuery(code),
+          kuery: getKqlFromESQLQuery(code),
+        })
+        .then((nextQuery) => {
+          onQueryUpdate(nextQuery);
+        })
+        .finally(() => {
+          setIsSuggestionLoading(false);
+        });
+    }
+  };
 
   const onCommentLine = useCallback(() => {
     const currentSelection = editor1?.current?.getSelection();
@@ -711,6 +741,14 @@ export const ESQLEditor = memo(function ESQLEditor({
                       // eslint-disable-next-line no-bitwise
                       monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
                       onQuerySubmit
+                    );
+
+                    editor.addCommand(
+                      // eslint-disable-next-line no-bitwise
+                      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Backslash,
+                      () => {
+                        onQueryAutocompleteRef.current?.();
+                      }
                     );
 
                     // on CMD/CTRL + / comment out the entire line

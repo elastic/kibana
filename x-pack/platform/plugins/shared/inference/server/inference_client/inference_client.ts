@@ -12,6 +12,7 @@ import type { InferenceClient } from './types';
 import { createChatCompleteApi } from '../chat_complete';
 import { createOutputApi } from '../../common/output/create_output_api';
 import { getConnectorById } from '../util/get_connector_by_id';
+import { getConnectors } from '../util/get_connectors';
 
 export function createInferenceClient({
   request,
@@ -29,6 +30,10 @@ export function createInferenceClient({
     getConnectorById: async (connectorId: string) => {
       const actionsClient = await actions.getActionsClientWithRequest(request);
       return await getConnectorById({ connectorId, actionsClient });
+    },
+    getConnectors: async () => {
+      const actionsClient = await actions.getActionsClientWithRequest(request);
+      return await getConnectors({ actionsClient });
     },
   };
 }
