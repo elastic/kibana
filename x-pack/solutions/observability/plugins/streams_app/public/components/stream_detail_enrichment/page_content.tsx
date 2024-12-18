@@ -47,7 +47,6 @@ export function StreamDetailEnrichmentContent({
       const items = euiDragDropReorder(processors, source.index, destination.index);
       setProcessors(items);
     }
-    openBottomBar();
   };
 
   useEffect(() => {
