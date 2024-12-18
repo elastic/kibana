@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import { EuiAccordion } from '@elastic/eui';
+import { EuiAccordion, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { Stackframe } from '@kbn/apm-types';
+import { css } from '@emotion/react';
 import { Stackframe as StackframeComponent } from './stackframe';
-
-const LibraryStacktraceAccordion = euiStyled(EuiAccordion)`
-  margin: ${({ theme }) => theme.eui.euiSizeXS} 0;
-`;
 
 interface Props {
   codeLanguage?: string;
@@ -23,12 +19,14 @@ interface Props {
 }
 
 export function LibraryStacktrace({ codeLanguage, id, stackframes }: Props) {
+  const { euiTheme } = useEuiTheme();
+
   if (stackframes.length === 0) {
     return null;
   }
 
   return (
-    <LibraryStacktraceAccordion
+    <EuiAccordion
       buttonContent={i18n.translate(
         'xpack.eventStacktrace.stacktraceTab.libraryFramesToogleButtonLabel',
         {
@@ -38,6 +36,9 @@ export function LibraryStacktrace({ codeLanguage, id, stackframes }: Props) {
       )}
       data-test-subj="LibraryStacktraceAccordion"
       id={id}
+      css={css`
+        margin: ${euiTheme.size.xs} 0;
+      `}
     >
       {stackframes.map((stackframe, i) => (
         <StackframeComponent
@@ -48,6 +49,6 @@ export function LibraryStacktrace({ codeLanguage, id, stackframes }: Props) {
           stackframe={stackframe}
         />
       ))}
-    </LibraryStacktraceAccordion>
+    </EuiAccordion>
   );
 }

@@ -5,28 +5,13 @@
  * 2.0.
  */
 
-import { EuiAccordion } from '@elastic/eui';
+import { EuiAccordion, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { Stackframe as StackframeType, StackframeWithLineContext } from '@kbn/apm-types';
+import { css } from '@emotion/react';
 import { Context } from './context';
 import { FrameHeading } from './frame_heading';
 import { Variables } from './variables';
-
-const ContextContainer = euiStyled.div<{ isLibraryFrame: boolean }>`
-  position: relative;
-  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
-  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
-  border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  border-radius: ${({ theme }) => theme.eui.euiBorderRadiusSmall};
-  background: ${({ isLibraryFrame, theme }) =>
-    isLibraryFrame ? theme.eui.euiColorEmptyShade : theme.eui.euiColorLightestShade};
-`;
-
-// Indent the non-context frames the same amount as the accordion control
-const NoContextFrameHeadingWrapper = euiStyled.div`
-  margin-left: 28px;
-`;
 
 interface Props {
   stackframe: StackframeType;
@@ -43,16 +28,24 @@ export function Stackframe({
   initialIsOpen = false,
   isLibraryFrame = false,
 }: Props) {
+  const { euiTheme } = useEuiTheme();
+  const fontSize = useEuiFontSize('s').fontSize;
+
   if (!hasLineContext(stackframe)) {
     return (
-      <NoContextFrameHeadingWrapper>
+      // Indent the non-context frames the same amount as the accordion control
+      <div
+        css={css`
+          margin-left: 28px;
+        `}
+      >
         <FrameHeading
           codeLanguage={codeLanguage}
           stackframe={stackframe}
           isLibraryFrame={isLibraryFrame}
           idx={id}
         />
-      </NoContextFrameHeadingWrapper>
+      </div>
     );
   }
 
@@ -69,13 +62,24 @@ export function Stackframe({
       id={id}
       initialIsOpen={initialIsOpen}
     >
-      <ContextContainer isLibraryFrame={isLibraryFrame}>
+      <div
+        css={css`
+          position: relative;
+          font-family: ${euiTheme.font.familyCode};
+          font-size: ${fontSize};
+          border: 1px solid ${euiTheme.border.color};
+          border-radius: ${euiTheme.border.radius.small};
+          background: ${isLibraryFrame
+            ? euiTheme.colors.emptyShade
+            : euiTheme.colors.lightestShade};
+        `}
+      >
         <Context
           stackframe={stackframe}
           codeLanguage={codeLanguage}
           isLibraryFrame={isLibraryFrame}
         />
-      </ContextContainer>
+      </div>
       <Variables vars={stackframe.vars} />
     </EuiAccordion>
   );

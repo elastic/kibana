@@ -5,46 +5,39 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiTitle } from '@elastic/eui';
+import { EuiAccordion, EuiTitle, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { Stackframe } from '@kbn/apm-types';
+import { css } from '@emotion/react';
 import { Stacktrace } from '.';
 
-const Accordion = euiStyled(EuiAccordion)`
-  border-top: ${({ theme }) => theme.eui.euiBorderThin};
-  margin-top: ${({ theme }) => theme.eui.euiSizeS};
-`;
-
-const CausedByContainer = euiStyled('h5')`
-  padding: ${({ theme }) => theme.eui.euiSizeS} 0;
-`;
-
-const CausedByHeading = euiStyled('span')`
-  color: ${({ theme }) => theme.eui.euiTextSubduedColor};
-  display: block;
-  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  font-weight: ${({ theme }) => theme.eui.euiFontWeightBold};
-  text-transform: uppercase;
-`;
-
-const FramesContainer = euiStyled('div')`
-  padding-left: ${({ theme }) => theme.eui.euiSizeM};
-`;
-
 function CausedBy({ message }: { message: string }) {
+  const { euiTheme } = useEuiTheme();
+
   return (
-    <CausedByContainer>
-      <CausedByHeading>
+    <h5
+      css={css`
+        padding: ${euiTheme.size.s} 0;
+      `}
+    >
+      <span
+        css={css`
+          color: ${euiTheme.colors.textSubdued};
+          display: block;
+          font-size: ${useEuiFontSize('xs').fontSize};
+          font-weight: ${euiTheme.font.weight.bold};
+          text-transform: uppercase;
+        `}
+      >
         {i18n.translate('xpack.eventStacktrace.stacktraceTab.causedByFramesToogleButtonLabel', {
           defaultMessage: 'Caused By',
         })}
-      </CausedByHeading>
+      </span>
       <EuiTitle size="xxs">
         <span>{message}</span>
       </EuiTitle>
-    </CausedByContainer>
+    </h5>
   );
 }
 
@@ -61,15 +54,28 @@ export function CauseStacktrace({
   message = '…',
   stackframes = [],
 }: CauseStacktraceProps) {
+  const { euiTheme } = useEuiTheme();
+
   if (stackframes.length === 0) {
     return <CausedBy message={message} />;
   }
 
   return (
-    <Accordion buttonContent={<CausedBy message={message} />} id={id}>
-      <FramesContainer>
+    <EuiAccordion
+      buttonContent={<CausedBy message={message} />}
+      id={id}
+      css={css`
+        border-top: ${euiTheme.border.thin};
+        margin-top: ${euiTheme.size.s};
+      `}
+    >
+      <div
+        css={css`
+          padding-left: ${euiTheme.size.m};
+        `}
+      >
         <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />
-      </FramesContainer>
-    </Accordion>
+      </div>
+    </EuiAccordion>
   );
 }
