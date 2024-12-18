@@ -18,7 +18,7 @@ import { LogsOverviewHighlights } from './logs_overview_highlights';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { LogsOverviewDegradedFields } from './logs_overview_degraded_fields';
-import { LogsOverviewStacktrace } from './logs_overview_stacktrace';
+import { LogsOverviewStacktraceSection } from './logs_overview_stacktrace_section';
 
 export type LogsOverviewProps = DocViewRenderProps & {
   renderAIAssistant?: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
@@ -51,7 +51,7 @@ export function LogsOverview({
       <EuiHorizontalRule margin="xs" />
       <LogsOverviewHighlights formattedDoc={parsedDoc} flattenedDoc={hit.flattened} />
       <LogsOverviewDegradedFields rawDoc={hit.raw} />
-      {isStacktraceAvailable && <LogsOverviewStacktrace hit={hit} dataView={dataView} />}
+      {isStacktraceAvailable && <LogsOverviewStacktraceSection hit={hit} dataView={dataView} />}
       {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}
     </FieldActionsProvider>
   );

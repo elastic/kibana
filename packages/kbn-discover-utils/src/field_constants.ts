@@ -19,6 +19,7 @@ export const TRACE_ID_FIELD = 'trace.id';
 export const LOG_FILE_PATH_FIELD = 'log.file.path';
 export const DATASTREAM_NAMESPACE_FIELD = 'data_stream.namespace';
 export const DATASTREAM_DATASET_FIELD = 'data_stream.dataset';
+export const DATASTREAM_TYPE_FIELD = 'data_stream.type';
 
 // Resource Fields
 export const AGENT_NAME_FIELD = 'agent.name';
