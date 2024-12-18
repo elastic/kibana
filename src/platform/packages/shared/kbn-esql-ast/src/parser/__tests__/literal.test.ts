@@ -26,8 +26,8 @@ describe('literal expression', () => {
 
   it('numeric expression captures "value", and "name" fields', () => {
     const text = 'ROW 1';
-    const { ast } = parse(text);
-    const literal = ast[0].args[0] as ESQLLiteral;
+    const { root } = parse(text);
+    const literal = root.commands[0].args[0] as ESQLLiteral;
 
     expect(literal).toMatchObject({
       type: 'literal',
@@ -39,9 +39,9 @@ describe('literal expression', () => {
 
   it('doubles vs integers', () => {
     const text = 'ROW a(1.0, 1)';
-    const { ast } = parse(text);
+    const { root } = parse(text);
 
-    expect(ast[0]).toMatchObject({
+    expect(root.commands[0]).toMatchObject({
       type: 'command',
       args: [
         {
@@ -61,54 +61,117 @@ describe('literal expression', () => {
     });
   });
 
-  // TODO: Un-skip once string parsing fixed: https://github.com/elastic/kibana/issues/203445
-  it.skip('single-quoted string', () => {
-    const text = 'ROW "abc"';
-    const { root } = parse(text);
+  describe('string', () => {
+    describe('single quoted', () => {
+      it('empty string', () => {
+        const text = 'ROW "", 1';
+        const { root } = parse(text);
 
-    expect(root.commands[0]).toMatchObject({
-      type: 'command',
-      args: [
-        {
-          type: 'literal',
-          literalType: 'keyword',
-          value: 'abc',
-        },
-      ],
+        expect(root.commands[0]).toMatchObject({
+          type: 'command',
+          args: [
+            {
+              type: 'literal',
+              literalType: 'keyword',
+              name: '""',
+              valueUnquoted: '',
+            },
+            {},
+          ],
+        });
+      });
+
+      it('short string', () => {
+        const text = 'ROW "abc", 1';
+        const { root } = parse(text);
+
+        expect(root.commands[0]).toMatchObject({
+          type: 'command',
+          args: [
+            {
+              type: 'literal',
+              literalType: 'keyword',
+              name: '"abc"',
+              valueUnquoted: 'abc',
+            },
+            {},
+          ],
+        });
+      });
+
+      it('escaped characters', () => {
+        const text = 'ROW "a\\nb\\tc\\rd\\\\e\\"f", 1';
+        const { root } = parse(text);
+
+        expect(root.commands[0]).toMatchObject({
+          type: 'command',
+          args: [
+            {
+              type: 'literal',
+              literalType: 'keyword',
+              name: '"a\\nb\\tc\\rd\\\\e\\"f"',
+              valueUnquoted: 'a\nb\tc\rd\\e"f',
+            },
+            {},
+          ],
+        });
+      });
     });
-  });
 
-  // TODO: Un-skip once string parsing fixed: https://github.com/elastic/kibana/issues/203445
-  it.skip('unescapes characters', () => {
-    const text = 'ROW "a\\nbc"';
-    const { root } = parse(text);
+    describe('triple quoted', () => {
+      it('empty string', () => {
+        const text = 'ROW """""", 1';
+        const { root } = parse(text);
 
-    expect(root.commands[0]).toMatchObject({
-      type: 'command',
-      args: [
-        {
-          type: 'literal',
-          literalType: 'keyword',
-          value: 'a\nbc',
-        },
-      ],
-    });
-  });
+        expect(root.commands[0]).toMatchObject({
+          type: 'command',
+          args: [
+            {
+              type: 'literal',
+              literalType: 'keyword',
+              name: '""""""',
+              valueUnquoted: '',
+            },
+            {},
+          ],
+        });
+      });
 
-  // TODO: Un-skip once string parsing fixed: https://github.com/elastic/kibana/issues/203445
-  it.skip('triple-quoted string', () => {
-    const text = 'ROW """abc"""';
-    const { root } = parse(text);
+      it('short string', () => {
+        const text = 'ROW """abc""", 1';
+        const { root } = parse(text);
 
-    expect(root.commands[0]).toMatchObject({
-      type: 'command',
-      args: [
-        {
-          type: 'literal',
-          literalType: 'keyword',
-          value: 'abc',
-        },
-      ],
+        expect(root.commands[0]).toMatchObject({
+          type: 'command',
+          args: [
+            {
+              type: 'literal',
+              literalType: 'keyword',
+              name: '"""abc"""',
+              valueUnquoted: 'abc',
+            },
+            {},
+          ],
+        });
+      });
+
+      it('characters are not escaped', () => {
+        const text = 'ROW """a\\nb\\c\\"d""", 1';
+        const { root } = parse(text);
+
+        expect(root.commands[0]).toMatchObject({
+          type: 'command',
+          args: [
+            {
+              type: 'literal',
+              literalType: 'keyword',
+              name: '"""a\\nb\\c\\"d"""',
+              valueUnquoted: 'a\\nb\\c\\"d',
+            },
+            {},
+          ],
+        });
+      });
     });
   });
 });

@@ -7,7 +7,7 @@
 
 import { EuiBadge, EuiIconTip, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import React, { useMemo, useState } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { isPending } from '../../../../hooks/use_fetcher';
@@ -30,25 +30,25 @@ import { isTimeComparison } from '../../../shared/time_comparison/get_comparison
 import { ErrorGroupItem, useErrorGroupListData } from './use_error_group_list_data';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
-const GroupIdLink = euiStyled(ErrorDetailLink)`
-  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
+const GroupIdLink = styled(ErrorDetailLink)`
+  font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
 `;
 
-const MessageAndCulpritCell = euiStyled.div`
+const MessageAndCulpritCell = styled.div`
   ${truncate('100%')};
 `;
 
-const ErrorLink = euiStyled(ErrorOverviewLink)`
+const ErrorLink = styled(ErrorOverviewLink)`
   ${truncate('100%')};
 `;
 
-const MessageLink = euiStyled(ErrorDetailLink)`
-  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
+const MessageLink = styled(ErrorDetailLink)`
+  font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
   ${truncate('100%')};
 `;
 
-const Culprit = euiStyled.div`
-  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
+const Culprit = styled.div`
+  font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
 `;
 
 interface Props {

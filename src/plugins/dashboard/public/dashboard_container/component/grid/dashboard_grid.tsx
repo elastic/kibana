@@ -15,8 +15,6 @@ import classNames from 'classnames';
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Layout, Responsive as ResponsiveReactGridLayout } from 'react-grid-layout';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { DashboardPanelState } from '../../../../common';
@@ -106,7 +104,7 @@ export const DashboardGrid = ({
 
   const onLayoutChange = useCallback(
     (newLayout: Array<Layout & { i: string }>) => {
-      if (viewMode !== ViewMode.EDIT) return;
+      if (viewMode !== 'edit') return;
 
       const updatedPanels: { [key: string]: DashboardPanelState } = newLayout.reduce(
         (updatedPanelsAcc, panelLayout) => {
@@ -127,8 +125,8 @@ export const DashboardGrid = ({
 
   const classes = classNames({
     'dshLayout-withoutMargins': !useMargins,
-    'dshLayout--viewing': viewMode === ViewMode.VIEW,
-    'dshLayout--editing': viewMode !== ViewMode.VIEW,
+    'dshLayout--viewing': viewMode === 'view',
+    'dshLayout--editing': viewMode !== 'view',
     'dshLayout--noAnimation': !animatePanelTransforms || delayedIsPanelExpanded,
     'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
   });
@@ -136,7 +134,7 @@ export const DashboardGrid = ({
   const { layouts, breakpoints, columns } = useDashboardGridSettings(panelsInOrder, panels);
 
   // in print mode, dashboard layout is not controlled by React Grid Layout
-  if (viewMode === ViewMode.PRINT) {
+  if (viewMode === 'print') {
     return <>{panelComponents}</>;
   }
 

@@ -25,7 +25,7 @@ import {
   TickFormatter,
 } from '@elastic/charts';
 
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind, useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -37,7 +37,6 @@ import type { HistogramItem } from '../../../../../common/correlations/types';
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { useTheme } from '../../../../hooks/use_theme';
 
 import { ChartContainer } from '../chart_container';
 
@@ -109,7 +108,7 @@ export function DurationDistributionChart({
   eventType,
 }: DurationDistributionChartProps) {
   const chartThemes = useChartThemes();
-  const euiTheme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const markerPercentile = DEFAULT_PERCENTILE_THRESHOLD;
 
   const annotationsDataValues: LineAnnotationDatum[] = [
@@ -188,7 +187,7 @@ export function DurationDistributionChart({
                   },
                   tickLabel: {
                     fontSize: 10,
-                    fill: euiTheme.eui.euiColorMediumShade,
+                    fill: euiTheme.colors.mediumShade,
                     padding: 0,
                   },
                 },
@@ -207,8 +206,8 @@ export function DurationDistributionChart({
               id="rect_annotation_1"
               style={{
                 strokeWidth: 1,
-                stroke: euiTheme.eui.euiColorLightShade,
-                fill: euiTheme.eui.euiColorLightShade,
+                stroke: euiTheme.colors.lightShade,
+                fill: euiTheme.colors.lightShade,
                 opacity: 0.9,
               }}
               hideTooltips={true}

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import '../_index.scss';
 import { pick } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
@@ -200,7 +199,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
         } catch (e) {
           toasts.addError(e, {
             title: i18n.translate('xpack.dataVisualizer.index.savedSearchErrorMessage', {
-              defaultMessage: 'Error retrieving saved search {savedSearchId}',
+              defaultMessage: 'Error retrieving Discover session {savedSearchId}',
               values: { savedSearchId },
             }),
           });

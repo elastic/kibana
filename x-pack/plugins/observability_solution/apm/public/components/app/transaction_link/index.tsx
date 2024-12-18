@@ -7,14 +7,15 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { getRedirectToTransactionDetailPageUrl } from '../trace_link/get_redirect_to_transaction_detail_page_url';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 
-const CentralizedContainer = euiStyled.div`
+const CentralizedContainer = styled.div`
   height: 100%;
   display: flex;
 `;
@@ -67,7 +68,16 @@ export function TransactionLink() {
 
   return (
     <CentralizedContainer>
-      <EuiEmptyPrompt iconType="apmTrace" title={<h2>Fetching transaction...</h2>} />
+      <EuiEmptyPrompt
+        iconType="apmTrace"
+        title={
+          <h2>
+            {i18n.translate('xpack.apm.transactionLink.h2.fetchingTransactionLabel', {
+              defaultMessage: 'Fetching transaction...',
+            })}
+          </h2>
+        }
+      />
     </CentralizedContainer>
   );
 }

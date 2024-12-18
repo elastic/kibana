@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { AgentIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { isMobileAgentName } from '../../../../../../common/agent_name';
@@ -21,7 +21,9 @@ import { PopoverTooltip } from '../../../popover_tooltip';
 import { TruncateWithTooltip } from '../../../truncate_with_tooltip';
 import { MaxGroupsMessage, OTHER_SERVICE_NAME } from '../max_groups_message';
 
-const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
+const StyledLink = styled(EuiLink)`
+  ${truncate('100%')};
+`;
 
 function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;

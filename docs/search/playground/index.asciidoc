@@ -18,7 +18,16 @@ Refer to the following for more advanced topics:
 
 * <<playground-context>>
 * <<playground-query>>
-* <<playground-troubleshooting>> 
+* <<playground-troubleshooting>>
+
+.🍿 Getting started videos
+***********************
+Watch these video tutorials to help you get started:
+
+* https://www.youtube.com/watch?v=zTHgJ3rhe10[Getting Started]
+* https://www.youtube.com/watch?v=ZtxoASFvkno[Using Playground with local LLMs]
+***********************
+
 
 [float]
 [[playground-how-it-works]]

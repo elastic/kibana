@@ -8,8 +8,8 @@
 import cytoscape from 'cytoscape';
 import { debounce } from 'lodash';
 import { useEffect } from 'react';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
 
 /*
@@ -39,13 +39,13 @@ function applyCubicBezierStyles(edges: cytoscape.EdgeCollection) {
 function getLayoutOptions({
   fit = false,
   nodeHeight,
-  theme,
+  euiTheme,
 }: {
   fit?: boolean;
   nodeHeight: number;
-  theme: EuiTheme;
+  euiTheme: EuiThemeComputed;
 }): cytoscape.LayoutOptions {
-  const animationOptions = getAnimationOptions(theme);
+  const animationOptions = getAnimationOptions(euiTheme);
 
   return {
     animationDuration: animationOptions.duration,
@@ -82,16 +82,16 @@ function resetConnectedEdgeStyle(cytoscapeInstance: cytoscape.Core, node?: cytos
 export function useCytoscapeEventHandlers({
   cy,
   serviceName,
-  theme,
+  euiTheme,
 }: {
   cy?: cytoscape.Core;
   serviceName?: string;
-  theme: EuiTheme;
+  euiTheme: EuiThemeComputed;
 }) {
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
   useEffect(() => {
-    const nodeHeight = getNodeHeight(theme);
+    const nodeHeight = getNodeHeight(euiTheme);
 
     const dataHandler: cytoscape.EventHandler = (event, fit) => {
       if (serviceName) {
@@ -111,7 +111,7 @@ export function useCytoscapeEventHandlers({
       event.cy
         .elements('[!hasBeenDragged]')
         .difference('node:selected')
-        .layout(getLayoutOptions({ fit, nodeHeight, theme }))
+        .layout(getLayoutOptions({ fit, nodeHeight, euiTheme }))
         .run();
     };
 
@@ -216,5 +216,5 @@ export function useCytoscapeEventHandlers({
         cy.removeListener('tapend', undefined, tapendHandler);
       }
     };
-  }, [cy, serviceName, trackApmEvent, theme]);
+  }, [cy, serviceName, trackApmEvent, euiTheme]);
 }

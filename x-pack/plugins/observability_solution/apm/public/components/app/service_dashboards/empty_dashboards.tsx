@@ -5,17 +5,16 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiEmptyPrompt, EuiImage } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiImage, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { dashboardsDark, dashboardsLight } from '@kbn/shared-svg';
-import { useTheme } from '../../../hooks/use_theme';
 
 interface Props {
   actions: React.ReactNode;
 }
 
 export function EmptyDashboards({ actions }: Props) {
-  const theme = useTheme();
+  const { colorMode } = useEuiTheme();
 
   return (
     <>
@@ -25,7 +24,7 @@ export function EmptyDashboards({ actions }: Props) {
         icon={
           <EuiImage
             size="fullWidth"
-            src={theme.darkMode ? dashboardsDark : dashboardsLight}
+            src={colorMode === 'DARK' ? dashboardsDark : dashboardsLight}
             alt=""
           />
         }

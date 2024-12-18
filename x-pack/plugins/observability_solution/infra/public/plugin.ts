@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import {
   METRICS_EXPLORER_LOCATOR_ID,
   MetricsExplorerLocatorParams,
-  ObservabilityTriggerId,
 } from '@kbn/observability-shared-plugin/common';
 import {
   BehaviorSubject,
@@ -100,10 +99,6 @@ export class Plugin implements InfraClientPluginClass {
     if (pluginsSetup.home) {
       registerFeatures(pluginsSetup.home);
     }
-
-    pluginsSetup.uiActions.registerTrigger({
-      id: ObservabilityTriggerId.LogEntryContextMenu,
-    });
 
     const assetDetailsLocator =
       pluginsSetup.share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
@@ -358,7 +353,7 @@ export class Plugin implements InfraClientPluginClass {
         getDisplayNameTooltip: () =>
           i18n.translate('xpack.infra.logStreamEmbeddable.description', {
             defaultMessage:
-              'Add a table of live streaming logs. For a more efficient experience, we recommend using the Discover Page to create a saved search instead of using Log stream.',
+              'Add a table of live streaming logs. For a more efficient experience, we recommend using the Discover Page to create a saved Discover session instead of using Log stream.',
           }),
         getIconType: () => 'logsApp',
         isCompatible: async ({ embeddable }) => {

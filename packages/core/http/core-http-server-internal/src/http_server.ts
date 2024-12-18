@@ -93,7 +93,11 @@ function startEluMeasurement<T>(
     if (
       eluMonitorOptions.logging.enabled &&
       active >= eluMonitorOptions.logging.threshold.ela &&
-      utilization >= eluMonitorOptions.logging.threshold.elu
+      utilization >= eluMonitorOptions.logging.threshold.elu &&
+      // static js and js.map assets are generating lots of noise for this
+      // event loop check, hiding endpoint slowness which are higher priority
+      // remove this check once endpoints slowness is addressed
+      !['js', 'js.map'].some((ext) => path.endsWith(ext))
     ) {
       log.warn(
         `Event loop utilization for ${path} exceeded threshold of ${elaThreshold}ms (${Math.round(

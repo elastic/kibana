@@ -286,7 +286,9 @@ describe('commands', () => {
             },
             {
               type: 'literal',
-              value: '"b"',
+              literalType: 'keyword',
+              name: '"b"',
+              valueUnquoted: 'b',
             },
             {
               type: 'option',
@@ -294,9 +296,36 @@ describe('commands', () => {
               args: [
                 {
                   type: 'literal',
-                  value: '"c"',
+                  literalType: 'keyword',
+                  name: '"c"',
+                  valueUnquoted: 'c',
                 },
               ],
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('DISSECT (no options)', () => {
+      const query = 'FROM index | DISSECT a "b"';
+      const { ast } = parse(query);
+
+      expect(ast).toMatchObject([
+        {},
+        {
+          type: 'command',
+          name: 'dissect',
+          args: [
+            {
+              type: 'column',
+              name: 'a',
+            },
+            {
+              type: 'literal',
+              literalType: 'keyword',
+              name: '"b"',
+              valueUnquoted: 'b',
             },
           ],
         },
@@ -319,7 +348,9 @@ describe('commands', () => {
             },
             {
               type: 'literal',
-              value: '"b"',
+              literalType: 'keyword',
+              name: '"b"',
+              valueUnquoted: 'b',
             },
           ],
         },

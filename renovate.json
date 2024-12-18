@@ -1371,6 +1371,90 @@
       "enabled": true
     },
     {
+      "groupName": "search-ui dependencies",
+      "matchDepNames": [
+        "@elastic/react-search-ui",
+        "@elastic/react-search-ui-views",
+        "@elastic/search-ui",
+        "@elastic/search-ui-app-search-connector",
+        "@elastic/search-ui-engines-connector"
+      ],
+      "reviewers": [
+        "team:search-kibana"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Search",
+        "Team:Enterprise Search",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "search-ui ai dependency",
+      "matchDepNames": [
+        "ai"
+      ],
+      "reviewers": [
+        "team:search-kibana"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Search",
+        "Team:Enterprise Search",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "search-ui kea dependency",
+      "matchDepNames": [
+        "kea"
+      ],
+      "reviewers": [
+        "team:search-kibana"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Search",
+        "Team:Enterprise Search",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "search-ui swr dependency",
+      "matchDepNames": [
+        "swr"
+      ],
+      "reviewers": [
+        "team:search-kibana"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Search",
+        "Team:Enterprise Search",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "vinyl",
       "matchDepNames": [
         "vinyl",

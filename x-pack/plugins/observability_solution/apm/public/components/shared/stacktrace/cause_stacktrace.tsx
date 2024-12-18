@@ -8,29 +8,29 @@
 import { EuiAccordion, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { Stacktrace } from '.';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 
-const Accordion = euiStyled(EuiAccordion)`
-  border-top: ${({ theme }) => theme.eui.euiBorderThin};
-  margin-top: ${({ theme }) => theme.eui.euiSizeS};
+const Accordion = styled(EuiAccordion)`
+  border-top: ${({ theme }) => theme.euiTheme.border.thin};
+  margin-top: ${({ theme }) => theme.euiTheme.size.s};
 `;
 
-const CausedByContainer = euiStyled('h5')`
-  padding: ${({ theme }) => theme.eui.euiSizeS} 0;
+const CausedByContainer = styled('h5')`
+  padding: ${({ theme }) => theme.euiTheme.size.s} 0;
 `;
 
-const CausedByHeading = euiStyled('span')`
-  color: ${({ theme }) => theme.eui.euiTextSubduedColor};
+const CausedByHeading = styled('span')`
+  color: ${({ theme }) => theme.euiTheme.colors.textSubdued};
   display: block;
-  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  font-weight: ${({ theme }) => theme.eui.euiFontWeightBold};
+  font-size: ${({ theme }) => theme.euiTheme.size.xs};
+  font-weight: ${({ theme }) => theme.euiTheme.font.weight.bold};
   text-transform: uppercase;
 `;
 
-const FramesContainer = euiStyled('div')`
-  padding-left: ${({ theme }) => theme.eui.euiSizeM};
+const FramesContainer = styled('div')`
+  padding-left: ${({ theme }) => theme.euiTheme.size.m};
 `;
 
 function CausedBy({ message }: { message: string }) {

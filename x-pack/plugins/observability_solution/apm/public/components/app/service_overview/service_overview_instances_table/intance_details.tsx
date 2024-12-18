@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
 import { CloudProvider, getAgentIcon, getCloudProviderIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -35,7 +35,6 @@ import {
 } from '../../../../../common/es_fields/infra_metrics';
 
 import { isPending } from '../../../../hooks/use_fetcher';
-import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { KeyValueFilterList } from '../../../shared/key_value_filter_list';
 import { pushNewItemToKueryBar } from '../../../shared/kuery_bar/utils';
@@ -89,7 +88,7 @@ const cloudDetailsKeys = [
 ];
 
 export function InstanceDetails({ serviceName, serviceNodeName, kuery }: Props) {
-  const theme = useTheme();
+  const { colorMode } = useEuiTheme();
   const history = useHistory();
 
   const { data, status } = useInstanceDetailsFetcher({
@@ -132,6 +131,8 @@ export function InstanceDetails({ serviceName, serviceNodeName, kuery }: Props) 
   });
 
   const containerType = data.kubernetes?.pod?.name ? 'Kubernetes' : 'Docker';
+
+  const isDarkMode = colorMode === 'DARK';
   return (
     <EuiFlexGroup direction="column" responsive={false}>
       <EuiFlexItem>
@@ -140,7 +141,7 @@ export function InstanceDetails({ serviceName, serviceNodeName, kuery }: Props) 
           title={i18n.translate('xpack.apm.serviceOverview.instanceTable.details.serviceTitle', {
             defaultMessage: 'Service',
           })}
-          icon={getAgentIcon(data.agent?.name, theme.darkMode)}
+          icon={getAgentIcon(data.agent?.name, isDarkMode)}
           keyValueList={serviceDetailsKeyValuePairs}
           onClickFilter={addKueryBarFilter}
         />

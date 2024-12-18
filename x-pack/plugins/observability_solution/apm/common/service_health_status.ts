@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 
 export enum ServiceHealthStatus {
@@ -34,29 +34,35 @@ export function getServiceHealthStatus({ severity }: { severity: ML_ANOMALY_SEVE
   }
 }
 
-export function getServiceHealthStatusColor(theme: EuiTheme, status: ServiceHealthStatus) {
+export function getServiceHealthStatusColor(
+  euiTheme: EuiThemeComputed,
+  status: ServiceHealthStatus
+) {
   switch (status) {
     case ServiceHealthStatus.healthy:
-      return theme.eui.euiColorVis0;
+      return euiTheme.colors.success;
     case ServiceHealthStatus.warning:
-      return theme.eui.euiColorVis5;
+      return euiTheme.colors.warning;
     case ServiceHealthStatus.critical:
-      return theme.eui.euiColorVis9;
+      return euiTheme.colors.danger;
     case ServiceHealthStatus.unknown:
-      return theme.eui.euiColorMediumShade;
+      return euiTheme.colors.mediumShade;
   }
 }
 
-export function getServiceHealthStatusBadgeColor(theme: EuiTheme, status: ServiceHealthStatus) {
+export function getServiceHealthStatusBadgeColor(
+  euiTheme: EuiThemeComputed,
+  status: ServiceHealthStatus
+) {
   switch (status) {
     case ServiceHealthStatus.healthy:
-      return theme.eui.euiColorVis0_behindText;
+      return euiTheme.colors.success;
     case ServiceHealthStatus.warning:
-      return theme.eui.euiColorVis5_behindText;
+      return euiTheme.colors.warning;
     case ServiceHealthStatus.critical:
-      return theme.eui.euiColorVis9_behindText;
+      return euiTheme.colors.danger;
     case ServiceHealthStatus.unknown:
-      return theme.eui.euiColorMediumShade;
+      return euiTheme.colors.mediumShade;
   }
 }
 

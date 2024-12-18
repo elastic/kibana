@@ -9,11 +9,30 @@
 
 import React, { Component, FC } from 'react';
 import { shallow } from 'enzyme';
+import { useSharedUXRoutesContext } from './routes_context';
 import { Route } from './route';
 import { createMemoryHistory } from 'history';
 
+jest.mock('./routes_context', () => ({
+  useSharedUXRoutesContext: jest.fn().mockImplementation(() => ({
+    enableExecutionContextTracking: true,
+  })),
+}));
+
 describe('Route', () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+
   test('renders', () => {
+    const example = shallow(<Route />);
+    expect(example).toMatchSnapshot();
+  });
+
+  test('renders with enableExecutionContextTracking as false', () => {
+    (useSharedUXRoutesContext as jest.Mock).mockImplementationOnce(() => ({
+      enableExecutionContextTracking: false,
+    }));
     const example = shallow(<Route />);
     expect(example).toMatchSnapshot();
   });

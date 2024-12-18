@@ -6,7 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
 /**
@@ -24,7 +24,7 @@ const tableHeight = 282;
  *
  * Hide the empty message when we don't yet have any items and are still not initiated.
  */
-const OverviewTableContainerDiv = euiStyled.div<{
+const OverviewTableContainerDiv = styled.div<{
   fixedHeight?: boolean;
   isEmptyAndNotInitiated: boolean;
   shouldUseMobileLayout: boolean;

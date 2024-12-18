@@ -34,7 +34,7 @@ import type { FieldVisStats } from '../../../../../common/types';
 import { ExpandedRowPanel } from '../stats_table/components/field_data_expanded_row/expanded_row_panel';
 import { EMPTY_EXAMPLE } from '../examples_list/examples_list';
 
-interface Props {
+interface TopValuesProps {
   stats: FieldVisStats | undefined;
   fieldFormat?: any;
   barColor?: EuiProgressProps['color'];
@@ -53,7 +53,7 @@ function getPercentLabel(percent: number): string {
   }
 }
 
-export const TopValues: FC<Props> = ({
+export const TopValues: FC<TopValuesProps> = ({
   stats,
   fieldFormat,
   barColor,
@@ -72,7 +72,11 @@ export const TopValues: FC<Props> = ({
       data: { fieldFormats },
     },
   } = useDataVisualizerKibana();
-  const euiTheme = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
+
+  const fieldDataTopValuesContainer = css({ paddingTop: euiTheme.size.xs });
+  const topValuesValueLabelContainer = css({ marginRight: euiTheme.size.m });
 
   if (stats === undefined || !stats.topValues) return null;
   const { fieldName, sampleCount, approximate } = stats;
@@ -175,7 +179,7 @@ export const TopValues: FC<Props> = ({
       className={classNames('dvPanel__wrapper', compressed ? 'dvPanel--compressed' : undefined)}
       css={css`
         overflow-x: auto;
-        ${euiScrollBarStyles(euiTheme)}
+        ${euiScrollBarStyles(euiThemeContext)}
       `}
     >
       <ExpandedRowFieldHeader>
@@ -194,7 +198,8 @@ export const TopValues: FC<Props> = ({
 
       <div
         data-test-subj="dataVisualizerFieldDataTopValuesContent"
-        className={classNames('fieldDataTopValuesContainer', 'dvTopValues__wrapper')}
+        className="dvTopValues__wrapper"
+        css={fieldDataTopValuesContainer}
       >
         {Array.isArray(topValues)
           ? topValues.map((value) => {
@@ -210,7 +215,8 @@ export const TopValues: FC<Props> = ({
                       color={barColor}
                       size="xs"
                       label={value.key ? kibanaFieldFormat(value.key, fieldFormat) : displayValue}
-                      className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
+                      className="eui-textTruncate"
+                      css={topValuesValueLabelContainer}
                       valueText={`${value.doc_count}${
                         totalDocuments !== undefined
                           ? ` (${getPercentLabel(value.percent * 100)})`
@@ -289,7 +295,8 @@ export const TopValues: FC<Props> = ({
                     defaultMessage="Other"
                   />
                 }
-                className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
+                className="eui-textTruncate"
+                css={topValuesValueLabelContainer}
                 valueText={`${topValuesOtherCount}${
                   totalDocuments !== undefined
                     ? ` (${getPercentLabel(topValuesOtherCountPercent * 100)})`

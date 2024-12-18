@@ -8,17 +8,24 @@
  */
 
 import inquirer from 'inquirer';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { Commit, PullRequest } from '../types';
 import { safeExec } from './exec';
 
 export const findRemoteName = async (repo: string) => {
-  const res = await safeExec('git remote -v');
-  const remotes = res.stdout.split('\n').map((line) => line.split(/\t| /).filter(Boolean));
-  return remotes.find(([_, url]) => url.includes(`github.com/${repo}`))?.[0];
+  const res = await safeExec('git remote -v', true, false);
+  const remotes = res.stdout
+    .trim()
+    .split('\n')
+    .map((line) => line.split(/\t| /).filter(Boolean))
+    .filter((chunks) => chunks.length >= 2);
+  return remotes.find(
+    ([, url]) => url.includes(`github.com/${repo}`) || url.includes(`github.com:${repo}`)
+  )?.[0];
 };
 
 export const findGithubLogin = async () => {
-  const res = await safeExec('gh auth status');
+  const res = await safeExec('gh auth status', true, false);
   // e.g. ✓ Logged in to github.com account gsoldevila (/Users/gsoldevila/.config/gh/hosts.yml)
   const loginLine = res.stdout
     .split('\n')
@@ -34,17 +41,16 @@ export const findPr = async (number: string): Promise<PullRequest> => {
   return { ...JSON.parse(res.stdout), number };
 };
 
-export function hasManualCommits(commits: Commit[]) {
-  const manualCommits = commits.filter(
-    (commit) =>
-      !commit.messageHeadline.startsWith('Relocating module ') &&
-      !commit.messageHeadline.startsWith('Moving modules owned by ') &&
-      commit.authors.some(
-        (author) => author.login !== 'kibanamachine' && author.login !== 'elasticmachine'
-      )
+export const isManualCommit = (commit: Commit) =>
+  !commit.messageHeadline.startsWith('Relocating module ') &&
+  !commit.messageHeadline.startsWith('Moving modules owned by ') &&
+  !commit.messageHeadline.startsWith('Merge branch ') &&
+  commit.authors.some(
+    (author) => author.login !== 'kibanamachine' && author.login !== 'elasticmachine'
   );
 
-  return manualCommits.length > 0;
+export function getManualCommits(commits: Commit[]) {
+  return commits.filter(isManualCommit);
 }
 
 export async function getLastCommitMessage() {
@@ -87,33 +93,14 @@ async function deleteBranches(...branchNames: string[]) {
   );
 }
 
-export const checkoutResetPr = async (baseBranch: string, prNumber: string): Promise<boolean> => {
-  const pr = await findPr(prNumber);
-
-  if (hasManualCommits(pr.commits)) {
-    const res = await inquirer.prompt({
-      type: 'confirm',
-      name: 'overrideManualCommits',
-      message: 'Detected manual commits in the PR, do you want to override them?',
-    });
-    if (!res.overrideManualCommits) {
-      return false;
-    }
-  }
-
-  // previous cleanup on current branch
-  await safeExec(`git restore --staged .`);
-  await safeExec(`git restore .`);
-  await safeExec(`git clean -f -d`);
-
+export const checkoutResetPr = async (pr: PullRequest, baseBranch: string) => {
   // delete existing branch
   await deleteBranches(pr.headRefName);
 
   // checkout the PR branch
-  await safeExec(`gh pr checkout ${prNumber}`);
+  await safeExec(`gh pr checkout ${pr.number}`);
   await resetAllCommits(pr.commits.length);
   await safeExec(`git rebase ${baseBranch}`);
-  return true;
 };
 
 export const checkoutBranch = async (branch: string) => {
@@ -122,5 +109,73 @@ export const checkoutBranch = async (branch: string) => {
     throw new Error('The local branch already exists, aborting!');
   } else {
     await safeExec(`git checkout -b ${branch}`);
+  }
+};
+
+export const cherryPickManualCommits = async (pr: PullRequest, log: ToolingLog) => {
+  const manualCommits = getManualCommits(pr.commits);
+  if (manualCommits.length) {
+    log.info(`Found manual commits on https://github.com/elastic/kibana/pull/${pr.number}/commits`);
+
+    for (let i = 0; i < manualCommits.length; ++i) {
+      const { oid, messageHeadline, authors } = manualCommits[i];
+      const url = `https://github.com/elastic/kibana/pull/${pr.number}/commits/${oid}`;
+
+      const res = await inquirer.prompt({
+        type: 'list',
+        choices: [
+          { name: 'Yes, attempt to cherry-pick', value: 'yes' },
+          { name: 'No, I will add it manually (press when finished)', value: 'no' },
+        ],
+        name: 'cherryPick',
+        message: `Do you want to cherry pick '${messageHeadline}' (${authors[0].login})?`,
+      });
+
+      if (res.cherryPick === 'yes') {
+        try {
+          await safeExec(`git cherry-pick ${oid}`);
+          log.info(`Commit '${messageHeadline}' (${authors[0].login}) cherry-picked successfully!`);
+        } catch (error) {
+          log.info(`Error trying to cherry-pick: ${url}`);
+          log.error(error.message);
+          const res2 = await inquirer.prompt({
+            type: 'list',
+            choices: [
+              { name: 'Abort this cherry-pick', value: 'abort' },
+              { name: 'Conflicts solved (git cherry-pick --continue)', value: 'continue' },
+              { name: 'I solved the conflicts and commited', value: 'done' },
+            ],
+            name: 'cherryPickFailed',
+            message: `Automatic cherry-pick failed, manual intervention required`,
+          });
+
+          if (res2.cherryPickFailed === 'abort') {
+            try {
+              await safeExec(`git cherry-pick --abort`);
+              log.warning(
+                'Cherry-pick aborted, please review changes in that commit and apply them manually if needed!'
+              );
+            } catch (error2) {
+              log.error(
+                'Cherry-pick --abort failed, please cleanup your working tree before continuing!'
+              );
+            }
+          } else if (res2.cherryPickFailed === 'continue') {
+            try {
+              await safeExec(`git cherry-pick --continue`);
+              log.info(
+                `Commit '${messageHeadline}' (${authors[0].login}) cherry-picked successfully!`
+              );
+            } catch (error2) {
+              await inquirer.prompt({
+                type: 'confirm',
+                name: 'cherryPickContinueFailed',
+                message: `Cherry pick --continue failed, please address conflicts AND COMMIT manually. Hit confirm when ready`,
+              });
+            }
+          }
+        }
+      }
+    }
   }
 };

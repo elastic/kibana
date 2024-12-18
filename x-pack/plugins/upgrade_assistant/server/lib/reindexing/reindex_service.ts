@@ -309,20 +309,17 @@ export const reindexServiceFactory = (
     }
 
     try {
-      // Delete the task from ES .tasks index
-      const deleteTaskResp = await esClient.delete({
+      // Best effort, delete the task from ES .tasks index...
+      await esClient.delete({
         index: '.tasks',
         id: taskId,
       });
-      if (deleteTaskResp.result !== 'deleted') {
-        log.warn(
-          error.reindexTaskCannotBeDeleted(
-            `Could not delete reindexing task ${taskId}, got response "${deleteTaskResp.result}"`
-          )
-        );
-      }
     } catch (e) {
-      log.warn(e);
+      // We explicitly ignore authz related error codes bc we expect this to be
+      // very common when deleting from .tasks
+      if (e?.statusCode !== 401 && e?.statusCode !== 403) {
+        log.warn(e);
+      }
     }
 
     return reindexOp;

@@ -275,10 +275,10 @@ export const ESQL_QUERY_BAR = '[data-test-subj="ruleEsqlQueryBar"]';
 export const NEW_TERMS_INPUT_AREA = '[data-test-subj="newTermsInput"]';
 
 export const NEW_TERMS_HISTORY_SIZE =
-  '[data-test-subj="detectionEngineStepDefineRuleHistoryWindowSize"] [data-test-subj="interval"]';
+  '[data-test-subj="historyWindowSize"] [data-test-subj="interval"]';
 
 export const NEW_TERMS_HISTORY_TIME_TYPE =
-  '[data-test-subj="detectionEngineStepDefineRuleHistoryWindowSize"] [data-test-subj="timeType"]';
+  '[data-test-subj="historyWindowSize"] [data-test-subj="timeType"]';
 
 export const LOAD_QUERY_DYNAMICALLY_CHECKBOX =
   '[data-test-subj="detectionEngineStepDefineRuleShouldLoadQueryDynamically"] input';

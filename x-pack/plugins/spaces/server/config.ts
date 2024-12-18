@@ -54,13 +54,6 @@ export const ConfigSchema = schema.object({
       defaultValue: true,
     }),
   }),
-  experimental: schema.maybe(
-    offeringBasedSchema({
-      traditional: schema.object({
-        forceSolutionVisibility: schema.boolean({ defaultValue: false }),
-      }),
-    })
-  ),
 });
 
 export function createConfig$(context: PluginInitializerContext) {

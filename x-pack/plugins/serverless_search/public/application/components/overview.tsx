@@ -14,7 +14,6 @@ import {
   EuiIcon,
   EuiPageTemplate,
   EuiPanel,
-  EuiText,
   EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -96,9 +95,7 @@ export const ElasticsearchOverview = () => {
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
       <EuiPageTemplate.Section alignment="top" className="serverlessSearchHeaderSection">
-        <EuiText color="ghost">
-          <WelcomeBanner user={user} assetBasePath={assetBasePath} />
-        </EuiText>
+        <WelcomeBanner user={user} assetBasePath={assetBasePath} />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section
         color="subdued"

@@ -8,7 +8,7 @@
 import { scaleTime } from 'd3-scale';
 import * as React from 'react';
 import styled from '@emotion/styled';
-import { useEuiFontSize } from '@elastic/eui';
+import { COLOR_MODES_STANDARD, useEuiFontSize } from '@elastic/eui';
 import { useKibanaTimeZoneSetting } from '../../../hooks/use_kibana_time_zone_setting';
 import { getTimeLabelFormat } from './time_label_formatter';
 
@@ -69,7 +69,7 @@ const TimeRulerTickLabel = styled.text`
 
 const TimeRulerGridLine = styled.line`
   stroke: ${(props) =>
-    props.theme.colorMode === 'DARK'
+    props.theme.colorMode === COLOR_MODES_STANDARD.dark
       ? props.theme.euiTheme.colors.darkestShade
       : props.theme.euiTheme.colors.darkShade};
   stroke-opacity: 0.5;

@@ -95,6 +95,7 @@ const appDependencies = {
     monitor: true,
     manageEnrich: true,
     monitorEnrich: true,
+    manageIndexTemplates: true,
   },
 } as any;
 

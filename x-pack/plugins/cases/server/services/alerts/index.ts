@@ -10,7 +10,10 @@ import { isEmpty } from 'lodash';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { STATUS_VALUES } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import {
+  ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_STATUS_UPDATED_AT,
+} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import type { MgetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -169,7 +172,8 @@ export class AlertService {
           body: {
             script: {
               source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
-                ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}'
+                ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}';
+                ctx._source['${ALERT_WORKFLOW_STATUS_UPDATED_AT}'] = '${new Date().toISOString()}';
               }
               if (ctx._source.signal != null && ctx._source.signal.status != null) {
                 ctx._source.signal.status = '${status}'

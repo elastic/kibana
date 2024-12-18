@@ -6,7 +6,6 @@
  */
 
 export enum ObservabilityTriggerId {
-  LogEntryContextMenu = 'logEntryContextMenu',
   ApmTransactionContextMenu = 'apmTransactionContextMenu',
   ApmErrorContextMenu = 'apmErrorContextMenu',
 }

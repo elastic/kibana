@@ -40,7 +40,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should return 404 when feature flag is not toggled', async () => {
         await postGraph(supertest, {
           query: {
-            eventIds: [],
+            originEventIds: [],
             start: 'now-1d/d',
             end: 'now/d',
           },

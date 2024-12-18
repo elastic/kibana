@@ -13,9 +13,16 @@ import {
   RerankParams,
   SparseEmbeddingParams,
   TextEmbeddingParams,
+  UnifiedChatCompleteParams,
 } from '../../../common/inference/types';
 
 export type InferenceActionParams =
+  | { subAction: SUB_ACTION.UNIFIED_COMPLETION_STREAM; subActionParams: UnifiedChatCompleteParams }
+  | { subAction: SUB_ACTION.UNIFIED_COMPLETION; subActionParams: UnifiedChatCompleteParams }
+  | {
+      subAction: SUB_ACTION.UNIFIED_COMPLETION_ASYNC_ITERATOR;
+      subActionParams: UnifiedChatCompleteParams;
+    }
   | { subAction: SUB_ACTION.COMPLETION; subActionParams: ChatCompleteParams }
   | { subAction: SUB_ACTION.RERANK; subActionParams: RerankParams }
   | { subAction: SUB_ACTION.SPARSE_EMBEDDING; subActionParams: SparseEmbeddingParams }

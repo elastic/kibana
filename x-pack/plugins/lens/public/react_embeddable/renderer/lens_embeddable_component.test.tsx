@@ -6,7 +6,7 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import { getLensApiMock, getLensInternalApiMock } from '../mocks';
+import { getLensApiMock, getLensInternalApiMock, getValidExpressionParams } from '../mocks';
 import { LensApi, LensInternalApi } from '../types';
 import { BehaviorSubject } from 'rxjs';
 import { PublishingSubject } from '@kbn/presentation-publishing';
@@ -25,6 +25,9 @@ function getDefaultProps({
   internalApiOverrides = undefined,
   apiOverrides = undefined,
 }: { internalApiOverrides?: Partial<LensInternalApi>; apiOverrides?: Partial<LensApi> } = {}) {
+  const internalApi = getLensInternalApiMock(internalApiOverrides);
+  // provide a valid expression to render
+  internalApi.updateExpressionParams(getValidExpressionParams());
   return {
     internalApi: getLensInternalApiMock(internalApiOverrides),
     api: getLensApiMock(apiOverrides),

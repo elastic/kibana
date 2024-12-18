@@ -14,6 +14,7 @@ import {
 import { scaleLinear } from 'd3-scale';
 import moment from 'moment';
 import * as React from 'react';
+import { COLOR_MODES_STANDARD } from '@elastic/eui';
 import { DensityChart } from './density_chart';
 import { HighlightedInterval } from './highlighted_interval';
 import { SearchMarkers } from './search_markers';
@@ -166,7 +167,7 @@ const TimeCursor = styled.line`
   pointer-events: none;
   stroke-width: 1px;
   stroke: ${(props) =>
-    props.theme.colorMode === 'DARK'
+    props.theme.colorMode === COLOR_MODES_STANDARD.dark
       ? props.theme.euiTheme.colors.darkestShade
       : props.theme.euiTheme.colors.darkShade};
 `;

@@ -7,20 +7,26 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+
 import { EuiSpacer } from '@elastic/eui';
 import { Axis, BarSeries, Chart, Settings, ScaleType, LEGACY_LIGHT_THEME } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import { i18n } from '@kbn/i18n';
+
 import { TopValues } from '../../../top_values';
+
 import type { FieldDataRowProps } from '../../types/field_data_row';
-import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { getTFPercentage } from '../../utils';
 import { useDataVizChartTheme } from '../../hooks';
+
+import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
+
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 import { ExpandedRowPanel } from './expanded_row_panel';
+import { useBarColor } from './use_bar_color';
 
 function getPercentLabel(value: number): string {
   if (value === 0) {
@@ -41,6 +47,8 @@ function getFormattedValue(value: number, totalCount: number): string {
 const BOOLEAN_DISTRIBUTION_CHART_HEIGHT = 70;
 
 export const BooleanContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
+  const barColor = useBarColor();
+
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
   const formattedPercentages = useMemo(() => getTFPercentage(config), [config]);
   const theme = useDataVizChartTheme();
@@ -54,7 +62,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
       <TopValues
         stats={config.stats}
         fieldFormat={fieldFormat}
-        barColor="accentSecondary"
+        barColor={barColor}
         onAddFilter={onAddFilter}
       />
 

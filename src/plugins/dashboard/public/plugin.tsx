@@ -298,7 +298,7 @@ export class DashboardPlugin
           defaultMessage: 'Analyze data in dashboards.',
         }),
         description: i18n.translate('dashboard.featureCatalogue.dashboardDescription', {
-          defaultMessage: 'Display and share a collection of visualizations and saved searches.',
+          defaultMessage: 'Display and share a collection of visualizations and search results.',
         }),
         icon: 'dashboardApp',
         path: `/app/${DASHBOARD_APP_ID}#${LANDING_PAGE_PATH}`,

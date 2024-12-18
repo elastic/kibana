@@ -578,7 +578,6 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "outerSizeRatio": 0.9,
               },
             },
-            Object {},
           ]
         }
       />
@@ -697,7 +696,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <span
-                  color="#bd271e"
+                  color="#BD271E"
                   data-euiicon-type="dot"
                 />
               </div>
@@ -739,7 +738,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <span
-                  color="#d3dae6"
+                  color="#D3DAE6"
                   data-euiicon-type="dot"
                 />
               </div>
@@ -856,7 +855,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <span
-                  color="#bd271e"
+                  color="#BD271E"
                   data-euiicon-type="dot"
                 />
               </div>
@@ -898,7 +897,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <span
-                  color="#d3dae6"
+                  color="#D3DAE6"
                   data-euiicon-type="dot"
                 />
               </div>

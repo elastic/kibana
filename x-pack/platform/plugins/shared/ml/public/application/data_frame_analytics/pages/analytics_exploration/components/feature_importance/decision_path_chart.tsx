@@ -23,51 +23,16 @@ import {
   Settings,
   LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
-import { EuiIcon } from '@elastic/eui';
+import { useEuiTheme, EuiIcon } from '@elastic/eui';
 
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { euiLightVars as euiVars } from '@kbn/ui-theme';
 import {
   type FeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { DecisionPathPlotData } from './use_classification_path_data';
 import { formatSingleValue } from '../../../../../formatters/format_value';
-const { euiColorFullShade, euiColorMediumShade } = euiVars;
-const axisColor = euiColorMediumShade;
-
-const baselineStyle: LineAnnotationStyle = {
-  line: {
-    strokeWidth: 1,
-    stroke: euiColorFullShade,
-    opacity: 0.75,
-  },
-};
-
-const axes: RecursivePartial<AxisStyle> = {
-  axisLine: {
-    stroke: axisColor,
-  },
-  tickLabel: {
-    fontSize: 10,
-    fill: axisColor,
-  },
-  tickLine: {
-    stroke: axisColor,
-  },
-  gridLine: {
-    horizontal: {
-      dash: [1, 2],
-    },
-    vertical: {
-      strokeWidth: 0,
-    },
-  },
-};
-const theme: PartialTheme = {
-  axes,
-};
 
 interface DecisionPathChartProps {
   decisionPathData: DecisionPathPlotData;
@@ -88,6 +53,49 @@ export const DecisionPathChart = ({
   maxDomain,
   baseline,
 }: DecisionPathChartProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  const { baselineStyle, theme } = useMemo<{
+    baselineStyle: LineAnnotationStyle;
+    theme: PartialTheme;
+  }>(() => {
+    const euiColorFullShade = euiTheme.colors.fullShade;
+    const euiColorMediumShade = euiTheme.colors.mediumShade;
+    const axisColor = euiColorMediumShade;
+
+    const axes: RecursivePartial<AxisStyle> = {
+      axisLine: {
+        stroke: axisColor,
+      },
+      tickLabel: {
+        fontSize: 10,
+        fill: axisColor,
+      },
+      tickLine: {
+        stroke: axisColor,
+      },
+      gridLine: {
+        horizontal: {
+          dash: [1, 2],
+        },
+        vertical: {
+          strokeWidth: 0,
+        },
+      },
+    };
+
+    return {
+      baselineStyle: {
+        line: {
+          strokeWidth: 1,
+          stroke: euiColorFullShade,
+          opacity: 0.75,
+        },
+      },
+      theme: { axes },
+    };
+  }, [euiTheme]);
+
   const regressionBaselineData: LineAnnotationDatum[] | undefined = useMemo(
     () =>
       baseline && isRegressionFeatureImportanceBaseline(baseline)

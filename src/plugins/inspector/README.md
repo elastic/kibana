@@ -14,7 +14,7 @@ a specific view is available depends on the used adapters.
 ## Inspector Adapters
 
 Since the Inspector panel itself is not tied to a specific type of elements (visualizations,
-saved searches, etc.), everything you need to open the inspector is a collection
+Discover sessions, etc.), everything you need to open the inspector is a collection
 of so called inspector adapters. A single adapter can be any type of JavaScript class.
 
 Most likely an adapter offers some kind of logging capabilities for the element, that

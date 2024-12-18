@@ -18,11 +18,18 @@ import {
   SparseEmbeddingResponseSchema,
   TextEmbeddingParamsSchema,
   TextEmbeddingResponseSchema,
+  UnifiedChatCompleteParamsSchema,
+  UnifiedChatCompleteResponseSchema,
+  DashboardActionParamsSchema,
+  DashboardActionResponseSchema,
 } from './schema';
 import { ConfigProperties } from '../dynamic_config/types';
 
 export type Config = TypeOf<typeof ConfigSchema>;
 export type Secrets = TypeOf<typeof SecretsSchema>;
+
+export type UnifiedChatCompleteParams = TypeOf<typeof UnifiedChatCompleteParamsSchema>;
+export type UnifiedChatCompleteResponse = TypeOf<typeof UnifiedChatCompleteResponseSchema>;
 
 export type ChatCompleteParams = TypeOf<typeof ChatCompleteParamsSchema>;
 export type ChatCompleteResponse = TypeOf<typeof ChatCompleteResponseSchema>;
@@ -37,6 +44,9 @@ export type TextEmbeddingParams = TypeOf<typeof TextEmbeddingParamsSchema>;
 export type TextEmbeddingResponse = TypeOf<typeof TextEmbeddingResponseSchema>;
 
 export type StreamingResponse = TypeOf<typeof StreamingResponseSchema>;
+
+export type DashboardActionParams = TypeOf<typeof DashboardActionParamsSchema>;
+export type DashboardActionResponse = TypeOf<typeof DashboardActionResponseSchema>;
 
 export type FieldsConfiguration = Record<string, ConfigProperties>;
 

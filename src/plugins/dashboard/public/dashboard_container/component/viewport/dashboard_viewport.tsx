@@ -13,7 +13,7 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiPortal } from '@elastic/eui';
-import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
 import {
@@ -119,7 +119,7 @@ export const DashboardViewport = ({ dashboardContainer }: { dashboardContainer?:
         'dshDashboardViewportWrapper--isFullscreen': fullScreenMode,
       })}
     >
-      {viewMode !== ViewMode.PRINT ? (
+      {viewMode !== 'print' ? (
         <div className={hasControls ? 'dshDashboardViewport-controls' : ''}>
           <ReactEmbeddableRenderer<
             ControlGroupSerializedState,

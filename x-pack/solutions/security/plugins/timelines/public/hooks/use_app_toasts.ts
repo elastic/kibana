@@ -80,7 +80,7 @@ export type MaybeESError = IEsError & { err?: Record<string, unknown> };
  * supported in the future. However, for now, this is _hopefully_ temporary.
  *
  * Also see the file:
- * x-pack/plugins/security_solution/public/app/home/setup.tsx
+ * x-pack/solutions/security/plugins/security_solution/public/app/home/setup.tsx
  *
  * Where this same technique of overriding and changing the stack is occurring.
  */

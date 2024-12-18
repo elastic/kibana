@@ -5,7 +5,10 @@
  * 2.0.
  */
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { isUndefinedOrNull } from '@kbn/observability-plugin/server/utils/queries';
+
+export function isUndefinedOrNull(value: any): value is undefined | null {
+  return value === undefined || value === null;
+}
 
 export function wildcardQuery<T extends string>(
   field: T,
@@ -16,4 +19,26 @@ export function wildcardQuery<T extends string>(
   }
 
   return [{ wildcard: { [field]: `*${value}*` } }];
+}
+
+export function rangeQuery(
+  start?: number,
+  end?: number,
+  field = '@timestamp'
+): QueryDslQueryContainer[] {
+  return [
+    {
+      range: {
+        [field]: {
+          gte: start,
+          lte: end,
+          format: 'epoch_millis',
+        },
+      },
+    },
+  ];
+}
+
+export function existsQuery(field: string): QueryDslQueryContainer[] {
+  return [{ exists: { field } }];
 }

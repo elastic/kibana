@@ -812,14 +812,6 @@
               "path": "x-pack/plugins/observability_solution/dataset_quality/server/services/data_telemetry/data_telemetry_service.ts"
             },
             {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender_helpers.ts"
-            },
-            {
               "plugin": "fleet",
               "path": "x-pack/plugins/fleet/server/telemetry/sender.test.ts"
             },
@@ -829,7 +821,11 @@
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.test.ts"
+              "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/sender.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/sender_helpers.ts"
             },
             {
               "plugin": "synthetics",
@@ -842,6 +838,10 @@
             {
               "plugin": "synthetics",
               "path": "x-pack/solutions/observability/plugins/synthetics/server/telemetry/sender.test.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/sender.test.ts"
             }
           ],
           "children": [],

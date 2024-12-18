@@ -211,8 +211,14 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
   );
 };
 
+// copied from x-pack/plugins/banners/server/utils.ts
+const hexColorRegexp = /^#([0-9a-f]{6}|[0-9a-f]{3})$/i;
+const isHexColor = (color: string) => {
+  return hexColorRegexp.test(color);
+};
+
 const getPercentageColor = (euiTheme: EuiThemeComputed, color: string) =>
-  euiTheme.themeName?.toLowerCase().includes('borealis')
+  euiTheme.themeName?.toLowerCase().includes('borealis') && isHexColor(color)
     ? makeHighContrastColor(color)(euiTheme)
     : color; // FIXME: remove in 9.x when Borealis becomes the default theme
 

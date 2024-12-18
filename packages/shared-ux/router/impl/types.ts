@@ -33,3 +33,11 @@ export declare interface SharedUXExecutionContext {
   /** an inner context spawned from the current context. */
   child?: SharedUXExecutionContext;
 }
+
+export declare interface SharedUXRoutesContextType {
+  /**
+   * This flag is used to enable the default execution context tracking for a specific router.
+   * Enable this flag in case you don't have a custom implementation for execution context tracking.
+   * */
+  readonly enableExecutionContextTracking?: boolean;
+}
