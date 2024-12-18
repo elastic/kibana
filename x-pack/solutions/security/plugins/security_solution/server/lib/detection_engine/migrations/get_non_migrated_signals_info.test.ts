@@ -135,6 +135,39 @@ describe('getNonMigratedSignalsInfo', () => {
       spaces: ['default'],
     });
   });
+  it('return empty result for migrated in v8 index', async () => {
+    getIndexAliasPerSpaceMock.mockReturnValue({
+      '.reindexed-v8-siem-signals-another-1-000001': {
+        alias: '.siem-signals-another-1',
+        indexName: '.reindexed-v8-siem-signals-another-1-000001',
+        space: 'another-1-000001',
+      },
+      '.siem-signals-another-1-000002': {
+        alias: '.siem-signals-another-1',
+        indexName: '.siem-signals-another-1-000002',
+        space: 'another-1',
+      },
+    });
+
+    getIndexVersionsByIndexMock.mockReturnValue({
+      '.reindexed-v8-siem-signals-another-1-000001': 57,
+      '.siem-signals-another-1-000002': TEMPLATE_VERSION,
+      '.reindexed-v8-siem-signals-another-1-000001-r000077': TEMPLATE_VERSION, // outdated .reindexed-v8-siem-signals-another-1-000001 is already migrated
+    });
+    getSignalVersionsByIndexMock.mockReturnValue({});
+
+    const result = await getNonMigratedSignalsInfo({
+      esClient,
+      signalsIndex: 'siem-signals',
+      logger,
+    });
+
+    expect(result).toEqual({
+      indices: [],
+      isMigrationRequired: false,
+      spaces: [],
+    });
+  });
   it('returns results for outdated signals in index', async () => {
     getIndexVersionsByIndexMock.mockReturnValue({
       '.siem-signals-another-1-legacy': TEMPLATE_VERSION,
