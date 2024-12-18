@@ -2035,7 +2035,13 @@ module.exports = {
       },
     },
     {
-      files: ['**/*.stories.tsx', '**/*.stories.ts', '.storybook/**/*', '**/kbn-storybook/**/*'],
+      files: [
+        '**/*.stories.tsx',
+        '**/*.stories.ts',
+        '.storybook/**/*',
+        '**/kbn-storybook/**/*',
+        '**/__stories__/**',
+      ],
       rules: {
         // @storybook/addon-essentials contains many packages which are not defined in package.json
         'import/no-extraneous-dependencies': 'off',
