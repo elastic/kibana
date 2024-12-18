@@ -10,6 +10,7 @@ import { getInferenceAdapter } from './get_inference_adapter';
 import { openAIAdapter } from './openai';
 import { geminiAdapter } from './gemini';
 import { bedrockClaudeAdapter } from './bedrock';
+import { inferenceAdapter } from './inference';
 
 describe('getInferenceAdapter', () => {
   it('returns the openAI adapter for OpenAI type', () => {
@@ -22,5 +23,9 @@ describe('getInferenceAdapter', () => {
 
   it('returns the bedrock adapter for Bedrock type', () => {
     expect(getInferenceAdapter(InferenceConnectorType.Bedrock)).toBe(bedrockClaudeAdapter);
+  });
+
+  it('returns the inference adapter for Inference type', () => {
+    expect(getInferenceAdapter(InferenceConnectorType.Inference)).toBe(inferenceAdapter);
   });
 });

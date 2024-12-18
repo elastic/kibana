@@ -61,7 +61,7 @@ export function isSupportedConnector(connector: RawConnector): connector is RawI
  * having dependencies from this package to some mid-level plugin,
  * so we're just using our own connector mixin type.
  */
-interface RawConnector {
+export interface RawConnector {
   id: string;
   actionTypeId: string;
   name: string;

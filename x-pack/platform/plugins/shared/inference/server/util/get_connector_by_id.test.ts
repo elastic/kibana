@@ -68,7 +68,7 @@ describe('getConnectorById', () => {
     await expect(() =>
       getConnectorById({ actionsClient, connectorId })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Type '.tcp-pigeon' not recognized as a supported connector type"`
+      `"Connector 'tcp-pigeon-3-0' of type '.tcp-pigeon' not recognized as a supported connector"`
     );
   });
 
