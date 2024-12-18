@@ -7029,7 +7029,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-types@link:packages/kbn-search-types":
+"@kbn/search-types@link:src/platform/packages/shared/kbn-search-types":
   version "0.0.0"
   uid ""
 
