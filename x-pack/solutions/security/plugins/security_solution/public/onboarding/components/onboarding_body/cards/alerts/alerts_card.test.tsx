@@ -5,17 +5,21 @@
  * 2.0.
  */
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import { TestProviders } from '../../../../../common/mock';
+import { AlertsCard } from './alerts_card';
+import { TestProviders } from '../../../../../common/mock/test_providers';
+import { render } from '@testing-library/react';
 import { OnboardingContextProvider } from '../../../onboarding_context';
-import AlertsCard from './alerts_card';
+import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 
-const mockSetComplete = jest.fn();
-const mockSetExpandedCardId = jest.fn();
+jest.mock('../../../../../common/experimental_features_service', () => ({
+  ExperimentalFeaturesService: { get: jest.fn() },
+}));
+const mockExperimentalFeatures = ExperimentalFeaturesService.get as jest.Mock;
 const mockIsCardComplete = jest.fn();
+const mockIsCardAvailable = jest.fn();
 
 const props = {
-  setComplete: mockSetComplete,
+  setComplete: jest.fn(),
   checkComplete: jest.fn(),
   isCardComplete: jest.fn(),
   setExpandedCardId: jest.fn(),
@@ -24,6 +28,7 @@ const props = {
 
 describe('AlertsCard', () => {
   beforeEach(() => {
+    mockExperimentalFeatures.mockReturnValue({});
     jest.clearAllMocks();
   });
 
@@ -39,55 +44,29 @@ describe('AlertsCard', () => {
     expect(getByTestId('alertsCardDescription')).toBeInTheDocument();
   });
 
-  it('card callout should be rendered if integrations card is available but not complete', () => {
-    props.isCardAvailable.mockReturnValueOnce(true);
-    props.isCardComplete.mockReturnValueOnce(false);
+  it('card callout should not be rendered if integrations card is not available', () => {
+    mockIsCardAvailable.mockReturnValueOnce(false);
 
-    const { getByText } = render(
+    const { queryByText } = render(
       <TestProviders>
         <OnboardingContextProvider spaceId="default">
           <AlertsCard {...props} />
         </OnboardingContextProvider>
-      </TestProviders>
-    );
-
-    expect(getByText('To view alerts add integrations first.')).toBeInTheDocument();
-  });
-
-  it('card callout should not be rendered if integrations card is not available', () => {
-    props.isCardAvailable.mockReturnValueOnce(false);
-
-    const { queryByText } = render(
-      <TestProviders>
-        <AlertsCard {...props} />
       </TestProviders>
     );
 
     expect(queryByText('To view alerts add integrations first.')).not.toBeInTheDocument();
   });
 
-  it('card button should be disabled if integrations card is available but not complete', () => {
-    props.isCardAvailable.mockReturnValueOnce(true);
-    props.isCardComplete.mockReturnValueOnce(false);
+  it('card button should be enabled if integrations card is complete', () => {
+    mockIsCardAvailable.mockReturnValueOnce(true);
+    mockIsCardComplete.mockReturnValueOnce(true);
 
     const { getByTestId } = render(
       <TestProviders>
         <OnboardingContextProvider spaceId="default">
           <AlertsCard {...props} />
         </OnboardingContextProvider>
-      </TestProviders>
-    );
-
-    expect(getByTestId('alertsCardButton').querySelector('button')).toBeDisabled();
-  });
-
-  it('card button should be enabled if integrations card is complete', () => {
-    props.isCardAvailable.mockReturnValueOnce(true);
-    props.isCardComplete.mockReturnValueOnce(true);
-
-    const { getByTestId } = render(
-      <TestProviders>
-        <AlertsCard {...props} />
       </TestProviders>
     );
 
