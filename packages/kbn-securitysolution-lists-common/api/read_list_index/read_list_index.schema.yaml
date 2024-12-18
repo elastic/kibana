@@ -8,7 +8,8 @@ paths:
       x-labels: [serverless, ess]
       operationId: ReadListIndex
       x-codegen-enabled: true
-      summary: Get list data stream existence status
+      summary: Get status of list data streams 
+      description: Verify that `.lists` and `.items` data streams exist.
       responses:
         200:
           description: Successful response
