@@ -49,17 +49,15 @@ export function StreamDetailEnrichmentContent({
 
   const hasProcessors = processors.length > 0;
 
+  const addProcessorFlyout = isAddProcessorOpen && (
+    <AddProcessorFlyout key="add-processor" definition={definition} onClose={closeAddProcessor} />
+  );
+
   if (!hasProcessors) {
     return (
       <>
         <EnrichmentEmptyPrompt onAddProcessor={openAddProcessor} />
-        {isAddProcessorOpen && (
-          <AddProcessorFlyout
-            key="add-processor"
-            definition={definition}
-            onClose={closeAddProcessor}
-          />
-        )}
+        {addProcessorFlyout}
       </>
     );
   }
@@ -80,13 +78,7 @@ export function StreamDetailEnrichmentContent({
       </SortableProcessorsList>
       <EuiSpacer size="m" />
       <AddProcessorButton onClick={openAddProcessor} />
-      {isAddProcessorOpen && (
-        <AddProcessorFlyout
-          key="add-processor"
-          definition={definition}
-          onClose={closeAddProcessor}
-        />
-      )}
+      {addProcessorFlyout}
     </EuiPanel>
   );
 }
