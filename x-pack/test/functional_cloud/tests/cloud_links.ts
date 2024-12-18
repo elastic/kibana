@@ -149,7 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(cloudLink).to.not.be(null);
       });
 
-      it('Shows the appearance buton', async () => {
+      it('Shows the appearance button', async () => {
         await PageObjects.common.clickAndValidate('userMenuButton', 'appearanceSelector');
       });
     });
