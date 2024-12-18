@@ -20,7 +20,6 @@ export class GisPage {
   }
 
   async goto() {
-    await this.page.pause();
     await this.page.gotoApp('maps');
     await this.waitForRenderCompletion();
   }
