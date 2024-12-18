@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
-import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-ui';
+import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
 import { SERVERLESS_ES_WEB_CRAWLERS_ID } from '@kbn/deeplinks-search/constants';
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
 

@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-ui';
+import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
 import { ELASTIC_MANAGED_WEB_CRAWLERS_PATH, BASE_WEB_CRAWLERS_PATH } from '../constants';
 

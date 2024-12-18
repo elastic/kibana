@@ -23,8 +23,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
 
 import { GithubLink } from '@kbn/search-api-panels';
-import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-ui';
-import { ConnectorIcon } from '@kbn/search-ui';
+import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
+import { ConnectorIcon } from '@kbn/search-shared-ui';
 import { docLinks } from '../../../common/doc_links';
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
 import { useConnectors } from '../hooks/api/use_connectors';

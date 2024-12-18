@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ConnectorIcon } from '@kbn/search-ui';
+import { ConnectorIcon } from '@kbn/search-shared-ui';
 import { docLinks } from '../../../../common/doc_links';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
