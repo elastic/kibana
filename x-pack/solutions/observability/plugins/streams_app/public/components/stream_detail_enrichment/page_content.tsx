@@ -10,28 +10,20 @@ import { ProcessingDefinition, ReadStreamDefinition } from '@kbn/streams-plugin/
 
 import {
   DragDropContextProps,
-  EuiButtonIcon,
-  EuiDragDropContext,
-  EuiDraggable,
-  EuiDroppable,
-  EuiDroppableProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
   EuiPanel,
-  EuiPanelProps,
   EuiSpacer,
   EuiText,
   EuiTitle,
   euiDragDropReorder,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { ClassNames } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import { EnrichmentEmptyPrompt } from './enrichment_empty_prompt';
 import { AddProcessorButton } from './add_processor_button';
-import { AddProcessorFlyout, EditProcessorFlyout } from './flyout';
+import { AddProcessorFlyout } from './flyout';
+import { DraggableProcessorListItem, SortableProcessorsList } from './processors_list';
+import { ProcessorDefinition } from './types';
 
 export function StreamDetailEnrichmentContent({
   definition,
@@ -50,6 +42,10 @@ export function StreamDetailEnrichmentContent({
       setProcessors(items);
     }
   };
+
+  const addProcessor = () => {};
+
+  const updateProcessor = () => {};
 
   const hasProcessors = processors.length > 0;
 
@@ -107,114 +103,13 @@ const ProcessorsHeader = () => {
       </EuiTitle>
       <EuiText component="p" size="s">
         {i18n.translate('xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle', {
-          defaultMessage: 'Use processors to transform data before indexing',
+          defaultMessage:
+            'Use processors to transform data before indexing. Drag and drop existing processors to update their execution order.',
         })}
       </EuiText>
     </>
   );
 };
-
-interface SortableProcessorsListProps {
-  onDragItem: DragDropContextProps['onDragEnd'];
-  children: EuiDroppableProps['children'];
-}
-
-const SortableProcessorsList = ({ onDragItem, children }: SortableProcessorsListProps) => {
-  return (
-    <EuiDragDropContext onDragEnd={onDragItem}>
-      <ClassNames>
-        {({ css, theme }) => (
-          <EuiDroppable
-            droppableId="processors-droppable-area"
-            className={css`
-              background-color: ${theme.euiTheme.colors.backgroundBasePlain};
-              max-width: min(800px, 100%);
-            `}
-          >
-            {children}
-          </EuiDroppable>
-        )}
-      </ClassNames>
-    </EuiDragDropContext>
-  );
-};
-
-const DraggableProcessorListItem = ({
-  processor,
-  idx,
-  ...props
-}: Omit<ProcessorListItemProps, 'hasShadow'> & { idx: number }) => (
-  <EuiDraggable
-    index={idx}
-    spacing="m"
-    draggableId={processor.id}
-    hasInteractiveChildren
-    style={{
-      paddingLeft: 0,
-      paddingRight: 0,
-    }}
-  >
-    {(_provided, state) => (
-      <ProcessorListItem processor={processor} hasShadow={state.isDragging} {...props} />
-    )}
-  </EuiDraggable>
-);
-
-interface ProcessorListItemProps {
-  definition: ReadStreamDefinition;
-  processor: ProcessorDefinition;
-  hasShadow: EuiPanelProps['hasShadow'];
-}
-
-const ProcessorListItem = ({
-  processor,
-  definition,
-  hasShadow = false,
-}: ProcessorListItemProps) => {
-  const { type } = processor.config;
-
-  const [isEditProcessorOpen, { on: openEditProcessor, off: closeEditProcessor }] = useBoolean();
-
-  const description = getProcessorDescription(processor);
-
-  return (
-    <EuiPanel hasBorder hasShadow={hasShadow} paddingSize="s">
-      <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
-        <EuiIcon type="grab" />
-        <EuiText component="span" size="s">
-          {type.toUpperCase()}
-        </EuiText>
-        <EuiFlexItem>
-          <EuiText component="span" size="s" color="subdued">
-            {description}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiButtonIcon
-          onClick={openEditProcessor}
-          iconType="pencil"
-          color="text"
-          size="s"
-          aria-label={i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.editProcessorAction',
-            { defaultMessage: 'Edit {type} processor', values: { type } }
-          )}
-        />
-      </EuiFlexGroup>
-      {isEditProcessorOpen && (
-        <EditProcessorFlyout
-          key={`edit-processor`}
-          definition={definition}
-          onClose={closeEditProcessor}
-          processor={processor}
-        />
-      )}
-    </EuiPanel>
-  );
-};
-
-interface ProcessorDefinition extends ProcessingDefinition {
-  id: string;
-}
 
 const createId = htmlIdGenerator();
 const createProcessorsList = (processors: ProcessingDefinition[]): ProcessorDefinition[] =>
@@ -222,13 +117,3 @@ const createProcessorsList = (processors: ProcessingDefinition[]): ProcessorDefi
     ...processor,
     id: createId(),
   }));
-
-const getProcessorDescription = (processor: ProcessorDefinition) => {
-  if (processor.config.type === 'grok') {
-    return processor.config.patterns.join(' • ');
-  } else if (processor.config.type === 'dissect') {
-    return processor.config.pattern;
-  }
-
-  return '';
-};

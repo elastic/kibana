@@ -114,18 +114,18 @@ export function EditProcessorFlyout({
 }
 
 interface ProcessorFlyoutWrapperProps {
-  title: string;
-  onClose: () => void;
   confirmButton?: React.ReactNode;
+  onClose: () => void;
   subHeader?: React.ReactNode;
+  title: string;
 }
 
 function ProcessorFlyout({
-  title,
-  onClose,
   children,
   confirmButton,
+  onClose,
   subHeader,
+  title,
 }: PropsWithChildren<ProcessorFlyoutWrapperProps>) {
   const [isDiscardModalOpen, { on: openDiscardModal, off: closeDiscardModal }] = useBoolean();
 
