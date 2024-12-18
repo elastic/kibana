@@ -41,7 +41,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
 
-    const onlyRunQuickChecks = true; // await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
+    const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
     if (onlyRunQuickChecks) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
 
