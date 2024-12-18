@@ -47,7 +47,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         tags: ['oas-tag:spaces'],
         summary: `Copy saved objects between spaces`,
         description:
-          'It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved searches, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.',
+          'It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved Discover sessions, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.',
       },
       validate: {
         body: schema.object(

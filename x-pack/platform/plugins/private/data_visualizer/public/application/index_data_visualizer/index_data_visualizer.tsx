@@ -200,7 +200,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
         } catch (e) {
           toasts.addError(e, {
             title: i18n.translate('xpack.dataVisualizer.index.savedSearchErrorMessage', {
-              defaultMessage: 'Error retrieving saved search {savedSearchId}',
+              defaultMessage: 'Error retrieving Discover session {savedSearchId}',
               values: { savedSearchId },
             }),
           });

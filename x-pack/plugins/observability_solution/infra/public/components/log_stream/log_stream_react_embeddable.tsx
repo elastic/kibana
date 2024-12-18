@@ -142,8 +142,8 @@ const DeprecationCallout = () => {
                 target="_blank"
               >
                 {i18n.translate(
-                  'xpack.infra.logsStreamEmbeddable.deprecationWarningDescription.savedSearchesLinkLabel',
-                  { defaultMessage: 'saved searches' }
+                  'xpack.infra.logsStreamEmbeddable.deprecationWarningDescription.discoverSessionsLinkLabel',
+                  { defaultMessage: 'Discover sessions' }
                 )}
               </EuiLink>
             ),

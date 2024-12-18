@@ -163,9 +163,9 @@ To enable series data interactions, configure <<settings-explore-data-in-chart,`
 +
 To use series data interactions, click a data series in the panel.
 
-* *Saved search interactions* &mdash; Opens <<save-your-search,saved search>> data in *Discover*.
+* *Discover session interactions* &mdash; Opens <<save-your-search,saved Discover session>> data in *Discover*.
 +
-To use saved search interactions, open the panel menu, then click *More > View saved search*.
+To use saved Discover session interactions, open the panel menu, then click *More > View Discover session*.
 
 [[edit-panels]]
 === Edit panels

@@ -67,7 +67,7 @@ export const SourceSelection: FC = () => {
           i18n.translate(
             'xpack.ml.dataFrame.analytics.create.searchSelection.errorGettingDataViewTitle',
             {
-              defaultMessage: 'Error loading data view used by the saved search',
+              defaultMessage: 'Error loading data view used by the saved Discover session',
             }
           )
         );
@@ -82,7 +82,7 @@ export const SourceSelection: FC = () => {
           i18n.translate(
             'xpack.ml.dataFrame.analytics.create.searchSelection.CcsErrorCallOutBody',
             {
-              defaultMessage: `The saved search ''{savedSearchTitle}'' uses the data view ''{dataViewName}''.`,
+              defaultMessage: `The saved Discover session ''{savedSearchTitle}'' uses the data view ''{dataViewName}''.`,
               values: {
                 savedSearchTitle: getNestedProperty(savedObject, 'attributes.title'),
                 dataViewName,
@@ -132,17 +132,17 @@ export const SourceSelection: FC = () => {
             noItemsMessage={i18n.translate(
               'xpack.ml.dataFrame.analytics.create.searchSelection.notFoundLabel',
               {
-                defaultMessage: 'No matching indices or saved searches found.',
+                defaultMessage: 'No matching indices or saved Discover sessions found.',
               }
             )}
             savedObjectMetaData={[
               {
                 type: 'search',
-                getIconForSavedObject: () => 'search',
+                getIconForSavedObject: () => 'discoverApp',
                 name: i18n.translate(
-                  'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.search',
+                  'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.discoverSession',
                   {
-                    defaultMessage: 'Saved search',
+                    defaultMessage: 'Discover session',
                   }
                 ),
                 showSavedObject: (savedObject: SavedObject) =>

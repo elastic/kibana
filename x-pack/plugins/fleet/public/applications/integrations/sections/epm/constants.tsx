@@ -36,7 +36,7 @@ export const AssetTitleMap: Record<
     defaultMessage: 'Visualizations',
   }),
   search: i18n.translate('xpack.fleet.epm.assetTitles.savedSearches', {
-    defaultMessage: 'Saved searches',
+    defaultMessage: 'Discover sessions',
   }),
   'index-pattern': i18n.translate('xpack.fleet.epm.assetTitles.indexPatterns', {
     defaultMessage: 'Data views',

@@ -35,7 +35,7 @@ async function saveDataSource({
     if (id) {
       services.toastNotifications.addSuccess({
         title: i18n.translate('discover.notifications.savedSearchTitle', {
-          defaultMessage: `Search ''{savedSearchTitle}'' was saved`,
+          defaultMessage: `Discover session ''{savedSearchTitle}'' was saved`,
           values: {
             savedSearchTitle: savedSearch.title,
           },
@@ -56,7 +56,7 @@ async function saveDataSource({
   function onError(error: Error) {
     services.toastNotifications.addDanger({
       title: i18n.translate('discover.notifications.notSavedSearchTitle', {
-        defaultMessage: `Search ''{savedSearchTitle}'' was not saved.`,
+        defaultMessage: `Discover session ''{savedSearchTitle}'' was not saved.`,
         values: {
           savedSearchTitle: savedSearch.title,
         },
@@ -266,7 +266,7 @@ const SaveSearchObjectModal: React.FC<{
         label={
           <FormattedMessage
             id="discover.topNav.saveModal.storeTimeWithSearchToggleLabel"
-            defaultMessage="Store time with saved search"
+            defaultMessage="Store time with Discover session"
           />
         }
       />
@@ -289,7 +289,7 @@ const SaveSearchObjectModal: React.FC<{
       initialCopyOnSave={initialCopyOnSave}
       description={description}
       objectType={i18n.translate('discover.localMenu.saveSaveSearchObjectType', {
-        defaultMessage: 'search',
+        defaultMessage: 'Discover session',
       })}
       showDescription={true}
       options={options}
@@ -299,7 +299,7 @@ const SaveSearchObjectModal: React.FC<{
         managed
           ? i18n.translate('discover.localMenu.mustCopyOnSave', {
               defaultMessage:
-                'Elastic manages this saved search. Save any changes to a new saved search.',
+                'Elastic manages this Discover session. Save any changes to a new Discover session.',
             })
           : undefined
       }

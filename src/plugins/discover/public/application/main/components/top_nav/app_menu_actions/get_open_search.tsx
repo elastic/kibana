@@ -21,11 +21,8 @@ export const getOpenSearchAppMenuItem = ({
     id: AppMenuActionId.open,
     type: AppMenuActionType.primary,
     controlProps: {
-      label: i18n.translate('discover.localMenu.openTitle', {
-        defaultMessage: 'Open',
-      }),
-      description: i18n.translate('discover.localMenu.openSavedSearchDescription', {
-        defaultMessage: 'Open Saved Search',
+      label: i18n.translate('discover.localMenu.openDiscoverSessionTitle', {
+        defaultMessage: 'Open session',
       }),
       iconType: 'folderOpen',
       testId: 'discoverOpenButton',
