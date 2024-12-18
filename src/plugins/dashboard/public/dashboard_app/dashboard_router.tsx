@@ -10,7 +10,6 @@
 import './_dashboard_app.scss';
 
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Routes } from '@kbn/shared-ux-router';
@@ -72,7 +71,7 @@ export async function mountApp({
     if (redirectTo.destination === 'dashboard') {
       path = redirectTo.id ? createDashboardEditUrl(redirectTo.id) : CREATE_NEW_DASHBOARD_URL;
       if (redirectTo.editMode) {
-        state = { viewMode: ViewMode.EDIT };
+        state = { viewMode: 'edit' };
       }
     } else {
       path = createDashboardListingFilterUrl(redirectTo.filter);

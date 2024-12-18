@@ -11,7 +11,6 @@ import { has } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 import { injectSearchSourceReferences } from '@kbn/data-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { Filter, Query } from '@kbn/es-query';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 
@@ -188,7 +187,7 @@ export const loadDashboardState = async ({
       query,
       title,
 
-      viewMode: ViewMode.VIEW, // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
+      viewMode: 'view', // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
       tags:
         savedObjectsTaggingService?.getTaggingApi()?.ui.getTagIdsFromReferences(references) ?? [],
 

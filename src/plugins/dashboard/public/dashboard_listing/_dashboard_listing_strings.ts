@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { ViewMode } from '@kbn/presentation-publishing';
 
 export const dashboardListingErrorStrings = {
   getErrorDeletingDashboardToast: () =>
@@ -116,7 +116,7 @@ export const resetConfirmStrings = {
       defaultMessage: 'Reset dashboard?',
     }),
   getResetSubtitle: (viewMode: ViewMode) =>
-    viewMode === ViewMode.EDIT
+    viewMode === 'edit'
       ? i18n.translate('dashboard.discardChangesConfirmModal.discardChangesDescription', {
           defaultMessage: `All unsaved changes will be lost.`,
         })
