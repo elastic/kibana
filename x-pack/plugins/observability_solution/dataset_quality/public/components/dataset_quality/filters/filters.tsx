@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { EuiSuperDatePicker } from '@elastic/eui';
-import { UI_SETTINGS } from '@kbn/data-service';
-import { TimePickerQuickRange } from '@kbn/observability-shared-plugin/public/hooks/use_quick_time_ranges';
-import React, { useMemo } from 'react';
+import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useDatasetQualityFilters } from '../../../hooks/use_dataset_quality_filters';
-import { useKibanaContextForPlugin } from '../../../utils/use_kibana';
+import { useQuickTimeRanges } from '../../../utils/use_quick_time_ranges';
 import { FilterBar } from './filter_bar';
 import { IntegrationsSelector } from './integrations_selector';
 import { NamespacesSelector } from './namespaces_selector';
@@ -59,23 +56,7 @@ export default function Filters() {
     onQueryChange,
   } = useDatasetQualityFilters();
 
-  const {
-    services: { uiSettings },
-  } = useKibanaContextForPlugin();
-
-  const timePickerQuickRanges = uiSettings.get<TimePickerQuickRange[]>(
-    UI_SETTINGS.TIMEPICKER_QUICK_RANGES
-  );
-
-  const commonlyUsedRanges = useMemo(
-    () =>
-      timePickerQuickRanges.map(({ from, to, display }) => ({
-        start: from,
-        end: to,
-        label: display,
-      })),
-    [timePickerQuickRanges]
-  );
+  const commonlyUsedRanges = useQuickTimeRanges();
 
   return (
     <EuiFlexGroup data-test-subj="datasetQualityFiltersContainer" gutterSize="s" wrap>

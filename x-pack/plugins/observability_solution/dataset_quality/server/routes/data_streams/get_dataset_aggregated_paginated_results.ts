@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-import { rangeQuery } from '@kbn/observability-plugin/server';
 import { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { DataStreamDocsStat } from '../../../common/api_types';
 import { createDatasetQualityESClient } from '../../utils';
+import { rangeQuery } from '../../utils/queries';
 
 interface Dataset {
   type: string;

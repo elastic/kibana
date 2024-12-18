@@ -6,11 +6,11 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { rangeQuery } from '@kbn/observability-plugin/server/utils/queries';
-import { extractIndexNameFromBackingIndex } from '../../../common/utils';
 import { _IGNORED } from '../../../common/es_fields';
 import { DataStreamType } from '../../../common/types';
+import { extractIndexNameFromBackingIndex } from '../../../common/utils';
 import { createDatasetQualityESClient } from '../../utils';
+import { rangeQuery } from '../../utils/queries';
 
 export async function getNonAggregatableDataStreams({
   esClient,
