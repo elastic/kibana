@@ -18,7 +18,6 @@ import {
   transparentize,
   useEuiTheme,
 } from '@elastic/eui';
-import chroma from 'chroma-js';
 
 import { RuleConditionChart, TopAlert } from '@kbn/observability-plugin/public';
 import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES, ALERT_GROUP } from '@kbn/rule-data-utils';
@@ -90,7 +89,7 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
       timestamp: alertStart!,
       endTimestamp: alertEnd ?? moment().toISOString(),
     },
-    color: chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase(),
+    color: transparentize(euiTheme.colors.danger, 0.2),
     id: `metric_threshold_${alertEnd ? 'recovered' : 'active'}_alert_range_annotation`,
   };
 

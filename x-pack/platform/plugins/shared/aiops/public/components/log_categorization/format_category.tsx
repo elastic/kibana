@@ -11,7 +11,7 @@ import { EuiText, EuiHorizontalRule } from '@elastic/eui';
 import type { SerializedStyles } from '@emotion/react';
 import { css } from '@emotion/react';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
-import { useIsDarkTheme } from '../../hooks/use_eui_theme';
+import { useIsDarkTheme } from '../../hooks/use_is_dark_theme';
 
 interface Props {
   category: Category;
