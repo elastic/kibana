@@ -64,6 +64,7 @@ import type {
   UpdateAgentPolicyRequest,
   UpdateAgentPolicyResponse,
   PostNewAgentActionResponse,
+  InstallPackageResponse,
 } from '@kbn/fleet-plugin/common/types';
 import semver from 'semver';
 import axios from 'axios';
@@ -1589,4 +1590,24 @@ export const waitForFleetAgentActionToComplete = async (
     },
     { maxTimeout: 2_000, maxRetryTime: timeout }
   );
+};
+
+/**
+ * Installs an Integration in fleet, which ensures that all of its assets are configured
+ * @param kbnClient
+ * @param integrationName
+ * @param version
+ */
+export const installIntegration = async (
+  kbnClient: KbnClient,
+  integrationName: string,
+  version?: string
+): Promise<InstallPackageResponse> => {
+  return kbnClient
+    .request<InstallPackageResponse>({
+      method: 'POST',
+      path: epmRouteService.getInstallPath(integrationName, version),
+    })
+    .catch(catchAxiosErrorFormatAndThrow)
+    .then((response) => response.data);
 };
