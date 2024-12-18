@@ -281,7 +281,7 @@ export function FieldStatsPopover({
         )}
         data-test-subj={'apmCorrelationsContextPopoverButton'}
         css={css`
-          marginleft: ${euiTheme.size.xs};
+          margin-left: ${euiTheme.size.xs};
         `}
       />
     </EuiToolTip>

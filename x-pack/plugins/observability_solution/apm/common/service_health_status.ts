@@ -40,11 +40,11 @@ export function getServiceHealthStatusColor(
 ) {
   switch (status) {
     case ServiceHealthStatus.healthy:
-      return euiTheme.colors.vis.euiColorVis0;
+      return euiTheme.colors.success;
     case ServiceHealthStatus.warning:
-      return euiTheme.colors.vis.euiColorVis5;
+      return euiTheme.colors.warning;
     case ServiceHealthStatus.critical:
-      return euiTheme.colors.vis.euiColorVis9;
+      return euiTheme.colors.danger;
     case ServiceHealthStatus.unknown:
       return euiTheme.colors.mediumShade;
   }
@@ -56,11 +56,11 @@ export function getServiceHealthStatusBadgeColor(
 ) {
   switch (status) {
     case ServiceHealthStatus.healthy:
-      return euiTheme.colors.vis.euiColorVis0;
+      return euiTheme.colors.success;
     case ServiceHealthStatus.warning:
-      return euiTheme.colors.vis.euiColorVis5;
+      return euiTheme.colors.warning;
     case ServiceHealthStatus.critical:
-      return euiTheme.colors.vis.euiColorVis9;
+      return euiTheme.colors.danger;
     case ServiceHealthStatus.unknown:
       return euiTheme.colors.mediumShade;
   }

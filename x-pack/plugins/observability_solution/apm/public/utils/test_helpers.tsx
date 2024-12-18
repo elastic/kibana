@@ -112,15 +112,11 @@ export function expectTextsInDocument(output: any, texts: string[]) {
   });
 }
 
-export function renderWithTheme(
-  component: React.ReactNode,
-  params?: any,
-  { darkMode = false } = {}
-) {
+export function renderWithTheme(component: React.ReactNode, params?: any) {
   return render(<EuiThemeProvider>{component}</EuiThemeProvider>, params);
 }
 
-export function mountWithTheme(tree: React.ReactElement<any>, { darkMode = false } = {}) {
+export function mountWithTheme(tree: React.ReactElement<any>) {
   function WrappingThemeProvider(props: any) {
     return <EuiThemeProvider>{props.children}</EuiThemeProvider>;
   }

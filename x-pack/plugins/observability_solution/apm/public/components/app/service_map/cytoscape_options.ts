@@ -80,10 +80,9 @@ function getBorderWidth(el: cytoscape.NodeSingular) {
 const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
 export const getAnimationOptions = (euiTheme: EuiThemeComputed): cytoscape.AnimationOptions => ({
-  // @ts-expect-error
-  duration: parseInt(euiTheme.animation.normal, 10),
+  duration: euiTheme.animation.normal ? parseInt(euiTheme.animation.normal, 10) : 0,
   // @ts-expect-error The cubic-bezier options here are not recognized by the cytoscape types
-  easing: euiTheme.animation.bouncetheme,
+  easing: euiTheme.animation.bounce,
 });
 
 const zIndexNode = 200;
@@ -124,7 +123,7 @@ const getStyle = (
         color: (el: cytoscape.NodeSingular) =>
           el.hasClass('primary') || el.selected()
             ? euiTheme.colors.textPrimary
-            : euiTheme.colors.text,
+            : euiTheme.colors.textParagraph,
         // theme.euiFontFamily doesn't work here for some reason, so we're just
         // specifying a subset of the fonts for the label text.
         'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',

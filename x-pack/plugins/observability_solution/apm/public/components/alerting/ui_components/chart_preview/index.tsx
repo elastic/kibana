@@ -22,7 +22,7 @@ import {
   Tooltip,
   niceTimeFormatter,
 } from '@elastic/charts';
-import { EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { COLOR_MODES_STANDARD, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common';
@@ -122,7 +122,7 @@ export function ChartPreview({
           legendPosition={'bottom'}
           legendSize={legendSize}
           locale={i18n.getLocale()}
-          theme={theme.colorMode === 'DARK' ? DARK_THEME : LIGHT_THEME}
+          theme={theme.colorMode === COLOR_MODES_STANDARD.dark ? DARK_THEME : LIGHT_THEME}
         />
         <LineAnnotation
           dataValues={[{ dataValue: threshold }]}

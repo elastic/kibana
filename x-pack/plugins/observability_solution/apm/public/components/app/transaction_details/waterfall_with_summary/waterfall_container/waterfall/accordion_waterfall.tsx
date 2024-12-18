@@ -211,14 +211,14 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
       forceState={node.expanded ? 'open' : 'closed'}
       onToggle={toggleAccordion}
       css={css`
-        border-top: 1px solid ${euiTheme.colors.lightShade};
+        border-top: ${euiTheme.border.thin};
         .button_${node.item.id} {
           width: 100%;
           height: ${ACCORDION_HEIGHT}px;
           margin-left: ${marginLeftLevel}px;
           border-left: ${hasError
-            ? `2px solid ${euiTheme.colors.danger};`
-            : `1px solid ${euiTheme.colors.lightShade};`};
+            ? `${euiTheme.border.width.thick} solid ${euiTheme.colors.danger};`
+            : `${euiTheme.border.thin};`};
           &:hover {
             background-color: ${euiTheme.colors.lightestShade};
           }

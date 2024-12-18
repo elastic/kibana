@@ -43,7 +43,7 @@ const Description = styled.div`
 `;
 
 const ListItem = styled.li`
-  font-size: ${() => useEuiFontSize('s').fontSize};
+  font-size: ${() => useEuiFontSize('xs').fontSize};
   height: ${({ theme }) => theme.euiTheme.size.xl};
   align-items: center;
   display: flex;

@@ -52,7 +52,7 @@ const LineNumber = styled.div<{ highlight: boolean }>`
   color: ${({ theme }) => theme.euiTheme.colors.mediumShade};
   line-height: ${LINE_HEIGHT}px;
   text-align: right;
-  border-right: 1px solid ${({ theme }) => theme.euiTheme.colors.lightShade};
+  border-right: ${({ theme }) => theme.euiTheme.border.thin};
   background-color: ${({ highlight, theme }) =>
     highlight ? tint(0.9, theme.euiTheme.colors.warning) : null};
 

@@ -76,7 +76,7 @@ export function TimelineAxis({ plotValues, marks = [], topTraceDuration }: Timel
               key="topTrace"
               x={topTraceDurationPosition}
               y={0}
-              fill={euiTheme.colors.text}
+              fill={euiTheme.colors.textParagraph}
               textAnchor="middle"
             >
               {tickFormatter(topTraceDuration).formatted}

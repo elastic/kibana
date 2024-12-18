@@ -48,7 +48,7 @@ export function MLCallout({
       }
     | undefined;
 
-  const getLearnMoreLink = (color: 'primary' | 'accentSecondary') => {
+  const getLearnMoreLink = (color: 'primary' | 'success') => {
     return (
       <EuiButton
         data-test-subj="apmGetLearnMoreLinkButton"
@@ -106,7 +106,7 @@ export function MLCallout({
         primaryAction: isOnSettingsPage ? (
           <EuiButton
             data-test-subj="apmMLCalloutUpdateJobsButton"
-            color="accentSecondary"
+            color="success"
             isLoading={loading}
             onClick={() => {
               setLoading(true);
@@ -120,7 +120,7 @@ export function MLCallout({
             })}
           </EuiButton>
         ) : (
-          getLearnMoreLink('accentSecondary')
+          getLearnMoreLink('success')
         ),
       };
       break;

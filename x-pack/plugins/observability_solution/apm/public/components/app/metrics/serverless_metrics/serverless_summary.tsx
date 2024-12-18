@@ -34,7 +34,7 @@ const CentralizedContainer = styled.div`
 
 const Border = styled.div`
   height: 55px;
-  border-right: 1px solid ${({ theme }) => theme.euiTheme.colors.lightShade};
+  border-right: ${({ theme }) => theme.euiTheme.border.thin};
 `;
 
 function VerticalRule() {
