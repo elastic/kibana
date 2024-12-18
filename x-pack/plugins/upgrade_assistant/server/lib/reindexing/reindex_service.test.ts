@@ -26,7 +26,6 @@ import { esIndicesStateCheck } from '../es_indices_state_check';
 import { versionService } from '../version';
 
 import { ReindexService, reindexServiceFactory } from './reindex_service';
-import { error } from './error';
 
 const asApiResponse = <T>(body: T): TransportResult<T> =>
   ({
