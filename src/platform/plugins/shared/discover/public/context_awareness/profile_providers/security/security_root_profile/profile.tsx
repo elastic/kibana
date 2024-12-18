@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FunctionComponent, PropsWithChildren } from 'react';
-import React from 'react';
-import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import type { RootProfileProvider } from '../../../profiles';
-import { SolutionType } from '../../../profiles';
-import type { ProfileProviderServices } from '../../profile_provider_services';
-import type { SecurityProfileProviderFactory } from '../types';
+import React, { FunctionComponent, PropsWithChildren } from 'react';
+import { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import { RootProfileProvider, SolutionType } from '../../../profiles';
+import { ProfileProviderServices } from '../../profile_provider_services';
+import { SecurityProfileProviderFactory } from '../types';
 import { createCellRendererAccessor } from '../accessors/get_cell_renderer_accessor';
 import { createAppWrapperAccessor } from '../accessors/create_app_wrapper_accessor';
+import { getDefaultSecuritySolutionAppState } from '../accessors/get_default_app_state';
+import { getAlertEventRowIndicator } from '../accessors/get_row_indicator';
 
 interface SecurityRootProfileContext {
   appWrapper?: FunctionComponent<PropsWithChildren<{}>>;
@@ -50,11 +50,19 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
         (prev, { context }) =>
         (params) => {
           const entries = prev(params);
-          ['host.name', 'user.name', 'source.ip', 'destination.ip'].forEach((fieldName) => {
+          [
+            'host.name',
+            'user.name',
+            'source.ip',
+            'destination.ip',
+            'kibana.alert.workflow_status',
+          ].forEach((fieldName) => {
             entries[fieldName] = context.getCellRenderer?.(fieldName) ?? entries[fieldName];
           });
           return entries;
         },
+      getRowIndicatorProvider: () => () => getAlertEventRowIndicator,
+      getDefaultAppState: () => () => getDefaultSecuritySolutionAppState(),
     },
     resolve: async (params) => {
       if (params.solutionNavId !== SolutionType.Security) {
