@@ -75,7 +75,7 @@ export const groupingContainerCssLevel = (euiTheme: EuiThemeComputed<{}>) => css
   }
 `;
 
-export const StyledContextMenu = euiStyled(EuiContextMenu)`
+export const StyledContextMenu = euiStyled(EuiContextMenu)<{ euiTheme: EuiThemeComputed }>`
   width: 250px;
   & .euiContextMenuItem__text {
     overflow: hidden;
