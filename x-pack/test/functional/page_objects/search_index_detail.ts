@@ -38,9 +38,9 @@ export function SearchIndexDetailProvider({ getService }: FtrProviderContext) {
         'QuickStatsDocumentCount'
       );
       expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Document count\n0');
-      expect(await quickStatsDocumentElem.getVisibleText()).not.to.contain('Index Size\n0b');
+      expect(await quickStatsDocumentElem.getVisibleText()).not.to.contain('Index Size');
       await quickStatsDocumentElem.click();
-      expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Index Size\n0b');
+      expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Index Size\n227b');
     },
 
     async expectQuickStatsToHaveDocumentCount(count: number) {

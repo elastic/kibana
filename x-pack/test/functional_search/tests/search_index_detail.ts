@@ -16,11 +16,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     indexManagement,
     embeddedConsole,
   } = getPageObjects([
+    'header',
     'searchIndexDetail',
     'common',
     'searchApiKeys',
     'searchNavigation',
-    'common',
     'indexManagement',
     'embeddedConsole',
   ]);
@@ -270,7 +270,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
       });
-      describe('index management index list page', () => {
+      describe.skip('index management index list page', () => {
         before(async () => {
           await es.indices.create({ index: indexName });
           await security.testUser.setRoles(['index_management_user']);

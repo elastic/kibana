@@ -76,7 +76,7 @@ export const getNavigationTreeDefinition = ({
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
       debounceTime(10),
-      map(({ indices, searchApps, collections }) => {
+      map(({ searchApps, collections }) => {
         const navTree: NavigationTreeDefinition = {
           body: [
             {

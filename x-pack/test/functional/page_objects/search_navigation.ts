@@ -12,10 +12,10 @@ export function SearchNavigationServiceProvider({
   getPageObjects,
 }: FtrProviderContext) {
   const retry = getService('retry');
-  const { common, indexManagement, solutionNavigation } = getPageObjects([
+  const { common, indexManagement, header } = getPageObjects([
+    'header',
     'common',
     'indexManagement',
-    'solutionNavigation',
   ]);
   const testSubjects = getService('testSubjects');
 
@@ -45,10 +45,10 @@ export function SearchNavigationServiceProvider({
     },
 
     async navigateToIndexManagementPage() {
-      await retry.tryForTime(60 * 1000, async () => {
-        await solutionNavigation.sidenav.clickLink({
-          deepLinkId: 'enterpriseSearchContent:searchIndices',
-        });
+      await retry.tryForTime(10 * 1000, async () => {
+        await common.navigateToApp(`indexManagement`);
+        await indexManagement.changeTabs('indicesTab');
+        await header.waitUntilLoadingHasFinished();
         await indexManagement.expectToBeOnIndicesManagement();
       });
     },
