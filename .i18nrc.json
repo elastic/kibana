@@ -166,7 +166,7 @@
     "unifiedFieldList": "src/platform/packages/shared/kbn-unified-field-list",
     "unifiedHistogram": "src/platform/plugins/shared/unified_histogram",
     "unifiedDataTable": "src/platform/packages/shared/kbn-unified-data-table",
-    "unsavedChangesBadge": "packages/kbn-unsaved-changes-badge",
+    "unsavedChangesBadge": "src/platform/packages/private/kbn-unsaved-changes-badge",
     "unsavedChangesPrompt": "src/platform/packages/shared/kbn-unsaved-changes-prompt",
     "managedContentBadge": "packages/kbn-managed-content-badge",
     "responseOpsRuleForm": "packages/response-ops/rule_form"
