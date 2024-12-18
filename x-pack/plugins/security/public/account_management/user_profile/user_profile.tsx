@@ -327,7 +327,7 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
       >
         <p>
           {i18n.translate(
-            'xpack.security.accountManagement.userProfile.deprecatedSpaceDefaultDescr',
+            'xpack.security.accountManagement.userProfile.deprecatedSpaceDefaultDescription',
             {
               defaultMessage:
                 'All users with the Space default color mode enabled will be automatically transitioned to the System color mode.',
