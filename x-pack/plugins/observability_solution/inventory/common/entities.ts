@@ -37,5 +37,6 @@ export type InventoryEntity = {
   entityType: string;
   entityDisplayName: string;
   entityLastSeenTimestamp: string;
+  entityIdentityFields: { [key: string]: string[] };
   alertsCount?: number;
 } & EntityMetadata;

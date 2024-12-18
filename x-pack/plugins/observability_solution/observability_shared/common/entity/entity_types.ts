@@ -12,7 +12,9 @@ const createKubernetesEntity = <T extends string>(base: T) => ({
 
 export const BUILT_IN_ENTITY_TYPES = {
   HOST: 'host',
+  HOST_V2: 'built_in_hosts_from_ecs_data',
   CONTAINER: 'container',
+  CONTAINER_V2: 'built_in_containers_from_ecs_data',
   SERVICE: 'service',
   SERVICE_V2: 'built_in_services_from_ecs_data',
   KUBERNETES: {

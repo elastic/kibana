@@ -116,6 +116,7 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
         entityType: entity['entity.type'],
         entityDisplayName: entity['entity.display_name'],
         entityLastSeenTimestamp: entity['entity.last_seen_timestamp'] as string,
+        entityIdentityFields: identityFieldsBySource,
         ...entity,
       };
     });

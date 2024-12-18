@@ -14,7 +14,6 @@ import {
 import { useCallback } from 'react';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { castArray } from 'lodash';
 import { isBuiltinEntityOfType } from '../../common/utils/entity_type_guards';
 import type { InventoryEntity } from '../../common/entities';
 import { useKibana } from './use_kibana';
@@ -48,21 +47,23 @@ export const useDetailViewRedirect = () => {
   const getDetailViewRedirectUrl = useCallback(
     (entity: InventoryEntity) => {
       const identityFieldsValue = entityManager.entityClient.getIdentityFieldsValue({
-        entity: {
-          identity_fields: entity.entityIdentityFields,
-        },
-        ...entity,
+        entity,
       });
-      const identityFields = castArray(entity.entityIdentityFields);
+      const identityFields = Object.keys(identityFieldsValue || {});
 
-      if (isBuiltinEntityOfType('host', entity) || isBuiltinEntityOfType('container', entity)) {
+      if (
+        isBuiltinEntityOfType(BUILT_IN_ENTITY_TYPES.HOST_V2, entity) ||
+        isBuiltinEntityOfType(BUILT_IN_ENTITY_TYPES.CONTAINER_V2, entity)
+      ) {
         return assetDetailsLocator?.getRedirectUrl({
           assetId: identityFieldsValue[identityFields[0]],
-          assetType: entity.entityType,
+          assetType: isBuiltinEntityOfType(BUILT_IN_ENTITY_TYPES.HOST_V2, entity)
+            ? 'host'
+            : 'container',
         });
       }
 
-      if (isBuiltinEntityOfType('service', entity)) {
+      if (isBuiltinEntityOfType(BUILT_IN_ENTITY_TYPES.SERVICE_V2, entity)) {
         return serviceOverviewLocator?.getRedirectUrl({
           serviceName: identityFieldsValue[identityFields[0]],
         });
@@ -84,10 +85,7 @@ export const useDetailViewRedirect = () => {
             query: {
               language: 'kuery',
               query: entityManager.entityClient.asKqlFilter({
-                entity: {
-                  identity_fields: entity.entityIdentityFields,
-                },
-                ...entity,
+                entity,
               }),
             },
           })

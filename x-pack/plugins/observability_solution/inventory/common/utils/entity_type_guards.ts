@@ -5,21 +5,12 @@
  * 2.0.
  */
 
-import type { AgentName } from '@kbn/elastic-agent-utils';
+import { BUILT_IN_ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
 import type { InventoryEntity } from '../entities';
 
-interface BuiltinEntityMap {
-  host: InventoryEntity & { cloud?: { provider?: string[] } };
-  container: InventoryEntity & { cloud?: { provider?: string[] } };
-  service: InventoryEntity & {
-    agent?: { name: AgentName[] };
-    service?: { environment?: string | string[] | null };
-  };
-}
-
-export const isBuiltinEntityOfType = <T extends keyof BuiltinEntityMap>(
-  type: T,
+export const isBuiltinEntityOfType = (
+  type: (typeof BUILT_IN_ENTITY_TYPES)[keyof typeof BUILT_IN_ENTITY_TYPES],
   entity: InventoryEntity
-): entity is BuiltinEntityMap[T] => {
+): boolean => {
   return entity.entityType === type;
 };
