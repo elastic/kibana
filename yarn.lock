@@ -5969,7 +5969,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/inspector-plugin@link:src/plugins/inspector":
+"@kbn/inspector-plugin@link:src/platform/plugins/shared/inspector":
   version "0.0.0"
   uid ""
 
