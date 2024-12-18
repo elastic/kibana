@@ -27,6 +27,7 @@ import type {
   ResponseActionGetFileParameters,
   EndpointActionResponseDataOutput,
   ResponseActionScanOutputContent,
+  ResponseActionRunScriptOutputContent,
 } from '../../../common/endpoint/types';
 import { getFileDownloadId } from '../../../common/endpoint/service/response_actions/get_file_download_id';
 import {
@@ -137,6 +138,15 @@ export const sendEndpointActionResponse = async (
           endpointResponse.EndpointActions.data.output
             .content as unknown as ResponseActionExecuteOutputContent
         ).stderr = 'execute command timed out';
+      }
+      if (
+        endpointResponse.EndpointActions.data.command === 'runscript' &&
+        endpointResponse.EndpointActions.data.output
+      ) {
+        (
+          endpointResponse.EndpointActions.data.output
+            .content as unknown as ResponseActionRunScriptOutputContent
+        ).stderr = 'runscript command timed out';
       }
     }
 
