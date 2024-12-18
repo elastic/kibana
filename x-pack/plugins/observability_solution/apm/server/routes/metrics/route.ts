@@ -32,7 +32,7 @@ const metricsChartsRoute = createApmServerRoute({
       rangeRt,
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -67,7 +67,7 @@ const serviceMetricsJvm = createApmServerRoute({
     }),
     query: t.intersection([kueryRt, rangeRt, environmentRt]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ serviceNodes: ServiceNodesResponse }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
