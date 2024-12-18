@@ -25,10 +25,10 @@ describe('ESQLEditor', () => {
   } as IUiSettingsClient;
 
   const esqlVariablesService = {
-    enable: jest.fn(),
-    disable: jest.fn(),
+    enableSuggestions: jest.fn(),
+    disableSuggestions: jest.fn(),
     getVariablesByType: jest.fn(),
-    isEnabled: false,
+    areSuggestionsEnabled: false,
   };
 
   const services = {

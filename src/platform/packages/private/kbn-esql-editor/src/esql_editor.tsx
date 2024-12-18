@@ -230,9 +230,9 @@ export const ESQLEditor = memo(function ESQLEditor({
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
     if (supportsControls) {
-      esqlService.enable();
+      esqlService.enableSuggestions();
     } else {
-      esqlService.disable();
+      esqlService.disableSuggestions();
     }
   }, [esqlService, supportsControls]);
 
@@ -462,7 +462,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         return esqlService.getVariablesByType(type);
       },
       canSuggestVariables: () => {
-        return esqlService.isEnabled;
+        return esqlService.areSuggestionsEnabled;
       },
     };
     return callbacks;

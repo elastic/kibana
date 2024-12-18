@@ -13,20 +13,20 @@ import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 export class EsqlVariablesService {
   esqlVariables$: BehaviorSubject<ESQLControlVariable[]>;
   esqlVariables: ESQLControlVariable[] = [];
-  isEnabled: boolean;
+  areSuggestionsEnabled: boolean;
 
   constructor() {
     this.esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
     this.esqlVariables = [];
-    this.isEnabled = false;
+    this.areSuggestionsEnabled = false;
   }
 
-  enable() {
-    this.isEnabled = true;
+  enableSuggestions() {
+    this.areSuggestionsEnabled = true;
   }
 
-  disable() {
-    this.isEnabled = false;
+  disableSuggestions() {
+    this.areSuggestionsEnabled = false;
   }
 
   addVariable(variable: ESQLControlVariable): void {
