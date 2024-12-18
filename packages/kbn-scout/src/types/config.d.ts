@@ -29,6 +29,6 @@ export interface ScoutLoaderConfig {
     buildArgs?: string[];
     sourceArgs?: string[];
     serverArgs: string[];
-    useDedicatedTastRunner?: boolean;
+    useDedicatedTestRunner?: boolean;
   };
 }

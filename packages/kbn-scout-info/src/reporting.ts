@@ -7,13 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * as cli from './src/cli';
-export { expect, test, createPlaywrightConfig, createLazyPageObject } from './src/playwright';
-export type {
-  ScoutPage,
-  ScoutPlaywrightOptions,
-  ScoutTestOptions,
-  PageObjects,
-  ScoutTestFixtures,
-  ScoutWorkerFixtures,
-} from './src/playwright';
+export const SCOUT_TEST_EVENTS_TEMPLATE_NAME = 'scout-test-events';
+export const SCOUT_TEST_EVENTS_INDEX_PATTERN = `${SCOUT_TEST_EVENTS_TEMPLATE_NAME}-*`;
+export const SCOUT_TEST_EVENTS_DATA_STREAM_NAME = `${SCOUT_TEST_EVENTS_TEMPLATE_NAME}-kibana`;
