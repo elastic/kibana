@@ -112,21 +112,30 @@ function DiscoverDocumentsComponent({
   const { dataViews, capabilities, uiSettings, uiActions, ebtManager, fieldsMetadata } = services;
 
   const requestParams = useInternalStateSelector((state) => state.requestParams);
-  const dataSource = requestParams.appState?.dataSource;
   const query = requestParams.appState?.query;
-  const [sort, rowHeight, headerRowHeight, rowsPerPage, grid, columns, sampleSizeState, density] =
-    useAppStateSelector((state) => {
-      return [
-        state.sort,
-        state.rowHeight,
-        state.headerRowHeight,
-        state.rowsPerPage,
-        state.grid,
-        state.columns,
-        state.sampleSize,
-        state.density,
-      ];
-    });
+  const [
+    dataSource,
+    sort,
+    rowHeight,
+    headerRowHeight,
+    rowsPerPage,
+    grid,
+    columns,
+    sampleSizeState,
+    density,
+  ] = useAppStateSelector((state) => {
+    return [
+      state.dataSource,
+      state.sort,
+      state.rowHeight,
+      state.headerRowHeight,
+      state.rowsPerPage,
+      state.grid,
+      state.columns,
+      state.sampleSize,
+      state.density,
+    ];
+  });
   const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
   const isEsqlMode = useIsEsqlMode();
   const documentState = useDataState(documents$);
