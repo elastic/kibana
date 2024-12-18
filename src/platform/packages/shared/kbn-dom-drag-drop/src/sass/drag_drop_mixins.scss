@@ -40,17 +40,17 @@ $domDragDropZLevel3: 3;
 
 // Style for drop area when there's an item being dragged
 @mixin mixinDomDroppableActive($borderWidth: $euiBorderWidthThin) {
-  background-color: transparentize($euiColorVis0, .9) !important;
+  background-color: transparentize($euiColorSuccess, .9) !important;
   &:before {
-    border-color: $euiColorVis0 !important;
+    border-color: $euiColorSuccess !important;
   }
 }
 
 // Style for drop area while hovering with item
 @mixin mixinDomDroppableHover($borderWidth: $euiBorderWidthThin) {
-  background-color: transparentize($euiColorVis0, .75) !important;
+  background-color: transparentize($euiColorSuccess, .75) !important;
   &:before {
-    border-color: $euiColorVis0 !important;
+    border-color: $euiColorSuccess !important;
   }
 }
 
