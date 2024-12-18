@@ -63,12 +63,14 @@ const defaultContextValue = {
   services: {},
 };
 
-export const SharedUXContext =
+export const SharedUXRouterContext =
   createContext<SharedUXRouterContextValue<KibanaServices>>(defaultContextValue);
 
 export const useKibanaSharedUX = <Extra extends object = {}>(): SharedUXRouterContextValue<
   KibanaServices & Extra
 > =>
   useContext(
-    SharedUXContext as unknown as React.Context<SharedUXRouterContextValue<KibanaServices & Extra>>
+    SharedUXRouterContext as unknown as React.Context<
+      SharedUXRouterContextValue<KibanaServices & Extra>
+    >
   );

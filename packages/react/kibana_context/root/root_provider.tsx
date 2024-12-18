@@ -12,7 +12,7 @@ import React, { FC, PropsWithChildren } from 'react';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
-import { SharedUXContext } from '@kbn/shared-ux-router';
+import { SharedUXRouterContext } from '@kbn/shared-ux-router';
 
 // @ts-expect-error EUI exports this component internally, but Kibana isn't picking it up its types
 import { useIsNestedEuiProvider } from '@elastic/eui/lib/components/provider/nested';
@@ -53,9 +53,9 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
 }) => {
   const hasEuiProvider = useIsNestedEuiProvider();
   const rootContextProvider = (
-    <SharedUXContext.Provider value={{ services: { executionContext } }}>
+    <SharedUXRouterContext.Provider value={{ services: { executionContext } }}>
       <i18n.Context>{children}</i18n.Context>
-    </SharedUXContext.Provider>
+    </SharedUXRouterContext.Provider>
   );
 
   if (hasEuiProvider) {
