@@ -15,8 +15,8 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiInputPopover,
+  EuiToken,
   EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
@@ -121,15 +121,18 @@ export const OptionsListControl = ({
                 )}
                 delay="long"
               >
-                <EuiIcon
+                <EuiToken
                   tabIndex={0}
-                  type="warningFilled"
+                  iconType="alert"
                   size="s"
-                  color="warning"
+                  color="euiColorVis5"
+                  shape="square"
+                  fill="dark"
                   title={OptionsListStrings.control.getInvalidSelectionWarningLabel(
                     invalidSelections.size
                   )}
                   data-test-subj={`optionsList__invalidSelectionsToken-${api.uuid}`}
+                  css={{ verticalAlign: 'text-bottom' }} // Align with the notification badge
                 />
               </EuiToolTip>
             </EuiFlexItem>

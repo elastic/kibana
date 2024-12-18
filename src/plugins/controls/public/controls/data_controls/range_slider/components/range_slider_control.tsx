@@ -13,9 +13,9 @@ import {
   EuiRangeTick,
   EuiDualRange,
   EuiDualRangeProps,
+  EuiToken,
   EuiToolTip,
   useEuiTheme,
-  EuiIcon,
 } from '@elastic/eui';
 import { RangeValue } from '../types';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
@@ -212,11 +212,13 @@ export const RangeSliderControl: FC<Props> = ({
                 content={RangeSliderStrings.control.getInvalidSelectionWarningLabel()}
                 delay="long"
               >
-                <EuiIcon
+                <EuiToken
                   tabIndex={0}
-                  type="warningFilled"
+                  iconType="alert"
                   size="s"
-                  color="warning"
+                  color="euiColorVis5"
+                  shape="square"
+                  fill="dark"
                   title={RangeSliderStrings.control.getInvalidSelectionWarningLabel()}
                 />
               </EuiToolTip>
