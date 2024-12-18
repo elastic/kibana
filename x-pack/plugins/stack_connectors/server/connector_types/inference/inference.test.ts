@@ -299,7 +299,6 @@ describe('InferenceConnector', () => {
         statusCode: 200,
       });
 
-
       const signal = jest.fn() as unknown as AbortSignal;
       await connector.performApiUnifiedCompletionStream({
         body: { messages: [{ content: 'Hello world', role: 'user' }] },
