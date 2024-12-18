@@ -273,12 +273,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     const expectedDynamicColors = [
-      'rgba(204, 86, 66, 1)',
-      'rgba(204, 86, 66, 1)',
-      'rgba(204, 86, 66, 1)',
-      'rgba(204, 86, 66, 1)',
-      'rgba(204, 86, 66, 1)',
-      'rgba(32, 146, 128, 1)',
+      'rgba(246, 109, 100, 1)',
+      'rgba(246, 109, 100, 1)',
+      'rgba(246, 109, 100, 1)',
+      'rgba(246, 109, 100, 1)',
+      'rgba(246, 109, 100, 1)',
+      'rgba(35, 190, 143, 1)',
     ];
 
     it('applies dynamic color', async () => {

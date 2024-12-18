@@ -308,7 +308,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           expect(areasCount).to.be(2);
           expect(legendNames).to.eql(['apache', 'nginx']);
-          expect(areaColors).to.eql(['#54b399', '#6092c0']);
+          expect(areaColors).to.eql(['#00beb8', '#98e6e2']);
           expect(firstAreaChartData).to.eql(firstAreaExpectedChartData);
           expect(secondAreaChartData).to.eql(secondAreaExpectedChartData);
         });
