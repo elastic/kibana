@@ -59,6 +59,7 @@ interface AnomalyContextMenuProps {
   bounds?: TimeRangeBounds;
   interval?: number;
   chartsCount: number;
+  mergedGroupsAndJobsIds: string[];
 }
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -76,6 +77,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
   bounds,
   interval,
   chartsCount,
+  mergedGroupsAndJobsIds,
 }) => {
   const {
     services: {
@@ -104,8 +106,8 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
   const { anomalyExplorerCommonStateService, chartsStateService } = useAnomalyExplorerContext();
   const { queryString } = useObservable(
-    anomalyExplorerCommonStateService.getFilterSettings$(),
-    anomalyExplorerCommonStateService.getFilterSettings()
+    anomalyExplorerCommonStateService.filterSettings$,
+    anomalyExplorerCommonStateService.filterSettings
   );
 
   const chartsData = useObservable(
@@ -137,8 +139,6 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     maxSeriesToPlot >= 1 &&
     maxSeriesToPlot <= MAX_ANOMALY_CHARTS_ALLOWED;
 
-  const jobIds = selectedJobs.map(({ id }) => id);
-
   const getEmbeddableInput = useCallback(
     (timeRange?: TimeRange) => {
       // Respect the query and the influencers selected
@@ -151,7 +151,8 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
       );
 
       const influencers = selectionInfluencers ?? [];
-      const config = getDefaultEmbeddablePanelConfig(jobIds, queryString);
+      const config = getDefaultEmbeddablePanelConfig(mergedGroupsAndJobsIds, queryString);
+
       const queryFromSelectedCells = influencers
         .map((s) => escapeKueryForEmbeddableFieldValuePair(s.fieldName, s.fieldValue))
         .join(' or ');
@@ -161,7 +162,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
       return {
         ...config,
         ...(timeRange ? { timeRange } : {}),
-        jobIds,
+        jobIds: mergedGroupsAndJobsIds,
         maxSeriesToPlot: maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT,
         severityThreshold: severity.val,
         ...((isDefined(queryString) && queryString !== '') ||
@@ -175,7 +176,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
           : {}),
       };
     },
-    [jobIds, maxSeriesToPlot, severity, queryString, selectedCells]
+    [selectedCells, mergedGroupsAndJobsIds, queryString, maxSeriesToPlot, severity.val]
   );
 
   const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
@@ -350,7 +351,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
             defaultMessage: 'Anomaly charts',
           })}
           documentInfo={{
-            title: getDefaultExplorerChartsPanelTitle(selectedJobs.map(({ id }) => id)),
+            title: getDefaultExplorerChartsPanelTitle(mergedGroupsAndJobsIds),
           }}
           onClose={setIsAddDashboardActive.bind(null, false)}
           onSave={onSaveCallback}
