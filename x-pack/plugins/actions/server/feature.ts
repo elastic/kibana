@@ -72,105 +72,105 @@ export const ACTIONS_FEATURE = {
     },
   },
   subFeatures: [
-    {
-      name: 'Communication & Notification',
-      description:
-        'Includes: Email, Server log, Slack, Slack API, Microsoft Teams, PagerDuty, xMatters, Opsgenie',
-      privilegeGroups: [
-        {
-          groupType: 'independent',
-          privileges: [
-            {
-              api: [],
-              name: 'Execute',
-              id: 'run-comm-notif',
-              includeIn: 'read',
-              savedObject: {
-                all: [],
-                read: [],
-              },
-              ui: ['ui-run-comm-notif'],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      name: 'Security Orchestration & Incident Response',
-      description: 'Includes: Swimlane, Torq, Tines, D3 Security, IBM Resilient, TheHive',
-      privilegeGroups: [
-        {
-          groupType: 'independent',
-          privileges: [
-            {
-              api: [],
-              name: 'Execute',
-              id: 'run-orch-i-resp',
-              includeIn: 'read',
-              savedObject: {
-                all: [],
-                read: [],
-              },
-              ui: ['ui-run-orch-i-resp'],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      name: 'IT Service Management & Issue Tracking',
-      description: 'Includes: ServiceNow ITSM, ServiceNow SecOps, ServiceNow ITOM, Jira',
-      privilegeGroups: [
-        {
-          groupType: 'independent',
-          privileges: [
-            {
-              api: [],
-              name: 'Execute',
-              id: 'run-im',
-              includeIn: 'read',
-              savedObject: {
-                all: [],
-                read: [],
-              },
-              ui: ['ui-run-im'],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      name: 'Artificial Intelligence & Machine Learning',
-      description: 'Includes: OpenAI, Amazon Bedrock, Google Gemini',
-      privilegeGroups: [
-        {
-          groupType: 'independent',
-          privileges: [
-            {
-              api: [],
-              name: 'Execute',
-              id: 'run-ai',
-              includeIn: 'read',
-              savedObject: {
-                all: [],
-                read: [],
-              },
-              ui: ['ui-run-ai'],
-            },
-          ],
-        },
-      ],
-    },
+    // {
+    //   name: 'Communication & Notification',
+    //   description:
+    //     'Includes: Email, Server log, Slack, Slack API, Microsoft Teams, PagerDuty, xMatters, Opsgenie',
+    //   privilegeGroups: [
+    //     {
+    //       groupType: 'independent',
+    //       privileges: [
+    //         {
+    //           api: [],
+    //           name: 'Execute',
+    //           id: 'run-comm-notif',
+    //           includeIn: 'read',
+    //           savedObject: {
+    //             all: [],
+    //             read: [],
+    //           },
+    //           ui: ['ui-run-comm-notif'],
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
+    // {
+    //   name: 'Security Orchestration & Incident Response',
+    //   description: 'Includes: Swimlane, Torq, Tines, D3 Security, IBM Resilient, TheHive',
+    //   privilegeGroups: [
+    //     {
+    //       groupType: 'independent',
+    //       privileges: [
+    //         {
+    //           api: [],
+    //           name: 'Execute',
+    //           id: 'run-orch-i-resp',
+    //           includeIn: 'read',
+    //           savedObject: {
+    //             all: [],
+    //             read: [],
+    //           },
+    //           ui: ['ui-run-orch-i-resp'],
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
+    // {
+    //   name: 'IT Service Management & Issue Tracking',
+    //   description: 'Includes: ServiceNow ITSM, ServiceNow SecOps, ServiceNow ITOM, Jira',
+    //   privilegeGroups: [
+    //     {
+    //       groupType: 'independent',
+    //       privileges: [
+    //         {
+    //           api: [],
+    //           name: 'Execute',
+    //           id: 'run-im',
+    //           includeIn: 'read',
+    //           savedObject: {
+    //             all: [],
+    //             read: [],
+    //           },
+    //           ui: ['ui-run-im'],
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
+    // {
+    //   name: 'Artificial Intelligence & Machine Learning',
+    //   description: 'Includes: OpenAI, Amazon Bedrock, Google Gemini',
+    //   privilegeGroups: [
+    //     {
+    //       groupType: 'independent',
+    //       privileges: [
+    //         {
+    //           api: [],
+    //           name: 'Execute',
+    //           id: 'run-ai',
+    //           includeIn: 'read',
+    //           savedObject: {
+    //             all: [],
+    //             read: [],
+    //           },
+    //           ui: ['ui-run-ai'],
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
     {
       name: 'Endpoint Security',
-      description: 'Includes: Sentinel One, CrowdStrike',
+      description: 'Includes: CrowdStrike, Sentinel One',
       privilegeGroups: [
         {
           groupType: 'independent',
           privileges: [
             {
               api: [],
-              name: 'Execute',
+              name: 'Run',
               id: 'run-edr',
               includeIn: 'all',
               savedObject: {
@@ -183,27 +183,27 @@ export const ACTIONS_FEATURE = {
         },
       ],
     },
-    {
-      name: 'Custom Integration',
-      description: 'Includes: Index, Webhook, Webhook - Case Management',
-      privilegeGroups: [
-        {
-          groupType: 'independent',
-          privileges: [
-            {
-              api: [],
-              name: 'Execute',
-              id: 'run-g',
-              includeIn: 'read',
-              savedObject: {
-                all: [],
-                read: [],
-              },
-              ui: ['ui-run-g'],
-            },
-          ],
-        },
-      ],
-    },
+    // {
+    //   name: 'Custom Integration',
+    //   description: 'Includes: Index, Webhook, Webhook - Case Management',
+    //   privilegeGroups: [
+    //     {
+    //       groupType: 'independent',
+    //       privileges: [
+    //         {
+    //           api: [],
+    //           name: 'Execute',
+    //           id: 'run-g',
+    //           includeIn: 'read',
+    //           savedObject: {
+    //             all: [],
+    //             read: [],
+    //           },
+    //           ui: ['ui-run-g'],
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
   ],
 };
