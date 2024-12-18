@@ -21,9 +21,9 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { ISearchSource } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewBase, Filter, Query, isOfQueryType } from '@kbn/es-query';
+import { DataViewBase } from '@kbn/es-query';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -49,6 +49,7 @@ import { AlertContextMeta, AlertParams, MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { getSearchConfiguration } from '../../common/helpers/get_search_configuration';
 
 type Props = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
@@ -63,56 +64,6 @@ const defaultExpression = {
   timeUnit: 'm',
 } as MetricExpression;
 export { defaultExpression };
-
-// Types for the executor
-export interface MetricThresholdSearchSourceFields extends SerializedSearchSourceFields {
-  query?: Query;
-  filter?: Array<Pick<Filter, 'meta' | 'query'>>;
-}
-
-const searchConfigQueryWarning = i18n.translate(
-  'xpack.infra.metrichThreshold.rule.alertFlyout.searchConfiguration.queryWarning',
-  {
-    defaultMessage:
-      'Metric threshold does not support queries other than Query type, query was changed to default query.',
-  }
-);
-
-export const defaultQuery: Query = {
-  language: 'kuery',
-  query: '',
-};
-
-export const getSearchConfiguration = (
-  fields: SerializedSearchSourceFields,
-  onWarning: (title: string) => void
-): MetricThresholdSearchSourceFields => {
-  if (fields.query && !isOfQueryType(fields.query)) {
-    onWarning(searchConfigQueryWarning);
-    return adjustSearchConfigurationFilter({
-      ...fields,
-      query: defaultQuery,
-    });
-  }
-  return adjustSearchConfigurationFilter({
-    ...fields,
-    query: fields.query,
-  });
-};
-
-const adjustSearchConfigurationFilter = (
-  searchConfiguration: MetricThresholdSearchSourceFields
-): MetricThresholdSearchSourceFields => {
-  // Only meta and query fields are saved in the rule params, so we ignore other fields such as $state
-  const filter = searchConfiguration.filter
-    ? searchConfiguration.filter.map(({ meta, query }) => ({ meta, query }))
-    : undefined;
-
-  return {
-    ...searchConfiguration,
-    filter,
-  };
-};
 
 export const Expressions: React.FC<Props> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
