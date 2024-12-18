@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
-
 import { getClassColor, getClassLabel, getClassIcon } from './ner_output';
 
 describe('NER output', () => {
@@ -54,83 +52,25 @@ describe('NER output', () => {
     });
   });
 
-  describe('getClassColor with Amsterdam', () => {
-    const mockEuiTheme = {
-      colors: {
-        vis: {
-          euiColorVis0: 'euiColorVis0',
-          euiColorVis1: 'euiColorVis1',
-          euiColorVis2: 'euiColorVis2',
-          euiColorVis3: 'euiColorVis3',
-          euiColorVis4: 'euiColorVis4',
-          euiColorVis5: 'euiColorVis5',
-          euiColorVis6: 'euiColorVis6',
-          euiColorVis7: 'euiColorVis7',
-          euiColorVis8: 'euiColorVis8',
-          euiColorVis9: 'euiColorVis9',
-        },
-      },
-      flags: { hasVisColorAdjustment: true },
-    } as EuiThemeComputed;
-
+  describe('getClassColor', () => {
     test('returns the correct color for class PER', () => {
-      expect(getClassColor(mockEuiTheme, 'PER')).toBe('euiColorVis5');
+      expect(getClassColor('PER', true)).toBe('#f1d86f');
     });
 
     test('returns the correct color for class LOC', () => {
-      expect(getClassColor(mockEuiTheme, 'LOC')).toBe('euiColorVis1');
+      expect(getClassColor('LOC', true)).toBe('#79aad9');
     });
 
     test('returns the correct color for class ORG', () => {
-      expect(getClassColor(mockEuiTheme, 'ORG')).toBe('euiColorVis0');
+      expect(getClassColor('ORG', true)).toBe('#6dccb1');
     });
 
     test('returns the correct color for class MISC', () => {
-      expect(getClassColor(mockEuiTheme, 'MISC')).toBe('euiColorVis7');
+      expect(getClassColor('MISC', true)).toBe('#f5a35c');
     });
 
     test('returns the default color for an unknown class', () => {
-      expect(getClassColor(mockEuiTheme, 'UNKNOWN')).toBe('euiColorVis5');
-    });
-  });
-
-  describe('getClassColor with Borealis', () => {
-    const mockEuiTheme = {
-      colors: {
-        vis: {
-          euiColorVis0: 'euiColorVis0',
-          euiColorVis1: 'euiColorVis1',
-          euiColorVis2: 'euiColorVis2',
-          euiColorVis3: 'euiColorVis3',
-          euiColorVis4: 'euiColorVis4',
-          euiColorVis5: 'euiColorVis5',
-          euiColorVis6: 'euiColorVis6',
-          euiColorVis7: 'euiColorVis7',
-          euiColorVis8: 'euiColorVis8',
-          euiColorVis9: 'euiColorVis9',
-        },
-      },
-      flags: { hasVisColorAdjustment: false },
-    } as EuiThemeComputed;
-
-    test('returns the correct color for class PER', () => {
-      expect(getClassColor(mockEuiTheme, 'PER')).toBe('euiColorVis9');
-    });
-
-    test('returns the correct color for class LOC', () => {
-      expect(getClassColor(mockEuiTheme, 'LOC')).toBe('euiColorVis2');
-    });
-
-    test('returns the correct color for class ORG', () => {
-      expect(getClassColor(mockEuiTheme, 'ORG')).toBe('euiColorVis0');
-    });
-
-    test('returns the correct color for class MISC', () => {
-      expect(getClassColor(mockEuiTheme, 'MISC')).toBe('euiColorVis8');
-    });
-
-    test('returns the default color for an unknown class', () => {
-      expect(getClassColor(mockEuiTheme, 'UNKNOWN')).toBe('euiColorVis9');
+      expect(getClassColor('UNKNOWN', true)).toBe('#f1d86f');
     });
   });
 });
