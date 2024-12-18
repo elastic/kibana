@@ -75,8 +75,6 @@ describe('useAggregatedAnomaliesByJob', () => {
       wrapper: TestProviders,
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
     act(() => {
       result.current.refetch();
     });
@@ -145,12 +143,13 @@ describe('useAggregatedAnomaliesByJob', () => {
     const { result } = renderHook(() => useAggregatedAnomaliesByJob({ skip: false, from, to }), {
       wrapper: TestProviders,
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
 
-    const names = result.current.data.map(({ name }) => name);
+    await waitFor(() => {
+      const names = result.current.data.map(({ name }) => name);
 
-    expect(names[0]).toEqual(firstJobSecurityName);
-    expect(names[1]).toEqual(secondJobSecurityName);
+      expect(names[0]).toEqual(firstJobSecurityName);
+      expect(names[1]).toEqual(secondJobSecurityName);
+    });
   });
 
   it('does not throw error when aggregations is undefined', async () => {

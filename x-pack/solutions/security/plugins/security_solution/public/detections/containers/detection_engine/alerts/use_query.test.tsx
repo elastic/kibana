@@ -73,7 +73,7 @@ describe('useQueryAlerts', () => {
         initialProps: [mockAlertsQuery, indexName],
       }
     );
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+
     rerender([mockAlertsQuery, 'new-mock-index-name']);
     await waitFor(() => expect(spyOnfetchRules).toHaveBeenCalledTimes(2));
   });
@@ -115,8 +115,6 @@ describe('useQueryAlerts', () => {
     const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
     const localProps = { ...defaultProps, skip: false };
     const { rerender } = renderHook(() => useQueryAlerts<unknown, unknown>(localProps));
-
-    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     localProps.skip = true;
     rerender();

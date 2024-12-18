@@ -58,7 +58,6 @@ describe('useFullScreen', () => {
         wrapper: WrapperContainer,
       }));
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
       act(() => {
         result.current.setGlobalFullScreen(true);
       });
@@ -78,7 +77,7 @@ describe('useFullScreen', () => {
       ({ result } = renderHook(() => useGlobalFullScreen(), {
         wrapper: WrapperContainer,
       }));
-      await waitFor(() => new Promise((resolve) => resolve(null)));
+
       act(() => {
         result.current.setGlobalFullScreen(false);
       });

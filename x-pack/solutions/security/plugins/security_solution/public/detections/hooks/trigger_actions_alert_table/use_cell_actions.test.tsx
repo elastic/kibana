@@ -100,13 +100,13 @@ describe('getUseCellActionsHook', () => {
       }
     );
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => {
+      const cellAction = result.current.getCellActions('host.name', 0)[0];
 
-    const cellAction = result.current.getCellActions('host.name', 0)[0];
+      renderCellAction(cellAction);
 
-    renderCellAction(cellAction);
-
-    expect(screen.getByTestId('dataGridColumnCellAction-action1')).toBeInTheDocument();
+      expect(screen.getByTestId('dataGridColumnCellAction-action1')).toBeInTheDocument();
+    });
   });
 
   it('should not render cell actions correctly for eventRendered view', async () => {
