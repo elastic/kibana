@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { without, pick } from 'lodash';
+import { without } from 'lodash';
 import { GridPanelData, GridRowData } from '../types';
 
 const collides = (panelA: GridPanelData, panelB: GridPanelData) => {
