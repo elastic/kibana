@@ -25,7 +25,9 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import { ClassNames } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { EnrichmentEmptyPrompt } from './enrichment_empty_prompt';
+import { AddProcessorButton } from './add_processor_button';
 
 export function StreamDetailEnrichmentContent({
   definition,
@@ -43,10 +45,12 @@ export function StreamDetailEnrichmentContent({
     }
   };
 
+  const handleAddProcessorClick = () => {};
+
   const hasProcessors = processors.length > 0;
 
   if (!hasProcessors) {
-    return <EnrichmentEmptyPrompt onAddProcessor={() => {}} />;
+    return <EnrichmentEmptyPrompt onAddProcessor={handleAddProcessorClick} />;
   }
 
   return (
@@ -54,6 +58,8 @@ export function StreamDetailEnrichmentContent({
       <ProcessorsHeader />
       <EuiSpacer size="l" />
       <SortableProcessorsList processors={processors} onDragEnd={onDragEnd} />
+      <EuiSpacer size="m" />
+      <AddProcessorButton onClick={handleAddProcessorClick} />
     </EuiPanel>
   );
 }
@@ -62,10 +68,16 @@ const ProcessorsHeader = () => {
   return (
     <>
       <EuiTitle size="xs">
-        <h2>Processors for field extraction</h2>
+        <h2>
+          {i18n.translate('xpack.streams.streamDetailView.managementTab.enrichment.headingTitle', {
+            defaultMessage: 'Processors for field extraction',
+          })}
+        </h2>
       </EuiTitle>
       <EuiText component="p" size="s">
-        Use processors to transform data before indexing
+        {i18n.translate('xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle', {
+          defaultMessage: 'Use processors to transform data before indexing',
+        })}
       </EuiText>
     </>
   );
@@ -79,7 +91,8 @@ const SortableProcessorsList = ({ processors, onDragEnd }) => {
           <EuiDroppable
             droppableId="processors-droppable-area"
             className={css`
-              background-color: ${theme.euiTheme.colors.backgroundTransparent};
+              background-color: ${theme.euiTheme.colors.backgroundBasePlain};
+              max-width: min(800px, 100%);
             `}
           >
             {processors.map((processor, idx) => (
@@ -94,7 +107,7 @@ const SortableProcessorsList = ({ processors, onDragEnd }) => {
                   paddingRight: 0,
                 }}
               >
-                {(provided, state) => (
+                {(_provided, state) => (
                   <ProcessorListItem processor={processor} hasShadow={state.isDragging} />
                 )}
               </EuiDraggable>
@@ -121,7 +134,15 @@ const ProcessorListItem = ({ processor, hasShadow = false }) => {
             {patterns.join(' • ')}
           </EuiText>
         </EuiFlexItem>
-        <EuiButtonIcon iconType="pencil" color="text" size="s" />
+        <EuiButtonIcon
+          iconType="pencil"
+          color="text"
+          size="s"
+          aria-label={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.editProcessorAction',
+            { defaultMessage: 'Edit {type} processor', values: { type } }
+          )}
+        />
       </EuiFlexGroup>
     </EuiPanel>
   );
@@ -129,9 +150,7 @@ const ProcessorListItem = ({ processor, hasShadow = false }) => {
 
 const createId = htmlIdGenerator();
 const createProcessorsList = (processors) =>
-  processors.map((processor) => {
-    return {
-      ...processor,
-      id: createId(),
-    };
-  });
+  processors.map((processor) => ({
+    ...processor,
+    id: createId(),
+  }));

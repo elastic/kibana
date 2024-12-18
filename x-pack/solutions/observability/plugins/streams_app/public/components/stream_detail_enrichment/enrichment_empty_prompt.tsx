@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { WelcomeImage } from '../welcome_image';
+import { AddProcessorButton } from './add_processor_button';
 
 interface EnrichmentEmptyPromptProps {
   onAddProcessor: () => void;
@@ -22,16 +23,7 @@ export const EnrichmentEmptyPrompt = ({ onAddProcessor }: EnrichmentEmptyPromptP
       icon={<WelcomeImage />}
       title={title}
       body={body}
-      actions={[
-        <EuiButton iconType="plusInCircle" onClick={onAddProcessor}>
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichmentEmptyPrompt.addProcessorAction',
-            {
-              defaultMessage: 'Add a processor',
-            }
-          )}
-        </EuiButton>,
-      ]}
+      actions={[<AddProcessorButton onClick={onAddProcessor} />]}
     />
   );
 };
