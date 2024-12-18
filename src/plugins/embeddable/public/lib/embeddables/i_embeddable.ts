@@ -8,54 +8,12 @@
  */
 
 import { ErrorLike } from '@kbn/expressions-plugin/common';
-import {
-  HasEditCapabilities,
-  HasType,
-  HasDisableTriggers,
-  PublishesBlockingError,
-  PublishesDataLoading,
-  PublishesDataViews,
-  PublishesDisabledActionIds,
-  PublishesUnifiedSearch,
-  HasUniqueId,
-  PublishesViewMode,
-  PublishesWritablePanelDescription,
-  PublishesWritablePanelTitle,
-  PublishesPhaseEvents,
-  PublishesSavedObjectId,
-  HasLegacyLibraryTransforms,
-  CanLockHoverActions,
-} from '@kbn/presentation-publishing';
 import { Observable } from 'rxjs';
 import { EmbeddableInput } from '../../../common/types';
-import { EmbeddableHasTimeRange } from '../filterable_embeddable/types';
-import { HasInspectorAdapters } from '../inspector';
 import { Adapters } from '../types';
 
 export type EmbeddableError = ErrorLike;
 export type { EmbeddableInput };
-
-/**
- * Types for compatibility between the legacy Embeddable system and the new system
- */
-export type LegacyEmbeddableAPI = HasType &
-  HasUniqueId &
-  HasDisableTriggers &
-  PublishesPhaseEvents &
-  PublishesViewMode &
-  PublishesDataViews &
-  HasEditCapabilities &
-  PublishesDataLoading &
-  HasInspectorAdapters &
-  PublishesBlockingError &
-  PublishesUnifiedSearch &
-  PublishesDisabledActionIds &
-  PublishesWritablePanelTitle &
-  PublishesWritablePanelDescription &
-  Partial<HasLegacyLibraryTransforms> &
-  EmbeddableHasTimeRange &
-  PublishesSavedObjectId &
-  CanLockHoverActions;
 
 export interface EmbeddableOutput {
   // Whether the embeddable is actively loading.
@@ -83,7 +41,7 @@ export interface IEmbeddable<
   I extends EmbeddableInput = EmbeddableInput,
   O extends EmbeddableOutput = EmbeddableOutput,
   N = any
-> extends LegacyEmbeddableAPI {
+> {
   /**
    * The type of embeddable, this is what will be used to take a serialized
    * embeddable and find the correct factory for which to create an instance of it.
