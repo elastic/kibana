@@ -377,8 +377,8 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
           fullWidth
           label={
             searchItems?.savedSearch?.id !== undefined
-              ? i18n.translate('xpack.transform.stepDefineForm.savedSearchLabel', {
-                  defaultMessage: 'Saved search',
+              ? i18n.translate('xpack.transform.stepDefineForm.discoverSessionLabel', {
+                  defaultMessage: 'Discover session',
                 })
               : i18n.translate('xpack.transform.stepDefineForm.searchFilterLabel', {
                   defaultMessage: 'Search filter',
