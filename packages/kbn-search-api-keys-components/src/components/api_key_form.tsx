@@ -23,30 +23,31 @@ import { ApiKeyFlyoutWrapper } from './api_key_flyout_wrapper';
 import { useSearchApiKey } from '../hooks/use_search_api_key';
 import { Status } from '../constants';
 
+const API_KEY_MASK = '•'.repeat(60);
+
 interface ApiKeyFormProps {
   hasTitle?: boolean;
 }
 
 export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
   const [showFlyout, setShowFlyout] = useState(false);
-  const { apiKey, status, updateApiKey, toggleApiKeyVisibility, displayedApiKey, apiKeyIsVisible } =
-    useSearchApiKey();
+  const { apiKey, status, updateApiKey, toggleApiKeyVisibility } = useSearchApiKey();
 
   const titleLocale = i18n.translate('searchApiKeysComponents.apiKeyForm.title', {
     defaultMessage: 'API Key',
   });
 
-  if (apiKey && displayedApiKey) {
+  if (apiKey) {
     return (
       <FormInfoField
         label={hasTitle ? titleLocale : undefined}
-        value={displayedApiKey}
+        value={status === Status.showPreviewKey ? apiKey : API_KEY_MASK}
         copyValue={apiKey}
         dataTestSubj="apiKeyFormAPIKey"
         copyValueDataTestSubj="APIKeyButtonCopy"
         actions={[
           <EuiButtonIcon
-            iconType={apiKeyIsVisible ? 'eyeClosed' : 'eye'}
+            iconType={status === Status.showPreviewKey ? 'eyeClosed' : 'eye'}
             color="text"
             onClick={toggleApiKeyVisibility}
             data-test-subj="showAPIKeyButton"

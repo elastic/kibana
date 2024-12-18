@@ -112,7 +112,8 @@ export const mergeInputsOverrides = (
 
 export const getFullInputStreams = (
   input: PackagePolicyInput,
-  allStreamEnabled: boolean = false
+  allStreamEnabled: boolean = false,
+  streamsOriginalIdsMap?: Map<string, string> // Map of stream ids <destinationId, originalId>
 ): FullAgentPolicyInputStream => {
   return {
     ...(input.compiled_input || {}),
@@ -121,8 +122,9 @@ export const getFullInputStreams = (
           streams: input.streams
             .filter((stream) => stream.enabled || allStreamEnabled)
             .map((stream) => {
+              const streamId = stream.id;
               const fullStream: FullAgentPolicyInputStream = {
-                id: stream.id,
+                id: streamId,
                 data_stream: stream.data_stream,
                 ...stream.compiled_stream,
                 ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
@@ -130,6 +132,8 @@ export const getFullInputStreams = (
                   return acc;
                 }, {} as { [k: string]: any }),
               };
+              streamsOriginalIdsMap?.set(fullStream.id, streamId);
+
               return fullStream;
             }),
         }

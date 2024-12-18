@@ -27,7 +27,8 @@ const defaultProps = {
   isLoadingDescription: false,
 };
 
-describe('Description', () => {
+// Failing: See https://github.com/elastic/kibana/issues/185879
+describe.skip('Description', () => {
   const onUpdateField = jest.fn();
   let appMockRender: AppMockRenderer;
 

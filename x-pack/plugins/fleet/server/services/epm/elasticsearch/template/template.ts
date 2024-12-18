@@ -15,7 +15,11 @@ import type {
 import pMap from 'p-map';
 import { isResponseError } from '@kbn/es-errors';
 
-import { STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS } from '../../../../constants/fleet_es_assets';
+import {
+  FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
+  STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+} from '../../../../constants/fleet_es_assets';
+import { MAX_CONCURRENT_DATASTREAM_OPERATIONS } from '../../../../constants';
 
 import type { Field, Fields } from '../../fields/field';
 import type {
@@ -27,6 +31,7 @@ import type {
 } from '../../../../types';
 import { appContextService } from '../../..';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
+import type { FleetConfigType } from '../../../../../common/types';
 import {
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
@@ -61,6 +66,7 @@ export interface CurrentDataStream {
   dataStreamName: string;
   replicated: boolean;
   indexTemplate: IndexTemplate;
+  currentWriteIndex: string;
 }
 
 const DEFAULT_IGNORE_ABOVE = 1024;
@@ -115,6 +121,9 @@ export function getTemplate({
 
   const esBaseComponents = getBaseEsComponents(type, !!isIndexModeTimeSeries);
 
+  const isEventIngestedEnabled = (config?: FleetConfigType): boolean =>
+    Boolean(!config?.agentIdVerificationEnabled && config?.eventIngestedEnabled);
+
   template.composed_of = [
     ...esBaseComponents,
     ...(template.composed_of || []),
@@ -122,6 +131,9 @@ export function getTemplate({
     FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
     ...(appContextService.getConfig()?.agentIdVerificationEnabled
       ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
+      : []),
+    ...(isEventIngestedEnabled(appContextService.getConfig())
+      ? [FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME]
       : []),
   ];
 
@@ -298,6 +310,124 @@ function _generateMappings(
     }
   }
 
+  function addObjectAsDynamicMapping(field: Field) {
+    const path = ctx.groupFieldName ? `${ctx.groupFieldName}.${field.name}` : field.name;
+    const pathMatch = path.includes('*') ? path : `${path}.*`;
+
+    let dynProperties: Properties = getDefaultProperties(field);
+    let matchingType: string | undefined;
+    switch (field.object_type) {
+      case 'histogram':
+        dynProperties = histogram(field);
+        matchingType = field.object_type_mapping_type ?? '*';
+        break;
+      case 'ip':
+      case 'keyword':
+      case 'match_only_text':
+      case 'text':
+      case 'wildcard':
+        dynProperties.type = field.object_type;
+        matchingType = field.object_type_mapping_type ?? 'string';
+        break;
+      case 'scaled_float':
+        dynProperties = scaledFloat(field);
+        matchingType = field.object_type_mapping_type ?? '*';
+        break;
+      case 'aggregate_metric_double':
+        dynProperties.type = field.object_type;
+        dynProperties.metrics = field.metrics;
+        dynProperties.default_metric = field.default_metric;
+        matchingType = field.object_type_mapping_type ?? '*';
+        break;
+      case 'double':
+      case 'float':
+      case 'half_float':
+        dynProperties.type = field.object_type;
+        if (isIndexModeTimeSeries) {
+          dynProperties.time_series_metric = field.metric_type;
+        }
+        matchingType = field.object_type_mapping_type ?? 'double';
+        break;
+      case 'byte':
+      case 'long':
+      case 'short':
+      case 'unsigned_long':
+        dynProperties.type = field.object_type;
+        if (isIndexModeTimeSeries) {
+          dynProperties.time_series_metric = field.metric_type;
+        }
+        matchingType = field.object_type_mapping_type ?? 'long';
+        break;
+      case 'integer':
+        // Map integers as long, as in other cases.
+        dynProperties.type = 'long';
+        if (isIndexModeTimeSeries) {
+          dynProperties.time_series_metric = field.metric_type;
+        }
+        matchingType = field.object_type_mapping_type ?? 'long';
+        break;
+      case 'boolean':
+        dynProperties.type = field.object_type;
+        if (isIndexModeTimeSeries) {
+          dynProperties.time_series_metric = field.metric_type;
+        }
+        matchingType = field.object_type_mapping_type ?? field.object_type;
+        break;
+      case 'group':
+        if (!field?.fields) {
+          break;
+        }
+        const subFields = field.fields.map((subField) => ({
+          ...subField,
+          type: 'object',
+          object_type: subField.object_type ?? subField.type,
+        }));
+        const mappings = _generateMappings(
+          subFields,
+          {
+            ...ctx,
+            groupFieldName: ctx.groupFieldName ? `${ctx.groupFieldName}.${field.name}` : field.name,
+          },
+          isIndexModeTimeSeries
+        );
+        if (mappings.hasDynamicTemplateMappings) {
+          hasDynamicTemplateMappings = true;
+        }
+        break;
+      case 'flattened':
+        dynProperties.type = field.object_type;
+        matchingType = field.object_type_mapping_type ?? 'object';
+        break;
+      default:
+        throw new PackageInvalidArchiveError(
+          `No dynamic mapping generated for field ${path} of type ${field.object_type}`
+        );
+    }
+
+    if (field.dimension && isIndexModeTimeSeries) {
+      dynProperties.time_series_dimension = field.dimension;
+    }
+
+    // When a wildcard field specifies the subobjects setting,
+    // the parent intermediate object should set the subobjects
+    // setting.
+    //
+    // For example, if a wildcard field `foo.*` has subobjects,
+    // we should set subobjects on the intermediate object `foo`.
+    //
+    if (field.subobjects !== undefined && path.includes('*')) {
+      subobjects = field.subobjects;
+    }
+
+    if (dynProperties && matchingType) {
+      addDynamicMappingWithIntermediateObjects(path, pathMatch, matchingType, dynProperties);
+
+      // Add the parent object as static property, this is needed for
+      // index templates not using `"dynamic": true`.
+      addParentObjectAsStaticProperty(field);
+    }
+  }
+
   // TODO: this can happen when the fields property in fields.yml is present but empty
   // Maybe validation should be moved to fields/field.ts
   if (fields) {
@@ -359,123 +489,7 @@ function _generateMappings(
       }
 
       if (type === 'object' && field.object_type) {
-        const path = ctx.groupFieldName ? `${ctx.groupFieldName}.${field.name}` : field.name;
-        const pathMatch = path.includes('*') ? path : `${path}.*`;
-
-        let dynProperties: Properties = getDefaultProperties(field);
-        let matchingType: string | undefined;
-        switch (field.object_type) {
-          case 'histogram':
-            dynProperties = histogram(field);
-            matchingType = field.object_type_mapping_type ?? '*';
-            break;
-          case 'ip':
-          case 'keyword':
-          case 'match_only_text':
-          case 'text':
-          case 'wildcard':
-            dynProperties.type = field.object_type;
-            matchingType = field.object_type_mapping_type ?? 'string';
-            break;
-          case 'scaled_float':
-            dynProperties = scaledFloat(field);
-            matchingType = field.object_type_mapping_type ?? '*';
-            break;
-          case 'aggregate_metric_double':
-            dynProperties.type = field.object_type;
-            dynProperties.metrics = field.metrics;
-            dynProperties.default_metric = field.default_metric;
-            matchingType = field.object_type_mapping_type ?? '*';
-            break;
-          case 'double':
-          case 'float':
-          case 'half_float':
-            dynProperties.type = field.object_type;
-            if (isIndexModeTimeSeries) {
-              dynProperties.time_series_metric = field.metric_type;
-            }
-            matchingType = field.object_type_mapping_type ?? 'double';
-            break;
-          case 'byte':
-          case 'long':
-          case 'short':
-          case 'unsigned_long':
-            dynProperties.type = field.object_type;
-            if (isIndexModeTimeSeries) {
-              dynProperties.time_series_metric = field.metric_type;
-            }
-            matchingType = field.object_type_mapping_type ?? 'long';
-            break;
-          case 'integer':
-            // Map integers as long, as in other cases.
-            dynProperties.type = 'long';
-            if (isIndexModeTimeSeries) {
-              dynProperties.time_series_metric = field.metric_type;
-            }
-            matchingType = field.object_type_mapping_type ?? 'long';
-            break;
-          case 'boolean':
-            dynProperties.type = field.object_type;
-            if (isIndexModeTimeSeries) {
-              dynProperties.time_series_metric = field.metric_type;
-            }
-            matchingType = field.object_type_mapping_type ?? field.object_type;
-            break;
-          case 'group':
-            if (!field?.fields) {
-              break;
-            }
-            const subFields = field.fields.map((subField) => ({
-              ...subField,
-              type: 'object',
-              object_type: subField.object_type ?? subField.type,
-            }));
-            const mappings = _generateMappings(
-              subFields,
-              {
-                ...ctx,
-                groupFieldName: ctx.groupFieldName
-                  ? `${ctx.groupFieldName}.${field.name}`
-                  : field.name,
-              },
-              isIndexModeTimeSeries
-            );
-            if (mappings.hasDynamicTemplateMappings) {
-              hasDynamicTemplateMappings = true;
-            }
-            break;
-          case 'flattened':
-            dynProperties.type = field.object_type;
-            matchingType = field.object_type_mapping_type ?? 'object';
-            break;
-          default:
-            throw new PackageInvalidArchiveError(
-              `No dynamic mapping generated for field ${path} of type ${field.object_type}`
-            );
-        }
-
-        if (field.dimension && isIndexModeTimeSeries) {
-          dynProperties.time_series_dimension = field.dimension;
-        }
-
-        // When a wildcard field specifies the subobjects setting,
-        // the parent intermediate object should set the subobjects
-        // setting.
-        //
-        // For example, if a wildcard field `foo.*` has subobjects,
-        // we should set subobjects on the intermediate object `foo`.
-        //
-        if (field.subobjects !== undefined && path.includes('*')) {
-          subobjects = field.subobjects;
-        }
-
-        if (dynProperties && matchingType) {
-          addDynamicMappingWithIntermediateObjects(path, pathMatch, matchingType, dynProperties);
-
-          // Add the parent object as static property, this is needed for
-          // index templates not using `"dynamic": true`.
-          addParentObjectAsStaticProperty(field);
-        }
+        addObjectAsDynamicMapping(field);
       } else {
         let fieldProps = getDefaultProperties(field);
 
@@ -491,6 +505,12 @@ function _generateMappings(
               },
               isIndexModeTimeSeries
             );
+            if (field.object_type) {
+              // A group can have an object_type if it has been merged with an object during deduplication,
+              // generate also the dynamic mapping for the object.
+              addObjectAsDynamicMapping(field);
+              mappings.hasDynamicTemplateMappings = true;
+            }
             if (mappings.hasNonDynamicTemplateMappings) {
               fieldProps = {
                 properties:
@@ -920,10 +940,15 @@ const queryDataStreamsFromTemplates = async (
   esClient: ElasticsearchClient,
   templates: IndexTemplateEntry[]
 ): Promise<CurrentDataStream[]> => {
-  const dataStreamPromises = templates.map((template) => {
-    return getDataStreams(esClient, template);
-  });
-  const dataStreamObjects = await Promise.all(dataStreamPromises);
+  const dataStreamObjects = await pMap(
+    templates,
+    (template) => {
+      return getDataStreams(esClient, template);
+    },
+    {
+      concurrency: MAX_CONCURRENT_DATASTREAM_OPERATIONS,
+    }
+  );
   return dataStreamObjects.filter(isCurrentDataStream).flat();
 };
 
@@ -944,6 +969,7 @@ const getDataStreams = async (
     dataStreamName: dataStream.name,
     replicated: dataStream.replicated,
     indexTemplate,
+    currentWriteIndex: dataStream.indices?.at(-1)?.index_name,
   }));
 };
 
@@ -979,24 +1005,26 @@ const updateAllDataStreams = async (
       return updateExistingDataStream({
         esClient,
         logger,
+        currentWriteIndex: templateEntry.currentWriteIndex,
         dataStreamName: templateEntry.dataStreamName,
         options,
       });
     },
     {
-      // Limit concurrent putMapping/rollover requests to avoid overwhelming ES cluster
-      concurrency: 20,
+      concurrency: MAX_CONCURRENT_DATASTREAM_OPERATIONS,
     }
   );
 };
 
 const updateExistingDataStream = async ({
   dataStreamName,
+  currentWriteIndex,
   esClient,
   logger,
   options,
 }: {
   dataStreamName: string;
+  currentWriteIndex: string;
   esClient: ElasticsearchClient;
   logger: Logger;
   options?: {
@@ -1005,14 +1033,14 @@ const updateExistingDataStream = async ({
   };
 }) => {
   const existingDs = await esClient.indices.get({
-    index: dataStreamName,
+    index: currentWriteIndex,
   });
 
   const existingDsConfig = Object.values(existingDs);
   const currentBackingIndexConfig = existingDsConfig.at(-1);
   const currentIndexMode = currentBackingIndexConfig?.settings?.index?.mode;
-  // @ts-expect-error Property 'mode' does not exist on type 'MappingSourceField'
-  const currentSourceType = currentBackingIndexConfig.mappings?._source?.mode;
+  // @ts-expect-error Property 'source.mode' does not exist on type 'IndicesMappingLimitSettings'
+  const currentSourceType = currentBackingIndexConfig?.settings?.index?.mapping?.source?.mode;
 
   let settings: IndicesIndexSettings;
   let mappings: MappingTypeMapping = {};
@@ -1064,6 +1092,10 @@ const updateExistingDataStream = async ({
 
     // if update fails, rollover data stream and bail out
   } catch (err) {
+    subobjectsFieldChanged =
+      subobjectsFieldChanged ||
+      (err.body?.error?.type === 'mapper_exception' &&
+        err.body?.error?.reason?.includes('subobjects'));
     if (
       (isResponseError(err) &&
         err.statusCode === 400 &&
@@ -1117,7 +1149,7 @@ const updateExistingDataStream = async ({
   // Trigger a rollover if the index mode or source type has changed
   if (
     currentIndexMode !== settings?.index?.mode ||
-    currentSourceType !== mappings?._source?.mode ||
+    currentSourceType !== settings?.index?.source?.mode ||
     dynamicDimensionMappingsChanged
   ) {
     if (options?.skipDataStreamRollover === true) {

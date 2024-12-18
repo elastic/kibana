@@ -17,10 +17,10 @@ import {
   OpenInDiscoverDrilldown,
 } from './open_in_discover_drilldown';
 import { DataViewsService } from '@kbn/data-views-plugin/public';
-import { LensApi } from '../embeddable';
+import { getLensApiMock } from '../react_embeddable/mocks';
 
 jest.mock('./open_in_discover_helpers', () => ({
-  isCompatible: jest.fn(() => true),
+  isCompatible: jest.fn().mockReturnValue(true),
   getHref: jest.fn(),
 }));
 
@@ -63,19 +63,13 @@ describe('open in discover drilldown', () => {
 
   it('calls through to isCompatible helper', async () => {
     const filters: Filter[] = [{ meta: { disabled: false } }];
-    await drilldown.isCompatible(
-      { openInNewTab: true },
-      { embeddable: { type: 'lens' } as LensApi, filters }
-    );
+    await drilldown.isCompatible({ openInNewTab: true }, { embeddable: getLensApiMock(), filters });
     expect(isCompatible).toHaveBeenCalledWith(expect.objectContaining({ filters }));
   });
 
   it('calls through to getHref helper', async () => {
     const filters: Filter[] = [{ meta: { disabled: false } }];
-    await drilldown.execute(
-      { openInNewTab: true },
-      { embeddable: { type: 'lens' } as LensApi, filters }
-    );
+    await drilldown.execute({ openInNewTab: true }, { embeddable: getLensApiMock(), filters });
     expect(getHref).toHaveBeenCalledWith(expect.objectContaining({ filters }));
   });
 });

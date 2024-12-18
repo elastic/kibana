@@ -107,7 +107,7 @@ export interface AppMockRenderer {
 export const createAppMockRenderer = (): AppMockRenderer => {
   const services = createStartServicesMock();
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+  const AppWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
     </I18nProvider>

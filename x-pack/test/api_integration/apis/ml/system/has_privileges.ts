@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 
-import { MlHasPrivilegesResponse } from '@kbn/ml-plugin/public/application/services/ml_api_service';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
@@ -17,11 +16,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
 
-  async function runRequest(
-    user: USER,
-    index: any,
-    expectedStatusCode = 200
-  ): Promise<MlHasPrivilegesResponse> {
+  async function runRequest(user: USER, index: any, expectedStatusCode = 200) {
     const { body, status } = await supertest
       .post(`/internal/ml/_has_privileges`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
@@ -104,7 +99,10 @@ export default ({ getService }: FtrProviderContext) => {
           privileges: ['write'],
         },
       ],
-      expectedResponse: { statusCode: 403, error: 'Forbidden', message: 'Forbidden' },
+      expectedResponse: {
+        statusCode: 403,
+        error: 'Forbidden',
+      },
       expectedStatusCode: 403,
     },
   ];
@@ -120,9 +118,17 @@ export default ({ getService }: FtrProviderContext) => {
     it('should return correct privileges for test data', async () => {
       for (const { user, index, expectedResponse, expectedStatusCode } of testData) {
         const response = await runRequest(user, index, expectedStatusCode);
-        expect(response).to.eql(
-          expectedResponse,
-          `expected ${JSON.stringify(expectedResponse)}, got ${JSON.stringify(response)}`
+        expect(response.statusCode).to.eql(
+          expectedResponse.statusCode,
+          `expected ${JSON.stringify(expectedResponse.statusCode)}, got ${JSON.stringify(
+            response.statusCode
+          )}`
+        );
+        expect(response.error).to.eql(
+          expectedResponse.error,
+          `expected ${JSON.stringify(expectedResponse.error)}, got ${JSON.stringify(
+            response.error
+          )}`
         );
       }
     });

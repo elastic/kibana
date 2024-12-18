@@ -19,6 +19,11 @@ const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => 
 const configSchema = schema.object({
   overrides: schema.object({}, { unknowns: 'allow' }),
   publicApiEnabled: offeringBasedSchema({ serverless: schema.boolean({ defaultValue: false }) }),
+  experimental: schema.maybe(
+    schema.object({
+      themeSwitcherEnabled: schema.maybe(schema.boolean({ defaultValue: false })),
+    })
+  ),
 });
 
 export type UiSettingsConfigType = TypeOf<typeof configSchema>;

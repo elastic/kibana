@@ -14,8 +14,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const logger = getService('log');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const pageObjects = getPageObjects(['common', 'header', 'alerts']);
+  const pageObjects = getPageObjects(['common', 'header', 'alerts', 'expandedFlyout']);
   const alertsPage = pageObjects.alerts;
+  const expandedFlyout = pageObjects.expandedFlyout;
 
   describe('Security Alerts Page - Graph visualization', function () {
     this.tags(['cloud_security_posture_graph_viz']);
@@ -33,8 +34,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Setting the timerange to fit the data and open the flyout for a specific alert
       await alertsPage.navigateToAlertsPage(
         `${alertsPage.getAbsoluteTimerangeFilter(
-          '2024-10-13T00:00:00.000Z',
-          '2024-10-14T00:00:00.000Z'
+          '2024-09-01T00:00:00.000Z',
+          '2024-09-02T00:00:00.000Z'
         )}&${alertsPage.getFlyoutFilter(
           '589e086d7ceec7d4b353340578bd607e96fbac7eab9e2926f110990be15122f1'
         )}`
@@ -54,9 +55,52 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
     });
 
-    it('should render graph visualization', async () => {
+    it('expanded flyout - filter by node', async () => {
       await alertsPage.flyout.assertGraphPreviewVisible();
       await alertsPage.flyout.assertGraphNodesNumber(3);
+
+      await expandedFlyout.expandGraph();
+      await expandedFlyout.waitGraphIsLoaded();
+      await expandedFlyout.assertGraphNodesNumber(3);
+
+      // Show actions by entity
+      await expandedFlyout.showActionsByEntity('admin@example.com');
+      await expandedFlyout.expectFilterTextEquals(0, 'actor.entity.id: admin@example.com');
+      await expandedFlyout.expectFilterPreviewEquals(0, 'actor.entity.id: admin@example.com');
+
+      // Show actions on entity
+      await expandedFlyout.showActionsOnEntity('admin@example.com');
+      await expandedFlyout.expectFilterTextEquals(
+        0,
+        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com'
+      );
+      await expandedFlyout.expectFilterPreviewEquals(
+        0,
+        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com'
+      );
+
+      // Explore related entities
+      await expandedFlyout.exploreRelatedEntities('admin@example.com');
+      await expandedFlyout.expectFilterTextEquals(
+        0,
+        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com'
+      );
+      await expandedFlyout.expectFilterPreviewEquals(
+        0,
+        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com'
+      );
+
+      // Clear filters
+      await expandedFlyout.clearAllFilters();
+
+      // Add custom filter
+      await expandedFlyout.addFilter({
+        field: 'actor.entity.id',
+        operation: 'is',
+        value: 'admin2@example.com',
+      });
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await expandedFlyout.assertGraphNodesNumber(5);
     });
   });
 }

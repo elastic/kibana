@@ -19,7 +19,12 @@ import {
 } from '@elastic/eui';
 import { TopNavMenuData } from './top_nav_menu_data';
 
-export function TopNavMenuItem(props: TopNavMenuData & { isMobileMenu?: boolean }) {
+export interface TopNavMenuItemProps extends TopNavMenuData {
+  closePopover: () => void;
+  isMobileMenu?: boolean;
+}
+
+export function TopNavMenuItem(props: TopNavMenuItemProps) {
   function isDisabled(): boolean {
     const val = isFunction(props.disableButton) ? props.disableButton() : props.disableButton;
     return val!;
@@ -46,6 +51,9 @@ export function TopNavMenuItem(props: TopNavMenuData & { isMobileMenu?: boolean 
   function handleClick(e: MouseEvent<HTMLButtonElement>) {
     if (isDisabled()) return;
     props.run(e.currentTarget);
+    if (props.isMobileMenu) {
+      props.closePopover();
+    }
   }
 
   const commonButtonProps = {
@@ -80,7 +88,12 @@ export function TopNavMenuItem(props: TopNavMenuData & { isMobileMenu?: boolean 
       </EuiToolTip>
     ) : props.emphasize ? (
       // fill is not compatible with EuiHeaderLink
-      <EuiButton size="s" {...commonButtonProps} fill={props.fill ?? true}>
+      <EuiButton
+        size="s"
+        fullWidth={props.isMobileMenu}
+        {...commonButtonProps}
+        fill={props.fill ?? true}
+      >
         {getButtonContainer()}
       </EuiButton>
     ) : (

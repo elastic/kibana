@@ -69,7 +69,6 @@ export async function getErrorSampleDetails({
   const requiredFields = asMutableArray([
     AGENT_NAME,
     PROCESSOR_EVENT,
-    TRACE_ID,
     TIMESTAMP_US,
     AT_TIMESTAMP,
     SERVICE_NAME,
@@ -78,6 +77,7 @@ export async function getErrorSampleDetails({
   ] as const);
 
   const optionalFields = asMutableArray([
+    TRACE_ID,
     TRANSACTION_ID,
     SPAN_ID,
     AGENT_VERSION,
@@ -131,7 +131,7 @@ export async function getErrorSampleDetails({
   const errorFromFields = unflattenKnownApmEventFields(hit.fields, requiredFields);
 
   const transactionId = errorFromFields.transaction?.id ?? errorFromFields.span?.id;
-  const traceId = errorFromFields.trace.id;
+  const traceId = errorFromFields.trace?.id;
 
   let transaction: Transaction | undefined;
   if (transactionId && traceId) {

@@ -48,7 +48,9 @@ describe('TimesliderControlApi', () => {
       uuid,
       parentApi: controlGroupApi,
       unsavedChanges: new BehaviorSubject<Partial<TimesliderControlState> | undefined>(undefined),
-      resetUnsavedChanges: () => {},
+      resetUnsavedChanges: () => {
+        return true;
+      },
       type: factory.type,
     };
   }

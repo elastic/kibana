@@ -33,7 +33,11 @@ import type {
   ControlPanelsState,
   ParentIgnoreSettings,
 } from '../../common';
-import { CONTROL_GROUP_TYPE, DEFAULT_CONTROL_LABEL_POSITION } from '../../common';
+import {
+  CONTROL_GROUP_TYPE,
+  DEFAULT_CONTROL_CHAINING,
+  DEFAULT_CONTROL_LABEL_POSITION,
+} from '../../common';
 import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
 import { coreServices, dataViewsService } from '../services/kibana_services';
 import { ControlGroup } from './components/control_group';
@@ -44,8 +48,6 @@ import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
 import { initSelectionsManager } from './selections_manager';
 import type { ControlGroupApi } from './types';
 import { deserializeControlGroup } from './utils/serialization_utils';
-
-const DEFAULT_CHAINING_SYSTEM = 'HIERARCHICAL';
 
 export const getControlGroupEmbeddableFactory = () => {
   const controlGroupEmbeddableFactory: ReactEmbeddableFactory<
@@ -85,7 +87,7 @@ export const getControlGroupEmbeddableFactory = () => {
       });
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
       const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(
-        chainingSystem ?? DEFAULT_CHAINING_SYSTEM
+        chainingSystem ?? DEFAULT_CONTROL_CHAINING
       );
       const ignoreParentSettings$ = new BehaviorSubject<ParentIgnoreSettings | undefined>(
         ignoreParentSettings
@@ -108,7 +110,7 @@ export const getControlGroupEmbeddableFactory = () => {
           chainingSystem: [
             chainingSystem$,
             (next: ControlGroupChainingSystem) => chainingSystem$.next(next),
-            (a, b) => (a ?? DEFAULT_CHAINING_SYSTEM) === (b ?? DEFAULT_CHAINING_SYSTEM),
+            (a, b) => (a ?? DEFAULT_CONTROL_CHAINING) === (b ?? DEFAULT_CONTROL_CHAINING),
           ],
           ignoreParentSettings: [
             ignoreParentSettings$,
@@ -187,14 +189,14 @@ export const getControlGroupEmbeddableFactory = () => {
           });
         },
         serializeState: () => {
-          const { panelsJSON, references } = controlsManager.serializeControls();
+          const { controls, references } = controlsManager.serializeControls();
           return {
             rawState: {
               chainingSystem: chainingSystem$.getValue(),
-              controlStyle: labelPosition$.getValue(),
-              showApplySelections: !autoApplySelections$.getValue(),
-              ignoreParentSettingsJSON: JSON.stringify(ignoreParentSettings$.getValue()),
-              panelsJSON,
+              labelPosition: labelPosition$.getValue(),
+              autoApplySelections: autoApplySelections$.getValue(),
+              ignoreParentSettings: ignoreParentSettings$.getValue(),
+              controls,
             },
             references,
           };

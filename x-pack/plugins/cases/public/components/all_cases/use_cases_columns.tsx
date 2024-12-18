@@ -122,7 +122,7 @@ export const useCasesColumns = ({
           }
           return getEmptyCellValue();
         },
-        width: !isSelectorView ? '20%' : '55%',
+        width: !isSelectorView ? '17%' : '55%',
       },
       assignees: {
         field: casesColumnsConfig.assignees.field,
@@ -130,6 +130,7 @@ export const useCasesColumns = ({
         render: (assignees: CaseUI['assignees']) => (
           <AssigneesColumn assignees={assignees} userProfiles={userProfiles} />
         ),
+        width: '10%',
       },
       tags: {
         field: casesColumnsConfig.tags.field,
@@ -193,7 +194,7 @@ export const useCasesColumns = ({
           totalAlerts != null
             ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
             : getEmptyCellValue(),
-        width: !isSelectorView ? '80px' : '55px',
+        width: !isSelectorView ? '70px' : '55px',
       },
       totalComment: {
         field: casesColumnsConfig.totalComment.field,
@@ -203,7 +204,7 @@ export const useCasesColumns = ({
           totalComment != null
             ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
             : getEmptyCellValue(),
-        width: '90px',
+        width: '75px',
       },
       category: {
         field: casesColumnsConfig.category.field,
@@ -217,7 +218,7 @@ export const useCasesColumns = ({
           }
           return getEmptyCellValue();
         },
-        width: '120px',
+        width: '12%',
       },
       closedAt: {
         field: casesColumnsConfig.closedAt.field,
@@ -233,6 +234,7 @@ export const useCasesColumns = ({
           }
           return getEmptyCellValue();
         },
+        width: '10%',
       },
       createdAt: {
         field: casesColumnsConfig.createdAt.field,
@@ -248,6 +250,7 @@ export const useCasesColumns = ({
           }
           return getEmptyCellValue();
         },
+        width: '15%',
       },
       updatedAt: {
         field: casesColumnsConfig.updatedAt.field,
@@ -263,6 +266,7 @@ export const useCasesColumns = ({
           }
           return getEmptyCellValue();
         },
+        width: '15%',
       },
       externalIncident: {
         // no field
@@ -273,6 +277,7 @@ export const useCasesColumns = ({
           }
           return getEmptyCellValue();
         },
+        width: '10%',
       },
       status: {
         field: casesColumnsConfig.status.field,
@@ -285,7 +290,7 @@ export const useCasesColumns = ({
 
           return getEmptyCellValue();
         },
-        width: '110px',
+        width: '100px',
       },
       severity: {
         field: casesColumnsConfig.severity.field,
@@ -326,6 +331,7 @@ export const useCasesColumns = ({
           }
           return getEmptyCellValue();
         },
+        width: '70px',
       },
     }),
     [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles]

@@ -9,9 +9,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
 
-import { CoreSetup, CoreTheme } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
@@ -20,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
-import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { ProgressRendererConfig } from '../../common/types';
 
 const strings = {
@@ -35,8 +33,7 @@ const strings = {
 };
 
 export const getProgressRenderer =
-  (theme$: Observable<CoreTheme> = defaultTheme$) =>
-  (): ExpressionRenderDefinition<ProgressRendererConfig> => ({
+  (core: CoreStart) => (): ExpressionRenderDefinition<ProgressRendererConfig> => ({
     name: 'progress',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
@@ -54,7 +51,7 @@ export const getProgressRenderer =
       render(
         <KibanaErrorBoundaryProvider analytics={undefined}>
           <KibanaErrorBoundary>
-            <KibanaThemeProvider theme={{ theme$ }}>
+            <KibanaThemeProvider {...core}>
               <I18nProvider>
                 <ProgressComponent {...config} parentNode={domNode} onLoaded={handlers.done} />
               </I18nProvider>
@@ -66,4 +63,4 @@ export const getProgressRenderer =
     },
   });
 
-export const progressRendererFactory = (core: CoreSetup) => getProgressRenderer(core.theme.theme$);
+export const progressRendererFactory = (core: CoreStart) => getProgressRenderer(core);

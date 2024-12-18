@@ -5,14 +5,14 @@
  * 2.0.
  */
 import createContainer from 'constate';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { buildEsQuery, Filter, fromKueryExpression, TimeRange, type Query } from '@kbn/es-query';
 import { Subscription, map, tap } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useSearchSessionContext } from '../../../../hooks/use_search_session';
-import { parseDateRange } from '../../../../utils/datemath';
-import { useKibanaQuerySettings } from '../../../../hooks/use_kibana_query_settings';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
@@ -38,17 +38,6 @@ const buildQuerySubmittedPayload = (
   };
 };
 
-const DEFAULT_FROM_IN_MILLISECONDS = 15 * 60000;
-
-const getDefaultTimestamps = () => {
-  const now = Date.now();
-
-  return {
-    from: new Date(now - DEFAULT_FROM_IN_MILLISECONDS).toISOString(),
-    to: new Date(now).toISOString(),
-  };
-};
-
 export const useUnifiedSearch = () => {
   const [error, setError] = useState<Error | null>(null);
   const [searchCriteria, setSearch] = useHostsUrlState();
@@ -57,9 +46,18 @@ export const useUnifiedSearch = () => {
   const { services } = useKibanaContextForPlugin();
   const kibanaQuerySettings = useKibanaQuerySettings();
 
+  const parsedDateRange = useTimeRange({
+    rangeFrom: searchCriteria.dateRange.from,
+    rangeTo: searchCriteria.dateRange.to,
+  });
+
   const {
     data: {
-      query: { filterManager: filterManagerService, queryString: queryStringService },
+      query: {
+        filterManager: filterManagerService,
+        queryString: queryStringService,
+        timefilter: timeFilterService,
+      },
     },
     telemetry,
   } = services;
@@ -74,29 +72,33 @@ export const useUnifiedSearch = () => {
   const onFiltersChange = useCallback(
     (filters: Filter[]) => {
       setSearch({ type: 'SET_FILTERS', filters });
+      updateSearchSessionId();
     },
-    [setSearch]
+    [setSearch, updateSearchSessionId]
   );
 
   const onPanelFiltersChange = useCallback(
     (panelFilters: Filter[]) => {
       setSearch({ type: 'SET_PANEL_FILTERS', panelFilters });
+      updateSearchSessionId();
     },
-    [setSearch]
+    [setSearch, updateSearchSessionId]
   );
 
   const onLimitChange = useCallback(
     (limit: number) => {
       setSearch({ type: 'SET_LIMIT', limit });
+      updateSearchSessionId();
     },
-    [setSearch]
+    [setSearch, updateSearchSessionId]
   );
 
   const onDateRangeChange = useCallback(
     (dateRange: StringDateRange) => {
       setSearch({ type: 'SET_DATE_RANGE', dateRange });
+      updateSearchSessionId();
     },
-    [setSearch]
+    [setSearch, updateSearchSessionId]
   );
 
   const onQueryChange = useCallback(
@@ -105,28 +107,20 @@ export const useUnifiedSearch = () => {
         setError(null);
         validateQuery(query);
         setSearch({ type: 'SET_QUERY', query });
+        updateSearchSessionId();
       } catch (err) {
         setError(err);
       }
     },
-    [validateQuery, setSearch]
+    [validateQuery, setSearch, updateSearchSessionId]
   );
 
   const onSubmit = useCallback(
     ({ dateRange }: { dateRange: TimeRange }) => {
       onDateRangeChange(dateRange);
-      updateSearchSessionId();
     },
-    [onDateRangeChange, updateSearchSessionId]
+    [onDateRangeChange]
   );
-
-  const parsedDateRange = useMemo(() => {
-    const defaults = getDefaultTimestamps();
-
-    const { from = defaults.from, to = defaults.to } = parseDateRange(searchCriteria.dateRange);
-
-    return { from, to };
-  }, [searchCriteria.dateRange]);
 
   const getDateRangeAsTimestamp = useCallback(() => {
     const from = new Date(parsedDateRange.from).getTime();
@@ -183,6 +177,16 @@ export const useUnifiedSearch = () => {
     );
 
     subscription.add(
+      timeFilterService.timefilter
+        .getTimeUpdate$()
+        .pipe(
+          map(() => timeFilterService.timefilter.getTime()),
+          tap((dateRange) => onDateRangeChange(dateRange))
+        )
+        .subscribe()
+    );
+
+    subscription.add(
       queryStringService
         .getUpdates$()
         .pipe(
@@ -195,7 +199,14 @@ export const useUnifiedSearch = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [filterManagerService, queryStringService, onQueryChange, onFiltersChange]);
+  }, [
+    filterManagerService,
+    queryStringService,
+    onQueryChange,
+    onFiltersChange,
+    timeFilterService.timefilter,
+    onDateRangeChange,
+  ]);
 
   // Track telemetry event on query/filter/date changes
   useEffect(() => {

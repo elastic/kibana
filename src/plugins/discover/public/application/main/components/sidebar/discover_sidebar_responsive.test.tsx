@@ -162,6 +162,7 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): DiscoverSidebarRe
       result: hits,
     }) as DataDocuments$,
     onChangeDataView: jest.fn(),
+    onAddBreakdownField: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
@@ -397,6 +398,19 @@ describe('discover responsive sidebar', function () {
     expect(ExistingFieldsServiceApi.loadFieldExisting).not.toHaveBeenCalled();
   });
 
+  it('should allow adding breakdown field', async function () {
+    const comp = await mountComponent(props);
+    const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
+    await act(async () => {
+      const button = findTestSubject(availableFields, 'field-extension-showDetails');
+      button.simulate('click');
+      comp.update();
+    });
+
+    comp.update();
+    findTestSubject(comp, 'fieldPopoverHeader_addBreakdownField-extension').simulate('click');
+    expect(props.onAddBreakdownField).toHaveBeenCalled();
+  });
   it('should allow selecting fields', async function () {
     const comp = await mountComponent(props);
     const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');

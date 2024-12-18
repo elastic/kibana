@@ -15,13 +15,10 @@ import type { DefaultInspectorAdapters, Datatable } from '@kbn/expressions-plugi
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
-import type {
-  EmbeddableComponentProps,
-  LensEmbeddableInput,
-  LensEmbeddableOutput,
-} from '@kbn/lens-plugin/public';
+import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { Observable } from 'rxjs';
+import { PublishingSubject } from '@kbn/presentation-publishing';
 import {
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
@@ -121,7 +118,7 @@ export function Histogram({
     (
       isLoading: boolean,
       adapters: Partial<DefaultInspectorAdapters> | undefined,
-      lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>
+      dataLoading$?: PublishingSubject<boolean | undefined>
     ) => {
       const lensRequest = adapters?.requests?.getRequests()[0];
       const requestFailed = lensRequest?.status === RequestStatus.ERROR;
@@ -129,9 +126,6 @@ export function Histogram({
         | IKibanaSearchResponse<estypes.SearchResponse>
         | undefined;
       const response = json?.rawResponse;
-
-      // The response can have `response?._shards.failed` but we should still be able to show hits number
-      // TODO: show shards warnings as a badge next to the total hits number
 
       if (requestFailed) {
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, undefined);
@@ -142,10 +136,14 @@ export function Histogram({
       const adapterTables = adapters?.tables?.tables;
       const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, isPlainRecord);
 
-      onTotalHitsChange?.(
-        isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
-        totalHits ?? hits?.total
-      );
+      if (response?._shards?.failed || response?.timed_out) {
+        onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, totalHits);
+      } else {
+        onTotalHitsChange?.(
+          isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
+          totalHits ?? hits?.total
+        );
+      }
 
       if (response) {
         const newBucketInterval = buildBucketInterval({
@@ -159,7 +157,7 @@ export function Histogram({
         setBucketInterval(newBucketInterval);
       }
 
-      onChartLoad?.({ adapters: adapters ?? {}, embeddableOutput$: lensEmbeddableOutput$ });
+      onChartLoad?.({ adapters: adapters ?? {}, dataLoading$ });
     }
   );
 

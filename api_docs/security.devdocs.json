@@ -141,6 +141,22 @@
             "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-public.AuthenticatedUser.operator",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "operator",
+            "description": [
+              "\nIndicates whether user is an operator."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1188,6 +1204,14 @@
             "docId": "kibKbnCoreThemeBrowserPluginApi",
             "section": "def-public.ThemeServiceSetup",
             "text": "ThemeServiceSetup"
+          },
+          "; userProfile: ",
+          {
+            "pluginId": "@kbn/core-user-profile-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+            "section": "def-public.UserProfileService",
+            "text": "UserProfileService"
           },
           "; }"
         ],
@@ -3665,6 +3689,22 @@
             "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuthenticatedUser.operator",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "operator",
+            "description": [
+              "\nIndicates whether user is an operator."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5832,7 +5872,7 @@
         "label": "CasesSupportedOperations",
         "description": [],
         "signature": [
-          "\"getTags\" | \"pushCase\" | \"createCase\" | \"createComment\" | \"getCase\" | \"getComment\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"deleteCase\" | \"deleteComment\" | \"createConfiguration\" | \"updateConfiguration\""
+          "\"getTags\" | \"createComment\" | \"reopenCase\" | \"pushCase\" | \"createCase\" | \"getCase\" | \"getComment\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"deleteCase\" | \"deleteComment\" | \"createConfiguration\" | \"updateConfiguration\""
         ],
         "path": "x-pack/packages/security/authorization_core/src/privileges/feature_privilege_builder/cases.ts",
         "deprecated": false,
@@ -6332,11 +6372,11 @@
           "references": [
             {
               "plugin": "ml",
-              "path": "x-pack/plugins/ml/server/routes/annotations.ts"
+              "path": "x-pack/platform/plugins/shared/ml/server/routes/annotations.ts"
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/route.ts"
+              "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/route.ts"
             }
           ]
         },
@@ -6372,19 +6412,19 @@
             },
             {
               "plugin": "ml",
-              "path": "x-pack/plugins/ml/server/saved_objects/initialization/initialization.ts"
+              "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/initialization/initialization.ts"
             },
             {
               "plugin": "ml",
-              "path": "x-pack/plugins/ml/server/saved_objects/sync_task.ts"
+              "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/sync_task.ts"
             },
             {
               "plugin": "ml",
-              "path": "x-pack/plugins/ml/server/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/ml/server/plugin.ts"
             },
             {
               "plugin": "ml",
-              "path": "x-pack/plugins/ml/server/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/ml/server/plugin.ts"
             },
             {
               "plugin": "enterpriseSearch",
@@ -6459,7 +6499,7 @@
             },
             {
               "plugin": "observabilityAIAssistant",
-              "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/service/index.ts"
+              "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/server/service/index.ts"
             },
             {
               "plugin": "fleet",
@@ -6478,36 +6518,8 @@
               "path": "x-pack/plugins/fleet/server/routes/setup/handlers.ts"
             },
             {
-              "plugin": "cloudSecurityPosture",
-              "path": "x-pack/plugins/cloud_security_posture/server/routes/setup_routes.ts"
-            },
-            {
-              "plugin": "entityManager",
-              "path": "x-pack/plugins/entity_manager/server/lib/auth/api_key/api_key.ts"
-            },
-            {
-              "plugin": "entityManager",
-              "path": "x-pack/plugins/entity_manager/server/lib/auth/api_key/api_key.ts"
-            },
-            {
-              "plugin": "entityManager",
-              "path": "x-pack/plugins/entity_manager/server/lib/auth/api_key/api_key.ts"
-            },
-            {
-              "plugin": "entityManager",
-              "path": "x-pack/plugins/entity_manager/server/routes/enablement/enable.ts"
-            },
-            {
-              "plugin": "entityManager",
-              "path": "x-pack/plugins/entity_manager/server/routes/enablement/disable.ts"
-            },
-            {
               "plugin": "serverlessSearch",
               "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
-            },
-            {
-              "plugin": "transform",
-              "path": "x-pack/plugins/transform/server/routes/api/reauthorize_transforms/route_handler_factory.ts"
             },
             {
               "plugin": "upgradeAssistant",
@@ -6534,36 +6546,24 @@
               "path": "x-pack/plugins/observability_solution/apm/server/routes/fleet/is_superuser.ts"
             },
             {
-              "plugin": "synthetics",
-              "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
+              "plugin": "entityManager",
+              "path": "x-pack/platform/plugins/shared/entity_manager/server/lib/auth/api_key/api_key.ts"
             },
             {
-              "plugin": "synthetics",
-              "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
+              "plugin": "entityManager",
+              "path": "x-pack/platform/plugins/shared/entity_manager/server/lib/auth/api_key/api_key.ts"
             },
             {
-              "plugin": "synthetics",
-              "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
+              "plugin": "entityManager",
+              "path": "x-pack/platform/plugins/shared/entity_manager/server/lib/auth/api_key/api_key.ts"
             },
             {
-              "plugin": "synthetics",
-              "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
+              "plugin": "entityManager",
+              "path": "x-pack/platform/plugins/shared/entity_manager/server/routes/enablement/enable.ts"
             },
             {
-              "plugin": "synthetics",
-              "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
-            },
-            {
-              "plugin": "synthetics",
-              "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
-            },
-            {
-              "plugin": "synthetics",
-              "path": "x-pack/plugins/observability_solution/synthetics/server/routes/synthetics_service/enablement.ts"
-            },
-            {
-              "plugin": "synthetics",
-              "path": "x-pack/plugins/observability_solution/synthetics/server/routes/synthetics_service/enablement.ts"
+              "plugin": "entityManager",
+              "path": "x-pack/platform/plugins/shared/entity_manager/server/routes/enablement/disable.ts"
             },
             {
               "plugin": "fleet",
@@ -6576,6 +6576,46 @@
             {
               "plugin": "fleet",
               "path": "x-pack/plugins/fleet/server/routes/setup/handlers.test.ts"
+            },
+            {
+              "plugin": "transform",
+              "path": "x-pack/platform/plugins/private/transform/server/routes/api/reauthorize_transforms/route_handler_factory.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/get_api_key.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/get_api_key.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/get_api_key.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/get_api_key.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/get_api_key.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/get_api_key.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/solutions/observability/plugins/synthetics/server/routes/synthetics_service/enablement.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/solutions/observability/plugins/synthetics/server/routes/synthetics_service/enablement.ts"
+            },
+            {
+              "plugin": "cloudSecurityPosture",
+              "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/setup_routes.ts"
             }
           ]
         },
@@ -6643,11 +6683,11 @@
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/users/suggest_user_profiles_route.ts"
+              "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/users/suggest_user_profiles_route.ts"
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/notes/get_notes.ts"
+              "path": "x-pack/solutions/security/plugins/security_solution/server/lib/timeline/routes/notes/get_notes.ts"
             }
           ]
         }
@@ -6951,6 +6991,22 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.AuthenticatedUser.operator",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "operator",
+            "description": [
+              "\nIndicates whether user is an operator."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
             "deprecated": false,

@@ -9,36 +9,21 @@
 
 import { SerializableRecord } from '@kbn/utility-types';
 
+import { ControlGroupSavedObjectState, SerializableControlGroupState } from './types';
 import {
+  DEFAULT_CONTROL_CHAINING,
   DEFAULT_CONTROL_LABEL_POSITION,
-  type ControlGroupRuntimeState,
-  type ControlGroupSerializedState,
-  type ControlPanelState,
-  type SerializedControlState,
+  DEFAULT_IGNORE_PARENT_SETTINGS,
+  DEFAULT_AUTO_APPLY_SELECTIONS,
 } from '../../common';
 
 export const getDefaultControlGroupState = (): SerializableControlGroupState => ({
   panels: {},
   labelPosition: DEFAULT_CONTROL_LABEL_POSITION,
-  chainingSystem: 'HIERARCHICAL',
-  autoApplySelections: true,
-  ignoreParentSettings: {
-    ignoreFilters: false,
-    ignoreQuery: false,
-    ignoreTimerange: false,
-    ignoreValidations: false,
-  },
+  chainingSystem: DEFAULT_CONTROL_CHAINING,
+  autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
+  ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
 });
-
-// using SerializableRecord to force type to be read as serializable
-export type SerializableControlGroupState = SerializableRecord &
-  Omit<
-    ControlGroupRuntimeState,
-    'initialChildControlState' | 'ignoreParentSettings' | 'editorConfig' // editor config is not persisted
-  > & {
-    ignoreParentSettings: Record<string, boolean>;
-    panels: Record<string, ControlPanelState<SerializedControlState>> | {};
-  };
 
 const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
   if (!jsonString && typeof jsonString !== 'string') return;
@@ -49,22 +34,26 @@ const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
   }
 };
 
-export const controlGroupSerializedStateToSerializableRuntimeState = (
-  serializedState: ControlGroupSerializedState
+export const controlGroupSavedObjectStateToSerializableRuntimeState = (
+  savedObjectState: ControlGroupSavedObjectState
 ): SerializableControlGroupState => {
   const defaultControlGroupInput = getDefaultControlGroupState();
   return {
-    chainingSystem: serializedState?.chainingSystem,
-    labelPosition: serializedState?.controlStyle ?? defaultControlGroupInput.labelPosition,
-    autoApplySelections: !serializedState?.showApplySelections,
-    ignoreParentSettings: safeJSONParse(serializedState?.ignoreParentSettingsJSON) ?? {},
-    panels: safeJSONParse(serializedState?.panelsJSON) ?? {},
+    chainingSystem:
+      (savedObjectState?.chainingSystem as SerializableControlGroupState['chainingSystem']) ??
+      defaultControlGroupInput.chainingSystem,
+    labelPosition:
+      (savedObjectState?.controlStyle as SerializableControlGroupState['labelPosition']) ??
+      defaultControlGroupInput.labelPosition,
+    autoApplySelections: !savedObjectState?.showApplySelections,
+    ignoreParentSettings: safeJSONParse(savedObjectState?.ignoreParentSettingsJSON) ?? {},
+    panels: safeJSONParse(savedObjectState?.panelsJSON) ?? {},
   };
 };
 
-export const serializableRuntimeStateToControlGroupSerializedState = (
+export const serializableRuntimeStateToControlGroupSavedObjectState = (
   serializable: SerializableRecord // It is safe to treat this as SerializableControlGroupState
-): ControlGroupSerializedState => {
+): ControlGroupSavedObjectState => {
   return {
     controlStyle: serializable.labelPosition as SerializableControlGroupState['labelPosition'],
     chainingSystem: serializable.chainingSystem as SerializableControlGroupState['chainingSystem'],

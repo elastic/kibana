@@ -1,5 +1,9 @@
 {
   "type": "shared-server",
   "id": "@kbn/object-versioning",
-  "owner": "@elastic/appex-sharedux"
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

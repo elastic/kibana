@@ -59,6 +59,7 @@ interface AlertsServiceParams {
   timeoutMs?: number;
   dataStreamAdapter: DataStreamAdapter;
   elasticsearchAndSOAvailability$: Observable<boolean>;
+  isServerless: boolean;
 }
 
 export interface CreateAlertsClientParams extends LegacyAlertsClientParams {
@@ -120,6 +121,7 @@ export type PublicFrameworkAlertsService = PublicAlertsService & {
 
 export class AlertsService implements IAlertsService {
   private initialized: boolean;
+  private isServerless: boolean;
   private isInitializing: boolean = false;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private registeredContexts: Map<string, IRuleTypeAlerts> = new Map();
@@ -129,6 +131,7 @@ export class AlertsService implements IAlertsService {
   constructor(private readonly options: AlertsServiceParams) {
     this.initialized = false;
 
+    this.isServerless = options.isServerless;
     this.dataStreamAdapter = options.dataStreamAdapter;
 
     // Kick off initialization of common assets and save the promise
@@ -245,6 +248,7 @@ export class AlertsService implements IAlertsService {
       spaceId: opts.spaceId,
       kibanaVersion: this.options.kibanaVersion,
       dataStreamAdapter: this.dataStreamAdapter,
+      isServerless: this.isServerless,
     });
   }
 

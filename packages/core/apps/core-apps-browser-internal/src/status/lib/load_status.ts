@@ -11,11 +11,11 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
-import type { ServiceStatusLevelId } from '@kbn/core-status-common';
 import type {
+  ServiceStatusLevelId,
   StatusResponse,
   StatusInfoServiceStatus as ServiceStatus,
-} from '@kbn/core-status-common-internal';
+} from '@kbn/core-status-common';
 import type { DataType } from './format_number';
 
 interface MetricMeta {
@@ -155,7 +155,9 @@ function formatStatus(id: string, status: ServiceStatus): FormattedStatus {
     },
   };
 }
-
+/**
+ * Maps status to health color for frontend views
+ */
 export const STATUS_LEVEL_UI_ATTRS: Record<ServiceStatusLevelId, StatusUIAttributes> = {
   critical: {
     title: i18n.translate('core.status.redTitle', {

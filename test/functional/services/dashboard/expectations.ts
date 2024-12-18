@@ -81,14 +81,6 @@ export class DashboardExpectService extends FtrService {
     });
   }
 
-  async docTableFieldCount(expectedCount: number) {
-    this.log.debug(`DashboardExpect.docTableFieldCount(${expectedCount})`);
-    await this.retry.try(async () => {
-      const docTableCells = await this.testSubjects.findAll('docTableField', this.findTimeout);
-      expect(docTableCells.length).to.be(expectedCount);
-    });
-  }
-
   async fieldSuggestions(expectedFields: string[]) {
     this.log.debug(`DashboardExpect.fieldSuggestions(${expectedFields})`);
     const fields = await this.filterBar.getFilterEditorFields();

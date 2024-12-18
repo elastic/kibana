@@ -62,8 +62,12 @@ export const LanguageClientPanel: React.FC<SelectClientProps> = ({
                 width={euiTheme.size.xl}
               />
               <EuiSpacer size="s" />
-              <EuiText textAlign="center" color={isSelectedLanguage ? 'default' : 'subdued'}>
-                <h5>{language.name}</h5>
+              <EuiText
+                size="relative"
+                textAlign="center"
+                color={isSelectedLanguage ? 'default' : 'subdued'}
+              >
+                <strong>{language.name}</strong>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>

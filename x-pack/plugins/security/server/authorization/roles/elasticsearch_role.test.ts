@@ -94,7 +94,7 @@ const roles = [
     applications: [
       {
         application: 'kibana-.kibana',
-        privileges: ['feature_securitySolutionCases.a;;'],
+        privileges: ['feature_securitySolutionCasesV2.a;;'],
         resources: ['*'],
       },
     ],
@@ -184,7 +184,7 @@ const roles = [
     applications: [
       {
         application: 'kibana-.kibana',
-        privileges: ['feature_securitySolutionCases.a;;'],
+        privileges: ['feature_securitySolutionCasesV2.a;;'],
         resources: ['space:default'],
       },
     ],

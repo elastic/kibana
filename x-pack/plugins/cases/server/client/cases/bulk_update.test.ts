@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CustomFieldTypes } from '../../../common/types/domain';
+import { CustomFieldTypes, CaseStatuses } from '../../../common/types/domain';
 import {
   MAX_CATEGORY_LENGTH,
   MAX_DESCRIPTION_LENGTH,
@@ -19,6 +19,7 @@ import {
 } from '../../../common/constants';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
+import { Operations } from '../../authorization';
 import { bulkUpdate } from './bulk_update';
 
 describe('update', () => {
@@ -1511,6 +1512,59 @@ describe('update', () => {
       );
     });
 
+    it('throws an error if the case is not found', async () => {
+      clientArgsMock.services.caseService.getCases.mockResolvedValue({ saved_objects: [] });
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                status: CaseStatuses.open,
+              },
+            ],
+          },
+          clientArgsMock,
+          casesClientMock
+        )
+      ).rejects.toThrow(
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: These cases mock-id-1 do not exist. Please check you have the correct ids.'
+      );
+    });
+
+    it('throws an error if the case is not found and the SO clients returns an SO object', async () => {
+      clientArgsMock.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [
+          {
+            type: 'cases',
+            id: 'mock-id-1',
+            references: [],
+            error: { error: 'Non found', message: 'Non found', statusCode: 404 },
+          },
+        ],
+      });
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                status: CaseStatuses.open,
+              },
+            ],
+          },
+          clientArgsMock,
+          casesClientMock
+        )
+      ).rejects.toThrow(
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: These cases mock-id-1 do not exist. Please check you have the correct ids.'
+      );
+    });
+
     describe('Validate max user actions per page', () => {
       beforeEach(() => {
         jest.clearAllMocks();
@@ -1625,6 +1679,108 @@ describe('update', () => {
           )
         ).rejects.toThrow(
           `Error: The case with case id ${mockCases[0].id} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+        );
+      });
+    });
+
+    describe('Authorization', () => {
+      const clientArgs = createCasesClientMockArgs();
+
+      beforeEach(() => {
+        jest.clearAllMocks();
+        clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+        clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+          saved_objects: [],
+          total: 0,
+          per_page: 10,
+          page: 1,
+        });
+        clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(
+          new Map()
+        );
+      });
+
+      it('checks authorization for updateCase operation', async () => {
+        clientArgs.services.caseService.patchCases.mockResolvedValue({
+          saved_objects: [{ ...mockCases[0] }],
+        });
+
+        await bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                title: 'Updated title',
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        );
+
+        expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
+          entities: [{ id: mockCases[0].id, owner: mockCases[0].attributes.owner }],
+          operation: [Operations.updateCase],
+        });
+      });
+
+      it('checks authorization for both reopenCase and updateCase operations when reopening a case', async () => {
+        // Mock a closed case
+        const closedCase = {
+          ...mockCases[0],
+          attributes: {
+            ...mockCases[0].attributes,
+            status: CaseStatuses.closed,
+          },
+        };
+
+        clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: [closedCase] });
+
+        clientArgs.services.caseService.patchCases.mockResolvedValue({
+          saved_objects: [{ ...closedCase }],
+        });
+
+        await bulkUpdate(
+          {
+            cases: [
+              {
+                id: closedCase.id,
+                version: closedCase.version ?? '',
+                status: CaseStatuses.open,
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        );
+
+        expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
+          entities: [{ id: closedCase.id, owner: closedCase.attributes.owner }],
+          operation: [Operations.reopenCase, Operations.updateCase],
+        });
+      });
+
+      it('throws when user is not authorized to update case', async () => {
+        const error = new Error('Unauthorized');
+        clientArgs.authorization.ensureAuthorized.mockRejectedValue(error);
+
+        await expect(
+          bulkUpdate(
+            {
+              cases: [
+                {
+                  id: mockCases[0].id,
+                  version: mockCases[0].version ?? '',
+                  title: 'Updated title',
+                },
+              ],
+            },
+            clientArgs,
+            casesClientMock
+          )
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Unauthorized"`
         );
       });
     });

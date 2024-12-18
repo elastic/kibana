@@ -17,7 +17,6 @@ spec:
     spec:
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/security_solution_quality_gate/mki_security_solution_rule_management.yml
-      skip_intermediate_builds: false
       provider_settings:
         build_branches: false
         build_pull_requests: false

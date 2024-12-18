@@ -24,6 +24,8 @@ import { BlobStorageService } from '../../../blob_storage_service';
 import { InternalFileShareService } from '../../../file_share_service';
 import { InternalFileService } from '../../../file_service/internal_file_service';
 
+import { getFips } from 'crypto';
+
 describe('When using the FileHashTransform', () => {
   let file: IFile;
   let fileContent: Readable;
@@ -75,23 +77,25 @@ describe('When using the FileHashTransform', () => {
     expect(() => fileHash.getFileHash()).toThrow('File hash generation not yet complete');
   });
 
-  it.each([
-    ['md5', '098f6bcd4621d373cade4e832627b4f6'],
-    ['sha1', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3'],
-    ['sha256', '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08'],
-    [
-      'sha512',
-      'ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff',
-    ],
-  ] as Array<[SupportedFileHashAlgorithm, string]>)(
-    'should generate file hash using algorithm: %s',
-    async (algorithm, expectedHash) => {
-      const fileHash = createFileHashTransform(algorithm);
-      await file.uploadContent(fileContent, undefined, {
-        transforms: [fileHash],
-      });
+  describe('algorithms', function () {
+    it.each([
+      ...(getFips() !== 1 ? [['md5', '098f6bcd4621d373cade4e832627b4f6']] : []),
+      ['sha1', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3'],
+      ['sha256', '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08'],
+      [
+        'sha512',
+        'ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff',
+      ],
+    ] as Array<[SupportedFileHashAlgorithm, string]>)(
+      'should generate file hash using algorithm: %s',
+      async (algorithm, expectedHash) => {
+        const fileHash = createFileHashTransform(algorithm);
+        await file.uploadContent(fileContent, undefined, {
+          transforms: [fileHash],
+        });
 
-      expect(fileHash.getFileHash()).toEqual({ algorithm, value: expectedHash });
-    }
-  );
+        expect(fileHash.getFileHash()).toEqual({ algorithm, value: expectedHash });
+      }
+    );
+  });
 });

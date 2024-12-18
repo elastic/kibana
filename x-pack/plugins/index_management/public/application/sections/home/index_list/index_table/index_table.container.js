@@ -25,6 +25,7 @@ import {
   sortChanged,
   loadIndices,
   toggleChanged,
+  performExtensionAction,
 } from '../../../../store/actions';
 
 import { IndexTable as PresentationComponent } from './index_table';
@@ -62,6 +63,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     loadIndices: () => {
       dispatch(loadIndices());
+    },
+    performExtensionAction: (requestMethod, successMessage, indexNames) => {
+      dispatch(performExtensionAction({ requestMethod, successMessage, indexNames }));
     },
   };
 };

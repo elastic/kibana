@@ -51,9 +51,16 @@ describe('finishMaintenanceWindowRoute', () => {
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "access": "internal",
-        "tags": Array [
-          "access:write-maintenance-window",
-        ],
+      }
+    `);
+
+    expect(config.security).toMatchInlineSnapshot(`
+      Object {
+        "authz": Object {
+          "requiredPrivileges": Array [
+            "write-maintenance-window",
+          ],
+        },
       }
     `);
 

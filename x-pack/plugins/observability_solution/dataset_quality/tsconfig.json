@@ -29,7 +29,6 @@
     "@kbn/router-utils",
     "@kbn/xstate-utils",
     "@kbn/shared-ux-utility",
-    "@kbn/ui-theme",
     "@kbn/data-service",
     "@kbn/observability-shared-plugin",
     "@kbn/data-plugin",
@@ -60,7 +59,9 @@
     "@kbn/usage-collection-plugin",
     "@kbn/rison",
     "@kbn/task-manager-plugin",
-    "@kbn/core-application-browser"
+    "@kbn/core-application-browser",
+    "@kbn/field-utils",
+    "@kbn/logging"
   ],
   "exclude": [
     "target/**/*"

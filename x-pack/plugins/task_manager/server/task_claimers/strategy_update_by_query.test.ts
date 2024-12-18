@@ -99,14 +99,12 @@ describe('TaskClaiming', () => {
       hits = [generateFakeTasks(1)],
       versionConflicts = 2,
       excludedTaskTypes = [],
-      unusedTaskTypes = [],
     }: {
       storeOpts: Partial<StoreOpts>;
       taskClaimingOpts: Partial<TaskClaimingOpts>;
       hits?: ConcreteTaskInstance[][];
       versionConflicts?: number;
       excludedTaskTypes?: string[];
-      unusedTaskTypes?: string[];
     }) {
       const definitions = storeOpts.definitions ?? taskDefinitions;
       const store = taskStoreMock.create({ taskManagerId: storeOpts.taskManagerId });
@@ -136,7 +134,6 @@ describe('TaskClaiming', () => {
         definitions,
         taskStore: store,
         excludedTaskTypes,
-        unusedTypes: unusedTaskTypes,
         maxAttempts: taskClaimingOpts.maxAttempts ?? 2,
         getAvailableCapacity: taskClaimingOpts.getAvailableCapacity ?? (() => 10),
         taskPartitioner,
@@ -153,7 +150,6 @@ describe('TaskClaiming', () => {
       hits = [generateFakeTasks(1)],
       versionConflicts = 2,
       excludedTaskTypes = [],
-      unusedTaskTypes = [],
     }: {
       storeOpts: Partial<StoreOpts>;
       taskClaimingOpts: Partial<TaskClaimingOpts>;
@@ -161,14 +157,12 @@ describe('TaskClaiming', () => {
       hits?: ConcreteTaskInstance[][];
       versionConflicts?: number;
       excludedTaskTypes?: string[];
-      unusedTaskTypes?: string[];
     }) {
       const getCapacity = taskClaimingOpts.getAvailableCapacity ?? (() => 10);
       const { taskClaiming, store } = initialiseTestClaiming({
         storeOpts,
         taskClaimingOpts,
         excludedTaskTypes,
-        unusedTaskTypes,
         hits,
         versionConflicts,
       });
@@ -471,7 +465,6 @@ if (doc['task.runAt'].size()!=0) {
             'anotherLimitedToOne',
             'limitedToTwo',
           ],
-          unusedTaskTypes: [],
           taskMaxAttempts: {
             unlimited: maxAttempts,
           },
@@ -493,7 +486,6 @@ if (doc['task.runAt'].size()!=0) {
             'anotherLimitedToOne',
             'limitedToTwo',
           ],
-          unusedTaskTypes: [],
           taskMaxAttempts: {
             limitedToOne: maxAttempts,
           },
@@ -640,7 +632,6 @@ if (doc['task.runAt'].size()!=0) {
         },
         taskPartitioner,
         excludedTaskTypes: [],
-        unusedTypes: [],
       });
 
       const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
@@ -846,129 +837,6 @@ if (doc['task.runAt'].size()!=0) {
       );
 
       expect(firstCycle).not.toMatchObject(secondCycle);
-    });
-
-    test('it passes any unusedTaskTypes to script', async () => {
-      const maxAttempts = _.random(2, 43);
-      const customMaxAttempts = _.random(44, 100);
-      const taskManagerId = uuidv1();
-      const fieldUpdates = {
-        ownerId: taskManagerId,
-        retryAt: new Date(Date.now()),
-      };
-      const definitions = new TaskTypeDictionary(mockLogger());
-      definitions.registerTaskDefinitions({
-        foo: {
-          title: 'foo',
-          createTaskRunner: jest.fn(),
-        },
-        bar: {
-          title: 'bar',
-          maxAttempts: customMaxAttempts,
-          createTaskRunner: jest.fn(),
-        },
-        foobar: {
-          title: 'foobar',
-          maxAttempts: customMaxAttempts,
-          createTaskRunner: jest.fn(),
-        },
-      });
-
-      const {
-        args: {
-          updateByQuery: [{ query, script }],
-        },
-      } = await testClaimAvailableTasks({
-        storeOpts: {
-          definitions,
-          taskManagerId,
-        },
-        taskClaimingOpts: {
-          maxAttempts,
-        },
-        claimingOpts: {
-          claimOwnershipUntil: new Date(),
-        },
-        excludedTaskTypes: ['foobar'],
-        unusedTaskTypes: ['barfoo'],
-      });
-      expect(query).toMatchObject({
-        bool: {
-          must: [
-            {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      'task.enabled': true,
-                    },
-                  },
-                ],
-              },
-            },
-            {
-              bool: {
-                should: [
-                  {
-                    bool: {
-                      must: [
-                        { term: { 'task.status': 'idle' } },
-                        { range: { 'task.runAt': { lte: 'now' } } },
-                      ],
-                    },
-                  },
-                  {
-                    bool: {
-                      must: [
-                        {
-                          bool: {
-                            should: [
-                              { term: { 'task.status': 'running' } },
-                              { term: { 'task.status': 'claiming' } },
-                            ],
-                          },
-                        },
-                        { range: { 'task.retryAt': { lte: 'now' } } },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-          filter: [
-            {
-              bool: {
-                must_not: [
-                  {
-                    bool: {
-                      should: [
-                        { term: { 'task.status': 'running' } },
-                        { term: { 'task.status': 'claiming' } },
-                      ],
-                      must: { range: { 'task.retryAt': { gt: 'now' } } },
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      });
-      expect(script).toMatchObject({
-        source: expect.any(String),
-        lang: 'painless',
-        params: {
-          fieldUpdates,
-          claimableTaskTypes: ['foo', 'bar'],
-          skippedTaskTypes: ['foobar'],
-          unusedTaskTypes: ['barfoo'],
-          taskMaxAttempts: {
-            bar: customMaxAttempts,
-            foo: maxAttempts,
-          },
-        },
-      });
     });
 
     test('it claims tasks by setting their ownerId, status and retryAt', async () => {
@@ -1356,7 +1224,6 @@ if (doc['task.runAt'].size()!=0) {
         strategy: 'update_by_query',
         definitions,
         excludedTaskTypes: [],
-        unusedTypes: [],
         taskStore,
         maxAttempts: 2,
         getAvailableCapacity,

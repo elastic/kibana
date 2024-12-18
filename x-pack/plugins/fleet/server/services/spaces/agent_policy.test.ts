@@ -7,6 +7,7 @@
 
 import { createAppContextStartContractMock } from '../../mocks';
 import { agentPolicyService } from '../agent_policy';
+import { getAgentsByKuery } from '../agents';
 import { appContextService } from '../app_context';
 import { packagePolicyService } from '../package_policy';
 
@@ -16,6 +17,7 @@ import { isSpaceAwarenessEnabled } from './helpers';
 jest.mock('./helpers');
 jest.mock('../agent_policy');
 jest.mock('../package_policy');
+jest.mock('../agents');
 
 describe('updateAgentPolicySpaces', () => {
   beforeEach(() => {
@@ -39,6 +41,26 @@ describe('updateAgentPolicySpaces', () => {
     jest
       .mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension())
       .updateObjectsSpaces.mockResolvedValue({ objects: [] });
+
+    jest
+      .mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension())
+      .find.mockResolvedValue({
+        total: 1,
+        page: 1,
+        per_page: 100,
+        saved_objects: [
+          {
+            id: 'token1',
+            attributes: {
+              namespaces: ['default'],
+            },
+          } as any,
+        ],
+      });
+
+    jest.mocked(getAgentsByKuery).mockResolvedValue({
+      agents: [],
+    } as any);
   });
 
   it('does nothings if agent policy already in correct space', async () => {
@@ -87,6 +109,18 @@ describe('updateAgentPolicySpaces', () => {
       ['default'],
       { namespace: 'default', refresh: 'wait_for' }
     );
+
+    expect(
+      jest.mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension()).bulkUpdate
+    ).toBeCalledWith([
+      {
+        id: 'token1',
+        type: 'fleet-uninstall-tokens',
+        attributes: {
+          namespaces: ['test'],
+        },
+      },
+    ]);
   });
 
   it('throw when trying to change space to a policy with reusable package policies', async () => {

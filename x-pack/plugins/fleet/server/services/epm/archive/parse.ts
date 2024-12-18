@@ -40,7 +40,7 @@ import {
 import { PackageInvalidArchiveError } from '../../../errors';
 import { pkgToPkgKey } from '../registry';
 
-import { unpackBufferEntries } from '.';
+import { traverseArchiveEntries } from '.';
 
 const readFileAsync = promisify(readFile);
 export const MANIFEST_NAME = 'manifest.yml';
@@ -59,7 +59,7 @@ const DEFAULT_INGEST_PIPELINE_VALUE = 'default';
 const DEFAULT_INGEST_PIPELINE_FILE_NAME_YML = 'default.yml';
 const DEFAULT_INGEST_PIPELINE_FILE_NAME_JSON = 'default.json';
 
-// Borrowed from https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/utils/expand_dotted.ts
+// Borrowed from https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/common/utils/expand_dotted.ts
 // with some alterations around non-object values. The package registry service expands some dotted fields from manifest files,
 // so we need to do the same here.
 const expandDottedField = (dottedFieldName: string, val: unknown): object => {
@@ -160,9 +160,8 @@ export async function generatePackageInfoFromArchiveBuffer(
   contentType: string
 ): Promise<{ paths: string[]; packageInfo: ArchivePackage }> {
   const assetsMap: AssetsBufferMap = {};
-  const entries = await unpackBufferEntries(archiveBuffer, contentType);
   const paths: string[] = [];
-  entries.forEach(({ path: bufferPath, buffer }) => {
+  await traverseArchiveEntries(archiveBuffer, contentType, async ({ path: bufferPath, buffer }) => {
     paths.push(bufferPath);
     if (buffer && filterAssetPathForParseAndVerifyArchive(bufferPath)) {
       assetsMap[bufferPath] = buffer;

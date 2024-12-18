@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { act } from 'react-dom/test-utils';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -504,7 +504,7 @@ describe('DatatableComponent', () => {
       data.rows = new Array(rowNumbers).fill({
         a: 'shoes',
         b: 1588024800000,
-        c: faker.random.number(),
+        c: faker.number.int(),
       });
 
       args.pageSize = pageSize;
@@ -537,7 +537,7 @@ describe('DatatableComponent', () => {
       data.rows = new Array(rowNumbers).fill({
         a: 'shoes',
         b: 1588024800000,
-        c: faker.random.number(),
+        c: faker.number.int(),
       });
 
       args.pageSize = pageSize;
@@ -558,7 +558,7 @@ describe('DatatableComponent', () => {
       data.rows = new Array(20).fill({
         a: 'shoes',
         b: 1588024800000,
-        c: faker.random.number(),
+        c: faker.number.int(),
       });
       renderDatatableComponent({
         args,
@@ -584,7 +584,7 @@ describe('DatatableComponent', () => {
       data.rows = new Array(rowNumbers).fill({
         a: 'shoes',
         b: 1588024800000,
-        c: faker.random.number(),
+        c: faker.number.int(),
       });
 
       args.pageSize = pageSize;
@@ -624,7 +624,7 @@ describe('DatatableComponent', () => {
       data.rows = new Array(rowNumbers).fill({
         a: 'shoes',
         b: 1588024800000,
-        c: faker.random.number(),
+        c: faker.number.int(),
       });
 
       args.pageSize = pageSize;

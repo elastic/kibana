@@ -87,11 +87,28 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
-        <EuiFlexItem>
-          <ConnectionDetails connectorId={connectorId} serviceType={serviceType} status={status} />
-        </EuiFlexItem>
+        {Boolean(serviceType) ? (
+          <EuiFlexItem>
+            <ConnectionDetails
+              connectorId={connectorId}
+              serviceType={serviceType}
+              status={status}
+            />
+          </EuiFlexItem>
+        ) : (
+          <EuiFlexItem>
+            <EuiCallOut
+              title={i18n.translate('xpack.serverlessSearch.connectors.pleaseSelectServiceType', {
+                defaultMessage: 'Please select a connector type.',
+              })}
+              color="warning"
+              iconType="iInCircle"
+            />
+          </EuiFlexItem>
+        )}
         <EuiSpacer />
-        {status === ConnectorStatus.CREATED ? (
+        {Boolean(serviceType) &&
+        (status === ConnectorStatus.CREATED || status === ConnectorStatus.NEEDS_CONFIGURATION) ? (
           <EuiFlexItem>
             <EuiCallOut
               title={i18n.translate('xpack.serverlessSearch.connectors.waitingForConnection', {

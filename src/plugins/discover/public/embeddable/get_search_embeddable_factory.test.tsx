@@ -18,7 +18,7 @@ import { BuildReactEmbeddableApiRegistration } from '@kbn/embeddable-plugin/publ
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { PhaseEvent, PublishesUnifiedSearch, StateComparators } from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { act, render } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { createDataViewDataSource } from '../../common/data_sources';
@@ -143,8 +143,10 @@ describe('saved search embeddable', () => {
       expect(api.dataLoading.getValue()).toBe(false);
 
       expect(discoverComponent.queryByTestId('embeddedSavedSearchDocTable')).toBeInTheDocument();
-      expect(discoverComponent.getByTestId('embeddedSavedSearchDocTable').textContent).toEqual(
-        'No results found'
+      await waitFor(() =>
+        expect(discoverComponent.getByTestId('embeddedSavedSearchDocTable').textContent).toEqual(
+          'No results found'
+        )
       );
     });
 
@@ -238,7 +240,7 @@ describe('saved search embeddable', () => {
       await waitOneTick(); // wait for build to complete
 
       expect(resolveRootProfileSpy).toHaveBeenCalledWith({ solutionNavId: 'test' });
-      resolveRootProfileSpy.mockReset();
+      resolveRootProfileSpy.mockClear();
       expect(resolveRootProfileSpy).not.toHaveBeenCalled();
     });
 

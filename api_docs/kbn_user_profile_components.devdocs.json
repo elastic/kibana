@@ -872,6 +872,14 @@
                 "section": "def-public.ThemeServiceSetup",
                 "text": "ThemeServiceSetup"
               },
+              "; userProfile: ",
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.UserProfileService",
+                "text": "UserProfileService"
+              },
               "; i18n: ",
               {
                 "pluginId": "@kbn/core-i18n-browser",
@@ -976,12 +984,20 @@
                   ", \"reportEvent\"> | undefined; theme: ",
                   {
                     "pluginId": "@kbn/react-kibana-context-common",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnReactKibanaContextCommonPluginApi",
-                    "section": "def-public.ThemeServiceStart",
+                    "section": "def-common.ThemeServiceStart",
                     "text": "ThemeServiceStart"
                   },
-                  "; }"
+                  "; userProfile?: Pick<",
+                  {
+                    "pluginId": "@kbn/core-user-profile-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                    "section": "def-public.UserProfileService",
+                    "text": "UserProfileService"
+                  },
+                  ", \"getUserProfile$\"> | undefined; }"
                 ],
                 "path": "packages/react/kibana_mount/to_mount_point.tsx",
                 "deprecated": false,
@@ -1081,7 +1097,7 @@
           },
           "<Option> extends Pick<",
           "EuiSelectableProps",
-          "<{}>, \"singleSelection\" | \"data-test-subj\" | \"height\" | \"errorMessage\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
+          "<{}>, \"data-test-subj\" | \"height\" | \"errorMessage\" | \"singleSelection\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
         ],
         "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
         "deprecated": false,
@@ -1393,7 +1409,7 @@
               "EuiSelectableLIOption",
               "<{}>> & ",
               "CommonProps",
-              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"mixed\" | \"on\" | \"off\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
               "EuiTextTruncateProps",
               ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
               "EuiToolTipProps",

@@ -20,7 +20,7 @@ export function ForceRefreshCheckbox({ applyForceRefresh, setApplyForceRefresh }
   };
 
   return (
-    <EuiFormRow display="columnCompressedSwitch">
+    <EuiFormRow display="columnCompressed">
       <EuiToolTip
         position="top"
         content={i18n.translate('xpack.maps.filterEditor.applyForceRefreshTooltip', {

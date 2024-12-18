@@ -33,6 +33,11 @@ const mockAsyncStatusResponse = (isComplete = false) => ({
       failed: 0,
     },
   },
+  headers: {
+    'x-elasticsearch-async-id':
+      'FlVYVkw0clJIUS1TMHpHdXA3a29pZUEedldKX1c1bnBRVXFmalZ4emV1cjFCUToxNjYzMDgx',
+    'x-elasticsearch-async-is-running': isComplete ? '?0' : '?1',
+  },
 });
 
 const mockAsyncResponse = {
@@ -46,6 +51,10 @@ const mockAsyncResponse = {
         successful: 7,
       },
     },
+  },
+  headers: {
+    'x-elasticsearch-async-id': 'foo',
+    'x-elasticsearch-async-is-running': '?0',
   },
 };
 
@@ -335,6 +344,10 @@ describe('ES search strategy', () => {
             ...mockAsyncResponse.body,
             is_running: true,
           },
+          headers: {
+            ...mockAsyncResponse.headers,
+            'x-elasticsearch-async-is-running': '?1',
+          },
         });
 
         const params = { index: 'logstash-*', body: { query: {} } };
@@ -366,6 +379,10 @@ describe('ES search strategy', () => {
           body: {
             ...mockAsyncResponse.body,
             is_running: true,
+          },
+          headers: {
+            ...mockAsyncResponse.headers,
+            'x-elasticsearch-async-is-running': '?1',
           },
         });
 
@@ -517,6 +534,10 @@ describe('ES search strategy', () => {
           body: {
             ...mockAsyncResponse.body,
             is_running: true,
+          },
+          headers: {
+            ...mockAsyncResponse.headers,
+            'x-elasticsearch-async-is-running': '?1',
           },
         });
 

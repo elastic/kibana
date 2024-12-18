@@ -92,6 +92,12 @@ export default function ({ getService }: FtrProviderContext) {
       let scheduledTaskRuns = 0;
       let scheduledTaskInstanceRunAt = scheduledTask.runAt;
 
+      await request
+        .post('/api/sample_tasks/run_mark_removed_tasks_as_unrecognized')
+        .set('kbn-xsrf', 'xxx')
+        .send({})
+        .expect(200);
+
       await retry.try(async () => {
         const tasks = (await currentTasks()).docs;
         expect(tasks.length).to.eql(3);

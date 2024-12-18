@@ -12,7 +12,7 @@ export const initLogViewRoutes = (libs: LogsSharedBackendLibs) => {
   initGetLogViewRoute(libs);
 
   // Register the log view update endpoint only when the Saved object is correctly registered
-  if (libs.config.savedObjects.logView.enabled) {
+  if (!libs.isServerless) {
     initPutLogViewRoute(libs);
   }
 };

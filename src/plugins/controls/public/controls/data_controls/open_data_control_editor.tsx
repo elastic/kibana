@@ -91,12 +91,12 @@ export const openDataControlEditor = <
           onSave({ type: selectedControlType, state });
         }}
       />,
-      {
-        theme: coreServices.theme,
-        i18n: coreServices.i18n,
-      }
+      coreServices
     ),
     {
+      size: 'm',
+      maxWidth: 500,
+      paddingSize: 'm',
       onClose: () => closeOverlay(overlay),
     }
   );

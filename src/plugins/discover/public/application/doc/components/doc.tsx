@@ -9,7 +9,6 @@
 
 import React, { useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { firstValueFrom } from 'rxjs';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPage, EuiPageBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
@@ -31,18 +30,16 @@ export interface DocProps extends EsDocSearchProps {
 export function Doc(props: DocProps) {
   const { dataView } = props;
   const services = useDiscoverServices();
-  const { locator, chrome, docLinks, core, profilesManager } = services;
+  const { locator, chrome, docLinks, profilesManager } = services;
   const indexExistsLink = docLinks.links.apis.indexExists;
 
   const onBeforeFetch = useCallback(async () => {
-    const solutionNavId = await firstValueFrom(core.chrome.getActiveSolutionNavId$());
-    await profilesManager.resolveRootProfile({ solutionNavId });
     await profilesManager.resolveDataSourceProfile({
       dataSource: dataView?.id ? createDataViewDataSource({ dataViewId: dataView.id }) : undefined,
       dataView,
       query: { query: '', language: 'kuery' },
     });
-  }, [profilesManager, core, dataView]);
+  }, [profilesManager, dataView]);
 
   const onProcessRecord = useCallback(
     (record: DataTableRecord) => {

@@ -101,11 +101,7 @@ export class InputControlVis extends Component<InputControlVisProps> {
       }
 
       return (
-        <EuiFlexItem
-          key={control.id}
-          style={{ minWidth: '250px' }}
-          data-test-subj="inputControlItem"
-        >
+        <EuiFlexItem key={control.id} css={{ minWidth: '250px' }} data-test-subj="inputControlItem">
           {controlComponent}
         </EuiFlexItem>
       );

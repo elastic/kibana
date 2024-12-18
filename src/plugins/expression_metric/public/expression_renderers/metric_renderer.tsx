@@ -9,9 +9,8 @@
 
 import React, { CSSProperties } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
 
-import { CoreSetup, CoreTheme } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
@@ -19,7 +18,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
-import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { MetricRendererConfig } from '../../common/types';
 
 const strings = {
@@ -34,8 +32,7 @@ const strings = {
 };
 
 export const getMetricRenderer =
-  (theme$: Observable<CoreTheme> = defaultTheme$) =>
-  (): ExpressionRenderDefinition<MetricRendererConfig> => ({
+  (core: CoreStart) => (): ExpressionRenderDefinition<MetricRendererConfig> => ({
     name: 'metric',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
@@ -53,7 +50,7 @@ export const getMetricRenderer =
       render(
         <KibanaErrorBoundaryProvider analytics={undefined}>
           <KibanaErrorBoundary>
-            <KibanaThemeProvider theme={{ theme$ }}>
+            <KibanaThemeProvider {...core}>
               <MetricComponent
                 label={config.label}
                 labelFont={config.labelFont ? (config.labelFont.spec as CSSProperties) : {}}
@@ -70,4 +67,4 @@ export const getMetricRenderer =
     },
   });
 
-export const metricRendererFactory = (core: CoreSetup) => getMetricRenderer(core.theme.theme$);
+export const metricRendererFactory = (core: CoreStart) => getMetricRenderer(core);

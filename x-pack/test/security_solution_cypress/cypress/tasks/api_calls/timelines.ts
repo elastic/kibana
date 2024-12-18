@@ -6,7 +6,6 @@
  */
 
 import type {
-  DeleteTimelinesResponse,
   GetTimelinesResponse,
   PatchTimelineResponse,
 } from '@kbn/security-solution-plugin/common/api/timeline';
@@ -168,7 +167,7 @@ export const getAllTimelines = () =>
 export const deleteTimelines = () => {
   getAllTimelines().then(($timelines) => {
     const savedObjectIds = $timelines.body.timeline.map((timeline) => timeline.savedObjectId);
-    rootRequest<DeleteTimelinesResponse>({
+    rootRequest({
       method: 'DELETE',
       url: 'api/timeline',
       body: {

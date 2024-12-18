@@ -15,21 +15,22 @@ import {
   EuiPanel,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { elasticAiAssistantImage } from '@kbn/observability-ai-assistant-plugin/public';
 import { UPGRADE_LICENSE_TITLE } from '../i18n';
 import { useLicenseManagementLocator } from '../hooks/use_license_management_locator';
 
-const incorrectLicenseContainer = css`
-  height: 100%;
-  padding: ${euiThemeVars.euiPanelPaddingModifiers.paddingMedium};
-`;
-
 export function IncorrectLicensePanel() {
   const handleNavigateToLicenseManagement = useLicenseManagementLocator();
+  const { euiTheme } = useEuiTheme();
+
+  const incorrectLicenseContainer = css`
+    height: 100%;
+    padding: ${euiTheme.size.base};
+  `;
 
   return (
     <EuiPanel hasBorder hasShadow={false}>

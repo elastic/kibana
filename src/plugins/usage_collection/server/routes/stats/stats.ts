@@ -54,6 +54,12 @@ export function registerStatsRoute({
   router.get(
     {
       path: '/api/stats',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         authRequired: !config.allowAnonymous,
         // The `api` tag ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page.

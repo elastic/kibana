@@ -11,7 +11,7 @@ import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
-import { Relationships, RelationshipsProps } from './relationships';
+import { RelationshipsClass as Relationships, RelationshipsProps } from './relationships';
 
 jest.mock('../../../lib/fetch_export_by_type_and_search', () => ({
   fetchExportByTypeAndSearch: jest.fn(),
@@ -20,6 +20,14 @@ jest.mock('../../../lib/fetch_export_by_type_and_search', () => ({
 jest.mock('../../../lib/fetch_export_objects', () => ({
   fetchExportObjects: jest.fn(),
 }));
+
+const baseProps = {
+  euiTablePersist: {
+    pageSize: 10,
+    onTableChange: () => {},
+    sorting: { sort: { direction: 'asc' as const, field: 'id' as const } },
+  },
+};
 
 const allowedTypes: SavedObjectManagementTypeInfo[] = [
   {
@@ -86,7 +94,7 @@ describe('Relationships', () => {
       close: jest.fn(),
     };
 
-    const component = shallowWithI18nProvider(<Relationships {...props} />);
+    const component = shallowWithI18nProvider(<Relationships {...baseProps} {...props} />);
 
     // Make sure we are showing loading
     expect(component.find('EuiLoadingElastic').length).toBe(1);
@@ -155,7 +163,7 @@ describe('Relationships', () => {
       close: jest.fn(),
     };
 
-    const component = shallowWithI18nProvider(<Relationships {...props} />);
+    const component = shallowWithI18nProvider(<Relationships {...baseProps} {...props} />);
 
     // Make sure we are showing loading
     expect(component.find('EuiLoadingElastic').length).toBe(1);
@@ -223,7 +231,7 @@ describe('Relationships', () => {
       close: jest.fn(),
     };
 
-    const component = shallowWithI18nProvider(<Relationships {...props} />);
+    const component = shallowWithI18nProvider(<Relationships {...baseProps} {...props} />);
 
     // Make sure we are showing loading
     expect(component.find('EuiLoadingElastic').length).toBe(1);
@@ -292,7 +300,7 @@ describe('Relationships', () => {
       showPlainSpinner: true,
     };
 
-    const component = shallowWithI18nProvider(<Relationships {...props} />);
+    const component = shallowWithI18nProvider(<Relationships {...baseProps} {...props} />);
 
     // Make sure we are showing loading
     expect(component.find('EuiLoadingSpinner').length).toBe(1);
@@ -332,7 +340,7 @@ describe('Relationships', () => {
       close: jest.fn(),
     };
 
-    const component = shallowWithI18nProvider(<Relationships {...props} />);
+    const component = shallowWithI18nProvider(<Relationships {...baseProps} {...props} />);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -378,7 +386,7 @@ describe('Relationships', () => {
       close: jest.fn(),
     };
 
-    const component = shallowWithI18nProvider(<Relationships {...props} />);
+    const component = shallowWithI18nProvider(<Relationships {...baseProps} {...props} />);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));

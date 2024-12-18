@@ -30,7 +30,7 @@ export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
   setAgentDataConfirmed,
   troubleshootLink,
 }) => {
-  const { incomingData, isLoading } = usePollingIncomingData(agentIds);
+  const { incomingData, isLoading } = usePollingIncomingData({ agentIds });
   const isGuidedOnboardingActive = useIsGuidedOnboardingActive(installedPolicy?.name);
   const { guidedOnboarding } = useStartServices();
 

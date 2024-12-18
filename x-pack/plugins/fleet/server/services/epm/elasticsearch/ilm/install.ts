@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import pMap from 'p-map';
 
 import type { EsAssetReference } from '../../../../types';
 
@@ -16,6 +17,7 @@ import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 import { PackageInvalidArchiveError } from '../../../../errors';
 import type { PackageInstallContext } from '../../../../../common/types';
+import { MAX_CONCURRENT_ILM_POLICIES_OPERATIONS } from '../../../../constants';
 
 export async function installILMPolicy(
   packageInstallContext: PackageInstallContext,
@@ -48,8 +50,9 @@ export async function installILMPolicy(
     })),
   });
 
-  await Promise.all(
-    ilmPolicies.map(async (policy) => {
+  await pMap(
+    ilmPolicies,
+    async (policy) => {
       try {
         await retryTransientEsErrors(
           () =>
@@ -63,7 +66,10 @@ export async function installILMPolicy(
       } catch (err) {
         throw new PackageInvalidArchiveError(`Couldn't install ilm policies: ${err.message}`);
       }
-    })
+    },
+    {
+      concurrency: MAX_CONCURRENT_ILM_POLICIES_OPERATIONS,
+    }
   );
 
   return esReferences;

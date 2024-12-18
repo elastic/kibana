@@ -22,6 +22,7 @@ import {
   getSearch,
   getSpaces,
   getTheme,
+  getUserProfile,
 } from '../services';
 import {
   deserializeReferences,
@@ -112,6 +113,9 @@ export const deserializeSavedObjectState = async ({
   enhancements,
   uiState,
   timeRange,
+  title: embeddableTitle,
+  description: embeddableDescription,
+  hidePanelTitles,
 }: VisualizeSavedObjectInputState) => {
   // Load a saved visualization from the library
   const {
@@ -134,9 +138,12 @@ export const deserializeSavedObjectState = async ({
       overlays: getOverlays(),
       analytics: getAnalytics(),
       theme: getTheme(),
+      userProfile: getUserProfile(),
     },
     savedObjectId
   );
+  const panelTitle = embeddableTitle ?? title;
+  const panelDescription = embeddableDescription ?? description;
   return {
     savedVis: {
       title,
@@ -149,8 +156,9 @@ export const deserializeSavedObjectState = async ({
         savedSearchId,
       },
     },
-    title,
-    description,
+    title: panelTitle,
+    description: panelDescription,
+    hidePanelTitles,
     savedObjectId,
     savedObjectProperties,
     linkedToLibrary: true,
@@ -188,6 +196,7 @@ export const serializeState: (props: {
   if (linkedToLibrary) {
     return {
       rawState: {
+        ...titlesWithDefaults,
         savedObjectId: id,
         ...(enhancements ? { enhancements } : {}),
         ...(!isEmpty(serializedVis.uiState) ? { uiState: serializedVis.uiState } : {}),

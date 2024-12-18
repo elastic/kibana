@@ -43,6 +43,7 @@ import {
   ContentInsightsProvider,
   useContentInsightsServices,
 } from '@kbn/content-management-content-insights-public';
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
 import {
   Table,
@@ -375,6 +376,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     DateFormatterComp,
     getTagList,
     isFavoritesEnabled,
+    isKibanaVersioningEnabled,
   } = useServices();
 
   const openContentEditor = useOpenContentEditor();
@@ -443,7 +445,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     hasUpdatedAtMetadata,
     hasCreatedByMetadata,
     hasRecentlyAccessedMetadata,
-    pagination,
+    pagination: _pagination,
     tableSort,
     tableFilter,
   } = state;
@@ -577,7 +579,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         appendRows: contentInsightsServices && (
           // have to "REWRAP" in the provider here because it will be rendered in a different context
           <ContentInsightsProvider {...contentInsightsServices}>
-            <ContentEditorActivityRow item={item} />
+            <ContentEditorActivityRow item={item} entityNamePlural={entityNamePlural} />
           </ContentInsightsProvider>
         ),
       });
@@ -590,6 +592,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       tableItemsRowActions,
       fetchItems,
       contentInsightsServices,
+      entityNamePlural,
     ]
   );
 
@@ -645,7 +648,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           ) : record.managed ? (
             <ManagedAvatarTip entityName={entityName} />
           ) : (
-            <NoCreatorTip iconType={'minus'} />
+            <NoCreatorTip iconType={'minus'} includeVersionTip={isKibanaVersioningEnabled} />
           ),
         sortable:
           false /* createdBy column is not sortable because it doesn't make sense to sort by id*/,
@@ -752,6 +755,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     inspectItem,
     entityName,
     isFavoritesEnabled,
+    isKibanaVersioningEnabled,
   ]);
 
   const itemsById = useMemo(() => {
@@ -903,7 +907,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     [updateTableSortFilterAndPagination]
   );
 
-  const onTableChange = useCallback(
+  const customOnTableChange = useCallback(
     (criteria: CriteriaWithPagination<T>) => {
       const data: {
         sort?: State<T>['tableSort'];
@@ -1037,6 +1041,20 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       </React.Fragment>
     );
   }, [entityName, fetchError]);
+
+  const { pageSize, onTableChange } = useEuiTablePersist({
+    tableId: listingId,
+    initialPageSize,
+    customOnTableChange,
+    pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort(),
+  });
+
+  const pagination = useMemo<Pagination>(() => {
+    return {
+      ..._pagination,
+      pageSize,
+    };
+  }, [_pagination, pageSize]);
 
   // ------------
   // Effects

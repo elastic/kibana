@@ -30,7 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should disable the share button if no request is made', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       expect(await lens.isShareable()).to.eql(false);
     });

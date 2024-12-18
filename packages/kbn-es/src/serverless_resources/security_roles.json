@@ -35,7 +35,7 @@
           "siem": ["read", "read_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
-          "securitySolutionCases": ["read"],
+          "securitySolutionCasesV2": ["read"],
           "actions": ["read"],
           "builtInAlerts": ["read"]
         },
@@ -82,7 +82,7 @@
           "siem": ["read", "read_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
-          "securitySolutionCases": ["read"],
+          "securitySolutionCasesV2": ["read"],
           "actions": ["read"],
           "builtInAlerts": ["read"]
         },
@@ -150,7 +150,7 @@
             "actions_log_management_all",
             "file_operations_all"
           ],
-          "securitySolutionCases": ["all"],
+          "securitySolutionCasesV2": ["all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "actions": ["read"],
@@ -210,7 +210,7 @@
           "siem": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
-          "securitySolutionCases": ["all"],
+          "securitySolutionCasesV2": ["all"],
           "actions": ["read"],
           "builtInAlerts": ["all"]
         },
@@ -263,7 +263,7 @@
           "siem": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
-          "securitySolutionCases": ["all"],
+          "securitySolutionCasesV2": ["all"],
           "actions": ["all"],
           "builtInAlerts": ["all"]
         },
@@ -311,7 +311,7 @@
           "siem": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
-          "securitySolutionCases": ["all"],
+          "securitySolutionCasesV2": ["all"],
           "actions": ["read"],
           "builtInAlerts": ["all"],
           "dev_tools": ["all"]
@@ -366,7 +366,7 @@
           "siem": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
-          "securitySolutionCases": ["all"],
+          "securitySolutionCasesV2": ["all"],
           "actions": ["all"],
           "builtInAlerts": ["all"]
         },

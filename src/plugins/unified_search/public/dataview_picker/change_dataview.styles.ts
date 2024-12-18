@@ -12,15 +12,18 @@ import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count'
 import { DataViewListItemEnhanced } from './dataview_list';
 
 const MIN_WIDTH = 300;
+const MAX_MOBILE_WIDTH = 350;
 
 export const changeDataViewStyles = ({
   fullWidth,
   dataViewsList,
   theme,
+  isMobile,
 }: {
   fullWidth?: boolean;
   dataViewsList: DataViewListItemEnhanced[];
   theme: EuiThemeComputed;
+  isMobile: boolean;
 }) => {
   return {
     trigger: {
@@ -30,7 +33,10 @@ export const changeDataViewStyles = ({
       borderBottomLeftRadius: 0,
     },
     popoverContent: {
-      width: calculateWidthFromEntries(dataViewsList, ['name', 'id'], { minWidth: MIN_WIDTH }),
+      width: calculateWidthFromEntries(dataViewsList, ['name', 'id'], {
+        minWidth: MIN_WIDTH,
+        ...(isMobile && { maxWidth: MAX_MOBILE_WIDTH }),
+      }),
     },
   };
 };

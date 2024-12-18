@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Pagination } from './types';
 
 export const PLUGIN_ID = 'searchPlayground';
-export const PLUGIN_NAME = 'Playground';
+export const PLUGIN_NAME = i18n.translate('xpack.searchPlayground.plugin.name', {
+  defaultMessage: 'Playground',
+});
 export const PLUGIN_PATH = '/app/search_playground';
 
 export const SEARCH_MODE_FEATURE_FLAG_ID = 'searchPlayground:searchModeEnabled';

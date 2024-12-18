@@ -10,7 +10,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 import { appContextService } from '../app_context';
 
-import { saveSpaceSettings } from './space_settings';
+import { getSpaceSettings, saveSpaceSettings } from './space_settings';
 
 jest.mock('../app_context');
 
@@ -99,6 +99,38 @@ describe('saveSpaceSettings', () => {
           },
         })
       ).rejects.toThrowError(/Settings are managed by: kibana_config and should be edited there/);
+    });
+  });
+});
+
+describe('getSpaceSettings', () => {
+  function createSavedsClientMock(settingsAttributes?: any) {
+    const client = savedObjectsClientMock.create();
+
+    if (settingsAttributes) {
+      client.get.mockResolvedValue({
+        attributes: settingsAttributes,
+      } as any);
+    } else {
+      client.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('Not found')
+      );
+    }
+
+    jest.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReturnValue(client);
+
+    return client;
+  }
+  it('should work with managedBy:null', async () => {
+    createSavedsClientMock({
+      allowed_namespace_prefixes: ['test'],
+      managed_by: null,
+    });
+    const res = await getSpaceSettings();
+
+    expect(res).toEqual({
+      allowed_namespace_prefixes: ['test'],
+      managed_by: undefined,
     });
   });
 });

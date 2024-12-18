@@ -5,5 +5,7 @@
     "@elastic/kibana-data-discovery",
     "@elastic/kibana-presentation",
     "@elastic/kibana-visualizations"
-  ]
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

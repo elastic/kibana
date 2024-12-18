@@ -159,8 +159,9 @@ export const reindexServiceFactory = (
   // ------ Functions used to process the state machine
 
   /**
-   * Sets the original index as readonly so new data can be indexed until the reindex
-   * is completed.
+   * Sets a write-block on the original index. New data cannot be indexed until
+   * the reindex is completed; there will be downtime for indexing until the
+   * reindex is completed.
    * @param reindexOp
    */
   const setReadonly = async (reindexOp: ReindexSavedObject) => {
@@ -307,14 +308,18 @@ export const reindexServiceFactory = (
       });
     }
 
-    // Delete the task from ES .tasks index
-    const deleteTaskResp = await esClient.delete({
-      index: '.tasks',
-      id: taskId,
-    });
-
-    if (deleteTaskResp.result !== 'deleted') {
-      throw error.reindexTaskCannotBeDeleted(`Could not delete reindexing task ${taskId}`);
+    try {
+      // Best effort, delete the task from ES .tasks index...
+      await esClient.delete({
+        index: '.tasks',
+        id: taskId,
+      });
+    } catch (e) {
+      // We explicitly ignore authz related error codes bc we expect this to be
+      // very common when deleting from .tasks
+      if (e?.statusCode !== 401 && e?.statusCode !== 403) {
+        log.warn(e);
+      }
     }
 
     return reindexOp;
@@ -330,6 +335,9 @@ export const reindexServiceFactory = (
 
   /**
    * Creates an alias that points the old index to the new index, deletes the old index.
+   * If old index was closed, the new index will also be closed.
+   *
+   * @note indexing/writing to the new index is effectively enabled after this action!
    * @param reindexOp
    */
   const switchAlias = async (reindexOp: ReindexSavedObject) => {
@@ -392,24 +400,21 @@ export const reindexServiceFactory = (
         names.push(sourceName);
       }
 
-      // Otherwise, query for required privileges for this index.
-      const body = {
-        cluster: ['manage'],
-        index: [
-          {
-            names,
-            allow_restricted_indices: true,
-            privileges: ['all'],
-          },
-          {
-            names: ['.tasks'],
-            privileges: ['read', 'delete'],
-          },
-        ],
-      } as any;
-
       const resp = await esClient.security.hasPrivileges({
-        body,
+        body: {
+          cluster: ['manage'],
+          index: [
+            {
+              names,
+              allow_restricted_indices: true,
+              privileges: ['all'],
+            },
+            {
+              names: ['.tasks'],
+              privileges: ['read'],
+            },
+          ],
+        },
       });
 
       return resp.has_all_requested;

@@ -109,176 +109,6 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/reporting-export-types-csv-common",
-        "id": "def-common.JobParamsDownloadCSV",
-        "type": "Interface",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "JobParamsDownloadCSV",
-        "description": [],
-        "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
-        "deprecated": true,
-        "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "@kbn/reporting-export-types-csv",
-            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts"
-          },
-          {
-            "plugin": "@kbn/reporting-export-types-csv",
-            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts"
-          },
-          {
-            "plugin": "@kbn/reporting-export-types-csv",
-            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts"
-          },
-          {
-            "plugin": "@kbn/reporting-export-types-csv",
-            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts"
-          }
-        ],
-        "children": [
-          {
-            "parentPluginId": "@kbn/reporting-export-types-csv-common",
-            "id": "def-common.JobParamsDownloadCSV.browserTimezone",
-            "type": "string",
-            "tags": [],
-            "label": "browserTimezone",
-            "description": [],
-            "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-export-types-csv-common",
-            "id": "def-common.JobParamsDownloadCSV.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-export-types-csv-common",
-            "id": "def-common.JobParamsDownloadCSV.searchSource",
-            "type": "Object",
-            "tags": [],
-            "label": "searchSource",
-            "description": [],
-            "signature": [
-              "{ type?: string | undefined; query?: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined; filter?: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined; sort?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.EsQuerySortValue",
-                "text": "EsQuerySortValue"
-              },
-              "[] | undefined; highlight?: ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              " | undefined; highlightAll?: boolean | undefined; trackTotalHits?: number | boolean | undefined; aggs?: { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              " | undefined; schema?: string | undefined; }[] | undefined; from?: number | undefined; size?: number | undefined; source?: boolean | ",
-              "Fields",
-              " | undefined; version?: boolean | undefined; fields?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchFieldValue",
-                "text": "SearchFieldValue"
-              },
-              "[] | undefined; fieldsFromSource?: ",
-              "Fields",
-              " | undefined; index?: string | ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewSpec",
-                "text": "DataViewSpec"
-              },
-              " | undefined; searchAfter?: ",
-              "SortResults",
-              " | undefined; timeout?: string | undefined; terminate_after?: number | undefined; parent?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SerializedSearchSourceFields",
-                "text": "SerializedSearchSourceFields"
-              },
-              " | undefined; }"
-            ],
-            "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-export-types-csv-common",
-            "id": "def-common.JobParamsDownloadCSV.columns",
-            "type": "Array",
-            "tags": [],
-            "label": "columns",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/reporting-export-types-csv-common",
         "id": "def-common.QueryInspection",
         "type": "Interface",
         "tags": [],
@@ -467,53 +297,6 @@
       },
       {
         "parentPluginId": "@kbn/reporting-export-types-csv-common",
-        "id": "def-common.CSV_SEARCHSOURCE_IMMEDIATE_TYPE",
-        "type": "string",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "CSV_SEARCHSOURCE_IMMEDIATE_TYPE",
-        "description": [],
-        "signature": [
-          "\"csv_searchsource_immediate\""
-        ],
-        "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
-        "deprecated": true,
-        "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "@kbn/reporting-export-types-csv",
-            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts"
-          },
-          {
-            "plugin": "@kbn/reporting-export-types-csv",
-            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts"
-          },
-          {
-            "plugin": "@kbn/reporting-export-types-csv",
-            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts"
-          },
-          {
-            "plugin": "@kbn/reporting-export-types-csv",
-            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts"
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/reporting-export-types-csv-common",
         "id": "def-common.JobAppParamsCSV",
         "type": "Type",
         "tags": [],
@@ -522,7 +305,15 @@
           "\nPublic-facing interface\nApps should use this interface to build job params. The browserTimezone and version\nfields become automatically provided by Reporting"
         ],
         "signature": [
-          "{ title: string; columns?: string[] | undefined; layout?: { id?: ",
+          "{ title: string; columns?: string[] | undefined; searchSource: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SerializedSearchSourceFields",
+            "text": "SerializedSearchSourceFields"
+          },
+          "; layout?: { id?: ",
           {
             "pluginId": "screenshotting",
             "scope": "common",
@@ -532,15 +323,7 @@
           },
           " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
           "LayoutSelectorDictionary",
-          "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; searchSource: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SerializedSearchSourceFields",
-            "text": "SerializedSearchSourceFields"
-          },
-          "; pagingStrategy?: ",
+          "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; pagingStrategy?: ",
           "CsvPagingStrategy",
           " | undefined; }"
         ],

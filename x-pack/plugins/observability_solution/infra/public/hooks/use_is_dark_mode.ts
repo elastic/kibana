@@ -10,7 +10,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import { useKibanaContextForPlugin } from './use_kibana';
 
-const themeDefault: CoreTheme = { darkMode: false };
+const themeDefault: CoreTheme = { darkMode: false, name: 'amsterdam' };
 
 export const useIsDarkMode = () => {
   const { services } = useKibanaContextForPlugin();

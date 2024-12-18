@@ -1261,7 +1261,7 @@
         "label": "loadRuleAggregations",
         "description": [],
         "signature": [
-          "({\n  http,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleExecutionStatusesFilter,\n  ruleStatusesFilter,\n  tagsFilter,\n  filterConsumers,\n}: ",
+          "({\n  http,\n  searchText,\n  actionTypesFilter,\n  ruleExecutionStatusesFilter,\n  ruleStatusesFilter,\n  tagsFilter,\n  ruleTypeIds,\n  consumers,\n}: ",
           "LoadRuleAggregationsProps",
           ") => Promise<",
           "AggregateRulesResponse",
@@ -1276,7 +1276,7 @@
             "id": "def-public.loadRuleAggregations.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleExecutionStatusesFilter,\n  ruleStatusesFilter,\n  tagsFilter,\n  filterConsumers,\n}",
+            "label": "{\n  http,\n  searchText,\n  actionTypesFilter,\n  ruleExecutionStatusesFilter,\n  ruleStatusesFilter,\n  tagsFilter,\n  ruleTypeIds,\n  consumers,\n}",
             "description": [],
             "signature": [
               "LoadRuleAggregationsProps"
@@ -4602,7 +4602,7 @@
             "section": "def-common.RuleType",
             "text": "RuleType"
           },
-          "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"recoveryActionGroup\" | \"actionGroups\" | \"defaultActionGroupId\" | \"producer\" | \"minimumLicenseRequired\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\">"
+          "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"recoveryActionGroup\" | \"actionGroups\" | \"defaultActionGroupId\" | \"category\" | \"producer\" | \"minimumLicenseRequired\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\">"
         ],
         "path": "packages/kbn-triggers-actions-ui-types/rule_types.ts",
         "deprecated": false,
@@ -4764,9 +4764,9 @@
             "signature": [
               "(ruleParams: Params, isServerless?: boolean | undefined) => ",
               {
-                "pluginId": "@kbn/alerts-ui-shared",
+                "pluginId": "@kbn/response-ops-rule-form",
                 "scope": "public",
-                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "docId": "kibKbnResponseOpsRuleFormPluginApi",
                 "section": "def-public.ValidationResult",
                 "text": "ValidationResult"
               }
@@ -5963,7 +5963,7 @@
         "tags": [],
         "label": "ValidationResult",
         "description": [],
-        "path": "packages/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "path": "packages/response-ops/rule_form/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5977,7 +5977,7 @@
             "signature": [
               "{ [x: string]: any; }"
             ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+            "path": "packages/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6274,15 +6274,7 @@
             "section": "def-common.Alert",
             "text": "Alert"
           },
-          ") => boolean) | undefined; dynamicRowHeight?: boolean | undefined; featureIds?: ",
-          {
-            "pluginId": "@kbn/rule-data-utils",
-            "scope": "common",
-            "docId": "kibKbnRuleDataUtilsPluginApi",
-            "section": "def-common.AlertConsumers",
-            "text": "AlertConsumers"
-          },
-          "[] | undefined; pageIndex: number; pageSize: number; sort: ",
+          ") => boolean) | undefined; dynamicRowHeight?: boolean | undefined; ruleTypeIds?: string[] | undefined; pageIndex: number; pageSize: number; sort: ",
           "SortCombinations",
           "[]; isLoading: boolean; alerts: ",
           "Alerts",
@@ -6550,7 +6542,7 @@
         "label": "RuleStatus",
         "description": [],
         "signature": [
-          "\"enabled\" | \"disabled\" | \"snoozed\""
+          "\"disabled\" | \"enabled\" | \"snoozed\""
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -7906,7 +7898,7 @@
             },
             ">(props: Omit<",
             "RuleAddProps",
-            "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">) => React.ReactElement<",
+            "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">) => React.ReactElement<",
             "RuleAddProps",
             "<Params, MetaData>, string | React.JSXElementConstructor<any>>"
           ],
@@ -7924,7 +7916,7 @@
               "signature": [
                 "Omit<",
                 "RuleAddProps",
-                "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">"
+                "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
@@ -7976,7 +7968,7 @@
             },
             ">(props: Omit<",
             "RuleEditProps",
-            "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">) => React.ReactElement<",
+            "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">) => React.ReactElement<",
             "RuleEditProps",
             "<Params, MetaData>, string | React.JSXElementConstructor<any>>"
           ],
@@ -7994,7 +7986,7 @@
               "signature": [
                 "Omit<",
                 "RuleEditProps",
-                "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">"
+                "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
@@ -8110,15 +8102,7 @@
               "section": "def-public.AlertsTableConfigurationRegistryContract",
               "text": "AlertsTableConfigurationRegistryContract"
             },
-            "; configurationId: string; id: string; featureIds: ",
-            {
-              "pluginId": "@kbn/rule-data-utils",
-              "scope": "common",
-              "docId": "kibKbnRuleDataUtilsPluginApi",
-              "section": "def-common.AlertConsumers",
-              "text": "AlertConsumers"
-            },
-            "[]; query: Pick<",
+            "; configurationId: string; id: string; ruleTypeIds: string[]; consumers?: string[] | undefined; query: Pick<",
             "QueryDslQueryContainer",
             ", \"ids\" | \"bool\">; initialPageSize?: number | undefined; browserFields?: ",
             {
@@ -8182,15 +8166,7 @@
                   "section": "def-public.AlertsTableConfigurationRegistryContract",
                   "text": "AlertsTableConfigurationRegistryContract"
                 },
-                "; configurationId: string; id: string; featureIds: ",
-                {
-                  "pluginId": "@kbn/rule-data-utils",
-                  "scope": "common",
-                  "docId": "kibKbnRuleDataUtilsPluginApi",
-                  "section": "def-common.AlertConsumers",
-                  "text": "AlertConsumers"
-                },
-                "[]; query: Pick<",
+                "; configurationId: string; id: string; ruleTypeIds: string[]; consumers?: string[] | undefined; query: Pick<",
                 "QueryDslQueryContainer",
                 ", \"ids\" | \"bool\">; initialPageSize?: number | undefined; browserFields?: ",
                 {

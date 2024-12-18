@@ -23,6 +23,8 @@ import type {
   AnalyticsServiceStart,
   AppMountParameters,
   ScopedHistory,
+  ThemeServiceStart,
+  UserProfileService,
 } from '@kbn/core/public';
 import type {
   FilterManager,
@@ -59,6 +61,7 @@ import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
@@ -89,12 +92,14 @@ export interface DiscoverServices {
   chrome: ChromeStart;
   core: CoreStart;
   data: DataPublicPluginStart;
+  discoverShared: DiscoverSharedPublicStart;
   docLinks: DocLinksStart;
   embeddable: EmbeddableStart;
   history: History<HistoryLocationState>;
   getScopedHistory: <T>() => ScopedHistory<T | undefined> | undefined;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  theme: CoreStart['theme'];
+  theme: ThemeServiceStart;
+  userProfile: UserProfileService;
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsContract;
@@ -178,10 +183,12 @@ export const buildServices = memoize(
       core,
       data: plugins.data,
       dataVisualizer: plugins.dataVisualizer,
+      discoverShared: plugins.discoverShared,
       docLinks: core.docLinks,
       embeddable: plugins.embeddable,
       i18n: core.i18n,
       theme: core.theme,
+      userProfile: core.userProfile,
       fieldFormats: plugins.fieldFormats,
       filterManager: plugins.data.query.filterManager,
       history,

@@ -21,7 +21,7 @@
         "description": [
           "\nInterfaces for registering tools to be used by the elastic assistant"
         ],
-        "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+        "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -32,7 +32,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -43,7 +43,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -54,7 +54,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -65,7 +65,7 @@
             "tags": [],
             "label": "sourceRegister",
             "description": [],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -87,7 +87,7 @@
               },
               ") => boolean"
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -107,7 +107,7 @@
                     "text": "AssistantToolParams"
                   }
                 ],
-                "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -139,7 +139,7 @@
               "ZodObjectAny",
               "> | null"
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -159,7 +159,7 @@
                     "text": "AssistantToolParams"
                   }
                 ],
-                "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -177,7 +177,7 @@
         "tags": [],
         "label": "AssistantToolParams",
         "description": [],
-        "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+        "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -191,7 +191,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -205,7 +205,7 @@
             "signature": [
               "{ id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[] | undefined"
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -226,7 +226,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -237,7 +237,7 @@
             "tags": [],
             "label": "isEnabledKnowledgeBase",
             "description": [],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -251,7 +251,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1519,7 +1519,7 @@
               "default",
               "; }"
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1534,7 +1534,7 @@
               "AIAssistantKnowledgeBaseDataClient",
               " | undefined"
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1548,7 +1548,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1565,7 +1565,28 @@
               "AssistantToolLlm",
               " | undefined"
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
+            "id": "def-server.AssistantToolParams.llmTasks",
+            "type": "Object",
+            "tags": [],
+            "label": "llmTasks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "llmTasks",
+                "scope": "server",
+                "docId": "kibLlmTasksPluginApi",
+                "section": "def-server.LlmTasksPluginStart",
+                "text": "LlmTasksPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1579,7 +1600,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1599,7 +1620,7 @@
                 "text": "Logger"
               }
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1613,7 +1634,7 @@
             "signature": [
               "((newReplacements: Zod.objectOutputType<{}, Zod.ZodString, \"strip\">) => void) | undefined"
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1627,7 +1648,7 @@
                 "signature": [
                   "Zod.objectOutputType<{}, Zod.ZodString, \"strip\">"
                 ],
-                "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1645,7 +1666,7 @@
             "signature": [
               "Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined"
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1664,9 +1685,9 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; message?: string | undefined; allow?: string[] | undefined; size?: number | undefined; conversationId?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allowReplacement?: string[] | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; } | { size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; }, any>"
+              "<unknown, unknown, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; message?: string | undefined; size?: number | undefined; allow?: string[] | undefined; conversationId?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allowReplacement?: string[] | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; } | { size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; } | { subAction: \"invokeAI\" | \"invokeStream\"; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; endpointIds: string[]; insightType: \"incompatible_antivirus\" | \"noisy_process_tree\"; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; }, any>"
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1680,7 +1701,28 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
+            "id": "def-server.AssistantToolParams.telemetry",
+            "type": "Object",
+            "tags": [],
+            "label": "telemetry",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-analytics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreAnalyticsServerPluginApi",
+                "section": "def-server.AnalyticsServiceSetup",
+                "text": "AnalyticsServiceSetup"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1694,7 +1736,7 @@
         "tags": [],
         "label": "ElasticAssistantPluginSetupDependencies",
         "description": [],
-        "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+        "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1714,7 +1756,7 @@
                 "text": "PluginSetupContract"
               }
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1762,7 +1804,7 @@
               "; } | undefined>; }; } & ",
               "TrainedModelsProvider"
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1782,7 +1824,7 @@
                 "text": "TaskManagerSetupContract"
               }
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1803,7 +1845,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1817,7 +1859,7 @@
         "tags": [],
         "label": "ElasticAssistantPluginStartDependencies",
         "description": [],
-        "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+        "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1837,7 +1879,27 @@
                 "text": "PluginStartContract"
               }
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
+            "id": "def-server.ElasticAssistantPluginStartDependencies.llmTasks",
+            "type": "Object",
+            "tags": [],
+            "label": "llmTasks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "llmTasks",
+                "scope": "server",
+                "docId": "kibLlmTasksPluginApi",
+                "section": "def-server.LlmTasksPluginStart",
+                "text": "LlmTasksPluginStart"
+              }
+            ],
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1857,7 +1919,7 @@
                 "text": "InferenceServerStart"
               }
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1878,27 +1940,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "elasticAssistant",
-            "id": "def-server.ElasticAssistantPluginStartDependencies.security",
-            "type": "Object",
-            "tags": [],
-            "label": "security",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-security-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-server.SecurityServiceStart",
-                "text": "SecurityServiceStart"
-              }
-            ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1918,7 +1960,27 @@
                 "text": "LicensingPluginStart"
               }
             ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
+            "id": "def-server.ElasticAssistantPluginStartDependencies.productDocBase",
+            "type": "Object",
+            "tags": [],
+            "label": "productDocBase",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "productDocBase",
+                "scope": "server",
+                "docId": "kibProductDocBasePluginApi",
+                "section": "def-server.ProductDocBaseStartContract",
+                "text": "ProductDocBaseStartContract"
+              }
+            ],
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1938,7 +2000,7 @@
       "description": [
         "The plugin setup interface"
       ],
-      "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+      "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1958,7 +2020,7 @@
               "text": "PluginSetupContract"
             }
           ],
-          "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+          "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1975,7 +2037,7 @@
       "description": [
         "The plugin start interface"
       ],
-      "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+      "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1997,7 +2059,7 @@
               "text": "PluginStartContract"
             }
           ],
-          "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+          "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -2019,7 +2081,7 @@
               "text": "InferenceServerStart"
             }
           ],
-          "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+          "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -2043,7 +2105,7 @@
             },
             ">) => void"
           ],
-          "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+          "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -2059,7 +2121,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+              "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2084,7 +2146,7 @@
                 },
                 ">"
               ],
-              "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+              "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2111,7 +2173,7 @@
               "text": "AssistantFeatures"
             }
           ],
-          "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+          "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -2125,7 +2187,7 @@
               "description": [
                 "Name of the plugin to get the features for"
               ],
-              "path": "x-pack/plugins/elastic_assistant/server/services/app_context.ts",
+              "path": "x-pack/solutions/security/plugins/elastic_assistant/server/services/app_context.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -2151,7 +2213,7 @@
             },
             "[]) => void"
           ],
-          "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+          "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -2167,7 +2229,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+              "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2191,7 +2253,7 @@
                 },
                 "[]"
               ],
-              "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+              "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2219,7 +2281,7 @@
             },
             "[]"
           ],
-          "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+          "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -2233,7 +2295,7 @@
               "description": [
                 "Name of the plugin to get the tools for"
               ],
-              "path": "x-pack/plugins/elastic_assistant/server/services/app_context.ts",
+              "path": "x-pack/solutions/security/plugins/elastic_assistant/server/services/app_context.ts",
               "deprecated": false,
               "trackAdoption": false
             }

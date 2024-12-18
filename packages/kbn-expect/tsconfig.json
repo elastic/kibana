@@ -1,10 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
+    "types": [
+      "jest",
+    ],
   },
   "include": [
-    "expect.d.ts"
+    "expect.d.ts",
+    "**/*.ts"
   ],
   "exclude": [
     "target/**/*",

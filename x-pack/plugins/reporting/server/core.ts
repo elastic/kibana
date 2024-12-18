@@ -29,11 +29,7 @@ import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { ReportingServerInfo } from '@kbn/reporting-common/types';
-import {
-  CsvSearchSourceExportType,
-  CsvSearchSourceImmediateExportType,
-  CsvV2ExportType,
-} from '@kbn/reporting-export-types-csv';
+import { CsvSearchSourceExportType, CsvV2ExportType } from '@kbn/reporting-export-types-csv';
 import { PdfExportType, PdfV1ExportType } from '@kbn/reporting-export-types-pdf';
 import { PngExportType } from '@kbn/reporting-export-types-png';
 import type { ReportingConfigType } from '@kbn/reporting-server';
@@ -96,7 +92,6 @@ export class ReportingCore {
   private pluginStartDeps?: ReportingInternalStart;
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps each are done
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
-  private deprecatedAllowedRoles: string[] | false = false; // DEPRECATED. If `false`, the deprecated features have been disableed
   private executeTask: ExecuteReportTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
@@ -118,11 +113,9 @@ export class ReportingCore {
     this.getExportTypes().forEach((et) => {
       this.exportTypesRegistry.register(et);
     });
-    this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
 
     this.getContract = () => ({
-      usesUiCapabilities: () => config.roles.enabled === false,
       registerExportTypes: (id) => id,
       getSpaceId: this.getSpaceId.bind(this),
     });
@@ -262,15 +255,6 @@ export class ReportingCore {
   }
 
   /*
-   * If deprecated feature has not been disabled,
-   * this returns an array of allowed role names
-   * that have access to Reporting.
-   */
-  public getDeprecatedAllowedRoles(): string[] | false {
-    return this.deprecatedAllowedRoles;
-  }
-
-  /*
    * Track usage of API endpoints
    */
   public getUsageCounter(): UsageCounter | undefined {
@@ -382,23 +366,5 @@ export class ReportingCore {
   public getEventLogger(report: IReport, task?: { id: string }) {
     const ReportingEventLogger = reportingEventLoggerFactory(this.logger);
     return new ReportingEventLogger(report, task);
-  }
-
-  /**
-   * @deprecated
-   * Requires `xpack.reporting.csv.enablePanelActionDownload` set to `true` (default is false)
-   */
-  public async getCsvSearchSourceImmediate() {
-    const startDeps = await this.getPluginStartDeps();
-
-    const csvImmediateExport = new CsvSearchSourceImmediateExportType(
-      this.core,
-      this.config,
-      this.logger,
-      this.context
-    );
-    csvImmediateExport.setup(this.getPluginSetupDeps());
-    csvImmediateExport.start({ ...startDeps });
-    return csvImmediateExport;
   }
 }

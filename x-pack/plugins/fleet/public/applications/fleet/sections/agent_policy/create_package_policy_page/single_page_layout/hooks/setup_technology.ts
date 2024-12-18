@@ -8,7 +8,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useConfig } from '../../../../../hooks';
-import { ExperimentalFeaturesService } from '../../../../../services';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
 import type {
   AgentPolicy,
@@ -17,10 +16,9 @@ import type {
   PackageInfo,
 } from '../../../../../types';
 import { SetupTechnology } from '../../../../../types';
-import { sendGetOneAgentPolicy, useStartServices } from '../../../../../hooks';
+import { useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
 import {
-  AGENTLESS_POLICY_ID,
   AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
   AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
   AGENTLESS_GLOBAL_TAG_NAME_TEAM,
@@ -33,23 +31,15 @@ import {
 
 export const useAgentless = () => {
   const config = useConfig();
-  const { agentless: agentlessExperimentalFeatureEnabled } = ExperimentalFeaturesService.get();
   const { cloud } = useStartServices();
   const isServerless = !!cloud?.isServerlessEnabled;
   const isCloud = !!cloud?.isCloudEnabled;
 
-  const isAgentlessApiEnabled = (isCloud || isServerless) && config.agentless?.enabled;
-  const isDefaultAgentlessPolicyEnabled =
-    !isAgentlessApiEnabled && isServerless && agentlessExperimentalFeatureEnabled;
-
-  const isAgentlessEnabled = isAgentlessApiEnabled || isDefaultAgentlessPolicyEnabled;
+  const isAgentlessEnabled = (isCloud || isServerless) && config.agentless?.enabled === true;
 
   const isAgentlessAgentPolicy = (agentPolicy: AgentPolicy | undefined) => {
     if (!agentPolicy) return false;
-    return (
-      isAgentlessEnabled &&
-      (agentPolicy?.id === AGENTLESS_POLICY_ID || !!agentPolicy?.supports_agentless)
-    );
+    return isAgentlessEnabled && !!agentPolicy?.supports_agentless;
   };
 
   // When an integration has at least a policy template enabled for agentless
@@ -60,17 +50,10 @@ export const useAgentless = () => {
     return false;
   };
 
-  // TODO: remove this check when CSPM implements the above flag and rely only on `isAgentlessIntegration`
-  const isAgentlessPackagePolicy = (packagePolicy: NewPackagePolicy) => {
-    return isAgentlessEnabled && packagePolicy.policy_ids.includes(AGENTLESS_POLICY_ID);
-  };
   return {
-    isAgentlessApiEnabled,
-    isDefaultAgentlessPolicyEnabled,
     isAgentlessEnabled,
     isAgentlessAgentPolicy,
     isAgentlessIntegration,
-    isAgentlessPackagePolicy,
   };
 };
 
@@ -78,6 +61,7 @@ export function useSetupTechnology({
   setNewAgentPolicy,
   newAgentPolicy,
   updateAgentPolicies,
+  updatePackagePolicy,
   setSelectedPolicyTab,
   packageInfo,
   packagePolicy,
@@ -87,14 +71,14 @@ export function useSetupTechnology({
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   newAgentPolicy: NewAgentPolicy;
   updateAgentPolicies: (policies: AgentPolicy[]) => void;
+  updatePackagePolicy: (policy: Partial<NewPackagePolicy>) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
   packageInfo?: PackageInfo;
   packagePolicy: NewPackagePolicy;
   isEditPage?: boolean;
   agentPolicies?: AgentPolicy[];
 }) {
-  const { isAgentlessEnabled, isAgentlessApiEnabled, isDefaultAgentlessPolicyEnabled } =
-    useAgentless();
+  const { isAgentlessEnabled } = useAgentless();
 
   // this is a placeholder for the new agent-BASED policy that will be used when the user switches from agentless to agent-based and back
   const newAgentBasedPolicy = useRef<NewAgentPolicy>(newAgentPolicy);
@@ -119,7 +103,7 @@ export function useSetupTechnology({
       setSelectedSetupTechnology(SetupTechnology.AGENTLESS);
       return;
     }
-    if (isAgentlessApiEnabled && selectedSetupTechnology === SetupTechnology.AGENTLESS) {
+    if (isAgentlessEnabled && selectedSetupTechnology === SetupTechnology.AGENTLESS) {
       const nextNewAgentlessPolicy = {
         ...newAgentlessPolicy,
         name: getAgentlessAgentPolicyNameFromPackagePolicyName(packagePolicy.name),
@@ -130,41 +114,34 @@ export function useSetupTechnology({
         updateAgentPolicies([nextNewAgentlessPolicy] as AgentPolicy[]);
       }
     }
+    if (
+      selectedSetupTechnology === SetupTechnology.AGENTLESS &&
+      !packagePolicy.supports_agentless
+    ) {
+      updatePackagePolicy({
+        supports_agentless: true,
+      });
+    } else if (
+      selectedSetupTechnology !== SetupTechnology.AGENTLESS &&
+      packagePolicy.supports_agentless
+    ) {
+      updatePackagePolicy({
+        supports_agentless: false,
+      });
+    }
   }, [
-    isAgentlessApiEnabled,
+    isAgentlessEnabled,
     isEditPage,
     newAgentlessPolicy,
     packagePolicy.name,
+    packagePolicy.supports_agentless,
     selectedSetupTechnology,
     updateAgentPolicies,
     setNewAgentPolicy,
     agentPolicies,
     setSelectedSetupTechnology,
+    updatePackagePolicy,
   ]);
-
-  // tech debt: remove this useEffect when Serverless uses the Agentless API
-  // https://github.com/elastic/security-team/issues/9781
-  useEffect(() => {
-    const fetchAgentlessPolicy = async () => {
-      const { data, error } = await sendGetOneAgentPolicy(AGENTLESS_POLICY_ID);
-      const isAgentlessAvailable = !error && data && data.item;
-
-      if (isAgentlessAvailable) {
-        setNewAgentlessPolicy(data.item);
-      }
-    };
-
-    if (isDefaultAgentlessPolicyEnabled) {
-      fetchAgentlessPolicy();
-    }
-  }, [isDefaultAgentlessPolicyEnabled]);
-
-  useEffect(() => {
-    if (isEditPage) {
-      return;
-    }
-    setSelectedSetupTechnology(defaultSetupTechnology);
-  }, [packageInfo, defaultSetupTechnology, isEditPage]);
 
   const handleSetupTechnologyChange = useCallback(
     (setupTechnology: SetupTechnology, policyTemplateName?: string) => {
@@ -173,26 +150,26 @@ export function useSetupTechnology({
       }
 
       if (setupTechnology === SetupTechnology.AGENTLESS) {
-        if (isAgentlessApiEnabled) {
+        if (isAgentlessEnabled) {
           const agentlessPolicy = {
             ...newAgentlessPolicy,
             ...getAdditionalAgentlessPolicyInfo(policyTemplateName, packageInfo),
           } as NewAgentPolicy;
 
           setNewAgentPolicy(agentlessPolicy);
+          setNewAgentlessPolicy(agentlessPolicy);
           setSelectedPolicyTab(SelectedPolicyTab.NEW);
           updateAgentPolicies([agentlessPolicy] as AgentPolicy[]);
         }
-        // tech debt: remove this when Serverless uses the Agentless API
-        // https://github.com/elastic/security-team/issues/9781
-        if (isDefaultAgentlessPolicyEnabled) {
-          setNewAgentPolicy(newAgentlessPolicy as AgentPolicy);
-          updateAgentPolicies([newAgentlessPolicy] as AgentPolicy[]);
-          setSelectedPolicyTab(SelectedPolicyTab.EXISTING);
-        }
+        updatePackagePolicy({
+          supports_agentless: true,
+        });
       } else if (setupTechnology === SetupTechnology.AGENT_BASED) {
         setNewAgentPolicy({
           ...newAgentBasedPolicy.current,
+          supports_agentless: false,
+        });
+        updatePackagePolicy({
           supports_agentless: false,
         });
         setSelectedPolicyTab(SelectedPolicyTab.NEW);
@@ -203,13 +180,12 @@ export function useSetupTechnology({
     [
       isAgentlessEnabled,
       selectedSetupTechnology,
-      isAgentlessApiEnabled,
-      isDefaultAgentlessPolicyEnabled,
+      updatePackagePolicy,
       setNewAgentPolicy,
       newAgentlessPolicy,
+      packageInfo,
       setSelectedPolicyTab,
       updateAgentPolicies,
-      packageInfo,
     ]
   );
 

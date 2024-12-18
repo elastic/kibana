@@ -17,6 +17,7 @@ import {
   EuiContextMenuItem,
   useEuiTheme,
   useGeneratedHtmlId,
+  useIsWithinBreakpoints,
   EuiIcon,
   EuiText,
   EuiContextMenuPanelProps,
@@ -43,6 +44,10 @@ const mapAdHocDataView = (adHocDataView: DataView): DataViewListItemEnhanced => 
   };
 };
 
+const shrinkableContainerCss = css`
+  min-width: 0;
+`;
+
 export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
@@ -64,10 +69,13 @@ export function ChangeDataView({
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { application, data, dataViews, dataViewEditor } = kibana.services;
 
+  const isMobile = useIsWithinBreakpoints(['xs']);
+
   const styles = changeDataViewStyles({
     fullWidth: trigger.fullWidth,
     dataViewsList,
     theme: euiTheme,
+    isMobile,
   });
 
   // Create a reusable id to ensure search input is the first focused item in the popover even though it's not the first item
@@ -238,7 +246,7 @@ export function ChangeDataView({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <>
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow={true} css={shrinkableContainerCss}>
           <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
             <EuiFlexItem
               grow={false}
@@ -254,7 +262,7 @@ export function ChangeDataView({
                 defaultMessage: 'Data view',
               })}
             </EuiFlexItem>
-            <EuiFlexItem grow={true}>
+            <EuiFlexItem grow={true} css={shrinkableContainerCss}>
               <EuiPopover
                 panelClassName="changeDataViewPopover"
                 button={createTrigger()}

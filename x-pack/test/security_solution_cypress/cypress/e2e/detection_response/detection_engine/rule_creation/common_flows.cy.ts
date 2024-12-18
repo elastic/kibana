@@ -59,7 +59,7 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
     deleteAlertsAndRules();
     createTimeline()
       .then((response) => {
-        return response.body.data.persistTimeline.timeline.savedObjectId;
+        return response.body.savedObjectId;
       })
       .as('timelineId');
     visit(CREATE_RULE_URL);

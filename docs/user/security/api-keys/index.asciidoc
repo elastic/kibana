@@ -13,7 +13,8 @@ You can use {kib} to manage your different API keys:
 * Cross-cluster API key: allows other clusters to connect to this cluster.
 * Managed API key: created and managed by Kibana to run background tasks.
 
-To manage API keys, open the main menu, then click *Stack Management > Security > API Keys*.
+To manage API keys, go to the *API Keys* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
 [role="screenshot"]
 image:images/api-keys.png["API Keys UI"]
@@ -28,13 +29,15 @@ image:images/api-keys.png["API Keys UI"]
 * To create or update a *cross-cluster API key*, you must have the `manage_security` privilege and an Enterprise license.
 * To have a read-only view on the API keys, you must have access to the page and the `read_security` cluster privilege.
 
-To manage roles, open the main menu, then click  *Stack Management > Security > Roles*, or use the {api-kibana}/group/endpoint-roles[role APIs].
+To manage roles, go to the *Roles* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>, or use the {api-kibana}/group/endpoint-roles[role APIs].
 
 [float]
 [[create-api-key]]
 === Create an API key
 
-To create an API key, open the main menu, then click *Stack Management > Security > API Keys > Create API key*.
+To create an API key, go to the *API Keys* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>, and select *Create API key*.
 
 [role="screenshot"]
 image:images/create-ccr-api-key.png["Create API Key UI"]
@@ -48,7 +51,8 @@ Refer to the {ref}/security-api-create-cross-cluster-api-key.html[create cross-c
 [[udpate-api-key]]
 === Update an API key
 
-To update an API key, open the main menu, click *Stack Management > Security > API Keys*, and then click on the name of the key. You cannot update the name or the type of API key.
+To update an API key, go to the *API Keys* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>, and then click on the name of the key. You cannot update the name or the type of API key.
 
 Refer to the {ref}/security-api-update-api-key.html[update API key] documentation to learn more about updating user API keys.
 

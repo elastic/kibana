@@ -38,6 +38,7 @@ export const TaskTypeFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
       options={options}
       renderOption={(option) => option.label}
       selectedOptionKeys={optionKeys}
+      dataTestSubj="type-field-endpoints"
     />
   );
 };

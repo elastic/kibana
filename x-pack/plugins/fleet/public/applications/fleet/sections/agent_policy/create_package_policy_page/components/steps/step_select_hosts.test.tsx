@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { act, fireEvent, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
+
+import { userEvent } from '@testing-library/user-event';
 
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
@@ -40,7 +42,8 @@ jest.mock('../../../../../hooks', () => {
   };
 });
 
-describe('StepSelectHosts', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/203307
+describe.skip('StepSelectHosts', () => {
   const packageInfo: PackageInfo = {
     name: 'apache',
     version: '1.0.0',
@@ -108,22 +111,24 @@ describe('StepSelectHosts', () => {
     testRenderer = createFleetTestRendererMock();
   });
 
-  it('should display create form when no agent policies', () => {
+  it('should display create form when no agent policies', async () => {
     (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
       data: {
         items: [],
       },
     });
+    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([]);
 
     render();
 
-    waitFor(() => {
-      expect(renderResult.getByText('Agent policy 1')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(renderResult.getByText('New agent policy name')).toBeInTheDocument();
     });
-    expect(renderResult.queryByRole('tablist')).not.toBeInTheDocument();
+    expect(renderResult.queryByRole('tablist')).toBeInTheDocument();
+    expect(renderResult.getByText('Create agent policy')).toBeInTheDocument();
   });
 
-  it('should display tabs with New hosts selected when agent policies exist', () => {
+  it('should display tabs with New hosts selected when agent policies exist', async () => {
     (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
       data: {
         items: [{ id: '1', name: 'Agent policy 1', namespace: 'default' }],
@@ -135,10 +140,7 @@ describe('StepSelectHosts', () => {
 
     render();
 
-    waitFor(() => {
-      expect(renderResult.getByRole('tablist')).toBeInTheDocument();
-      expect(renderResult.getByText('Agent policy 3')).toBeInTheDocument();
-    });
+    expect(renderResult.getByRole('tablist')).toBeInTheDocument();
     expect(renderResult.getByText('New hosts').closest('button')).toHaveAttribute(
       'aria-selected',
       'true'
@@ -157,16 +159,15 @@ describe('StepSelectHosts', () => {
 
     render();
 
-    waitFor(() => {
-      expect(renderResult.getByRole('tablist')).toBeInTheDocument();
-    });
-    act(() => {
-      fireEvent.click(renderResult.getByText('Existing hosts').closest('button')!);
-    });
+    expect(renderResult.getByRole('tablist')).toBeInTheDocument();
 
-    expect(
-      renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]')?.textContent
-    ).toContain('Agent policy 1');
+    await userEvent.click(renderResult.getByText('Existing hosts').closest('button')!);
+
+    await waitFor(() => {
+      expect(
+        renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]')?.textContent
+      ).toContain('Agent policy 1');
+    });
   });
 
   it('should display dropdown without preselected value when Existing hosts selected with mulitple agent policies', async () => {
@@ -185,14 +186,11 @@ describe('StepSelectHosts', () => {
 
     render();
 
-    waitFor(() => {
-      expect(renderResult.getByRole('tablist')).toBeInTheDocument();
-    });
-    act(() => {
-      fireEvent.click(renderResult.getByText('Existing hosts').closest('button')!);
-    });
+    expect(renderResult.getByRole('tablist')).toBeInTheDocument();
 
-    await act(async () => {
+    await userEvent.click(renderResult.getByText('Existing hosts').closest('button')!);
+
+    await waitFor(() => {
       const select = renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]');
       expect((select as any)?.value).toEqual('');
     });

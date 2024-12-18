@@ -76,9 +76,6 @@ export const useBulkActions = ({
 
   const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
     const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [];
-    const panelsToBuild: EuiContextMenuPanelDescriptor[] = [
-      { id: 0, items: mainPanelItems, title: i18n.ACTIONS },
-    ];
 
     if (canUpdate) {
       mainPanelItems.push({
@@ -119,7 +116,13 @@ export const useBulkActions = ({
     if (canDelete) {
       mainPanelItems.push(deleteAction.getAction(selectedCases));
     }
-
+    const panelsToBuild: EuiContextMenuPanelDescriptor[] = [
+      {
+        id: 0,
+        items: [...mainPanelItems], // Create a new array instead of using reference
+        title: i18n.ACTIONS,
+      },
+    ];
     if (canUpdate) {
       panelsToBuild.push({
         id: 1,

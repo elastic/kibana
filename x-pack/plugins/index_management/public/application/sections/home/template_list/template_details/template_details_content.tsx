@@ -171,7 +171,7 @@ export const TemplateDetailsContent = ({
         [SETTINGS_TAB_ID]: <TabSettings settings={settings} />,
         [MAPPINGS_TAB_ID]: <TabMappings mappings={mappings} />,
         [ALIASES_TAB_ID]: <TabAliases aliases={aliases} />,
-        [PREVIEW_TAB_ID]: <TabPreview templateDetails={templateDetails} />,
+        [PREVIEW_TAB_ID]: <TabPreview templateName={templateName} />,
       };
 
       const tabContent = tabToComponentMap[activeTab];

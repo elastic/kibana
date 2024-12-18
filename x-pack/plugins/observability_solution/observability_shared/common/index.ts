@@ -8,7 +8,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 
 export const observabilityFeatureId = 'observability';
 export const observabilityAppId = 'observability-overview';
-export const casesFeatureId = 'observabilityCases';
+export const casesFeatureId = 'observabilityCasesV2';
 export const sloFeatureId = 'slo';
 
 // SLO alerts table in slo detail page
@@ -128,15 +128,16 @@ export {
   PROFILE_ALLOC_SPACE,
   PROFILE_INUSE_OBJECTS,
   PROFILE_INUSE_SPACE,
+  DATA_STREAM_TYPE,
   ENTITY,
-  ENTITY_DEFINITION_ID,
-  ENTITY_DISPLAY_NAME,
-  ENTITY_FIRST_SEEN,
   ENTITY_ID,
-  ENTITY_LAST_SEEN,
   ENTITY_TYPE,
-  SOURCE_DATA_STREAM_TYPE,
+  ENTITY_LAST_SEEN,
+  ENTITY_FIRST_SEEN,
+  ENTITY_DISPLAY_NAME,
+  ENTITY_DEFINITION_ID,
   ENTITY_IDENTITY_FIELDS,
+  SOURCE_DATA_STREAM_TYPE,
 } from './field_names/elasticsearch';
 
 export {
@@ -193,6 +194,7 @@ export type {
 
 export {
   ServiceOverviewLocatorDefinition,
+  SERVICE_OVERVIEW_LOCATOR_ID,
   TransactionDetailsByNameLocatorDefinition,
   ASSET_DETAILS_FLYOUT_LOCATOR_ID,
   AssetDetailsFlyoutLocatorDefinition,
@@ -218,4 +220,4 @@ export {
 
 export { COMMON_OBSERVABILITY_GROUPING } from './embeddable_grouping';
 
-export { EntityType, EntityDataStreamType } from './entity';
+export { BUILT_IN_ENTITY_TYPES, EntityDataStreamType } from './entity';

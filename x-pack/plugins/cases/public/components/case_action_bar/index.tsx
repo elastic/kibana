@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import type { CaseStatuses } from '../../../common/types/domain';
@@ -23,6 +23,7 @@ import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_pa
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
+import { useShouldDisableStatus } from '../actions/status/use_should_disable_status';
 
 export interface CaseActionBarProps {
   caseData: CaseUI;
@@ -67,6 +68,11 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
     [caseData.settings, onUpdateField]
   );
 
+  const shouldDisableStatusFn = useShouldDisableStatus();
+  const isStatusMenuDisabled = useMemo(() => {
+    return shouldDisableStatusFn([caseData]);
+  }, [caseData, shouldDisableStatusFn]);
+
   return (
     <EuiFlexGroup gutterSize="l" justifyContent="flexEnd" data-test-subj="case-action-bar-wrapper">
       <EuiFlexItem
@@ -83,7 +89,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
         <ActionBarStatusItem title={i18n.STATUS} data-test-subj="case-view-status">
           <StatusContextMenu
             currentStatus={caseData.status}
-            disabled={!permissions.update}
+            disabled={isStatusMenuDisabled}
             isLoading={isLoading}
             onStatusChanged={onStatusChanged}
           />

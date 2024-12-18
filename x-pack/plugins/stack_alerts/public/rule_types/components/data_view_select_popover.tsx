@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -17,8 +18,10 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
+  EuiLoadingSpinner,
   EuiText,
   useEuiPaddingCSS,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type {
@@ -29,6 +32,9 @@ import type {
 import { DataViewSelector } from '@kbn/unified-search-plugin/public';
 import type { DataViewListItemEnhanced } from '@kbn/unified-search-plugin/public/dataview_picker/dataview_list';
 import { EsQueryRuleMetaData } from '../es_query/types';
+
+const DESKTOP_WIDTH = 450;
+const MOBILE_WIDTH = 350;
 
 export interface DataViewSelectPopoverProps {
   dependencies: {
@@ -58,13 +64,16 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   onSelectDataView,
   onChangeMetaData,
 }) => {
+  const [loadingDataViews, setLoadingDataViews] = useState(false);
   const [dataViewItems, setDataViewsItems] = useState<DataViewListItemEnhanced[]>([]);
   const [dataViewPopoverOpen, setDataViewPopoverOpen] = useState(false);
+
+  const isMobile = useIsWithinBreakpoints(['xs']);
 
   const closeDataViewEditor = useRef<() => void | undefined>();
 
   const allDataViewItems = useMemo(
-    () => [...dataViewItems, ...metadata.adHocDataViewList.map(toDataViewListItem)],
+    () => [...(dataViewItems ?? []), ...metadata.adHocDataViewList.map(toDataViewListItem)],
     [dataViewItems, metadata.adHocDataViewList]
   );
 
@@ -80,10 +89,16 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   );
 
   const loadPersistedDataViews = useCallback(async () => {
-    const ids = await dataViews.getIds();
-    const dataViewsList = await Promise.all(ids.map((id) => dataViews.get(id)));
-
-    setDataViewsItems(dataViewsList.map(toDataViewListItem));
+    setLoadingDataViews(true);
+    try {
+      // Calling getIds with refresh = true to make sure we don't get stale data
+      const ids = await dataViews.getIds(true);
+      const dataViewsList = await Promise.all(ids.map((id) => dataViews.get(id)));
+      setDataViewsItems(dataViewsList.map(toDataViewListItem));
+    } catch (e) {
+      // Error fetching data views
+    }
+    setLoadingDataViews(false);
   }, [dataViews]);
 
   const onAddAdHocDataView = useCallback(
@@ -146,8 +161,10 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
     [dataViews, onAddAdHocDataView, onChangeDataView]
   );
 
-  if (!allDataViewItems) {
-    return null;
+  if (loadingDataViews) {
+    // The loading indicator is to make sure we don't render an
+    // empty popover when the DV cache is initially loading
+    return <EuiLoadingSpinner />;
   }
 
   return (
@@ -179,9 +196,14 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
       anchorPosition="downLeft"
       display="block"
     >
-      <div style={{ width: '450px' }} data-test-subj="chooseDataViewPopoverContent">
+      <div
+        css={css`
+          width: ${isMobile ? `${MOBILE_WIDTH}px` : `${DESKTOP_WIDTH}px`};
+        `}
+        data-test-subj="chooseDataViewPopoverContent"
+      >
         <EuiPopoverTitle>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem>
               {i18n.translate('xpack.stackAlerts.components.ui.alertParams.dataViewPopoverTitle', {
                 defaultMessage: 'Data view',

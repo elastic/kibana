@@ -23,9 +23,15 @@ import {
   collectPanelsByType,
   getEmptyDashboardData,
 } from './dashboard_telemetry';
-import { injectReferences } from '../../common';
-import { DashboardAttributesAndReferences } from '../../common/types';
-import { DashboardAttributes, SavedDashboardPanel } from '../../common/content_management';
+import type {
+  DashboardSavedObjectAttributes,
+  SavedDashboardPanel,
+} from '../dashboard_saved_object';
+
+interface DashboardSavedObjectAttributesAndReferences {
+  attributes: DashboardSavedObjectAttributes;
+  references: SavedObjectReference[];
+}
 
 // This task is responsible for running daily and aggregating all the Dashboard telemerty data
 // into a single document. This is an effort to make sure the load of fetching/parsing all of the
@@ -88,17 +94,18 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
       async run() {
         let dashboardData = getEmptyDashboardData();
         const controlsCollector = controlsCollectorFactory(embeddable);
-        const processDashboards = (dashboards: DashboardAttributesAndReferences[]) => {
+        const processDashboards = (dashboards: DashboardSavedObjectAttributesAndReferences[]) => {
           for (const dashboard of dashboards) {
-            const attributes = injectReferences(dashboard, {
-              embeddablePersistableStateService: embeddable,
-            });
+            // TODO is this injecting references really necessary?
+            // const attributes = injectReferences(dashboard, {
+            //   embeddablePersistableStateService: embeddable,
+            // });
 
-            dashboardData = controlsCollector(attributes, dashboardData);
+            dashboardData = controlsCollector(dashboard.attributes, dashboardData);
 
             try {
               const panels = JSON.parse(
-                attributes.panelsJSON as string
+                dashboard.attributes.panelsJSON as string
               ) as unknown as SavedDashboardPanel[];
 
               collectPanelsByType(panels, dashboardData, embeddable);
@@ -129,7 +136,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
           const esClient = await getEsClient();
 
           let result = await esClient.search<{
-            dashboard: DashboardAttributes;
+            dashboard: DashboardSavedObjectAttributes;
             references: SavedObjectReference[];
           }>(searchParams);
 
@@ -144,8 +151,8 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
                 }
                 return undefined;
               })
-              .filter<DashboardAttributesAndReferences>(
-                (s): s is DashboardAttributesAndReferences => s !== undefined
+              .filter<DashboardSavedObjectAttributesAndReferences>(
+                (s): s is DashboardSavedObjectAttributesAndReferences => s !== undefined
               )
           );
 
@@ -163,8 +170,8 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
                   }
                   return undefined;
                 })
-                .filter<DashboardAttributesAndReferences>(
-                  (s): s is DashboardAttributesAndReferences => s !== undefined
+                .filter<DashboardSavedObjectAttributesAndReferences>(
+                  (s): s is DashboardSavedObjectAttributesAndReferences => s !== undefined
                 )
             );
           }
