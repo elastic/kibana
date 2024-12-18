@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { EuiIcon, EuiToolTip, RIGHT_ALIGNMENT, useEuiFontSize } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { ApmRoutes } from '../../routing/apm_route_config';
 import { asMillisecondDuration, asTransactionRate } from '../../../../common/utils/formatters';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -25,8 +25,8 @@ import { ServiceLink } from '../../shared/links/apm/service_link';
 import { TruncateWithTooltip } from '../../shared/truncate_with_tooltip';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 
-const StyledTransactionLink = euiStyled(TransactionDetailLink)`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
+const StyledTransactionLink = styled(TransactionDetailLink)`
+  font-size: ${() => useEuiFontSize('s').fontSize};
   ${truncate('100%')};
 `;
 
