@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
-import { useMlKibana } from './kibana_context';
+import { useEuiTheme } from '@elastic/eui';
 
-export function useCurrentThemeVars() {
-  const {
-    services: { theme },
-  } = useMlKibana();
-  return useCurrentEuiThemeVars(theme);
-}
+export const useBarColor = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return euiTheme.flags.hasVisColorAdjustment ? 'success' : 'vis0';
+};

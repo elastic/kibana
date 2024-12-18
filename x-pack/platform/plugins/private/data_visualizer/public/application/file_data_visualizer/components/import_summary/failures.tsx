@@ -6,10 +6,9 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Component } from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
+import React, { useState, type FC } from 'react';
 
-import { EuiAccordion, EuiPagination } from '@elastic/eui';
+import { useEuiTheme, EuiAccordion, EuiPagination } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 const PAGE_SIZE = 100;
@@ -22,12 +21,8 @@ export interface DocFailure {
   };
 }
 
-interface Props {
+interface FailuresProps {
   failedDocs: DocFailure[];
-}
-
-interface State {
-  page: number;
 }
 
 const containerStyle = css({
@@ -35,50 +30,47 @@ const containerStyle = css({
   overflowY: 'auto',
 });
 
-const errorStyle = css({
-  color: euiThemeVars.euiColorDanger,
-});
+export const Failures: FC<FailuresProps> = ({ failedDocs }) => {
+  const { euiTheme } = useEuiTheme();
 
-export class Failures extends Component<Props, State> {
-  state: State = { page: 0 };
+  const [page, setPage] = useState(0);
 
-  _renderPaginationControl() {
-    return this.props.failedDocs.length > PAGE_SIZE ? (
-      <EuiPagination
-        pageCount={Math.ceil(this.props.failedDocs.length / PAGE_SIZE)}
-        activePage={this.state.page}
-        onPageClick={(page) => this.setState({ page })}
-        compressed
-      />
-    ) : null;
-  }
+  const startIndex = page * PAGE_SIZE;
+  const endIndex = startIndex + PAGE_SIZE;
 
-  render() {
-    const startIndex = this.state.page * PAGE_SIZE;
-    const endIndex = startIndex + PAGE_SIZE;
-    return (
-      <EuiAccordion
-        id="failureList"
-        buttonContent={
-          <FormattedMessage
-            id="xpack.dataVisualizer.file.importSummary.failedDocumentsButtonLabel"
-            defaultMessage="Failed documents"
+  return (
+    <EuiAccordion
+      id="failureList"
+      buttonContent={
+        <FormattedMessage
+          id="xpack.dataVisualizer.file.importSummary.failedDocumentsButtonLabel"
+          defaultMessage="Failed documents"
+        />
+      }
+      paddingSize="m"
+    >
+      <div css={containerStyle}>
+        {failedDocs.length > PAGE_SIZE && (
+          <EuiPagination
+            pageCount={Math.ceil(failedDocs.length / PAGE_SIZE)}
+            activePage={page}
+            onPageClick={(newPage) => setPage(newPage)}
+            compressed
           />
-        }
-        paddingSize="m"
-      >
-        <div css={containerStyle}>
-          {this._renderPaginationControl()}
-          {this.props.failedDocs.slice(startIndex, endIndex).map(({ item, reason, doc }) => (
-            <div key={item}>
-              <div css={errorStyle}>
-                {item}: {reason}
-              </div>
-              <div>{JSON.stringify(doc)}</div>
+        )}
+        {failedDocs.slice(startIndex, endIndex).map(({ item, reason, doc }) => (
+          <div key={item}>
+            <div
+              css={{
+                color: euiTheme.colors.danger,
+              }}
+            >
+              {item}: {reason}
             </div>
-          ))}
-        </div>
-      </EuiAccordion>
-    );
-  }
-}
+            <div>{JSON.stringify(doc)}</div>
+          </div>
+        ))}
+      </div>
+    </EuiAccordion>
+  );
+};

@@ -6,7 +6,6 @@
  */
 
 export { ColorRangeLegend } from './color_range_legend';
-export type { EuiThemeType } from './use_color_range';
 export {
   colorRangeOptions,
   colorRangeScaleOptions,

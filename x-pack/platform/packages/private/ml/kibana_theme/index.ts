@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { useIsDarkTheme, useCurrentEuiThemeVars, type EuiThemeType } from './src/hooks';
+export { useIsDarkTheme } from './src/hooks';

@@ -15,7 +15,7 @@ import { context } from '@kbn/kibana-react-plugin/public';
 
 import { detectorToString } from '../../../../../util/string_utils';
 
-export class Detectors extends Component {
+export class EditDetectorsTab extends Component {
   static contextType = context;
 
   constructor(props, constructorContext) {
@@ -67,7 +67,7 @@ export class Detectors extends Component {
     );
   }
 }
-Detectors.propTypes = {
+EditDetectorsTab.propTypes = {
   jobDetectors: PropTypes.array.isRequired,
   jobDetectorDescriptions: PropTypes.array.isRequired,
   setDetectorDescriptions: PropTypes.func.isRequired,

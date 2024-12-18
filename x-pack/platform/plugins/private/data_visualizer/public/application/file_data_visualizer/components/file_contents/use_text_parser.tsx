@@ -6,18 +6,17 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiText } from '@elastic/eui';
+import { useEuiTheme, EuiText } from '@elastic/eui';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { FieldBadge } from './field_badge';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import { GrokHighlighter } from './grok_highlighter';
 
 export function useGrokHighlighter() {
   const {
     services: { http },
   } = useDataVisualizerKibana();
-  const { euiSizeL } = useCurrentEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const createLines = useMemo(
     () =>
@@ -56,7 +55,7 @@ export function useGrokHighlighter() {
           return (
             <EuiText
               size="s"
-              css={{ lineHeight: euiSizeL }}
+              css={{ lineHeight: euiTheme.size.l }}
               data-test-subj="dataVisualizerHighlightedLine"
             >
               <code>{formattedWords}</code>
@@ -64,7 +63,7 @@ export function useGrokHighlighter() {
           );
         });
       },
-    [euiSizeL, http]
+    [euiTheme, http]
   );
 
   return createLines;
