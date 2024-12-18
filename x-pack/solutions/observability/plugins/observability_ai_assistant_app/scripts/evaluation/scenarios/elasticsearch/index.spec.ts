@@ -11,7 +11,7 @@ import expect from '@kbn/expect/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { chatClient, esClient } from '../../services';
 
-describe('elasticsearch functions', () => {
+describe('Elasticsearch functions', () => {
   // using 'all' for elasticsearch scenarios enables the LLM correctly pick
   // elasticsearch functions when querying for data
   before(() => {

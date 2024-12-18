@@ -18,7 +18,7 @@ import {
   customThresholdAIAssistantLogCount,
 } from '../../alert_templates/templates';
 
-describe('alert function', () => {
+describe('Alert function', () => {
   const ruleIds: any[] = [];
 
   before(async () => {
