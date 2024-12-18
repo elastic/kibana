@@ -38,7 +38,7 @@ export const WelcomeSetup: React.FC<Props> = ({
             data-test-subj="welcome-setup"
           >
             <EuiFlexItem grow={false}>
-              <AssistantBeacon backgroundColor="ghost" />
+              <AssistantBeacon backgroundColor="emptyShade" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText>

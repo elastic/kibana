@@ -104,7 +104,7 @@ export const AssistantBody: FunctionComponent<Props> = ({
         {isLoading ? (
           <EuiEmptyPrompt
             data-test-subj="animatedLogo"
-            icon={<AssistantBeacon backgroundColor="ghost" />}
+            icon={<AssistantBeacon backgroundColor="emptyShade" />}
           />
         ) : isWelcomeSetup ? (
           <WelcomeSetup
