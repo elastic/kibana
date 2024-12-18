@@ -13,7 +13,6 @@ import { EuiButton } from '@elastic/eui';
 
 import { action } from '@storybook/addon-actions';
 import { TextField } from '../../components';
-import { STORYBOOK_SECTION } from '../constants';
 import { FormHook, FieldConfig } from '../types';
 import { useForm } from '../hooks/use_form';
 import { Form, Props as FormProps } from './form';
@@ -22,7 +21,7 @@ import { formStories } from './__stories__';
 
 export default {
   component: Form,
-  title: `${STORYBOOK_SECTION}/Form`,
+  title: 'Form lib/Form',
   subcomponents: { UseField },
   decorators: [(Story) => <div style={{ maxWidth: '600px' }}>{Story()}</div>],
   parameters: {
