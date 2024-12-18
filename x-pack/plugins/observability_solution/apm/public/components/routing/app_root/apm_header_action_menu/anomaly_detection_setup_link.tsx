@@ -7,7 +7,7 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
-import { EuiHeaderLink, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiHeaderLink, EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { AnomalyDetectionSetupState } from '../../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
@@ -18,7 +18,6 @@ import {
 import { useAnomalyDetectionJobsContext } from '../../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useTheme } from '../../../../hooks/use_theme';
 import { getLegacyApmHref } from '../../../shared/links/apm/apm_link';
 
 export function AnomalyDetectionSetupLink() {
@@ -29,12 +28,12 @@ export function AnomalyDetectionSetupLink() {
   const { core } = useApmPluginContext();
 
   const { basePath } = core.http;
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
 
   let tooltipText: string = '';
-  let color: 'warning' | 'text' | 'success' | 'danger' = 'text';
+  let color: 'warning' | 'text' | 'accentSecondary' | 'danger' = 'text';
   let icon: IconType | undefined;
 
   if (anomalyDetectionSetupState === AnomalyDetectionSetupState.Failure) {
@@ -51,7 +50,7 @@ export function AnomalyDetectionSetupLink() {
     tooltipText = getNoJobsMessage(anomalyDetectionSetupState, environment);
     icon = 'machineLearningApp';
   } else if (anomalyDetectionSetupState === AnomalyDetectionSetupState.UpgradeableJobs) {
-    color = 'success';
+    color = 'accentSecondary';
     tooltipText = i18n.translate('xpack.apm.anomalyDetectionSetup.upgradeableJobsText', {
       defaultMessage: 'Updates available for existing anomaly detection jobs.',
     });
@@ -74,7 +73,7 @@ export function AnomalyDetectionSetupLink() {
       data-test-subj="apmAnomalyDetectionHeaderLink"
     >
       {pre}
-      <span style={{ marginInlineStart: theme.eui.euiSizeS }}>{ANOMALY_DETECTION_LINK_LABEL}</span>
+      <span style={{ marginInlineStart: euiTheme.size.s }}>{ANOMALY_DETECTION_LINK_LABEL}</span>
     </EuiHeaderLink>
   );
 

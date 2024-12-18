@@ -8,19 +8,21 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { truncate } from '../../../utils/style';
 import { ApmRoutes } from '../../routing/apm_route_config';
 import { SpanIcon } from '../span_icon';
 
-const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
+const StyledLink = styled(EuiLink)`
+  ${truncate('100%')};
+`;
 
 interface Props {
   query: TypeOf<ApmRoutes, '/dependencies/overview'>['query'];
   subtype?: string;
   type?: string;
-  onClick?: React.ComponentProps<typeof EuiLink>['onClick'];
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>;
 }
 
 export function DependencyLink({ query, subtype, type, onClick }: Props) {

@@ -18,14 +18,13 @@ import {
   DARK_THEME,
   LegendValue,
 } from '@elastic/charts';
-import { EuiTitle } from '@elastic/eui';
+import { EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
-import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ChartContainer } from '../../../shared/charts/chart_container';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
@@ -42,7 +41,7 @@ interface Props {
 
 export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
   const { core } = useApmPluginContext();
-  const theme = useTheme();
+  const { colorMode } = useEuiTheme();
 
   const { urlParams } = useLegacyUrlParams();
   const { comparisonEnabled } = urlParams;
@@ -97,7 +96,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
             showLegend
             legendValues={[LegendValue.CurrentAndLastValue]}
             legendPosition={Position.Bottom}
-            theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
+            theme={colorMode === 'DARK' ? DARK_THEME : LIGHT_THEME}
             locale={i18n.getLocale()}
           />
           <Axis

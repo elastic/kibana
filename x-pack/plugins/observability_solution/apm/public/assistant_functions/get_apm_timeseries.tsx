@@ -20,7 +20,6 @@ import type {
   GetApmTimeseriesFunctionResponse,
 } from '../../server/assistant_functions/get_apm_timeseries';
 import { Coordinate, TimeSeries } from '../../typings/timeseries';
-import { ApmThemeProvider } from '../components/routing/app_root';
 import {
   ChartType,
   getTimeSeriesColor,
@@ -54,101 +53,99 @@ export function registerGetApmTimeseriesFunction({
 
     return (
       <ChartPointerEventContextProvider>
-        <ApmThemeProvider>
-          <EuiFlexGroup direction="column">
-            {Object.values(groupedSeries).map((groupSeries) => {
-              const groupId = groupSeries[0].group;
+        <EuiFlexGroup direction="column">
+          {Object.values(groupedSeries).map((groupSeries) => {
+            const groupId = groupSeries[0].group;
 
-              const maxY = getMaxY(groupSeries);
-              const latencyFormatter = getDurationFormatter(maxY, 10, 1000);
+            const maxY = getMaxY(groupSeries);
+            const latencyFormatter = getDurationFormatter(maxY, 10, 1000);
 
-              let yLabelFormat: (value: number) => string;
+            let yLabelFormat: (value: number) => string;
 
-              const firstStat = groupSeries[0].stat;
+            const firstStat = groupSeries[0].stat;
 
-              switch (firstStat.timeseries.name) {
-                case 'transaction_throughput':
-                case 'exit_span_throughput':
-                case 'error_event_rate':
-                  yLabelFormat = asTransactionRate;
-                  break;
+            switch (firstStat.timeseries.name) {
+              case 'transaction_throughput':
+              case 'exit_span_throughput':
+              case 'error_event_rate':
+                yLabelFormat = asTransactionRate;
+                break;
 
-                case 'transaction_latency':
-                case 'exit_span_latency':
-                  yLabelFormat = getResponseTimeTickFormatter(latencyFormatter);
-                  break;
+              case 'transaction_latency':
+              case 'exit_span_latency':
+                yLabelFormat = getResponseTimeTickFormatter(latencyFormatter);
+                break;
 
-                case 'transaction_failure_rate':
-                case 'exit_span_failure_rate':
-                  yLabelFormat = (y) => asPercent(y || 0, 100);
-                  break;
-              }
+              case 'transaction_failure_rate':
+              case 'exit_span_failure_rate':
+                yLabelFormat = (y) => asPercent(y || 0, 100);
+                break;
+            }
 
-              const timeseries: Array<TimeSeries<Coordinate>> = groupSeries.map(
-                (series): TimeSeries<Coordinate> => {
-                  let chartType: ChartType;
+            const timeseries: Array<TimeSeries<Coordinate>> = groupSeries.map(
+              (series): TimeSeries<Coordinate> => {
+                let chartType: ChartType;
 
-                  const data = series.data;
+                const data = series.data;
 
-                  switch (series.stat.timeseries.name) {
-                    case 'transaction_throughput':
-                    case 'exit_span_throughput':
-                      chartType = ChartType.THROUGHPUT;
-                      break;
+                switch (series.stat.timeseries.name) {
+                  case 'transaction_throughput':
+                  case 'exit_span_throughput':
+                    chartType = ChartType.THROUGHPUT;
+                    break;
 
-                    case 'transaction_failure_rate':
-                    case 'exit_span_failure_rate':
-                      chartType = ChartType.FAILED_TRANSACTION_RATE;
-                      break;
+                  case 'transaction_failure_rate':
+                  case 'exit_span_failure_rate':
+                    chartType = ChartType.FAILED_TRANSACTION_RATE;
+                    break;
 
-                    case 'transaction_latency':
-                      if (series.stat.timeseries.function === LatencyAggregationType.p99) {
-                        chartType = ChartType.LATENCY_P99;
-                      } else if (series.stat.timeseries.function === LatencyAggregationType.p95) {
-                        chartType = ChartType.LATENCY_P95;
-                      } else {
-                        chartType = ChartType.LATENCY_AVG;
-                      }
-                      break;
-
-                    case 'exit_span_latency':
+                  case 'transaction_latency':
+                    if (series.stat.timeseries.function === LatencyAggregationType.p99) {
+                      chartType = ChartType.LATENCY_P99;
+                    } else if (series.stat.timeseries.function === LatencyAggregationType.p95) {
+                      chartType = ChartType.LATENCY_P95;
+                    } else {
                       chartType = ChartType.LATENCY_AVG;
-                      break;
+                    }
+                    break;
 
-                    case 'error_event_rate':
-                      chartType = ChartType.ERROR_OCCURRENCES;
-                      break;
-                  }
+                  case 'exit_span_latency':
+                    chartType = ChartType.LATENCY_AVG;
+                    break;
 
-                  return {
-                    title: series.id,
-                    type: 'line',
-                    color: getTimeSeriesColor(chartType!).currentPeriodColor,
-                    data,
-                  };
+                  case 'error_event_rate':
+                    chartType = ChartType.ERROR_OCCURRENCES;
+                    break;
                 }
-              );
 
-              return (
-                <EuiFlexItem grow={false} key={groupId}>
-                  <EuiFlexGroup direction="column" gutterSize="s">
-                    <EuiFlexItem>
-                      <EuiText size="m">{groupId}</EuiText>
-                      <TimeseriesChart
-                        comparisonEnabled={false}
-                        fetchStatus={FETCH_STATUS.SUCCESS}
-                        id={groupId}
-                        timeZone={timeZone}
-                        timeseries={timeseries}
-                        yLabelFormat={yLabelFormat!}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGroup>
-        </ApmThemeProvider>
+                return {
+                  title: series.id,
+                  type: 'line',
+                  color: getTimeSeriesColor(chartType!).currentPeriodColor,
+                  data,
+                };
+              }
+            );
+
+            return (
+              <EuiFlexItem grow={false} key={groupId}>
+                <EuiFlexGroup direction="column" gutterSize="s">
+                  <EuiFlexItem>
+                    <EuiText size="m">{groupId}</EuiText>
+                    <TimeseriesChart
+                      comparisonEnabled={false}
+                      fetchStatus={FETCH_STATUS.SUCCESS}
+                      id={groupId}
+                      timeZone={timeZone}
+                      timeseries={timeseries}
+                      yLabelFormat={yLabelFormat!}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGroup>
       </ChartPointerEventContextProvider>
     );
   });

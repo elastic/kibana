@@ -7,20 +7,19 @@
 
 import {
   EuiAccordion,
-  EuiAccordionProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { transparentize } from 'polished';
 import React, { useEffect, useRef } from 'react';
 import { WindowScroller, AutoSizer } from 'react-virtualized';
 import { areEqual, ListChildComponentProps, VariableSizeList as List } from 'react-window';
+import { css } from '@emotion/react';
 import { asBigNumber } from '../../../../../../../common/utils/formatters';
-import { useTheme } from '../../../../../../hooks/use_theme';
 import { Margins } from '../../../../../shared/charts/timeline';
 import {
   IWaterfallNodeFlatten,
@@ -52,38 +51,6 @@ interface WaterfallNodeProps extends WaterfallProps {
 }
 
 const ACCORDION_HEIGHT = 48;
-
-const StyledAccordion = euiStyled(EuiAccordion).withConfig({
-  shouldForwardProp: (prop) => !['marginLeftLevel', 'hasError'].includes(prop),
-})<
-  EuiAccordionProps & {
-    marginLeftLevel: number;
-    hasError: boolean;
-  }
->`
-
-  border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-
-  ${(props) => {
-    const borderLeft = props.hasError
-      ? `2px solid ${props.theme.eui.euiColorDanger};`
-      : `1px solid ${props.theme.eui.euiColorLightShade};`;
-    return `.button_${props.id} {
-      width: 100%;
-      height: ${ACCORDION_HEIGHT}px;
-      margin-left: ${props.marginLeftLevel}px;
-      border-left: ${borderLeft}
-      &:hover {
-        background-color: ${props.theme.eui.euiColorLightestShade};
-      }
-    }`;
-  }}
-
-  .accordion__buttonContent {
-    width: 100%;
-    height: 100%;
-  }
-`;
 
 export function AccordionWaterfall({
   maxLevelOpen,
@@ -176,7 +143,7 @@ const VirtualRow = React.memo(
 );
 
 const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const { duration, waterfallItemId, onClickWaterfallItem, timelineMargins, node } = props;
   const { criticalPathSegmentsById, getErrorCount, updateTreeNode, showCriticalPath } =
     useWaterfallContext();
@@ -190,7 +157,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
     ?.filter((segment) => segment.self)
     .map((segment) => ({
       id: segment.item.id,
-      color: theme.eui.euiColorAccent,
+      color: euiTheme.colors.accent,
       left: (segment.offset - node.item.offset - node.item.skew) / node.item.duration,
       width: segment.duration / node.item.duration,
     }));
@@ -203,14 +170,14 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
     onClickWaterfallItem(node.item, flyoutDetailTab);
   };
 
+  const hasError = node.item.doc.event?.outcome === 'failure';
+
   return (
-    <StyledAccordion
+    <EuiAccordion
       data-test-subj="waterfallItem"
       style={{ position: 'relative' }}
       buttonClassName={`button_${node.item.id}`}
       id={node.item.id}
-      hasError={node.item.doc.event?.outcome === 'failure'}
-      marginLeftLevel={marginLeftLevel}
       buttonContentClassName="accordion__buttonContent"
       buttonContent={
         <EuiFlexGroup gutterSize="none" responsive={false}>
@@ -243,6 +210,24 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
       initialIsOpen
       forceState={node.expanded ? 'open' : 'closed'}
       onToggle={toggleAccordion}
+      css={css`
+        border-top: ${euiTheme.border.thin};
+        .button_${node.item.id} {
+          width: 100%;
+          height: ${ACCORDION_HEIGHT}px;
+          margin-left: ${marginLeftLevel}px;
+          border-left: ${hasError
+            ? `${euiTheme.border.width.thick} solid ${euiTheme.colors.danger};`
+            : `${euiTheme.border.thin};`};
+          &:hover {
+            background-color: ${euiTheme.colors.lightestShade};
+          }
+        }
+        .accordion__buttonContent {
+          width: 100%;
+          height: 100%;
+        }
+      `}
     />
   );
 });

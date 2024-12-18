@@ -22,7 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
 import { first } from 'lodash';
@@ -56,8 +56,8 @@ import { ExceptionStacktrace } from './exception_stacktrace';
 import { SampleSummary } from './sample_summary';
 import { ErrorSampleContextualInsight } from './error_sample_contextual_insight';
 
-const TransactionLinkName = euiStyled.div`
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+const TransactionLinkName = styled.div`
+  margin-left: ${({ theme }) => theme.euiTheme.size.s};
   display: inline-block;
   vertical-align: middle;
 `;

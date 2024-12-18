@@ -9,18 +9,22 @@ import { isEmpty } from 'lodash';
 import { tint } from 'polished';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { unit } from '../../../../utils/style';
 import Suggestion from './suggestion';
 
-const List = euiStyled.ul`
+const List = styled.ul`
   width: 100%;
-  border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  border-radius: ${({ theme }) => theme.eui.euiBorderRadiusSmall};
-  box-shadow: 0 ${({ theme }) =>
-    `${theme.eui.euiSizeXS} ${theme.eui.euiSizeXL} ${tint(0.9, theme.eui.euiColorFullShade)}`};
+  border: 1px solid ${({ theme }) => theme.euiTheme.colors.lightShade};
+  border-radius: ${({ theme }) => theme.euiTheme.border.radius.small};
+  box-shadow: 0
+    ${({ theme }) =>
+      `${theme.euiTheme.size.xs} ${theme.euiTheme.size.xl} ${tint(
+        0.9,
+        theme.euiTheme.colors.fullShade
+      )}`};
   position: absolute;
-  background: ${({ theme }) => theme.eui.euiColorEmptyShade};
+  background: ${({ theme }) => theme.euiTheme.colors.emptyShade};
   z-index: 10;
   left: 0;
   max-height: ${unit * 20}px;

@@ -7,7 +7,7 @@
 
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { KibanaContextProvider, useDarkMode } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
@@ -16,9 +16,7 @@ import {
 } from '@kbn/observability-shared-plugin/public';
 import { Route } from '@kbn/shared-ux-router';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
-import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
-import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { KibanaEnvironmentContextProvider } from '../../../context/kibana_environment_context/kibana_environment_context';
 import { AnomalyDetectionJobsContextProvider } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
@@ -84,11 +82,9 @@ export function ApmAppRoot({
                                         <LicenseProvider>
                                           <AnomalyDetectionJobsContextProvider>
                                             <InspectorContextProvider>
-                                              <ApmThemeProvider>
-                                                <MountApmHeaderActionMenu />
-                                                <Route component={ScrollToTopOnPathChange} />
-                                                <RouteRenderer />
-                                              </ApmThemeProvider>
+                                              <MountApmHeaderActionMenu />
+                                              <Route component={ScrollToTopOnPathChange} />
+                                              <RouteRenderer />
                                             </InspectorContextProvider>
                                           </AnomalyDetectionJobsContextProvider>
                                         </LicenseProvider>
@@ -126,21 +122,5 @@ function MountApmHeaderActionMenu() {
         </EuiFlexItem>
       </EuiFlexGroup>
     </HeaderMenuPortal>
-  );
-}
-
-export function ApmThemeProvider({ children }: { children: React.ReactNode }) {
-  const darkMode = useDarkMode(false);
-
-  return (
-    <ThemeProvider
-      theme={(outerTheme?: DefaultTheme) => ({
-        ...outerTheme,
-        eui: darkMode ? euiDarkVars : euiLightVars,
-        darkMode,
-      })}
-    >
-      {children}
-    </ThemeProvider>
   );
 }

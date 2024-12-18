@@ -18,6 +18,7 @@ import {
   EuiBadge,
   EuiSwitch,
   EuiIconTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
@@ -34,7 +35,6 @@ import { FailedTransactionsCorrelation } from '../../../../common/correlations/f
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useTheme } from '../../../hooks/use_theme';
 import { push } from '../../shared/links/url_helpers';
 
 import { CorrelationsTable } from './correlations_table';
@@ -54,7 +54,7 @@ import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_
 import { TotalDocCountLabel } from '../../shared/charts/duration_distribution_chart/total_doc_count_label';
 
 export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => void }) {
-  const euiTheme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const {
     core: { notifications },
@@ -456,7 +456,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
           style={{
             display: 'flex',
             flexDirection: 'row',
-            paddingLeft: euiTheme.eui.euiSizeS,
+            paddingLeft: euiTheme.size.s,
           }}
         >
           <EuiSwitch
@@ -473,7 +473,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
           <EuiIconTip
             size="m"
             iconProps={{
-              style: { marginLeft: euiTheme.eui.euiSizeXS },
+              css: { marginLeft: euiTheme.size.xs },
             }}
             content={i18n.translate(
               'xpack.apm.correlations.latencyCorrelations.advancedStatisticsTooltipContent',

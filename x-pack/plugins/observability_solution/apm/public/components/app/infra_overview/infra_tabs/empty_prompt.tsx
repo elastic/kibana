@@ -11,12 +11,12 @@ import {
   EuiDescriptionListTitle,
   EuiEmptyPrompt,
   EuiImage,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import noResultsIllustrationDark from '../../../../assets/no_results_dark.svg';
 import noResultsIllustrationLight from '../../../../assets/no_results_light.svg';
-import { useTheme } from '../../../../hooks/use_theme';
 
 export function EmptyPrompt() {
   return (
@@ -52,9 +52,10 @@ export function EmptyPrompt() {
 }
 
 function NoResultsIllustration() {
-  const theme = useTheme();
+  const { colorMode } = useEuiTheme();
 
-  const illustration = theme.darkMode ? noResultsIllustrationDark : noResultsIllustrationLight;
+  const illustration =
+    colorMode === 'DARK' ? noResultsIllustrationDark : noResultsIllustrationLight;
 
   return (
     <EuiImage alt={noResultsIllustrationAlternativeText} size="fullWidth" src={illustration} />

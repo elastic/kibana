@@ -7,12 +7,12 @@
 
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { truncate } from '../../../utils/style';
 
 const tooltipAnchorClassname = '_apm_truncate_tooltip_anchor_';
 
-const TooltipWrapper = euiStyled.div`
+const TooltipWrapper = styled.div`
   width: 100%;
   .${tooltipAnchorClassname} {
     width: 100% !important;
@@ -20,7 +20,7 @@ const TooltipWrapper = euiStyled.div`
   }
 `;
 
-const ContentWrapper = euiStyled.div`
+const ContentWrapper = styled.div`
   ${truncate('100%')}
 `;
 

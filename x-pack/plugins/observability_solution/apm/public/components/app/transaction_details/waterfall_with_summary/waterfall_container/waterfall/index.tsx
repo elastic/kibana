@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { css } from '@emotion/react';
-import { useTheme } from '../../../../../../hooks/use_theme';
 import {
   VerticalLinesContainer,
   TimelineAxisContainer,
@@ -24,7 +23,7 @@ import { AccordionWaterfall } from './accordion_waterfall';
 import { WaterfallFlyout } from './waterfall_flyout';
 import { IWaterfall, IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 
-const Container = euiStyled.div`
+const Container = styled.div`
   transition: 0.1s padding ease;
   position: relative;
 `;
@@ -48,8 +47,8 @@ const toggleFlyout = ({
   });
 };
 
-const WaterfallItemsContainer = euiStyled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
+const WaterfallItemsContainer = styled.div`
+  border-bottom: 1px solid ${({ theme }) => theme.euiTheme.colors.mediumShade};
 `;
 
 interface Props {
@@ -90,7 +89,7 @@ const MAX_DEPTH_OPEN_LIMIT = 2;
 
 export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Props) {
   const history = useHistory();
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
 
   const { duration } = waterfall;
@@ -134,16 +133,16 @@ export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Prop
           display: flex;
           position: sticky;
           top: var(--euiFixedHeadersOffset, 0);
-          z-index: ${theme.eui.euiZLevel2};
-          background-color: ${theme.eui.euiColorEmptyShade};
-          border-bottom: 1px solid ${theme.eui.euiColorMediumShade};
+          z-index: ${euiTheme.levels.content};
+          background-color: ${euiTheme.colors.emptyShade};
+          border-bottom: 1px solid ${euiTheme.colors.mediumShade};
         `}
       >
         <EuiButtonEmpty
           data-test-subj="apmWaterfallButton"
           css={css`
             position: absolute;
-            z-index: ${theme.eui.euiZLevel2};
+            z-index: ${euiTheme.levels.content};
           `}
           iconType={isAccordionOpen ? 'fold' : 'unfold'}
           onClick={() => {

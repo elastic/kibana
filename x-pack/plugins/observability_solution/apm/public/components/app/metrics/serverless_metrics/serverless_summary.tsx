@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { asMillisecondDuration, asPercent } from '../../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -34,7 +34,7 @@ const CentralizedContainer = styled.div`
 
 const Border = styled.div`
   height: 55px;
-  border-right: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  border-right: ${({ theme }) => theme.euiTheme.border.thin};
 `;
 
 function VerticalRule() {

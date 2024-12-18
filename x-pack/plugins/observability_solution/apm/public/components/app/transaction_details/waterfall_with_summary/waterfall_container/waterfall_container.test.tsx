@@ -6,9 +6,9 @@
  */
 
 import { composeStories } from '@storybook/testing-react';
-import { render, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import React from 'react';
-import { disableConsoleWarning } from '../../../../../utils/test_helpers';
+import { disableConsoleWarning, renderWithTheme } from '../../../../../utils/test_helpers';
 import * as stories from './waterfall_container.stories';
 
 const { Example } = composeStories(stories);
@@ -25,7 +25,7 @@ describe('WaterfallContainer', () => {
   });
 
   it('expands and contracts the accordion', async () => {
-    const { getAllByRole } = render(<Example />);
+    const { getAllByRole } = renderWithTheme(<Example />);
     const buttons = await waitFor(() => getAllByRole('button'));
     const parentItem = buttons[1];
     const childItem = buttons[2];

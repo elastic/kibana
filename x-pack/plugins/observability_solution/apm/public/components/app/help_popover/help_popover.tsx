@@ -16,9 +16,9 @@ import {
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 
-const PopoverContent = euiStyled(EuiText)`
+const PopoverContent = styled(EuiText)`
   max-width: 480px;
   max-height: 40vh;
 `;

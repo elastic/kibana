@@ -6,16 +6,17 @@
  */
 
 import { composeStories } from '@storybook/testing-react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as stories from './popover.stories';
+import { renderWithTheme } from '../../../../utils/test_helpers';
 
 const { Dependency, ExternalsList, Resource, Service } = composeStories(stories);
 
 describe('Popover', () => {
   describe('with dependency data', () => {
     it('renders a dependency link', async () => {
-      render(<Dependency />);
+      renderWithTheme(<Dependency />);
 
       await waitFor(() => {
         expect(screen.getByRole('link', { name: /Dependency Details/i })).toBeInTheDocument();
@@ -25,7 +26,7 @@ describe('Popover', () => {
 
   describe('with externals list data', () => {
     it('renders an externals list', async () => {
-      render(<ExternalsList />);
+      renderWithTheme(<ExternalsList />);
 
       await waitFor(() => {
         expect(screen.getByText(/813-mam-392.mktoresp.com:443/)).toBeInTheDocument();
@@ -35,7 +36,7 @@ describe('Popover', () => {
 
   describe('with resource data', () => {
     it('renders with no buttons', async () => {
-      render(<Resource />);
+      renderWithTheme(<Resource />);
 
       await waitFor(() => {
         expect(screen.queryByRole('link')).not.toBeInTheDocument();
@@ -45,7 +46,7 @@ describe('Popover', () => {
 
   describe('with service data', () => {
     it('renders contents for a service', async () => {
-      render(<Service />);
+      renderWithTheme(<Service />);
 
       await waitFor(() => {
         expect(screen.getByRole('link', { name: /service details/i })).toBeInTheDocument();

@@ -6,14 +6,13 @@
  */
 
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../context/license/use_license_context';
-import { useTheme } from '../../../hooks/use_theme';
 import { LicensePrompt } from '../../shared/license_prompt';
 import { Controls } from './controls';
 import { Cytoscape } from './cytoscape';
@@ -103,7 +102,7 @@ export function ServiceMap({
   end: string;
   serviceGroupId?: string;
 }) {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const license = useLicenseContext();
   const serviceName = useServiceName();
   const { config } = useApmPluginContext();
@@ -200,7 +199,7 @@ export function ServiceMap({
             elements={data.elements}
             height={heightWithPadding}
             serviceName={serviceName}
-            style={getCytoscapeDivStyle(theme, status)}
+            style={getCytoscapeDivStyle(euiTheme, status)}
           >
             <Controls />
             {serviceName && <EmptyBanner />}

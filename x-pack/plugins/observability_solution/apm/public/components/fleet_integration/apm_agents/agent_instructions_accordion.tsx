@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ComponentType } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { AgentIcon } from '@kbn/custom-icons';

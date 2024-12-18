@@ -17,7 +17,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useTheme } from '../../../hooks/use_theme';
+import { useEuiTheme } from '@elastic/eui';
 import { useTraceExplorerEnabledSetting } from '../../../hooks/use_trace_explorer_enabled_setting';
 import { getCytoscapeOptions } from './cytoscape_options';
 import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
@@ -57,13 +57,13 @@ function useCytoscape(options: cytoscape.CytoscapeOptions) {
 }
 
 function CytoscapeComponent({ children, elements, height, serviceName, style }: CytoscapeProps) {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
   const [ref, cy] = useCytoscape({
-    ...getCytoscapeOptions(theme, isTraceExplorerEnabled),
+    ...getCytoscapeOptions(euiTheme, isTraceExplorerEnabled),
     elements,
   });
-  useCytoscapeEventHandlers({ cy, serviceName, theme });
+  useCytoscapeEventHandlers({ cy, serviceName, euiTheme });
 
   // Add items from the elements prop to the cytoscape collection and remove
   // items that no longer are in the list, then trigger an event to notify
