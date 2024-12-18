@@ -255,6 +255,8 @@ export const findAndRelocateModules = async (params: RelocateModulesParams, log:
     log.info(`Access the PR at: https://github.com/elastic/kibana/pull/${prNumber}`);
   } else {
     log.info('TIP: Run the following command to quickly create a PR:');
-    log.info(`$ gh pr create -d -t "<title>" -F ${DESCRIPTION} -R elastic/kibana`);
+    log.info(
+      `$ gh pr create -d -B "${baseBranch}" -t "<title>" -F ${DESCRIPTION} -R elastic/kibana`
+    );
   }
 };
