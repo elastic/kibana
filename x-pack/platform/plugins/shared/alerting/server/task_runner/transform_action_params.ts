@@ -85,7 +85,7 @@ export function transformActionParams({
 }: TransformActionParamsOptions): RuleActionParams {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
-  // x-pack/plugins/triggers_actions_ui/public/application/lib/action_variables.ts
+  // x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/action_variables.ts
 
   const variables: ActionContextVariables = {
     alertId,
@@ -158,7 +158,7 @@ export function transformSummaryActionParams({
 }): RuleActionParams {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
-  // x-pack/plugins/triggers_actions_ui/public/application/lib/action_variables.ts
+  // x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/action_variables.ts
 
   const variables: SummaryActionContextVariables = {
     alertId: rule.id,

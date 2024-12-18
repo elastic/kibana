@@ -52,8 +52,8 @@ Kibana ships with several built-in alert types:
 
 Every alert type must be registered server side, and can optionally be registered client side.
 Only alert types registered on both client and server will be displayed in the Create Alert flyout, as a part of the UI.
-Built-in alert types UI are located under the folder `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types`
-and this is a file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types/index.ts` for client side registration.
+Built-in alert types UI are located under the folder `x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/builtin_alert_types`
+and this is a file `x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/builtin_alert_types/index.ts` for client side registration.
 
 ### Index Threshold Alert
 
@@ -125,7 +125,7 @@ const setRuleProperty = (key: string, value: any) => {
 
 ```
 
-'x-pack/plugins/triggers_actions_ui/public/application/sections/alert_add/alert_reducer.ts' define the methods for changing different type of alert properties:
+'x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alert_add/alert_reducer.ts' define the methods for changing different type of alert properties:
 
 ```
 export const alertReducer = (state: any, action: AlertReducerAction) => {
@@ -283,7 +283,7 @@ Design of user interface and server API for multiple action groups is under disc
 There are two ways of registering a new alert type:
 
 1. Directly in the `triggers_actions_ui` plugin. In this case, the alert type will be available in the Create Alert flyout of the Alerts and Actions management section.
-   Registration code for a new alert type model should be added to the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types/index.ts`
+   Registration code for a new alert type model should be added to the file `x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/builtin_alert_types/index.ts`
    Only registered alert types are available in UI.
 
 2. Register the alert type in another plugin. In this case, the alert type will be available only in the current plugin UI.
@@ -305,11 +305,11 @@ Alert type UI is expected to be defined as `RuleTypeModel` object.
 
 Below is a list of steps that should be done to build and register a new alert type with the name `Example Alert Type`:
 
-1. At any suitable place in Kibana, create a file, which will expose an object implementing interface [RuleTypeModel](https://github.com/elastic/kibana/blob/55b7905fb5265b73806006e7265739545d7521d0/x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/types.ts#L83). Example:
+1. At any suitable place in Kibana, create a file, which will expose an object implementing interface [RuleTypeModel](https://github.com/elastic/kibana/blob/55b7905fb5265b73806006e7265739545d7521d0/x-pack/legacy/platform/plugins/shared/triggers_actions_ui/np_ready/public/types.ts#L83). Example:
 
 ```
 import { lazy } from 'react';
-import { RuleTypeModel } from '../../../../types';
+import { RuleTypeModel } from '../../../../../../types';
 import { validateExampleAlertType } from './validation';
 
 export function getAlertType(): RuleTypeModel {
@@ -332,8 +332,8 @@ Fields of this object `RuleTypeModel` will be mapped properly in the UI below.
 ```
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { WhenExpression, OfExpression } from '../../../../common/expression_items';
-import { builtInAggregationTypes } from '../../../../common/constants';
+import { WhenExpression, OfExpression } from '../../../../../../common/expression_items';
+import { builtInAggregationTypes } from '../../../../../../common/constants';
 
 interface ExampleProps {
   testAggType?: string;
@@ -390,7 +390,7 @@ Expression components, which can be embedded to different alert types, are descr
 
 ```
 import { i18n } from '@kbn/i18n';
-import { ValidationResult } from '../../../../types';
+import { ValidationResult } from '../../../../../../types';
 
 export function validateExampleAlertType({
   testAggField,
@@ -413,7 +413,7 @@ export function validateExampleAlertType({
 }
 ```
 
-4. Extend registration code with the new alert type register in the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types/index.ts`
+4. Extend registration code with the new alert type register in the file `x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/builtin_alert_types/index.ts`
 
 ```
 import { getAlertType as getExampledAlertType } from './example';
@@ -459,7 +459,7 @@ interface WhenExpressionProps {
 | Property                | Description                                                                                                                                                                    |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | aggType                 | Selected aggregation type that will be set as the alert type property.                                                                                                         |
-| customAggTypesOptions   | (Optional) List of aggregation types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts`. |
+| customAggTypesOptions   | (Optional) List of aggregation types that replaces the default options defined in constants `x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts`. |
 | onChangeSelectedAggType | event handler that will be executed when selected aggregation type is changed.                                                                                                 |
 | popupPosition           | (Optional) expression popup position. Default is `downLeft`. Recommend changing it for a small parent window space.                                                            |
 
@@ -505,7 +505,7 @@ interface OfExpressionProps {
 | errors                   | List of errors with proper messages for the alert params that should be validated. In current component is validated `aggField`.                                               |
 | onChangeSelectedAggField | Event handler that will be excuted if selected aggregation field is changed.                                                                                                   |
 | fields                   | Fields list that will be available in the OF `Select a field` dropdown.                                                                                                        |
-| customAggTypesOptions    | (Optional) List of aggregation types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts`. |
+| customAggTypesOptions    | (Optional) List of aggregation types that replaces the default options defined in constants `x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/aggregation_types.ts`. |
 | popupPosition            | (Optional) expression popup position. Default is `downRight`. Recommend changing it for a small parent window space.                                                           |
 
 ### GROUPED BY expression component
@@ -559,7 +559,7 @@ interface GroupByExpressionProps {
 | onChangeSelectedTermField | Event handler that will be executed if selected term field is changed.                                                                                                    |
 | onChangeSelectedGroupBy   | Event handler that will be executed if selected group by is changed.                                                                                                      |
 | fields                    | Fields list with options for the `termField` dropdown.                                                                                                                   |
-| customGroupByTypes        | (Optional) List of group by types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts`. |
+| customGroupByTypes        | (Optional) List of group by types that replaces the default options defined in constants `x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/group_by_types.ts`. |
 | popupPosition             | (Optional) expression popup position. Default is `downLeft`. Recommend changing it for a small parent window space.                                                      |
 
 ### FOR THE LAST expression component
@@ -645,7 +645,7 @@ interface ThresholdExpressionProps {
 | errors                              | List of errors with proper messages for the alert params that should be validated. In current component is validated `threshold0` and `threshold1`.                |
 | onChangeSelectedThresholdComparator | Event handler that will be excuted if selected threshold comparator is changed.                                                                                    |
 | onChangeSelectedThreshold           | Event handler that will be excuted if selected threshold is changed.                                                                                               |
-| customComparators                   | (Optional) List of comparators that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts`. |
+| customComparators                   | (Optional) List of comparators that replaces the default options defined in constants `x-pack/platform/plugins/shared/triggers_actions_ui/public/common/constants/comparators.ts`. |
 | popupPosition                       | (Optional) expression popup position. Default is `downLeft`. Recommend changing it for a small parent window space.                                                |
 
 ## Alert Conditions Components
@@ -886,8 +886,8 @@ Kibana ships with a set of built-in action types UI:
 
 Every action type should be registered server side, and can be optionally registered client side.
 Only action types registered on both client and server will be displayed in the Alerts and Actions UI.
-Built-in action types UI is located under the folder `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types`
-and this is a file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/index.ts` for client side registration.
+Built-in action types UI is located under the folder `x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/builtin_action_types`
+and this is a file `x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/builtin_action_types/index.ts` for client side registration.
 
 ### Server log
 
@@ -1192,7 +1192,7 @@ Each action type should be defined as an `ActionTypeModel` object with the follo
 There are two ways to register a new action type UI:
 
 1. Directly in `triggers_actions_ui` plugin. In this case, the action type will be available in the Alerts and Actions management section.
-   Registration code for a new action type model should be added to the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/index.ts`
+   Registration code for a new action type model should be added to the file `x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/builtin_action_types/index.ts`
    Only registered action types are available in UI.
 
 2. Register action type in another plugin. In this case, the action type will be available only in the current plugin UI.
@@ -1226,7 +1226,7 @@ import {
   ValidationResult,
   ActionConnectorFieldsProps,
   ActionParamsProps,
-} from '../../../types';
+} from '../../../../../types';
 
 interface ExampleActionParams {
   message: string;
@@ -1280,7 +1280,7 @@ import { i18n } from '@kbn/i18n';
 import { FieldConfig, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { ActionConnectorFieldsProps } from '../../../types';
+import { ActionConnectorFieldsProps } from '../../../../../types';
 
 const { emptyField } = fieldValidators;
 
@@ -1329,7 +1329,7 @@ import {
   ValidationResult,
   ActionConnectorFieldsProps,
   ActionParamsProps,
-} from '../../../types';
+} from '../../../../../types';
 
 interface ExampleActionParams {
   message: string;
@@ -1366,7 +1366,7 @@ const ExampleParamsFields: React.FunctionComponent<ActionParamsProps<ExampleActi
 export {ExampleParamsFields as default};
 ```
 
-4. Extend registration code with the new action type register in the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/index.ts`
+4. Extend registration code with the new action type register in the file `x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/builtin_action_types/index.ts`
 
 ```
 import { getActionType as getExampledActionType } from './example';
@@ -1401,7 +1401,7 @@ Follow the instructions bellow to embed the Alert Actions form within any Kibana
 import {
    TriggersAndActionsUIPublicPluginSetup,
    TriggersAndActionsUIPublicPluginStart,
- } from '../../../../../x-pack/plugins/triggers_actions_ui/public';
+ } from '../../../../../../../x-pack/platform/plugins/shared/triggers_actions_ui/public';
 
 triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 ...
@@ -1415,8 +1415,8 @@ Then this dependencies will be used to embed Actions form or register your own a
 
 ```
 import React, { useCallback } from 'react';
-import { ActionForm } from '../../../../../../../../../plugins/triggers_actions_ui/public';
-import { RuleAction } from '../../../../../../../../../plugins/triggers_actions_ui/public/types';
+import { ActionForm } from '../../../../../../../../../../../platform/plugins/shared/triggers_actions_ui/public';
+import { RuleAction } from '../../../../../../../../../../../platform/plugins/shared/triggers_actions_ui/public/types';
 
 export const ComponentWithActionsForm: () => {
   const { http, triggersActionsUi, notifications } = useKibana().services;
@@ -1531,7 +1531,7 @@ Follow the instructions bellow to embed the Create Connector flyout within any K
 import {
    TriggersAndActionsUIPublicPluginSetup,
    TriggersAndActionsUIPublicPluginStart,
- } from '../../../../../x-pack/plugins/triggers_actions_ui/public';
+ } from '../../../../../../../x-pack/platform/plugins/shared/triggers_actions_ui/public';
 
 triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 ...
@@ -1545,7 +1545,7 @@ Then this dependency will be used to embed Create Connector flyout or register n
 
 ```
 // import section
-import { ActionsConnectorsContextProvider, CreateConnectorFlyout } from '../../../../../../../triggers_actions_ui/public';
+import { ActionsConnectorsContextProvider, CreateConnectorFlyout } from '../../../../../../../../../triggers_actions_ui/public';
 
 // in the component state definition section
 const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -1615,7 +1615,7 @@ Follow the instructions bellow to embed the Edit Connector flyout within any Kib
 import {
    TriggersAndActionsUIPublicPluginSetup,
    TriggersAndActionsUIPublicPluginStart,
- } from '../../../../../x-pack/plugins/triggers_actions_ui/public';
+ } from '../../../../../../../x-pack/platform/plugins/shared/triggers_actions_ui/public';
 
 triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 ...
@@ -1629,7 +1629,7 @@ Then this dependency will be used to embed Edit Connector flyout.
 
 ```
 // import section
-import { ActionsConnectorsContextProvider, EditConnectorFlyout } from '../../../../../../../triggers_actions_ui/public';
+import { ActionsConnectorsContextProvider, EditConnectorFlyout } from '../../../../../../../../../triggers_actions_ui/public';
 
 // in the component state definition section
 const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
