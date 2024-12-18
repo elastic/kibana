@@ -11,11 +11,8 @@
     "@kbn/test",
     "@kbn/apm-synthtrace",
     "@kbn/apm-synthtrace-client",
-    "@kbn/dev-utils",
     "@kbn/axe-config",
     "@kbn/cypress-config",
     "@kbn/apm-plugin",
-    "@kbn/ftr-common-functional-services",
-    "@kbn/ftr-common-functional-ui-services"
   ]
 }
