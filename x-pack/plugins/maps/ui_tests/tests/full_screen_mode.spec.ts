@@ -8,7 +8,7 @@
 import { expect, tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
-test.describe('Maps full screen mode', () => {
+test.describe('Maps full screen mode', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin(); // add layer button not there when logged in as viewer
     await pageObjects.gis.goto();
@@ -17,7 +17,7 @@ test.describe('Maps full screen mode', () => {
     const sel = 'mapsFullScreenMode';
     await expect(
       page.testSubj.locator(sel),
-      `Could not find the Full screen in the ui, using selector ${sel}`
+      `Could not find the Full screen button, using selector ${sel}`
     ).toBeVisible();
   });
   test('full screen mode hides the kbn app wrapper', async ({ page, pageObjects }) => {
@@ -30,8 +30,14 @@ test.describe('Maps full screen mode', () => {
   test('layer control is visible', async ({ page }) => {
     expect(await page.testSubj.locator('addLayerButton').waitFor({ state: 'visible' }));
   });
-  // test('displays exit full screen logo button', async ({ page }) => {
-  // });
+  test('displays exit full screen logo button', async ({ page, pageObjects }) => {
+    await pageObjects.gis.clickFullScreenMode();
+    const sel = 'exitFullScreenModeButton';
+    await expect(
+      page.testSubj.locator(sel),
+      `Could not find the exit full screen button, using selector ${sel}`
+    ).toBeVisible();
+  });
   // test('exits when the text button is clicked on', async ({ page }) => {
   // });
 });
