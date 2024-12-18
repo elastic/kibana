@@ -64,11 +64,11 @@ describe('Component BulkEditRuleErrorsList', () => {
     ],
     [
       BulkActionsDryRunErrCode.MACHINE_LEARNING_INDEX_PATTERN,
-      "2 custom machine learning rules (these rules don't have index patterns)",
+      "2 machine learning rules (these rules don't have index patterns)",
     ],
     [
       BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN,
-      "2 custom ES|QL rules (these rules don't have index patterns)",
+      "2 ES|QL rules (these rules don't have index patterns)",
     ],
     [
       BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH,
