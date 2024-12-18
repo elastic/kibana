@@ -297,6 +297,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       }),
       icon: 'pencil',
       onClick: () => setDataStreamsToEditDataRetention(selection),
+      'data-test-subj': 'bulkEditDataRetentionButton',
     },
   ];
 
@@ -308,6 +309,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       icon: 'trash',
       onClick: () => setDataStreamsToDelete(selection.map(({ name }: DataStream) => name)),
       className: 'dataStreamsBulkDeleteButton',
+      'data-test-subj': 'deleteDataStreamsButton',
     });
   }
 

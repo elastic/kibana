@@ -215,7 +215,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
         </EuiModalHeader>
 
         <EuiModalBody>
-          {!isBulkEdit && ilmPolicyLink && isDSLWithILMIndices(dataStreams[0]) && (
+          {!isBulkEdit && isDSLWithILMIndices(dataStreams[0]) && (
             <>
               <MixedIndicesCallout
                 history={history}
