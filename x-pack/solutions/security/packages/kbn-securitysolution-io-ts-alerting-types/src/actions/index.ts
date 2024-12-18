@@ -25,7 +25,7 @@ export const RuleActionUuid = NonEmptyString;
 
 /**
  * Params is an "object", since it is a type of RuleActionParams which is action templates.
- * @see x-pack/plugins/alerting/common/rule.ts
+ * @see x-pack/platform/plugins/shared/alerting/common/rule.ts
  */
 export type RuleActionParams = t.TypeOf<typeof RuleActionParams>;
 export const RuleActionParams = saved_object_attributes;

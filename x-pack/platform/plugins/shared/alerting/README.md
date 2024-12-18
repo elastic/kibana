@@ -254,7 +254,7 @@ Currently most rule types are free features. But some rule types are subscriptio
 
 You should create asciidoc for each new rule type you develop:
 
-- For stack rules, add an entry to the rule type index - [`docs/user/alerting/stack-rules.asciidoc`](../../../docs/user/alerting/stack-rules.asciidoc) which points to a new document for the rule type that should live in the directory [`docs/user/alerting/stack-rules`](../../../docs/user/alerting/stack-rules).
+- For stack rules, add an entry to the rule type index - [`docs/user/alerting/stack-rules.asciidoc`](../../../../../docs/user/alerting/stack-rules.asciidoc) which points to a new document for the rule type that should live in the directory [`docs/user/alerting/stack-rules`](../../../docs/user/alerting/stack-rules).
 
 - Solution specific rule documentation should live within the docs for the solution.
 
@@ -271,14 +271,14 @@ This example rule type receives server and threshold as parameters. It will read
 
 ```typescript
 import { schema } from '@kbn/config-schema';
-import { RuleType, RuleExecutorOptions } from '../../../alerting/server';
+import { RuleType, RuleExecutorOptions } from '../../../../../alerting/server';
 // These type names will eventually be updated to reflect the new terminology
 import {
 	RuleTypeParams,
 	RuleTypeState,
 	AlertInstanceState,
 	AlertInstanceContext,
-} from '../../../alerting/common';
+} from '../../../../../alerting/common';
 ...
 interface MyRuleTypeParams extends RuleTypeParams {
 	server: string;
