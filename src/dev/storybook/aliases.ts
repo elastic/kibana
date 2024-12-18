@@ -41,7 +41,7 @@ export const storybookAliases = {
   expression_partition_vis: 'src/plugins/chart_expressions/expression_partition_vis/.storybook',
   expression_repeat_image: 'src/platform/plugins/shared/expression_repeat_image/.storybook',
   expression_reveal_image: 'src/platform/plugins/shared/expression_reveal_image/.storybook',
-  expression_shape: 'src/plugins/expression_shape/.storybook',
+  expression_shape: 'src/platform/plugins/shared/expression_shape/.storybook',
   expression_tagcloud: 'src/plugins/chart_expressions/expression_tagcloud/.storybook',
   fleet: 'x-pack/plugins/fleet/.storybook',
   grouping: 'packages/kbn-grouping/.storybook',
