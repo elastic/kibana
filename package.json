@@ -713,7 +713,7 @@
     "@kbn/observability-utils-server": "link:x-pack/packages/observability/observability_utils/observability_utils_server",
     "@kbn/oidc-provider-plugin": "link:x-pack/test/security_api_integration/plugins/oidc_provider",
     "@kbn/open-telemetry-instrumented-plugin": "link:test/common/plugins/otel_metrics",
-    "@kbn/openapi-common": "link:packages/kbn-openapi-common",
+    "@kbn/openapi-common": "link:src/platform/packages/shared/kbn-openapi-common",
     "@kbn/osquery-io-ts-types": "link:src/platform/packages/shared/kbn-osquery-io-ts-types",
     "@kbn/osquery-plugin": "link:x-pack/platform/plugins/shared/osquery",
     "@kbn/paertial-results-example-plugin": "link:examples/partial_results_example",
