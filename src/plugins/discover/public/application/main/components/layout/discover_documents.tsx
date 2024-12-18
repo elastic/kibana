@@ -48,6 +48,7 @@ import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
+import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -111,20 +112,22 @@ function DiscoverDocumentsComponent({
   const { dataViews, capabilities, uiSettings, uiActions, ebtManager, fieldsMetadata } = services;
 
   const requestParams = useInternalStateSelector((state) => state.requestParams);
+  const dataSource = requestParams.appState?.dataSource;
+  const query = requestParams.appState?.query;
+  const [sort, rowHeight, headerRowHeight, rowsPerPage, grid, columns, sampleSizeState, density] =
+    useAppStateSelector((state) => {
+      return [
+        state.sort,
+        state.rowHeight,
+        state.headerRowHeight,
+        state.rowsPerPage,
+        state.grid,
+        state.columns,
+        state.sampleSize,
+        state.density,
+      ];
+    });
   const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
-
-  const {
-    dataSource,
-    query,
-    sort,
-    rowHeight,
-    headerRowHeight,
-    rowsPerPage,
-    grid,
-    columns,
-    sampleSize: sampleSizeState,
-    density,
-  } = requestParams.appState || {};
   const isEsqlMode = useIsEsqlMode();
   const documentState = useDataState(documents$);
   const isDataLoading =
