@@ -683,7 +683,7 @@ x-pack/packages/observability/observability_utils/observability_utils_server @el
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
 packages/kbn-openapi-bundler @elastic/security-detection-rule-management
-packages/kbn-openapi-common @elastic/security-detection-rule-management
+src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-rule-management
 packages/kbn-openapi-generator @elastic/security-detection-rule-management
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
@@ -1039,7 +1039,7 @@ packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 packages/kbn-xstate-utils @elastic/obs-ux-logs-team
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 packages/kbn-zod @elastic/kibana-core
-packages/kbn-zod-helpers @elastic/security-detection-rule-management
+src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-management
 ####
 ## Everything below this line overrides the default assignments for each package.
 ## Items lower in the file have higher precedence:

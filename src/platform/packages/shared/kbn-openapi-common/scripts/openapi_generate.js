@@ -7,8 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-zod-helpers'],
-};
+require('../../../../../setup_node_env');
+const { resolve } = require('path');
+const { generate } = require('@kbn/openapi-generator');
+
+const ROOT = resolve(__dirname, '..');
+
+(async () => {
+  await generate({
+    title: 'OpenAPI Common Schemas (kbn-openapi-common)',
+    rootDir: ROOT,
+    sourceGlob: './schemas/**/*.schema.yaml',
+    templateName: 'zod_operation_schema',
+  });
+})();
