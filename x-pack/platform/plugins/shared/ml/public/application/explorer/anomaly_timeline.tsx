@@ -239,6 +239,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             />
           ),
           panel: 'addToDashboardPanel',
+          icon: 'dashboardApp',
           'data-test-subj': 'mlAnomalyTimelinePanelAddToDashboardButton',
         });
 
@@ -284,6 +285,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               defaultMessage="Add to case"
             />
           ),
+          icon: 'casesApp',
           'data-test-subj': 'mlAnomalyTimelinePanelAttachToCaseButton',
         });
 

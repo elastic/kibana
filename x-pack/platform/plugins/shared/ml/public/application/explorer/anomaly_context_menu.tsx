@@ -270,6 +270,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
           />
         ),
         panel: 'addToDashboardPanel',
+        icon: 'dashboardApp',
         'data-test-subj': 'mlAnomalyAddChartsToDashboardButton',
       });
 
@@ -290,6 +291,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
         name: (
           <FormattedMessage id="xpack.ml.explorer.attachToCaseLabel" defaultMessage="Add to case" />
         ),
+        icon: 'casesApp',
         panel: 'addToCasePanel',
         'data-test-subj': 'mlAnomalyAttachChartsToCasesButton',
       });

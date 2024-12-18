@@ -287,6 +287,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                     defaultMessage: 'To dashboard',
                   }),
                   panel: 'attachToDashboardPanel',
+                  icon: 'dashboardApp',
                   'data-test-subj': 'aiopsChangePointDetectionAttachToDashboardButton',
                 },
               ]
@@ -311,6 +312,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                     : {}),
                   'data-test-subj': 'aiopsChangePointDetectionAttachToCaseButton',
                   panel: 'attachToCasePanel',
+                  icon: 'casesApp',
                 },
               ]
             : []),

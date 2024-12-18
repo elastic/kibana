@@ -145,6 +145,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
               defaultMessage="Add to dashboard"
             />
           ),
+          icon: 'dashboardApp',
           onClick: closePopoverOnAction(() => {
             setCreateInDashboard(true);
           }),
@@ -163,6 +164,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
           defaultMessage="Add to case"
         />
       ),
+      icon: 'casesApp',
       onClick: closePopoverOnAction(() => {
         openCasesModalCallback({
           forecastId,

@@ -124,6 +124,7 @@ export const LogRateAnalysisAttachmentsMenu = ({
                   name: i18n.translate('xpack.aiops.logRateAnalysis.addToDashboardTitle', {
                     defaultMessage: 'Add to dashboard',
                   }),
+                  icon: 'dashboardApp',
                   panel: 'attachToDashboardPanel',
                   'data-test-subj': 'aiopsLogRateAnalysisAttachToDashboardButton',
                 },
@@ -135,6 +136,7 @@ export const LogRateAnalysisAttachmentsMenu = ({
                   name: i18n.translate('xpack.aiops.logRateAnalysis.attachToCaseLabel', {
                     defaultMessage: 'Add to case',
                   }),
+                  icon: 'casesApp',
                   'data-test-subj': 'aiopsLogRateAnalysisAttachToCaseButton',
                   disabled: !isCasesAttachmentEnabled,
                   ...(!isCasesAttachmentEnabled

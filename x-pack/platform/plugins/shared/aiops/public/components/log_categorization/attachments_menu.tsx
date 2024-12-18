@@ -127,6 +127,7 @@ export const AttachmentsMenu = ({
                     defaultMessage: 'Add to dashboard',
                   }),
                   panel: 'attachToDashboardPanel',
+                  icon: 'dashboardApp',
                   'data-test-subj': 'aiopsLogPatternAnalysisAttachToDashboardButton',
                 },
               ]
@@ -137,6 +138,7 @@ export const AttachmentsMenu = ({
                   name: i18n.translate('xpack.aiops.logCategorization.attachToCaseLabel', {
                     defaultMessage: 'Add to case',
                   }),
+                  icon: 'casesApp',
                   'data-test-subj': 'aiopsLogPatternAnalysisAttachToCaseButton',
                   onClick: () => {
                     setIsActionMenuOpen(false);
