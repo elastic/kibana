@@ -226,7 +226,7 @@ These are the contracts exposed by the core services for each lifecycle:
 
 |_setup_
 |{kib-repo}blob/{branch}/packages/core/lifecycle/core-lifecycle-server/src/core_setup.ts[CoreSetup]
-|{kib-repo}blob/{branch}/packages/core/lifecycle/core-lifecycle-browser-internal/src/internal_core_setup.ts[CoreSetup]
+|{kib-repo}blob/{branch}/src/core/packages/lifecycle/browser-internal/src/internal_core_setup.ts[CoreSetup]
 
 |_start_
 |{kib-repo}blob/{branch}/packages/core/lifecycle/core-lifecycle-server/src/core_start.ts[CoreStart]
