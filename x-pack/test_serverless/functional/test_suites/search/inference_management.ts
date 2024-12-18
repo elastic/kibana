@@ -97,6 +97,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
+    describe('create inference flyout', () => {
+      it('renders successfully', async () => {
+        await pageObjects.svlSearchInferenceManagementPage.AddInferenceFlyout.expectInferenceEndpointToBeVisible();
+      });
+    });
+
     it('has embedded dev console', async () => {
       await testHasEmbeddedConsole(pageObjects);
     });

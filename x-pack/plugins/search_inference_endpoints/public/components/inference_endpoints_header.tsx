@@ -30,7 +30,7 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
           iconType="plusInCircle"
           fill
           iconSize="m"
-          data-test-subj="add-ai-connector"
+          data-test-subj="add-inference-endpoint-header-button"
           onClick={() => setIsAddInferenceFlyoutOpen(true)}
         >
           {i18n.ADD_ENDPOINT_LABEL}
