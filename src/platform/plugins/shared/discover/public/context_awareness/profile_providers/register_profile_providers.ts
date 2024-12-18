@@ -151,5 +151,5 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
 const createDocumentProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDocumentProfileProvider(),
   createObservabilityLogDocumentProfileProvider(providerServices),
-  createSecurityDocumentProfileProvider(),
+  createSecurityDocumentProfileProvider(providerServices),
 ];

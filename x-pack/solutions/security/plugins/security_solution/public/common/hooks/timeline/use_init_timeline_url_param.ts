@@ -43,8 +43,6 @@ export const useInitTimelineFromUrlParam = () => {
   useEffect(() => {
     const listener = () => {
       const timelineState = new URLSearchParams(window.location.search).get(URL_PARAM_KEY.timeline);
-      console.log({ timelineState });
-      debugger;
 
       if (!timelineState) {
         return;
