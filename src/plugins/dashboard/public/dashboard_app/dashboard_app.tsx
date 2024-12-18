@@ -14,10 +14,10 @@ import { debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
+import { ViewMode } from '@kbn/presentation-publishing';
 import { DashboardApi, DashboardCreationOptions, DashboardRenderer } from '..';
 import { SharedDashboardState } from '../../common';
 import {
@@ -154,7 +154,7 @@ export function DashboardApp({
         // if print mode is active, force viewMode.PRINT
         ...(screenshotModeService.isScreenshotMode() &&
         screenshotModeService.getScreenshotContext('layout') === 'print'
-          ? { viewMode: ViewMode.PRINT }
+          ? { viewMode: 'print' as ViewMode }
           : {}),
       };
     };
