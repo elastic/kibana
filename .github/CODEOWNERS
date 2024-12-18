@@ -784,7 +784,7 @@ packages/kbn-scout-reporting @elastic/appex-qa
 examples/screenshot_mode_example @elastic/appex-sharedux
 src/plugins/screenshot_mode @elastic/appex-sharedux
 x-pack/examples/screenshotting_example @elastic/appex-sharedux
-x-pack/plugins/screenshotting @elastic/kibana-reporting-services
+x-pack/platform/plugins/shared/screenshotting @elastic/kibana-reporting-services
 packages/kbn-screenshotting-server @elastic/appex-sharedux
 packages/kbn-search-api-keys-components @elastic/search-kibana
 packages/kbn-search-api-keys-server @elastic/search-kibana
