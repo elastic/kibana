@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { EuiHealth, EuiText, useEuiTheme } from '@elastic/eui';
-import { capitalize, get as _get } from 'lodash';
+import { capitalize } from 'lodash';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
