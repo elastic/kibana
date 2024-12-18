@@ -11947,7 +11947,7 @@ paths:
         - saved objects
   /api/endpoint_list:
     post:
-      description: Creates an endpoint list or does nothing if the list already exists
+      description: Create an endpoint exception list, which groups endpoint exception list items. If an endpoint exception list already exists, an empty response is returned.
       operationId: CreateEndpointList
       responses:
         '200':
@@ -11982,11 +11982,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Creates an endpoint list
+      summary: Create an endpoint exception list
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint_list/items:
     delete:
+      description: Delete an endpoint exception list item using the `id` or `item_id` field.
       operationId: DeleteEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -12040,10 +12041,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Deletes an endpoint list item
+      summary: Delete an endpoint exception list item
       tags:
         - Security Endpoint Exceptions API
     get:
+      description: Get the details of an endpoint exception list item using the `id` or `item_id` field.
       operationId: ReadEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -12099,10 +12101,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Reads an endpoint list item
+      summary: Get an endpoint exception list item
       tags:
         - Security Endpoint Exceptions API
     post:
+      description: Create an endpoint exception list item, and associate it with the endpoint exception list.
       operationId: CreateEndpointListItem
       requestBody:
         content:
@@ -12177,10 +12180,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Creates an endpoint list item
+      summary: Create an endpoint exception list item
       tags:
         - Security Endpoint Exceptions API
     put:
+      description: Update an endpoint exception list item using the `id` or `item_id` field.
       operationId: UpdateEndpointListItem
       requestBody:
         content:
@@ -12260,11 +12264,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Updates an endpoint list item
+      summary: Update an endpoint exception list item
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint_list/items/_find:
     get:
+      description: Get a list of all endpoint exception list items.
       operationId: FindEndpointListItems
       parameters:
         - description: |
@@ -12364,7 +12369,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Finds endpoint list items
+      summary: Get endpoint exception list items
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint/action:
@@ -18194,6 +18199,10 @@ paths:
         - Fleet uninstall tokens
   /api/lists:
     delete:
+      description: |
+        Delete a list using the list ID.
+        > info
+        > When you delete a list, all of its list items are also deleted.
       operationId: DeleteList
       parameters:
         - description: List's `id` value
@@ -18253,10 +18262,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Deletes a list
+      summary: Delete a list
       tags:
         - Security Lists API
     get:
+      description: Get the details of a list using the list ID.
       operationId: ReadList
       parameters:
         - description: List's `id` value
@@ -18304,10 +18314,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Retrieves a list using its id field
+      summary: Get list details
       tags:
         - Security Lists API
     patch:
+      description: Update specific fields of an existing list using the list ID.
       operationId: PatchList
       requestBody:
         content:
@@ -18371,10 +18382,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Patches a list
+      summary: Patch a list
       tags:
         - Security Lists API
     post:
+      description: Create a new list.
       operationId: CreateList
       requestBody:
         content:
@@ -18445,10 +18457,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Creates a list
+      summary: Create a list
       tags:
         - Security Lists API
     put:
+      description: |
+        Update a list using the list ID. The original list is replaced, and all unspecified fields are deleted.
+        > info
+        > You cannot modify the `id` value.
       operationId: UpdateList
       requestBody:
         content:
@@ -18514,11 +18530,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Updates a list
+      summary: Update a list
       tags:
         - Security Lists API
   /api/lists/_find:
     get:
+      description: Get a paginated subset of lists. By default, the first page is returned, with 20 results per page.
       operationId: FindLists
       parameters:
         - description: The page number to return
@@ -18620,11 +18637,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Finds lists
+      summary: Get lists
       tags:
         - Security Lists API
   /api/lists/index:
     delete:
+      description: Delete the `.lists` and `.items` data streams.
       operationId: DeleteListIndex
       responses:
         '200':
@@ -18670,10 +18688,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Deletes list data streams
+      summary: Delete list data streams
       tags:
         - Security Lists API
     get:
+      description: Verify that `.lists` and `.items` data streams exist.
       operationId: ReadListIndex
       responses:
         '200':
@@ -18722,10 +18741,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Get list data stream existence status
+      summary: Get status of list data streams
       tags:
         - Security Lists API
     post:
+      description: Create `.lists` and `.items` data streams in the relevant space.
       operationId: CreateListIndex
       responses:
         '200':
@@ -18771,11 +18791,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Creates necessary list data streams
+      summary: Create list data streams
       tags:
         - Security Lists API
   /api/lists/items:
     delete:
+      description: Delete a list item using its `id`, or its `list_id` and `value` fields.
       operationId: DeleteListItem
       parameters:
         - description: Required if `list_id` and `value` are not specified
@@ -18850,10 +18871,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Deletes a list item
+      summary: Delete a list item
       tags:
         - Security Lists API
     get:
+      description: Get the details of a list item.
       operationId: ReadListItem
       parameters:
         - description: Required if `list_id` and `value` are not specified
@@ -18917,10 +18939,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Gets a list item
+      summary: Get a list item
       tags:
         - Security Lists API
     patch:
+      description: Update specific fields of an existing list item using the list item ID.
       operationId: PatchListItem
       requestBody:
         content:
@@ -18986,10 +19009,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Patches a list item
+      summary: Patch a list item
       tags:
         - Security Lists API
     post:
+      description: |
+        Create a list item and associate it with the specified list.
+
+        All list items in the same list must be the same type. For example, each list item in an `ip` list must define a specific IP address.
+        > info
+        > Before creating a list item, you must create a list.
       operationId: CreateListItem
       requestBody:
         content:
@@ -19056,10 +19085,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Creates a list item
+      summary: Create a list item
       tags:
         - Security Lists API
     put:
+      description: |
+        Update a list item using the list item ID. The original list item is replaced, and all unspecified fields are deleted.
+        > info
+        > You cannot modify the `id` value.
       operationId: UpdateListItem
       requestBody:
         content:
@@ -19119,12 +19152,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Updates a list item
+      summary: Update a list item
       tags:
         - Security Lists API
   /api/lists/items/_export:
     post:
-      description: Exports list item values from the specified list
+      description: Export list item values from the specified list.
       operationId: ExportListItems
       parameters:
         - description: List's id to export
@@ -19174,11 +19207,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Exports list items
+      summary: Export list items
       tags:
         - Security Lists API
   /api/lists/items/_find:
     get:
+      description: Get all list items in the specified list.
       operationId: FindListItems
       parameters:
         - description: List's id
@@ -19286,13 +19320,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Finds list items
+      summary: Get list items
       tags:
         - Security Lists API
   /api/lists/items/_import:
     post:
       description: |
-        Imports a list of items from a `.txt` or `.csv` file. The maximum file size is 9 million bytes.
+        Import list items from a TXT or CSV file. The maximum file size is 9 million bytes.
 
         You can import items to a new or existing list.
       operationId: ImportListItems
@@ -19385,7 +19419,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Imports list items
+      summary: Import list items
       tags:
         - Security Lists API
   /api/lists/privileges:
@@ -19435,7 +19469,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Gets list privileges
+      summary: Get list privileges
       tags:
         - Security Lists API
   /api/ml/saved_objects/sync:
