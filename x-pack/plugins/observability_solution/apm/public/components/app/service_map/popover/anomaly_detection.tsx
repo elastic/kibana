@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiIconTip, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+  EuiIconTip,
+  EuiTitle,
+  useEuiFontSize,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { getSeverity, ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
 import {
   getServiceHealthStatus,
@@ -16,32 +24,31 @@ import {
 } from '../../../../../common/service_health_status';
 import { TRANSACTION_REQUEST } from '../../../../../common/transaction_types';
 import { asDuration, asInteger } from '../../../../../common/utils/formatters';
-import { useTheme } from '../../../../hooks/use_theme';
 import { MLSingleMetricLink } from '../../../shared/links/machine_learning_links/mlsingle_metric_link';
 import { popoverWidth } from '../cytoscape_options';
 
-const HealthStatusTitle = euiStyled(EuiTitle)`
+const HealthStatusTitle = styled(EuiTitle)`
   display: inline;
   text-transform: uppercase;
 `;
 
-const VerticallyCentered = euiStyled.div`
+const VerticallyCentered = styled.div`
   display: flex;
   align-items: center;
 `;
 
-const SubduedText = euiStyled.span`
-  color: ${({ theme }) => theme.eui.euiTextSubduedColor};
+const SubduedText = styled.span`
+  color: ${({ theme }) => theme.euiTheme.colors.textSubdued};
 `;
 
-const EnableText = euiStyled.section`
-  color: ${({ theme }) => theme.eui.euiTextSubduedColor};
+const EnableText = styled.section`
+  color: ${({ theme }) => theme.euiTheme.colors.textSubdued};
   line-height: 1.4;
-  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
+  font-size: ${() => useEuiFontSize('s').fontSize};
   width: ${popoverWidth}px;
 `;
 
-export const ContentLine = euiStyled.section`
+export const ContentLine = styled.section`
   line-height: 2;
 `;
 
@@ -50,7 +57,7 @@ interface Props {
   serviceAnomalyStats: ServiceAnomalyStats | undefined;
 }
 export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const anomalyScore = serviceAnomalyStats?.anomalyScore;
   const severity = getSeverity(anomalyScore);
@@ -76,7 +83,7 @@ export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
           <EuiFlexGroup>
             <EuiFlexItem>
               <VerticallyCentered>
-                <EuiHealth color={getServiceHealthStatusColor(theme, healthStatus)} />
+                <EuiHealth color={getServiceHealthStatusColor(euiTheme, healthStatus)} />
                 <SubduedText>{ANOMALY_DETECTION_SCORE_METRIC}</SubduedText>
               </VerticallyCentered>
             </EuiFlexItem>

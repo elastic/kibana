@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { JobDetails } from './job_details';
-export { Detectors } from './detectors';
-export { Datafeed } from './datafeed';
+export { EditJobDetailsTab } from './edit_job_details_tab';
+export { EditDetectorsTab } from './edit_detectors_tab';
+export { EditDatafeedTab } from './edit_datafeed_tab';
