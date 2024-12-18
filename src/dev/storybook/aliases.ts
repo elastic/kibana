@@ -12,11 +12,13 @@
 // If you wish for your Storybook to be built and included in CI, also add your
 // alias to .buildkite/scripts/steps/storybooks/build_and_upload.ts
 export const storybookAliases = {
+  ai_assistant: 'x-pack/packages/kbn-ai-assistant/.storybook',
   apm: 'x-pack/plugins/observability_solution/apm/.storybook',
   canvas: 'x-pack/plugins/canvas/storybook',
   cases: 'packages/kbn-cases-components/.storybook',
   cell_actions: 'src/platform/packages/shared/kbn-cell-actions/.storybook',
-  cloud_security_posture_packages: 'x-pack/packages/kbn-cloud-security-posture/storybook/config',
+  cloud_security_posture_packages:
+    'x-pack/solutions/security/packages/kbn-cloud-security-posture/.storybook',
   cloud: 'packages/cloud/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',
   language_documentation_popover:
