@@ -18,7 +18,6 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/react-kibana-context-styled",
-    "@kbn/react-kibana-context-styled",
     "@kbn/kibana-react-plugin"
   ]
 }
