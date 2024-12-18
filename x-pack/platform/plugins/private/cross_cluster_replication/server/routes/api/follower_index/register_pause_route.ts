@@ -22,6 +22,12 @@ export const registerPauseRoute = ({
   router.put(
     {
       path: addBasePath('/follower_indices/{id}/pause'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },

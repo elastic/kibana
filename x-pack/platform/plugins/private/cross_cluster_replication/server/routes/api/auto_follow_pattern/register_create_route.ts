@@ -29,6 +29,12 @@ export const registerCreateRoute = ({
   router.post(
     {
       path: addBasePath('/auto_follow_patterns'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },

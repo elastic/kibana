@@ -18,6 +18,12 @@ export function registerLicenseRoute({
   router.put(
     {
       path: addBasePath(''),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         query: schema.object({ acknowledge: schema.string() }),
         body: schema.object({

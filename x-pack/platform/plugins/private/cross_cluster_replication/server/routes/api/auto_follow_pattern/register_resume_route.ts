@@ -24,6 +24,12 @@ export const registerResumeRoute = ({
   router.post(
     {
       path: addBasePath('/auto_follow_patterns/{id}/resume'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },

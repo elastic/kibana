@@ -50,7 +50,16 @@ export function registerCreateRoute({
   lib: { handleEsError },
 }: RouteDependencies) {
   router.post(
-    { path: addBasePath('/policies'), validate: { body: bodySchema } },
+    {
+      path: addBasePath('/policies'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { body: bodySchema },
+    },
     license.guardApiRoute(async (context, request, response) => {
       const body = request.body as typeof bodySchema.type;
       const { name, ...rest } = body;
