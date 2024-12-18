@@ -75,6 +75,10 @@ export const ExpandableSection: FC<PropsWithChildren<{ title: string }>> = ({
 
 export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
   const reason = useMemo(() => getFieldValue(hit, 'kibana.alert.reason') as string, [hit]);
+  const description = useMemo(
+    () => getFieldValue(hit, 'kibana.alert.rule.description') as string,
+    [hit]
+  );
   const alertURL = useMemo(() => getFieldValue(hit, 'kibana.alert.url') as string, [hit]);
   const eventKind = useMemo(() => getFieldValue(hit, 'event.kind') as string, [hit]);
   const isAlert = useMemo(() => eventKind === 'signal', [eventKind]);
@@ -104,6 +108,13 @@ export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
           <EuiText data-test-subj="about">{getEcsAllowedValueDescription(eventCategory)}</EuiText>
         </ExpandableSection>
       </EuiFlexItem>
+      {description ? (
+        <EuiFlexItem>
+          <ExpandableSection title={'Description'}>
+            <EuiText data-test-subj="description">{description}</EuiText>
+          </ExpandableSection>
+        </EuiFlexItem>
+      ) : null}
       {isAlert ? (
         <EuiFlexItem>
           <ExpandableSection title={'Reason'}>
