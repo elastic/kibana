@@ -78,7 +78,7 @@ const registerCustomThresholdRuleAction = (
   { dataView }: AppMenuExtensionParams
 ) => {
   registry.registerCustomActionUnderSubmenu(AppMenuActionId.alerts, {
-    id: AppMenuActionId.createRule,
+    id: 'custom-threshold-rule',
     type: AppMenuActionType.custom,
     order: 101,
     controlProps: {
