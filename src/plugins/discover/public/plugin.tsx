@@ -429,7 +429,7 @@ export class DiscoverPlugin
       },
       savedObjectType: SavedSearchType,
       savedObjectName: i18n.translate('discover.savedSearch.savedObjectName', {
-        defaultMessage: 'Saved search',
+        defaultMessage: 'Discover session',
       }),
       getIconForSavedObject: () => 'discoverApp',
     });
