@@ -157,7 +157,7 @@ export class KibanaClient {
     });
 
     if (ready) {
-      this.log.info('Knowledge base is already installed');
+      this.log.success('Knowledge base is already installed');
       return;
     }
 
@@ -176,7 +176,7 @@ export class KibanaClient {
       { retries: 10 }
     );
 
-    this.log.info('Knowledge base installed');
+    this.log.success('Knowledge base installed');
   }
 
   async createSpaceIfNeeded() {
@@ -204,7 +204,7 @@ export class KibanaClient {
     });
 
     if (spaceExistsResponse.data.id) {
-      this.log.info(`Space id ${this.spaceId} found`);
+      this.log.success(`Space id ${this.spaceId} found`);
       return;
     }
 
@@ -223,7 +223,7 @@ export class KibanaClient {
     );
 
     if (spaceCreatedResponse.status === 200) {
-      this.log.info(`Created space ${this.spaceId}`);
+      this.log.success(`Created space ${this.spaceId}`);
     } else {
       throw new Error(
         `Error creating space: ${spaceCreatedResponse.status} - ${spaceCreatedResponse.data}`
@@ -624,7 +624,7 @@ export class KibanaClient {
           })
           .concat({
             score: errors.length === 0 ? 1 : 0,
-            criterion: 'The conversation encountered errors',
+            criterion: 'The conversation did not encounter any errors',
             reasoning: errors.length
               ? `The following errors occurred: ${errors.map((error) => error.error.message)}`
               : 'No errors occurred',

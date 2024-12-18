@@ -77,6 +77,7 @@ describe('ES|QL query generation', () => {
             },
           },
         });
+
         await esClient.index({
           index: 'packetbeat-8.11.3',
           document: {
