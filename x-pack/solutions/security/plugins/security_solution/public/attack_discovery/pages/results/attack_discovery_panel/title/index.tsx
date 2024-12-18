@@ -13,7 +13,7 @@ import {
 import { css } from '@emotion/react';
 
 import React, { useMemo } from 'react';
-import { AssistantBeacon } from '@kbn/ai-assistant-icon';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 
 const AVATAR_SIZE = 24; // px
 
@@ -55,11 +55,11 @@ const TitleComponent: React.FC<Props> = ({
         data-test-subj="assistantAvatar"
         grow={false}
       >
-        <AssistantBeacon
+        <AssistantIcon
           css={css`
             transform: translate(5px, 5px);
           `}
-          size="l"
+          size="s"
         />
       </EuiFlexItem>
 

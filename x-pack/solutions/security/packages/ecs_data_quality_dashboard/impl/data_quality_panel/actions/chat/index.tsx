@@ -45,7 +45,7 @@ const ChatActionComponent: FC<Props> = ({ indexName, markdownComment }) => {
       iconType={null}
     >
       <StyledLinkText>
-        <AssistantIcon size="m" />
+        <AssistantIcon />
         {ASK_ASSISTANT}
       </StyledLinkText>
     </NewChat>
