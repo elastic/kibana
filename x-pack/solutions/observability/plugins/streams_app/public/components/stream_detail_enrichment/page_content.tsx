@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import deepEqual from 'fast-deep-equal';
 import { ProcessingDefinition, ReadStreamDefinition } from '@kbn/streams-plugin/common';
-
 import {
   DragDropContextProps,
   EuiPanel,
@@ -34,10 +34,10 @@ export function StreamDetailEnrichmentContent({
   definition: ReadStreamDefinition;
   refreshDefinition: () => void;
 }) {
-  const { core } = useKibana();
-  const { toasts } = core.notifications;
-
-  const [processors, setProcessors] = useState(() => createProcessorsList(definition.processing));
+  const { processors, setProcessors, hasChanges, resetChanges, saveChanges } = useProcessorsList(
+    definition,
+    refreshDefinition
+  );
 
   const [isAddProcessorOpen, { on: openAddProcessor, off: closeAddProcessor }] = useBoolean();
   const [isBottomBarOpen, { on: openBottomBar, off: closeBottomBar }] = useBoolean();
@@ -50,20 +50,18 @@ export function StreamDetailEnrichmentContent({
     openBottomBar();
   };
 
-  const addProcessor = () => {};
+  useEffect(() => {
+    if (hasChanges) openBottomBar();
+    else closeBottomBar();
+  }, [closeBottomBar, hasChanges, openBottomBar]);
 
-  const updateProcessor = () => {};
-
-  const saveChanges = () => {
+  const handleSaveChanges = async () => {
+    await saveChanges();
     closeBottomBar();
-    toasts.addSuccess(
-      i18n.translate('xpack.streams.streamDetailView.managementTab.enrichment.saveChangesSuccess', {
-        defaultMessage: "Stream's processors were successfully updated",
-      })
-    );
   };
 
-  const discardChanges = () => {
+  const handleDiscardChanges = async () => {
+    await resetChanges();
     closeBottomBar();
   };
 
@@ -99,7 +97,9 @@ export function StreamDetailEnrichmentContent({
       <EuiSpacer size="m" />
       <AddProcessorButton onClick={openAddProcessor} />
       {addProcessorFlyout}
-      {isBottomBarOpen && <ManagementBottomBar onCancel={discardChanges} onConfirm={saveChanges} />}
+      {isBottomBarOpen && (
+        <ManagementBottomBar onCancel={handleDiscardChanges} onConfirm={handleSaveChanges} />
+      )}
     </EuiPanel>
   );
 }
@@ -124,9 +124,74 @@ const ProcessorsHeader = () => {
   );
 };
 
+const useProcessorsList = (definition: ReadStreamDefinition, refreshDefinition: () => void) => {
+  const { core, dependencies } = useKibana();
+  const { toasts } = core.notifications;
+  const { streamsRepositoryClient } = dependencies.start.streams;
+
+  const [processors, setProcessors] = useState(() => createProcessorsList(definition.processing));
+
+  const httpProcessing = useMemo(() => processors.map(removeIdFromProcessor), [processors]);
+
+  const hasChanges = useMemo(
+    () => !deepEqual(definition.processing, httpProcessing),
+    [definition.processing, httpProcessing]
+  );
+
+  const addProcessor = (processor: ProcessingDefinition) => {
+    setProcessors(processors.concat(createProcessorWithId(processor)));
+  };
+
+  const resetChanges = () => {
+    setProcessors(createProcessorsList(definition.processing));
+  };
+
+  const saveChanges = async () => {
+    try {
+      await streamsRepositoryClient.fetch(`PUT /api/streams/{id}`, {
+        params: {
+          path: {
+            id: definition.id,
+          },
+          body: {
+            processing: httpProcessing,
+            children: definition.children,
+            fields: definition.fields,
+          },
+        },
+      });
+
+      await refreshDefinition();
+
+      toasts.addSuccess(
+        i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.saveChangesSuccess',
+          { defaultMessage: "Stream's processors were successfully updated" }
+        )
+      );
+    } catch (error) {}
+  };
+
+  return {
+    hasChanges,
+    processors,
+    addProcessor,
+    resetChanges,
+    saveChanges,
+    setProcessors,
+  };
+};
+
 const createId = htmlIdGenerator();
 const createProcessorsList = (processors: ProcessingDefinition[]): ProcessorDefinition[] =>
-  processors.map((processor) => ({
-    ...processor,
-    id: createId(),
-  }));
+  processors.map(createProcessorWithId);
+
+const createProcessorWithId = (processor: ProcessingDefinition): ProcessorDefinition => ({
+  ...processor,
+  id: createId(),
+});
+
+const removeIdFromProcessor = (processor: ProcessorDefinition): ProcessingDefinition => {
+  const { id, ...rest } = processor;
+  return rest;
+};
