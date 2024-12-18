@@ -7033,10 +7033,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-ui@link:packages/kbn-search-ui":
-  version "0.0.0"
-  uid ""
-
 "@kbn/searchprofiler-plugin@link:x-pack/platform/plugins/shared/searchprofiler":
   version "0.0.0"
   uid ""
