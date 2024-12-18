@@ -505,8 +505,10 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from index | limit 4', []);
     });
 
-    describe('lookup', () => {
-      testErrorsAndWarnings('ROW a=1::LONG | LOOKUP JOIN t ON a', []);
+    describe('join', () => {
+      testErrorsAndWarnings('ROW a=1::LONG | LOOKUP JOIN t ON a', [
+        '[t] index is not a valid JOIN index. Please use a "lookup" mode index JOIN commands.',
+      ]);
     });
 
     describe('keep', () => {
