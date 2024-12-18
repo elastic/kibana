@@ -32,6 +32,14 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
   public render() {
     const error = typeof this.error === 'string' ? { message: this.error, name: '' } : this.error;
 
-    return <PresentationPanelError api={this} error={error} />;
+    return (
+      <PresentationPanelError
+        api={{
+          uuid: this.id,
+          ...this,
+        }}
+        error={error}
+      />
+    );
   }
 }
