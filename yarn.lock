@@ -5965,7 +5965,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/input-control-vis-plugin@link:src/plugins/input_control_vis":
+"@kbn/input-control-vis-plugin@link:src/platform/plugins/private/input_control_vis":
   version "0.0.0"
   uid ""
 
