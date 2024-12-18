@@ -100,7 +100,6 @@ import {
   GetRuleMigrationRequestQueryInput,
   GetRuleMigrationRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { GetRuleMigrationIntegrationsRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { GetRuleMigrationPrebuiltRulesRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
   GetRuleMigrationResourcesRequestQueryInput,
@@ -978,17 +977,11 @@ finalize it.
     /**
      * Retrieves all related integrations
      */
-    getRuleMigrationIntegrations(
-      props: GetRuleMigrationIntegrationsProps,
-      kibanaSpace: string = 'default'
-    ) {
+    getRuleMigrationIntegrations(kibanaSpace: string = 'default') {
       return supertest
         .get(
           routeWithNamespace(
-            replaceParams(
-              '/internal/siem_migrations/rules/{migration_id}/integrations',
-              props.params
-            ),
+            '/internal/siem_migrations/rules/{migration_id}/integrations',
             kibanaSpace
           )
         )
@@ -1814,9 +1807,6 @@ export interface GetRuleExecutionResultsProps {
 export interface GetRuleMigrationProps {
   query: GetRuleMigrationRequestQueryInput;
   params: GetRuleMigrationRequestParamsInput;
-}
-export interface GetRuleMigrationIntegrationsProps {
-  params: GetRuleMigrationIntegrationsRequestParamsInput;
 }
 export interface GetRuleMigrationPrebuiltRulesProps {
   params: GetRuleMigrationPrebuiltRulesRequestParamsInput;
