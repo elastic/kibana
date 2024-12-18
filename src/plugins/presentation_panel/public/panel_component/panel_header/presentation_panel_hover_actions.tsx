@@ -122,8 +122,8 @@ export const PresentationPanelHoverActions = ({
 
   const { euiTheme } = useEuiTheme();
 
-  const EDIT_MODE_OUTLINE = `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseFormsControl}`;
-  const VIEW_MODE_OUTLINE = euiTheme.border.thin;
+  const EDIT_MODE_OUTLINE = useMemo(()=> `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseFormsControl}`,[euiTheme.border.width.thin, euiTheme.colors.borderBaseFormsControl]);
+  const VIEW_MODE_OUTLINE = useMemo(()=> `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,[euiTheme.border.width.thin, euiTheme.colors.borderBasePlain]);
 
   const ALL_ROUNDED_CORNERS = `
   border-radius: ${euiTheme.border.radius.medium};
