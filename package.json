@@ -1027,7 +1027,7 @@
     "@kbn/watcher-plugin": "link:x-pack/platform/plugins/private/watcher",
     "@kbn/xstate-utils": "link:packages/kbn-xstate-utils",
     "@kbn/zod": "link:packages/kbn-zod",
-    "@kbn/zod-helpers": "link:packages/kbn-zod-helpers",
+    "@kbn/zod-helpers": "link:src/platform/packages/shared/kbn-zod-helpers",
     "@langchain/aws": "^0.1.2",
     "@langchain/community": "0.3.14",
     "@langchain/core": "^0.3.16",
