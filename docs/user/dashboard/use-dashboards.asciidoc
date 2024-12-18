@@ -40,11 +40,11 @@ image::images/dashboard-global-time-range.png[Time range menu with multiple time
 
 **To apply a panel-level time range:**
 
-. Open the panel menu, then select *Settings*.
+. Hover over the panel and click image:dashboard/images/settings-icon-hover-action.png[Settings icon, width=3%]. The *Settings* flyout appears.
 
 . Turn on *Apply a custom time range*.
 
-. Enter the time range you want to view, then *Apply* it.
+. Enter the time range you want to view, then click *Apply*.
 
 **To view and edit the time range applied to a specific panel:**
 
@@ -145,7 +145,7 @@ image::images/dashboard-filter-editor.png[Filter editor with 2 conditions]
 
 **View the data in visualizations and the requests that collect the data:**
 
-. Open the panel menu, then select **Inspect**.
+. Open the panel menu and select **Inspect**.
 
 . View and download the panel data.
 

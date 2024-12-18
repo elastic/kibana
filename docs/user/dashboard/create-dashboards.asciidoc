@@ -138,7 +138,7 @@ Duplicated panels appear next to the original panel, and move the other panels t
 
 . In the toolbar, click *Edit*.
 
-. Open the panel menu, then select *Duplicate*.
+. Open the panel menu and select *Duplicate*.
 
 [float]
 [[copy-to-dashboard]]
