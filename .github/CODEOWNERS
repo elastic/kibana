@@ -422,7 +422,6 @@ packages/kbn-reporting/get_csv_panel_actions @elastic/appex-sharedux
 packages/kbn-reporting/mocks_server @elastic/appex-sharedux
 packages/kbn-reporting/public @elastic/appex-sharedux
 packages/kbn-reporting/server @elastic/appex-sharedux
-packages/kbn-resizable-layout @elastic/kibana-data-discovery
 packages/kbn-rison @elastic/kibana-operations
 packages/kbn-router-to-openapispec @elastic/kibana-core
 packages/kbn-router-utils @elastic/obs-ux-logs-team
@@ -596,6 +595,7 @@ src/platform/packages/shared/kbn-management/settings/types @elastic/kibana-manag
 src/platform/packages/shared/kbn-management/settings/utilities @elastic/kibana-management
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
 src/platform/packages/shared/kbn-react-field @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-resizable-layout @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
 src/platform/packages/shared/kbn-securitysolution-es-utils @elastic/security-detection-engine
 src/platform/packages/shared/kbn-securitysolution-io-ts-types @elastic/security-detection-engine
