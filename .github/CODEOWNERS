@@ -758,7 +758,7 @@ packages/kbn-router-to-openapispec @elastic/kibana-core
 packages/kbn-router-utils @elastic/obs-ux-logs-team
 examples/routing_example @elastic/kibana-core
 packages/kbn-rrule @elastic/response-ops
-packages/kbn-rule-data-utils @elastic/security-detections-response @elastic/response-ops @elastic/obs-ux-management-team
+src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detections-response @elastic/response-ops @elastic/obs-ux-management-team
 x-pack/plugins/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 x-pack/platform/plugins/private/runtime_fields @elastic/kibana-management
 packages/kbn-safer-lodash-set @elastic/kibana-security
