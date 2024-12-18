@@ -829,7 +829,7 @@ export class AlertsClient<
       const op = item.create || item.index || item.update || item.delete;
       if (op?.error && op.error.type === CLUSTER_BLOCK_EXCEPTION) {
         throw new ErrorWithType({
-          message: op!.error!.reason,
+          message: op.error.reason || 'Unknown reason',
           type: CLUSTER_BLOCK_EXCEPTION,
           stack: op.error.stack_trace,
         });
