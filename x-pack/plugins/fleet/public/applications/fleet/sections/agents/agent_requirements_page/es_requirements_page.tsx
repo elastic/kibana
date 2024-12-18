@@ -62,7 +62,7 @@ export const MissingESRequirementsPage: React.FunctionComponent<{
       <EuiPageBody
         restrictWidth={820}
         css={css`
-          border: 1px solid ${theme.euiTheme.colors.lightShade};
+          border: ${theme.euiTheme.border.thin}};
           border-radius: 5px;
         `}
       >
