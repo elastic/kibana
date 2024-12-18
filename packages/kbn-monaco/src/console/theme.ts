@@ -18,7 +18,7 @@ const getConsoleColorConfig = (themeVars: UseEuiTheme['euiTheme']) => {
     background: themeVars.colors.backgroundBaseSubdued,
     booleanTextColor: themeVars.colors.textPrimary,
     methodTextColor: themeVars.colors.textAccent,
-    urlTextColor: themeVars.colors.accentSecondary,
+    urlTextColor: themeVars.colors.textAccentSecondary,
     defaultStatusBackgroundColor: themeVars.colors.backgroundLightAccentSecondary,
     successStatusBackgroundColor: themeVars.colors.backgroundLightSuccess,
     primaryStatusBackgroundColor: themeVars.colors.backgroundLightPrimary,

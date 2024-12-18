@@ -9,6 +9,7 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { monaco } from '../..';
+/*import { rgb } from 'chroma-js';*/
 
 export function createTheme(
   { euiTheme }: UseEuiTheme,
@@ -20,31 +21,31 @@ export function createTheme(
     rules: [
       {
         token: '',
-        foreground: euiTheme.colors.darkestShade,
+        foreground: euiTheme.colors.textParagraph,
         background: euiTheme.colors.backgroundBaseSubdued,
       },
-      { token: 'invalid', foreground: euiTheme.colors.accent },
+      { token: 'invalid', foreground: euiTheme.colors.textAccent },
       { token: 'emphasis', fontStyle: 'italic' },
       { token: 'strong', fontStyle: 'bold' },
 
       { token: 'variable', foreground: euiTheme.colors.textPrimary },
       { token: 'variable.predefined', foreground: euiTheme.colors.textSuccess },
-      { token: 'constant', foreground: euiTheme.colors.accent },
+      { token: 'constant', foreground: euiTheme.colors.textAccent },
       { token: 'comment', foreground: euiTheme.colors.textSubdued },
-      { token: 'number', foreground: euiTheme.colors.accent },
-      { token: 'number.hex', foreground: euiTheme.colors.accent },
+      { token: 'number', foreground: euiTheme.colors.textAccent },
+      { token: 'number.hex', foreground: euiTheme.colors.textAccent },
       { token: 'regexp', foreground: euiTheme.colors.textDanger },
       { token: 'annotation', foreground: euiTheme.colors.textSubdued },
       { token: 'type', foreground: euiTheme.colors.textSuccess },
 
       { token: 'delimiter', foreground: euiTheme.colors.textSubdued },
-      { token: 'delimiter.html', foreground: euiTheme.colors.darkShade },
+      { token: 'delimiter.html', foreground: euiTheme.colors.textParagraph },
       { token: 'delimiter.xml', foreground: euiTheme.colors.textPrimary },
 
       { token: 'tag', foreground: euiTheme.colors.textDanger },
       { token: 'tag.id.jade', foreground: euiTheme.colors.textPrimary },
       { token: 'tag.class.jade', foreground: euiTheme.colors.textPrimary },
-      { token: 'meta.scss', foreground: euiTheme.colors.accent },
+      { token: 'meta.scss', foreground: euiTheme.colors.textAccent },
       { token: 'metatag', foreground: euiTheme.colors.textSuccess },
       { token: 'metatag.content.html', foreground: euiTheme.colors.textDanger },
       { token: 'metatag.html', foreground: euiTheme.colors.textDanger },
@@ -73,30 +74,30 @@ export function createTheme(
       { token: 'keyword.flow', foreground: euiTheme.colors.textWarning },
       { token: 'keyword.flow.scss', foreground: euiTheme.colors.textPrimary },
       // Monaco editor supports strikethrough font style only starting from 0.32.0.
-      { token: 'keyword.deprecated', foreground: euiTheme.colors.accent },
+      { token: 'keyword.deprecated', foreground: euiTheme.colors.textAccent },
 
-      { token: 'operator.scss', foreground: euiTheme.colors.darkShade },
+      { token: 'operator.scss', foreground: euiTheme.colors.textParagraph },
       { token: 'operator.sql', foreground: euiTheme.colors.textSubdued },
       { token: 'operator.swift', foreground: euiTheme.colors.textSubdued },
       { token: 'predefined.sql', foreground: euiTheme.colors.textSubdued },
 
-      { token: 'text', foreground: euiTheme.colors.textAccent },
+      { token: 'text', foreground: euiTheme.colors.textHeading },
       { token: 'label', foreground: euiTheme.colors.vis.euiColorVis9 },
     ],
     colors: {
-      'editor.foreground': euiTheme.colors.darkestShade,
+      'editor.foreground': euiTheme.colors.textParagraph,
       'editor.background': backgroundColor ?? euiTheme.colors.backgroundBasePlain,
-      'editorLineNumber.foreground': euiTheme.colors.darkShade,
-      'editorLineNumber.activeForeground': euiTheme.colors.darkShade,
+      'editorLineNumber.foreground': euiTheme.colors.textSubdued,
+      'editorLineNumber.activeForeground': euiTheme.colors.textSubdued,
       'editorIndentGuide.background1': euiTheme.colors.lightShade,
       'editor.selectionBackground': euiTheme.colors.backgroundBaseInteractiveSelect,
-      'editorWidget.border': euiTheme.colors.lightShade,
-      'editorWidget.background': euiTheme.colors.lightestShade,
+      'editorWidget.border': euiTheme.colors.borderBasePlain,
+      'editorWidget.background': euiTheme.colors.backgroundBaseSubdued,
       'editorCursor.foreground': euiTheme.colors.darkestShade,
       'editorSuggestWidget.selectedForeground': euiTheme.colors.darkestShade,
       'editorSuggestWidget.focusHighlightForeground': euiTheme.colors.primary,
       'editorSuggestWidget.selectedBackground': euiTheme.colors.lightShade,
-      'list.hoverBackground': euiTheme.colors.lightestShade,
+      'list.hoverBackground': euiTheme.colors.backgroundBaseSubdued,
       'list.highlightForeground': euiTheme.colors.primary,
       'editor.lineHighlightBorder': euiTheme.colors.lightestShade,
       'editorHoverWidget.foreground': euiTheme.colors.darkestShade,
