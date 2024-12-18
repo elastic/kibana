@@ -175,9 +175,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                   <EuiSplitPanel.Inner
                     grow={false}
                     paddingSize="s"
-                    css={{
-                      backgroundColor: euiThemeVars.euiFormBackgroundColor,
-                    }}
+                    color="subdued"
                     className="consoleEditorPanel"
                   >
                     <EuiButtonEmpty
