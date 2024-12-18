@@ -7533,7 +7533,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/stack-alerts-plugin@link:x-pack/plugins/stack_alerts":
+"@kbn/stack-alerts-plugin@link:x-pack/platform/plugins/shared/stack_alerts":
   version "0.0.0"
   uid ""
 

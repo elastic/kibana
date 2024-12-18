@@ -937,7 +937,7 @@
     "@kbn/sse-utils": "link:src/platform/packages/shared/kbn-sse-utils",
     "@kbn/sse-utils-client": "link:src/platform/packages/shared/kbn-sse-utils-client",
     "@kbn/sse-utils-server": "link:src/platform/packages/shared/kbn-sse-utils-server",
-    "@kbn/stack-alerts-plugin": "link:x-pack/plugins/stack_alerts",
+    "@kbn/stack-alerts-plugin": "link:x-pack/platform/plugins/shared/stack_alerts",
     "@kbn/stack-connectors-plugin": "link:x-pack/plugins/stack_connectors",
     "@kbn/stack-management-usage-test-plugin": "link:x-pack/test/usage_collection/plugins/stack_management_usage_test",
     "@kbn/state-containers-examples-plugin": "link:examples/state_containers_examples",
