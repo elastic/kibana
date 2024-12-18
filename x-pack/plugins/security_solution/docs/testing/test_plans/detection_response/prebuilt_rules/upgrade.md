@@ -291,7 +291,7 @@ Examples:
   | all rules on the page, e.g. 12  |
 ```
 
-#### **Scenario: User cannot upgrade multiple prebuilt rules selected on the page when they have upgrade conflicts**
+#### **Scenario: User cannot upgrade selected prebuilt rules with conflicts**
 
 **Automation**: 1 e2e test with mock rules
 
@@ -373,19 +373,19 @@ Examples:
   | all rules on the page, e.g. 12  |
 ```
 
-#### **Scenario: User can upgrade only conflict-free rules when user attempts to upgrade all rules and only a subset contains upgrade conflicts**
+#### **Scenario: User can upgrade only conflict-free rules when attempting to upgrade all rules**
 
 **Automation**: 1 e2e test with mock rules
 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
 And for Y of the installed rules there are new versions available
-And a subset Z of the rules have conflicts with the current versions
+And Z (where Z < Y) rules have conflicts with the current versions
 And user is on the Rule Management page
 Then Y rules available for upgrade should be displayed in the table
 Then user should see an enabled CTA to upgrade all rules
 When user clicks the CTA
-A modal window should inform the user that only Z rules without conflicts will be upgraded
+A modal window should inform the user that only K (where K < Z) rules without conflicts will be upgraded
 When user confirms the action in the modal
 Then success message should be displayed after upgrade informing that Z rules were updated
 And the Z upgraded rules should be removed from the table
