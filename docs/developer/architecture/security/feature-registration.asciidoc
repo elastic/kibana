@@ -39,7 +39,7 @@ Registering a feature consists of the following fields. For more information, co
 |A human readable name for your feature.
 
 |`category` (required)
-|{kib-repo}blob/{branch}/packages/core/application/core-application-common/src/app_category.ts[`AppCategory`]
+|{kib-repo}blob/{branch}/src/core/packages/application/common/src/app_category.ts[`AppCategory`]
 |`DEFAULT_APP_CATEGORIES.kibana`
 |The `AppCategory` which best represents your feature. Used to organize the display
 of features within the management screens.
