@@ -9,7 +9,7 @@ import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-commo
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
-import { AssistantBeacon } from '@kbn/ai-assistant-icon';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import * as i18n from './translations';
 import { useViewInAiAssistant } from './use_view_in_ai_assistant';
 
@@ -48,7 +48,7 @@ const ViewInAiAssistantComponent: React.FC<Props> = ({
     >
       <EuiFlexGroup alignItems="center" gutterSize="xs">
         <EuiFlexItem data-test-subj="assistantAvatar" grow={false}>
-          <AssistantBeacon />
+          <AssistantIcon size="m" />
         </EuiFlexItem>
         <EuiFlexItem data-test-subj="viewInAiAssistantLabel" grow={false}>
           {i18n.VIEW_IN_AI_ASSISTANT}
