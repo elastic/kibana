@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import type { ThreatMapEntries } from '../../../../common/components/threat_match/types';
 import type { FieldConfig } from '../../../../shared_imports';
 import { UseField } from '../../../../shared_imports';
-import { threatMatchMappingValidator } from './validators/threat_match_mapping_validator';
+import { threatMatchMappingValidatorFactory } from './validators/threat_match_mapping_validator_factory';
 import { ThreatMatchMappingField } from './threat_match_mapping_field';
 import * as i18n from './translations';
 
@@ -25,10 +25,22 @@ export const ThreatMatchMappingEdit = memo(function ThreatMatchMappingEdit({
   indexPatterns,
   threatIndexPatterns,
 }: ThreatMatchMappingEditProps): JSX.Element {
+  const fieldConfig: FieldConfig<ThreatMapEntries[]> = useMemo(
+    () => ({
+      label: i18n.THREAT_MATCH_MAPPING_FIELD_LABEL,
+      validations: [
+        {
+          validator: threatMatchMappingValidatorFactory({ indexPatterns, threatIndexPatterns }),
+        },
+      ],
+    }),
+    [indexPatterns, threatIndexPatterns]
+  );
+
   return (
     <UseField
       path={path}
-      config={THREAT_MATCH_MAPPING_FIELD_CONFIG}
+      config={fieldConfig}
       component={ThreatMatchMappingField}
       componentProps={{
         indexPatterns,
@@ -37,12 +49,3 @@ export const ThreatMatchMappingEdit = memo(function ThreatMatchMappingEdit({
     />
   );
 });
-
-const THREAT_MATCH_MAPPING_FIELD_CONFIG: FieldConfig<ThreatMapEntries[]> = {
-  label: i18n.THREAT_MATCH_MAPPING_FIELD_LABEL,
-  validations: [
-    {
-      validator: threatMatchMappingValidator,
-    },
-  ],
-};
