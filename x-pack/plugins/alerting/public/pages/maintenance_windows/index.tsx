@@ -23,7 +23,6 @@ import * as i18n from './translations';
 import { useCreateMaintenanceWindowNavigation } from '../../hooks/use_navigation';
 import { MaintenanceWindowsList } from './components/maintenance_windows_list';
 import { useFindMaintenanceWindows } from '../../hooks/use_find_maintenance_windows';
-import { CenterJustifiedSpinner } from './components/center_justified_spinner';
 import { ExperimentalBadge } from './components/page_header';
 import { useLicense } from '../../hooks/use_license';
 import { LicensePrompt } from './components/license_prompt';
