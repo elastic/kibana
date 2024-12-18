@@ -23,11 +23,11 @@ import {
   NAV_SEARCH_RESULTS,
 } from '../../../screens/search_bar';
 import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
-import { openTimelineById, refreshTimelinesUntilTimeLinePresent } from '../../../tasks/timeline';
+import { openTimelineById } from '../../../tasks/timeline';
 import { addNoteToTimeline } from '../../../tasks/api_calls/notes';
 import { getTimeline } from '../../../objects/timeline';
 
-describe('Privileges', { tags: ['@ess', '@serverless'] }, () => {
+describe('Privileges', { tags: ['@ess', '@skipInServerless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'endpoint' });
   });
@@ -71,28 +71,19 @@ describe('Privileges', { tags: ['@ess', '@serverless'] }, () => {
       deleteTimelines();
       login();
       visit(TIMELINES_URL);
-      createTimeline()
+      createTimeline(getTimeline())
         .then((response) => response.body.savedObjectId)
-        .then((timelineId: string) => {
+        .then((timelineId) => {
           currTimelineId = timelineId;
-          refreshTimelinesUntilTimeLinePresent(timelineId)
-            // This cy.wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL
-            // request responses and indeterminism since on clicks to activates URL's.
-            .then(() => cy.wrap(timelineId).as('timelineId'))
-            // eslint-disable-next-line cypress/no-unnecessary-waiting
-            .then(() => cy.wait(1000))
-            .then(() =>
-              addNoteToTimeline(getTimeline().notes, timelineId).should((response) =>
-                expect(response.status).to.equal(200)
-              )
-            );
+          addNoteToTimeline(getTimeline().notes, timelineId).should((response) =>
+            expect(response.status).to.equal(200)
+          );
         });
     });
 
     it('should show notes tab to users with privileges', () => {
       login(ROLES.t3_analyst);
       visit(TIMELINES_URL);
-      refreshTimelinesUntilTimeLinePresent(currTimelineId);
       openTimelineById(currTimelineId);
       cy.get(NOTES_TAB_BUTTON).should('exist');
       cy.get(NOTES_TAB_BUTTON).contains('1');
@@ -101,7 +92,6 @@ describe('Privileges', { tags: ['@ess', '@serverless'] }, () => {
     it('should not show notes tab to users with insufficient privileges', () => {
       login(ROLES.notes_none);
       visit(TIMELINES_URL);
-      refreshTimelinesUntilTimeLinePresent(currTimelineId);
       openTimelineById(currTimelineId);
       cy.get(NOTES_TAB_BUTTON).should('be.disabled');
     });
