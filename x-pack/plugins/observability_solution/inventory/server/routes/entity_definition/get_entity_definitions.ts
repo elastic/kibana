@@ -17,11 +17,8 @@ export const getEntityDefinitionSourceIndexPatternsByType = createInventoryServe
   options: {
     tags: ['access:inventory'],
   },
-  async handler({ context, params, request, plugins }) {
-    const [_coreContext, entityManagerStart] = await Promise.all([
-      context.core,
-      plugins.entityManager.start(),
-    ]);
+  async handler({ params, request, plugins }) {
+    const entityManagerStart = await plugins.entityManager.start();
     const { type } = params.query;
     const entityManagerClient = await entityManagerStart.getScopedClient({ request });
 
