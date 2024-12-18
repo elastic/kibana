@@ -14,18 +14,9 @@ import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
 import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
 import { Adapters } from '../types';
-import {
-  EmbeddableError,
-  EmbeddableOutput,
-  IEmbeddable,
-  LegacyEmbeddableAPI,
-} from './i_embeddable';
+import { EmbeddableError, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { EmbeddableInput, ViewMode } from '../../../common/types';
 import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
-import {
-  CommonLegacyEmbeddable,
-  legacyEmbeddableToApi,
-} from './compatibility/legacy_embeddable_to_api';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   if (input.hidePanelTitles) return '';
@@ -96,85 +87,11 @@ export abstract class Embeddable<
       )
       .subscribe((title) => this.renderComplete.setTitle(title));
 
-    const { api, destroyAPI } = legacyEmbeddableToApi(this as unknown as CommonLegacyEmbeddable);
-    this.destroyAPI = destroyAPI;
-    ({
-      uuid: this.uuid,
-      disableTriggers: this.disableTriggers,
-      onEdit: this.onEdit,
-      viewMode: this.viewMode,
-      dataViews: this.dataViews,
-      panelTitle: this.panelTitle,
-      query$: this.query$,
-      dataLoading: this.dataLoading,
-      filters$: this.filters$,
-      blockingError: this.blockingError,
-      phase$: this.phase$,
-      setPanelTitle: this.setPanelTitle,
-      linkToLibrary: this.linkToLibrary,
-      hidePanelTitle: this.hidePanelTitle,
-      timeRange$: this.timeRange$,
-      isEditingEnabled: this.isEditingEnabled,
-      panelDescription: this.panelDescription,
-      defaultPanelDescription: this.defaultPanelDescription,
-      canLinkToLibrary: this.canLinkToLibrary,
-      disabledActionIds: this.disabledActionIds,
-      setDisabledActionIds: this.setDisabledActionIds,
-      unlinkFromLibrary: this.unlinkFromLibrary,
-      setHidePanelTitle: this.setHidePanelTitle,
-      defaultPanelTitle: this.defaultPanelTitle,
-      setTimeRange: this.setTimeRange,
-      getTypeDisplayName: this.getTypeDisplayName,
-      setPanelDescription: this.setPanelDescription,
-      canUnlinkFromLibrary: this.canUnlinkFromLibrary,
-      isCompatibleWithUnifiedSearch: this.isCompatibleWithUnifiedSearch,
-      savedObjectId: this.savedObjectId,
-      hasLockedHoverActions$: this.hasLockedHoverActions$,
-      lockHoverActions: this.lockHoverActions,
-    } = api);
-
     setTimeout(() => {
       // after the constructor has finished, we initialize this embeddable if it isn't delayed
       if (!this.deferEmbeddableLoad) this.initializationFinished.complete();
     }, 0);
   }
-
-  /**
-   * Assign compatibility API directly to the Embeddable instance.
-   */
-  private destroyAPI;
-  public uuid: LegacyEmbeddableAPI['uuid'];
-  public disableTriggers: LegacyEmbeddableAPI['disableTriggers'];
-  public onEdit: LegacyEmbeddableAPI['onEdit'];
-  public viewMode: LegacyEmbeddableAPI['viewMode'];
-  public dataViews: LegacyEmbeddableAPI['dataViews'];
-  public query$: LegacyEmbeddableAPI['query$'];
-  public panelTitle: LegacyEmbeddableAPI['panelTitle'];
-  public dataLoading: LegacyEmbeddableAPI['dataLoading'];
-  public filters$: LegacyEmbeddableAPI['filters$'];
-  public phase$: LegacyEmbeddableAPI['phase$'];
-  public linkToLibrary: LegacyEmbeddableAPI['linkToLibrary'];
-  public blockingError: LegacyEmbeddableAPI['blockingError'];
-  public setPanelTitle: LegacyEmbeddableAPI['setPanelTitle'];
-  public timeRange$: LegacyEmbeddableAPI['timeRange$'];
-  public hidePanelTitle: LegacyEmbeddableAPI['hidePanelTitle'];
-  public isEditingEnabled: LegacyEmbeddableAPI['isEditingEnabled'];
-  public canLinkToLibrary: LegacyEmbeddableAPI['canLinkToLibrary'];
-  public panelDescription: LegacyEmbeddableAPI['panelDescription'];
-  public defaultPanelDescription: LegacyEmbeddableAPI['defaultPanelDescription'];
-  public disabledActionIds: LegacyEmbeddableAPI['disabledActionIds'];
-  public setDisabledActionIds: LegacyEmbeddableAPI['setDisabledActionIds'];
-  public unlinkFromLibrary: LegacyEmbeddableAPI['unlinkFromLibrary'];
-  public setTimeRange: LegacyEmbeddableAPI['setTimeRange'];
-  public defaultPanelTitle: LegacyEmbeddableAPI['defaultPanelTitle'];
-  public setHidePanelTitle: LegacyEmbeddableAPI['setHidePanelTitle'];
-  public getTypeDisplayName: LegacyEmbeddableAPI['getTypeDisplayName'];
-  public setPanelDescription: LegacyEmbeddableAPI['setPanelDescription'];
-  public canUnlinkFromLibrary: LegacyEmbeddableAPI['canUnlinkFromLibrary'];
-  public isCompatibleWithUnifiedSearch: LegacyEmbeddableAPI['isCompatibleWithUnifiedSearch'];
-  public savedObjectId: LegacyEmbeddableAPI['savedObjectId'];
-  public hasLockedHoverActions$: LegacyEmbeddableAPI['hasLockedHoverActions$'];
-  public lockHoverActions: LegacyEmbeddableAPI['lockHoverActions'];
 
   public async getEditHref(): Promise<string | undefined> {
     return this.getOutput().editUrl ?? undefined;
@@ -290,7 +207,6 @@ export abstract class Embeddable<
 
     this.inputSubject.complete();
     this.outputSubject.complete();
-    this.destroyAPI();
 
     return;
   }
