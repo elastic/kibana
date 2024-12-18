@@ -267,7 +267,7 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
       buttonContent={
         <EuiPanel
           data-test-subj="ruleActionsSystemActionsItemAccordionButton"
-          color={subdued}
+          color="transparent"
           paddingSize="m"
         >
           <EuiFlexGroup alignItems="center">
