@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { isArray } from 'lodash/fp';
@@ -94,30 +95,33 @@ const RuleNameGroupContent = React.memo<{
 RuleNameGroupContent.displayName = 'RuleNameGroup';
 
 const HostNameGroupContent = React.memo<{ hostName: string | string[]; nullGroupMessage?: string }>(
-  ({ hostName, nullGroupMessage }) => (
-    <EuiFlexGroup data-test-subj="host-name-group-renderer" gutterSize="s" alignItems="center">
-      <EuiFlexItem
-        grow={false}
-        style={{
-          backgroundColor: euiThemeVars.euiColorVis1_behindText,
-          borderRadius: '50%',
-        }}
-      >
-        <EuiIcon type="database" size="l" style={{ padding: 4 }} />
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xs">
-          <h5>{hostName}</h5>
-        </EuiTitle>
-      </EuiFlexItem>
-      {nullGroupMessage && (
-        <EuiFlexItem grow={false}>
-          <EuiIconTip content={nullGroupMessage} position="right" />
+  ({ hostName, nullGroupMessage }) => {
+    const { euiTheme } = useEuiTheme();
+    return (
+      <EuiFlexGroup data-test-subj="host-name-group-renderer" gutterSize="s" alignItems="center">
+        <EuiFlexItem
+          grow={false}
+          style={{
+            backgroundColor: euiTheme.colors.vis.euiColorVis1,
+            borderRadius: '50%',
+          }}
+        >
+          <EuiIcon type="database" size="l" style={{ padding: 4 }} />
         </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  )
+
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h5>{hostName}</h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        {nullGroupMessage && (
+          <EuiFlexItem grow={false}>
+            <EuiIconTip content={nullGroupMessage} position="right" />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  }
 );
 HostNameGroupContent.displayName = 'HostNameGroupContent';
 
