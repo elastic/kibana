@@ -21,8 +21,8 @@ import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Warnings } from '@kbn/charts-plugin/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import {
-  Adapters,
   Embeddable,
   EmbeddableInput,
   EmbeddableOutput,

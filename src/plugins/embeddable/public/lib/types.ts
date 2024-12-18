@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Adapters } from './inspector';
-
 export interface Trigger {
   id: string;
   title?: string;
@@ -23,7 +21,6 @@ export interface PropertySpec {
   value?: string;
 }
 export { ViewMode } from '../../common/types';
-export type { Adapters };
 
 export interface CommonlyUsedRange {
   from: string;

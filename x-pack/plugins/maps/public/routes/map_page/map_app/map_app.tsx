@@ -15,7 +15,7 @@ import {
   KibanaExecutionContext,
   ScopedHistory,
 } from '@kbn/core/public';
-import { Adapters } from '@kbn/embeddable-plugin/public';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import { Subscription } from 'rxjs';
 import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
