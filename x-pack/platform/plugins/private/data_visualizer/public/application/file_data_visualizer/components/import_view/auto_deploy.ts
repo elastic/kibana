@@ -28,6 +28,8 @@ export class AutoDeploy {
       const status = e.response?.status;
       // eslint-disable-next-line no-console
       console.dir(e.response);
+      // eslint-disable-next-line no-console
+      console.dir(e.response.body);
 
       if (status === 408 || status === 504 || status === 502) {
         return;
