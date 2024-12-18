@@ -53,7 +53,6 @@ export {
   withEmbeddableSubscription,
 } from './lib';
 export type {
-  Adapters,
   CellValueContext,
   ChartActionContext,
   EmbeddableContext,
