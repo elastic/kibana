@@ -8,17 +8,22 @@ import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'r
 import {
   EuiAccordion,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCheckbox,
+  EuiEmptyPrompt,
   EuiFieldSearch,
+  EuiFormErrorText,
   EuiFormRow,
   EuiIconTip,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import { ISearchSource } from '@kbn/data-plugin/common';
+import { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewBase } from '@kbn/es-query';
+import { DataViewBase, Filter, Query, isOfQueryType } from '@kbn/es-query';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -59,6 +64,56 @@ const defaultExpression = {
 } as MetricExpression;
 export { defaultExpression };
 
+// Types for the executor
+export interface MetricThresholdSearchSourceFields extends SerializedSearchSourceFields {
+  query?: Query;
+  filter?: Array<Pick<Filter, 'meta' | 'query'>>;
+}
+
+const searchConfigQueryWarning = i18n.translate(
+  'xpack.infra.metrichThreshold.rule.alertFlyout.searchConfiguration.queryWarning',
+  {
+    defaultMessage:
+      'Metric threshold does not support queries other than Query type, query was changed to default query.',
+  }
+);
+
+export const defaultQuery: Query = {
+  language: 'kuery',
+  query: '',
+};
+
+export const getSearchConfiguration = (
+  fields: SerializedSearchSourceFields,
+  onWarning: (title: string) => void
+): MetricThresholdSearchSourceFields => {
+  if (fields.query && !isOfQueryType(fields.query)) {
+    onWarning(searchConfigQueryWarning);
+    return adjustSearchConfigurationFilter({
+      ...fields,
+      query: defaultQuery,
+    });
+  }
+  return adjustSearchConfigurationFilter({
+    ...fields,
+    query: fields.query,
+  });
+};
+
+const adjustSearchConfigurationFilter = (
+  searchConfiguration: MetricThresholdSearchSourceFields
+): MetricThresholdSearchSourceFields => {
+  // Only meta and query fields are saved in the rule params, so we ignore other fields such as $state
+  const filter = searchConfiguration.filter
+    ? searchConfiguration.filter.map(({ meta, query }) => ({ meta, query }))
+    : undefined;
+
+  return {
+    ...searchConfiguration,
+    filter,
+  };
+};
+
 export const Expressions: React.FC<Props> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
   const { services } = useKibanaContextForPlugin();
@@ -69,6 +124,10 @@ export const Expressions: React.FC<Props> = (props) => {
 
   const [dataView, setDataView] = useState<DataView>();
   const [searchSource, setSearchSource] = useState<ISearchSource>();
+  const [paramsError, setParamsError] = useState<Error>();
+  const [paramsWarning, setParamsWarning] = useState<string>();
+  const [dataViewTimeFieldError, setDataViewTimeFieldError] = useState<string>();
+
   const dataViewIndexPattern = useMemo<DataViewBase>(
     () => ({
       fields: dataView?.fields || [],
@@ -81,31 +140,74 @@ export const Expressions: React.FC<Props> = (props) => {
     const initSearchSource = async () => {
       let initialSearchConfiguration = ruleParams.searchConfiguration;
 
-      if (!ruleParams.searchConfiguration) {
-        const newSearchSource = data.search.searchSource.createEmpty();
-        newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
+      if (!ruleParams.searchConfiguration || !ruleParams.searchConfiguration.index) {
+        if (metadata?.currentOptions?.searchConfiguration) {
+          initialSearchConfiguration = {
+            query: {
+              query: ruleParams.searchConfiguration?.query ?? '',
+              language: 'kuery',
+            },
+            ...metadata.currentOptions.searchConfiguration,
+          };
+        } else {
+          const newSearchSource = data.search.searchSource.createEmpty();
+          newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
 
-        const metricsDataView =
-          (await data.dataViews.get('infra_rules_data_view')) ??
-          (await data.dataViews.getDefaultDataView());
+          const metricsDataView =
+            (await data.dataViews.get('infra_rules_data_view')) ??
+            (await data.dataViews.getDefaultDataView());
 
-        if (metricsDataView) {
-          newSearchSource.setField('index', metricsDataView);
-          setDataView(metricsDataView);
+          if (metricsDataView) {
+            newSearchSource.setField('index', metricsDataView);
+            setDataView(metricsDataView);
+          }
+
+          initialSearchConfiguration = getSearchConfiguration(
+            newSearchSource.getSerializedFields(),
+            setParamsWarning
+          );
         }
-
-        initialSearchConfiguration = newSearchSource.getSerializedFields();
       }
 
       try {
         const createdSearchSource = await data.search.searchSource.create(
           initialSearchConfiguration
         );
-        setRuleParams('searchConfiguration', initialSearchConfiguration);
+        setRuleParams(
+          'searchConfiguration',
+          getSearchConfiguration(
+            {
+              ...initialSearchConfiguration,
+              ...(ruleParams.searchConfiguration?.query && {
+                query: ruleParams.searchConfiguration.query,
+              }),
+            },
+            setParamsWarning
+          )
+        );
         setSearchSource(createdSearchSource);
         setDataView(createdSearchSource.getField('index'));
+
+        if (createdSearchSource.getField('index')) {
+          const timeFieldName = createdSearchSource.getField('index')?.timeFieldName;
+          if (!timeFieldName) {
+            setDataViewTimeFieldError(
+              i18n.translate(
+                'xpack.infra.metricThreshold.rule.alertFlyout.dataViewError.noTimestamp',
+                {
+                  defaultMessage:
+                    'The selected data view does not have a timestamp field, please select another data view.',
+                }
+              )
+            );
+          } else {
+            setDataViewTimeFieldError(undefined);
+          }
+        } else {
+          setDataViewTimeFieldError(undefined);
+        }
       } catch (error) {
-        // TODO
+        setParamsError(error);
       }
     };
 
@@ -136,7 +238,10 @@ export const Expressions: React.FC<Props> = (props) => {
       );
       setRuleParams('criteria', ruleCriteria);
       searchSource?.setParent(undefined).setField('index', newDataView);
-      setRuleParams('searchConfiguration', searchSource?.getSerializedFields());
+      setRuleParams(
+        'searchConfiguration',
+        searchSource && getSearchConfiguration(searchSource.getSerializedFields(), setParamsWarning)
+      );
       setDataView(newDataView);
     },
     [ruleParams.criteria, searchSource, setRuleParams]
@@ -319,16 +424,66 @@ export const Expressions: React.FC<Props> = (props) => {
     [ruleParams.criteria]
   );
 
+  if (paramsError) {
+    return (
+      <>
+        <EuiCallOut color="danger" iconType="warning" data-test-subj="metricRuleExpressionError">
+          <p>{paramsError.message}</p>
+        </EuiCallOut>
+        <EuiSpacer size={'m'} />
+      </>
+    );
+  }
+
+  if (!searchSource) {
+    return (
+      <>
+        <EuiEmptyPrompt title={<EuiLoadingSpinner size="xl" />} />
+        <EuiSpacer size="m" />
+      </>
+    );
+  }
+
   return (
     <>
+      {!!paramsWarning && (
+        <>
+          <EuiCallOut
+            title={i18n.translate('xpack.infra.metricThreshold.rule.alertFlyout.warning.title', {
+              defaultMessage: 'Warning',
+            })}
+            color="warning"
+            iconType="warning"
+            data-test-subj="metricRuleExpressionWarning"
+          >
+            {paramsWarning}
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.infra.metricThreshold.rule.alertFlyout.selectDataViewPrompt"
+            defaultMessage="Select a data view"
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <DataViewSelectPopover
         dependencies={{ dataViews, dataViewEditor }}
         dataView={dataView}
+        metadata={{ adHocDataViewList: metadata?.adHocDataViewList || [] }}
         onSelectDataView={onSelectDataView}
         onChangeMetaData={({ adHocDataViewList }) => {
           onChangeMetaData({ ...metadata, adHocDataViewList });
         }}
       />
+      {dataViewTimeFieldError && (
+        <EuiFormErrorText data-test-subj="metricRuleDataViewErrorNoTimestamp">
+          {dataViewTimeFieldError}
+        </EuiFormErrorText>
+      )}
       <EuiSpacer size="m" />
       <EuiText size="xs">
         <h4>
