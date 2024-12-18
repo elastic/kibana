@@ -1,0 +1,205 @@
+{
+  "id": "@kbn/gen-ai-functional-testing",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/gen-ai-functional-testing",
+        "id": "def-common.getAvailableConnectors",
+        "type": "Function",
+        "tags": [],
+        "label": "getAvailableConnectors",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/gen-ai-functional-testing",
+            "scope": "common",
+            "docId": "kibKbnGenAiFunctionalTestingPluginApi",
+            "section": "def-common.AvailableConnectorWithId",
+            "text": "AvailableConnectorWithId"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/gen-ai-functional-testing",
+        "id": "def-common.getPreconfiguredConnectorConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "getPreconfiguredConnectorConfig",
+        "description": [
+          "\nRetrieve the list of preconfigured connectors that should be used when defining the\nFTR configuration of suites using the connectors.\n"
+        ],
+        "signature": [
+          "() => Record<string, ",
+          {
+            "pluginId": "@kbn/gen-ai-functional-testing",
+            "scope": "common",
+            "docId": "kibKbnGenAiFunctionalTestingPluginApi",
+            "section": "def-common.AvailableConnector",
+            "text": "AvailableConnector"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/gen-ai-functional-testing",
+        "id": "def-common.AvailableConnector",
+        "type": "Interface",
+        "tags": [],
+        "label": "AvailableConnector",
+        "description": [],
+        "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/gen-ai-functional-testing",
+            "id": "def-common.AvailableConnector.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/gen-ai-functional-testing",
+            "id": "def-common.AvailableConnector.actionTypeId",
+            "type": "string",
+            "tags": [],
+            "label": "actionTypeId",
+            "description": [],
+            "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/gen-ai-functional-testing",
+            "id": "def-common.AvailableConnector.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/gen-ai-functional-testing",
+            "id": "def-common.AvailableConnector.secrets",
+            "type": "Object",
+            "tags": [],
+            "label": "secrets",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/gen-ai-functional-testing",
+        "id": "def-common.AvailableConnectorWithId",
+        "type": "Interface",
+        "tags": [],
+        "label": "AvailableConnectorWithId",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/gen-ai-functional-testing",
+            "scope": "common",
+            "docId": "kibKbnGenAiFunctionalTestingPluginApi",
+            "section": "def-common.AvailableConnectorWithId",
+            "text": "AvailableConnectorWithId"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/gen-ai-functional-testing",
+            "scope": "common",
+            "docId": "kibKbnGenAiFunctionalTestingPluginApi",
+            "section": "def-common.AvailableConnector",
+            "text": "AvailableConnector"
+          }
+        ],
+        "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/gen-ai-functional-testing",
+            "id": "def-common.AvailableConnectorWithId.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/gen-ai-functional-testing",
+        "id": "def-common.AI_CONNECTORS_VAR_ENV",
+        "type": "string",
+        "tags": [],
+        "label": "AI_CONNECTORS_VAR_ENV",
+        "description": [
+          "\nThe environment variable that is used by the CI to load the connectors configuration"
+        ],
+        "signature": [
+          "\"KIBANA_TESTING_AI_CONNECTORS\""
+        ],
+        "path": "packages/kbn-gen-ai-functional-testing/src/connectors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

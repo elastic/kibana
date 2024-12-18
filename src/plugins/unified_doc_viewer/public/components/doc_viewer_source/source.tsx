@@ -17,9 +17,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
-import { SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import { omit } from 'lodash';
-import { getUnifiedDocViewerServices } from '../../plugin';
 import { useEsDocSearch } from '../../hooks';
 import { getHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
 import { JSONCodeEditorCommonMemoized } from '../json_code_editor';
@@ -52,13 +50,10 @@ export const DocViewerSource = ({
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
   const [editorHeight, setEditorHeight] = useState<number>();
   const [jsonValue, setJsonValue] = useState<string>('');
-  const { uiSettings } = getUnifiedDocViewerServices();
-  const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   const [requestState, hit] = useEsDocSearch({
     id,
     index,
     dataView,
-    requestSource: useNewFieldsApi,
     textBasedHits,
   });
 

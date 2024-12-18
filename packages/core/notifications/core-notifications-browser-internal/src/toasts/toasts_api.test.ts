@@ -12,8 +12,10 @@ import { firstValueFrom } from 'rxjs';
 import { ToastsApi } from './toasts_api';
 
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 
 async function getCurrentToasts(toasts: ToastsApi) {
   return await firstValueFrom(toasts.get$());
@@ -45,8 +47,10 @@ function toastDeps() {
 function startDeps() {
   return {
     overlays: {} as any,
+    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     i18n: i18nServiceMock.createStartContract(),
     theme: themeServiceMock.createStartContract(),
+    userProfile: userProfileServiceMock.createStart(),
   };
 }
 

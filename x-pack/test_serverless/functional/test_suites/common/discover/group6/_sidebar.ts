@@ -273,49 +273,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
       });
 
-      it('should show field list groups excluding subfields when searched from source', async function () {
-        await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': true });
-        await browser.refresh();
-
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-        expect(await PageObjects.unifiedFieldList.doesSidebarShowFields()).to.be(true);
-
-        // Initial Available fields
-        const availableFields = await PageObjects.unifiedFieldList.getSidebarSectionFieldNames(
-          'available'
-        );
-        expect(availableFields.length).to.be(48);
-        expect(
-          availableFields
-            .join(', ')
-            .startsWith(
-              '@message, @tags, @timestamp, agent, bytes, clientip, extension, geo.coordinates'
-            )
-        ).to.be(true);
-
-        // Available fields after scrolling down
-        const metaSectionButton = await find.byCssSelector(
-          PageObjects.unifiedFieldList.getSidebarSectionSelector('meta', true)
-        );
-        await metaSectionButton.scrollIntoViewIfNecessary();
-
-        // Expand Meta section
-        await PageObjects.unifiedFieldList.toggleSidebarSection('meta');
-        expect(
-          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('meta')).join(', ')
-        ).to.be('_id, _ignored, _index, _score');
-
-        // Expand Unmapped section
-        await PageObjects.unifiedFieldList.toggleSidebarSection('unmapped');
-        expect(
-          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('unmapped')).join(', ')
-        ).to.be('relatedContent');
-
-        await expectFieldListDescription(
-          '48 available fields. 1 unmapped field. 5 empty fields. 4 meta fields.'
-        );
-      });
-
       it('should show selected and popular fields', async function () {
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
         await PageObjects.discover.waitUntilSearchingHasFinished();

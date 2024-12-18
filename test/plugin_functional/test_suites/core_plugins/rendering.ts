@@ -128,7 +128,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data_visualizer.resultLinks.fileBeat.enabled (boolean)',
         'dev_tools.deeplinks.navLinkStatus (string?)',
         'discover.experimental.enabledProfiles (array?)',
-        'enterpriseSearch.canDeployEntSearch (boolean?)',
         'enterpriseSearch.host (string?)',
         'enterpriseSearch.ui.enabled (boolean?)',
         'home.disableWelcomeScreen (boolean?)',
@@ -320,8 +319,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
          * NOTE: The Reporting plugin is currently disabled in functional tests (see test/functional/config.base.js).
          * It will be re-enabled once #102552 is completed.
          */
-        // 'xpack.reporting.roles.allow (array)',
-        // 'xpack.reporting.roles.enabled (boolean)',
         // 'xpack.reporting.poll.jobCompletionNotifier.interval (number)',
         // 'xpack.reporting.poll.jobCompletionNotifier.intervalErrorMultiplier (number)',
         // 'xpack.reporting.poll.jobsRefresh.interval (number)',

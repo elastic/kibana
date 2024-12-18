@@ -16,7 +16,9 @@ import { LoadingIndicator } from './loading_indicator';
 describe('kbnLoadingIndicator', () => {
   it('is hidden by default', () => {
     const wrapper = shallow(<LoadingIndicator loadingCount$={new BehaviorSubject(0)} />);
-    expect(wrapper.prop('data-test-subj')).toBe('globalLoadingIndicator-hidden');
+    expect(
+      wrapper.findWhere((node) => node.prop('data-test-subj') === 'globalLoadingIndicator-hidden')
+    ).toHaveLength(1);
     expect(wrapper).toMatchSnapshot();
   });
 

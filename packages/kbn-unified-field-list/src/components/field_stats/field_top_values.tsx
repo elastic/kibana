@@ -20,7 +20,7 @@ export interface FieldTopValuesProps {
   dataView: DataView;
   field: DataViewField;
   sampledValuesCount: number;
-  color?: string;
+  color: string;
   'data-test-subj': string;
   onAddFilter?: AddFieldFilterHandler;
   overrideFieldTopValueBar?: OverrideFieldTopValueBarCallback;
@@ -32,7 +32,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
   dataView,
   field,
   sampledValuesCount,
-  color = getDefaultColor(),
+  color,
   'data-test-subj': dataTestSubject,
   onAddFilter,
   overrideFieldTopValueBar,
@@ -106,7 +106,10 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
   );
 };
 
-export const getDefaultColor = () => euiPaletteColorBlind()[1];
+export const getDefaultColor = (euiThemeName: string) =>
+  euiThemeName?.toLowerCase().includes('borealis')
+    ? euiPaletteColorBlind()[2]
+    : euiPaletteColorBlind()[1]; // FIXME: remove in 9.x when Borealis becomes the default theme
 
 export const getFormattedPercentageValue = (
   currentValue: number,

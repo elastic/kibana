@@ -80,7 +80,6 @@ export const DISCOVER_MODIFY_COLUMNS_ON_SWITCH_ID = 'discover:modifyColumnsOnSwi
 export const DISCOVER_ROW_HEIGHT_OPTION_ID = 'discover:rowHeightOption';
 export const DISCOVER_SAMPLE_ROWS_PER_PAGE_ID = 'discover:sampleRowsPerPage';
 export const DISCOVER_SAMPLE_SIZE_ID = 'discover:sampleSize';
-export const DISCOVER_SEARCH_FIELDS_FROM_SOURCE_ID = 'discover:searchFieldsFromSource';
 export const DISCOVER_SEARCH_ON_PAGE_LOAD_ID = 'discover:searchOnPageLoad';
 export const DISCOVER_SHOW_FIELD_STATISTICS_ID = 'discover:showFieldStatistics';
 export const DISCOVER_SHOW_MULTI_FIELDS_ID = 'discover:showMultiFields';
