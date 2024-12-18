@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import '@emotion/react';
-import type { UseEuiTheme } from '@elastic/eui';
-
-declare module '@emotion/react' {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  export interface Theme extends UseEuiTheme {}
+export function assertEnv(variable: unknown, message: string): asserts variable is string {
+  if (typeof variable !== 'string') {
+    throw new Error(message);
+  }
 }
