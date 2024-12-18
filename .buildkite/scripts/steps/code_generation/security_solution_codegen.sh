@@ -7,7 +7,7 @@ source .buildkite/scripts/common/util.sh
 echo --- Security Solution OpenAPI Code Generation
 
 echo -e "\n[Security Solution OpenAPI Code Generation] OpenAPI Common Package\n"
-(cd packages/kbn-openapi-common && yarn openapi:generate)
+(cd src/platform/packages/shared/kbn-openapi-common && yarn openapi:generate)
 
 echo -e "\n[Security Solution OpenAPI Code Generation] Lists Common Package\n"
 (cd x-pack/solutions/security/packages/kbn-securitysolution-lists-common && yarn openapi:generate)

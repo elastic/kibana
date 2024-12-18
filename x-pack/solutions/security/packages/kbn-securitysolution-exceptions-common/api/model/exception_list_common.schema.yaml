@@ -7,10 +7,10 @@ components:
   x-codegen-enabled: true
   schemas:
     ExceptionListId:
-      $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
     ExceptionListHumanId:
-      $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
       description: Human readable string identifier, e.g. `trusted-linux-processes`
 
     ExceptionListType:
@@ -122,17 +122,17 @@ components:
         - updated_by
 
     ExceptionListItemId:
-      $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
     ExceptionListItemHumanId:
-      $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
     ExceptionListItemType:
       type: string
       enum: [simple]
 
     ExceptionListItemName:
-      $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
     ExceptionListItemDescription:
       type: string
@@ -144,7 +144,7 @@ components:
     ExceptionListItemTags:
       type: array
       items:
-        $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
     ExceptionListItemOsType:
       type: string
@@ -162,19 +162,19 @@ components:
       type: object
       properties:
         id:
-          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         comment:
-          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         created_at:
           type: string
           format: date-time
         created_by:
-          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         updated_at:
           type: string
           format: date-time
         updated_by:
-          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
       required:
         - id
         - comment
@@ -278,7 +278,7 @@ components:
         comments:
           $ref: '#/components/schemas/ExceptionListItemCommentArray'
         version:
-          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         tie_breaker_id:
           type: string
         created_at:

@@ -6545,7 +6545,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/openapi-common@link:packages/kbn-openapi-common":
+"@kbn/openapi-common@link:src/platform/packages/shared/kbn-openapi-common":
   version "0.0.0"
   uid ""
 
@@ -7965,7 +7965,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/zod-helpers@link:packages/kbn-zod-helpers":
+"@kbn/zod-helpers@link:src/platform/packages/shared/kbn-zod-helpers":
   version "0.0.0"
   uid ""
 
