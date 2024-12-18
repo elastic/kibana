@@ -14,10 +14,12 @@ import {
   EuiComboBoxOptionOption,
   EuiFormRow,
   EuiFlyoutBody,
+  EuiCallOut,
   type EuiSwitchEvent,
   EuiPanel,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchGeneric } from '@kbn/search-types';
 import ESQLEditor from '@kbn/esql-editor';
 import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
@@ -32,8 +34,14 @@ import {
   VariableName,
   ControlLabel,
 } from './shared_form_components';
-import { getRecurrentVariableName, getValuesFromQueryField, getFlyoutStyling } from './helpers';
+import {
+  getRecurrentVariableName,
+  getValuesFromQueryField,
+  getFlyoutStyling,
+  appendStatsByToQuery,
+} from './helpers';
 import { EsqlControlFlyoutType } from '../types';
+import { ChooseColumnPopover } from './choose_column_popover';
 
 interface ValueControlFormProps {
   search: ISearchGeneric;
@@ -56,6 +64,7 @@ export function ValueControlForm({
   onCreateControl,
   onEditControl,
 }: ValueControlFormProps) {
+  const valuesField = useMemo(() => getValuesFromQueryField(queryString), [queryString]);
   const suggestedVariableName = useMemo(() => {
     const existingVariables = esqlVariablesService.getVariablesByType(controlType);
 
@@ -63,10 +72,9 @@ export function ValueControlForm({
       return initialState.variableName;
     }
 
-    const field = getValuesFromQueryField(queryString);
-    if (field) {
+    if (valuesField) {
       // variables names can't have special characters, only underscore
-      const fieldVariableName = field.replace(/[^a-zA-Z0-9]/g, '_');
+      const fieldVariableName = valuesField.replace(/[^a-zA-Z0-9]/g, '_');
       return getRecurrentVariableName(
         fieldVariableName,
         existingVariables.map((variable) => variable.key)
@@ -76,7 +84,7 @@ export function ValueControlForm({
       'variable',
       existingVariables.map((variable) => variable.key)
     );
-  }, [controlType, initialState, queryString]);
+  }, [controlType, initialState, valuesField]);
 
   const [controlFlyoutType, setControlFlyoutType] = useState<EsqlControlFlyoutType>(
     EsqlControlFlyoutType.VALUES_FROM_QUERY
@@ -101,6 +109,7 @@ export function ValueControlForm({
   const [valuesQuery, setValuesQuery] = useState<string>(initialState?.esqlQuery ?? '');
   const [esqlQueryErrors, setEsqlQueryErrors] = useState<Error[] | undefined>();
   const [formIsInvalid, setFormIsInvalid] = useState(false);
+  const [queryColumns, setQueryColumns] = useState<string[]>([valuesField ?? '']);
   const [variableName, setVariableName] = useState(suggestedVariableName);
   const [label, setLabel] = useState(initialState?.title ?? '');
   const [minimumWidth, setMinimumWidth] = useState(initialState?.width ?? 'medium');
@@ -139,15 +148,18 @@ export function ValueControlForm({
 
   const onValuesQuerySubmit = useCallback(
     async (query: string) => {
-      if (valuesQuery !== query) {
-        try {
-          getESQLResults({
-            esqlQuery: query,
-            search,
-            signal: undefined,
-            filter: undefined,
-            dropNullColumns: true,
-          }).then((results) => {
+      try {
+        getESQLResults({
+          esqlQuery: query,
+          search,
+          signal: undefined,
+          filter: undefined,
+          dropNullColumns: true,
+        }).then((results) => {
+          const columns = results.response.columns.map((col) => col.name);
+          setQueryColumns(columns);
+
+          if (columns.length === 1) {
             const valuesArray = results.response.values.map((value) => value[0]);
             const options = valuesArray
               .filter((v) => v)
@@ -160,14 +172,14 @@ export function ValueControlForm({
             setSelectedValues(options);
             setAvailableValuesOptions(options);
             setEsqlQueryErrors([]);
-          });
-          setValuesQuery(query);
-        } catch (e) {
-          setEsqlQueryErrors([e]);
-        }
+          }
+        });
+        setValuesQuery(query);
+      } catch (e) {
+        setEsqlQueryErrors([e]);
       }
     },
-    [search, valuesQuery]
+    [search]
   );
 
   useEffect(() => {
@@ -224,6 +236,14 @@ export function ValueControlForm({
     onCreateControl,
     onEditControl,
   ]);
+
+  const updateQuery = useCallback(
+    (column: string) => {
+      const updatedQuery = appendStatsByToQuery(valuesQuery, column);
+      onValuesQuerySubmit(updatedQuery);
+    },
+    [onValuesQuerySubmit, valuesQuery]
+  );
 
   const styling = useMemo(() => getFlyoutStyling(), []);
 
@@ -289,7 +309,30 @@ export function ValueControlForm({
                   max-height: 200px;
                 `}
               >
-                {selectedValues.map((value) => value.label).join(', ')}
+                {queryColumns.length === 1 ? (
+                  selectedValues.map((value) => value.label).join(', ')
+                ) : (
+                  <EuiCallOut
+                    title={i18n.translate('esql.flyout.displayMultipleColsCallout.title', {
+                      defaultMessage: 'Your query must return a single column',
+                    })}
+                    iconType="warning"
+                  >
+                    <p>
+                      <FormattedMessage
+                        id="esql.flyout.displayMultipleColsCallout.description"
+                        defaultMessage="Your query is currently returning {totalColumns} columns. Choose column {chooseColumnPopover} or use {boldText}."
+                        values={{
+                          totalColumns: queryColumns.length,
+                          boldText: <strong>STATS BY</strong>,
+                          chooseColumnPopover: (
+                            <ChooseColumnPopover columns={queryColumns} updateQuery={updateQuery} />
+                          ),
+                        }}
+                      />
+                    </p>
+                  </EuiCallOut>
+                )}
               </EuiPanel>
             </EuiFormRow>
           </>

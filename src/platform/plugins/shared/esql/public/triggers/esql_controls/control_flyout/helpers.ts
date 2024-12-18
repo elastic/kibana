@@ -8,7 +8,7 @@
  */
 import { monaco } from '@kbn/monaco';
 import { inKnownTimeInterval } from '@kbn/esql-validation-autocomplete';
-import { type ESQLColumn, parse, walk } from '@kbn/esql-ast';
+import { type ESQLColumn, parse, walk, mutate, BasicPrettyPrinter } from '@kbn/esql-ast';
 
 export const updateQueryStringWithVariable = (
   queryString: string,
@@ -73,8 +73,7 @@ export const getRecurrentVariableName = (name: string, existingNames: string[]) 
 };
 
 export const getValuesFromQueryField = (queryString: string) => {
-  const validQuery = `${queryString} ""`;
-  const { root } = parse(validQuery);
+  const { root } = parse(queryString);
   const lastCommand = root.commands[root.commands.length - 1];
   const columns: ESQLColumn[] = [];
 
@@ -105,4 +104,17 @@ export const getFlyoutStyling = () => {
             block-size: 100%;
           }
   `;
+};
+
+export const appendStatsByToQuery = (queryString: string, column: string) => {
+  const { root } = parse(queryString);
+  const lastCommand = root.commands[root.commands.length - 1];
+  if (lastCommand.name === 'stats') {
+    const statsCommand = lastCommand;
+    mutate.generic.commands.remove(root, statsCommand);
+    const queryWithoutStats = BasicPrettyPrinter.print(root);
+    return `${queryWithoutStats}\n| STATS BY ${column}`;
+  } else {
+    return `${queryString}\n| STATS BY ${column}`;
+  }
 };
