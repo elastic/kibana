@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { DashboardTopNav, LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
-import type { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common';
@@ -56,7 +56,7 @@ const DashboardToolBarComponent = ({
   );
 
   useEffect(() => {
-    onLoad?.((viewMode as ViewMode) ?? 'view');
+    onLoad?.(viewMode ?? 'view');
   }, [onLoad, viewMode]);
 
   const embedSettings = useMemo(

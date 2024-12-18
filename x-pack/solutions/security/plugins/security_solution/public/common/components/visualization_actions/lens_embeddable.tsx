@@ -9,7 +9,6 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import styled from 'styled-components';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { RangeFilterParams } from '@kbn/es-query';
@@ -256,7 +255,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             syncCursor={false}
             syncTooltips={false}
             timeRange={timerange}
-            viewMode={ViewMode.VIEW}
+            viewMode={'view'}
             withDefaultActions={false}
           />
         </LensComponentWrapper>
