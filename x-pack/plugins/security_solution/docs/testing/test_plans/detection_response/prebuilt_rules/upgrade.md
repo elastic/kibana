@@ -355,7 +355,7 @@ Then a message should be displayed that informs the user why the rules cannot be
 Given X prebuilt rules are installed in Kibana
 And for Y of the installed rules there are new versions available
 And a subset Z of the rules have conflicts with the current versions
-And user is on the Rule Management page
+And user is on the Rule Updates table
 Then Y rules available for upgrade should be displayed in the table
 And user selects <Z> rules, which is a mixture of rules with and without upgrade conflicts
 Then user should see a CTA to upgrade <Z> number of rules, which is enabled
@@ -381,16 +381,16 @@ Examples:
 Given X prebuilt rules are installed in Kibana
 And for Y of the installed rules there are new versions available
 And Z (where Z < Y) rules have conflicts with the current versions
-And user is on the Rule Management page
+And user is on the Rule Updates table
 Then Y rules available for upgrade should be displayed in the table
 Then user should see an enabled CTA to upgrade all rules
 When user clicks the CTA
-A modal window should inform the user that only K (where K < Z) rules without conflicts will be upgraded
+A modal window should inform the user that only K (where K < Y) rules without conflicts will be upgraded
 When user confirms the action in the modal
-Then success message should be displayed after upgrade informing that Z rules were updated
-And the Z upgraded rules should be removed from the table
-And the remaining Y - Z rules should still be present in the table
-And user should see the number of rules available to upgrade decreased by Z number of upgraded rules
+Then success message should be displayed after upgrade informing that K rules were updated
+And the K upgraded rules should be removed from the table
+And the remaining Y - K rules should still be present in the table
+And user should see the number of rules available to upgrade decreased by K number of upgraded rules
 ```
 
 ### Rule upgrade workflow: rule previews
