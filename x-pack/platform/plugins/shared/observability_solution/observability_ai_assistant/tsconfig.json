@@ -50,7 +50,6 @@
     "@kbn/core-lifecycle-server",
     "@kbn/server-route-repository-utils",
     "@kbn/inference-plugin",
-    "@kbn/ai-assistant-icon"
   ],
   "exclude": ["target/**/*"]
 }
