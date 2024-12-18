@@ -14,7 +14,7 @@ import { VisualizeAppState } from '../types';
  * Creates a new instance of AppState based on the table vis state.
  *
  * Dashboards have a similar implementation; see
- * src/plugins/dashboard/public/application/lib/migrate_app_state.ts
+ * src/platform/plugins/shared/dashboard/public/application/lib/migrate_app_state.ts
  *
  * @param appState {VisualizeAppState}
  */

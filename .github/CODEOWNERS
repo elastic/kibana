@@ -613,6 +613,7 @@ src/platform/packages/shared/serverless/settings/security_project @elastic/secur
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/platform/plugins/shared/console @elastic/kibana-management
 src/platform/plugins/shared/controls @elastic/kibana-presentation
+src/platform/plugins/shared/dashboard @elastic/kibana-presentation
 src/platform/plugins/shared/dev_tools @elastic/kibana-management
 src/platform/plugins/shared/es_ui_shared @elastic/kibana-management
 src/platform/plugins/shared/esql @elastic/kibana-esql
@@ -631,7 +632,6 @@ src/plugins/chart_expressions/expression_xy @elastic/kibana-visualizations
 src/plugins/charts @elastic/kibana-visualizations
 src/plugins/content_management @elastic/appex-sharedux
 src/plugins/custom_integrations @elastic/fleet
-src/plugins/dashboard @elastic/kibana-presentation
 src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/plugins/data_view_editor @elastic/kibana-data-discovery
 src/plugins/data_view_field_editor @elastic/kibana-data-discovery
