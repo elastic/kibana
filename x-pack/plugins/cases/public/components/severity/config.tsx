@@ -54,6 +54,10 @@ export const SeverityHealth: React.FC<Props> = ({ severity }) => {
 
   const { color, label } = severityData[severity];
 
-  return <EuiHealth color={color}>{label}</EuiHealth>;
+  return (
+    <EuiHealth color={color} data-test-subj={`case-table-column-severity-${severity}`}>
+      {label}
+    </EuiHealth>
+  );
 };
 SeverityHealth.displayName = 'SeverityHealth';
