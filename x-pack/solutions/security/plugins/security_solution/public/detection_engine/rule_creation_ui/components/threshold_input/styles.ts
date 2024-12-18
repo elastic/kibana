@@ -46,7 +46,7 @@ export const input = cx(
   baseStyle,
   css`
     @container (min-width: ${CONTAINER_BREAKPOINT}px) {
-      flex: 0 0 auto;
+      flex: 0 0 150px;
     }
   `
 );
