@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { join } from 'path';
+import { join, basename } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { orderBy } from 'lodash';
 import type { Package } from '../types';
@@ -154,9 +154,22 @@ const replaceReferencesInternal = async (
       continue;
     }
 
+    let d = dst;
+
+    // For .bazel references, we need to keep the original name reference if we are renaming the path
+    // For example, in the move "src/core/packages/base/common" to "src/core/packages/base/common",
+    // we need to keep the reference name to core-base-common by replacing it with "src/core/packages/base/common:core-base-common"
+    if (
+      file.endsWith('.bazel') &&
+      relativeDestination.startsWith('src/core/packages/') && // Only on core packages for now, since are the ones being renamed
+      basename(relativeSource) !== basename(relativeDestination)
+    ) {
+      d = `${dst}:${basename(relativeSource)}`;
+    }
+
     const md5Before = (await quietExec(`md5 ${file} --quiet`)).stdout.trim();
     // if we are updating packages/cloud references, we must pay attention to not update packages/cloud_defend too
-    await safeExec(`sed -i '' -E "/${src}[\-_a-zA-Z0-9]/! s/${src}/${dst}/g" ${file}`, false);
+    await safeExec(`sed -i '' -E "/${src}[\-_a-zA-Z0-9]/! s/${src}/${d}/g" ${file}`, false);
     const md5After = (await quietExec(`md5 ${file} --quiet`)).stdout.trim();
 
     if (md5Before !== md5After) {
