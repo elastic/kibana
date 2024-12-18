@@ -8,6 +8,8 @@
  */
 
 export const SavedSearchType = 'search';
+// While the legacy SO name has to stay "search" the display name can be customized.
+export const SavedSearchTypeDisplayName = 'discover session'; // visible on Saved Objects page
 
 export const LATEST_VERSION = 1;
 
