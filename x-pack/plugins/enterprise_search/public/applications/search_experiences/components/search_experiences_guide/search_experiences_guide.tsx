@@ -181,20 +181,6 @@ export const SearchExperiencesGuide: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiCard
-              icon={<EuiIcon size="xl" type="logoAppSearch" />}
-              title="App Search"
-              description={i18n.translate(
-                'xpack.enterpriseSearch.searchExperiences.guide.tutorials.appSearch.description',
-                {
-                  defaultMessage: 'Build a search experience with App Search and Search UI.',
-                }
-              )}
-              href={SEARCH_EXPERIENCES_PLUGIN.APP_SEARCH_TUTORIAL_URL}
-              target="_blank"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiCard
               icon={<EuiIcon size="xl" type="logoWorkplaceSearch" />}
               title="Workplace Search"
               description={i18n.translate(

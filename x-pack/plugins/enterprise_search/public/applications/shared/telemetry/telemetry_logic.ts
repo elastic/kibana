@@ -13,14 +13,13 @@ import { HttpLogic } from '../http';
 interface SendTelemetry {
   action: 'viewed' | 'error' | 'clicked';
   metric: string; // e.g., 'setup_guide'
-  product: 'enterprise_search' | 'app_search' | 'workplace_search';
+  product: 'enterprise_search' | 'workplace_search';
 }
 export type SendTelemetryHelper = Omit<SendTelemetry, 'product'>;
 
 interface TelemetryActions {
   sendTelemetry(args: SendTelemetry): SendTelemetry;
   sendEnterpriseSearchTelemetry(args: SendTelemetryHelper): SendTelemetryHelper;
-  sendAppSearchTelemetry(args: SendTelemetryHelper): SendTelemetryHelper;
   sendWorkplaceSearchTelemetry(args: SendTelemetryHelper): SendTelemetryHelper;
 }
 
@@ -29,7 +28,6 @@ export const TelemetryLogic = kea<MakeLogicType<TelemetryActions>>({
   actions: {
     sendTelemetry: ({ action, metric, product }) => ({ action, metric, product }),
     sendEnterpriseSearchTelemetry: ({ action, metric }) => ({ action, metric }),
-    sendAppSearchTelemetry: ({ action, metric }) => ({ action, metric }),
     sendWorkplaceSearchTelemetry: ({ action, metric }) => ({ action, metric }),
   },
   listeners: ({ actions }) => ({
@@ -44,8 +42,6 @@ export const TelemetryLogic = kea<MakeLogicType<TelemetryActions>>({
     },
     sendEnterpriseSearchTelemetry: ({ action, metric }: SendTelemetryHelper) =>
       actions.sendTelemetry({ action, metric, product: 'enterprise_search' }),
-    sendAppSearchTelemetry: ({ action, metric }: SendTelemetryHelper) =>
-      actions.sendTelemetry({ action, metric, product: 'app_search' }),
     sendWorkplaceSearchTelemetry: ({ action, metric }: SendTelemetryHelper) =>
       actions.sendTelemetry({ action, metric, product: 'workplace_search' }),
   }),

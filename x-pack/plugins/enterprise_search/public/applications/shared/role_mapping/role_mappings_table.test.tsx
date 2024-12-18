@@ -15,8 +15,6 @@ import { act } from 'react-dom/test-utils';
 import { EuiInMemoryTable, EuiTableHeaderCell, EuiTableRow } from '@elastic/eui';
 import type { EuiSearchBarProps } from '@elastic/eui';
 
-import { engines } from '../../app_search/__mocks__/engines.mock';
-
 import { RoleMappingsTable } from './role_mappings_table';
 import { UsersAndRolesRowActions } from './users_and_roles_row_actions';
 

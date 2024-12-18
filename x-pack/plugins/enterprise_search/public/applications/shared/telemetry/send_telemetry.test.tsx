@@ -12,11 +12,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import {
-  SendEnterpriseSearchTelemetry,
-  SendAppSearchTelemetry,
-  SendWorkplaceSearchTelemetry,
-} from '.';
+import { SendEnterpriseSearchTelemetry, SendWorkplaceSearchTelemetry } from '.';
 
 describe('Telemetry component helpers', () => {
   beforeEach(() => {
@@ -30,16 +26,6 @@ describe('Telemetry component helpers', () => {
       action: 'viewed',
       metric: 'page',
       product: 'enterprise_search',
-    });
-  });
-
-  it('SendAppSearchTelemetry', () => {
-    shallow(<SendAppSearchTelemetry action="clicked" metric="button" />);
-
-    expect(mockTelemetryActions.sendTelemetry).toHaveBeenCalledWith({
-      action: 'clicked',
-      metric: 'button',
-      product: 'app_search',
     });
   });
 

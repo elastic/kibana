@@ -7,7 +7,7 @@
 
 import type { AppDeepLinkId, EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 
-import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
+import { WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
 
 import { ADD, UPDATE } from './constants/operations';
 
@@ -40,7 +40,7 @@ export interface RoleMapping {
   };
 }
 
-export type ProductName = typeof APP_SEARCH_PLUGIN.NAME | typeof WORKPLACE_SEARCH_PLUGIN.NAME;
+export type ProductName = typeof WORKPLACE_SEARCH_PLUGIN.NAME;
 
 export interface Invitation {
   email: string;

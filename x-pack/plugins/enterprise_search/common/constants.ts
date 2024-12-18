@@ -12,7 +12,6 @@ import {
   ENTERPRISE_SEARCH_CONTENT_APP_ID,
   ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
-  ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
   ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID,
   SEARCH_ELASTICSEARCH,
   SEARCH_VECTOR_SEARCH,
@@ -103,19 +102,6 @@ export const ELASTICSEARCH_PLUGIN = {
   }),
   URL: '/app/elasticsearch/elasticsearch',
   SUPPORT_URL: 'https://discuss.elastic.co/c/elastic-stack/elasticsearch/',
-};
-
-export const APP_SEARCH_PLUGIN = {
-  ID: ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
-  NAME: i18n.translate('xpack.enterpriseSearch.appSearch.productName', {
-    defaultMessage: 'App Search',
-  }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.appSearch.productDescription', {
-    defaultMessage:
-      'Leverage dashboards, analytics, and APIs for advanced application search made simple.',
-  }),
-  URL: '/app/enterprise_search/app_search',
-  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/app-search/',
 };
 
 export const WORKPLACE_SEARCH_PLUGIN = {

@@ -6,5 +6,4 @@
  */
 
 export const overviewPath = '/app/elasticsearch/overview';
-export const appSearchPath = '/app/enterprise_search/app_search';
 export const workplaceSearchPath = '/app/enterprise_search/workplace_search';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { generateTitle, searchTitle, appSearchTitle, workplaceSearchTitle } from './generate_title';
+import { generateTitle, searchTitle, workplaceSearchTitle } from './generate_title';
 
 describe('generateTitle', () => {
   it('creates a hyphen separated string from an array of page titles', () => {
@@ -20,26 +20,9 @@ describe('searchTitle', () => {
     expect(title).toEqual('Setup Guide - Elasticsearch');
   });
 
-  it('can be mixed and matched', () => {
-    const title = searchTitle([appSearchTitle(['Some Page'])]);
-    expect(title).toEqual('Some Page - App Search - Elasticsearch');
-  });
-
   it('falls back to product name', () => {
     const title = searchTitle();
     expect(title).toEqual('Elasticsearch');
-  });
-});
-
-describe('appSearchTitle', () => {
-  it('automatically appends the App Search product onto the pages array', () => {
-    const title = appSearchTitle(['Engines']);
-    expect(title).toEqual('Engines - App Search');
-  });
-
-  it('falls back to product name', () => {
-    const title = appSearchTitle();
-    expect(title).toEqual('App Search');
   });
 });
 

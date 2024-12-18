@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 
 import {
   ANALYTICS_PLUGIN,
-  APP_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_PRODUCT_NAME,
   AI_SEARCH_PLUGIN,
@@ -143,9 +142,6 @@ export const useElasticsearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
     },
     ...breadcrumbs,
   ]);
-
-export const useAppSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useEnterpriseSearchBreadcrumbs([{ text: APP_SEARCH_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
 
 export const useWorkplaceSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEnterpriseSearchBreadcrumbs([

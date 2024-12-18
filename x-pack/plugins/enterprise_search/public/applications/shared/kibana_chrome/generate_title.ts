@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import {
   AI_SEARCH_PLUGIN,
   ANALYTICS_PLUGIN,
-  APP_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
@@ -48,9 +47,6 @@ export const elasticsearchTitle = (page: Title = []) =>
       defaultMessage: 'Getting started with Elasticsearch',
     }),
   ]);
-
-export const appSearchTitle = (page: Title = []) =>
-  generateTitle([...page, APP_SEARCH_PLUGIN.NAME]);
 
 export const workplaceSearchTitle = (page: Title = []) =>
   generateTitle([...page, WORKPLACE_SEARCH_PLUGIN.NAME]);

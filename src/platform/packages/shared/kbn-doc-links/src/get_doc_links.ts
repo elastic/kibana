@@ -34,7 +34,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const OBSERVABILITY_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/`;
   const APM_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/apm/`;
   const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
-  const APP_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/`;
   const ENTERPRISE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/`;
   const ESRE_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/esre/${DOC_LINK_VERSION}/`;
   const WORKPLACE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/`;
@@ -120,33 +119,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       base: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}`,
       auditdModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}/auditbeat-module-auditd.html`,
       systemModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}/auditbeat-module-system.html`,
-    },
-    appSearch: {
-      adaptiveRelevance: `${APP_SEARCH_DOCS}curations-guide.html#curations-reference-adaptive-relevance`,
-      apiRef: `${APP_SEARCH_DOCS}api-reference.html`,
-      apiClients: `${APP_SEARCH_DOCS}api-clients.html`,
-      apiKeys: `${APP_SEARCH_DOCS}authentication.html#authentication-api-keys`,
-      authentication: `${APP_SEARCH_DOCS}authentication.html`,
-      crawlRules: `${APP_SEARCH_DOCS}crawl-web-content.html#crawl-web-content-manage-crawl-rules`,
-      curations: `${APP_SEARCH_DOCS}curations-guide.html`,
-      duplicateDocuments: `${APP_SEARCH_DOCS}web-crawler-reference.html#web-crawler-reference-content-deduplication`,
-      elasticsearchIndexedEngines: `${APP_SEARCH_DOCS}elasticsearch-engines.html`,
-      entryPoints: `${APP_SEARCH_DOCS}crawl-web-content.html#crawl-web-content-manage-entry-points`,
-      gettingStarted: `${APP_SEARCH_DOCS}getting-started.html`,
-      guide: `${APP_SEARCH_DOCS}index.html`,
-      indexingDocuments: `${APP_SEARCH_DOCS}indexing-documents-guide.html`,
-      indexingDocumentsSchema: `${APP_SEARCH_DOCS}indexing-documents-guide.html#indexing-documents-guide-schema`,
-      logSettings: `${APP_SEARCH_DOCS}logs.html`,
-      metaEngines: `${APP_SEARCH_DOCS}meta-engines-guide.html`,
-      precisionTuning: `${APP_SEARCH_DOCS}precision-tuning.html`,
-      relevanceTuning: `${APP_SEARCH_DOCS}relevance-tuning-guide.html`,
-      resultSettings: `${APP_SEARCH_DOCS}result-settings-guide.html`,
-      searchUI: `${APP_SEARCH_DOCS}reference-ui-guide.html`,
-      security: `${APP_SEARCH_DOCS}security-and-users.html`,
-      synonyms: `${APP_SEARCH_DOCS}synonyms-guide.html`,
-      webCrawler: `${APP_SEARCH_DOCS}web-crawler.html`,
-      webCrawlerEventLogs: `${APP_SEARCH_DOCS}view-web-crawler-events-logs.html`,
-      webCrawlerReference: `${APP_SEARCH_DOCS}web-crawler-reference.html`,
     },
     enterpriseSearch: {
       aiSearchDoc: `${ESRE_DOCS}`,

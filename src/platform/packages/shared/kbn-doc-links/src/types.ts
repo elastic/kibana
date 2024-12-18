@@ -87,33 +87,6 @@ export interface DocLinks {
     readonly install: string;
     readonly start: string;
   };
-  readonly appSearch: {
-    readonly adaptiveRelevance: string;
-    readonly apiRef: string;
-    readonly apiClients: string;
-    readonly apiKeys: string;
-    readonly authentication: string;
-    readonly crawlRules: string;
-    readonly curations: string;
-    readonly duplicateDocuments: string;
-    readonly elasticsearchIndexedEngines: string;
-    readonly entryPoints: string;
-    readonly gettingStarted: string;
-    readonly guide: string;
-    readonly indexingDocuments: string;
-    readonly indexingDocumentsSchema: string;
-    readonly logSettings: string;
-    readonly metaEngines: string;
-    readonly precisionTuning: string;
-    readonly relevanceTuning: string;
-    readonly resultSettings: string;
-    readonly searchUI: string;
-    readonly security: string;
-    readonly synonyms: string;
-    readonly webCrawler: string;
-    readonly webCrawlerEventLogs: string;
-    readonly webCrawlerReference: string;
-  };
   readonly enterpriseSearch: {
     readonly aiSearchDoc: string;
     readonly aiSearchHelp: string;
