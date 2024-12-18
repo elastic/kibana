@@ -78,7 +78,7 @@ function createBaseLensDefinition<D extends {}>(
             yConfig: [
               {
                 forAccessor: '607b2253-ed20-4f0a-bf62-07a1f846cca4',
-                color: '#6092c0',
+                color: euiTheme.colors.vis.euiColorVis2,
               },
             ],
           },
