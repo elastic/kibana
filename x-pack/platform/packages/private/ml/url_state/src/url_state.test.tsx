@@ -6,13 +6,25 @@
  */
 
 import React, { useEffect, type FC } from 'react';
-import { render, act } from '@testing-library/react';
+import { render, act, renderHook } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { parseUrlState, useUrlState, UrlStateProvider } from './url_state';
+import {
+  parseUrlState,
+  useUrlState,
+  UrlStateProvider,
+  usePageUrlState,
+  useGlobalUrlState,
+} from './url_state';
 
 const mockHistoryInitialState =
   "?_a=(mlExplorerFilter:(),mlExplorerSwimlane:(viewByFieldName:action),query:(query_string:(analyze_wildcard:!t,query:'*')))&_g=(ml:(jobIds:!(dec-2)),refreshInterval:(display:Off,pause:!f,value:0),time:(from:'2019-01-01T00:03:40.000Z',mode:absolute,to:'2019-08-30T11:55:07.000Z'))&savedSearchId=571aaf70-4c88-11e8-b3d7-01146121b73d";
+
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <MemoryRouter>
+    <UrlStateProvider>{children}</UrlStateProvider>
+  </MemoryRouter>
+);
 
 describe('getUrlState', () => {
   test('properly decode url with _g and _a', () => {
@@ -141,5 +153,52 @@ describe('useUrlState', () => {
 
     expect(getByTestId('globalState').innerHTML).toBe('now-5y');
     expect(getByTestId('appState').innerHTML).toBe('the updated query');
+  });
+});
+
+describe('usePageUrlState', () => {
+  it('manages page-specific state with default values', () => {
+    const pageKey = 'testPage';
+    const defaultPageState = {
+      defaultValue: 'initial',
+    };
+
+    const updatedPageState = {
+      defaultValue: 'updated',
+    };
+
+    const { result } = renderHook(() => usePageUrlState(pageKey, defaultPageState), { wrapper });
+
+    expect(result.current[0]).toEqual(defaultPageState);
+
+    act(() => {
+      result.current[1](updatedPageState);
+    });
+
+    expect(result.current[0]).toEqual(updatedPageState);
+  });
+});
+
+describe('useGlobalUrlState', () => {
+  it('manages global state with ML and time properties', () => {
+    const defaultState = {
+      ml: { jobIds: ['initial-job'] },
+      time: { from: 'now-15m', to: 'now' },
+    };
+
+    const updatedState = {
+      ml: { jobIds: ['updated-job'] },
+      time: { from: 'now-1h', to: 'now' },
+    };
+
+    const { result } = renderHook(() => useGlobalUrlState(defaultState), { wrapper });
+
+    expect(result.current[0]).toEqual(defaultState);
+
+    act(() => {
+      result.current[1](updatedState);
+    });
+
+    expect(result.current[0]).toEqual(updatedState);
   });
 });

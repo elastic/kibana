@@ -19,7 +19,16 @@ import { messagesToOpenAI, toolsToOpenAI, toolChoiceToOpenAI } from './to_openai
 import { processOpenAIStream } from './process_openai_stream';
 
 export const openAIAdapter: InferenceConnectorAdapter = {
-  chatComplete: ({ executor, system, messages, toolChoice, tools, functionCalling, logger }) => {
+  chatComplete: ({
+    executor,
+    system,
+    messages,
+    toolChoice,
+    tools,
+    functionCalling,
+    logger,
+    abortSignal,
+  }) => {
     const stream = true;
     const simulatedFunctionCalling = functionCalling === 'simulated';
 
@@ -49,6 +58,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         subAction: 'stream',
         subActionParams: {
           body: JSON.stringify(request),
+          signal: abortSignal,
           stream,
         },
       })
