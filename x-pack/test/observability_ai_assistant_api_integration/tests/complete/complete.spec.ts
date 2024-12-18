@@ -8,7 +8,7 @@ import { Response } from 'supertest';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { omit, pick } from 'lodash';
 import { PassThrough } from 'stream';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import {
   ChatCompletionChunkEvent,
   ConversationCreateEvent,

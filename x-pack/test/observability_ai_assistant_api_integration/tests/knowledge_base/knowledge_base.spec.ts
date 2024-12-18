@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { type KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
