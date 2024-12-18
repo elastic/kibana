@@ -20,7 +20,7 @@ import { Form as Component } from '../form';
 import { FormProvider } from '../services';
 
 export default {
-  title: `Settings/Form/Form`,
+  title: 'Settings/Form/Form',
   description: 'A form with field rows',
   argTypes: {
     isSavingEnabled: {
