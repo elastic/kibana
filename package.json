@@ -538,7 +538,7 @@
     "@kbn/files-management-plugin": "link:src/plugins/files_management",
     "@kbn/files-plugin": "link:src/plugins/files",
     "@kbn/fleet-plugin": "link:x-pack/plugins/fleet",
-    "@kbn/flot-charts": "link:packages/kbn-flot-charts",
+    "@kbn/flot-charts": "link:src/platform/packages/shared/kbn-flot-charts",
     "@kbn/foo-plugin": "link:x-pack/test/ui_capabilities/common/plugins/foo_plugin",
     "@kbn/formatters": "link:packages/kbn-formatters",
     "@kbn/ftr-apis-plugin": "link:src/plugins/ftr_apis",
