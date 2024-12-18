@@ -8,7 +8,7 @@
 import React from 'react';
 import { FieldValueSuggestions } from '.';
 import { render, screen, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { EuiThemeProvider } from '@elastic/eui';
 import * as obsHooks from '../../hooks/use_es_search';
 
 jest.setTimeout(30000);
@@ -43,9 +43,27 @@ describe('FieldValueSuggestions', () => {
       { key: 'Pak', doc_count: 200 },
       { key: 'Japan', doc_count: 100 },
     ]);
-
+    // mockedUseEuiTheme.mockReturnValue({
+    //   euiPaletteColorBlind: jest.fn().mockReturnValue({ euiPalette: [1, 2, 3, 4, 5, 6, 7, 8] }),
+    //   euiTheme: {
+    //     border: {
+    //       radius: {
+    //         small: 2,
+    //         medium: 20,
+    //       },
+    //       color: '',
+    //       thin: undefined,
+    //       thick: undefined,
+    //       editable: undefined,
+    //       width: {
+    //         thin: 1,
+    //         thick: 2,
+    //       },
+    //     },
+    //   },
+    // }) as unknown as UseEuiTheme;
     render(
-      <EuiThemeProvider darkMode={false}>
+      <EuiThemeProvider>
         <FieldValueSuggestions
           label="Service name"
           sourceField={'service'}
@@ -87,7 +105,7 @@ describe('FieldValueSuggestions', () => {
     const onChange = jest.fn();
 
     const { rerender } = render(
-      <EuiThemeProvider darkMode={false}>
+      <EuiThemeProvider>
         <FieldValueSuggestions
           label="Service name"
           sourceField={'service'}
@@ -111,7 +129,7 @@ describe('FieldValueSuggestions', () => {
     await waitForElementToBeRemoved(() => screen.queryByText('Apply'));
 
     rerender(
-      <EuiThemeProvider darkMode={false}>
+      <EuiThemeProvider>
         <FieldValueSuggestions
           label="Service name"
           sourceField={'service'}
