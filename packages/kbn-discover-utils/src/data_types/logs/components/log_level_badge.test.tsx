@@ -9,14 +9,17 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { EuiProvider } from '@elastic/eui';
 import { LogLevelBadge } from './log_level_badge';
 
 const renderBadge = (logLevel: string) => {
   render(
-    <LogLevelBadge
-      logLevel={logLevel}
-      fallback={<span data-test-subj="logLevelBadge-unknown">{logLevel}</span>}
-    />
+    <EuiProvider>
+      <LogLevelBadge
+        logLevel={logLevel}
+        fallback={<span data-test-subj="logLevelBadge-unknown">{logLevel}</span>}
+      />
+    </EuiProvider>
   );
 };
 
