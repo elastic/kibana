@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './app_container.scss';
-
+import { css, keyframes } from '@emotion/react';
 import { Observable } from 'rxjs';
 import React, { Fragment, FC, useLayoutEffect, useRef, useState, MutableRefObject } from 'react';
-import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingElastic, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { CoreTheme } from '@kbn/core-theme-browser';
@@ -129,11 +128,29 @@ export const AppContainer: FC<Props> = ({
 };
 
 const AppLoadingPlaceholder: FC<{ showPlainSpinner: boolean }> = ({ showPlainSpinner }) => {
+  const { euiTheme } = useEuiTheme();
+  const appContainerFadeIn = keyframes({
+    '0%': { opacity: 0 },
+    '50%': { opacity: 0 },
+    '100%': { opacity: 1 },
+  });
+  const appContainerStyles = css({
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    zIndex: euiTheme.levels.header,
+    animationName: appContainerFadeIn,
+    animationIterationCount: 1,
+    animationTimingFunction: 'ease-in',
+    animationDuration: '2s',
+  });
+
   if (showPlainSpinner) {
     return (
       <EuiLoadingSpinner
         size={'xxl'}
-        className="appContainer__loading"
+        css={appContainerStyles}
         data-test-subj="appContainer-loadingSpinner"
         aria-label={i18n.translate('core.application.appContainer.plainSpinner.loadingAriaLabel', {
           defaultMessage: 'Loading application',
@@ -143,7 +160,7 @@ const AppLoadingPlaceholder: FC<{ showPlainSpinner: boolean }> = ({ showPlainSpi
   }
   return (
     <EuiLoadingElastic
-      className="appContainer__loading"
+      css={appContainerStyles}
       aria-label={i18n.translate('core.application.appContainer.loadingAriaLabel', {
         defaultMessage: 'Loading application',
       })}

@@ -70,9 +70,7 @@ export const redirectToSavedObjectPage = (
   savedVisualizationsId?: string
 ) => {
   const {
-    history,
     setActiveUrl,
-    toastNotifications,
     http: { basePath },
     application: { navigateToApp },
   } = services;
@@ -81,9 +79,7 @@ export const redirectToSavedObjectPage = (
     path: `kibana/objects/savedVisualizations/${savedVisualizationsId}`,
   };
   redirectWhenMissing({
-    history,
     navigateToApp,
-    toastNotifications,
     basePath,
     mapping: {
       visualization: VisualizeConstants.LANDING_PAGE_PATH,
@@ -94,7 +90,7 @@ export const redirectToSavedObjectPage = (
     onBeforeRedirect() {
       setActiveUrl(VisualizeConstants.LANDING_PAGE_PATH);
     },
-    theme: services.theme,
+    ...services,
   })(error);
 };
 
