@@ -9,13 +9,12 @@
 
 import './_presentation_panel.scss';
 
-import { EuiErrorBoundary, EuiFlexGroup } from '@elastic/eui';
+import { EuiErrorBoundary, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { PanelLoader } from '@kbn/panel-loader';
 import { isPromise } from '@kbn/std';
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { untilPluginStartServicesReady } from '../kibana_services';
 import { PresentationPanelError } from './presentation_panel_error';
 import { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
@@ -30,6 +29,7 @@ export const PresentationPanel = <
   }
 ) => {
   const { Component, hidePanelChrome, ...passThroughProps } = props;
+  const { euiTheme } = useEuiTheme();
   const { loading, value, error } = useAsync(async () => {
     if (hidePanelChrome) {
       return {
@@ -58,7 +58,7 @@ export const PresentationPanel = <
         showShadow={props.showShadow}
         showBorder={props.showBorder}
         css={css`
-          border-radius: ${euiThemeVars.euiBorderRadius};
+          border-radius: ${euiTheme.border.radius.medium};
         `}
         dataTestSubj="embed
         dablePanelLoadingIndicator"
