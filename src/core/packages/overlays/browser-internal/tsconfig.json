@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../tsconfig.base.json",
+  "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -12,7 +12,7 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "../../../../typings/emotion.d.ts"
+    "../../../../../typings/emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/i18n-react",
