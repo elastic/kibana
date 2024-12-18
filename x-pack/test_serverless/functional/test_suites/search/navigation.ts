@@ -280,7 +280,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'project_settings_project_nav',
         'ml:modelManagement',
         'management',
-        'cloudLinkUserAndRoles',
         'cloudLinkDeployment',
         'cloudLinkBilling',
       ]);
