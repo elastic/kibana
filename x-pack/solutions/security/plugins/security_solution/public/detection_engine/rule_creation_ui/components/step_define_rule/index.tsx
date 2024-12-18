@@ -661,11 +661,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             <EuiFormRow fullWidth>
               <>
                 <EuiFlexGroup>
-                  <EuiFlexItem>
+                  <EuiFlexItem grow={false}>
                     <MachineLearningJobIdEdit path="machineLearningJobId" />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiSpacer size="l" />
+                    <EuiSpacer size="xs" />
+                    <EuiSpacer size="m" />
                     <CreateCustomMlJobButton />
                   </EuiFlexItem>
                 </EuiFlexGroup>
