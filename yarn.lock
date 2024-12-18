@@ -7537,7 +7537,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/stack-connectors-plugin@link:x-pack/plugins/stack_connectors":
+"@kbn/stack-connectors-plugin@link:x-pack/platform/plugins/shared/stack_connectors":
   version "0.0.0"
   uid ""
 

@@ -73,7 +73,7 @@ const CreateAlertSchemaOptionalProps = rt.partial(
 
 /**
  * This schema is duplicated from the server. The only difference is that it is using io-ts vs kbn-schema.
- * NOTE: This schema must be the same as defined here: x-pack/plugins/stack_connectors/server/connector_types/stack/opsgenie/schema.ts
+ * NOTE: This schema must be the same as defined here: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/stack/opsgenie/schema.ts
  *
  * The reason it is duplicated here is because the server uses kbn-schema which uses Joi under the hood. If we import
  * Joi on the frontend it will cause ~500KB of data to be loaded on page loads. To avoid this we'll use io-ts in the frontend.
