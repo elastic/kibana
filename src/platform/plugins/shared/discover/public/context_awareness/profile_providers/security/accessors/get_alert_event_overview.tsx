@@ -56,6 +56,7 @@ export const ExpandableSection: FC<PropsWithChildren<{ title: string }>> = ({
 
   return (
     <EuiAccordion
+      id={'accordion-${title}'}
       forceState={trigger}
       onToggle={onToggle}
       buttonContent={

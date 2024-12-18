@@ -18,7 +18,7 @@ export const overviewTabTitle = (isAlert: boolean) =>
 export const overviewExploreButtonLabel = (isAlert: boolean) =>
   i18n.translate('discover.profile.security.flyout.overviewExploreButtonLabel', {
     values: { isAlert },
-    defaultMessage: `Explore ${isAlert ? 'Alert' : 'Event'} in Security`,
+    defaultMessage: 'Explore {isAlert, select, true {Alert} other {Event}} in Security',
   });
 
 export const noEcsDescriptionReason = i18n.translate(
