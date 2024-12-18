@@ -27,7 +27,7 @@ export interface CasesUiCapabilities {
 }
 /**
  * Return the UI capabilities for each type of operation. These strings must match the values defined in the UI
- * here: x-pack/plugins/cases/public/client/helpers/capabilities.ts
+ * here: x-pack/platform/plugins/shared/cases/public/client/helpers/capabilities.ts
  */
 export const createUICapabilities = (): CasesUiCapabilities => ({
   all: [

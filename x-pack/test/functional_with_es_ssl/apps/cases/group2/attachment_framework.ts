@@ -92,7 +92,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   /**
    * Attachment types are being registered in
-   * x-pack/test/functional_with_es_ssl/plugins/cases/public/plugin.ts
+   * x-pack/test/functional_with_es_ssl/platform/plugins/shared/cases/public/plugin.ts
    */
   describe('Attachment framework', () => {
     describe('External reference attachments', () => {
@@ -202,7 +202,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     /**
-     * The UI of the cases fixture plugin is in x-pack/test/functional_with_es_ssl/plugins/cases/public/application.tsx
+     * The UI of the cases fixture plugin is in x-pack/test/functional_with_es_ssl/platform/plugins/shared/cases/public/application.tsx
      */
     describe('Attachment hooks', () => {
       const TOTAL_OWNERS = ['cases', 'securitySolution', 'observability'];
