@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { defaultConfig } from '@kbn/storybook';
-
 module.exports = {
-  ...defaultConfig,
-  stories: ['../../**/*.stories.+(tsx|mdx)'],
-  reactOptions: {
-    strictMode: true,
-  },
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/screenshotting'],
 };
