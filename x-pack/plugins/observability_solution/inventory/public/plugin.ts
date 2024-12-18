@@ -57,7 +57,7 @@ export class InventoryPlugin
     const inventoryAPIClient = createCallInventoryAPI(coreSetup);
     const isEntityCentricExperienceSettingEnabled = coreSetup.uiSettings.get<boolean>(
       'observability:entityCentricExperience',
-      true
+      false
     );
 
     this.telemetry.setup({
