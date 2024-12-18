@@ -67,15 +67,15 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
         &:placeholder-shown,
         &::placeholder {
           font-weight: ${euiTheme.font.weight.regular};
-          color: ${euiTheme.colors.subduedText};
+          color: ${euiTheme.colors.textSubdued};
         }
       `,
       invalid: css`
         &:not(:invalid) {
-          color: ${euiTheme.colors.warningText};
+          color: ${euiTheme.colors.textWarning};
         }
         &:invalid {
-          color: ${euiTheme.colors.dangerText};
+          color: ${euiTheme.colors.textDanger};
         }
       `,
       // unset the red underline for values between steps
