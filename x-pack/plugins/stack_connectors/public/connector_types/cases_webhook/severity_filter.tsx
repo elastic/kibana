@@ -30,31 +30,22 @@ interface Props {
 
 export const SeverityFilter: React.FC<Props> = ({ selectedSeverity, onSeverityChange }) => {
   const { euiTheme } = useEuiTheme();
-  const { hasVisColorAdjustment } = euiTheme;
 
   const severities = {
     [CaseSeverity.LOW]: {
-      color: hasVisColorAdjustment
-        ? euiTheme.colors.vis.euiColorVis0
-        : euiTheme.colors.vis.euiColorVisSuccess0,
+      color: euiTheme.flags.hasVisColorAdjustment ? '#54B399' : '#CAD3E2',
       label: i18n.SEVERITY_LOW_LABEL,
     },
     [CaseSeverity.MEDIUM]: {
-      color: hasVisColorAdjustment
-        ? euiTheme.colors.vis.euiColorVis5
-        : euiTheme.colors.vis.euiColorVisWarning0,
+      color: euiTheme.flags.hasVisColorAdjustment ? '#D6BF57' : '#FCD883',
       label: i18n.SEVERITY_MEDIUM_LABEL,
     },
     [CaseSeverity.HIGH]: {
-      color: hasVisColorAdjustment
-        ? euiTheme.colors.vis.euiColorVis7
-        : euiTheme.colors.vis.euiColorVisDanger1,
+      color: euiTheme.flags.hasVisColorAdjustment ? '#DA8B45' : '#FC9188',
       label: i18n.SEVERITY_HIGH_LABEL,
     },
     [CaseSeverity.CRITICAL]: {
-      color: hasVisColorAdjustment
-        ? euiTheme.colors.vis.euiColorVis9
-        : euiTheme.colors.vis.euiColorVisDanger0,
+      color: euiTheme.flags.hasVisColorAdjustment ? '#E7664C' : '#C61E25',
       label: i18n.SEVERITY_CRITICAL_LABEL,
     },
   };
