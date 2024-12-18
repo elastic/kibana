@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiHealth } from '@elastic/eui';
+import { ML_SEVERITY_COLORS } from '@kbn/ml-anomaly-utils/severity_colors';
 
 interface Props {
   score: number;
@@ -29,16 +30,16 @@ ScoreHealth.displayName = 'ScoreHealth';
 // less than 3 are assigned a severity of 'low'.
 export const getSeverityColor = (normalizedScore: number): string => {
   if (normalizedScore >= 75) {
-    return '#fe5050';
+    return ML_SEVERITY_COLORS.CRITICAL;
   } else if (normalizedScore >= 50) {
-    return '#fba740';
+    return ML_SEVERITY_COLORS.MAJOR;
   } else if (normalizedScore >= 25) {
-    return '#fdec25';
+    return ML_SEVERITY_COLORS.MINOR;
   } else if (normalizedScore >= 3) {
-    return '#8bc8fb';
+    return ML_SEVERITY_COLORS.WARNING;
   } else if (normalizedScore >= 0) {
-    return '#d2e9f7';
+    return ML_SEVERITY_COLORS.LOW;
   } else {
-    return '#ffffff';
+    return ML_SEVERITY_COLORS.BLANK;
   }
 };

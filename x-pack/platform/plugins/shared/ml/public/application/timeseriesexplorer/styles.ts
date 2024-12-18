@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 
 import { useEuiFontSize, useEuiTheme, transparentize } from '@elastic/eui';
 
-import { mlColors } from '../styles';
+import { ML_SEVERITY_COLORS } from '@kbn/ml-anomaly-utils';
 
 // Annotations constants
 const mlAnnotationBorderWidth = '2px';
@@ -119,23 +119,23 @@ export const useTimeseriesExplorerStyles = () => {
             stroke: euiTheme.colors.mediumShade,
 
             '&.critical': {
-              fill: mlColors.critical,
+              fill: ML_SEVERITY_COLORS.CRITICAL,
             },
 
             '&.major': {
-              fill: mlColors.major,
+              fill: ML_SEVERITY_COLORS.MAJOR,
             },
 
             '&.minor': {
-              fill: mlColors.minor,
+              fill: ML_SEVERITY_COLORS.MINOR,
             },
 
             '&.warning': {
-              fill: mlColors.warning,
+              fill: ML_SEVERITY_COLORS.WARNING,
             },
 
             '&.low': {
-              fill: mlColors.lowWarning,
+              fill: ML_SEVERITY_COLORS.LOW,
             },
           },
 
