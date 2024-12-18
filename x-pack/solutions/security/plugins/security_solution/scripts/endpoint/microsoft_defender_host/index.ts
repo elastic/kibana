@@ -1,0 +1,151 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { run, type RunFn } from '@kbn/dev-cli-runner';
+import { ok } from 'assert';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { onboardVmHostWithMicrosoftDefender } from './services/onboard_microsoft_vm';
+import { generateVmName } from '../common/vm_services';
+import { createKbnClient } from '../common/stack_services';
+import { ensureSpaceIdExists, fetchActiveSpace } from '../common/spaces';
+import {
+  DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME,
+  enableFleetSpaceAwareness,
+  fetchAgentPolicy,
+  getOrCreateDefaultAgentPolicy,
+} from '../common/fleet_services';
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
+
+export const cli = async () => {
+  return run(runCli, {
+    description: `Sets up the kibana system so that Microsoft Defender for Endpoint hosts data can be be streamed to Elasticsearch.
+It will first setup a host VM that runs the Microsoft Defender agent on it. This VM will ensure that data is being
+created in Microsoft Defender's system.
+
+It will then also setup a second VM (if necessary) that runs Elastic Agent along with the Microsoft Defender for Endpiont integration
+policy (an agent-less integration) - this is the process that then connects to the Microsoft's management
+console and pushes the data to Elasticsearch.`,
+    flags: {
+      string: [
+        'clientId',
+        'tenantId',
+        'clientSecret',
+        'oAuthServerUrl',
+        'oAuthScope',
+        'apiUrl,',
+        'kibanaUrl',
+        'username',
+        'password',
+        'policy',
+        'vmName',
+        'spaceId',
+        'apiKey',
+      ],
+      boolean: ['forceFleetServer', 'forceNewHost'],
+      default: {
+        oAuthServerUrl: 'https://login.microsoftonline.com',
+        oAuthScope: 'https://securitycenter.onmicrosoft.com/windowsatpservice/.default',
+        apiUrl: 'https://api.securitycenter.windows.com',
+        kibanaUrl: 'http://127.0.0.1:5601',
+        username: 'elastic',
+        password: 'changeme',
+        policy: '',
+        spaceId: '',
+        apiKey: '',
+      },
+      help: `
+      --tenantId          Required. The tenantId having access to Microsoft Defender for Endpoint management system.
+      --clientId          Required. The azure application having privileges to access Microsoft Defender for Endpoint system
+      --clientSecret      Required. The client secret created for the registered application's API access.
+      --oAuthServerUrl:   Optional. The url for OAuth2 authorization. (Default: https://login.microsoftonline.com)
+      --oAuthScope:       Optional. The OAuth2 scope for the authorization request and token retrieval.
+                          (Default: https://securitycenter.onmicrosoft.com/windowsatpservice/.default)
+      --apiUrl:           Optional. The URL for making API calls to Microsoft Defender for Endpoint management system.
+                          (Default: https://api.securitycenter.windows.com)
+      --vmName            Optional. The name for the VM.
+                          Default: [current login user name]-msdefender-[unique number]
+      --policy            Optional. The UUID of the Fleet Agent Policy that should be used to setup
+                          the Microsoft Integration
+                          Default: re-uses existing dev policy (if found) or creates a new one
+      --forceFleetServer  Optional. If fleet server should be started/configured even if it seems
+                          like it is already setup. (Default: false)
+      --forceNewHost      Optional. Force a new VM host to be created and enrolled with Microsoft.
+                          By default, a check is done to see if a host running Microsoft is
+                          already running and if so, a new one will not be created - unless this
+                          option is used (Default: false)
+      --username          Optional. User name to be used for auth against elasticsearch and
+                          kibana (Default: elastic).
+      --password          Optional. Password associated with the username (Default: changeme)
+      --apiKey            Optional. A Kibana API key to use for authz. When defined, 'username'
+                            and 'password' arguments are ignored.
+      --spaceId           Optional. The space id where the host should be added to in kibana. The
+                            space will be created if it does not exist. Default: default space.
+      --kibanaUrl         Optional. The url to Kibana (Default: http://127.0.0.1:5601)
+`,
+    },
+  });
+};
+
+const runCli: RunFn = async ({ log, flags }) => {
+  const tenantId = flags.tenantId as string;
+  const clientId = flags.clientId as string;
+  const clientSecret = flags.clientSecret as string;
+  const oAuthServerUrl = flags.oAuthServerUrl as string;
+  const oAuthScope = flags.oAuthScope as string;
+  const apiUrl = flags.apiUrl as string;
+  const username = flags.username as string;
+  const password = flags.password as string;
+  const kibanaUrl = flags.kibanaUrl as string;
+  const policy = flags.policy as string;
+  const spaceId = flags.spaceId as string;
+  const apiKey = flags.apiKey as string;
+  const forceFleetServer = flags.forceFleetServer as boolean;
+  const forceNewHost = flags.forceNewHost as boolean;
+  const vmName = (flags.vmName as string) || generateVmName('msdefender');
+
+  const getRequiredArgMessage = (argName: string) => `${argName} argument is required`;
+
+  createToolingLogger.setDefaultLogLevelFromCliFlags(flags);
+
+  ok(tenantId, getRequiredArgMessage('tenantId'));
+  ok(clientId, getRequiredArgMessage('clientId'));
+  ok(clientSecret, getRequiredArgMessage('clientSecret'));
+  ok(oAuthServerUrl, getRequiredArgMessage('oAuthServerUrl'));
+  ok(oAuthScope, getRequiredArgMessage('oAuthScope'));
+  ok(apiUrl, getRequiredArgMessage('apiUrl'));
+
+  const kbnClient = createKbnClient({
+    log,
+    url: kibanaUrl,
+    username,
+    password,
+    spaceId,
+    apiKey,
+  });
+
+  if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
+    await ensureSpaceIdExists(kbnClient, spaceId, { log });
+    await enableFleetSpaceAwareness(kbnClient);
+  }
+
+  const activeSpaceId = (await fetchActiveSpace(kbnClient)).id;
+
+  await onboardVmHostWithMicrosoftDefender({ kbnClient, log });
+
+  const {
+    id: agentPolicyId,
+    agents = 0,
+    name: agentPolicyName,
+    namespace: agentPolicyNamespace,
+  } = policy
+    ? await fetchAgentPolicy(kbnClient, policy)
+    : await getOrCreateDefaultAgentPolicy({
+        kbnClient,
+        log,
+        policyName: `${DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME} - ${activeSpaceId}`,
+      });
+};
