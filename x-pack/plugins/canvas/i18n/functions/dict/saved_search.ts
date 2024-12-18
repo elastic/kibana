@@ -12,9 +12,9 @@ import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof savedSearch>> = {
   help: i18n.translate('xpack.canvas.functions.savedSearchHelpText', {
-    defaultMessage: `Returns an embeddable for a saved search object`,
+    defaultMessage: `Returns an embeddable for a saved Discover session object`,
   }),
   args: {
-    id: 'The id of the saved search object',
+    id: 'The id of the saved Discover session object',
   },
 };
