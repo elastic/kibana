@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiText,
-  EuiLink,
   useEuiTheme,
   useEuiFontSize,
   EuiSkeletonText,
@@ -19,11 +18,6 @@ import {
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { LeftPanelInsightsTab } from '../../left';
-import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useDocumentDetailsContext } from '../../shared/context';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import { USER_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
@@ -83,22 +77,7 @@ export const USER_PREVIEW_BANNER = {
  * User preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
-  const { eventId, indexName, scopeId } = useDocumentDetailsContext();
-  const { openLeftPanel } = useExpandableFlyoutApi();
-
-  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
-
-  const goToEntitiesTab = useCallback(() => {
-    openLeftPanel({
-      id: DocumentDetailsLeftPanelKey,
-      path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
-  }, [eventId, openLeftPanel, indexName, scopeId]);
+  const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
 
@@ -210,34 +189,21 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
             <EuiIcon type={USER_ICON} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {isPreviewEnabled ? (
-              <PreviewLink
-                field={USER_NAME_FIELD_NAME}
-                value={userName}
-                scopeId={scopeId}
-                data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
-              >
-                <EuiText
-                  css={css`
-                    font-size: ${xsFontSize};
-                    font-weight: ${euiTheme.font.weight.bold};
-                  `}
-                >
-                  {userName}
-                </EuiText>
-              </PreviewLink>
-            ) : (
-              <EuiLink
-                data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
+            <PreviewLink
+              field={USER_NAME_FIELD_NAME}
+              value={userName}
+              scopeId={scopeId}
+              data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
+            >
+              <EuiText
                 css={css`
                   font-size: ${xsFontSize};
                   font-weight: ${euiTheme.font.weight.bold};
                 `}
-                onClick={goToEntitiesTab}
               >
                 {userName}
-              </EuiLink>
-            )}
+              </EuiText>
+            </PreviewLink>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

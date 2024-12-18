@@ -26,27 +26,27 @@ export const RunScriptActionRequestSchema = {
         /**
          * The script to run
          */
-        Raw: schema.maybe(NonEmptyString),
+        raw: schema.maybe(NonEmptyString),
         /**
          * The path to the script on the host to run
          */
-        HostPath: schema.maybe(NonEmptyString),
+        hostPath: schema.maybe(NonEmptyString),
         /**
          * The path to the script in the cloud to run
          */
-        CloudFile: schema.maybe(NonEmptyString),
+        cloudFile: schema.maybe(NonEmptyString),
         /**
          * The command line to run
          */
-        CommandLine: schema.maybe(NonEmptyString),
+        commandLine: schema.maybe(NonEmptyString),
         /**
          * The max timeout value before the command is killed. Number represents milliseconds
          */
-        Timeout: schema.maybe(schema.number({ min: 1 })),
+        timeout: schema.maybe(schema.number({ min: 1 })),
       },
       {
         validate: (params) => {
-          if (!params.Raw && !params.HostPath && !params.CloudFile) {
+          if (!params.raw && !params.hostPath && !params.cloudFile) {
             return 'At least one of Raw, HostPath, or CloudFile must be provided';
           }
         },

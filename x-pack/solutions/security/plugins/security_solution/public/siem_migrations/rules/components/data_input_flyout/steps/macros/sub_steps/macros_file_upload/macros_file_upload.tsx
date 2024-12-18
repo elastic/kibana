@@ -25,8 +25,8 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
   ({ createResources, apiError, isLoading }) => {
     const onFileParsed = useCallback(
       (content: Array<SplunkRow<SplunkMacroResult>>) => {
-        const rules = content.map(formatMacroRow);
-        createResources(rules);
+        const macros = content.map(formatMacroRow);
+        createResources(macros);
       },
       [createResources]
     );
@@ -56,14 +56,14 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
           initialPromptText={
             <>
               <EuiText size="s" textAlign="center">
-                {i18n.RULES_DATA_INPUT_FILE_UPLOAD_PROMPT}
+                {i18n.MACROS_DATA_INPUT_FILE_UPLOAD_PROMPT}
               </EuiText>
             </>
           }
           accept="application/json, application/x-ndjson"
           onChange={parseFile}
           display="large"
-          aria-label="Upload logs sample file"
+          aria-label="Upload macros file"
           isLoading={isParsing || isLoading}
           disabled={isParsing || isLoading}
           data-test-subj="macrosFilePicker"
