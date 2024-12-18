@@ -21,8 +21,6 @@ export function StreamDetailEnrichment({
   definition?: ReadStreamDefinition;
   refreshDefinition: () => void;
 }) {
-  console.log(definition);
-
   if (!definition) return null;
 
   return (

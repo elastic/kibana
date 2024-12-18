@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export type { StreamDefinition, ReadStreamDefinition } from './types';
+export type {
+  FieldDefinition,
+  ProcessingDefinition,
+  ReadStreamDefinition,
+  StreamDefinition,
+} from './types';

@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
+import { ProcessingDefinition, ReadStreamDefinition } from '@kbn/streams-plugin/common';
 
 import {
   DragDropContextProps,
@@ -14,10 +14,12 @@ import {
   EuiDragDropContext,
   EuiDraggable,
   EuiDroppable,
+  EuiDroppableProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiPanelProps,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -26,8 +28,10 @@ import {
 } from '@elastic/eui';
 import { ClassNames } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useBoolean } from '@kbn/react-hooks';
 import { EnrichmentEmptyPrompt } from './enrichment_empty_prompt';
 import { AddProcessorButton } from './add_processor_button';
+import { AddProcessorFlyout, EditProcessorFlyout } from './flyout';
 
 export function StreamDetailEnrichmentContent({
   definition,
@@ -38,28 +42,55 @@ export function StreamDetailEnrichmentContent({
 }) {
   const [processors, setProcessors] = useState(() => createProcessorsList(definition.processing));
 
-  const onDragEnd: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
+  const [isAddProcessorOpen, { on: openAddProcessor, off: closeAddProcessor }] = useBoolean();
+
+  const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
       const items = euiDragDropReorder(processors, source.index, destination.index);
       setProcessors(items);
     }
   };
 
-  const handleAddProcessorClick = () => {};
-
   const hasProcessors = processors.length > 0;
 
   if (!hasProcessors) {
-    return <EnrichmentEmptyPrompt onAddProcessor={handleAddProcessorClick} />;
+    return (
+      <>
+        <EnrichmentEmptyPrompt onAddProcessor={openAddProcessor} />
+        {isAddProcessorOpen && (
+          <AddProcessorFlyout
+            key="add-processor"
+            definition={definition}
+            onClose={closeAddProcessor}
+          />
+        )}
+      </>
+    );
   }
 
   return (
     <EuiPanel paddingSize="none">
       <ProcessorsHeader />
       <EuiSpacer size="l" />
-      <SortableProcessorsList processors={processors} onDragEnd={onDragEnd} />
+      <SortableProcessorsList onDragItem={handlerItemDrag}>
+        {processors.map((processor, idx) => (
+          <DraggableProcessorListItem
+            key={processor.id}
+            idx={idx}
+            definition={definition}
+            processor={processor}
+          />
+        ))}
+      </SortableProcessorsList>
       <EuiSpacer size="m" />
-      <AddProcessorButton onClick={handleAddProcessorClick} />
+      <AddProcessorButton onClick={openAddProcessor} />
+      {isAddProcessorOpen && (
+        <AddProcessorFlyout
+          key="add-processor"
+          definition={definition}
+          onClose={closeAddProcessor}
+        />
+      )}
     </EuiPanel>
   );
 }
@@ -83,9 +114,14 @@ const ProcessorsHeader = () => {
   );
 };
 
-const SortableProcessorsList = ({ processors, onDragEnd }) => {
+interface SortableProcessorsListProps {
+  onDragItem: DragDropContextProps['onDragEnd'];
+  children: EuiDroppableProps['children'];
+}
+
+const SortableProcessorsList = ({ onDragItem, children }: SortableProcessorsListProps) => {
   return (
-    <EuiDragDropContext onDragEnd={onDragEnd}>
+    <EuiDragDropContext onDragEnd={onDragItem}>
       <ClassNames>
         {({ css, theme }) => (
           <EuiDroppable
@@ -95,23 +131,7 @@ const SortableProcessorsList = ({ processors, onDragEnd }) => {
               max-width: min(800px, 100%);
             `}
           >
-            {processors.map((processor, idx) => (
-              <EuiDraggable
-                spacing="m"
-                key={processor.id}
-                index={idx}
-                draggableId={processor.id}
-                hasInteractiveChildren
-                style={{
-                  paddingLeft: 0,
-                  paddingRight: 0,
-                }}
-              >
-                {(_provided, state) => (
-                  <ProcessorListItem processor={processor} hasShadow={state.isDragging} />
-                )}
-              </EuiDraggable>
-            ))}
+            {children}
           </EuiDroppable>
         )}
       </ClassNames>
@@ -119,8 +139,43 @@ const SortableProcessorsList = ({ processors, onDragEnd }) => {
   );
 };
 
-const ProcessorListItem = ({ processor, hasShadow = false }) => {
-  const { patterns, type } = processor.config;
+const DraggableProcessorListItem = ({
+  processor,
+  idx,
+  ...props
+}: Omit<ProcessorListItemProps, 'hasShadow'> & { idx: number }) => (
+  <EuiDraggable
+    index={idx}
+    spacing="m"
+    draggableId={processor.id}
+    hasInteractiveChildren
+    style={{
+      paddingLeft: 0,
+      paddingRight: 0,
+    }}
+  >
+    {(_provided, state) => (
+      <ProcessorListItem processor={processor} hasShadow={state.isDragging} {...props} />
+    )}
+  </EuiDraggable>
+);
+
+interface ProcessorListItemProps {
+  definition: ReadStreamDefinition;
+  processor: ProcessorDefinition;
+  hasShadow: EuiPanelProps['hasShadow'];
+}
+
+const ProcessorListItem = ({
+  processor,
+  definition,
+  hasShadow = false,
+}: ProcessorListItemProps) => {
+  const { type } = processor.config;
+
+  const [isEditProcessorOpen, { on: openEditProcessor, off: closeEditProcessor }] = useBoolean();
+
+  const description = getProcessorDescription(processor);
 
   return (
     <EuiPanel hasBorder hasShadow={hasShadow} paddingSize="s">
@@ -131,10 +186,11 @@ const ProcessorListItem = ({ processor, hasShadow = false }) => {
         </EuiText>
         <EuiFlexItem>
           <EuiText component="span" size="s" color="subdued">
-            {patterns.join(' • ')}
+            {description}
           </EuiText>
         </EuiFlexItem>
         <EuiButtonIcon
+          onClick={openEditProcessor}
           iconType="pencil"
           color="text"
           size="s"
@@ -144,13 +200,35 @@ const ProcessorListItem = ({ processor, hasShadow = false }) => {
           )}
         />
       </EuiFlexGroup>
+      {isEditProcessorOpen && (
+        <EditProcessorFlyout
+          key={`edit-processor`}
+          definition={definition}
+          onClose={closeEditProcessor}
+          processor={processor}
+        />
+      )}
     </EuiPanel>
   );
 };
 
+interface ProcessorDefinition extends ProcessingDefinition {
+  id: string;
+}
+
 const createId = htmlIdGenerator();
-const createProcessorsList = (processors) =>
+const createProcessorsList = (processors: ProcessingDefinition[]): ProcessorDefinition[] =>
   processors.map((processor) => ({
     ...processor,
     id: createId(),
   }));
+
+const getProcessorDescription = (processor: ProcessorDefinition) => {
+  if (processor.config.type === 'grok') {
+    return processor.config.patterns.join(' • ');
+  } else if (processor.config.type === 'dissect') {
+    return processor.config.pattern;
+  }
+
+  return '';
+};
