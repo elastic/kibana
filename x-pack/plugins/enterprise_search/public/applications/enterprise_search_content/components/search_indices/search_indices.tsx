@@ -142,13 +142,13 @@ export const SearchIndices: React.FC = () => {
         {productFeatures.hasDefaultIngestPipeline && showDefaultSettingsFlyout && (
           <DefaultSettingsFlyout closeFlyout={() => setShowDefaultSettingsFlyout(false)} />
         )}
-        {config.host && config.canDeployEntSearch && errorConnectingMessage && (
+        {config.host && errorConnectingMessage && (
           <>
             <CannotConnect />
             <EuiSpacer />
           </>
         )}
-        {!config.host && config.canDeployEntSearch && (
+        {!config.host && (
           <>
             <EuiCallOut
               title={i18n.translate('xpack.enterpriseSearch.noEntSearchConfigured.title', {

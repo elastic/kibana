@@ -19,6 +19,7 @@ import {
   TextEmbeddingParamsSchema,
   TextEmbeddingResponseSchema,
 } from './schema';
+import { ConfigProperties } from '../dynamic_config/types';
 
 export type Config = TypeOf<typeof ConfigSchema>;
 export type Secrets = TypeOf<typeof SecretsSchema>;
@@ -36,3 +37,13 @@ export type TextEmbeddingParams = TypeOf<typeof TextEmbeddingParamsSchema>;
 export type TextEmbeddingResponse = TypeOf<typeof TextEmbeddingResponseSchema>;
 
 export type StreamingResponse = TypeOf<typeof StreamingResponseSchema>;
+
+export type FieldsConfiguration = Record<string, ConfigProperties>;
+
+export interface InferenceProvider {
+  service: string;
+  name: string;
+  task_types: string[];
+  logo?: string;
+  configurations: FieldsConfiguration;
+}

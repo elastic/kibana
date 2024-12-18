@@ -85,6 +85,7 @@ kibana_vars=(
     elasticsearch.username
     enterpriseSearch.accessCheckTimeout
     enterpriseSearch.accessCheckTimeoutWarning
+    enterpriseSearch.appsDisabled
     enterpriseSearch.host
     externalUrl.policy
     i18n.locale

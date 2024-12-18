@@ -114,7 +114,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
               </EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
-          {config.host && config.canDeployEntSearch && errorConnectingMessage && (
+          {config.host && errorConnectingMessage && (
             <>
               <EuiCallOut
                 color="warning"

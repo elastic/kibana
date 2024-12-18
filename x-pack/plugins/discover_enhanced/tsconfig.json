@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*"],
+  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*", "ui_tests/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -13,7 +13,6 @@
     "@kbn/lens-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/embeddable-plugin",
-    "@kbn/visualizations-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/i18n",
     "@kbn/es-query",
@@ -21,6 +20,7 @@
     "@kbn/presentation-publishing",
     "@kbn/data-views-plugin",
     "@kbn/unified-search-plugin",
+    "@kbn/scout",
   ],
   "exclude": [
     "target/**/*",
