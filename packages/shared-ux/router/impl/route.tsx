@@ -15,6 +15,7 @@ import {
   RouteProps,
   useRouteMatch,
 } from 'react-router-dom';
+import { useSharedUXRoutesContext } from './routes_context';
 import { useKibanaSharedUX } from './services';
 import { useSharedUXExecutionContext } from './use_execution_context';
 
@@ -30,17 +31,18 @@ export const Route = <T extends {}>({
   render,
   ...rest
 }: RouteProps<string, { [K: string]: string } & T>) => {
+  const { enableExecutionContextTracking } = useSharedUXRoutesContext();
   const component = useMemo(() => {
     if (!Component) {
       return undefined;
     }
     return (props: RouteComponentProps) => (
       <>
-        <MatchPropagator />
+        {enableExecutionContextTracking && <MatchPropagator />}
         <Component {...props} />
       </>
     );
-  }, [Component]);
+  }, [Component, enableExecutionContextTracking]);
 
   if (component) {
     return <ReactRouterRoute {...rest} component={component} />;
@@ -52,7 +54,7 @@ export const Route = <T extends {}>({
         {...rest}
         render={(props) => (
           <>
-            <MatchPropagator />
+            {enableExecutionContextTracking && <MatchPropagator />}
             {/* @ts-ignore  else condition exists if renderFunction is undefined*/}
             {renderFunction(props)}
           </>
@@ -62,7 +64,7 @@ export const Route = <T extends {}>({
   }
   return (
     <ReactRouterRoute {...rest}>
-      <MatchPropagator />
+      {enableExecutionContextTracking && <MatchPropagator />}
       {children}
     </ReactRouterRoute>
   );
@@ -74,6 +76,12 @@ export const Route = <T extends {}>({
 export const MatchPropagator = () => {
   const { executionContext } = useKibanaSharedUX().services;
   const match = useRouteMatch();
+
+  if (!executionContext && process.env.NODE_ENV !== 'production') {
+    throw new Error(
+      'Default execution context tracking is enabled but the executionContext service is not available'
+    );
+  }
 
   useSharedUXExecutionContext(executionContext, {
     type: 'application',
