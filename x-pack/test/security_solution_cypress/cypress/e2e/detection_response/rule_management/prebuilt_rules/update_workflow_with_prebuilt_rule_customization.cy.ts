@@ -393,42 +393,23 @@ describe(
         clickRuleUpdatesTab();
       });
 
-      it('should upgrade prebuilt rules one by one', () => {
-        // Attempt to upgrade rule
-        cy.get(
-          getUpgradeSingleRuleButtonByRuleId(OUTDATED_QUERY_RULE_1['security-rule'].rule_id)
-        ).click();
-        // Wait for request to complete
-        assertUpgradeRequestIsComplete([OUTDATED_QUERY_RULE_1]);
-
-        assertRuleUpgradeSuccessToastShown([OUTDATED_QUERY_RULE_1]);
-        assertRulesNotPresentInRuleUpdatesTable([OUTDATED_QUERY_RULE_1]);
+      it('should disable individual upgrade button for all rules', () => {
+        // All buttons should be disabled because rule type chanfes are considered conflicts
+        for (const rule of [OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]) {
+          const { rule_id: ruleId } = rule['security-rule'];
+          expect(cy.get(getUpgradeSingleRuleButtonByRuleId(ruleId)).should('be.disabled'));
+        }
       });
-
-      it('should upgrade multiple selected prebuilt rules by selecting them individually', () => {
+      it('should disable `Update selected rules` button for all selected rules', () => {
         selectRulesByName([
           OUTDATED_QUERY_RULE_1['security-rule'].name,
           OUTDATED_QUERY_RULE_2['security-rule'].name,
         ]);
-        cy.get(UPGRADE_SELECTED_RULES_BUTTON).click();
-        assertUpgradeRequestIsComplete([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
-        assertRuleUpgradeSuccessToastShown([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
-        assertRulesNotPresentInRuleUpdatesTable([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
+        cy.get(UPGRADE_SELECTED_RULES_BUTTON).should('be.disabled');
       });
 
-      it('should upgrade multiple selected prebuilt rules by selecting all in page', () => {
-        cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
-        cy.get(UPGRADE_SELECTED_RULES_BUTTON).click();
-        assertUpgradeRequestIsComplete([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
-        assertRuleUpgradeSuccessToastShown([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
-        assertRulesNotPresentInRuleUpdatesTable([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
-      });
-
-      it('should upgrade all rules with available upgrades at once', () => {
-        cy.get(UPGRADE_ALL_RULES_BUTTON).click();
-        assertUpgradeRequestIsComplete([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
-        assertRuleUpgradeSuccessToastShown([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
-        assertRulesNotPresentInRuleUpdatesTable([OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]);
+      it('should disable `Update all rules` button', () => {
+        cy.get(UPGRADE_ALL_RULES_BUTTON).should('be.disabled');
       });
     });
   }
