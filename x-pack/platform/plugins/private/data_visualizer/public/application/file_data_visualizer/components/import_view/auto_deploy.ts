@@ -26,6 +26,9 @@ export class AutoDeploy {
       // we'll know when it's ready from polling the inference endpoints
       // looking for num_allocations
       const status = e.response?.status;
+      // eslint-disable-next-line no-console
+      console.dir(e.response);
+
       if (status === 408 || status === 504 || status === 502) {
         return;
       }
