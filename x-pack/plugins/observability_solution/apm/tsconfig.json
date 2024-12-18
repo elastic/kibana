@@ -129,8 +129,8 @@
     "@kbn/alerting-comparators",
     "@kbn/saved-search-component",
     "@kbn/saved-search-plugin",
-    "@kbn/response-ops-rule-params"
-    "@kbn/entityManager-plugin",
+    "@kbn/response-ops-rule-params",
+    "@kbn/entityManager-plugin"
   ],
   "exclude": ["target/**/*"]
 }
