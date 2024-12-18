@@ -22,6 +22,11 @@ export function defineRoutes(
     {
       path: ROUTES_APPEND_CUSTOM_INTEGRATIONS,
       validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['integrations-read'],
+        },
+      },
     },
     async (context, request, response) => {
       const integrations = customIntegrationsRegistry.getAppendCustomIntegrations();
@@ -35,6 +40,11 @@ export function defineRoutes(
     {
       path: ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,
       validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['integrations-read'],
+        },
+      },
     },
     async (context, request, response) => {
       const integrations = customIntegrationsRegistry.getReplacementCustomIntegrations();
