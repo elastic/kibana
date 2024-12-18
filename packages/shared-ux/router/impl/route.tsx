@@ -77,6 +77,12 @@ export const MatchPropagator = () => {
   const { executionContext } = useKibanaSharedUX().services;
   const match = useRouteMatch();
 
+  if (!executionContext && process.env.NODE_ENV !== 'production') {
+    throw new Error(
+      'Default execution context tracking is enabled but the executionContext service is not available'
+    );
+  }
+
   useSharedUXExecutionContext(executionContext, {
     type: 'application',
     page: match.path,
