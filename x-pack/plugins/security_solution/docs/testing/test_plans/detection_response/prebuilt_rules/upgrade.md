@@ -17,9 +17,10 @@ Status: `in progress`. The current test plan matches [Rule Immutability/Customiz
           - [**Scenario: User is NOT notified when all installed prebuilt rules are up to date**](#scenario-user-is-not-notified-when-all-installed-prebuilt-rules-are-up-to-date)
           - [**Scenario: User is notified when some prebuilt rules can be upgraded**](#scenario-user-is-notified-when-some-prebuilt-rules-can-be-upgraded)
           - [**Scenario: User is notified when both rules to install and upgrade are available**](#scenario-user-is-notified-when-both-rules-to-install-and-upgrade-are-available)
-      - [Rule upgrade workflow: individual and bulk updates from Rule Updates table](#rule-upgrade-workflow-individual-and-bulk-updates-from-rule-updates-table)
+      - [Rule upgrade workflow: individual updates from Rule Updates table](#rule-upgrade-workflow-individual-and-bulk-updates-from-rule-updates-table)
           - [**Scenario: User can upgrade conflict-free prebuilt rules one by one**](#scenario-user-can-upgrade-conflict-free-prebuilt-rules-one-by-one)
           - [**Scenario: User cannot upgrade prebuilt rules one by one from Rules Update table if they have conflicts**](#scenario-user-cannot-upgrade-prebuilt-rules-one-by-one-from-rules-update-table-if-they-have-conflicts)
+      - [Rule upgrade workflow: bulk updates from Rule Updates table](#rule-upgrade-workflow-individual-and-bulk-updates-from-rule-updates-table)
           - [**Scenario: User can upgrade multiple conflict-free prebuilt rules selected on the page**](#scenario-user-can-upgrade-multiple-conflict-free-prebuilt-rules-selected-on-the-page)
           - [**Scenario: User cannot upgrade multiple prebuilt rules selected on the page when they have upgrade conflicts**](#scenario-user-cannot-upgrade-multiple-prebuilt-rules-selected-on-the-page-when-they-have-upgrade-conflicts)
           - [**Scenario: User can upgrade all available conflict-free prebuilt rules at once**](#scenario-user-can-upgrade-all-available-conflict-free-prebuilt-rules-at-once)
@@ -233,7 +234,7 @@ And user should see a CTA to upgrade prebuilt rules
 And user should see the number of rules available to upgrade (Z)
 ```
 
-### Rule upgrade workflow: individual and bulk updates from Rule Updates table
+### Rule upgrade workflow: individual updates from Rule Updates table
 
 #### **Scenario: User can upgrade conflict-free prebuilt rules one by one**
 
@@ -258,14 +259,15 @@ And user should see the number of rules available to upgrade decreased by 1
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
 And for Y of the installed rules there are new versions available
-And user is on the Rule Management page
-When user opens the Rule Updates table
+And user is on the Rule Updates table
 Then Y rules available for upgrade should be displayed in the table
 And for Z (where Z < Y) of the rules with upgrades there are upgrade conflicts
 Then for those Z rules the Upgrade Rule button should be disabled
 And the user should not be able to upgrade them directly from the table
-And there should be a message/tooltip indicating why the rule cannot be updated directly
+And there should be a message/tooltip indicating why the rule cannot be upgraded directly
 ```
+
+### Rule upgrade workflow: bulk updates from Rule Updates table
 
 #### **Scenario: User can upgrade multiple conflict-free prebuilt rules selected on the page**
 
