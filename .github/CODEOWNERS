@@ -2638,7 +2638,14 @@ oas_docs/kibana.info.yaml                     @elastic/platform-docs
 
 # Plugin manifests
 /src/plugins/**/kibana.jsonc @elastic/kibana-core
+/src/platform/plugins/shared/**/kibana.jsonc @elastic/kibana-core
+/src/platform/plugins/private/**/kibana.jsonc @elastic/kibana-core
 /x-pack/plugins/**/kibana.jsonc @elastic/kibana-core
+/x-pack/platform/plugins/shared/**/kibana.jsonc @elastic/kibana-core
+/x-pack/platform/plugins/private/**/kibana.jsonc @elastic/kibana-core
+/x-pack//solutions/observability/plugins/**/kibana.jsonc @elastic/kibana-core
+/x-pack//solutions/search/plugins/**/kibana.jsonc @elastic/kibana-core
+/x-pack//solutions/security/plugins/**/kibana.jsonc @elastic/kibana-core
 
 # Temporary Encrypted Saved Objects (ESO) guarding
 # This additional code-ownership is meant to be a temporary precaution to notify the Kibana platform security team
