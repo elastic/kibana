@@ -8,13 +8,17 @@
 import { expect, tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
-test.describe('maps full screen mode', { tag: tags.ESS_ONLY } , () => {
+test.describe('Maps full screen mode', { tag: tags.ESS_ONLY } , () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
     await pageObjects.gis.goto();
   });
-  test('full screen button should exist', async ({ pageObjects}) => {
-    await pageObjects.gis.fullScreenModeMenuItemExists();
+  test('Full screen button should be visisble', async ({ page }) => {
+    const sel = 'mapsFullScreenMode';
+    await expect(
+      page.testSubj.locator(sel),
+      `Could not find the Full screen in the ui, using selector ${sel}`
+    ).toBeVisible();
   });
   test('full screen mode hides the kbn app wrapper', async ({ page, pageObjects }) => {
     expect(await page.testSubj.locator('kbnAppWrapper visibleChrome').waitFor({state: 'visible'}));
