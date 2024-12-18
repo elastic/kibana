@@ -82,7 +82,7 @@ export const StyledContextMenu = euiStyled(EuiContextMenu)`
     text-overflow: ellipsis;
   }
   .euiContextMenuItem {
-    border-bottom: ${(props) => props.theme.eui.euiBorderThin};
+    border-bottom: ${(props) => props.euiTheme.border.thin};
   }
   .euiContextMenuItem:last-child {
     border: none;
