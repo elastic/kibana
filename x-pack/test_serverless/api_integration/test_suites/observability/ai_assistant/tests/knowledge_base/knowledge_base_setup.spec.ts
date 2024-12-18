@@ -21,6 +21,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   describe('/internal/observability_ai_assistant/kb/setup', function () {
+    // TODO: https://github.com/elastic/kibana/issues/192886 kb/setup error
     this.tags(['skipMKI']);
 
     before(async () => {

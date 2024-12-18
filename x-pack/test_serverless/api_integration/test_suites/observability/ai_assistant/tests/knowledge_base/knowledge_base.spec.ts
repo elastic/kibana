@@ -11,35 +11,38 @@ import {
   createKnowledgeBaseModel,
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
+  TINY_ELSER,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
+import { type KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
-
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
-  // TODO: https://github.com/elastic/kibana/issues/192886
-  describe.skip('Knowledge base', function () {
+  describe('Knowledge base', function () {
+    // TODO: https://github.com/elastic/kibana/issues/192886 kb/setup error
     this.tags(['skipMKI']);
-
     before(async () => {
       await createKnowledgeBaseModel(ml);
+
+      await observabilityAIAssistantAPIClient
+        .slsAdmin({
+          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+          params: {
+            query: {
+              model_id: TINY_ELSER.id,
+            },
+          },
+        })
+        .expect(200);
     });
 
     after(async () => {
       await deleteKnowledgeBaseModel(ml);
       await deleteInferenceEndpoint({ es });
-    });
-
-    it('returns 200 on knowledge base setup', async () => {
-      const res = await observabilityAIAssistantAPIClient
-        .slsEditor({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-        })
-        .expect(200);
-      expect(res.body).to.eql({});
+      await clearKnowledgeBase(es);
     });
 
     describe('when managing a single entry', () => {
@@ -48,7 +51,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         title: 'My title',
         text: 'My content',
       };
-
       it('returns 200 on create', async () => {
         await observabilityAIAssistantAPIClient
           .slsEditor({
@@ -56,19 +58,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             params: { body: knowledgeBaseEntry },
           })
           .expect(200);
-
         const res = await observabilityAIAssistantAPIClient.slsEditor({
           endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
           params: {
             query: {
               query: '',
-              sortBy: 'doc_id',
+              sortBy: 'title',
               sortDirection: 'asc',
             },
           },
         });
         const entry = res.body.entries[0];
         expect(entry.id).to.equal(knowledgeBaseEntry.id);
+        expect(entry.title).to.equal(knowledgeBaseEntry.title);
         expect(entry.text).to.equal(knowledgeBaseEntry.text);
       });
 
@@ -79,7 +81,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             params: {
               query: {
                 query: '',
-                sortBy: 'doc_id',
+                sortBy: 'title',
                 sortDirection: 'asc',
               },
             },
@@ -87,6 +89,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .expect(200);
         const entry = res.body.entries[0];
         expect(entry.id).to.equal(knowledgeBaseEntry.id);
+        expect(entry.title).to.equal(knowledgeBaseEntry.title);
         expect(entry.text).to.equal(knowledgeBaseEntry.text);
       });
 
@@ -107,7 +110,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             params: {
               query: {
                 query: '',
-                sortBy: 'doc_id',
+                sortBy: 'title',
                 sortDirection: 'asc',
               },
             },
@@ -132,125 +135,86 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('when managing multiple entries', () => {
-      before(async () => {
+      async function getEntries({
+        query = '',
+        sortBy = 'title',
+        sortDirection = 'asc',
+      }: { query?: string; sortBy?: string; sortDirection?: 'asc' | 'desc' } = {}) {
+        const res = await observabilityAIAssistantAPIClient
+          .slsEditor({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
+            params: {
+              query: { query, sortBy, sortDirection },
+            },
+          })
+          .expect(200);
+
+        return omitCategories(res.body.entries);
+      }
+
+      beforeEach(async () => {
         await clearKnowledgeBase(es);
+
+        await observabilityAIAssistantAPIClient
+          .slsEditor({
+            endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
+            params: {
+              body: {
+                entries: [
+                  {
+                    id: 'my_doc_a',
+                    title: 'My title a',
+                    text: 'My content a',
+                  },
+                  {
+                    id: 'my_doc_b',
+                    title: 'My title b',
+                    text: 'My content b',
+                  },
+                  {
+                    id: 'my_doc_c',
+                    title: 'My title c',
+                    text: 'My content c',
+                  },
+                ],
+              },
+            },
+          })
+          .expect(200);
       });
 
       afterEach(async () => {
         await clearKnowledgeBase(es);
       });
 
-      const knowledgeBaseEntries = [
-        {
-          id: 'my_doc_a',
-          title: 'My title a',
-          text: 'My content a',
-        },
-        {
-          id: 'my_doc_b',
-          title: 'My title b',
-          text: 'My content b',
-        },
-        {
-          id: 'my_doc_c',
-          title: 'My title c',
-          text: 'My content c',
-        },
-      ];
-
       it('returns 200 on create', async () => {
-        await observabilityAIAssistantAPIClient
-          .slsEditor({
-            endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
-            params: { body: { entries: knowledgeBaseEntries } },
-          })
-          .expect(200);
-
-        const res = await observabilityAIAssistantAPIClient
-          .slsEditor({
-            endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-            params: {
-              query: {
-                query: '',
-                sortBy: 'doc_id',
-                sortDirection: 'asc',
-              },
-            },
-          })
-          .expect(200);
-        expect(res.body.entries.filter((entry) => entry.id.startsWith('my_doc')).length).to.eql(3);
+        const entries = await getEntries();
+        expect(omitCategories(entries).length).to.eql(3);
       });
 
-      it('allows sorting', async () => {
-        await observabilityAIAssistantAPIClient
-          .slsEditor({
-            endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
-            params: { body: { entries: knowledgeBaseEntries } },
-          })
-          .expect(200);
+      describe('when sorting ', () => {
+        const ascendingOrder = ['my_doc_a', 'my_doc_b', 'my_doc_c'];
 
-        const res = await observabilityAIAssistantAPIClient
-          .slsEditor({
-            endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-            params: {
-              query: {
-                query: '',
-                sortBy: 'doc_id',
-                sortDirection: 'desc',
-              },
-            },
-          })
-          .expect(200);
+        it('allows sorting ascending', async () => {
+          const entries = await getEntries({ sortBy: 'title', sortDirection: 'asc' });
+          expect(entries.map(({ id }) => id)).to.eql(ascendingOrder);
+        });
 
-        const entries = res.body.entries.filter((entry) => entry.id.startsWith('my_doc'));
-        expect(entries[0].id).to.eql('my_doc_c');
-        expect(entries[1].id).to.eql('my_doc_b');
-        expect(entries[2].id).to.eql('my_doc_a');
-
-        // asc
-        const resAsc = await observabilityAIAssistantAPIClient
-          .slsEditor({
-            endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-            params: {
-              query: {
-                query: '',
-                sortBy: 'doc_id',
-                sortDirection: 'asc',
-              },
-            },
-          })
-          .expect(200);
-
-        const entriesAsc = resAsc.body.entries.filter((entry) => entry.id.startsWith('my_doc'));
-        expect(entriesAsc[0].id).to.eql('my_doc_a');
-        expect(entriesAsc[1].id).to.eql('my_doc_b');
-        expect(entriesAsc[2].id).to.eql('my_doc_c');
+        it('allows sorting descending', async () => {
+          const entries = await getEntries({ sortBy: 'title', sortDirection: 'desc' });
+          expect(entries.map(({ id }) => id)).to.eql([...ascendingOrder].reverse());
+        });
       });
 
-      it('allows searching', async () => {
-        await observabilityAIAssistantAPIClient
-          .slsEditor({
-            endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
-            params: { body: { entries: knowledgeBaseEntries } },
-          })
-          .expect(200);
-
-        const res = await observabilityAIAssistantAPIClient
-          .slsEditor({
-            endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-            params: {
-              query: {
-                query: 'my_doc_a',
-                sortBy: 'doc_id',
-                sortDirection: 'asc',
-              },
-            },
-          })
-          .expect(200);
-
-        expect(res.body.entries.length).to.eql(1);
-        expect(res.body.entries[0].id).to.eql('my_doc_a');
+      it('allows searching by title', async () => {
+        const entries = await getEntries({ query: 'b' });
+        expect(entries.length).to.eql(1);
+        expect(entries[0].title).to.eql('My title b');
       });
     });
   });
+}
+
+function omitCategories(entries: KnowledgeBaseEntry[]) {
+  return entries.filter((entry) => entry.labels?.category === undefined);
 }
