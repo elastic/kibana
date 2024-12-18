@@ -15,21 +15,26 @@ import { useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { KibanaTheme } from '@kbn/react-kibana-context-common';
-import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+import { I18nStart } from '@kbn/core-i18n-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { KibanaRootContextProvider } from './root_provider';
 import { I18nStart } from '@kbn/core-i18n-browser';
 
 describe('KibanaRootContextProvider', () => {
   let euiTheme: UseEuiTheme | undefined;
   let i18nMock: I18nStart;
-  let analytics: AnalyticsServiceStart;
+  let userProfile: UserProfileService;
+  let executionContext: ExecutionContextStart;
 
   beforeEach(() => {
     euiTheme = undefined;
-    analytics = analyticsServiceMock.createAnalyticsServiceStart();
     i18nMock = i18nServiceMock.createStartContract();
+    userProfile = userProfileServiceMock.createStart();
+    executionContext = executionContextServiceMock.createStartContract();
   });
 
   const flushPromises = async () => {
@@ -62,8 +67,9 @@ describe('KibanaRootContextProvider', () => {
 
     const wrapper = mountWithIntl(
       <KibanaRootContextProvider
-        analytics={analytics}
         i18n={i18nMock}
+        userProfile={userProfile}
+        executionContext={executionContext}
         theme={{ theme$: of(coreTheme) }}
       >
         <InnerComponent />
@@ -80,8 +86,9 @@ describe('KibanaRootContextProvider', () => {
 
     const wrapper = mountWithIntl(
       <KibanaRootContextProvider
-        analytics={analytics}
         i18n={i18nMock}
+        userProfile={userProfile}
+        executionContext={executionContext}
         theme={{ theme$: coreTheme$ }}
       >
         <InnerComponent />
