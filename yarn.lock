@@ -3837,7 +3837,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/actions-types@link:packages/kbn-actions-types":
+"@kbn/actions-types@link:src/platform/packages/shared/kbn-actions-types":
   version "0.0.0"
   uid ""
 
