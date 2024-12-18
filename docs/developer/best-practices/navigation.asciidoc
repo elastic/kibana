@@ -58,7 +58,7 @@ const discoverUrl = await plugins.discover.locator.getUrl({filters, timeRange});
 await plugins.discover.locator.navigate({filters, timeRange});
 ----
 
-To get a better idea, take a look at *Discover* locator {kib-repo}tree/{branch}/src/plugins/discover/public/application/doc/locator.ts[implementation].
+To get a better idea, take a look at *Discover* locator {kib-repo}tree/{branch}/src/platform/plugins/shared/discover/public/application/doc/locator.ts[implementation].
 It allows specifying various **Discover** app state pieces like: index pattern, filters, query, time range and more.
 
 There are two ways to access locators of other apps:
