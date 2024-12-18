@@ -9,7 +9,6 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { monaco } from '../..';
-/*import { rgb } from 'chroma-js';*/
 
 export function createTheme(
   { euiTheme }: UseEuiTheme,

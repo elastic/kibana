@@ -17,8 +17,8 @@ import {
   EuiButtonEmpty,
   EuiResizableContainer,
   useIsWithinBreakpoints,
+  useEuiTheme,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import { i18n } from '@kbn/i18n';
 import { TextObject } from '../../../../common/text_object';
@@ -54,6 +54,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
   const {
     services: { storage, objectStorageClient },
   } = useServicesContext();
+  const { euiTheme } = useEuiTheme();
 
   const { currentTextObject } = useEditorReadContext();
 
@@ -228,7 +229,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                     grow={false}
                     paddingSize="s"
                     css={{
-                      backgroundColor: euiThemeVars.euiFormBackgroundColor,
+                      backgroundColor: euiTheme.colors.backgroundBasePlain,
                     }}
                     className="consoleEditorPanel"
                   >
