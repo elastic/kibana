@@ -17,7 +17,7 @@ import type {
 
 export interface UserProfileService {
   /**
-   * Retrieve an observable emitting current user profile data.
+   * Retrieve an observable emitting the current user profile data.
    */
   getUserProfile$(): Observable<UserProfileData | null>;
 
