@@ -130,12 +130,14 @@ export class EntityClient {
   }): Record<string, any> {
     const { entityIdentityFields: identityFields } = entity;
     if (!Object.keys(identityFields || {}).length) {
-      return {};
+      throw new Error('Identity fields are missing');
     }
 
     return Object.values(identityFields).reduce((acc: Record<string, any>, fields) => {
       fields.forEach((field) => {
-        acc[field] = entity?.[field];
+        if (entity?.[field]) {
+          acc[field] = entity[field];
+        }
       });
       return acc;
     }, {} as Record<string, any>);
