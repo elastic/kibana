@@ -38,7 +38,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
     panelRef
   ) => {
     const [dragHandleApi, setDragHandleApi] = useState<DragHandleApi | null>(null);
-    const {euiTheme} = useEuiTheme();
+    const { euiTheme } = useEuiTheme();
 
     useEffect(() => {
       const onDropEventHandler = (dropEvent: MouseEvent) => interactionStart('drop', dropEvent);
