@@ -24,6 +24,8 @@ import { AddProcessorButton } from './add_processor_button';
 import { AddProcessorFlyout } from './flyout';
 import { DraggableProcessorListItem, SortableProcessorsList } from './processors_list';
 import { ProcessorDefinition } from './types';
+import { ManagementBottomBar } from '../management_bottom_bar';
+import { useKibana } from '../../hooks/use_kibana';
 
 export function StreamDetailEnrichmentContent({
   definition,
@@ -32,20 +34,38 @@ export function StreamDetailEnrichmentContent({
   definition: ReadStreamDefinition;
   refreshDefinition: () => void;
 }) {
+  const { core } = useKibana();
+  const { toasts } = core.notifications;
+
   const [processors, setProcessors] = useState(() => createProcessorsList(definition.processing));
 
   const [isAddProcessorOpen, { on: openAddProcessor, off: closeAddProcessor }] = useBoolean();
+  const [isBottomBarOpen, { on: openBottomBar, off: closeBottomBar }] = useBoolean();
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
       const items = euiDragDropReorder(processors, source.index, destination.index);
       setProcessors(items);
     }
+    openBottomBar();
   };
 
   const addProcessor = () => {};
 
   const updateProcessor = () => {};
+
+  const saveChanges = () => {
+    closeBottomBar();
+    toasts.addSuccess(
+      i18n.translate('xpack.streams.streamDetailView.managementTab.enrichment.saveChangesSuccess', {
+        defaultMessage: "Stream's processors were successfully updated",
+      })
+    );
+  };
+
+  const discardChanges = () => {
+    closeBottomBar();
+  };
 
   const hasProcessors = processors.length > 0;
 
@@ -79,6 +99,7 @@ export function StreamDetailEnrichmentContent({
       <EuiSpacer size="m" />
       <AddProcessorButton onClick={openAddProcessor} />
       {addProcessorFlyout}
+      {isBottomBarOpen && <ManagementBottomBar onCancel={discardChanges} onConfirm={saveChanges} />}
     </EuiPanel>
   );
 }

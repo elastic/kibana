@@ -20,8 +20,6 @@ import {
   EuiFlyoutFooter,
   EuiButtonEmpty,
   EuiButton,
-  EuiConfirmModal,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
@@ -32,6 +30,7 @@ import {
   ReadStreamDefinition,
 } from '@kbn/streams-plugin/common';
 import React, { PropsWithChildren, useMemo, useState } from 'react';
+import { DiscardChangesModal } from '../discard_changes_modal';
 
 interface ProcessorFlyoutProps {
   definition: ReadStreamDefinition;
@@ -129,15 +128,13 @@ function ProcessorFlyout({
 }: PropsWithChildren<ProcessorFlyoutWrapperProps>) {
   const [isDiscardModalOpen, { on: openDiscardModal, off: closeDiscardModal }] = useBoolean();
 
-  const discardModalId = useGeneratedHtmlId();
-
   const discardChanges = () => {
     closeDiscardModal();
     onClose();
   };
 
   return (
-    <EuiFlyoutResizable onClose={onClose}>
+    <EuiFlyoutResizable onClose={openDiscardModal}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>{title}</h2>
@@ -157,33 +154,7 @@ function ProcessorFlyout({
         </EuiFlexGroup>
       </EuiFlyoutFooter>
       {isDiscardModalOpen && (
-        <EuiConfirmModal
-          aria-labelledby={discardModalId}
-          title={i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.discardModalTitle',
-            { defaultMessage: 'Discard in progress changes?' }
-          )}
-          titleProps={{ id: discardModalId }}
-          onCancel={closeDiscardModal}
-          onConfirm={discardChanges}
-          cancelButtonText={i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.discardModalCancel',
-            { defaultMessage: 'Keep editing' }
-          )}
-          confirmButtonText={i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.discardModalConfirm',
-            { defaultMessage: 'Discard work in progress' }
-          )}
-          buttonColor="danger"
-          defaultFocusedButton="confirm"
-        >
-          <p>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.discardModalBody',
-              { defaultMessage: 'You will lose all unsaved work in progress for this processor.' }
-            )}
-          </p>
-        </EuiConfirmModal>
+        <DiscardChangesModal onCancel={closeDiscardModal} onConfirm={discardChanges} />
       )}
     </EuiFlyoutResizable>
   );
