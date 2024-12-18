@@ -5,33 +5,29 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
-import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
+import React, { type FC, useMemo } from 'react';
 import { css } from '@emotion/react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  useEuiTheme,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useDataVisualizerKibana } from '../../../kibana_context';
-
-const docIconStyle = css({
-  marginLeft: euiThemeVars.euiSizeL,
-  marginTop: euiThemeVars.euiSizeXS,
-});
-
-const mainIconStyle = css({
-  width: '96px',
-  height: '96px',
-  marginLeft: euiThemeVars.euiSizeXL,
-  marginRight: euiThemeVars.euiSizeL,
-});
 
 interface Props {
   hasPermissionToImport: boolean;
 }
 
 export const WelcomeContent: FC<Props> = ({ hasPermissionToImport }) => {
+  const { euiTheme } = useEuiTheme();
   const {
     services: {
       fileUpload: { getMaxBytesFormatted, getMaxTikaBytesFormatted },
@@ -39,6 +35,21 @@ export const WelcomeContent: FC<Props> = ({ hasPermissionToImport }) => {
   } = useDataVisualizerKibana();
   const maxFileSize = getMaxBytesFormatted();
   const maxTikaFileSize = getMaxTikaBytesFormatted();
+
+  const { docIconStyle, mainIconStyle } = useMemo(() => {
+    return {
+      docIconStyle: css({
+        marginLeft: euiTheme.size.l,
+        marginTop: euiTheme.size.xs,
+      }),
+      mainIconStyle: css({
+        width: '96px',
+        height: '96px',
+        marginLeft: euiTheme.size.xl,
+        marginRight: euiTheme.size.l,
+      }),
+    };
+  }, [euiTheme]);
 
   return (
     <EuiFlexGroup gutterSize="xl" alignItems="center">
