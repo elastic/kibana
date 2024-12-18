@@ -8,11 +8,8 @@ You must have `gh` CLI tool installed. You can install it by running:
 
 ```sh
 brew install gh
+gh auth login
 ```
-
-You must have `elastic/kibana` remote configured under the name `upstream`.
-
-You must have a remote named `origin` pointing to your fork of the Kibana repo.
 
 ## Usage
 
