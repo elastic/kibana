@@ -42,7 +42,8 @@ jest.mock('../../../../../hooks', () => {
   };
 });
 
-describe('StepSelectHosts', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/203307
+describe.skip('StepSelectHosts', () => {
   const packageInfo: PackageInfo = {
     name: 'apache',
     version: '1.0.0',
