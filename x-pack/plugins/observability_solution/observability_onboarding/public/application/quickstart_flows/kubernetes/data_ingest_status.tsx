@@ -80,6 +80,7 @@ export function DataIngestStatus({ onboardingId }: Props) {
         css={css`
           max-width: 40%;
         `}
+        data-test-subj="observabilityOnboardingKubernetesPanelDataProgressIndicator"
       />
 
       {isTroubleshootingVisible && (

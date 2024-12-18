@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import React, { useEffect, useState, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { isEmpty } from 'lodash';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { KueryBar } from '../../../shared/kuery_bar';
