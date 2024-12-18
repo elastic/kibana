@@ -47,6 +47,7 @@ import { CHART_HEIGHT, TRANSPARENT_BACKGROUND } from './constants';
 import { filter } from 'rxjs';
 import { drawCursor } from './utils/draw_anomaly_explorer_charts_cursor';
 import { SCHEDULE_EVENT_MARKER_ENTITY } from '../../../../common/constants/charts';
+import { cssMlExplorerChart } from './explorer_chart_styles';
 
 const popoverMenuOffset = 0;
 const CONTENT_WRAPPER_HEIGHT = 215;
@@ -776,7 +777,7 @@ export class ExplorerChartDistribution extends React.Component {
             </EuiPopover>
           </div>
         )}
-        <div className="ml-explorer-chart" ref={this.setRef.bind(this)}>
+        <div css={cssMlExplorerChart} ref={this.setRef.bind(this)}>
           {isLoading && <LoadingIndicator height={CONTENT_WRAPPER_HEIGHT} />}
           {!isLoading && <div className="content-wrapper" />}
         </div>
