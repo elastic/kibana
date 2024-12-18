@@ -576,7 +576,7 @@ export const useTimelineEvents = ({
 
   const combinedEvents = useMemo(
     // exclude undefined values / empty slots
-    () => eventsPerPage.filter((i) => !!i).flat(),
+    () => eventsPerPage.filter(Boolean).flat(),
     [eventsPerPage]
   );
 
