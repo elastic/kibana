@@ -6,6 +6,7 @@
  */
 import type { Logger } from '@kbn/core/server';
 import { ProductLine } from '../../common/product';
+import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
 import { CNVM, CSPM, KSPM } from './constants';
 import type { CloudSecuritySolutions } from './types';
 import type { MeteringCallBackResponse, MeteringCallbackInput, Tier, UsageRecord } from '../types';
@@ -37,8 +38,7 @@ export const cloudSecurityMetringCallback = async ({
 
     const promiseResults = await Promise.allSettled(
       cloudSecuritySolutions.map((cloudSecuritySolution) => {
-        // since lastSuccessfulReport is not used by getCloudSecurityUsageRecord, we want to verify if it is used by getCloudDefendUsageRecords before getCloudSecurityUsageRecord.
-        return getCloudDefendUsageRecords({
+        return getCloudSecurityUsageRecord({
           esClient,
           projectId,
           logger,
