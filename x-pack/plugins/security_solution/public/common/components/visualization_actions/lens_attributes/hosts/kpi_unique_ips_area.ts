@@ -17,17 +17,6 @@ const columnDestinationTimestamp = '95e74e6-99dd-4b11-8faf-439b4d959df9';
 const layerDestinationIp = 'ca05ecdb-0fa4-49a8-9305-b23d91012a46';
 const layerSourceIp = '8be0156b-d423-4a39-adf1-f54d4c9f2e69';
 
-const layer = {
-  [`source.ip`]: {
-    layerId: layerSourceIp,
-    columns: [columnSourceTimestamp, columnSourceUniqueIp],
-  },
-  [`destination.ip`]: {
-    layerId: layerDestinationIp,
-    columns: [columnDestinationTimestamp, columnDestinationIp],
-  },
-};
-
 export const getKpiUniqueIpsAreaLensAttributes: GetLensAttributes = ({ euiTheme }) => {
   return {
     description: '',
@@ -36,7 +25,7 @@ export const getKpiUniqueIpsAreaLensAttributes: GetLensAttributes = ({ euiTheme 
         formBased: {
           layers: {
             [layerSourceIp]: {
-              columnOrder: layer[`source.ip`].columns,
+              columnOrder: [columnSourceTimestamp, columnSourceUniqueIp],
               columns: {
                 [columnSourceTimestamp]: {
                   dataType: 'date',
@@ -60,7 +49,7 @@ export const getKpiUniqueIpsAreaLensAttributes: GetLensAttributes = ({ euiTheme 
               incompleteColumns: {},
             },
             [layerDestinationIp]: {
-              columnOrder: layer[`destination.ip`].columns,
+              columnOrder: [columnDestinationTimestamp, columnDestinationIp],
               columns: {
                 [columnDestinationIp]: {
                   customLabel: true,

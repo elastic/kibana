@@ -37,7 +37,6 @@ const Wrapper = styled.div`
 
 const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   applyGlobalQueriesAndFilters = true,
-  colorSchemas,
   className,
   extraActions,
   extraOptions,
@@ -69,7 +68,6 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
 
   const attributes = useLensAttributes({
     applyGlobalQueriesAndFilters,
-    colorSchemas,
     extraOptions,
     getLensAttributes,
     lensAttributes,

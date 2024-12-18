@@ -17,7 +17,7 @@ const columnEventOutcomeSuccessFilter = '430e690c-9992-414f-9bce-00812d99a5e7';
 const layerEventOutcomeFailure = 'b9acd453-f476-4467-ad38-203e37b73e55';
 const layerEventOutcomeSuccess = '31213ae3-905b-4e88-b987-0cccb1f3209f';
 
-export const getKpiUserAuthenticationsBarLensAttributes: GetLensAttributes = ({ colorSchemas }) =>
+export const getKpiUserAuthenticationsBarLensAttributes: GetLensAttributes = ({ euiTheme }) =>
   ({
     title: '[Host] User authentications - bar ',
     description: '',
@@ -47,7 +47,12 @@ export const getKpiUserAuthenticationsBarLensAttributes: GetLensAttributes = ({ 
             layerType: 'data',
             seriesType: 'bar_horizontal_stacked',
             xAccessor: columnEventOutcomeSuccessFilter,
-            yConfig: [],
+            yConfig: [
+              {
+                color: euiTheme.colors.vis.euiColorVis0,
+                forAccessor: columnEventOutcomeSuccess,
+              },
+            ],
           },
           {
             accessors: [columnEventOutcomeFailure],
@@ -57,7 +62,7 @@ export const getKpiUserAuthenticationsBarLensAttributes: GetLensAttributes = ({ 
             xAccessor: columnEventOutcomeFailureFilter,
             yConfig: [
               {
-                color: colorSchemas?.['event.outcome.failure'],
+                color: euiTheme.colors.vis.euiColorVis9,
                 forAccessor: columnEventOutcomeFailure,
               },
             ],

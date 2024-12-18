@@ -16,19 +16,7 @@ const columnDestinationFilter = 'c72aad6a-fc9c-43dc-9194-e13ca3ee8aff';
 const layerSourceIp = '8be0156b-d423-4a39-adf1-f54d4c9f2e69';
 const layerDestinationIp = 'ec84ba70-2adb-4647-8ef0-8ad91a0e6d4e';
 
-const layer = {
-  [`source.ip`]: {
-    layerId: layerSourceIp,
-    columns: [columnSourceFilter, columnSourceIp],
-  },
-  [`destination.ip`]: {
-    layerId: layerDestinationIp,
-    columns: [columnDestinationFilter, columnDestinationIp],
-  },
-};
-
-export const getKpiUniqueIpsBarLensAttributes: GetLensAttributes = (params) => {
-  const colorSchemas = params?.colorSchemas;
+export const getKpiUniqueIpsBarLensAttributes: GetLensAttributes = ({ euiTheme }) => {
   return {
     description: '',
     state: {
@@ -36,7 +24,7 @@ export const getKpiUniqueIpsBarLensAttributes: GetLensAttributes = (params) => {
         formBased: {
           layers: {
             [layerSourceIp]: {
-              columnOrder: layer[`source.ip`].columns,
+              columnOrder: [columnSourceFilter, columnSourceIp],
               columns: {
                 [columnSourceIp]: {
                   dataType: 'number',
@@ -65,7 +53,7 @@ export const getKpiUniqueIpsBarLensAttributes: GetLensAttributes = (params) => {
               incompleteColumns: {},
             },
             [layerDestinationIp]: {
-              columnOrder: layer[`destination.ip`].columns,
+              columnOrder: [columnDestinationFilter, columnDestinationIp],
               columns: {
                 [columnDestinationIp]: {
                   dataType: 'number',
@@ -108,7 +96,7 @@ export const getKpiUniqueIpsBarLensAttributes: GetLensAttributes = (params) => {
             layerType: 'data',
             seriesType: 'bar_horizontal_stacked',
             xAccessor: columnSourceFilter,
-            yConfig: [{ color: colorSchemas?.[`source.ip`], forAccessor: columnSourceIp }],
+            yConfig: [{ color: euiTheme.colors.vis.euiColorVis2, forAccessor: columnSourceIp }],
           },
           {
             accessors: [columnDestinationIp],
@@ -117,7 +105,7 @@ export const getKpiUniqueIpsBarLensAttributes: GetLensAttributes = (params) => {
             seriesType: 'bar_horizontal_stacked',
             xAccessor: columnDestinationFilter,
             yConfig: [
-              { color: colorSchemas?.[`destination.ip`], forAccessor: columnDestinationIp },
+              { color: euiTheme.colors.vis.euiColorVis3, forAccessor: columnDestinationIp },
             ],
           },
         ],

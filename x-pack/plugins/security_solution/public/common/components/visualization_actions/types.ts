@@ -52,7 +52,6 @@ export enum VisualizationContextMenuActions {
 
 export interface VisualizationActionsProps {
   applyGlobalQueriesAndFilters?: boolean;
-  colorSchemas?: ColorSchemas;
   className?: string;
   extraActions?: Action[];
   extraOptions?: ExtraOptions;
@@ -115,11 +114,6 @@ export interface LensEmbeddableComponentProps {
    * Metadata for cases Attachable visualization.
    */
   casesAttachmentMetadata?: LensProps['metadata'];
-
-  /**
-   * Color schemas for the visualization.
-   */
-  colorSchemas?: ColorSchemas;
 }
 
 export enum RequestStatus {
