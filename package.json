@@ -512,7 +512,7 @@
     "@kbn/expression-heatmap-plugin": "link:src/plugins/chart_expressions/expression_heatmap",
     "@kbn/expression-image-plugin": "link:src/platform/plugins/shared/expression_image",
     "@kbn/expression-legacy-metric-vis-plugin": "link:src/plugins/chart_expressions/expression_legacy_metric",
-    "@kbn/expression-metric-plugin": "link:src/plugins/expression_metric",
+    "@kbn/expression-metric-plugin": "link:src/platform/plugins/shared/expression_metric",
     "@kbn/expression-metric-vis-plugin": "link:src/plugins/chart_expressions/expression_metric",
     "@kbn/expression-partition-vis-plugin": "link:src/plugins/chart_expressions/expression_partition_vis",
     "@kbn/expression-repeat-image-plugin": "link:src/plugins/expression_repeat_image",
