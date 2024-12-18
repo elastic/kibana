@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import { ScoutPage} from '@kbn/scout';
+import { ScoutPage } from '@kbn/scout';
 
+const RENDER_COMPLETE_SELECTOR = '[data-render-complete="true"]';
 export class GisPage {
   constructor(private readonly page: ScoutPage) {}
 
-  async fullScreenModeMenuItemExists() {
-    await this.page.testSubj.locator('mapsFullScreenMode').waitFor({ state: 'visible' });
-  }
-
   async clickFullScreenMode() {
-    await this.page.testSubj.click('mapsFullScreenMode')
+    await this.page.testSubj.click('mapsFullScreenMode');
   }
 
   async clickExitFullScreenTextButton() {
@@ -23,6 +20,12 @@ export class GisPage {
   }
 
   async goto() {
+    await this.page.pause();
     await this.page.gotoApp('maps');
+    await this.waitForRenderCompletion();
+  }
+
+  async waitForRenderCompletion(selector: string = RENDER_COMPLETE_SELECTOR) {
+    await this.page.locator(selector).waitFor();
   }
 }

@@ -8,8 +8,8 @@
 import { expect, tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
-test.describe('Maps full screen mode', { tag: tags.ESS_ONLY } , () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+test.describe('Maps full screen mode', { tag: tags.ESS_ONLY }, () => {
+  test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
     await browserAuth.loginAsViewer();
     await pageObjects.gis.goto();
   });
@@ -21,14 +21,18 @@ test.describe('Maps full screen mode', { tag: tags.ESS_ONLY } , () => {
     ).toBeVisible();
   });
   test('full screen mode hides the kbn app wrapper', async ({ page, pageObjects }) => {
-    expect(await page.testSubj.locator('kbnAppWrapper visibleChrome').waitFor({state: 'visible'}));
+    expect(
+      await page.testSubj.locator('kbnAppWrapper visibleChrome').waitFor({ state: 'visible' })
+    );
     await pageObjects.gis.clickFullScreenMode();
-    expect(await page.testSubj.locator('kbnAppWrapper hiddenChrome').waitFor({state: 'visible'}));
+    expect(await page.testSubj.locator('kbnAppWrapper hiddenChrome').waitFor({ state: 'visible' }));
     await pageObjects.gis.clickExitFullScreenTextButton();
-    expect(await page.testSubj.locator('kbnAppWrapper visibleChrome').waitFor({state: 'visible'}));
+    expect(
+      await page.testSubj.locator('kbnAppWrapper visibleChrome').waitFor({ state: 'visible' })
+    );
   });
   test.skip('layer control is visible', async ({ page }) => {
-    expect(await page.testSubj.locator('addLayerButton').waitFor({state: 'visible'}));
+    expect(await page.testSubj.locator('addLayerButton').waitFor({ state: 'visible' }));
   });
   // test('displays exit full screen logo button', async ({ page }) => {
   // });
