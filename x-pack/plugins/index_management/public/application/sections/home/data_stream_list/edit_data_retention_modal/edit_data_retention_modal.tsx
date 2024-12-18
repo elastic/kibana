@@ -343,7 +343,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
 
           <EuiSpacer />
 
-          {affectedDataStreams.length > 0 && !formData.infiniteRetentionPeriod && (
+          {isBulkEdit && affectedDataStreams.length > 0 && !formData.infiniteRetentionPeriod && (
             <EuiCallOut
               title={i18n.translate(
                 'xpack.idxMgmt.dataStreams.editDataRetentionModal.affectedDataStreamsCalloutTitle',

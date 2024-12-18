@@ -33,8 +33,8 @@ export const editDataRetentionFormSchema: FormSchema = {
       },
       {
         validator: ({ value, formData, customData }) => {
-          // We only need to validate the data retention field if infiniteRetentionPeriod is set to false
-          if (!formData.infiniteRetentionPeriod) {
+          // We only need to validate the data retention field if infiniteRetentionPeriod is set to false and dataRetentionEnabled is set to true
+          if (formData.dataRetentionEnabled !== false && !formData.infiniteRetentionPeriod) {
             // If project level data retention is enabled, we need to enforce the global max retention
             const { globalMaxRetention, enableProjectLevelRetentionChecks } =
               customData.value as any;
@@ -46,8 +46,11 @@ export const editDataRetentionFormSchema: FormSchema = {
       },
       {
         validator: (args) => {
-          // We only need to validate the data retention field if infiniteRetentionPeriod is set to false
-          if (!args.formData.infiniteRetentionPeriod) {
+          // We only need to validate the data retention field if infiniteRetentionPeriod is set to false and dataRetentionEnabled is set to true
+          if (
+            args.formData.dataRetentionEnabled !== false &&
+            !args.formData.infiniteRetentionPeriod
+          ) {
             return fieldValidators.emptyField(
               i18n.translate(
                 'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldRequiredError',
@@ -61,8 +64,11 @@ export const editDataRetentionFormSchema: FormSchema = {
       },
       {
         validator: (args) => {
-          // We only need to validate the data retention field if infiniteRetentionPeriod is set to false
-          if (!args.formData.infiniteRetentionPeriod) {
+          // We only need to validate the data retention field if infiniteRetentionPeriod is set to false and dataRetentionEnabled is set to true
+          if (
+            args.formData.dataRetentionEnabled !== false &&
+            !args.formData.infiniteRetentionPeriod
+          ) {
             return fieldValidators.numberGreaterThanField({
               than: 0,
               allowEquality: false,
