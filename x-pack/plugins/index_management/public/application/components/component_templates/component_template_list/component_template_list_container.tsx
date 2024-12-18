@@ -11,8 +11,6 @@ import { RouteComponentProps } from 'react-router-dom';
 import qs from 'query-string';
 import { useExecutionContext } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
-import { ComponentTemplatesAuthProvider } from './auth_provider';
-import { ComponentTemplatesWithPrivileges } from './with_privileges';
 import { ComponentTemplateList } from './component_template_list';
 
 interface MatchParams {
@@ -39,14 +37,10 @@ export const ComponentTemplateListContainer: React.FunctionComponent<
   const filter = urlParams.filter ?? '';
 
   return (
-    <ComponentTemplatesAuthProvider>
-      <ComponentTemplatesWithPrivileges>
-        <ComponentTemplateList
-          componentTemplateName={componentTemplateName}
-          history={history}
-          filter={String(filter)}
-        />
-      </ComponentTemplatesWithPrivileges>
-    </ComponentTemplatesAuthProvider>
+    <ComponentTemplateList
+      componentTemplateName={componentTemplateName}
+      history={history}
+      filter={String(filter)}
+    />
   );
 };

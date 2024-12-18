@@ -47,6 +47,10 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
           ui: ['manageEnrich'],
         },
         {
+          requiredClusterPrivileges: ['manage_index_templates'],
+          ui: ['manageIndexTemplates'],
+        },
+        {
           // manage_index_templates is also required, but we will disable specific parts of the
           // UI if this privilege is missing.
           requiredClusterPrivileges: ['monitor'],
