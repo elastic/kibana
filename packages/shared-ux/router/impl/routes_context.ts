@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Route } from './route';
-export { HashRouter, BrowserRouter, MemoryRouter, Router } from './router';
-export { Routes } from './routes';
+import { createContext, useContext } from 'react';
+import { SharedUXRoutesContextType } from './types';
 
-export { SharedUXRouterContext } from './services';
+const defaultContextValue = {};
+
+export const SharedUXRoutesContext = createContext<SharedUXRoutesContextType>(defaultContextValue);
+
+export const useSharedUXRoutesContext = (): SharedUXRoutesContextType =>
+  useContext(SharedUXRoutesContext as unknown as React.Context<SharedUXRoutesContextType>);
