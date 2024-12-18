@@ -7,9 +7,9 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/embeddable_enhanced'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/embeddable_enhanced',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/embeddable_enhanced'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/embeddable_enhanced',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/embeddable_enhanced/public/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/platform/plugins/shared/embeddable_enhanced/public/**/*.{ts,tsx}'],
 };

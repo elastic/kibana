@@ -5437,7 +5437,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/embeddable-enhanced-plugin@link:x-pack/plugins/embeddable_enhanced":
+"@kbn/embeddable-enhanced-plugin@link:x-pack/platform/plugins/shared/embeddable_enhanced":
   version "0.0.0"
   uid ""
 
