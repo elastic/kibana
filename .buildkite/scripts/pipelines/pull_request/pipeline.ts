@@ -52,16 +52,16 @@ const getPipeline = (filename: string, removeSteps = true) => {
       return;
     }
 
+    pipeline.push(getAgentImageConfig({ returnYaml: true }));
+
     const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
     if (onlyRunQuickChecks) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
       console.warn('Isolated changes to renovate.json. Skipping main PR pipeline.');
       emitPipeline([...new Set(pipeline)].join('\n'));
       return;
     }
 
-    pipeline.push(getAgentImageConfig({ returnYaml: true }));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
     if (await doAnyChangesMatch([/^packages\/kbn-handlebars/])) {
