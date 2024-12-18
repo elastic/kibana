@@ -693,7 +693,7 @@ the infrastructure monitoring use-case within Kibana.
 |The licensing plugin retrieves license data from Elasticsearch at regular configurable intervals.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/lists/README.md[lists]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/lists/README.md[lists]
 |README.md for developers working on the backend lists on how to get started
 using the CURL scripts in the scripts folder.
 
