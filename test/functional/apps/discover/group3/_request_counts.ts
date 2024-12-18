@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
+  const log = getService('log');
 
   describe('discover request counts', function describeIndexTests() {
     before(async function () {
@@ -152,6 +153,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // https://github.com/elastic/kibana/issues/165192
         // creating the saved search
         const actualExpectedRequests = savedSearchesRequests ?? expectedRequests;
+        log.debug('Creating saved search');
         await expectSearches(
           type,
           type === 'esql' ? actualExpectedRequests + 2 : actualExpectedRequests,
@@ -159,7 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await discover.saveSearch(savedSearch);
           }
         );
-        // resetting the saved search
+        log.debug('Resetting saved search');
         await setQuery(query2);
         await queryBar.clickQuerySubmitButton();
         await waitForLoadingToFinish();
@@ -170,7 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await discover.revertUnsavedChanges();
           }
         );
-        // clearing the saved search
+        log.debug('Clearing saved search');
         await expectSearches(
           type,
           type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
@@ -179,6 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await waitForLoadingToFinish();
           }
         );
+        log.debug('Loading saved search');
         await expectSearches(
           type,
           type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
