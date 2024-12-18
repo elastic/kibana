@@ -1211,9 +1211,193 @@ paths:
                     nullable: true
                     type: string
                   params:
-                    additionalProperties: {}
-                    description: The parameters for the rule.
-                    type: object
+                    anyOf:
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          aggregationType:
+                            enum:
+                              - avg
+                              - 95th
+                              - 99th
+                            type: string
+                          environment:
+                            type: string
+                          groupBy:
+                            items:
+                              type: string
+                            type: array
+                          searchConfiguration:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              query:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  language:
+                                    type: string
+                                  query:
+                                    anyOf:
+                                      - type: string
+                                      - additionalProperties: {}
+                                        type: object
+                                required:
+                                  - query
+                                  - language
+                            required:
+                              - query
+                          serviceName:
+                            type: string
+                          threshold:
+                            type: number
+                          transactionName:
+                            type: string
+                          transactionType:
+                            type: string
+                          useKqlFilter:
+                            type: boolean
+                          windowSize:
+                            type: number
+                          windowUnit:
+                            type: string
+                        required:
+                          - windowSize
+                          - windowUnit
+                          - threshold
+                          - aggregationType
+                          - environment
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          anomalyDetectorTypes:
+                            items:
+                              enum:
+                                - txLatency
+                                - txThroughput
+                                - txFailureRate
+                              type: string
+                            minItems: 1
+                            type: array
+                          anomalySeverityType:
+                            enum:
+                              - critical
+                              - major
+                              - minor
+                              - warning
+                            type: string
+                          environment:
+                            type: string
+                          serviceName:
+                            type: string
+                          transactionType:
+                            type: string
+                          windowSize:
+                            type: number
+                          windowUnit:
+                            type: string
+                        required:
+                          - windowSize
+                          - windowUnit
+                          - environment
+                          - anomalySeverityType
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          environment:
+                            type: string
+                          errorGroupingKey:
+                            type: string
+                          groupBy:
+                            items:
+                              type: string
+                            type: array
+                          searchConfiguration:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              query:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  language:
+                                    type: string
+                                  query:
+                                    anyOf:
+                                      - type: string
+                                      - additionalProperties: {}
+                                        type: object
+                                required:
+                                  - query
+                                  - language
+                            required:
+                              - query
+                          serviceName:
+                            type: string
+                          threshold:
+                            type: number
+                          useKqlFilter:
+                            type: boolean
+                          windowSize:
+                            type: number
+                          windowUnit:
+                            type: string
+                        required:
+                          - windowSize
+                          - windowUnit
+                          - threshold
+                          - environment
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          environment:
+                            type: string
+                          groupBy:
+                            items:
+                              type: string
+                            type: array
+                          searchConfiguration:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              query:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  language:
+                                    type: string
+                                  query:
+                                    anyOf:
+                                      - type: string
+                                      - additionalProperties: {}
+                                        type: object
+                                required:
+                                  - query
+                                  - language
+                            required:
+                              - query
+                          serviceName:
+                            type: string
+                          threshold:
+                            type: number
+                          transactionName:
+                            type: string
+                          transactionType:
+                            type: string
+                          useKqlFilter:
+                            type: boolean
+                          windowSize:
+                            type: number
+                          windowUnit:
+                            type: string
+                        required:
+                          - windowSize
+                          - windowUnit
+                          - threshold
+                          - environment
+                      - additionalProperties: {}
+                        description: The parameters for the rule.
+                        type: object
                   revision:
                     description: The rule revision number.
                     type: number
@@ -2116,9 +2300,193 @@ paths:
                     nullable: true
                     type: string
                   params:
-                    additionalProperties: {}
-                    description: The parameters for the rule.
-                    type: object
+                    anyOf:
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          aggregationType:
+                            enum:
+                              - avg
+                              - 95th
+                              - 99th
+                            type: string
+                          environment:
+                            type: string
+                          groupBy:
+                            items:
+                              type: string
+                            type: array
+                          searchConfiguration:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              query:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  language:
+                                    type: string
+                                  query:
+                                    anyOf:
+                                      - type: string
+                                      - additionalProperties: {}
+                                        type: object
+                                required:
+                                  - query
+                                  - language
+                            required:
+                              - query
+                          serviceName:
+                            type: string
+                          threshold:
+                            type: number
+                          transactionName:
+                            type: string
+                          transactionType:
+                            type: string
+                          useKqlFilter:
+                            type: boolean
+                          windowSize:
+                            type: number
+                          windowUnit:
+                            type: string
+                        required:
+                          - windowSize
+                          - windowUnit
+                          - threshold
+                          - aggregationType
+                          - environment
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          anomalyDetectorTypes:
+                            items:
+                              enum:
+                                - txLatency
+                                - txThroughput
+                                - txFailureRate
+                              type: string
+                            minItems: 1
+                            type: array
+                          anomalySeverityType:
+                            enum:
+                              - critical
+                              - major
+                              - minor
+                              - warning
+                            type: string
+                          environment:
+                            type: string
+                          serviceName:
+                            type: string
+                          transactionType:
+                            type: string
+                          windowSize:
+                            type: number
+                          windowUnit:
+                            type: string
+                        required:
+                          - windowSize
+                          - windowUnit
+                          - environment
+                          - anomalySeverityType
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          environment:
+                            type: string
+                          errorGroupingKey:
+                            type: string
+                          groupBy:
+                            items:
+                              type: string
+                            type: array
+                          searchConfiguration:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              query:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  language:
+                                    type: string
+                                  query:
+                                    anyOf:
+                                      - type: string
+                                      - additionalProperties: {}
+                                        type: object
+                                required:
+                                  - query
+                                  - language
+                            required:
+                              - query
+                          serviceName:
+                            type: string
+                          threshold:
+                            type: number
+                          useKqlFilter:
+                            type: boolean
+                          windowSize:
+                            type: number
+                          windowUnit:
+                            type: string
+                        required:
+                          - windowSize
+                          - windowUnit
+                          - threshold
+                          - environment
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          environment:
+                            type: string
+                          groupBy:
+                            items:
+                              type: string
+                            type: array
+                          searchConfiguration:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              query:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  language:
+                                    type: string
+                                  query:
+                                    anyOf:
+                                      - type: string
+                                      - additionalProperties: {}
+                                        type: object
+                                required:
+                                  - query
+                                  - language
+                            required:
+                              - query
+                          serviceName:
+                            type: string
+                          threshold:
+                            type: number
+                          transactionName:
+                            type: string
+                          transactionType:
+                            type: string
+                          useKqlFilter:
+                            type: boolean
+                          windowSize:
+                            type: number
+                          windowUnit:
+                            type: string
+                        required:
+                          - windowSize
+                          - windowUnit
+                          - threshold
+                          - environment
+                      - additionalProperties: {}
+                        description: The parameters for the rule.
+                        type: object
                   revision:
                     description: The rule revision number.
                     type: number
@@ -2996,9 +3364,193 @@ paths:
                     nullable: true
                     type: string
                   params:
-                    additionalProperties: {}
-                    description: The parameters for the rule.
-                    type: object
+                    anyOf:
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          aggregationType:
+                            enum:
+                              - avg
+                              - 95th
+                              - 99th
+                            type: string
+                          environment:
+                            type: string
+                          groupBy:
+                            items:
+                              type: string
+                            type: array
+                          searchConfiguration:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              query:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  language:
+                                    type: string
+                                  query:
+                                    anyOf:
+                                      - type: string
+                                      - additionalProperties: {}
+                                        type: object
+                                required:
+                                  - query
+                                  - language
+                            required:
+                              - query
+                          serviceName:
+                            type: string
+                          threshold:
+                            type: number
+                          transactionName:
+                            type: string
+                          transactionType:
+                            type: string
+                          useKqlFilter:
+                            type: boolean
+                          windowSize:
+                            type: number
+                          windowUnit:
+                            type: string
+                        required:
+                          - windowSize
+                          - windowUnit
+                          - threshold
+                          - aggregationType
+                          - environment
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          anomalyDetectorTypes:
+                            items:
+                              enum:
+                                - txLatency
+                                - txThroughput
+                                - txFailureRate
+                              type: string
+                            minItems: 1
+                            type: array
+                          anomalySeverityType:
+                            enum:
+                              - critical
+                              - major
+                              - minor
+                              - warning
+                            type: string
+                          environment:
+                            type: string
+                          serviceName:
+                            type: string
+                          transactionType:
+                            type: string
+                          windowSize:
+                            type: number
+                          windowUnit:
+                            type: string
+                        required:
+                          - windowSize
+                          - windowUnit
+                          - environment
+                          - anomalySeverityType
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          environment:
+                            type: string
+                          errorGroupingKey:
+                            type: string
+                          groupBy:
+                            items:
+                              type: string
+                            type: array
+                          searchConfiguration:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              query:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  language:
+                                    type: string
+                                  query:
+                                    anyOf:
+                                      - type: string
+                                      - additionalProperties: {}
+                                        type: object
+                                required:
+                                  - query
+                                  - language
+                            required:
+                              - query
+                          serviceName:
+                            type: string
+                          threshold:
+                            type: number
+                          useKqlFilter:
+                            type: boolean
+                          windowSize:
+                            type: number
+                          windowUnit:
+                            type: string
+                        required:
+                          - windowSize
+                          - windowUnit
+                          - threshold
+                          - environment
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          environment:
+                            type: string
+                          groupBy:
+                            items:
+                              type: string
+                            type: array
+                          searchConfiguration:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              query:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  language:
+                                    type: string
+                                  query:
+                                    anyOf:
+                                      - type: string
+                                      - additionalProperties: {}
+                                        type: object
+                                required:
+                                  - query
+                                  - language
+                            required:
+                              - query
+                          serviceName:
+                            type: string
+                          threshold:
+                            type: number
+                          transactionName:
+                            type: string
+                          transactionType:
+                            type: string
+                          useKqlFilter:
+                            type: boolean
+                          windowSize:
+                            type: number
+                          windowUnit:
+                            type: string
+                        required:
+                          - windowSize
+                          - windowUnit
+                          - threshold
+                          - environment
+                      - additionalProperties: {}
+                        description: The parameters for the rule.
+                        type: object
                   revision:
                     description: The rule revision number.
                     type: number
@@ -3980,9 +4532,193 @@ paths:
                     nullable: true
                     type: string
                   params:
-                    additionalProperties: {}
-                    description: The parameters for the rule.
-                    type: object
+                    anyOf:
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          aggregationType:
+                            enum:
+                              - avg
+                              - 95th
+                              - 99th
+                            type: string
+                          environment:
+                            type: string
+                          groupBy:
+                            items:
+                              type: string
+                            type: array
+                          searchConfiguration:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              query:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  language:
+                                    type: string
+                                  query:
+                                    anyOf:
+                                      - type: string
+                                      - additionalProperties: {}
+                                        type: object
+                                required:
+                                  - query
+                                  - language
+                            required:
+                              - query
+                          serviceName:
+                            type: string
+                          threshold:
+                            type: number
+                          transactionName:
+                            type: string
+                          transactionType:
+                            type: string
+                          useKqlFilter:
+                            type: boolean
+                          windowSize:
+                            type: number
+                          windowUnit:
+                            type: string
+                        required:
+                          - windowSize
+                          - windowUnit
+                          - threshold
+                          - aggregationType
+                          - environment
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          anomalyDetectorTypes:
+                            items:
+                              enum:
+                                - txLatency
+                                - txThroughput
+                                - txFailureRate
+                              type: string
+                            minItems: 1
+                            type: array
+                          anomalySeverityType:
+                            enum:
+                              - critical
+                              - major
+                              - minor
+                              - warning
+                            type: string
+                          environment:
+                            type: string
+                          serviceName:
+                            type: string
+                          transactionType:
+                            type: string
+                          windowSize:
+                            type: number
+                          windowUnit:
+                            type: string
+                        required:
+                          - windowSize
+                          - windowUnit
+                          - environment
+                          - anomalySeverityType
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          environment:
+                            type: string
+                          errorGroupingKey:
+                            type: string
+                          groupBy:
+                            items:
+                              type: string
+                            type: array
+                          searchConfiguration:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              query:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  language:
+                                    type: string
+                                  query:
+                                    anyOf:
+                                      - type: string
+                                      - additionalProperties: {}
+                                        type: object
+                                required:
+                                  - query
+                                  - language
+                            required:
+                              - query
+                          serviceName:
+                            type: string
+                          threshold:
+                            type: number
+                          useKqlFilter:
+                            type: boolean
+                          windowSize:
+                            type: number
+                          windowUnit:
+                            type: string
+                        required:
+                          - windowSize
+                          - windowUnit
+                          - threshold
+                          - environment
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          environment:
+                            type: string
+                          groupBy:
+                            items:
+                              type: string
+                            type: array
+                          searchConfiguration:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              query:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  language:
+                                    type: string
+                                  query:
+                                    anyOf:
+                                      - type: string
+                                      - additionalProperties: {}
+                                        type: object
+                                required:
+                                  - query
+                                  - language
+                            required:
+                              - query
+                          serviceName:
+                            type: string
+                          threshold:
+                            type: number
+                          transactionName:
+                            type: string
+                          transactionType:
+                            type: string
+                          useKqlFilter:
+                            type: boolean
+                          windowSize:
+                            type: number
+                          windowUnit:
+                            type: string
+                        required:
+                          - windowSize
+                          - windowUnit
+                          - threshold
+                          - environment
+                      - additionalProperties: {}
+                        description: The parameters for the rule.
+                        type: object
                   revision:
                     description: The rule revision number.
                     type: number
