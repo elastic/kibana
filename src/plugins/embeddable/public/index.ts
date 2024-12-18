@@ -81,7 +81,7 @@ export type {
   EmbeddableStart,
   EmbeddableStartDependencies,
 } from './plugin';
-export type { EnhancementRegistryDefinition } from './types';
+export type { EnhancementRegistryDefinition } from './enhancements/types';
 
 export {
   ReactEmbeddableRenderer,

@@ -8,8 +8,6 @@
  */
 
 import { Subscription } from 'rxjs';
-import { identity } from 'lodash';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import {
@@ -27,9 +25,6 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import {
   EmbeddableFactoryRegistry,
-  EnhancementsRegistry,
-  EnhancementRegistryDefinition,
-  EnhancementRegistryItem,
 } from './types';
 import { bootstrap } from './bootstrap';
 import {
@@ -52,6 +47,8 @@ import { getAllMigrations } from '../common/lib/get_all_migrations';
 import { setKibanaServices } from './kibana_services';
 import { registerReactEmbeddableFactory } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
+import { getEnhancement, getEnhancements, registerEnhancement } from './enhancements/registry';
+import type { EnhancementRegistryDefinition } from './enhancements/types';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -131,7 +128,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private readonly embeddableFactoryDefinitions: Map<string, EmbeddableFactoryDefinition> =
     new Map();
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
-  private readonly enhancements: EnhancementsRegistry = new Map();
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
   private isRegistryReady = false;
   private appList?: ReadonlyMap<string, PublicAppInfo>;
@@ -147,7 +143,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       registerAddFromLibraryType,
 
       registerEmbeddableFactory: this.registerEmbeddableFactory,
-      registerEnhancement: this.registerEnhancement,
+      registerEnhancement: registerEnhancement,
     };
   }
 
@@ -168,15 +164,13 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     this.isRegistryReady = true;
 
     const commonContract: CommonEmbeddableStartContract = {
-      getEmbeddableFactory: this
-        .getEmbeddableFactory as unknown as CommonEmbeddableStartContract['getEmbeddableFactory'],
-      getEnhancement: this.getEnhancement,
+      getEnhancement: getEnhancement,
     };
 
     const getAllMigrationsFn = () =>
       getAllMigrations(
         Array.from(this.embeddableFactories.values()),
-        Array.from(this.enhancements.values()),
+        getEnhancements(),
         getMigrateFunction(commonContract)
       );
 
@@ -210,37 +204,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       this.appListSubscription.unsubscribe();
     }
   }
-
-  private registerEnhancement = (enhancement: EnhancementRegistryDefinition) => {
-    if (this.enhancements.has(enhancement.id)) {
-      throw new Error(`enhancement with id ${enhancement.id} already exists in the registry`);
-    }
-    this.enhancements.set(enhancement.id, {
-      id: enhancement.id,
-      telemetry: enhancement.telemetry || ((state, stats) => stats),
-      inject: enhancement.inject || identity,
-      extract:
-        enhancement.extract ||
-        ((state: SerializableRecord) => {
-          return { state, references: [] };
-        }),
-      migrations: enhancement.migrations || {},
-    });
-  };
-
-  private getEnhancement = (id: string): EnhancementRegistryItem => {
-    return (
-      this.enhancements.get(id) || {
-        id: 'unknown',
-        telemetry: (state, stats) => stats,
-        inject: identity,
-        extract: (state: SerializableRecord) => {
-          return { state, references: [] };
-        },
-        migrations: {},
-      }
-    );
-  };
 
   private getEmbeddableFactories = () => {
     this.ensureFactoriesExist();
