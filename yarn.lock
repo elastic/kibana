@@ -6261,7 +6261,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/maps-plugin@link:x-pack/plugins/maps":
+"@kbn/maps-plugin@link:x-pack/platform/plugins/shared/maps":
   version "0.0.0"
   uid ""
 
