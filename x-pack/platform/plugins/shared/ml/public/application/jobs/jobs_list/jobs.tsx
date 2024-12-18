@@ -7,17 +7,16 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { JobsListView } from './components/jobs_list_view';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana } from '../../contexts/kibana';
-import { MlPageHeader } from '../../components/page_header';
 import { HeaderMenuPortal } from '../../components/header_menu_portal';
 import { JobsActionMenu } from '../components/jobs_action_menu';
 import { useEnabledFeatures } from '../../contexts/ml';
+import { getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
@@ -42,16 +41,17 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
     getDefaultAnomalyDetectionJobsListState()
   );
   const {
-    services: { docLinks },
+    services: {
+      docLinks,
+      mlServices: { mlApi },
+    },
   } = useMlKibana();
+  getMlNodeCount(mlApi);
 
   const { showNodeInfo } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.anomalyDetection;
   return (
     <>
-      <MlPageHeader>
-        <FormattedMessage id="xpack.ml.jobsList.title" defaultMessage="Anomaly Detection Jobs" />
-      </MlPageHeader>
       <HeaderMenuPortal>
         <JobsActionMenu />
       </HeaderMenuPortal>

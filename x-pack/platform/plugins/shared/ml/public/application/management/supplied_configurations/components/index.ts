@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Settings } from './settings';
+export { SuppliedConfigurationsPage } from './supplied_configurations';

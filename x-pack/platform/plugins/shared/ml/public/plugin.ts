@@ -54,7 +54,7 @@ import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
-import { registerManagementSection } from './application/management';
+import { registerManagementSections } from './application/management';
 import type { MlLocatorParams } from './locator';
 import { MlLocatorDefinition, type MlLocator } from './locator';
 import { registerHomeFeature } from './register_home_feature';
@@ -227,15 +227,16 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     }
 
     if (pluginsSetup.management) {
-      registerManagementSection(
+      registerManagementSections(
         pluginsSetup.management,
         core,
         {
           usageCollection: pluginsSetup.usageCollection,
         },
         this.isServerless,
-        this.enabledFeatures
-      ).enable();
+        this.enabledFeatures,
+        this.nlpSettings
+      );
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));

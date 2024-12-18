@@ -11,37 +11,189 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import type { MlFeatures } from '../../../common/constants/app';
+import type { MlFeatures, NLPSettings } from '../../../common/constants/app';
 import type { MlStartDependencies } from '../../plugin';
 
-export function registerManagementSection(
+export function registerManagementSections(
   management: ManagementSetup,
   core: CoreSetup<MlStartDependencies>,
   deps: { usageCollection?: UsageCollectionSetup },
   isServerless: boolean,
-  mlFeatures: MlFeatures
+  mlFeatures: MlFeatures,
+  nlpSettings: NLPSettings
 ) {
-  const appName = i18n.translate('xpack.ml.management.jobsListTitle', {
-    defaultMessage: 'Machine Learning',
+  const overviewTitle = i18n.translate('xpack.ml.management.overviewTitle', {
+    defaultMessage: 'Overview',
+  });
+  const adJobsTitle = i18n.translate('xpack.ml.management.anomalyDetectionJobsTitle', {
+    defaultMessage: 'Anomaly Detection Jobs',
+  });
+  const dfaJobsTitle = i18n.translate('xpack.ml.management.dataFrameAnalyticsJobsTitle', {
+    defaultMessage: 'Data Frame Analytics Jobs',
+  });
+  const trainedModelsTitle = i18n.translate('xpack.ml.management.trainedModelsTitle', {
+    defaultMessage: 'Trained Models',
+  });
+  const suppliedConfigurationsTitle = i18n.translate(
+    'xpack.ml.management.suppliedConfigurationsTitle',
+    {
+      defaultMessage: 'Supplied Configurations',
+    }
+  );
+  const settingsTitle = i18n.translate('xpack.ml.management.settingsTitle', {
+    defaultMessage: 'Settings',
   });
 
-  return management.sections.section.insightsAndAlerting.registerApp({
-    id: 'jobsListLink',
-    title: appName,
-    order: 4,
-    async mount(params: ManagementAppMountParams) {
-      const [{ chrome }] = await core.getStartServices();
-      const { docTitle } = chrome;
+  management.sections.section.machineLearning
+    .registerApp({
+      id: 'jobsListLink', // TODO: will need to update this
+      title: overviewTitle,
+      order: 1,
+      async mount(params: ManagementAppMountParams) {
+        const [{ chrome }] = await core.getStartServices();
+        const { docTitle } = chrome;
 
-      docTitle.change(appName);
+        docTitle.change(overviewTitle);
 
-      const { mountApp } = await import('./jobs_list');
-      const unmountAppCallback = await mountApp(core, params, deps, isServerless, mlFeatures);
+        const { mountApp } = await import('./overview');
+        const unmountAppCallback = await mountApp(core, params, deps, isServerless, mlFeatures);
 
-      return () => {
-        docTitle.reset();
-        unmountAppCallback();
-      };
-    },
-  });
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
+      },
+    })
+    .enable();
+
+  management.sections.section.machineLearning
+    .registerApp({
+      id: 'jobs',
+      title: adJobsTitle,
+      order: 2,
+      async mount(params: ManagementAppMountParams) {
+        const [{ chrome }] = await core.getStartServices();
+        const { docTitle } = chrome;
+
+        docTitle.change(overviewTitle);
+
+        const { mountApp } = await import('./anomaly_detection_jobs');
+        const unmountAppCallback = await mountApp(core, params, deps, isServerless, mlFeatures);
+
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
+      },
+    })
+    .enable();
+
+  management.sections.section.machineLearning
+    .registerApp({
+      id: 'data_frame_analytics',
+      title: dfaJobsTitle,
+      order: 3,
+      async mount(params: ManagementAppMountParams) {
+        const [{ chrome }] = await core.getStartServices();
+        const { docTitle } = chrome;
+
+        docTitle.change(overviewTitle);
+
+        const { mountApp } = await import('./data_frame_analytics_jobs');
+        const unmountAppCallback = await mountApp(core, params, deps, isServerless, mlFeatures);
+
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
+      },
+    })
+    .enable();
+
+  management.sections.section.machineLearning
+    .registerApp({
+      id: 'trained_models',
+      title: trainedModelsTitle,
+      order: 4,
+      async mount(params: ManagementAppMountParams) {
+        const [{ chrome }] = await core.getStartServices();
+        const { docTitle } = chrome;
+
+        docTitle.change(overviewTitle);
+
+        const { mountApp } = await import('./trained_models');
+        const unmountAppCallback = await mountApp(
+          core,
+          params,
+          deps,
+          isServerless,
+          mlFeatures,
+          nlpSettings
+        );
+
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
+      },
+    })
+    .enable();
+
+  management.sections.section.machineLearning
+    .registerApp({
+      id: 'supplied_configurations',
+      title: suppliedConfigurationsTitle,
+      order: 5,
+      async mount(params: ManagementAppMountParams) {
+        const [{ chrome }] = await core.getStartServices();
+        const { docTitle } = chrome;
+
+        docTitle.change(overviewTitle);
+
+        const { mountApp } = await import('./supplied_configurations');
+        const unmountAppCallback = await mountApp(
+          core,
+          params,
+          deps,
+          isServerless,
+          mlFeatures,
+          nlpSettings
+        );
+
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
+      },
+    })
+    .enable();
+
+  management.sections.section.machineLearning
+    .registerApp({
+      id: 'settings',
+      title: settingsTitle,
+      order: 6,
+      async mount(params: ManagementAppMountParams) {
+        const [{ chrome }] = await core.getStartServices();
+        const { docTitle } = chrome;
+
+        docTitle.change(overviewTitle);
+
+        const { mountApp } = await import('./settings');
+        const unmountAppCallback = await mountApp(
+          core,
+          params,
+          deps,
+          isServerless,
+          mlFeatures,
+          nlpSettings
+        );
+
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
+      },
+    })
+    .enable();
 }
