@@ -180,6 +180,10 @@ export function getFlamegraphModel({
       Object.entries(FRAME_TYPE_COLOR_MAP).map(([frameTypeKey, colors]) => {
         const frameType = Number(frameTypeKey) as FrameType;
 
+        if (frameType === FrameType.Root) {
+          return undefined;
+        }
+
         return usedFrameTypes.has(frameType)
           ? {
               color: `#${colors[0].toString(16)}`,
