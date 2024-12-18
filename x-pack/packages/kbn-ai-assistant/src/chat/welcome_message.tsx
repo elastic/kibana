@@ -80,7 +80,7 @@ export function WelcomeMessage({
         className={fullHeightClassName}
       >
         <EuiFlexItem grow={false}>
-          <AssistantBeacon backgroundColor="ghost" size="xl" />
+          <AssistantBeacon backgroundColor="emptyShade" size="xl" />
         </EuiFlexItem>
         <EuiFlexItem grow className={centerMaxWidthClassName}>
           <EuiSpacer size={['xl', 'l'].includes(breakpoint!) ? 'l' : 's'} />

@@ -41,7 +41,7 @@ export const EmptyConvo: React.FC<Props> = ({
         >
           <EuiFlexGroup alignItems="center" justifyContent="center" direction="column">
             <EuiFlexItem grow={false}>
-              <AssistantBeacon backgroundColor="ghost" />
+              <AssistantBeacon backgroundColor="emptyShade" size="xl" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText>
