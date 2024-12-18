@@ -170,7 +170,7 @@
     "@kbn/aiops-plugin": "link:x-pack/platform/plugins/shared/aiops",
     "@kbn/aiops-test-utils": "link:x-pack/platform/packages/private/ml/aiops_test_utils",
     "@kbn/alerting-api-integration-test-plugin": "link:x-pack/test/alerting_api_integration/common/plugins/alerts",
-    "@kbn/alerting-comparators": "link:x-pack/packages/kbn-alerting-comparators",
+    "@kbn/alerting-comparators": "link:x-pack/platform/packages/shared/kbn-alerting-comparators",
     "@kbn/alerting-example-plugin": "link:x-pack/examples/alerting_example",
     "@kbn/alerting-fixture-plugin": "link:x-pack/test/functional_with_es_ssl/plugins/alerts",
     "@kbn/alerting-plugin": "link:x-pack/plugins/alerting",
