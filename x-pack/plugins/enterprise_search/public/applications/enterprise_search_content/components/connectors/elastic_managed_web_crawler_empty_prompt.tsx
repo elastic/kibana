@@ -23,12 +23,12 @@ export const ElasticManagedWebCrawlerEmptyPrompt: React.FC = () => {
         onClickBack: () => KibanaLogic.values.navigateToUrl(CRAWLERS_PATH),
       }}
       icon={CrawlerIcon}
-      title={i18n.translate('xpack.serverlessSearch.elasticManagedWebCrawlerEmpty.title', {
+      title={i18n.translate('xpack.enterpriseSearch.elasticManagedWebCrawlerEmpty.title', {
         defaultMessage: 'Elastic managed web crawlers',
       })}
       isComingSoon
       description={i18n.translate(
-        'xpack.serverlessSearch.elasticManagedWebCrawlerEmpty.description',
+        'xpack.enterpriseSearch.elasticManagedWebCrawlerEmpty.description',
         {
           defaultMessage:
             "We're actively developing Elastic managed web crawlers, that won't require any self-managed infrastructure. You'll be able to handle all configuration in the UI. This will simplify syncing your data into a serverless Elasticsearch project. This new workflow will have two steps:",
@@ -65,7 +65,7 @@ export const ElasticManagedWebCrawlerEmptyPrompt: React.FC = () => {
                       <EuiText>
                         <p>
                           {i18n.translate(
-                            'xpack.serverlessSearch.elasticManagedWebCrawlerEmpty.guideOneDescription',
+                            'xpack.enterpriseSearch.elasticManagedWebCrawlerEmpty.guideOneDescription',
                             {
                               defaultMessage: 'Set one or more domain URLs you want to crawl',
                             }
@@ -96,7 +96,7 @@ export const ElasticManagedWebCrawlerEmptyPrompt: React.FC = () => {
                       <EuiText>
                         <p>
                           {i18n.translate(
-                            'xpack.serverlessSearch.elasticManagedWebCrawlerEmpty.guideThreeDescription',
+                            'xpack.enterpriseSearch.elasticManagedWebCrawlerEmpty.guideThreeDescription',
                             {
                               defaultMessage: 'Configure all the web crawler process using Kibana',
                             }

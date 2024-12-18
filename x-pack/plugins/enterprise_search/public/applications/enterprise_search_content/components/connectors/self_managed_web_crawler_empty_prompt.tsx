@@ -77,7 +77,7 @@ export const SelfManagedWebCrawlerEmptyPrompt: React.FC = () => {
                               source: (
                                 <EuiLink
                                   target="_blank"
-                                  data-test-subj="serverlessSearchEmptyConnectorsPromptSourceLink"
+                                  data-test-subj="enterpriseSearchEmptyConnectorsPromptSourceLink"
                                   href={'https://github.com/elastic/crawler'}
                                 >
                                   {i18n.translate(
@@ -89,7 +89,7 @@ export const SelfManagedWebCrawlerEmptyPrompt: React.FC = () => {
                               docker: (
                                 <EuiLink
                                   target="_blank"
-                                  data-test-subj="serverlessSearchEmptyConnectorsPromptDockerLink"
+                                  data-test-subj="enterpriseSearchEmptyConnectorsPromptDockerLink"
                                   href={
                                     'https://github.com/elastic/crawler?tab=readme-ov-file#running-open-crawler-with-docker'
                                   }
@@ -186,7 +186,7 @@ export const SelfManagedWebCrawlerEmptyPrompt: React.FC = () => {
         <>
           <EuiFlexItem>
             <EuiButton
-              data-test-subj="serverlessSearchEmptyConnectorsPromptCreateSelfManagedConnectorButton"
+              data-test-subj="enterpriseSearchEmptyConnectorsPromptCreateSelfManagedConnectorButton"
               fill
               iconType={GithubIcon}
               href={'https://github.com/elastic/crawler'}
@@ -201,7 +201,7 @@ export const SelfManagedWebCrawlerEmptyPrompt: React.FC = () => {
             <EuiFlexGroup direction="column" gutterSize="s" alignItems="center">
               <EuiFlexItem>
                 <EuiButton
-                  data-test-subj="serverlessSearchEmptyConnectorsPromptCreateElasticManagedConnectorButton"
+                  data-test-subj="enterpriseSearchEmptyConnectorsPromptCreateElasticManagedConnectorButton"
                   onClick={() => KibanaLogic.values.navigateToUrl(CRAWLERS_ELASTIC_MANAGED_PATH)}
                 >
                   {i18n.translate('xpack.enterpriseSearch.webCrawlersEmpty.elasticManagedButton', {

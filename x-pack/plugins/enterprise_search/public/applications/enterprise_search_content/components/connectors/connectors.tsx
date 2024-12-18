@@ -16,24 +16,25 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPopover,
   EuiSearchBar,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { handlePageChange } from '../../../shared/table_pagination';
 import {
-  NEW_CRAWLER_PATH,
   NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH,
   NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH,
   NEW_INDEX_SELECT_CONNECTOR_PATH,
 } from '../../routes';
+import { LEARN_MORE_LINK } from '../../../shared/constants';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
 
 import { DefaultSettingsFlyout } from '../settings/default_settings_flyout';
@@ -66,7 +67,6 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
   const { fetchConnectors, onPaginate, setIsFirstRequest, openDeleteModal } =
     useActions(ConnectorsLogic);
   const { data, isLoading, searchParams, isEmpty, connectors } = useValues(ConnectorsLogic);
-  const { errorConnectingMessage } = useValues(HttpLogic);
   const [searchQuery, setSearchValue] = useState('');
   const [showMoreOptionsPopover, setShowMoreOptionsPopover] = useState<boolean>(false);
   const [showDefaultSettingsFlyout, setShowDefaultSettingsFlyout] = useState<boolean>(false);
@@ -97,6 +97,29 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
             : i18n.translate('xpack.enterpriseSearch.crawlers.title', {
                 defaultMessage: 'Elastic Web Crawler',
               }),
+          description: [
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.webcrawlers.headerContent"
+                  defaultMessage="Discover extract and index searchable content from websites and knowledge bases {learnMoreLink}"
+                  values={{
+                    learnMoreLink: (
+                      <EuiLink
+                        data-test-subj="entSearchContentConnectorsLearnMoreLink"
+                        external
+                        target="_blank"
+                        href={'https://github.com/elastic/crawler'}
+                      >
+                        {LEARN_MORE_LINK}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiText>,
+          ],
+
           rightSideGroupProps: {
             gutterSize: 's',
             responsive: false,
