@@ -54,7 +54,7 @@ import { getSeverityColor } from '../utils';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { ChartLabel } from './chart_label';
 import { Legend } from '../../../../common/components/charts/legend';
-import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
+import { getEmptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
@@ -85,7 +85,7 @@ interface AlertsByStatusProps {
   signalIndexName: string | null;
 }
 
-const useGetChartConfigs: () => Array<{ key: Severity; label: string; color: string }> = () => {
+const useGetChartConfigs: () => { legendItems: LegendItem[]; fillColor: FillColor } = () => {
   const { euiTheme } = useEuiTheme();
   const severityColor = useMemo(() => getSeverityColor(euiTheme), [euiTheme]);
   const configs = useMemo(
@@ -97,7 +97,24 @@ const useGetChartConfigs: () => Array<{ key: Severity; label: string; color: str
     ],
     [severityColor]
   );
-  return configs;
+
+  const legendItems: LegendItem[] = useMemo(
+    () =>
+      configs.map((d) => ({
+        color: d.color,
+        field: ALERT_SEVERITY,
+        value: d.label,
+      })),
+    [configs]
+  );
+
+  const fillColor: FillColor = useCallback(
+    (dataName: string) => {
+      return configs.find((cfg) => cfg.label === dataName)?.color ?? getEmptyDonutColor(euiTheme);
+    },
+    [configs, euiTheme]
+  );
+  return { fillColor, legendItems };
 };
 
 const eventKindSignalFilter: EntityFilter = {
@@ -158,16 +175,7 @@ export const AlertsByStatus = ({
     to,
     from,
   });
-  const chartConfigs = useGetChartConfigs();
-  const legendItems: LegendItem[] = useMemo(
-    () =>
-      chartConfigs.map((d) => ({
-        color: d.color,
-        field: ALERT_SEVERITY,
-        value: d.label,
-      })),
-    [chartConfigs]
-  );
+  const { legendItems, fillColor } = useGetChartConfigs();
 
   const navigateToAlertsWithStatus = useCallback(
     (status: Status, level?: string) =>
@@ -223,13 +231,6 @@ export const AlertsByStatus = ({
   const { total: visualizationTotalAlerts } = useAlertsByStatusVisualizationData();
 
   const totalAlertsCount = isDonutChartEmbeddablesEnabled ? visualizationTotalAlerts : totalAlerts;
-
-  const fillColor: FillColor = useCallback(
-    (dataName: string) => {
-      return chartConfigs.find((cfg) => cfg.label === dataName)?.color ?? emptyDonutColor;
-    },
-    [chartConfigs]
-  );
 
   return (
     <>

@@ -14,6 +14,9 @@ interface DonutChartEmptyProps {
   donutWidth?: number;
 }
 
+/*
+ ** @deprecated use getEmptyDonutColor instead
+ */
 export const emptyDonutColor = 'colors.textSubdued';
 
 export const getEmptyDonutColor = (euiTheme: EuiThemeComputed) => euiTheme.colors.textSubdued;

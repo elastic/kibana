@@ -12,13 +12,13 @@ import type { AlertSearchResponse } from '../../../containers/detection_engine/a
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import type { SummaryChartsData, SummaryChartsAgg } from '../alerts_summary_charts_panel/types';
 import { severityLabels } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
-import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
+import { getEmptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
 import { getSeverityColor as getAlertsSeverityColor } from '../../../../overview/components/detection_response/utils';
 import * as i18n from './translations';
 
 export const getSeverityColor = (severity: string, euiTheme: EuiThemeComputed) => {
   const severityColor = getAlertsSeverityColor(euiTheme);
-  return severityColor[severity.toLocaleLowerCase() as Severity] ?? emptyDonutColor;
+  return severityColor[severity.toLocaleLowerCase() as Severity] ?? getEmptyDonutColor(euiTheme);
 };
 
 export const parseSeverityData = (
