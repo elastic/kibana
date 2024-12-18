@@ -48,7 +48,7 @@ export function DefaultEdge({
           stroke: euiTheme.colors[color],
         }}
         css={
-          data?.type === 'dashed' && {
+          (!data?.type || data?.type === 'dashed') && {
             strokeDasharray: '2,2',
           }
         }

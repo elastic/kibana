@@ -99,5 +99,5 @@ export const edgeDataSchema = schema.object({
   source: schema.string(),
   target: schema.string(),
   color: colorSchema,
-  type: schema.oneOf([schema.literal('solid'), schema.literal('dashed')]),
+  type: schema.maybe(schema.oneOf([schema.literal('solid'), schema.literal('dashed')])),
 });
