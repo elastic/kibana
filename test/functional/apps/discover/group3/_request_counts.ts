@@ -149,14 +149,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Sep 23, 2015 @ 00:00:00.000'
         );
         await waitForLoadingToFinish();
-        // TODO: Check why the request happens 4 times in case of opening a saved search
-        // https://github.com/elastic/kibana/issues/165192
-        // creating the saved search
         const actualExpectedRequests = savedSearchesRequests ?? expectedRequests;
         log.debug('Creating saved search');
         await expectSearches(
           type,
-          type === 'esql' ? actualExpectedRequests + 2 : actualExpectedRequests,
+          type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
           async () => {
             await discover.saveSearch(savedSearch);
           }
@@ -165,13 +162,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await setQuery(query2);
         await queryBar.clickQuerySubmitButton();
         await waitForLoadingToFinish();
-        await expectSearches(
-          type,
-          type === 'esql' ? actualExpectedRequests + 2 : actualExpectedRequests,
-          async () => {
-            await discover.revertUnsavedChanges();
-          }
-        );
+        await expectSearches(type, actualExpectedRequests, async () => {
+          await discover.revertUnsavedChanges();
+        });
         log.debug('Clearing saved search');
         await expectSearches(
           type,
