@@ -27,6 +27,7 @@ import {
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { ControlsToolbarButton } from './controls_toolbar_button';
 import { EditorMenu } from './editor_menu';
+import { addFromLibrary } from '../../dashboard_container/embeddable/api';
 
 export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
   const { euiTheme } = useEuiTheme();
@@ -79,17 +80,11 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
     [dashboardApi]
   );
 
-  /**
-   * embeddableFactory: Required, you can get the factory from embeddableStart.getEmbeddableFactory(<embeddable type, i.e. lens>)
-   * initialInput: Optional, use it in case you want to pass your own input to the factory
-   * dismissNotification: Optional, if not passed a toast will appear in the dashboard
-   */
-
   const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
   const extraButtons = [
     <EditorMenu createNewVisType={createNewVisType} isDisabled={isDisabled} />,
     <AddFromLibraryButton
-      onClick={() => dashboardApi.addFromLibrary()}
+      onClick={() => addFromLibrary(dashboardApi)}
       size="s"
       data-test-subj="dashboardAddFromLibraryButton"
       isDisabled={isDisabled}

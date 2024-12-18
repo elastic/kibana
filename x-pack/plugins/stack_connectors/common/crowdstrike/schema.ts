@@ -17,6 +17,8 @@ export const CrowdstrikeSecretsSchema = schema.object({
   clientSecret: schema.string(),
 });
 
+export const CrowdstrikeApiDoNotValidateResponsesSchema = schema.any();
+
 export const RelaxedCrowdstrikeBaseApiResponseSchema = schema.maybe(
   schema.object({}, { unknowns: 'allow' })
 );
@@ -307,3 +309,44 @@ export const CrowdstrikeInitRTRResponseSchema = schema.object(
 export const CrowdstrikeInitRTRParamsSchema = schema.object({
   endpoint_ids: schema.arrayOf(schema.string()),
 });
+
+export const CrowdstrikeExecuteRTRResponseSchema = schema.object(
+  {
+    combined: schema.object(
+      {
+        resources: schema.recordOf(
+          schema.string(),
+          schema.object(
+            {
+              session_id: schema.string(),
+              task_id: schema.string(),
+              complete: schema.boolean(),
+              stdout: schema.string(),
+              stderr: schema.string(),
+              base_command: schema.string(),
+              aid: schema.string(),
+              errors: schema.arrayOf(schema.any()),
+              query_time: schema.number(),
+              offline_queued: schema.boolean(),
+            },
+            { unknowns: 'allow' }
+          )
+        ),
+      },
+      { unknowns: 'allow' }
+    ),
+    meta: schema.object(
+      {
+        query_time: schema.number(),
+        powered_by: schema.string(),
+        trace_id: schema.string(),
+      },
+      { unknowns: 'allow' }
+    ),
+    errors: schema.nullable(schema.arrayOf(schema.any())),
+  },
+  { unknowns: 'allow' }
+);
+
+// TODO: will be part of a next PR
+export const CrowdstrikeGetScriptsParamsSchema = schema.any({});

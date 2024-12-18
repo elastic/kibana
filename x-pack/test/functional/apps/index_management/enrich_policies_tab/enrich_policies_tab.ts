@@ -100,16 +100,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await successToast.getVisibleText()).to.contain(`Executed ${ENRICH_POLICY_NAME}`);
     });
 
-    it('read only access', async () => {
-      await security.testUser.setRoles(['index_management_monitor_enrich_only']);
-      await pageObjects.common.navigateToApp('indexManagement');
-      await pageObjects.indexManagement.changeTabs('enrich_policiesTab');
-      await pageObjects.header.waitUntilLoadingHasFinished();
-
-      await testSubjects.missingOrFail('createPolicyButton');
-      await testSubjects.missingOrFail('deletePolicyButton');
-    });
-
     it('can delete a policy', async () => {
       await security.testUser.setRoles(['index_management_user']);
       await pageObjects.common.navigateToApp('indexManagement');
@@ -129,10 +119,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await successToast.getVisibleText()).to.contain(`Deleted ${ENRICH_POLICY_NAME}`);
     });
 
-    it('no access', async () => {
-      await security.testUser.setRoles(['index_management_monitor_only']);
-      await pageObjects.common.navigateToApp('indexManagement');
-      await testSubjects.missingOrFail('enrich_policiesTab');
+    describe('access', function () {
+      this.tags('skipFIPS');
+      it('read only access', async () => {
+        await security.testUser.setRoles(['index_management_monitor_enrich_only']);
+        await pageObjects.common.navigateToApp('indexManagement');
+        await pageObjects.indexManagement.changeTabs('enrich_policiesTab');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await testSubjects.missingOrFail('createPolicyButton');
+        await testSubjects.missingOrFail('deletePolicyButton');
+      });
+
+      it('no access', async () => {
+        await security.testUser.setRoles(['index_management_monitor_only']);
+        await pageObjects.common.navigateToApp('indexManagement');
+        await testSubjects.missingOrFail('enrich_policiesTab');
+      });
     });
   });
 };

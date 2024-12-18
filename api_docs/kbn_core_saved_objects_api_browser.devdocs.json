@@ -887,6 +887,14 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+          },
+          {
             "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
@@ -925,14 +933,6 @@
           {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/public/application/contexts/query_input_bar_context.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -1122,12 +1122,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "home",
-                "path": "src/plugins/home/public/application/components/home_app.js"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-browser-mocks",
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+              },
+              {
+                "plugin": "home",
+                "path": "src/plugins/home/public/application/components/home_app.js"
               },
               {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -2768,6 +2768,18 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+          },
+          {
             "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
@@ -2796,20 +2808,20 @@
             "path": "x-pack/platform/plugins/private/data_visualizer/common/types/index.ts"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
-          },
-          {
             "plugin": "dashboardEnhanced",
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
           },
           {
             "plugin": "dashboardEnhanced",
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
           },
           {
             "plugin": "graph",
@@ -2837,11 +2849,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/hooks/types.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/hooks/types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/hooks/types.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/hooks/types.ts"
           },
           {
             "plugin": "eventAnnotation",
@@ -2878,18 +2890,6 @@
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/wizard/search_selection/show_saved_object.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
           }
         ],
         "children": [

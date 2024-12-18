@@ -19,14 +19,14 @@ import { ProductSelector } from '.';
 
 describe('ProductSelector', () => {
   it('renders the overview page, product cards, & setup guide CTAs with no host set', () => {
-    setMockValues({ config: { canDeployEntSearch: true, host: '' } });
+    setMockValues({ config: { host: '' } });
     const wrapper = shallow(<ProductSelector />);
 
     expect(wrapper.find(ElasticsearchProductCard)).toHaveLength(1);
   });
 
   it('renders the trial callout', () => {
-    setMockValues({ config: { canDeployEntSearch: true, host: 'localhost' } });
+    setMockValues({ config: { host: 'localhost' } });
     const wrapper = shallow(<ProductSelector />);
 
     expect(wrapper.find(TrialCallout)).toHaveLength(1);
@@ -34,7 +34,7 @@ describe('ProductSelector', () => {
 
   describe('access checks when host is set', () => {
     beforeEach(() => {
-      setMockValues({ config: { canDeployEntSearch: true, host: 'localhost' } });
+      setMockValues({ config: { host: 'localhost' } });
     });
 
     it('does not render the Setup CTA when there is a host', () => {
