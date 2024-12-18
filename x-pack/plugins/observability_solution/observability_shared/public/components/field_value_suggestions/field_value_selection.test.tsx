@@ -55,23 +55,23 @@ describe('FieldValueSelection', () => {
     expect((list.props() as any).visibleOptions).toMatchInlineSnapshot(`
       Array [
         Object {
-          "append": <styled.div>
+          "append": <Styled(div)>
             <EuiText
               size="xs"
             >
               1
             </EuiText>
-          </styled.div>,
+          </Styled(div)>,
           "label": "elastic co frontend",
         },
         Object {
-          "append": <styled.div>
+          "append": <Styled(div)>
             <EuiText
               size="xs"
             >
               2
             </EuiText>
-          </styled.div>,
+          </Styled(div)>,
           "label": "apm server",
         },
       ]
