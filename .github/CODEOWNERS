@@ -864,6 +864,7 @@ x-pack/platform/plugins/shared/license_management @elastic/kibana-management
 x-pack/platform/plugins/shared/ml @elastic/ml-ui
 x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant @elastic/obs-ai-assistant
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
+x-pack/platform/plugins/shared/screenshotting @elastic/kibana-reporting-services
 x-pack/platform/plugins/shared/searchprofiler @elastic/kibana-management
 x-pack/plugins/actions @elastic/response-ops
 x-pack/plugins/alerting @elastic/response-ops
@@ -920,7 +921,6 @@ x-pack/plugins/observability_solution/profiling_data_access @elastic/obs-ux-infr
 x-pack/plugins/reporting @elastic/appex-sharedux
 x-pack/plugins/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 x-pack/plugins/saved_objects_tagging @elastic/appex-sharedux
-x-pack/plugins/screenshotting @elastic/kibana-reporting-services
 x-pack/plugins/search_assistant @elastic/search-kibana
 x-pack/plugins/search_connectors @elastic/search-kibana
 x-pack/plugins/search_homepage @elastic/search-kibana
