@@ -68,7 +68,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
     (indexName: string) => {
       if (searchIndicesLocator) {
         return {
-          href: generateEncodedPath(searchIndicesLocator.getRedirectUrl({}), { indexName }),
+          href: searchIndicesLocator.getRedirectUrl({}),
           onClick: async (event: React.MouseEvent<HTMLAnchorElement>) => {
             event.preventDefault();
             const url = await searchIndicesLocator.getUrl({ indexName });
