@@ -39,6 +39,14 @@ const getPipeline = (filename: string, removeSteps = true) => {
       return;
     }
 
+    const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
+    if (onlyRunQuickChecks) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
+      console.log('Isolated changes to renovate.json. Skipping main PR pipeline.');
+      return;
+    }
+
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
@@ -242,7 +250,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^packages\/kbn-securitysolution-.*/,
         /^x-pack\/plugins\/alerting/,
         /^x-pack\/plugins\/data_views\/common/,
-        /^x-pack\/plugins\/lists/,
+        /^x-pack\/solutions\/security\/plugins\/lists/,
         /^x-pack\/plugins\/rule_registry\/common/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
@@ -298,10 +306,10 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^packages\/kbn-search-types/,
         /^packages\/kbn-securitysolution-.*/,
         /^src\/platform\/packages\/shared\/kbn-securitysolution-ecs/,
-        /^packages\/kbn-securitysolution-io-ts-alerting-types/,
-        /^packages\/kbn-securitysolution-io-ts-list-types/,
-        /^packages\/kbn-securitysolution-list-hooks/,
-        /^packages\/kbn-securitysolution-t-grid/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-io-ts-alerting-types/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-io-ts-list-types/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-list-hooks/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-t-grid/,
         /^packages\/kbn-ui-theme/,
         /^packages\/kbn-utility-types/,
         /^packages\/react/,
@@ -327,7 +335,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/plugins\/cases/,
         /^x-pack\/plugins\/data_views\/common/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
-        /^x-pack\/plugins\/lists/,
+        /^x-pack\/solutions\/security\/plugins\/lists/,
         /^x-pack\/plugins\/rule_registry\/common/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
