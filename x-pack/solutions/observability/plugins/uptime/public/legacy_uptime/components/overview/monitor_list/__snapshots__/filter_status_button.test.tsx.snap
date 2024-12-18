@@ -21,39 +21,28 @@ exports[`FilterStatusButton renders without errors for valid props 1`] = `
 `;
 
 exports[`FilterStatusButton shallow renders without errors for valid props 1`] = `
-<ContextProvider
-  value={
+<Router
+  history={
     Object {
-      "history": Object {
-        "action": "POP",
-        "block": [Function],
-        "canGo": [Function],
-        "createHref": [Function],
-        "entries": Array [
-          Object {
-            "hash": "",
-            "key": "TestKeyForTesting",
-            "pathname": "/",
-            "search": "",
-            "state": undefined,
-          },
-        ],
-        "go": [Function],
-        "goBack": [Function],
-        "goForward": [Function],
-        "index": 0,
-        "length": 1,
-        "listen": [Function],
-        "location": Object {
+      "action": "POP",
+      "block": [Function],
+      "canGo": [Function],
+      "createHref": [Function],
+      "entries": Array [
+        Object {
           "hash": "",
           "key": "TestKeyForTesting",
           "pathname": "/",
           "search": "",
           "state": undefined,
         },
-        "push": [Function],
-        "replace": [Function],
-      },
+      ],
+      "go": [Function],
+      "goBack": [Function],
+      "goForward": [Function],
+      "index": 0,
+      "length": 1,
+      "listen": [Function],
       "location": Object {
         "hash": "",
         "key": "TestKeyForTesting",
@@ -61,59 +50,17 @@ exports[`FilterStatusButton shallow renders without errors for valid props 1`] =
         "search": "",
         "state": undefined,
       },
-      "match": Object {
-        "isExact": true,
-        "params": Object {},
-        "path": "/",
-        "url": "/",
-      },
-      "staticContext": undefined,
+      "push": [Function],
+      "replace": [Function],
     }
   }
 >
-  <ContextProvider
-    value={
-      Object {
-        "action": "POP",
-        "block": [Function],
-        "canGo": [Function],
-        "createHref": [Function],
-        "entries": Array [
-          Object {
-            "hash": "",
-            "key": "TestKeyForTesting",
-            "pathname": "/",
-            "search": "",
-            "state": undefined,
-          },
-        ],
-        "go": [Function],
-        "goBack": [Function],
-        "goForward": [Function],
-        "index": 0,
-        "length": 1,
-        "listen": [Function],
-        "location": Object {
-          "hash": "",
-          "key": "TestKeyForTesting",
-          "pathname": "/",
-          "search": "",
-          "state": undefined,
-        },
-        "push": [Function],
-        "replace": [Function],
-      }
-    }
-  >
-    <CompatRouter>
-      <FilterStatusButton
-        content="Up"
-        dataTestSubj="foo"
-        isActive={true}
-        value="up"
-        withNext={true}
-      />
-    </CompatRouter>
-  </ContextProvider>
-</ContextProvider>
+  <FilterStatusButton
+    content="Up"
+    dataTestSubj="foo"
+    isActive={true}
+    value="up"
+    withNext={true}
+  />
+</Router>
 `;

@@ -57,10 +57,10 @@ export function SemanticTextBanner({
 
   return isSemanticTextBannerDisplayable && isSemanticTextEnabled ? (
     <>
-      <EuiPanel color="success" data-test-subj="indexDetailsMappingsSemanticTextBanner">
+      <EuiPanel color="accentSecondary" data-test-subj="indexDetailsMappingsSemanticTextBanner">
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiText size="m" color="success">
+            <EuiText size="m" color="primary">
               {isPlatinumLicense ? platinumLicenseMessage : defaultLicenseMessage}
             </EuiText>
           </EuiFlexItem>

@@ -17,6 +17,18 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { AppClient } from '../../..';
 import type { EntityStoreConfig } from './types';
 import { mockGlobalState } from '../../../../public/common/mock';
+import type { EntityDefinition } from '@kbn/entities-schema';
+import { getUnitedEntityDefinition } from './united_entity_definitions';
+
+const unitedDefinition = getUnitedEntityDefinition({
+  entityType: 'host',
+  namespace: 'test',
+  fieldHistoryLength: 10,
+  indexPatterns: [],
+  syncDelay: '1m',
+  frequency: '1m',
+});
+const definition: EntityDefinition = unitedDefinition.entityManagerDefinition;
 
 describe('EntityStoreDataClient', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
@@ -180,6 +192,139 @@ describe('EntityStoreDataClient', () => {
       const response = await dataClient.searchEntities(defaultSearchParams);
 
       expect(response.records[0]).toEqual(fakeEntityRecord);
+    });
+  });
+
+  describe('getComponentFromEntityDefinition', () => {
+    it('returns installed false if no definition is provided', () => {
+      const result = dataClient.getComponentFromEntityDefinition('security_host_test', undefined);
+      expect(result).toEqual([
+        {
+          id: 'security_host_test',
+          installed: false,
+          resource: 'entity_definition',
+        },
+      ]);
+    });
+
+    it('returns correct components for EntityDefinitionWithState', () => {
+      const definitionWithState = {
+        ...definition,
+        state: {
+          installed: true,
+          running: true,
+          components: {
+            transforms: [
+              {
+                id: 'transforms_id',
+                installed: true,
+                running: true,
+              },
+            ],
+            ingestPipelines: [
+              {
+                id: 'pipeline-1',
+                installed: true,
+              },
+            ],
+            indexTemplates: [
+              {
+                id: 'indexTemplates_id',
+                installed: true,
+              },
+            ],
+          },
+        },
+      };
+
+      const result = dataClient.getComponentFromEntityDefinition(
+        'security_host_test',
+        definitionWithState
+      );
+      expect(result).toEqual([
+        {
+          id: 'security_host_test',
+          installed: true,
+          resource: 'entity_definition',
+        },
+        {
+          id: 'security_host_test',
+          resource: 'transform',
+          installed: true,
+          health: 'unknown',
+          errors: undefined,
+        },
+        {
+          resource: 'ingest_pipeline',
+          id: 'pipeline-1',
+          installed: true,
+        },
+        {
+          id: 'security_host_test',
+          installed: true,
+          resource: 'index_template',
+        },
+      ]);
+    });
+
+    it('returns empty array for EntityDefinition without state', () => {
+      const result = dataClient.getComponentFromEntityDefinition('security_host_test', definition);
+      expect(result).toEqual([]);
+    });
+
+    it('handles transform health issues correctly', () => {
+      const definitionWithState = {
+        ...definition,
+        state: {
+          installed: true,
+          components: {
+            transforms: [
+              {
+                installed: true,
+                stats: {
+                  health: {
+                    status: 'yellow',
+                    issues: [
+                      {
+                        type: 'issue-type',
+                        issue: 'issue-message',
+                        details: 'issue-details',
+                        count: 1,
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+            ingestPipelines: [],
+            indexTemplates: [],
+          },
+        },
+      };
+
+      const result = dataClient.getComponentFromEntityDefinition(
+        'security_host_test',
+        definitionWithState
+      );
+      expect(result).toEqual([
+        {
+          id: 'security_host_test',
+          installed: true,
+          resource: 'entity_definition',
+        },
+        {
+          id: 'security_host_test',
+          resource: 'transform',
+          installed: true,
+          health: 'yellow',
+          errors: [
+            {
+              title: 'issue-message',
+              message: 'issue-details',
+            },
+          ],
+        },
+      ]);
     });
   });
 });

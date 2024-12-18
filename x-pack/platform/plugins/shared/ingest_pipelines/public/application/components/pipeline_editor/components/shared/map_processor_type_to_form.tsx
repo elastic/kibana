@@ -481,7 +481,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   ip_location: {
     category: processorCategories.DATA_ENRICHMENT,
     FieldsComponent: IpLocation,
-    docLinkPath: '/geoip-processor.html',
+    docLinkPath: '/ip-location-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.ipLocation', {
       defaultMessage: 'IP Location',
     }),

@@ -34,7 +34,6 @@ type EmbedProps = Pick<
   | 'objectType'
   | 'isDirty'
 > & {
-  setIsNotSaved: () => void;
   objectConfig?: ShareContextObjectTypeConfig;
 };
 
@@ -55,7 +54,6 @@ export const EmbedContent = ({
   shareableUrl,
   objectType,
   objectConfig = {},
-  setIsNotSaved,
   isDirty,
 }: EmbedProps) => {
   const isMounted = useMountedState();
@@ -66,10 +64,6 @@ export const EmbedContent = ({
   const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
   const [anonymousAccessParameters] = useState<AnonymousAccessState['accessURLParameters']>(null);
   const [usePublicUrl] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (objectType !== 'dashboard') setIsNotSaved();
-  }, [url, setIsNotSaved, objectType]);
 
   const makeUrlEmbeddable = useCallback((tempUrl: string): string => {
     const embedParam = '?embed=true';

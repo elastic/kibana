@@ -98,7 +98,19 @@ export const IGNORE_FILE_GLOBS = [
  *
  * @type {Array}
  */
-export const KEBAB_CASE_DIRECTORY_GLOBS = ['packages/*', 'x-pack', 'x-pack/packages/*'];
+export const KEBAB_CASE_DIRECTORY_GLOBS = [
+  'packages/*',
+  'x-pack',
+  'x-pack/packages/*',
+  'src/core/packages/*/*',
+  'src/platform/packages/private/*',
+  'src/platform/packages/shared/*',
+  'x-pack/platform/packages/private/*',
+  'x-pack/platform/packages/shared/*',
+  'x-pack/solutions/observability/packages/*',
+  'x-pack/solutions/search/packages/*',
+  'x-pack/solutions/security/packages/*',
+];
 
 /**
  * These patterns are matched against directories and indicate
@@ -170,10 +182,10 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'x-pack/plugins/monitoring/public/icons/health-green.svg',
   'x-pack/plugins/monitoring/public/icons/health-red.svg',
   'x-pack/plugins/monitoring/public/icons/health-yellow.svg',
-  'x-pack/plugins/screenshotting/server/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
-  'x-pack/plugins/screenshotting/server/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
-  'x-pack/plugins/screenshotting/server/assets/fonts/roboto/Roboto-Italic.ttf',
-  'x-pack/plugins/screenshotting/server/assets/fonts/roboto/Roboto-Medium.ttf',
-  'x-pack/plugins/screenshotting/server/assets/fonts/roboto/Roboto-Regular.ttf',
-  'x-pack/plugins/screenshotting/server/assets/img/logo-grey.png',
+  'x-pack/platform/plugins/shared/screenshotting/server/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
+  'x-pack/platform/plugins/shared/screenshotting/server/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
+  'x-pack/platform/plugins/shared/screenshotting/server/assets/fonts/roboto/Roboto-Italic.ttf',
+  'x-pack/platform/plugins/shared/screenshotting/server/assets/fonts/roboto/Roboto-Medium.ttf',
+  'x-pack/platform/plugins/shared/screenshotting/server/assets/fonts/roboto/Roboto-Regular.ttf',
+  'x-pack/platform/plugins/shared/screenshotting/server/assets/img/logo-grey.png',
 ];

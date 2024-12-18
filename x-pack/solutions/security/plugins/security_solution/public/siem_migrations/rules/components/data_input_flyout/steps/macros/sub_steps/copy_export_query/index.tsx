@@ -19,7 +19,7 @@ export const useCopyExportQueryStep = ({
   onCopied,
 }: CopyExportQueryStepProps): EuiStepProps => {
   return {
-    title: i18n.RULES_DATA_INPUT_COPY_TITLE,
+    title: i18n.MACROS_DATA_INPUT_COPY_TITLE,
     status,
     children: <CopyExportQuery onCopied={onCopied} />,
   };

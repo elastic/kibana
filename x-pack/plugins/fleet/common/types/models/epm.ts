@@ -207,6 +207,15 @@ export interface DeploymentsModes {
   default?: DeploymentsModesDefault;
 }
 
+type Action = 'action';
+type NextStep = 'next_step';
+export interface ConfigurationLink {
+  title: string;
+  url: string;
+  type: Action | NextStep;
+  content?: string;
+}
+
 export enum RegistryPolicyTemplateKeys {
   categories = 'categories',
   data_streams = 'data_streams',
@@ -223,6 +232,7 @@ export enum RegistryPolicyTemplateKeys {
   icons = 'icons',
   screenshots = 'screenshots',
   deployment_modes = 'deployment_modes',
+  configuration_links = 'configuration_links',
 }
 interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
@@ -232,6 +242,7 @@ interface BaseTemplate {
   [RegistryPolicyTemplateKeys.screenshots]?: RegistryImage[];
   [RegistryPolicyTemplateKeys.multiple]?: boolean;
   [RegistryPolicyTemplateKeys.deployment_modes]?: DeploymentsModes;
+  [RegistryPolicyTemplateKeys.configuration_links]?: ConfigurationLink[];
 }
 export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;

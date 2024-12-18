@@ -28,7 +28,7 @@ const getCardHash = (cardId: OnboardingCardId | null) => (cardId ? `#${cardId}` 
  * This hook manages the expanded card id state in the LocalStorage and the hash in the URL.
  */
 export const useUrlDetail = () => {
-  const { spaceId, telemetry } = useOnboardingContext();
+  const { config, spaceId, telemetry } = useOnboardingContext();
   const topicId = useTopicId();
   const [storedUrlDetail, setStoredUrlDetail] = useStoredUrlDetails(spaceId);
 
@@ -56,6 +56,14 @@ export const useUrlDetail = () => {
 
   const syncUrlDetails = useCallback(
     (pathTopicId: OnboardingTopicId | null, hashCardId: OnboardingCardId | null) => {
+      if (storedUrlDetail) {
+        // If the stored topic is not valid, clear it
+        const [storedTopicId] = storedUrlDetail.split('#');
+        if (storedTopicId && !config.has(storedTopicId as OnboardingTopicId)) {
+          setStoredUrlDetail(null);
+          return;
+        }
+      }
       const urlDetail = `${pathTopicId || ''}${hashCardId ? `#${hashCardId}` : ''}`;
       if (urlDetail && urlDetail !== storedUrlDetail) {
         if (hashCardId) {
@@ -67,7 +75,7 @@ export const useUrlDetail = () => {
         navigateTo({ deepLinkId: SecurityPageName.landing, path: storedUrlDetail });
       }
     },
-    [navigateTo, setStoredUrlDetail, storedUrlDetail, telemetry]
+    [config, navigateTo, setStoredUrlDetail, storedUrlDetail, telemetry]
   );
 
   return { setTopicDetail, setCardDetail, syncUrlDetails };

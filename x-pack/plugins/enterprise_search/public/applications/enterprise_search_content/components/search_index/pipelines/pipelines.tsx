@@ -190,7 +190,7 @@ export const SearchIndexPipelines: React.FC = () => {
               hasIndexIngestionPipeline ? (
                 <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="center">
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color="success">
+                    <EuiBadge color="accent">
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.customBadge',
                         { defaultMessage: 'Custom' }

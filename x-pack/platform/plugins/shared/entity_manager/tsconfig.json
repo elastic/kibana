@@ -38,5 +38,6 @@
     "@kbn/es-types",
     "@kbn/apm-utils",
     "@kbn/features-plugin",
+    "@kbn/core-elasticsearch-server-mocks",
   ]
 }

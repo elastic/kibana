@@ -54,13 +54,13 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
         plugin: `@kbn/${METRICS_APP_ID}-plugin`,
       });
 
-      const entityCentriExperienceEnabled = await coreContext.uiSettings.client.get(
+      const entityCentricExperienceEnabled = await coreContext.uiSettings.client.get(
         entityCentricExperience
       );
 
       try {
         const sourceDataStreamTypes = await getDataStreamTypes({
-          entityCentriExperienceEnabled,
+          entityCentricExperienceEnabled,
           entityId,
           entityManagerClient,
           entityType,

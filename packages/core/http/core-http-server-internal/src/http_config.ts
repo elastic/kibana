@@ -213,7 +213,7 @@ const configSchema = schema.object(
        * Which handler resolution algo to use for public routes: "newest" or "oldest".
        *
        * @note Internal routes always require a version to be specified.
-       * @note in development we have an additional option "none" which is also the default in dev.
+       * @note in development we have an additional option "none".
        *       This prevents any fallbacks and requires that a version specified.
        *       Useful for ensuring that a given client always specifies a version.
        */
@@ -221,7 +221,7 @@ const configSchema = schema.object(
         schema.contextRef('dev'),
         true,
         schema.oneOf([schema.literal('newest'), schema.literal('oldest'), schema.literal('none')], {
-          defaultValue: 'none',
+          defaultValue: 'oldest',
         }),
         schema.oneOf([schema.literal('newest'), schema.literal('oldest')], {
           defaultValue: 'oldest',
