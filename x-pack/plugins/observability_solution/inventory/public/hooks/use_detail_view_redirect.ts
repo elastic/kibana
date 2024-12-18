@@ -76,7 +76,7 @@ export const useDetailViewRedirect = () => {
 
   const getDashboardRedirectUrl = useCallback(
     (entity: InventoryEntity) => {
-      const type = entity.entityType;
+      const { entityType: type } = entity;
       const dashboardId = KUBERNETES_DASHBOARDS_IDS[type];
 
       return dashboardId
