@@ -25,12 +25,12 @@ import {
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash/fp';
+import { ConfigEntryView, DisplayType } from '../../../../common/dynamic_config/types';
 import {
   ensureBooleanType,
   ensureCorrectTyping,
   ensureStringType,
 } from './connector_configuration_utils';
-import { ConfigEntryView, DisplayType } from './types';
 
 interface ConnectorConfigurationFieldProps {
   configEntry: ConfigEntryView;

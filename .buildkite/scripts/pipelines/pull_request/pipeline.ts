@@ -39,6 +39,14 @@ const getPipeline = (filename: string, removeSteps = true) => {
       return;
     }
 
+    const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
+    if (onlyRunQuickChecks) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
+      console.log('Isolated changes to renovate.json. Skipping main PR pipeline.');
+      return;
+    }
+
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
@@ -364,7 +372,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       (await doAnyChangesMatch([
         /^x-pack\/packages\/kbn-cloud-security-posture/,
-        /^x-pack\/plugins\/cloud_security_posture/,
+        /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^x-pack\/test\/security_solution_cypress/,
       ])) ||

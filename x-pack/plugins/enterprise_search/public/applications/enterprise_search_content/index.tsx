@@ -40,7 +40,7 @@ export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
 
   const showView = () => {
-    if (config.host && config.canDeployEntSearch && incompatibleVersions) {
+    if (config.host && incompatibleVersions) {
       return (
         <VersionMismatchPage
           enterpriseSearchVersion={enterpriseSearchVersion}
@@ -58,7 +58,7 @@ export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
         <SetupGuide />
       </Route>
       <Route exact path={ERROR_STATE_PATH}>
-        {config.host && config.canDeployEntSearch && errorConnectingMessage ? (
+        {config.host && errorConnectingMessage ? (
           <ErrorStatePrompt />
         ) : (
           <Redirect to={SEARCH_INDICES_PATH} />
