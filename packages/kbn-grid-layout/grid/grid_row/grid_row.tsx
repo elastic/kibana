@@ -93,7 +93,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
             const targetRow = interactionEvent?.targetRowIndex;
             if (rowIndex === targetRow && interactionEvent) {
               // apply "targetted row" styles
-              const gridColor = transparentize(euiTheme.colors.accentSecondary, 0.2);
+              const gridColor = euiTheme.colors.backgroundLightAccentSecondary;
               rowRef.style.backgroundPosition = `top -${gutterSize / 2}px left -${
                 gutterSize / 2
               }px`;
@@ -103,8 +103,8 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
               rowRef.style.backgroundImage = `linear-gradient(to right, ${gridColor} 1px, transparent 1px),
         linear-gradient(to bottom, ${gridColor} 1px, transparent 1px)`;
               rowRef.style.backgroundColor = `${transparentize(
-                euiTheme.colors.accentSecondary,
-                0.05
+                euiTheme.colors.backgroundLightAccentSecondary,
+	              0.25
               )}`;
             } else {
               // undo any "targetted row" styles
