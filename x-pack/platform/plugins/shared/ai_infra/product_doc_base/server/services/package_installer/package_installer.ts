@@ -14,8 +14,13 @@ import {
   type ProductName,
 } from '@kbn/product-doc-common';
 import type { ProductDocInstallClient } from '../doc_install_status';
-import type { InferenceEndpointManager } from '../inference_endpoint';
-import { downloadToDisk, openZipArchive, loadMappingFile, type ZipArchive } from './utils';
+import {
+  downloadToDisk,
+  openZipArchive,
+  loadMappingFile,
+  ensureDefaultElserDeployed,
+  type ZipArchive,
+} from './utils';
 import { majorMinor, latestVersion } from './utils/semver';
 import {
   validateArtifactArchive,
@@ -39,7 +44,6 @@ export class PackageInstaller {
   private readonly artifactsFolder: string;
   private readonly esClient: ElasticsearchClient;
   private readonly productDocClient: ProductDocInstallClient;
-  private readonly endpointManager: InferenceEndpointManager;
   private readonly artifactRepositoryUrl: string;
   private readonly currentVersion: string;
 
@@ -55,7 +59,6 @@ export class PackageInstaller {
     this.esClient = esClient;
     this.productDocClient = productDocClient;
     this.artifactsFolder = artifactsFolder;
-    this.endpointManager = endpointManager;
     this.artifactRepositoryUrl = artifactRepositoryUrl;
     this.currentVersion = majorMinor(kibanaVersion);
     this.log = logger;
@@ -144,7 +147,7 @@ export class PackageInstaller {
         productVersion,
       });
 
-      await this.endpointManager.ensureInternalElserInstalled();
+      await ensureDefaultElserDeployed({ client: this.esClient });
 
       const artifactFileName = getArtifactName({ productName, productVersion });
       const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
