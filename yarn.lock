@@ -4321,7 +4321,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-apps-browser-internal@link:packages/core/apps/core-apps-browser-internal":
+"@kbn/core-apps-browser-internal@link:src/core/packages/apps/browser-internal":
   version "0.0.0"
   uid ""
 
