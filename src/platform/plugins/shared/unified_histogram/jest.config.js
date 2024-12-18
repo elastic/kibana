@@ -11,7 +11,8 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/plugins/shared/unified_histogram'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/unified_histogram',
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/unified_histogram',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/src/platform/plugins/shared/unified_histogram/{common,public,server}/**/*.{ts,tsx}',

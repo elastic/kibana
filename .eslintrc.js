@@ -1577,7 +1577,10 @@ module.exports = {
      * Discover overrides
      */
     {
-      files: ['src/platform/plugins/shared/discover/**/*.{ts,tsx}', 'src/platform/plugins/shared/saved_search/**/*.{ts,tsx}'],
+      files: [
+        'src/platform/plugins/shared/discover/**/*.{ts,tsx}',
+        'src/platform/plugins/shared/saved_search/**/*.{ts,tsx}',
+      ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/ban-ts-comment': [
