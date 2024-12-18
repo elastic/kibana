@@ -1,0 +1,96 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Detects the usage of commonly used system time discovery techniques, which attackers may use during the reconnaissance phase after compromising a system.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-endpoint.events.*",
+            "logs-windows.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "System Time Discovery",
+        "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n(\n ((process.name: \"net.exe\" or (process.name : \"net1.exe\" and not process.parent.name : \"net.exe\")) and \n   process.args : \"time\") or \n (process.name: \"w32tm.exe\" and process.args: \"/tz\") or \n (process.name: \"tzutil.exe\" and process.args: \"/g\")\n) and not user.id : (\"S-1-5-18\", \"S-1-5-19\", \"S-1-5-20\")\n",
+        "related_integrations": [
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            },
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "06568a02-af29-4f20-929c-f3af281e41aa",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Discovery",
+            "Data Source: Elastic Defend",
+            "Data Source: Elastic Endgame",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0007",
+                    "name": "Discovery",
+                    "reference": "https://attack.mitre.org/tactics/TA0007/"
+                },
+                "technique": [
+                    {
+                        "id": "T1124",
+                        "name": "System Time Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1124/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 5
+    },
+    "id": "06568a02-af29-4f20-929c-f3af281e41aa_5",
+    "type": "security-rule"
+}

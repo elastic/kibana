@@ -1,0 +1,92 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "Identifies when an AWS RDS DB Snapshot is created. This can be used to evade defenses by allowing an attacker to bypass access controls or cover their tracks by reverting an instance to a previous state. This is a [building block rule](https://www.elastic.co/guide/en/security/current/building-block-rule.html) and does not generate alerts on its own. It is meant to be used for correlation with other rules to detect suspicious activity. To generate alerts, create a rule that uses this signal as a building block.",
+    "false_positives": [
+      "Legitimate manual or automated snapshots created for backups can trigger this rule. Ensure that the snapshots are authorized and align with your organization's policies."
+    ],
+    "from": "now-60m",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "interval": "10m",
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "AWS RDS DB Snapshot Created",
+    "query": "event.dataset: \"aws.cloudtrail\" and event.provider: \"rds.amazonaws.com\" \n    and event.action: (\"CreateDBSnapshot\" or \"CreateDBClusterSnapshot\") and event.outcome: \"success\" \n",
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "68c5c9d1-38e5-48bb-b1b2-8b5951d39738",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS RDS",
+      "Use Case: Asset Visibility",
+      "Tactic: Defense Evasion",
+      "Rule Type: BBR"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1578",
+            "name": "Modify Cloud Compute Infrastructure",
+            "reference": "https://attack.mitre.org/techniques/T1578/",
+            "subtechnique": [
+              {
+                "id": "T1578.001",
+                "name": "Create Snapshot",
+                "reference": "https://attack.mitre.org/techniques/T1578/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 1
+  },
+  "id": "68c5c9d1-38e5-48bb-b1b2-8b5951d39738_1",
+  "type": "security-rule"
+}

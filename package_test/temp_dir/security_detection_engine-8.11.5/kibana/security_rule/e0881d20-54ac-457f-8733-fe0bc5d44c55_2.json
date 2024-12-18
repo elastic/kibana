@@ -1,0 +1,104 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects the usage of commonly used system service discovery techniques, which attackers may use during the reconnaissance phase after compromising a system in order to gain a better understanding of the environment and/or escalate privileges.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-endpoint.events.*",
+            "logs-windows.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "System Service Discovery through built-in Windows Utilities",
+        "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n  (\n  ((process.name: \"net.exe\" or process.pe.original_file_name == \"net.exe\" or (process.name : \"net1.exe\" and not process.parent.name : \"net.exe\")) and process.args : (\"start\", \"use\") and process.args_count == 2) or\n  ((process.name: \"sc.exe\" or process.pe.original_file_name == \"sc.exe\") and process.args: (\"query\", \"q*\")) or\n  ((process.name: \"tasklist.exe\" or process.pe.original_file_name == \"tasklist.exe\") and process.args: \"/svc\")\n  ) and not user.id : \"S-1-5-18\"\n",
+        "related_integrations": [
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            },
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args_count",
+                "type": "long"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.pe.original_file_name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "e0881d20-54ac-457f-8733-fe0bc5d44c55",
+        "severity": "low",
+        "tags": [
+            "Elastic",
+            "Host",
+            "Windows",
+            "Threat Detection",
+            "Discovery",
+            "Elastic Endgame"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0007",
+                    "name": "Discovery",
+                    "reference": "https://attack.mitre.org/tactics/TA0007/"
+                },
+                "technique": [
+                    {
+                        "id": "T1007",
+                        "name": "System Service Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1007/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "e0881d20-54ac-457f-8733-fe0bc5d44c55_2",
+    "type": "security-rule"
+}

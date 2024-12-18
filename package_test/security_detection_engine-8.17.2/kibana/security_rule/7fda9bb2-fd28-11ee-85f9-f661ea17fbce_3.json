@@ -1,0 +1,56 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies potential ransomware note being uploaded to an AWS S3 bucket. This rule detects the `PutObject` S3 API call with a common ransomware note file extension such as `.ransom`, or `.lock`. Adversaries with access to a misconfigured S3 bucket may retrieve, delete, and replace objects with ransom notes to extort victims.",
+    "false_positives": [
+      "Administrators may legitimately access, delete, and replace objects in S3 buckets. Ensure that the sequence of events is not part of a legitimate operation before taking action."
+    ],
+    "from": "now-9m",
+    "language": "esql",
+    "license": "Elastic License v2",
+    "name": "Potential AWS S3 Bucket Ransomware Note Uploaded",
+    "note": "\n## Triage and Analysis\n\n### Investigating Potential AWS S3 Bucket Ransomware Note Uploaded\n\nThis rule detects the `PutObject` S3 API call with a common ransomware note file extension such as `.ransom`, or `.lock`. Adversaries with access to a misconfigured S3 bucket may retrieve, delete, and replace objects with ransom notes to extort victims.\n\n#### Possible Investigation Steps:\n\n- **Identify the Actor**: Review the `aws.cloudtrail.user_identity.arn` and `aws.cloudtrail.user_identity.access_key_id` fields to identify who performed the action. Verify if this actor typically performs such actions and if they have the necessary permissions.\n- **Review the Request Details**: Examine the `aws.cloudtrail.request_parameters` to understand the specific details of the `PutObject` action. Look for any unusual parameters that could suggest unauthorized or malicious modifications.\n- **Analyze the Source of the Request**: Investigate the `source.ip` and `source.geo` fields to determine the geographical origin of the request. An external or unexpected location might indicate compromised credentials or unauthorized access.\n- **Contextualize with Timestamp**: Use the `@timestamp` field to check when the ransom note was uploaded. Changes during non-business hours or outside regular maintenance windows might require further scrutiny.\n- **Inspect the Ransom Note**: Review the `aws.cloudtrail.request_parameters` for the `PutObject` action to identify the characteristics of the uploaded ransom note. Look for common ransomware file extensions such as `.txt`, `.note`, `.ransom`, or `.html`.\n- **Correlate with Other Activities**: Search for related CloudTrail events before and after this action to see if the same actor or IP address engaged in other potentially suspicious activities.\n- **Check for Object Deletion or Access**: Look for `DeleteObject`, `DeleteObjects`, or `GetObject` API calls to the same S3 bucket that may indicate the adversary accessing and destroying objects before placing the ransom note.\n\n### False Positive Analysis:\n\n- **Legitimate Administrative Actions**: Confirm if the `PutObject` action aligns with scheduled updates, maintenance activities, or legitimate administrative tasks documented in change management systems.\n- **Consistency Check**: Compare the action against historical data of similar activities performed by the user or within the organization. If the action is consistent with past legitimate activities, it might indicate a false alarm.\n- **Verify through Outcomes**: Check the `aws.cloudtrail.response_elements` and the `event.outcome` to confirm if the upload was successful and intended according to policy.\n\n### Response and Remediation:\n\n- **Immediate Review and Reversal if Necessary**: If the activity was unauthorized, remove the uploaded ransom notes from the S3 bucket and review the bucket's access logs for any suspicious activity.\n- **Enhance Monitoring and Alerts**: Adjust monitoring systems to alert on similar `PutObject` actions, especially those involving sensitive data or unusual file extensions.\n- **Educate and Train**: Provide additional training to users with administrative rights on the importance of security best practices concerning S3 bucket management and the risks of ransomware.\n- **Audit S3 Bucket Policies and Permissions**: Conduct a comprehensive audit of all S3 bucket policies and associated permissions to ensure they adhere to the principle of least privilege.\n- **Incident Response**: If there's an indication of malicious intent or a security breach, initiate the incident response protocol to mitigate any damage and prevent future occurrences.\n\n### Additional Information:\n\nFor further guidance on managing S3 bucket security and protecting against ransomware, refer to the [AWS S3 documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html) and AWS best practices for security. Additionally, consult the following resources for specific details on S3 ransomware protection:\n- [ERMETIC REPORT - AWS S3 Ransomware Exposure in the Wild](https://s3.amazonaws.com/bizzabo.file.upload/PtZzA0eFQwV2RA5ysNeo_ERMETIC%20REPORT%20-%20AWS%20S3%20Ransomware%20Exposure%20in%20the%20Wild.pdf)\n- [AWS S3 Ransomware Batch Deletion](https://stratus-red-team.cloud/attack-techniques/AWS/aws.impact.s3-ransomware-batch-deletion/)\n- [S3 Ransomware Part 1: Attack Vector](https://rhinosecuritylabs.com/aws/s3-ransomware-part-1-attack-vector/)\n",
+    "query": "from logs-aws.cloudtrail-*\n\n// any successful uploads via S3 API requests\n| where event.dataset == \"aws.cloudtrail\"\n    and event.provider == \"s3.amazonaws.com\"\n    and event.action == \"PutObject\"\n    and event.outcome == \"success\"\n\n// abstract object name from API request parameters\n| dissect aws.cloudtrail.request_parameters \"%{?ignore_values}key=%{object_name}}\"\n\n// regex on common ransomware note extensions\n| where object_name rlike \"(.*)(ransom|lock|crypt|enc|readme|how_to_decrypt|decrypt_instructions|recovery|datarescue)(.*)\"\n    and not object_name rlike \"(.*)(AWSLogs|CloudTrail|access-logs)(.*)\"\n\n// keep relevant fields\n| keep tls.client.server_name, aws.cloudtrail.user_identity.arn, object_name\n\n// aggregate by S3 bucket, resource and object name\n| stats note_upload_count = count(*) by tls.client.server_name, aws.cloudtrail.user_identity.arn, object_name\n\n// filter for single occurrence to eliminate common upload operations\n| where note_upload_count == 1\n",
+    "references": [
+      "https://s3.amazonaws.com/bizzabo.file.upload/PtZzA0eFQwV2RA5ysNeo_ERMETIC%20REPORT%20-%20AWS%20S3%20Ransomware%20Exposure%20in%20the%20Wild.pdf",
+      "https://stratus-red-team.cloud/attack-techniques/AWS/aws.impact.s3-ransomware-batch-deletion/",
+      "https://rhinosecuritylabs.com/aws/s3-ransomware-part-1-attack-vector/"
+    ],
+    "risk_score": 47,
+    "rule_id": "7fda9bb2-fd28-11ee-85f9-f661ea17fbce",
+    "setup": "AWS S3 data types need to be enabled in the CloudTrail trail configuration.",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS S3",
+      "Use Case: Threat Detection",
+      "Tactic: Impact"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0040",
+          "name": "Impact",
+          "reference": "https://attack.mitre.org/tactics/TA0040/"
+        },
+        "technique": [
+          {
+            "id": "T1485",
+            "name": "Data Destruction",
+            "reference": "https://attack.mitre.org/techniques/T1485/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "esql",
+    "version": 3
+  },
+  "id": "7fda9bb2-fd28-11ee-85f9-f661ea17fbce_3",
+  "type": "security-rule"
+}

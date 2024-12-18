@@ -1,0 +1,124 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "This rule identifies a sequence of events where a process named `entrypoint.sh` is started in a container, followed by a network connection attempt. This sequence indicates a potential egress connection from an entrypoint in a container. An entrypoint is a command or script specified in the Dockerfile and executed when the container starts. Attackers can use this technique to establish a foothold in the environment, escape from a container to the host, or establish persistence.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Egress Connection from Entrypoint in Container",
+    "query": "sequence by host.id with maxspan=3s\n  [process where host.os.type == \"linux\" and event.type == \"start\" and event.action == \"exec\" and\n   process.entry_leader.entry_meta.type == \"container\" and process.name == \"entrypoint.sh\"] by process.entity_id\n  [network where event.type == \"start\" and event.action == \"connection_attempted\" and not (\n     destination.ip == null or destination.ip == \"0.0.0.0\" or cidrmatch(\n       destination.ip, \"10.0.0.0/8\", \"127.0.0.0/8\", \"169.254.0.0/16\", \"172.16.0.0/12\", \"192.0.0.0/24\", \"192.0.0.0/29\",\n       \"192.0.0.8/32\", \"192.0.0.9/32\", \"192.0.0.10/32\", \"192.0.0.170/32\", \"192.0.0.171/32\", \"192.0.2.0/24\",\n       \"192.31.196.0/24\", \"192.52.193.0/24\", \"192.168.0.0/16\", \"192.88.99.0/24\", \"224.0.0.0/4\", \"100.64.0.0/10\",\n       \"192.175.48.0/24\",\"198.18.0.0/15\", \"198.51.100.0/24\", \"203.0.113.0/24\", \"240.0.0.0/4\", \"::1\", \"FE80::/10\",\n       \"FF00::/8\", \"172.31.0.0/16\"\n       )\n    )] by process.parent.entity_id\n",
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "destination.ip",
+        "type": "ip"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.id",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.entity_id",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.entry_leader.entry_meta.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.entity_id",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "c75d0c86-38d6-4821-98a1-465cff8ff4c8",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "Domain: Container",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Execution",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1059",
+            "name": "Command and Scripting Interpreter",
+            "reference": "https://attack.mitre.org/techniques/T1059/",
+            "subtechnique": [
+              {
+                "id": "T1059.004",
+                "name": "Unix Shell",
+                "reference": "https://attack.mitre.org/techniques/T1059/004/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": [
+          {
+            "id": "T1611",
+            "name": "Escape to Host",
+            "reference": "https://attack.mitre.org/techniques/T1611/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "c75d0c86-38d6-4821-98a1-465cff8ff4c8_1",
+  "type": "security-rule"
+}

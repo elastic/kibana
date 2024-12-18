@@ -1,0 +1,96 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies the use of built-in tools attackers can use to check for Internet connectivity on compromised systems. These results may be used to determine communication capabilities with C2 servers, or to identify routes, redirectors, and proxy servers.",
+        "from": "now-9m",
+        "history_window_start": "now-14d",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Discovery of Internet Capabilities via Built-in Tools",
+        "new_terms_fields": [
+            "host.id",
+            "user.id",
+            "process.command_line"
+        ],
+        "query": "host.os.type:windows and event.category:process and event.type:start and \nprocess.name.caseless:(\"ping.exe\" or \"tracert.exe\" or \"pathping.exe\") and\nnot process.args:(\"127.0.0.1\" or \"0.0.0.0\" or \"localhost\" or \"1.1.1.1\" or \"1.2.3.4\" or \"::1\")\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "process.name.caseless",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "7f89afef-9fc5-4e7b-bf16-75ffdf27f8db",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Discovery",
+            "Rule Type: BBR",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0007",
+                    "name": "Discovery",
+                    "reference": "https://attack.mitre.org/tactics/TA0007/"
+                },
+                "technique": [
+                    {
+                        "id": "T1016",
+                        "name": "System Network Configuration Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1016/",
+                        "subtechnique": [
+                            {
+                                "id": "T1016.001",
+                                "name": "Internet Connection Discovery",
+                                "reference": "https://attack.mitre.org/techniques/T1016/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "new_terms",
+        "version": 101
+    },
+    "id": "7f89afef-9fc5-4e7b-bf16-75ffdf27f8db_101",
+    "type": "security-rule"
+}

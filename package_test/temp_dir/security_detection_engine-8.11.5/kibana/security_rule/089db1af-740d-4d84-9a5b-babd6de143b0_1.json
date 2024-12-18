@@ -1,0 +1,122 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "This rule identifies the execution of commands that enumerates account or group information. Adversaries may use built-in applications to get a listing of local system or domain accounts and groups.",
+        "from": "now-119m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Windows Account or Group Discovery",
+        "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n(\n  (\n   (\n    (process.name : \"net.exe\" or process.pe.original_file_name == \"net.exe\") or\n    (\n     (process.name : \"net1.exe\" or process.pe.original_file_name == \"net1.exe\") and\n     not process.parent.name : \"net.exe\"\n    )\n   ) and process.args : (\"group\", \"user\", \"localgroup\") and not process.args : \"/add\"\n  ) or\n  (process.name:(\"dsquery.exe\", \"dsget.exe\") and process.args:(\"*members*\", \"user\")) or\n  (process.name:\"dsquery.exe\" and process.args:\"*filter*\") or\n  process.name:(\"quser.exe\", \"qwinsta.exe\", \"PsGetSID.exe\", \"PsLoggedOn.exe\", \"LogonSessions.exe\", \"whoami.exe\") or\n  (\n    process.name: \"cmd.exe\" and\n    (\n      process.args : \"echo\" and process.args : (\n        \"%username%\", \"%userdomain%\", \"%userdnsdomain%\",\n        \"%userdomain_roamingprofile%\", \"%userprofile%\",\n        \"%homepath%\", \"%localappdata%\", \"%appdata%\"\n      ) or\n      process.args : \"set\"\n    )\n  )\n) and not user.id : \"S-1-5-18\"\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.pe.original_file_name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "089db1af-740d-4d84-9a5b-babd6de143b0",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Discovery",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0007",
+                    "name": "Discovery",
+                    "reference": "https://attack.mitre.org/tactics/TA0007/"
+                },
+                "technique": [
+                    {
+                        "id": "T1069",
+                        "name": "Permission Groups Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1069/",
+                        "subtechnique": [
+                            {
+                                "id": "T1069.001",
+                                "name": "Local Groups",
+                                "reference": "https://attack.mitre.org/techniques/T1069/001/"
+                            },
+                            {
+                                "id": "T1069.002",
+                                "name": "Domain Groups",
+                                "reference": "https://attack.mitre.org/techniques/T1069/002/"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "T1087",
+                        "name": "Account Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1087/",
+                        "subtechnique": [
+                            {
+                                "id": "T1087.001",
+                                "name": "Local Account",
+                                "reference": "https://attack.mitre.org/techniques/T1087/001/"
+                            },
+                            {
+                                "id": "T1087.002",
+                                "name": "Domain Account",
+                                "reference": "https://attack.mitre.org/techniques/T1087/002/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "089db1af-740d-4d84-9a5b-babd6de143b0_1",
+    "type": "security-rule"
+}

@@ -1,0 +1,49 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies when a single AWS resource is making `DescribeInstances` API calls in more than 10 regions within a 30-second window. This could indicate a potential threat actor attempting to discover the AWS infrastructure across multiple regions using compromised credentials or a compromised instance. Adversaries may use this information to identify potential targets for further exploitation or to gain a better understanding of the target's infrastructure.",
+    "from": "now-9m",
+    "language": "esql",
+    "license": "Elastic License v2",
+    "name": "AWS EC2 Multi-Region DescribeInstances API Calls",
+    "query": "from logs-aws.cloudtrail-*\n\n// filter for DescribeInstances API calls\n| where event.dataset == \"aws.cloudtrail\" and event.provider == \"ec2.amazonaws.com\" and event.action == \"DescribeInstances\"\n\n// truncate the timestamp to a 30-second window\n| eval target_time_window = DATE_TRUNC(30 seconds, @timestamp)\n\n// count the number of unique regions and total API calls within the 30-second window\n| stats region_count = count_distinct(cloud.region), window_count = count(*) by target_time_window, aws.cloudtrail.user_identity.arn\n\n// filter for resources making DescribeInstances API calls in more than 10 regions within the 30-second window\n| where region_count >= 10 and window_count >= 10\n\n// sort the results by time windows in descending order\n| sort target_time_window desc\n",
+    "references": [
+      "https://www.sentinelone.com/labs/exploring-fbot-python-based-malware-targeting-cloud-and-payment-services/",
+      "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstances.html"
+    ],
+    "risk_score": 21,
+    "rule_id": "393ef120-63d1-11ef-8e38-f661ea17fbce",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: AWS EC2",
+      "Use Case: Threat Detection",
+      "Tactic: Discovery"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0007",
+          "name": "Discovery",
+          "reference": "https://attack.mitre.org/tactics/TA0007/"
+        },
+        "technique": [
+          {
+            "id": "T1580",
+            "name": "Cloud Infrastructure Discovery",
+            "reference": "https://attack.mitre.org/techniques/T1580/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "esql",
+    "version": 1
+  },
+  "id": "393ef120-63d1-11ef-8e38-f661ea17fbce_1",
+  "type": "security-rule"
+}

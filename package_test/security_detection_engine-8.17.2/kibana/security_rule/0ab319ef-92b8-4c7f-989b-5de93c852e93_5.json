@@ -1,0 +1,80 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "A statistical model has identified command-and-control (C2) beaconing activity with high confidence. Beaconing can help attackers maintain stealthy communication with their C2 servers, receive instructions and payloads, exfiltrate data and maintain persistence in a network.",
+    "from": "now-1h",
+    "index": [
+      "ml_beaconing.all"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Statistical Model Detected C2 Beaconing Activity with High Confidence",
+    "query": "beacon_stats.beaconing_score: 3\n",
+    "references": [
+      "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html",
+      "https://docs.elastic.co/en/integrations/beaconing",
+      "https://www.elastic.co/security-labs/identifying-beaconing-malware-using-elastic"
+    ],
+    "related_integrations": [
+      {
+        "package": "beaconing",
+        "version": "^1.0.0"
+      },
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "network_traffic",
+        "version": "^1.1.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "beacon_stats.beaconing_score",
+        "type": "unknown"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "0ab319ef-92b8-4c7f-989b-5de93c852e93",
+    "setup": "## Setup\n\nThe rule requires the Network Beaconing Identification integration assets to be installed, as well as network logs collected by the Elastic Defend or Network Packet Capture integrations.\n\n### Network Beaconing Identification Setup\nThe Network Beaconing Identification integration consists of a statistical framework to identify C2 beaconing activity in network logs.\n\n#### Prerequisite Requirements:\n- Fleet is required for Network Beaconing Identification.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n- Network events collected by the [Elastic Defend](https://docs.elastic.co/en/integrations/endpoint) or [Network Packet Capture](https://docs.elastic.co/integrations/network_traffic) integration.\n- To install Elastic Defend, refer to the [documentation](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n- To add the Network Packet Capture integration to an Elastic Agent policy, refer to [this](https://www.elastic.co/guide/en/fleet/current/add-integration-to-policy.html) guide.\n\n#### The following steps should be executed to install assets associated with the Network Beaconing Identification integration:\n- Go to the Kibana homepage. Under Management, click Integrations.\n- In the query bar, search for Network Beaconing Identification and select the integration to see more details about it.\n- Follow the instructions under the **Installation** section.\n",
+    "severity": "low",
+    "tags": [
+      "Domain: Network",
+      "Use Case: C2 Beaconing Detection",
+      "Tactic: Command and Control"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0011",
+          "name": "Command and Control",
+          "reference": "https://attack.mitre.org/tactics/TA0011/"
+        },
+        "technique": [
+          {
+            "id": "T1102",
+            "name": "Web Service",
+            "reference": "https://attack.mitre.org/techniques/T1102/",
+            "subtechnique": [
+              {
+                "id": "T1102.002",
+                "name": "Bidirectional Communication",
+                "reference": "https://attack.mitre.org/techniques/T1102/002/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 5
+  },
+  "id": "0ab319ef-92b8-4c7f-989b-5de93c852e93_5",
+  "type": "security-rule"
+}

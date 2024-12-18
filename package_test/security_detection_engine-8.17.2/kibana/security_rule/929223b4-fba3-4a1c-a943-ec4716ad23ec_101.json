@@ -1,0 +1,67 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "This rule is part of the \"GitHub UEBA - Unusual Activity from Account Pack\", and leverages alert data to determine when multiple alerts are executed by the same user in a timespan of one hour. Analysts can use this to prioritize triage and response, as these alerts are a higher indicator of compromised user accounts or PATs.",
+    "from": "now-60m",
+    "index": [
+      ".alerts-security.*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "GitHub UEBA - Multiple Alerts from a GitHub Account",
+    "query": "signal.rule.tags:(\"Use Case: UEBA\" and \"Data Source: Github\") and kibana.alert.workflow_status:\"open\"\n",
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "kibana.alert.workflow_status",
+        "type": "unknown"
+      },
+      {
+        "ecs": false,
+        "name": "signal.rule.tags",
+        "type": "unknown"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "929223b4-fba3-4a1c-a943-ec4716ad23ec",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Use Case: Threat Detection",
+      "Use Case: UEBA",
+      "Tactic: Execution",
+      "Rule Type: Higher-Order Rule",
+      "Data Source: Github"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": []
+      }
+    ],
+    "threshold": {
+      "cardinality": [
+        {
+          "field": "signal.rule.name",
+          "value": 5
+        }
+      ],
+      "field": [
+        "user.name"
+      ],
+      "value": 1
+    },
+    "timestamp_override": "event.ingested",
+    "type": "threshold",
+    "version": 101
+  },
+  "id": "929223b4-fba3-4a1c-a943-ec4716ad23ec_101",
+  "type": "security-rule"
+}

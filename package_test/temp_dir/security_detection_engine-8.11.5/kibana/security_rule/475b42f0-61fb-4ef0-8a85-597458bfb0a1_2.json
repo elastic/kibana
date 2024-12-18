@@ -1,0 +1,107 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies the use of a compression utility to collect known files containing sensitive information, such as credentials and system configurations inside a container.",
+        "from": "now-6m",
+        "index": [
+            "logs-cloud_defend*"
+        ],
+        "interval": "5m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Sensitive Files Compression Inside A Container",
+        "query": "process where container.id: \"*\" and event.type== \"start\" and \n\n/*account for tools that execute utilities as a subprocess, in this case the target utility name will appear as a process arg*/  \n(process.name: (\"zip\", \"tar\", \"gzip\", \"hdiutil\", \"7z\") or process.args: (\"zip\", \"tar\", \"gzip\", \"hdiutil\", \"7z\"))\nand process.args: ( \n\"/root/.ssh/id_rsa\", \n\"/root/.ssh/id_rsa.pub\", \n\"/root/.ssh/id_ed25519\", \n\"/root/.ssh/id_ed25519.pub\", \n\"/root/.ssh/authorized_keys\", \n\"/root/.ssh/authorized_keys2\", \n\"/root/.ssh/known_hosts\", \n\"/root/.bash_history\", \n\"/etc/hosts\", \n\"/home/*/.ssh/id_rsa\", \n\"/home/*/.ssh/id_rsa.pub\", \n\"/home/*/.ssh/id_ed25519\",\n\"/home/*/.ssh/id_ed25519.pub\",\n\"/home/*/.ssh/authorized_keys\",\n\"/home/*/.ssh/authorized_keys2\",\n\"/home/*/.ssh/known_hosts\",\n\"/home/*/.bash_history\",\n\"/root/.aws/credentials\",\n\"/root/.aws/config\",\n\"/home/*/.aws/credentials\",\n\"/home/*/.aws/config\",\n\"/root/.docker/config.json\",\n\"/home/*/.docker/config.json\",\n\"/etc/group\",\n\"/etc/passwd\",\n\"/etc/shadow\",\n\"/etc/gshadow\")\n",
+        "related_integrations": [
+            {
+                "package": "cloud_defend",
+                "version": "^1.0.5"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "container.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "475b42f0-61fb-4ef0-8a85-597458bfb0a1",
+        "severity": "medium",
+        "tags": [
+            "Data Source: Elastic Defend for Containers",
+            "Domain: Container",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Collection",
+            "Tactic: Credential Access"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1552",
+                        "name": "Unsecured Credentials",
+                        "reference": "https://attack.mitre.org/techniques/T1552/",
+                        "subtechnique": [
+                            {
+                                "id": "T1552.001",
+                                "name": "Credentials In Files",
+                                "reference": "https://attack.mitre.org/techniques/T1552/001/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0009",
+                    "name": "Collection",
+                    "reference": "https://attack.mitre.org/tactics/TA0009/"
+                },
+                "technique": [
+                    {
+                        "id": "T1560",
+                        "name": "Archive Collected Data",
+                        "reference": "https://attack.mitre.org/techniques/T1560/",
+                        "subtechnique": [
+                            {
+                                "id": "T1560.001",
+                                "name": "Archive via Utility",
+                                "reference": "https://attack.mitre.org/techniques/T1560/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "475b42f0-61fb-4ef0-8a85-597458bfb0a1_2",
+    "type": "security-rule"
+}

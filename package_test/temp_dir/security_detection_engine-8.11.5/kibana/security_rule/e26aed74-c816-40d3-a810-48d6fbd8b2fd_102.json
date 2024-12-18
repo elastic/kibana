@@ -1,0 +1,81 @@
+{
+    "attributes": {
+        "anomaly_threshold": 75,
+        "author": [
+            "Elastic"
+        ],
+        "description": "A machine learning job found an unusually large spike in successful authentication events from a particular source IP address. This can be due to password spraying, user enumeration or brute force activity.",
+        "false_positives": [
+            "Build servers and CI systems can sometimes trigger this alert. Security test cycles that include brute force or password spraying activities may trigger this alert."
+        ],
+        "from": "now-30m",
+        "interval": "15m",
+        "license": "Elastic License v2",
+        "machine_learning_job_id": "auth_high_count_logon_events_for_a_source_ip",
+        "name": "Spike in Successful Logon Events from a Source IP",
+        "note": "## Triage and analysis\n\n### Investigating Spike in Successful Logon Events from a Source IP\n\nThis rule uses a machine learning job to detect a substantial spike in successful authentication events. This could indicate post-exploitation activities that aim to test which hosts, services, and other resources the attacker can access with the compromised credentials.\n\n#### Possible investigation steps\n\n- Identify the specifics of the involved assets, such as role, criticality, and associated users.\n- Check if the authentication comes from different sources.\n- Use the historical data available to determine if the same behavior happened in the past.\n- Investigate other alerts associated with the involved users during the past 48 hours.\n- Check whether the involved credentials are used in automation or scheduled tasks.\n- If this activity is suspicious, contact the account owner and confirm whether they are aware of it.\n\n### False positive analysis\n\n- Understand the context of the authentications by contacting the asset owners. If this activity is related to a new business process or newly implemented (approved) technology, consider adding exceptions \u2014 preferably with a combination of user and source conditions.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+        "references": [
+            "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+        ],
+        "risk_score": 21,
+        "rule_id": "e26aed74-c816-40d3-a810-48d6fbd8b2fd",
+        "severity": "low",
+        "tags": [
+            "Elastic",
+            "Authentication",
+            "Threat Detection",
+            "ML",
+            "Machine Learning",
+            "Credential Access",
+            "Defense Evasion"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1110",
+                        "name": "Brute Force",
+                        "reference": "https://attack.mitre.org/techniques/T1110/"
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1078",
+                        "name": "Valid Accounts",
+                        "reference": "https://attack.mitre.org/techniques/T1078/",
+                        "subtechnique": [
+                            {
+                                "id": "T1078.002",
+                                "name": "Domain Accounts",
+                                "reference": "https://attack.mitre.org/techniques/T1078/002/"
+                            },
+                            {
+                                "id": "T1078.003",
+                                "name": "Local Accounts",
+                                "reference": "https://attack.mitre.org/techniques/T1078/003/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "type": "machine_learning",
+        "version": 102
+    },
+    "id": "e26aed74-c816-40d3-a810-48d6fbd8b2fd_102",
+    "type": "security-rule"
+}

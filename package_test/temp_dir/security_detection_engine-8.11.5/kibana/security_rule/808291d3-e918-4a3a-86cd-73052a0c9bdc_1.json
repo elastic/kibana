@@ -1,0 +1,92 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies the execution of the Microsoft Diagnostic Wizard to open a diagcab file from a suspicious path and with an unusual parent process. This may indicate an attempt to execute malicious Troubleshooting Pack Cabinet files.",
+        "from": "now-119m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Suspicious Troubleshooting Pack Cabinet Execution",
+        "query": "process where host.os.type == \"windows\" and event.action == \"start\" and\n  (process.name : \"msdt.exe\" or process.pe.original_file_name == \"msdt.exe\") and process.args : \"/cab\" and\n  process.parent.name : (\n    \"firefox.exe\", \"chrome.exe\", \"msedge.exe\", \"explorer.exe\", \"brave.exe\", \"whale.exe\", \"browser.exe\",\n    \"dragon.exe\", \"vivaldi.exe\", \"opera.exe\", \"iexplore\", \"firefox.exe\", \"waterfox.exe\", \"iexplore.exe\",\n    \"winrar.exe\", \"winrar.exe\", \"7zFM.exe\", \"outlook.exe\", \"winword.exe\", \"excel.exe\"\n  ) and\n  process.args : (\n    \"?:\\\\Users\\\\*\",\n    \"\\\\\\\\*\",\n    \"http*\",\n    \"ftp://*\"\n  )\n",
+        "references": [
+            "https://irsl.medium.com/the-trouble-with-microsofts-troubleshooters-6e32fc80b8bd"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.pe.original_file_name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "808291d3-e918-4a3a-86cd-73052a0c9bdc",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Rule Type: BBR",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1218",
+                        "name": "System Binary Proxy Execution",
+                        "reference": "https://attack.mitre.org/techniques/T1218/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "808291d3-e918-4a3a-86cd-73052a0c9bdc_1",
+    "type": "security-rule"
+}

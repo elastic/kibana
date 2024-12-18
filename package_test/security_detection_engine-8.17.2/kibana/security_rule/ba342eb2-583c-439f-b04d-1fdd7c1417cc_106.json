@@ -1,0 +1,48 @@
+{
+  "attributes": {
+    "anomaly_threshold": 50,
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies Windows processes that do not usually use the network but have unexpected network activity, which can indicate command-and-control, lateral movement, persistence, or data exfiltration activity. A process with unusual network activity can denote process exploitation or injection, where the process is used to run persistence mechanisms that allow a malicious actor remote access or control of the host, data exfiltration, and execution of unauthorized network applications.",
+    "false_positives": [
+      "A newly installed program or one that rarely uses the network could trigger this alert."
+    ],
+    "from": "now-45m",
+    "interval": "15m",
+    "license": "Elastic License v2",
+    "machine_learning_job_id": [
+      "v3_windows_anomalous_network_activity"
+    ],
+    "name": "Unusual Windows Network Activity",
+    "note": "## Triage and analysis\n\n### Investigating Unusual Network Activity\nDetection alerts from this rule indicate the presence of network activity from a Windows process for which network activity is very unusual.  Here are some possible avenues of investigation:\n- Consider the IP addresses, protocol and ports. Are these used by normal but infrequent network workflows? Are they expected or unexpected?\n- If the destination IP address is remote or external, does it associate with an expected domain, organization or geography? Note: avoid interacting directly with suspected malicious IP addresses.\n- Consider the user as identified by the username field. Is this network activity part of an expected workflow for the user who ran the program?\n- Examine the history of execution. If this process only manifested recently, it might be part of a new software package. If it has a consistent cadence (for example if it runs monthly or quarterly), it might be part of a monthly or quarterly business process.\n- Examine the process arguments, title and working directory. These may provide indications as to the source of the program or the nature of the tasks it is performing.\n- Consider the same for the parent process. If the parent process is a legitimate system utility or service, this could be related to software updates or system management. If the parent process is something user-facing like an Office application, this process could be more suspicious.\n- If you have file hash values in the event data, and you suspect malware, you can optionally run a search for the file hash to see if the file is identified as malware by anti-malware tools.",
+    "references": [
+      "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "ba342eb2-583c-439f-b04d-1fdd7c1417cc",
+    "setup": "## Setup\n\nThis rule requires the installation of associated Machine Learning jobs, as well as data coming in from one of the following integrations:\n- Elastic Defend\n- Windows\n\n### Anomaly Detection Setup\n\nOnce the rule is enabled, the associated Machine Learning job will start automatically. You can view the Machine Learning job linked under the \"Definition\" panel of the detection rule. If the job does not start due to an error, the issue must be resolved for the job to commence successfully. For more details on setting up anomaly detection jobs, refer to the [helper guide](https://www.elastic.co/guide/en/kibana/current/xpack-ml-anomalies.html).\n\n### Elastic Defend Integration Setup\nElastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.\n\n#### Prerequisite Requirements:\n- Fleet is required for Elastic Defend.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n\n#### The following steps should be executed in order to add the Elastic Defend integration to your system:\n- Go to the Kibana home page and click \"Add integrations\".\n- In the query bar, search for \"Elastic Defend\" and select the integration to see more details about it.\n- Click \"Add Elastic Defend\".\n- Configure the integration name and optionally add a description.\n- Select the type of environment you want to protect, either \"Traditional Endpoints\" or \"Cloud Workloads\".\n- Select a configuration preset. Each preset comes with different default settings for Elastic Agent, you can further customize these later by configuring the Elastic Defend integration policy. [Helper guide](https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html).\n- We suggest selecting \"Complete EDR (Endpoint Detection and Response)\" as a configuration setting, that provides \"All events; all preventions\"\n- Enter a name for the agent policy in \"New agent policy name\". If other agent policies already exist, you can click the \"Existing hosts\" tab and select an existing policy instead.\nFor more details on Elastic Agent configuration settings, refer to the [helper guide](https://www.elastic.co/guide/en/fleet/current/agent-policy.html).\n- Click \"Save and Continue\".\n- To complete the integration, select \"Add Elastic Agent to your hosts\" and continue to the next section to install the Elastic Agent on your hosts.\nFor more details on Elastic Defend refer to the [helper guide](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n\n### Windows Integration Setup\nThe Windows integration allows you to monitor the Windows OS, services, applications, and more.\n\n#### The following steps should be executed in order to add the Elastic Agent System integration \"windows\" to your system:\n- Go to the Kibana home page and click “Add integrations”.\n- In the query bar, search for “Windows” and select the integration to see more details about it.\n- Click “Add Windows”.\n- Configure the integration name and optionally add a description.\n- Review optional and advanced settings accordingly.\n- Add the newly installed “windows” to an existing or a new agent policy, and deploy the agent on your system from which windows log files are desirable.\n- Click “Save and Continue”.\n- For more details on the integration refer to the [helper guide](https://docs.elastic.co/integrations/windows).\n",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Rule Type: ML",
+      "Rule Type: Machine Learning"
+    ],
+    "type": "machine_learning",
+    "version": 106
+  },
+  "id": "ba342eb2-583c-439f-b04d-1fdd7c1417cc_106",
+  "type": "security-rule"
+}

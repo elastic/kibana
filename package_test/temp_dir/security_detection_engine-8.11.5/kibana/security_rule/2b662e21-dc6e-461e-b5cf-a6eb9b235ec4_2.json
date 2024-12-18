@@ -1,0 +1,83 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies instances where a process named 'grep', 'egrep', or 'pgrep' is started on a Linux system with arguments related to virtual machine (VM) files, such as \"vmdk\", \"vmx\", \"vmxf\", \"vmsd\", \"vmsn\", \"vswp\", \"vmss\", \"nvram\", or \"vmem\". These file extensions are associated with VM-related file formats, and their presence in grep command arguments may indicate that a threat actor is attempting to search for, analyze, or manipulate VM files on the system.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "ESXI Discovery via Grep",
+        "query": "process where host.os.type == \"linux\" and event.type == \"start\" and event.action == \"exec\" and\nprocess.name : (\"grep\", \"egrep\", \"pgrep\") and\nprocess.args : (\"vmdk\", \"vmx\", \"vmxf\", \"vmsd\", \"vmsn\", \"vswp\", \"vmss\", \"nvram\", \"vmem\")\n",
+        "references": [
+            "https://www.bleepingcomputer.com/news/security/massive-esxiargs-ransomware-attack-targets-vmware-esxi-servers-worldwide/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "2b662e21-dc6e-461e-b5cf-a6eb9b235ec4",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Discovery"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0007",
+                    "name": "Discovery",
+                    "reference": "https://attack.mitre.org/tactics/TA0007/"
+                },
+                "technique": [
+                    {
+                        "id": "T1518",
+                        "name": "Software Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1518/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "2b662e21-dc6e-461e-b5cf-a6eb9b235ec4_2",
+    "type": "security-rule"
+}

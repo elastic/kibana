@@ -1,0 +1,895 @@
+# newer versions go on top
+# NOTE: please use pre-release versions (e.g. -beta.0) until a package is ready for production
+- version: 8.17.2
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/12063
+- version: 8.17.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/12063
+- version: 8.17.1-beta.2
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/12059
+- version: 8.17.1-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/12043
+- version: 8.16.2
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/11904
+- version: 8.16.2-beta.2
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/11900
+- version: 8.16.2-beta.1
+  changes:
+    - description: Release security rules update for testing smart limits
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/11866
+- version: 8.16.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/11702
+- version: 8.16.1-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/11697
+- version: 8.15.9
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/11549
+- version: 8.15.9-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/11546
+- version: 8.15.8
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/11431
+- version: 8.15.8-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/11427
+- version: 8.15.7
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/11387
+- version: 8.15.7-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/11383
+- version: 8.15.6
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/11303
+- version: 8.15.6-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/11296
+- version: 8.15.5
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/11156
+- version: 8.15.5-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/11142
+- version: 8.15.4
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/10990
+- version: 8.15.4-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/10983
+- version: 8.15.3
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/10839
+- version: 8.15.3-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/10835
+- version: 8.15.2
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/10717
+- version: 8.15.2-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/10712
+- version: 8.15.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/10603
+- version: 8.15.1-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/10598
+- version: 8.14.6
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/10434
+- version: 8.14.6-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/10430
+- version: 8.14.5
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/10302
+- version: 8.14.5-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/10297
+- version: 8.14.4
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/10245
+- version: 8.14.4-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/10239
+- version: 8.14.3
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/10133
+- version: 8.14.3-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/10128
+- version: 8.14.2
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/10015
+- version: 8.14.2-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/10011
+    - description: Add security capability
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/9938
+- version: 8.14.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/9883
+- version: 8.14.1-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/9877
+- version: 8.13.6
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/9801
+- version: 8.13.6-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/9795
+- version: 8.13.5
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/9762
+- version: 8.13.5-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/9758
+- version: 8.13.4
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/9684
+- version: 8.13.4-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/9679
+- version: 8.13.3
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/9507
+- version: 8.13.3-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/9497
+- version: 8.13.2
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/9421
+- version: 8.13.2-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/9412
+- version: 8.13.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/9301
+- version: 8.13.1-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/9284
+- version: 8.12.5
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/9218
+- version: 8.12.5-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/9207
+- version: 8.12.4
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/9099
+- version: 8.12.4-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/9094
+- version: 8.12.3
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/8982
+- version: 8.12.3-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/8968
+- version: 8.12.2
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/8820
+- version: 8.12.2-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/8818
+- version: 8.12.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/8732
+- version: 8.12.1-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/8714
+- version: 8.11.4
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/8599
+- version: 8.11.4-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/8595
+- version: 8.11.3
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/8506
+- version: 8.11.3-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/8486
+- version: 8.11.2
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/8288
+- version: 8.11.2-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/8282
+- version: 8.11.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/8202
+- version: 8.11.1-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/8198
+- version: 8.10.4-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/8076
+- version: 8.10.3
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/7869
+- version: 8.10.3-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/7857
+- version: 8.10.2
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/7700
+- version: 8.10.2-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/7686
+- version: 8.10.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/7457
+- version: 8.10.1-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/7450
+- version: 8.9.3
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/7227
+- version: 8.9.3-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/7223
+- version: 8.9.2
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6957
+- version: 8.9.2-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6956
+- version: 8.8.7
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6955
+- version: 8.8.7-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6953
+- version: 8.7.9
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6951
+- version: 8.7.9-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6940
+- version: 8.6.9
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6937
+- version: 8.9.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6760
+- version: 8.8.6
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6759
+- version: 8.7.8
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6757
+- version: 8.6.8
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6755
+- version: 8.5.8
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6754
+- version: 8.8.5
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6726
+- version: 8.8.5-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6725
+- version: 8.7.7
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6724
+- version: 8.7.7-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6721
+- version: 8.6.7
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6720
+- version: 8.6.7-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6718
+- version: 8.5.7
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6717
+- version: 8.5.7-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6715
+- version: 8.8.4
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6572
+- version: 8.8.4-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6564
+- version: 8.7.6
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6563
+- version: 8.7.6-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6560
+- version: 8.6.6
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6558
+- version: 8.6.6-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6557
+- version: 8.5.6
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6556
+- version: 8.5.6-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6552
+- version: 8.8.3
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6441
+- version: 8.8.3-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6437
+- version: 8.7.5
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6436
+- version: 8.7.5-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6434
+- version: 8.6.5
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6433
+- version: 8.6.5-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6424
+- version: 8.5.5
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6416
+- version: 8.5.5-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6410
+- version: 8.8.2
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6261
+- version: 8.8.2-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6260
+- version: 8.7.4
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6259
+- version: 8.7.4-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6257
+- version: 8.6.4
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6254
+- version: 8.6.4-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6252
+- version: 8.5.4
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6250
+- version: 8.5.4-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6242
+- version: 8.8.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6009
+- version: 8.8.1-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6008
+- version: 8.7.3
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6007
+- version: 8.7.3-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6006
+- version: 8.6.3
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6005
+- version: 8.6.3-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6004
+- version: 8.5.3
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6002
+- version: 8.5.3-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/6000
+- version: 8.4.5
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/5996
+- version: 8.4.5-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/5995
+- version: 8.7.3-beta.0
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/5931
+- version: 8.7.2
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/5860
+- version: 8.7.2-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/5857
+- version: 8.6.2
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/5856
+- version: 8.6.2-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/5844
+- version: 8.5.2
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/5843
+- version: 8.5.2-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/5842
+- version: 8.4.4
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/5839
+- version: 8.4.4-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/5837
+- version: 8.7.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/5272
+- version: 8.7.1-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/5265
+- version: 8.6.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/5264
+- version: 8.6.1-beta.1
+  changes:
+    - description: Release security rules update
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/5263
+- version: 8.5.1
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/5262
+      type: enhancement
+- version: 8.5.1-beta.1
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/5261
+      type: enhancement
+- version: 8.4.3
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/5257
+      type: enhancement
+- version: 8.4.3-beta.1
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/5238
+      type: enhancement
+- version: 8.4.2
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/5062
+      type: enhancement
+- version: 8.4.2-beta.1
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/5027
+      type: enhancement
+- version: 8.3.4
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/5024
+      type: enhancement
+- version: 8.3.4-beta.1
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/5000
+      type: enhancement
+- version: 8.3.3
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/4965
+      type: enhancement
+- version: 8.4.1
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/4740
+      type: enhancement
+- version: 8.3.1
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/4063
+      type: enhancement
+- version: 8.2.1
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/4021
+      type: enhancement
+- version: 7.16.4
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/4010
+      type: enhancement
+- version: 8.1.1
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/3565
+      type: enhancement
+- version: 7.16.3
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/3556
+      type: enhancement
+- version: 1.0.2
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/3238
+      type: enhancement
+- version: 0.16.2
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/3191
+      type: enhancement
+- version: 0.16.1
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/2709
+      type: enhancement
+- version: 1.0.1
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/2605
+      type: enhancement
+- version: 0.14.3
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/2329
+      type: enhancement
+- version: 0.14.2
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/1924
+      type: enhancement
+- version: 0.14.1
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/1591
+      type: enhancement
+- version: 0.13.3
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/1361
+      type: enhancement
+- version: 0.13.2
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/1297
+      type: enhancement
+- version: 0.13.1
+  changes:
+    - description: Release security rules update
+      link: https://github.com/elastic/integrations/pull/1177
+      type: enhancement
+- version: 0.13.1-dev.0
+  changes:
+    - description: Pre-release for 0.13.1 security rules
+      link: https://github.com/elastic/integrations/pull/1144
+      type: bugfix
+- version: 0.13.0
+  changes:
+    - description: Fix package for 7.13.0 from detection-rules
+      link: https://github.com/elastic/integrations/pull/1127
+      type: bugfix
+- version: 0.13.0-dev.0
+  changes:
+    - description: Publish package for 7.13.0 from detection-rules
+      link: https://github.com/elastic/integrations/pull/1126
+      type: enhancement
+- version: 0.0.3
+  changes:
+    - description: Fix security rules naming
+      link: https://github.com/elastic/integrations/pull/987
+      type: bugfix
+- version: 0.0.2
+  changes:
+    - description: Change the rules to match Kibana 7.13 prepackaged
+      link: https://github.com/elastic/integrations/pull/938
+      type: enhancement
+- version: 0.0.1-dev.3
+  changes:
+    - description: Change the integration title
+      link: https://github.com/elastic/integrations/pull/896
+      type: enhancement
+- version: 0.0.1-dev.2
+  changes:
+    - description: Change the saved object type to security-rule
+      link: https://github.com/elastic/integrations/pull/797
+      type: enhancement
+- version: 0.0.1-dev.1
+  changes:
+    - description: Create package for security's detection engine
+      link: https://github.com/elastic/integrations/pull/797
+      type: enhancement

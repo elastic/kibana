@@ -1,0 +1,94 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Adversaries may collect the keychain storage data from a system to acquire credentials. Keychains are the built-in way for macOS to keep track of users' passwords and credentials for many services and features such as WiFi passwords, websites, secure notes and certificates.",
+        "from": "now-9m",
+        "index": [
+            "auditbeat-*",
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Access to Keychain Credentials Directories",
+        "query": "process where host.os.type == \"macos\" and event.type in (\"start\", \"process_started\") and\n  process.args :\n    (\n      \"/Users/*/Library/Keychains/*\",\n      \"/Library/Keychains/*\",\n      \"/Network/Library/Keychains/*\",\n      \"System.keychain\",\n      \"login.keychain-db\",\n      \"login.keychain\"\n    ) and\n    not process.args : (\"find-certificate\",\n                      \"add-trusted-cert\",\n                      \"set-keychain-settings\",\n                      \"delete-certificate\",\n                      \"/Users/*/Library/Keychains/openvpn.keychain-db\",\n                      \"show-keychain-info\",\n                      \"lock-keychain\",\n                      \"set-key-partition-list\",\n                      \"import\",\n                      \"find-identity\") and\n    not process.parent.executable :\n      (\n        \"/Applications/OpenVPN Connect/OpenVPN Connect.app/Contents/MacOS/OpenVPN Connect\",\n        \"/Applications/Microsoft Defender.app/Contents/MacOS/wdavdaemon_enterprise.app/Contents/MacOS/wdavdaemon_enterprise\",\n        \"/opt/jc/bin/jumpcloud-agent\"\n      ) and\n    not process.executable : \"/opt/jc/bin/jumpcloud-agent\"\n",
+        "references": [
+            "https://objective-see.com/blog/blog_0x25.html",
+            "https://securelist.com/calisto-trojan-for-macos/86543/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.executable",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "96e90768-c3b7-4df6-b5d9-6237f8bc36a8",
+        "setup": "\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions \u003c8.2,\nevents will not define `event.ingested` and default fallback for EQL rules was not added until version 8.2.\nHence for this rule to work effectively, users will need to add a custom ingest pipeline to populate\n`event.ingested` to @timestamp.\nFor more details on adding a custom ingest pipeline refer - https://www.elastic.co/guide/en/fleet/current/data-streams-pipeline-tutorial.html\n",
+        "severity": "high",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: macOS",
+            "Use Case: Threat Detection",
+            "Tactic: Credential Access",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1555",
+                        "name": "Credentials from Password Stores",
+                        "reference": "https://attack.mitre.org/techniques/T1555/",
+                        "subtechnique": [
+                            {
+                                "id": "T1555.001",
+                                "name": "Keychain",
+                                "reference": "https://attack.mitre.org/techniques/T1555/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 105
+    },
+    "id": "96e90768-c3b7-4df6-b5d9-6237f8bc36a8_105",
+    "type": "security-rule"
+}

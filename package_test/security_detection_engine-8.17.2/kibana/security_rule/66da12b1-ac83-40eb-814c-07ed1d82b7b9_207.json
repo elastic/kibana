@@ -1,0 +1,107 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies suspicious child processes of frequently targeted Microsoft Office applications (Word, PowerPoint, and Excel). These child processes are often launched during exploitation of Office applications or by documents with malicious macros.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Suspicious macOS MS Office Child Process",
+    "query": "process where event.action == \"exec\" and host.os.type == \"macos\" and\n    process.parent.name: (\n      \"Microsoft Word\",\n      \"Microsoft Outlook\",\n      \"Microsoft Excel\",\n      \"Microsoft PowerPoint\",\n      \"Microsoft OneNote\"\n    ) and\n  process.name : (\n    \"curl\",\n    \"nscurl\",\n    \"bash\",\n    \"sh\",\n    \"osascript\",\n    \"python*\",\n    \"perl*\",\n    \"mktemp\",\n    \"chmod\",\n    \"php\",\n    \"nohup\",\n    \"openssl\",\n    \"plutil\",\n    \"PlistBuddy\",\n    \"xattr\",\n    \"mktemp\",\n    \"sqlite3\",\n    \"funzip\",\n    \"popen\"\n  ) and\n\n  // Filter FPs related to product version discovery and Office error reporting behavior\n  not process.args:\n    (\n      \"ProductVersion\",\n      \"hw.model\",\n      \"ioreg\",\n      \"ProductName\",\n      \"ProductUserVisibleVersion\",\n      \"ProductBuildVersion\",\n      \"/Library/Application Support/Microsoft/MERP*/Microsoft Error Reporting.app/Contents/MacOS/Microsoft Error Reporting\",\n      \"open -a Safari *\",\n      \"defaults read *\",\n      \"sysctl hw.model*\",\n      \"ioreg -d2 -c IOPlatformExpertDevice *\",\n      \"ps aux | grep 'ToDesk_Desktop' | grep -v grep\",\n      \"PIPE=\\\"$CFFIXED_USER_HOME/.zoteroIntegrationPipe*\"\n    ) and\n\n   not process.parent.executable :\n        (\n          \"/Applications/ToDesk.app/Contents/MacOS/ToDesk_Service\",\n          \"/usr/local/Privacy-i/PISupervisor\",\n          \"/Library/Addigy/lan-cache\",\n          \"/Library/Elastic/Agent/*\",\n          \"/opt/jc/bin/jumpcloud-agent\",\n          \"/usr/sbin/networksetup\"\n        ) and\n   not (process.name : \"sh\" and process.command_line : \"*$CFFIXED_USER_HOME/.zoteroIntegrationPipe*\") and\n\n   not process.Ext.effective_parent.executable : (\n        \"/Applications/ToDesk.app/Contents/MacOS/ToDesk_Service\",\n        \"/usr/local/Privacy-i/PISupervisor\",\n        \"/Library/Addigy/auditor\",\n        \"/Library/Elastic/Agent/*\",\n        \"/opt/jc/bin/jumpcloud-agent\",\n        \"/usr/sbin/networksetup\"\n      )\n",
+    "references": [
+      "https://blog.malwarebytes.com/cybercrime/2017/02/microsoft-office-macro-malware-targets-macs/"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "process.Ext.effective_parent.executable",
+        "type": "unknown"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.command_line",
+        "type": "wildcard"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.executable",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "66da12b1-ac83-40eb-814c-07ed1d82b7b9",
+    "setup": "## Setup\n\nThis rule requires data coming in from Elastic Defend.\n\n### Elastic Defend Integration Setup\nElastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.\n\n#### Prerequisite Requirements:\n- Fleet is required for Elastic Defend.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n\n#### The following steps should be executed in order to add the Elastic Defend integration on a macOS System:\n- Go to the Kibana home page and click \"Add integrations\".\n- In the query bar, search for \"Elastic Defend\" and select the integration to see more details about it.\n- Click \"Add Elastic Defend\".\n- Configure the integration name and optionally add a description.\n- Select the type of environment you want to protect, for MacOS it is recommended to select \"Traditional Endpoints\".\n- Select a configuration preset. Each preset comes with different default settings for Elastic Agent, you can further customize these later by configuring the Elastic Defend integration policy. [Helper guide](https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html).\n- We suggest selecting \"Complete EDR (Endpoint Detection and Response)\" as a configuration setting, that provides \"All events; all preventions\"\n- Enter a name for the agent policy in \"New agent policy name\". If other agent policies already exist, you can click the \"Existing hosts\" tab and select an existing policy instead.\nFor more details on Elastic Agent configuration settings, refer to the [helper guide](https://www.elastic.co/guide/en/fleet/current/agent-policy.html).\n- Click \"Save and Continue\".\n- To complete the integration, select \"Add Elastic Agent to your hosts\" and continue to the next section to install the Elastic Agent on your hosts.\nFor more details on Elastic Defend refer to the [helper guide](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: macOS",
+      "Use Case: Threat Detection",
+      "Tactic: Initial Access",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0001",
+          "name": "Initial Access",
+          "reference": "https://attack.mitre.org/tactics/TA0001/"
+        },
+        "technique": [
+          {
+            "id": "T1566",
+            "name": "Phishing",
+            "reference": "https://attack.mitre.org/techniques/T1566/",
+            "subtechnique": [
+              {
+                "id": "T1566.001",
+                "name": "Spearphishing Attachment",
+                "reference": "https://attack.mitre.org/techniques/T1566/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 207
+  },
+  "id": "66da12b1-ac83-40eb-814c-07ed1d82b7b9_207",
+  "type": "security-rule"
+}

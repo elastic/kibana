@@ -1,0 +1,100 @@
+{
+  "attributes": {
+    "author": [
+      "Austin Songer",
+      "Elastic"
+    ],
+    "description": "An adversary with a set of compromised credentials may attempt to make copies of running or deleted RDS databases in order to evade defense mechanisms or access data. This rule identifies successful attempts to restore a DB instance using the RDS `RestoreDBInstanceFromDBSnapshot` or `RestoreDBInstanceFromS3` API operations.",
+    "false_positives": [
+      "Restoring DB instances may be done by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Instance restoration by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    ],
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "AWS RDS DB Instance Restored",
+    "query": "any where event.dataset == \"aws.cloudtrail\" \n    and event.provider == \"rds.amazonaws.com\" \n    and event.action in (\"RestoreDBInstanceFromDBSnapshot\", \"RestoreDBInstanceFromS3\") \n    and event.outcome == \"success\"\n",
+    "references": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_RestoreDBInstanceFromDBSnapshot.html",
+      "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_RestoreDBInstanceFromS3.html",
+      "https://github.com/RhinoSecurityLabs/pacu/blob/master/pacu/modules/rds__explore_snapshots/main.py",
+      "https://cloud.hacktricks.xyz/pentesting-cloud/aws-security/aws-post-exploitation/aws-rds-post-exploitation#rds-createdbsnapshot-rds-restoredbinstancefromdbsnapshot-rds-modifydbinstance"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "bf1073bf-ce26-4607-b405-ba1ed8e9e204",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS RDS",
+      "Use Case: Asset Visibility",
+      "Tactic: Defense Evasion"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1578",
+            "name": "Modify Cloud Compute Infrastructure",
+            "reference": "https://attack.mitre.org/techniques/T1578/",
+            "subtechnique": [
+              {
+                "id": "T1578.002",
+                "name": "Create Cloud Instance",
+                "reference": "https://attack.mitre.org/techniques/T1578/002/"
+              },
+              {
+                "id": "T1578.004",
+                "name": "Revert Cloud Instance",
+                "reference": "https://attack.mitre.org/techniques/T1578/004/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 207
+  },
+  "id": "bf1073bf-ce26-4607-b405-ba1ed8e9e204_207",
+  "type": "security-rule"
+}

@@ -1,0 +1,100 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Adversaries may install legitimate remote access tools (RAT) to compromised endpoints for further command-and-control (C2). Adversaries can rely on installed RATs for persistence, execution of native commands and more. This rule detects when a process is started whose name or code signature resembles commonly abused RATs. This is a New Terms rule type indicating the host has not seen this RAT process started before within the last 30 days.",
+        "from": "now-9m",
+        "history_window_start": "now-15d",
+        "index": [
+            "logs-endpoint.events.*",
+            "winlogbeat-*",
+            "logs-windows.*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "First Time Seen Commonly Abused Remote Access Tool Execution",
+        "new_terms_fields": [
+            "host.id"
+        ],
+        "query": "host.os.type: \"windows\" and\n\n   event.category: \"process\" and event.type : \"start\" and\n\n    (\n    process.code_signature.subject_name : (\n        TeamViewer* or \"NetSupport Ltd\" or \"GlavSoft\" or \"LogMeIn, Inc.\" or \"Ammyy LLC\" or\n        \"Nanosystems S.r.l.\" or \"Remote Utilities LLC\" or \"ShowMyPC\" or \"Splashtop Inc.\" or\n        \"Yakhnovets Denis Aleksandrovich IP\" or \"Pro Softnet Corporation\" or \"BeamYourScreen GmbH\" or\n        \"RealVNC\" or \"uvnc\" or \"SAFIB\") or\n\n    process.name.caseless : (\n        \"teamviewer.exe\" or \"apc_Admin.exe\" or \"apc_host.exe\" or \"SupremoHelper.exe\" or \"rfusclient.exe\" or\n        \"spclink.exe\" or \"smpcview.exe\" or \"ROMServer.exe\" or \"strwinclt.exe\" or \"RPCSuite.exe\" or \"RemotePCDesktop.exe\" or\n        \"RemotePCService.exe\" or \"tvn.exe\" or \"LMIIgnition.exe\" or \"B4-Service.exe\" or \"Mikogo-Service.exe\" or \"AnyDesk.exe\" or\n        \"Splashtop-streamer.exe\" or AA_v*.exe, or \"rutserv.exe\" or \"rutview.exe\" or \"vncserver.exe\" or \"vncviewer.exe\" or\n        \"tvnserver.exe\" or \"tvnviewer.exe\" or \"winvnc.exe\" or \"RemoteDesktopManager.exe\" or \"LogMeIn.exe\" or ScreenConnect*.exe or\n        \"RemotePC.exe\" or \"r_server.exe\" or \"radmin.exe\" or \"ROMServer.exe\" or \"ROMViewer.exe\" or \"DWRCC.exe\" or \"AeroAdmin.exe\" or\n        \"ISLLightClient.exe\" or \"ISLLight.exe\" or \"AteraAgent.exe\" or \"SRService.exe\")\n\t) and\n\n\tnot (process.pe.original_file_name : (\"G2M.exe\" or \"Updater.exe\" or \"powershell.exe\") and process.code_signature.subject_name : \"LogMeIn, Inc.\")\n",
+        "references": [
+            "https://thedfirreport.com/2023/04/03/malicious-iso-file-leads-to-domain-wide-ransomware/",
+            "https://attack.mitre.org/techniques/T1219/"
+        ],
+        "related_integrations": [
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            },
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.subject_name",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "process.name.caseless",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "process.pe.original_file_name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "6e1a2cc4-d260-11ed-8829-f661ea17fbcc",
+        "severity": "medium",
+        "tags": [
+            "Elastic",
+            "Host",
+            "Windows",
+            "Threat Detection",
+            "Command and Control"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0011",
+                    "name": "Command and Control",
+                    "reference": "https://attack.mitre.org/tactics/TA0011/"
+                },
+                "technique": [
+                    {
+                        "id": "T1219",
+                        "name": "Remote Access Software",
+                        "reference": "https://attack.mitre.org/techniques/T1219/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "new_terms",
+        "version": 1
+    },
+    "id": "6e1a2cc4-d260-11ed-8829-f661ea17fbcc_1",
+    "type": "security-rule"
+}

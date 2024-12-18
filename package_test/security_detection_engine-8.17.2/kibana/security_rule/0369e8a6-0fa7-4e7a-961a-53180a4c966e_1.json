@@ -1,0 +1,87 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Monitors for dynamic linker discovery via the od utility. od (octal dump) is a command-line utility in Unix operating systems used for displaying data in various formats, including octal, hexadecimal, decimal, and ASCII, primarily used for examining and debugging binary files or data streams. Attackers can leverage od to analyze the dynamic linker by identifying injection points and craft exploits based on the observed behaviors and structures within these files.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.*",
+      "endgame-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Suspicious Dynamic Linker Discovery via od",
+    "query": "process where host.os.type == \"linux\" and event.action in (\"exec\", \"exec_event\") and event.type == \"start\" and\nprocess.name == \"od\" and process.args in (\n  \"/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2\", \"/etc/ld.so.preload\", \"/lib64/ld-linux-x86-64.so.2\",\n  \"/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2\", \"/usr/lib64/ld-linux-x86-64.so.2\"\n)\n",
+    "references": [
+      "https://github.com/arget13/DDexec"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "0369e8a6-0fa7-4e7a-961a-53180a4c966e",
+    "setup": "\nThis rule requires data coming in from Elastic Defend.\n\n### Elastic Defend Integration Setup\nElastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.\n\n#### Prerequisite Requirements:\n- Fleet is required for Elastic Defend.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n\n#### The following steps should be executed in order to add the Elastic Defend integration on a Linux System:\n- Go to the Kibana home page and click \"Add integrations\".\n- In the query bar, search for \"Elastic Defend\" and select the integration to see more details about it.\n- Click \"Add Elastic Defend\".\n- Configure the integration name and optionally add a description.\n- Select the type of environment you want to protect, either \"Traditional Endpoints\" or \"Cloud Workloads\".\n- Select a configuration preset. Each preset comes with different default settings for Elastic Agent, you can further customize these later by configuring the Elastic Defend integration policy. [Helper guide](https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html).\n- We suggest selecting \"Complete EDR (Endpoint Detection and Response)\" as a configuration setting, that provides \"All events; all preventions\"\n- Enter a name for the agent policy in \"New agent policy name\". If other agent policies already exist, you can click the \"Existing hosts\" tab and select an existing policy instead.\nFor more details on Elastic Agent configuration settings, refer to the [helper guide](https://www.elastic.co/guide/en/fleet/8.10/agent-policy.html).\n- Click \"Save and Continue\".\n- To complete the integration, select \"Add Elastic Agent to your hosts\" and continue to the next section to install the Elastic Agent on your hosts.\nFor more details on Elastic Defend refer to the [helper guide](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n\n",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Discovery",
+      "Data Source: Elastic Defend",
+      "Data Source: Elastic Endgame"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0007",
+          "name": "Discovery",
+          "reference": "https://attack.mitre.org/tactics/TA0007/"
+        },
+        "technique": [
+          {
+            "id": "T1057",
+            "name": "Process Discovery",
+            "reference": "https://attack.mitre.org/techniques/T1057/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "0369e8a6-0fa7-4e7a-961a-53180a4c966e_1",
+  "type": "security-rule"
+}

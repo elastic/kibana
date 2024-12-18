@@ -1,0 +1,104 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies processes that are capable of downloading files with command line arguments containing URLs to SSH-IT's autonomous SSH worm. This worm intercepts outgoing SSH connections every time a user uses ssh.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential SSH-IT SSH Worm Downloaded",
+        "query": "process where host.os.type == \"linux\" and event.action == \"exec\" and event.type == \"start\" and \nprocess.name in (\"curl\", \"wget\") and process.args : (\n  \"https://thc.org/ssh-it/x\", \"http://nossl.segfault.net/ssh-it-deploy.sh\", \"https://gsocket.io/x\",\n  \"https://thc.org/ssh-it/bs\", \"http://nossl.segfault.net/bs\"\n)\n",
+        "references": [
+            "https://www.thc.org/ssh-it/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "2ddc468e-b39b-4f5b-9825-f3dcb0e998ea",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Lateral Movement",
+            "Data Source: Elastic Defend",
+            "Data Source: Elastic Endgame"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0008",
+                    "name": "Lateral Movement",
+                    "reference": "https://attack.mitre.org/tactics/TA0008/"
+                },
+                "technique": [
+                    {
+                        "id": "T1021",
+                        "name": "Remote Services",
+                        "reference": "https://attack.mitre.org/techniques/T1021/",
+                        "subtechnique": [
+                            {
+                                "id": "T1021.004",
+                                "name": "SSH",
+                                "reference": "https://attack.mitre.org/techniques/T1021/004/"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "T1563",
+                        "name": "Remote Service Session Hijacking",
+                        "reference": "https://attack.mitre.org/techniques/T1563/",
+                        "subtechnique": [
+                            {
+                                "id": "T1563.001",
+                                "name": "SSH Hijacking",
+                                "reference": "https://attack.mitre.org/techniques/T1563/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "2ddc468e-b39b-4f5b-9825-f3dcb0e998ea_1",
+    "type": "security-rule"
+}

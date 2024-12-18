@@ -1,0 +1,107 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule monitors for the execution of processes that interact with Linux containers through an interactive shell without root permissions. Utilities such as runc and ctr are universal command-line utilities leveraged to interact with containers via root permissions. On systems where the access to these utilities are misconfigured, attackers might be able to create and run a container that mounts the root folder or spawn a privileged container vulnerable to a container escape attack, which might allow them to escalate privileges and gain further access onto the host file system.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Privilege Escalation via Container Misconfiguration",
+        "query": "process where host.os.type == \"linux\" and event.action == \"exec\" and event.type == \"start\" and (\n  (process.name == \"runc\" and process.args == \"run\") or\n  (process.name == \"ctr\" and process.args == \"run\" and process.args in (\"--privileged\", \"--mount\"))\n) and not user.Ext.real.id == \"0\" and not group.Ext.real.id == \"0\" and \nprocess.interactive == true and process.parent.interactive == true\n",
+        "references": [
+            "https://book.hacktricks.xyz/linux-hardening/privilege-escalation/runc-privilege-escalation",
+            "https://book.hacktricks.xyz/linux-hardening/privilege-escalation/containerd-ctr-privilege-escalation"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "group.Ext.real.id",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.interactive",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.interactive",
+                "type": "boolean"
+            },
+            {
+                "ecs": false,
+                "name": "user.Ext.real.id",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "afe6b0eb-dd9d-4922-b08a-1910124d524d",
+        "setup": "This rule leverages `session` fields, which requires that the collection of session data is enabled for Linux operating systems.  The following steps should be performed in order to enable session data event collection on a Linux system. ``` Kibana --\u003e Management --\u003e Fleet --\u003e Agent Policies --\u003e Agent Policy with Elastic Defend installed --\u003e Elastic Defend integration --\u003e Enable the \"Collect session data\" box under \"Event Collection\" for \"Linux\" ``` More information on this topic and how to enable session data collection can be found at https://www.elastic.co/blog/secure-your-cloud-with-cloud-workload-protection-in-elastic-security.",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Privilege Escalation",
+            "Domain: Container",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0004",
+                    "name": "Privilege Escalation",
+                    "reference": "https://attack.mitre.org/tactics/TA0004/"
+                },
+                "technique": [
+                    {
+                        "id": "T1611",
+                        "name": "Escape to Host",
+                        "reference": "https://attack.mitre.org/techniques/T1611/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "afe6b0eb-dd9d-4922-b08a-1910124d524d_2",
+    "type": "security-rule"
+}

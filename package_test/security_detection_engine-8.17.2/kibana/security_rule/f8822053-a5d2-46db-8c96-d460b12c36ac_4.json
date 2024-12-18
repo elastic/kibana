@@ -1,0 +1,101 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the modification of the nTSecurityDescriptor attribute in a domain object with rights related to DCSync to a user/computer account. Attackers can use this backdoor to re-obtain access to hashes of any user/computer.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-system.security*",
+      "logs-windows.forwarded*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Potential Active Directory Replication Account Backdoor",
+    "note": "",
+    "query": "event.action:(\"Directory Service Changes\" or \"directory-service-object-modified\") and event.code:\"5136\" and\n  winlog.event_data.AttributeLDAPDisplayName:\"nTSecurityDescriptor\" and\n  winlog.event_data.AttributeValue : (\n    (\n      *1131f6ad-9c07-11d1-f79f-00c04fc2dcd2;;S-1-5-21-* and\n      *1131f6aa-9c07-11d1-f79f-00c04fc2dcd2;;S-1-5-21-* and\n      *89e95b76-444d-4c62-991a-0facbeda640c;;S-1-5-21-*\n    )\n  )\n",
+    "references": [
+      "https://twitter.com/menasec1/status/1111556090137903104",
+      "https://www.specterops.io/assets/resources/an_ace_up_the_sleeve.pdf",
+      "https://github.com/SigmaHQ/sigma/blob/master/rules/windows/builtin/security/win_security_account_backdoor_dcsync_rights.yml",
+      "https://learn.microsoft.com/en-us/windows/win32/adschema/r-ds-replication-get-changes-all",
+      "https://learn.microsoft.com/en-us/windows/win32/adschema/r-ds-replication-get-changes",
+      "https://learn.microsoft.com/en-us/windows/win32/adschema/r-ds-replication-get-changes-in-filtered-set"
+    ],
+    "related_integrations": [
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.code",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "winlog.event_data.AttributeLDAPDisplayName",
+        "type": "unknown"
+      },
+      {
+        "ecs": false,
+        "name": "winlog.event_data.AttributeValue",
+        "type": "unknown"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "f8822053-a5d2-46db-8c96-d460b12c36ac",
+    "setup": "The 'Audit Directory Service Changes' logging policy must be configured for (Success, Failure).\nSteps to implement the logging policy with Advanced Audit Configuration:\n\n```\nComputer Configuration >\nPolicies >\nWindows Settings >\nSecurity Settings >\nAdvanced Audit Policies Configuration >\nAudit Policies >\nDS Access >\nAudit Directory Service Changes (Success,Failure)\n```",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Credential Access",
+      "Data Source: Active Directory",
+      "Use Case: Active Directory Monitoring",
+      "Data Source: System"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1003",
+            "name": "OS Credential Dumping",
+            "reference": "https://attack.mitre.org/techniques/T1003/",
+            "subtechnique": [
+              {
+                "id": "T1003.006",
+                "name": "DCSync",
+                "reference": "https://attack.mitre.org/techniques/T1003/006/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 4
+  },
+  "id": "f8822053-a5d2-46db-8c96-d460b12c36ac_4",
+  "type": "security-rule"
+}

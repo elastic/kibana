@@ -1,0 +1,88 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies registry modifications related to the Windows Security Support Provider (SSP) configuration. Adversaries may abuse this to establish persistence in an environment.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-endpoint.events.*",
+            "logs-windows.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Installation of Security Support Provider",
+        "note": "",
+        "query": "registry where host.os.type == \"windows\" and\n   registry.path : (\n      \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Control\\\\Lsa\\\\Security Packages*\",\n      \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Control\\\\Lsa\\\\OSConfig\\\\Security Packages*\",\n      \"\\\\REGISTRY\\\\MACHINE\\\\SYSTEM\\\\*ControlSet*\\\\Control\\\\Lsa\\\\Security Packages*\",\n      \"\\\\REGISTRY\\\\MACHINE\\\\SYSTEM\\\\*ControlSet*\\\\Control\\\\Lsa\\\\OSConfig\\\\Security Packages*\"\n   ) and\n   not process.executable : (\"C:\\\\Windows\\\\System32\\\\msiexec.exe\", \"C:\\\\Windows\\\\SysWOW64\\\\msiexec.exe\")\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "registry.path",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "e86da94d-e54b-4fb5-b96c-cecff87e8787",
+        "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions \u003c8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Data Source: Elastic Endgame",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1547",
+                        "name": "Boot or Logon Autostart Execution",
+                        "reference": "https://attack.mitre.org/techniques/T1547/",
+                        "subtechnique": [
+                            {
+                                "id": "T1547.005",
+                                "name": "Security Support Provider",
+                                "reference": "https://attack.mitre.org/techniques/T1547/005/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 104
+    },
+    "id": "e86da94d-e54b-4fb5-b96c-cecff87e8787_104",
+    "type": "security-rule"
+}

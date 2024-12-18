@@ -1,0 +1,90 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "A supervised machine learning model has identified a DNS question name that is predicted to be the result of a Domain Generation Algorithm (DGA), which could indicate command and control network activity.",
+        "from": "now-10m",
+        "index": [
+            "logs-endpoint.events.*",
+            "logs-network_traffic.*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Machine Learning Detected a DNS Request Predicted to be a DGA Domain",
+        "note": "",
+        "query": "ml_is_dga.malicious_prediction:1 and not dns.question.registered_domain:avsvmcloud.com\n",
+        "references": [
+            "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html",
+            "https://docs.elastic.co/en/integrations/dga"
+        ],
+        "related_integrations": [
+            {
+                "package": "dga",
+                "version": "^2.0.0"
+            },
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            },
+            {
+                "package": "network_traffic",
+                "version": "^1.1.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "dns.question.registered_domain",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "ml_is_dga.malicious_prediction",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "f3403393-1fd9-4686-8f6e-596c58bc00b4",
+        "setup": "The Domain Generation Algorithm (DGA) integration must be enabled and related ML jobs configured for this rule to be effective. Please refer to this rule's references for more information.",
+        "severity": "low",
+        "tags": [
+            "Domain: Network",
+            "Domain: Endpoint",
+            "Data Source: Elastic Defend",
+            "Use Case: Domain Generation Algorithm Detection",
+            "Rule Type: ML",
+            "Rule Type: Machine Learning",
+            "Tactic: Command and Control"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0011",
+                    "name": "Command and Control",
+                    "reference": "https://attack.mitre.org/tactics/TA0011/"
+                },
+                "technique": [
+                    {
+                        "id": "T1568",
+                        "name": "Dynamic Resolution",
+                        "reference": "https://attack.mitre.org/techniques/T1568/",
+                        "subtechnique": [
+                            {
+                                "id": "T1568.002",
+                                "name": "Domain Generation Algorithms",
+                                "reference": "https://attack.mitre.org/techniques/T1568/002/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 1
+    },
+    "id": "f3403393-1fd9-4686-8f6e-596c58bc00b4_1",
+    "type": "security-rule"
+}

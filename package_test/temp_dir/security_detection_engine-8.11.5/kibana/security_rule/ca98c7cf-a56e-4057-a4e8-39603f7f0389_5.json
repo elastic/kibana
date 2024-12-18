@@ -1,0 +1,122 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies a Windows trusted program running from locations often abused by adversaries to masquerade as a trusted program and loading a recently dropped DLL. This behavior may indicate an attempt to evade defenses via side-loading a malicious DLL within the memory space of a signed processes.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Unsigned DLL Side-Loading from a Suspicious Folder",
+        "note": "",
+        "query": "library where host.os.type == \"windows\" and\n\n process.code_signature.trusted == true and \n \n (dll.Ext.relative_file_creation_time \u003c= 500 or dll.Ext.relative_file_name_modify_time \u003c= 500) and \n \n  not dll.code_signature.status : (\"trusted\", \"errorExpired\", \"errorCode_endpoint*\", \"errorChaining\") and \n  \n      /* Suspicious Paths */\n      dll.path : (\"?:\\\\PerfLogs\\\\*.dll\",\n                  \"?:\\\\Users\\\\*\\\\Pictures\\\\*.dll\",\n                  \"?:\\\\Users\\\\*\\\\Music\\\\*.dll\",\n                  \"?:\\\\Users\\\\Public\\\\*.dll\",\n                  \"?:\\\\Users\\\\*\\\\Documents\\\\*.dll\",\n                  \"?:\\\\Windows\\\\Tasks\\\\*.dll\",\n                  \"?:\\\\Windows\\\\System32\\\\Tasks\\\\*.dll\",\n                  \"?:\\\\Intel\\\\*.dll\",\n                  \"?:\\\\AMD\\\\Temp\\\\*.dll\",\n                  \"?:\\\\Windows\\\\AppReadiness\\\\*.dll\",\n                  \"?:\\\\Windows\\\\ServiceState\\\\*.dll\",\n                  \"?:\\\\Windows\\\\security\\\\*.dll\",\n\t\t  \"?:\\\\Windows\\\\System\\\\*.dll\",\n                  \"?:\\\\Windows\\\\IdentityCRL\\\\*.dll\",\n                  \"?:\\\\Windows\\\\Branding\\\\*.dll\",\n                  \"?:\\\\Windows\\\\csc\\\\*.dll\",\n                  \"?:\\\\Windows\\\\DigitalLocker\\\\*.dll\",\n                  \"?:\\\\Windows\\\\en-US\\\\*.dll\",\n                  \"?:\\\\Windows\\\\wlansvc\\\\*.dll\",\n                  \"?:\\\\Windows\\\\Prefetch\\\\*.dll\",\n                  \"?:\\\\Windows\\\\Fonts\\\\*.dll\",\n                  \"?:\\\\Windows\\\\diagnostics\\\\*.dll\",\n                  \"?:\\\\Windows\\\\TAPI\\\\*.dll\",\n                  \"?:\\\\Windows\\\\INF\\\\*.dll\",\n                  \"?:\\\\windows\\\\tracing\\\\*.dll\",\n                  \"?:\\\\windows\\\\IME\\\\*.dll\",\n                  \"?:\\\\Windows\\\\Performance\\\\*.dll\",\n                  \"?:\\\\windows\\\\intel\\\\*.dll\",\n                  \"?:\\\\windows\\\\ms\\\\*.dll\",\n                  \"?:\\\\Windows\\\\dot3svc\\\\*.dll\",\n                  \"?:\\\\Windows\\\\ServiceProfiles\\\\*.dll\",\n                  \"?:\\\\Windows\\\\panther\\\\*.dll\",\n                  \"?:\\\\Windows\\\\RemotePackages\\\\*.dll\",\n                  \"?:\\\\Windows\\\\OCR\\\\*.dll\",\n                  \"?:\\\\Windows\\\\appcompat\\\\*.dll\",\n                  \"?:\\\\Windows\\\\apppatch\\\\*.dll\",\n                  \"?:\\\\Windows\\\\addins\\\\*.dll\",\n                  \"?:\\\\Windows\\\\Setup\\\\*.dll\",\n                  \"?:\\\\Windows\\\\Help\\\\*.dll\",\n                  \"?:\\\\Windows\\\\SKB\\\\*.dll\",\n                  \"?:\\\\Windows\\\\Vss\\\\*.dll\",\n                  \"?:\\\\Windows\\\\Web\\\\*.dll\",\n                  \"?:\\\\Windows\\\\servicing\\\\*.dll\",\n                  \"?:\\\\Windows\\\\CbsTemp\\\\*.dll\",\n                  \"?:\\\\Windows\\\\Logs\\\\*.dll\",\n                  \"?:\\\\Windows\\\\WaaS\\\\*.dll\",\n                  \"?:\\\\Windows\\\\twain_32\\\\*.dll\",\n                  \"?:\\\\Windows\\\\ShellExperiences\\\\*.dll\",\n                  \"?:\\\\Windows\\\\ShellComponents\\\\*.dll\",\n                  \"?:\\\\Windows\\\\PLA\\\\*.dll\",\n                  \"?:\\\\Windows\\\\Migration\\\\*.dll\",\n                  \"?:\\\\Windows\\\\debug\\\\*.dll\",\n                  \"?:\\\\Windows\\\\Cursors\\\\*.dll\",\n                  \"?:\\\\Windows\\\\Containers\\\\*.dll\",\n                  \"?:\\\\Windows\\\\Boot\\\\*.dll\",\n                  \"?:\\\\Windows\\\\bcastdvr\\\\*.dll\",\n                  \"?:\\\\Windows\\\\TextInput\\\\*.dll\",\n                  \"?:\\\\Windows\\\\schemas\\\\*.dll\",\n                  \"?:\\\\Windows\\\\SchCache\\\\*.dll\",\n                  \"?:\\\\Windows\\\\Resources\\\\*.dll\",\n                  \"?:\\\\Windows\\\\rescache\\\\*.dll\",\n                  \"?:\\\\Windows\\\\Provisioning\\\\*.dll\",\n                  \"?:\\\\Windows\\\\PrintDialog\\\\*.dll\",\n                  \"?:\\\\Windows\\\\PolicyDefinitions\\\\*.dll\",\n                  \"?:\\\\Windows\\\\media\\\\*.dll\",\n                  \"?:\\\\Windows\\\\Globalization\\\\*.dll\",\n                  \"?:\\\\Windows\\\\L2Schemas\\\\*.dll\",\n                  \"?:\\\\Windows\\\\LiveKernelReports\\\\*.dll\",\n                  \"?:\\\\Windows\\\\ModemLogs\\\\*.dll\",\n                  \"?:\\\\Windows\\\\ImmersiveControlPanel\\\\*.dll\",\n                  \"?:\\\\$Recycle.Bin\\\\*.dll\") and \n\t \n\t /* DLL loaded from the process.executable current directory */\n\t endswith~(substring(dll.path, 0, length(dll.path) - (length(dll.name) + 1)), substring(process.executable, 0, length(process.executable) - (length(process.name) + 1)))\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": false,
+                "name": "dll.Ext.relative_file_creation_time",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "dll.Ext.relative_file_name_modify_time",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "dll.code_signature.status",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "dll.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "dll.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.trusted",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "ca98c7cf-a56e-4057-a4e8-39603f7f0389",
+        "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions \u003c8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1036",
+                        "name": "Masquerading",
+                        "reference": "https://attack.mitre.org/techniques/T1036/",
+                        "subtechnique": [
+                            {
+                                "id": "T1036.001",
+                                "name": "Invalid Code Signature",
+                                "reference": "https://attack.mitre.org/techniques/T1036/001/"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "T1574",
+                        "name": "Hijack Execution Flow",
+                        "reference": "https://attack.mitre.org/techniques/T1574/",
+                        "subtechnique": [
+                            {
+                                "id": "T1574.002",
+                                "name": "DLL Side-Loading",
+                                "reference": "https://attack.mitre.org/techniques/T1574/002/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 5
+    },
+    "id": "ca98c7cf-a56e-4057-a4e8-39603f7f0389_5",
+    "type": "security-rule"
+}

@@ -1,0 +1,85 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies the use of Cmdlets and methods related to encryption/decryption of files in PowerShell scripts, which malware and offensive security tools can abuse to encrypt data or decrypt payloads to bypass security solutions.",
+        "false_positives": [
+            "Legitimate PowerShell Scripts which makes use of encryption."
+        ],
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-windows.*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "PowerShell Script with Encryption/Decryption Capabilities",
+        "query": "event.category:process and host.os.type:windows and\n  powershell.file.script_block_text : (\n    (\n      \"Cryptography.AESManaged\" or\n      \"Cryptography.RijndaelManaged\" or\n      \"Cryptography.SHA1Managed\" or\n      \"Cryptography.SHA256Managed\" or\n      \"Cryptography.SHA384Managed\" or\n      \"Cryptography.SHA512Managed\" or\n      \"Cryptography.SymmetricAlgorithm\" or\n      \"PasswordDeriveBytes\" or\n      \"Rfc2898DeriveBytes\"\n    ) and\n    (\n      CipherMode and PaddingMode\n    ) and\n    (\n      \".CreateEncryptor\" or\n      \".CreateDecryptor\"\n    )\n  ) and not user.id : \"S-1-5-18\"\n",
+        "related_integrations": [
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "powershell.file.script_block_text",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "1d9aeb0b-9549-46f6-a32d-05e2a001b7fd",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Data Source: PowerShell Logs"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1027",
+                        "name": "Obfuscated Files or Information",
+                        "reference": "https://attack.mitre.org/techniques/T1027/"
+                    },
+                    {
+                        "id": "T1140",
+                        "name": "Deobfuscate/Decode Files or Information",
+                        "reference": "https://attack.mitre.org/techniques/T1140/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 4
+    },
+    "id": "1d9aeb0b-9549-46f6-a32d-05e2a001b7fd_4",
+    "type": "security-rule"
+}

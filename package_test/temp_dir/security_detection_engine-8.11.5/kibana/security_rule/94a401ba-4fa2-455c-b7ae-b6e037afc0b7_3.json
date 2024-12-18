@@ -1,0 +1,88 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects the usage of gpresult.exe to query group policy objects. Attackers may query group policy objects during the reconnaissance phase after compromising a system to gain a better understanding of the active directory environment and possible methods to escalate privileges or move laterally.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-endpoint.events.*",
+            "logs-windows.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Group Policy Discovery via Microsoft GPResult Utility",
+        "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n(process.name: \"gpresult.exe\" or process.pe.original_file_name == \"gprslt.exe\") and process.args: (\"/z\", \"/v\", \"/r\", \"/x\")\n",
+        "related_integrations": [
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            },
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.pe.original_file_name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "94a401ba-4fa2-455c-b7ae-b6e037afc0b7",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Discovery",
+            "Data Source: Elastic Endgame"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0007",
+                    "name": "Discovery",
+                    "reference": "https://attack.mitre.org/tactics/TA0007/"
+                },
+                "technique": [
+                    {
+                        "id": "T1615",
+                        "name": "Group Policy Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1615/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 3
+    },
+    "id": "94a401ba-4fa2-455c-b7ae-b6e037afc0b7_3",
+    "type": "security-rule"
+}

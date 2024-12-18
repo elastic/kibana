@@ -1,0 +1,109 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic",
+      "Matteo Potito Giorgio"
+    ],
+    "description": "Identifies the load of a DLL without a valid code signature by the Azure AD Sync process, which may indicate an attempt to persist or collect sensitive credentials passing through the Azure AD synchronization server.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-endpoint.events.library*",
+      "logs-windows.sysmon_operational-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Untrusted DLL Loaded by Azure AD Sync Service",
+    "query": "any where host.os.type == \"windows\" and process.name : \"AzureADConnectAuthenticationAgentService.exe\" and \n(\n (event.category == \"library\" and event.action == \"load\") or \n (event.category == \"process\" and event.action : \"Image loaded*\")\n) and \n\nnot (?dll.code_signature.trusted == true or file.code_signature.status == \"Valid\") and not \n\n  (\n   /* Elastic defend DLL path */\n   ?dll.path :\n         (\"?:\\\\Windows\\\\assembly\\\\NativeImages*\",\n          \"?:\\\\Windows\\\\Microsoft.NET\\\\*\",\n          \"?:\\\\Windows\\\\WinSxS\\\\*\",\n          \"?:\\\\Windows\\\\System32\\\\DriverStore\\\\FileRepository\\\\*\") or \n          \n   /* Sysmon DLL path is mapped to file.path */\n   file.path :\n         (\"?:\\\\Windows\\\\assembly\\\\NativeImages*\",\n          \"?:\\\\Windows\\\\Microsoft.NET\\\\*\",\n          \"?:\\\\Windows\\\\WinSxS\\\\*\",\n          \"?:\\\\Windows\\\\System32\\\\DriverStore\\\\FileRepository\\\\*\")\n  )\n",
+    "references": [
+      "https://blog.xpnsec.com/azuread-connect-for-redteam/",
+      "https://medium.com/@breakingmhet/detect-azure-pass-through-authentication-abuse-azure-hybrid-environments-ed4274784252",
+      "https://learn.microsoft.com/en-us/azure/active-directory/hybrid/tshoot-connect-pass-through-authentication"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "dll.code_signature.trusted",
+        "type": "boolean"
+      },
+      {
+        "ecs": true,
+        "name": "dll.path",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "file.code_signature.status",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "file.path",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "f909075d-afc7-42d7-b399-600b94352fd9",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Credential Access",
+      "Data Source: Elastic Defend",
+      "Data Source: Sysmon"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1003",
+            "name": "OS Credential Dumping",
+            "reference": "https://attack.mitre.org/techniques/T1003/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "f909075d-afc7-42d7-b399-600b94352fd9_1",
+  "type": "security-rule"
+}

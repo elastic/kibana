@@ -1,0 +1,111 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies executables with names resembling legitimate business applications but lacking signatures from the original developer. Attackers may trick users into downloading malicious executables that masquerade as legitimate applications via malicious ads, forum posts, and tutorials, effectively gaining initial access.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Masquerading as Business App Installer",
+        "query": "process where host.os.type == \"windows\" and\n  event.type == \"start\" and process.executable : \"?:\\\\Users\\\\*\\\\Downloads\\\\*\" and\n  not process.code_signature.status : (\"errorCode_endpoint*\", \"errorUntrustedRoot\", \"errorChaining\") and\n  (\n    /* Slack */\n    (process.name : \"*slack*.exe\" and not\n      (process.code_signature.subject_name in (\n        \"Slack Technologies, Inc.\",\n        \"Slack Technologies, LLC\"\n       ) and process.code_signature.trusted == true)\n    ) or\n\n    /* WebEx */\n    (process.name : \"*webex*.exe\" and not\n      (process.code_signature.subject_name in (\"Cisco WebEx LLC\", \"Cisco Systems, Inc.\") and process.code_signature.trusted == true)\n    ) or\n\n    /* Teams */\n    (process.name : \"teams*.exe\" and not\n      (process.code_signature.subject_name == \"Microsoft Corporation\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Discord */\n    (process.name : \"*discord*.exe\" and not\n      (process.code_signature.subject_name == \"Discord Inc.\" and process.code_signature.trusted == true)\n    ) or\n\n    /* WhatsApp */\n    (process.name : \"*whatsapp*.exe\" and not\n      (process.code_signature.subject_name in (\n        \"WhatsApp LLC\",\n        \"WhatsApp, Inc\",\n        \"24803D75-212C-471A-BC57-9EF86AB91435\"\n       ) and process.code_signature.trusted == true)\n    ) or\n\n    /* Zoom */\n    (process.name : (\"*zoom*installer*.exe\", \"*zoom*setup*.exe\", \"zoom.exe\")  and not\n      (process.code_signature.subject_name == \"Zoom Video Communications, Inc.\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Outlook */\n    (process.name : \"*outlook*.exe\" and not\n      (\n        (process.code_signature.subject_name == \"Microsoft Corporation\" and process.code_signature.trusted == true) or\n        (\n          process.name: \"MSOutlookHelp-PST-Viewer.exe\" and process.code_signature.subject_name == \"Aryson Technologies Pvt. Ltd\" and\n          process.code_signature.trusted == true\n        )\n      )\n    ) or\n\n    /* Thunderbird */\n    (process.name : \"*thunderbird*.exe\" and not\n      (process.code_signature.subject_name == \"Mozilla Corporation\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Grammarly */\n    (process.name : \"*grammarly*.exe\" and not\n      (process.code_signature.subject_name == \"Grammarly, Inc.\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Dropbox */\n    (process.name : \"*dropbox*.exe\" and not\n      (process.code_signature.subject_name == \"Dropbox, Inc\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Tableau */\n    (process.name : \"*tableau*.exe\" and not\n      (process.code_signature.subject_name == \"Tableau Software LLC\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Google Drive */\n    (process.name : \"*googledrive*.exe\" and not\n      (process.code_signature.subject_name == \"Google LLC\" and process.code_signature.trusted == true)\n    ) or\n\n    /* MSOffice */\n    (process.name : \"*office*setup*.exe\" and not\n      (process.code_signature.subject_name == \"Microsoft Corporation\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Okta */\n    (process.name : \"*okta*.exe\" and not\n      (process.code_signature.subject_name == \"Okta, Inc.\" and process.code_signature.trusted == true)\n    ) or\n\n    /* OneDrive */\n    (process.name : \"*onedrive*.exe\" and not\n      (process.code_signature.subject_name == \"Microsoft Corporation\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Chrome */\n    (process.name : \"*chrome*.exe\" and not\n      (process.code_signature.subject_name in (\"Google LLC\", \"Google Inc\") and process.code_signature.trusted == true)\n    ) or\n\n    /* Firefox */\n    (process.name : \"*firefox*.exe\" and not\n      (process.code_signature.subject_name == \"Mozilla Corporation\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Edge */\n    (process.name : (\"*microsoftedge*.exe\", \"*msedge*.exe\") and not\n      (process.code_signature.subject_name == \"Microsoft Corporation\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Brave */\n    (process.name : \"*brave*.exe\" and not\n      (process.code_signature.subject_name == \"Brave Software, Inc.\" and process.code_signature.trusted == true)\n    ) or\n\n    /* GoogleCloud Related Tools */\n    (process.name : \"*GoogleCloud*.exe\" and not\n      (process.code_signature.subject_name == \"Google LLC\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Github Related Tools */\n    (process.name : \"*github*.exe\" and not\n      (process.code_signature.subject_name == \"GitHub, Inc.\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Notion */\n    (process.name : \"*notion*.exe\" and not\n      (process.code_signature.subject_name == \"Notion Labs, Inc.\" and process.code_signature.trusted == true)\n    )\n  )\n",
+        "references": [
+            "https://www.rapid7.com/blog/post/2023/08/31/fake-update-utilizes-new-idat-loader-to-execute-stealc-and-lumma-infostealers"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.status",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.subject_name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.trusted",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "feafdc51-c575-4ed2-89dd-8e20badc2d6c",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "Data Source: Elastic Defend",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1036",
+                        "name": "Masquerading",
+                        "reference": "https://attack.mitre.org/techniques/T1036/"
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0001",
+                    "name": "Initial Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0001/"
+                },
+                "technique": [
+                    {
+                        "id": "T1189",
+                        "name": "Drive-by Compromise",
+                        "reference": "https://attack.mitre.org/techniques/T1189/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "feafdc51-c575-4ed2-89dd-8e20badc2d6c_1",
+    "type": "security-rule"
+}

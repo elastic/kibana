@@ -1,0 +1,92 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies the access on an object with WRITEDAC permissions. With the WRITEDAC permission, the user can perform a Write Discretionary Access Control List (WriteDACL) operation, which is used to modify the access control rules associated with a specific object within Active Directory. Attackers may abuse this privilege to grant themselves or other compromised accounts additional rights, ultimately compromising the target object, resulting in privilege escalation, lateral movement, and persistence.",
+        "from": "now-119m",
+        "index": [
+            "winlogbeat-*",
+            "logs-system.*",
+            "logs-windows.*"
+        ],
+        "interval": "60m",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "WRITEDAC Access on Active Directory Object",
+        "query": "event.action:\"Directory Service Access\" and event.code:\"5136\" and\n  winlog.event_data.AccessMask:\"0x40000\"\n",
+        "references": [
+            "https://www.blackhat.com/docs/us-17/wednesday/us-17-Robbins-An-ACE-Up-The-Sleeve-Designing-Active-Directory-DACL-Backdoors.pdf"
+        ],
+        "related_integrations": [
+            {
+                "package": "system",
+                "version": "^1.6.4"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.code",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.event_data.AccessMask",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "f5861570-e39a-4b8a-9259-abd39f84cb97",
+        "setup": "The 'Audit Directory Service Access' logging policy must be configured for (Success, Failure).\nSteps to implement the logging policy with Advanced Audit Configuration:\n\n```\nComputer Configuration \u003e\nPolicies \u003e\nWindows Settings \u003e\nSecurity Settings \u003e\nAdvanced Audit Policies Configuration \u003e\nAudit Policies \u003e\nDS Access \u003e\nAudit Directory Service Access (Success,Failure)\n```\n",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Data Source: Active Directory",
+            "Use Case: Active Directory Monitoring",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1222",
+                        "name": "File and Directory Permissions Modification",
+                        "reference": "https://attack.mitre.org/techniques/T1222/",
+                        "subtechnique": [
+                            {
+                                "id": "T1222.001",
+                                "name": "Windows File and Directory Permissions Modification",
+                                "reference": "https://attack.mitre.org/techniques/T1222/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 2
+    },
+    "id": "f5861570-e39a-4b8a-9259-abd39f84cb97_2",
+    "type": "security-rule"
+}

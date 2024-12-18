@@ -1,0 +1,85 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies a high number of failed S3 operations from a single source and account (or anonymous account) within a short timeframe. This activity can be indicative of attempting to cause an increase in billing to an account for excessive random operations, cause resource exhaustion, or enumerating bucket names for discovery.",
+    "false_positives": [
+      "Known or internal account IDs or automation"
+    ],
+    "from": "now-6m",
+    "language": "esql",
+    "license": "Elastic License v2",
+    "name": "AWS S3 Bucket Enumeration or Brute Force",
+    "note": "## Triage and analysis\n\n### Investigating AWS S3 Bucket Enumeration or Brute Force\n\nAWS S3 buckets can be be brute forced to cause financial impact against the resource owner. What makes this even riskier is that even private, locked down buckets can still trigger a potential cost, even with an \"Access Denied\", while also being accessible from unauthenticated, anonymous accounts. This also appears to work on several or all [operations](https://docs.aws.amazon.com/cli/latest/reference/s3api/) (GET, PUT, list-objects, etc.). Additionally, buckets are trivially discoverable by default as long as the bucket name is known, making it vulnerable to enumeration for discovery.\n\nAttackers may attempt to enumerate names until a valid bucket is discovered and then pivot to cause financial impact, enumerate for more information, or brute force in other ways to attempt to exfil data.\n\n#### Possible investigation steps\n\n- Examine the history of the operation requests from the same `source.address` and `cloud.account.id` to determine if there is other suspicious activity.\n- Review similar requests and look at the `user.agent` info to ascertain the source of the requests (though do not overly rely on this since it is controlled by the requestor).\n- Review other requests to the same `aws.s3.object.key` as well as other `aws.s3.object.key` accessed by the same `cloud.account.id` or `source.address`.\n- Investigate other alerts associated with the user account during the past 48 hours.\n- Validate the activity is not related to planned patches, updates, or network administrator activity.\n- Examine the request parameters. These may indicate the source of the program or the nature of the task being performed when the error occurred.\n    - Check whether the error is related to unsuccessful attempts to enumerate or access objects, data, or secrets.\n- Considering the source IP address and geolocation of the user who issued the command:\n    - Do they look normal for the calling user?\n    - If the source is an EC2 IP address, is it associated with an EC2 instance in one of your accounts or is the source IP from an EC2 instance that's not under your control?\n    - If it is an authorized EC2 instance, is the activity associated with normal behavior for the instance role or roles? Are there any other alerts or signs of suspicious activity involving this instance?\n- Consider the time of day. If the user is a human (not a program or script), did the activity take place during a normal time of day?\n- Contact the account owner and confirm whether they are aware of this activity if suspicious.\n- If you suspect the account has been compromised, scope potentially compromised assets by tracking servers, services, and data accessed by the account in the last 24 hours.\n\n### False positive analysis\n\n- Verify the `source.address` and `cloud.account.id` - there are some valid operations from within AWS directly that can cause failures and false positives. Additionally, failed automation can also caeuse false positives, but should be identifiable by reviewing the `source.address` and `cloud.account.id`.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Disable or limit the account during the investigation and response.\n- Identify the possible impact of the incident and prioritize accordingly; the following actions can help you gain context:\n    - Identify the account role in the cloud environment.\n    - Assess the criticality of affected services and servers.\n    - Work with your IT team to identify and minimize the impact on users.\n    - Identify if the attacker is moving laterally and compromising other accounts, servers, or services.\n    - Identify any regulatory or legal ramifications related to this activity.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords or delete API keys as needed to revoke the attacker's access to the environment. Work with your IT teams to minimize the impact on business operations during these actions.\n- Check if unauthorized new users were created, remove unauthorized new accounts, and request password resets for other IAM users.\n- Consider enabling multi-factor authentication for users.\n- Review the permissions assigned to the implicated user to ensure that the least privilege principle is being followed.\n- Implement security best practices [outlined](https://aws.amazon.com/premiumsupport/knowledge-center/security-best-practices/) by AWS.\n- Take the actions needed to return affected systems, data, or services to their normal operational levels.\n- Identify the initial vector abused by the attacker and take action to prevent reinfection via the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n- Check for PutBucketPolicy event actions as well to see if they have been tampered with. While we monitor for denied, a single successful action to add a backdoor into the bucket via policy updates (however they got permissions) may be critical to identify during TDIR.\n\n",
+    "query": "from logs-aws.cloudtrail*\n| where event.provider == \"s3.amazonaws.com\" and aws.cloudtrail.error_code == \"AccessDenied\"\n// keep only relevant fields\n| keep tls.client.server_name, source.address, cloud.account.id\n| stats failed_requests = count(*) by tls.client.server_name, source.address, cloud.account.id\n  // can modify the failed request count or tweak time window to fit environment\n  // can add `not cloud.account.id in (KNOWN)` or specify in exceptions\n| where failed_requests > 40\n",
+    "references": [
+      "https://medium.com/@maciej.pocwierz/how-an-empty-s3-bucket-can-make-your-aws-bill-explode-934a383cb8b1",
+      "https://docs.aws.amazon.com/cli/latest/reference/s3api/"
+    ],
+    "risk_score": 21,
+    "rule_id": "5f0234fd-7f21-42af-8391-511d5fd11d5c",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS S3",
+      "Resources: Investigation Guide",
+      "Use Case: Log Auditing",
+      "Tactic: Impact"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0040",
+          "name": "Impact",
+          "reference": "https://attack.mitre.org/tactics/TA0040/"
+        },
+        "technique": [
+          {
+            "id": "T1657",
+            "name": "Financial Theft",
+            "reference": "https://attack.mitre.org/techniques/T1657/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0007",
+          "name": "Discovery",
+          "reference": "https://attack.mitre.org/tactics/TA0007/"
+        },
+        "technique": [
+          {
+            "id": "T1580",
+            "name": "Cloud Infrastructure Discovery",
+            "reference": "https://attack.mitre.org/techniques/T1580/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0009",
+          "name": "Collection",
+          "reference": "https://attack.mitre.org/tactics/TA0009/"
+        },
+        "technique": [
+          {
+            "id": "T1530",
+            "name": "Data from Cloud Storage",
+            "reference": "https://attack.mitre.org/techniques/T1530/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "esql",
+    "version": 3
+  },
+  "id": "5f0234fd-7f21-42af-8391-511d5fd11d5c_3",
+  "type": "security-rule"
+}

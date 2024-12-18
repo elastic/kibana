@@ -1,0 +1,99 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule monitors for suspicious activities that may indicate an attacker attempting to execute arbitrary code within a PostgreSQL environment. Attackers can execute code via PostgreSQL as a result of gaining unauthorized access to a public facing PostgreSQL database or exploiting vulnerabilities, such as remote command execution and SQL injection attacks, which can result in unauthorized access and malicious actions, and facilitate post-exploitation activities for unauthorized access and malicious actions.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Code Execution via Postgresql",
+        "query": "process where host.os.type == \"linux\" and event.action in (\"exec\", \"exec_event\", \"fork\", \"fork_event\") and \nevent.type == \"start\" and user.name == \"postgres\" and (\n  (process.parent.args : \"*sh\" and process.parent.args : \"echo*\") or \n  (process.args : \"*sh\" and process.args : \"echo*\")\n) and not process.parent.name : \"puppet\"\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "2a692072-d78d-42f3-a48a-775677d79c4e",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Execution",
+            "Data Source: Elastic Endgame",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1059",
+                        "name": "Command and Scripting Interpreter",
+                        "reference": "https://attack.mitre.org/techniques/T1059/",
+                        "subtechnique": [
+                            {
+                                "id": "T1059.004",
+                                "name": "Unix Shell",
+                                "reference": "https://attack.mitre.org/techniques/T1059/004/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 3
+    },
+    "id": "2a692072-d78d-42f3-a48a-775677d79c4e_3",
+    "type": "security-rule"
+}

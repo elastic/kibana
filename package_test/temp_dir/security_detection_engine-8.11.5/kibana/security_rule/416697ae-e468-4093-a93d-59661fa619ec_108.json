@@ -1,0 +1,96 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies unusual instances of Control Panel with suspicious keywords or paths in the process command line value. Adversaries may abuse control.exe to proxy execution of malicious code.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*",
+            "winlogbeat-*",
+            "logs-windows.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Control Panel Process with Unusual Arguments",
+        "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n process.executable : (\"?:\\\\Windows\\\\SysWOW64\\\\control.exe\", \"?:\\\\Windows\\\\System32\\\\control.exe\") and\n process.command_line :\n          (\"*.jpg*\",\n           \"*.png*\",\n           \"*.gif*\",\n           \"*.bmp*\",\n           \"*.jpeg*\",\n           \"*.TIFF*\",\n           \"*.inf*\",\n           \"*.cpl:*/*\",\n           \"*../../..*\",\n           \"*/AppData/Local/*\",\n           \"*:\\\\Users\\\\Public\\\\*\",\n           \"*\\\\AppData\\\\Local\\\\*\")\n",
+        "references": [
+            "https://www.joesandbox.com/analysis/476188/1/html"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.command_line",
+                "type": "wildcard"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "416697ae-e468-4093-a93d-59661fa619ec",
+        "setup": "\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions \u003c8.2,\nevents will not define `event.ingested` and default fallback for EQL rules was not added until version 8.2.\nHence for this rule to work effectively, users will need to add a custom ingest pipeline to populate\n`event.ingested` to @timestamp.\nFor more details on adding a custom ingest pipeline refer - https://www.elastic.co/guide/en/fleet/current/data-streams-pipeline-tutorial.html\n",
+        "severity": "high",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Tactic: Execution",
+            "Data Source: Elastic Endgame",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1218",
+                        "name": "System Binary Proxy Execution",
+                        "reference": "https://attack.mitre.org/techniques/T1218/",
+                        "subtechnique": [
+                            {
+                                "id": "T1218.002",
+                                "name": "Control Panel",
+                                "reference": "https://attack.mitre.org/techniques/T1218/002/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 108
+    },
+    "id": "416697ae-e468-4093-a93d-59661fa619ec_108",
+    "type": "security-rule"
+}

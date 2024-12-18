@@ -1,0 +1,103 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the execution of a Python script that uses the ROT cipher for letters substitution. Adversaries may use this method to encode and obfuscate part of their malicious code in legit python packages.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.process-*",
+      "logs-endpoint.events.file-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "ROT Encoded Python Script Execution",
+    "query": "sequence by process.entity_id with maxspan=1m\n [process where host.os.type in (\"windows\", \"macos\") and event.type == \"start\" and process.name : \"python*\"]\n [file where host.os.type in (\"windows\", \"macos\") and\n  event.action != \"deletion\" and process.name : \"python*\" and file.name : \"rot_??.cpython-*.pyc*\"]\n",
+    "references": [
+      "https://www.elastic.co/security-labs/dprk-code-of-conduct",
+      "https://www.reversinglabs.com/blog/fake-recruiter-coding-tests-target-devs-with-malicious-python-packages"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "file.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.entity_id",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "5ab49127-b1b3-46e6-8a38-9e8512a2a363",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "OS: macOS",
+      "Use Case: Threat Detection",
+      "Tactic: Defense Evasion",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1140",
+            "name": "Deobfuscate/Decode Files or Information",
+            "reference": "https://attack.mitre.org/techniques/T1140/"
+          },
+          {
+            "id": "T1027",
+            "name": "Obfuscated Files or Information",
+            "reference": "https://attack.mitre.org/techniques/T1027/",
+            "subtechnique": [
+              {
+                "id": "T1027.013",
+                "name": "Encrypted/Encoded File",
+                "reference": "https://attack.mitre.org/techniques/T1027/013/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "type": "eql",
+    "version": 1
+  },
+  "id": "5ab49127-b1b3-46e6-8a38-9e8512a2a363_1",
+  "type": "security-rule"
+}

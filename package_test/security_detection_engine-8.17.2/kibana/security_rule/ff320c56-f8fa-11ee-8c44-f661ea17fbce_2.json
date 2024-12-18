@@ -1,0 +1,93 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies an expiration lifecycle configuration added to an S3 bucket. Lifecycle configurations can be used to manage objects in a bucket, including setting expiration policies. This rule detects when a lifecycle configuration is added to an S3 bucket, which could indicate that objects in the bucket will be automatically deleted after a specified period of time. This could be used to evade detection by deleting objects that contain evidence of malicious activity.",
+    "false_positives": [
+      "Bucket components may be deleted or adjusted by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Bucket component deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    ],
+    "from": "now-60m",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail*"
+    ],
+    "interval": "10m",
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "AWS S3 Bucket Expiration Lifecycle Configuration Added",
+    "note": "## Triage and Analysis\n\n### Investigating AWS S3 Bucket Expiration Lifecycle Configuration Added\n\nThis rule detects when an expiration lifecycle configuration is added to an S3 bucket in AWS. Such configurations can automate the deletion of objects within a bucket after a specified period, potentially obfuscating evidence of unauthorized access or malicious activity by automatically removing logs or other data.\n\n#### Detailed Investigation Steps\n\n- **Review the Affected S3 Bucket**: Check the bucket details (`bucketName`) where the lifecycle configuration has been added.\n    - Determine the contents and importance of the data stored in this bucket to assess the impact of the lifecycle policy.\n- **Analyze the Lifecycle Configuration**:\n  - **Expiration Policy**: Note the `Days` parameter under `Expiration` in the lifecycle rule. This indicates how long after creation data will remain in the bucket before being automatically deleted.\n  - **Rule ID and Status**: Review the `ID` and `Status` of the lifecycle rule to understand its operational scope and activation status.\n- **User Identity and Activity**:\n  - **User Details**: Investigate the user (`user_identity.arn`) who made the change. Determine whether this user's role typically involves managing S3 bucket configurations.\n  - **Authentication Details**: Examine the authentication method and whether the access key used (`access_key_id`) is routinely used for such configurations or if it has deviated from normal usage patterns.\n- **Source IP and User Agent**:\n  - **Source IP Address**: The IP address (`source.ip`) from which the request was made can provide clues about the geographical location of the requester. Determine if this location aligns with the user’s known locations.\n  - **User Agent**: Analyze the user agent string to understand the type of client or service that made the request, which can help identify scripted automation versus manual changes.\n\n#### Possible Indicators of Compromise or Misuse\n\n- **Frequent Changes**: Look for frequent modifications to lifecycle policies in the same or multiple buckets, which can indicate attempts to manipulate data retention dynamically.\n- **Unusual User Activity**: Activities that do not correlate with the user's typical behavior patterns, such as making changes during odd hours or from unusual locations, should be flagged for further investigation.\n\n### False Positive Analysis\n\n- Verify the operational requirements that might necessitate such lifecycle policies, especially in environments where data retention policies are strictly governed for compliance and cost-saving reasons.\n\n### Response and Remediation\n\n- **Immediate Review**: If the change was unauthorized, consider reverting the lifecycle configuration change immediately to prevent potential data loss.\n- **Enhance Monitoring**: Implement monitoring to alert on changes to lifecycle configurations across your S3 environments.\n- **User Education**: Ensure that users with access to critical resources like S3 buckets are aware of the best practices and company policies regarding data retention and security.\n\n### Additional Information\n\nFor further guidance on managing S3 lifecycle policies and ensuring compliance with organizational data retention and security policies, refer to the AWS official documentation on [S3 Lifecycle Configuration](https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-expire-general-considerations.html).\n",
+    "query": "event.dataset: \"aws.cloudtrail\" and event.provider: \"s3.amazonaws.com\" and\n    event.action: PutBucketLifecycle and event.outcome: success and\n    aws.cloudtrail.request_parameters: (*LifecycleConfiguration* and *Expiration=*)\n",
+    "references": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-expire-general-considerations.html"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.request_parameters",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "ff320c56-f8fa-11ee-8c44-f661ea17fbce",
+    "setup": "This rule requires S3 data events to be logged to CloudTrail. CloudTrail trails can be configured to log S3 data events in the AWS Management Console or using the AWS CLI.",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: Amazon S3",
+      "Use Case: Asset Visibility",
+      "Tactic: Defense Evasion"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1070",
+            "name": "Indicator Removal",
+            "reference": "https://attack.mitre.org/techniques/T1070/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 2
+  },
+  "id": "ff320c56-f8fa-11ee-8c44-f661ea17fbce_2",
+  "type": "security-rule"
+}

@@ -1,0 +1,107 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule monitors for the creation of a file, followed by its execution and self-deletion in a short timespan within a directory often used for malicious purposes by threat actors. This behavior is often used by malware to execute malicious code and delete itself to hide its tracks.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "File Creation, Execution and Self-Deletion in Suspicious Directory",
+        "query": "sequence by host.id, user.id with maxspan=1m\n  [file where host.os.type == \"linux\" and event.action == \"creation\" and \n   process.name in (\"curl\", \"wget\", \"fetch\", \"ftp\", \"sftp\", \"scp\", \"rsync\", \"ld\") and \n   file.path : (\"/dev/shm/*\", \"/run/shm/*\", \"/tmp/*\", \"/var/tmp/*\",\n     \"/run/*\", \"/var/run/*\", \"/var/www/*\", \"/proc/*/fd/*\")] by file.name\n  [process where host.os.type == \"linux\" and event.action == \"exec\" and event.type == \"start\" and \n   process.parent.name in (\"bash\", \"dash\", \"ash\", \"sh\", \"tcsh\", \"csh\", \"zsh\", \"ksh\", \"fish\")] by process.name\n  [file where host.os.type == \"linux\" and event.action == \"deletion\" and not process.name in (\"rm\", \"ld\") and \n   file.path : (\"/dev/shm/*\", \"/run/shm/*\", \"/tmp/*\", \"/var/tmp/*\",\n     \"/run/*\", \"/var/run/*\", \"/var/www/*\", \"/proc/*/fd/*\")] by file.name\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "09bc6c90-7501-494d-b015-5d988dc3f233",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Execution",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1059",
+                        "name": "Command and Scripting Interpreter",
+                        "reference": "https://attack.mitre.org/techniques/T1059/",
+                        "subtechnique": [
+                            {
+                                "id": "T1059.004",
+                                "name": "Unix Shell",
+                                "reference": "https://attack.mitre.org/techniques/T1059/004/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 1
+    },
+    "id": "09bc6c90-7501-494d-b015-5d988dc3f233_1",
+    "type": "security-rule"
+}

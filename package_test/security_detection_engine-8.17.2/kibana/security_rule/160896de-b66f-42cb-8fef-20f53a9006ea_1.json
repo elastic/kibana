@@ -1,0 +1,82 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "This rule detects modification of the CGroup release_agent file from inside a privileged container. The release_agent is a script that is executed at the termination of any process on that CGroup and is invoked from the host. A privileged container with SYS_ADMIN capabilities, enables a threat actor to mount a CGroup directory and modify the release_agent which could be used for further privilege escalation and container escapes to the host machine.",
+    "from": "now-6m",
+    "index": [
+      "logs-cloud_defend*"
+    ],
+    "interval": "5m",
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Potential Container Escape via Modified release_agent File",
+    "query": "file where event.module == \"cloud_defend\" and event.action == \"open\" and \nevent.type == \"change\" and file.name : \"release_agent\"\n",
+    "references": [
+      "https://blog.aquasec.com/threat-alert-container-escape",
+      "https://sysdig.com/blog/detecting-mitigating-cve-2022-0492-sysdig/",
+      "https://book.hacktricks.xyz/linux-hardening/privilege-escalation/docker-security/docker-breakout-privilege-escalation#privileged-escape-abusing-existent-release_agent-cve-2022-0492-poc1"
+    ],
+    "related_integrations": [
+      {
+        "package": "cloud_defend",
+        "version": "^1.0.5"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.module",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "file.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "160896de-b66f-42cb-8fef-20f53a9006ea",
+    "severity": "medium",
+    "tags": [
+      "Data Source: Elastic Defend for Containers",
+      "Domain: Container",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Privilege Escalation"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": [
+          {
+            "id": "T1611",
+            "name": "Escape to Host",
+            "reference": "https://attack.mitre.org/techniques/T1611/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "160896de-b66f-42cb-8fef-20f53a9006ea_1",
+  "type": "security-rule"
+}

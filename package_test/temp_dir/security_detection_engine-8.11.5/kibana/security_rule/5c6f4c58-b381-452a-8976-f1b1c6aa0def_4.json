@@ -1,0 +1,100 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule identifies when a User Account starts the Active Directory Replication Process for the first time. Attackers can use the DCSync technique to get credential information of individual accounts or the entire domain, thus compromising the entire domain.",
+        "from": "now-9m",
+        "history_window_start": "now-15d",
+        "index": [
+            "winlogbeat-*",
+            "logs-system.*",
+            "logs-windows.*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "FirstTime Seen Account Performing DCSync",
+        "new_terms_fields": [
+            "winlog.event_data.SubjectUserName"
+        ],
+        "note": "",
+        "query": "event.action:\"Directory Service Access\" and event.code:\"4662\" and\n winlog.event_data.Properties:(*DS-Replication-Get-Changes* or *DS-Replication-Get-Changes-All* or\n                               *DS-Replication-Get-Changes-In-Filtered-Set* or *1131f6ad-9c07-11d1-f79f-00c04fc2dcd2* or\n                               *1131f6aa-9c07-11d1-f79f-00c04fc2dcd2* or *89e95b76-444d-4c62-991a-0facbeda640c*) and\n not winlog.event_data.SubjectUserName:(*$ or MSOL_*)\n",
+        "references": [
+            "https://threathunterplaybook.com/notebooks/windows/06_credential_access/WIN-180815210510.html",
+            "https://threathunterplaybook.com/library/windows/active_directory_replication.html?highlight=dcsync#directory-replication-services-auditing",
+            "https://github.com/SigmaHQ/sigma/blob/master/rules/windows/builtin/security/win_ad_replication_non_machine_account.yml",
+            "https://github.com/atc-project/atomic-threat-coverage/blob/master/Atomic_Threat_Coverage/Logging_Policies/LP_0027_windows_audit_directory_service_access.md",
+            "https://attack.stealthbits.com/privilege-escalation-using-mimikatz-dcsync",
+            "https://www.thehacker.recipes/ad/movement/credentials/dumping/dcsync"
+        ],
+        "related_integrations": [
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.code",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.event_data.Properties",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.event_data.SubjectUserName",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "5c6f4c58-b381-452a-8976-f1b1c6aa0def",
+        "setup": "The 'Audit Directory Service Changes' logging policy must be configured for (Success, Failure).\nSteps to implement the logging policy with Advanced Audit Configuration:\n\n```\nComputer Configuration \u003e\nPolicies \u003e\nWindows Settings \u003e\nSecurity Settings \u003e\nAdvanced Audit Policies Configuration \u003e\nAudit Policies \u003e\nDS Access \u003e\nAudit Directory Service Changes (Success,Failure)\n```\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions \u003c8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
+        "severity": "high",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Credential Access",
+            "Use Case: Active Directory Monitoring",
+            "Data Source: Active Directory"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1003",
+                        "name": "OS Credential Dumping",
+                        "reference": "https://attack.mitre.org/techniques/T1003/",
+                        "subtechnique": [
+                            {
+                                "id": "T1003.006",
+                                "name": "DCSync",
+                                "reference": "https://attack.mitre.org/techniques/T1003/006/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "new_terms",
+        "version": 4
+    },
+    "id": "5c6f4c58-b381-452a-8976-f1b1c6aa0def_4",
+    "type": "security-rule"
+}

@@ -1,0 +1,100 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identify the modification of the msDS-KeyCredentialLink attribute in an Active Directory Computer or User Object. Attackers can abuse control over the object and create a key pair, append to raw public key in the attribute, and obtain persistent and stealthy access to the target user or computer object.",
+        "false_positives": [
+            "Modifications in the msDS-KeyCredentialLink attribute can be done legitimately by the Azure AD Connect synchronization account or the ADFS service account. These accounts can be added as Exceptions."
+        ],
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-system.*",
+            "logs-windows.*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Potential Shadow Credentials added to AD Object",
+        "note": "## Triage and analysis\n\n### Investigating Potential Shadow Credentials added to AD Object\n\nThe msDS-KeyCredentialLink is an Active Directory (AD) attribute that links cryptographic certificates to a user or computer for domain authentication.\n\nAttackers with write privileges on this attribute over an object can abuse it to gain access to the object or maintain persistence. This means they can authenticate and perform actions on behalf of the exploited identity, and they can use Shadow Credentials to request Ticket Granting Tickets (TGTs) on behalf of the identity.\n\n#### Possible investigation steps\n\n- Identify whether Windows Hello for Business (WHfB) and/or Azure AD is used in the environment.\n  - Review the event ID 4624 for logon events involving the subject identity (`winlog.event_data.SubjectUserName`).\n    - Check whether the `source.ip` is the server running Azure AD Connect.\n- Contact the account and system owners and confirm whether they are aware of this activity.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Review the event IDs 4768 and 4769 for suspicious ticket requests involving the modified identity (`winlog.event_data.ObjectDN`).\n  - Extract the source IP addresses from these events and use them as indicators of compromise (IoCs) to investigate whether the host is compromised and to scope the attacker's access to the environment.\n\n### False positive analysis\n\n- Administrators might use custom accounts on Azure AD Connect. If this is the case, make sure the account is properly secured. You can also create an exception for the account if expected activity makes too much noise in your environment.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n  - Remove the Shadow Credentials from the object.\n- Investigate how the attacker escalated privileges and identify systems they used to conduct lateral movement. Use this information to determine ways the attacker could regain access to the environment.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).",
+        "query": "event.action:\"Directory Service Changes\" and event.code:\"5136\" and\n winlog.event_data.AttributeLDAPDisplayName:\"msDS-KeyCredentialLink\" and winlog.event_data.AttributeValue :B\\:828* and\n not winlog.event_data.SubjectUserName: MSOL_*\n",
+        "references": [
+            "https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab",
+            "https://www.thehacker.recipes/ad/movement/kerberos/shadow-credentials",
+            "https://github.com/OTRF/Set-AuditRule",
+            "https://cyberstoph.org/posts/2022/03/detecting-shadow-credentials/"
+        ],
+        "related_integrations": [
+            {
+                "package": "system",
+                "version": "^1.6.4"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.code",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.event_data.AttributeLDAPDisplayName",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.event_data.AttributeValue",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.event_data.SubjectUserName",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "79f97b31-480e-4e63-a7f4-ede42bf2c6de",
+        "setup": "The 'Audit Directory Service Changes' logging policy must be configured for (Success, Failure).\nSteps to implement the logging policy with Advanced Audit Configuration:\n\n```\nComputer Configuration \u003e\nPolicies \u003e\nWindows Settings \u003e\nSecurity Settings \u003e\nAdvanced Audit Policies Configuration \u003e\nAudit Policies \u003e\nDS Access \u003e\nAudit Directory Service Changes (Success,Failure)\n```\n\nThe above policy does not cover User objects, so we need to set up an AuditRule using https://github.com/OTRF/Set-AuditRule.\nAs this specifies the msDS-KeyCredentialLink Attribute GUID, it is expected to be low noise.\n\n```\nSet-AuditRule -AdObjectPath 'AD:\\CN=Users,DC=Domain,DC=com' -WellKnownSidType WorldSid -Rights WriteProperty -InheritanceFlags Children -AttributeGUID 5b47d60f-6090-40b2-9f37-2a4de88f3063 -AuditFlags Success\n```",
+        "severity": "high",
+        "tags": [
+            "Elastic",
+            "Host",
+            "Windows",
+            "Threat Detection",
+            "Credential Access",
+            "Active Directory",
+            "Investigation Guide"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1556",
+                        "name": "Modify Authentication Process",
+                        "reference": "https://attack.mitre.org/techniques/T1556/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 105
+    },
+    "id": "79f97b31-480e-4e63-a7f4-ede42bf2c6de_105",
+    "type": "security-rule"
+}

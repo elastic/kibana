@@ -1,0 +1,91 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "This rule identifies the execution of commands that can be used to delete files and directories. Adversaries may delete files and directories on a host system, such as logs, browser history, or malware.",
+        "from": "now-119m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "File or Directory Deletion Command",
+        "query": "process where host.os.type == \"windows\" and event.type == \"start\" and \n(\n  (process.name: \"rundll32.exe\" and process.args: \"*InetCpl.cpl,Clear*\") or \n  (process.name: \"reg.exe\" and process.args:\"delete\") or \n  (\n    process.name: \"cmd.exe\" and process.args: (\"*rmdir*\", \"*rm *\", \"rm\") and\n    not process.args : (\n          \"*\\\\AppData\\\\Local\\\\Microsoft\\\\OneDrive\\\\*\",\n          \"*\\\\AppData\\\\Local\\\\Temp\\\\DockerDesktop\\\\*\",\n          \"*\\\\AppData\\\\Local\\\\Temp\\\\Report.*\",\n          \"*\\\\AppData\\\\Local\\\\Temp\\\\*.PackageExtraction\"\n    )\n  ) or\n  (process.name: \"powershell.exe\" and process.args: (\"*rmdir\", \"rm\", \"rd\", \"*Remove-Item*\", \"del\", \"*]::Delete(*\"))\n) and not user.id : \"S-1-5-18\"\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "5919988c-29e1-4908-83aa-1f087a838f63",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Rule Type: BBR",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1070",
+                        "name": "Indicator Removal",
+                        "reference": "https://attack.mitre.org/techniques/T1070/",
+                        "subtechnique": [
+                            {
+                                "id": "T1070.004",
+                                "name": "File Deletion",
+                                "reference": "https://attack.mitre.org/techniques/T1070/004/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "5919988c-29e1-4908-83aa-1f087a838f63_2",
+    "type": "security-rule"
+}

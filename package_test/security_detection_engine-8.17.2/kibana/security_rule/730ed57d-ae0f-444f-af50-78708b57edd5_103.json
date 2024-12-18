@@ -1,0 +1,143 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies suspicious processes being spawned by the JetBrain TeamCity process. This activity could be related to JetBrains remote code execution vulnerabilities.",
+    "false_positives": [
+      "Powershell and Windows Command Shell are often observed as legit child processes of the Jetbrains TeamCity service and may require further tuning."
+    ],
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.process-*",
+      "winlogbeat-*",
+      "logs-windows.forwarded*",
+      "logs-windows.sysmon_operational-*",
+      "endgame-*",
+      "logs-system.security*",
+      "logs-m365_defender.event-*",
+      "logs-sentinel_one_cloud_funnel.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Suspicious JetBrains TeamCity Child Process",
+    "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n  process.parent.executable :\n                 (\"?:\\\\TeamCity\\\\jre\\\\bin\\\\java.exe\",\n                  \"?:\\\\Program Files\\\\TeamCity\\\\jre\\\\bin\\\\java.exe\",\n                  \"?:\\\\Program Files (x86)\\\\TeamCity\\\\jre\\\\bin\\\\java.exe\",\n                  \"?:\\\\TeamCity\\\\BuildAgent\\\\jre\\\\bin\\\\java.exe\") and\n  process.name : (\"cmd.exe\", \"powershell.exe\", \"msiexec.exe\", \"certutil.exe\", \"bitsadmin.exe\", \"wmic.exe\", \"curl.exe\", \"ssh.exe\",\n                   \"rundll32.exe\", \"regsvr32.exe\", \"mshta.exe\", \"certreq.exe\", \"net.exe\", \"nltest.exe\", \"whoami.exe\", \"hostname.exe\",\n                   \"tasklist.exe\", \"arp.exe\", \"nbtstat.exe\", \"netstat.exe\", \"reg.exe\", \"tasklist.exe\", \"Microsoft.Workflow.Compiler.exe\",\n                   \"arp.exe\", \"atbroker.exe\", \"bginfo.exe\", \"bitsadmin.exe\", \"cdb.exe\", \"cmstp.exe\", \"control.exe\", \"cscript.exe\", \"csi.exe\",\n                   \"dnx.exe\", \"dsget.exe\", \"dsquery.exe\", \"forfiles.exe\", \"fsi.exe\", \"ftp.exe\", \"gpresult.exe\", \"ieexec.exe\", \"iexpress.exe\",\n                   \"installutil.exe\", \"ipconfig.exe\",\"msxsl.exe\", \"netsh.exe\", \"odbcconf.exe\", \"ping.exe\", \"pwsh.exe\", \"qprocess.exe\",\n                   \"quser.exe\", \"qwinsta.exe\", \"rcsi.exe\", \"regasm.exe\", \"regsvcs.exe\", \"regsvr32.exe\", \"sc.exe\", \"schtasks.exe\",\n                   \"systeminfo.exe\", \"tracert.exe\", \"wmic.exe\", \"wscript.exe\",\"xwizard.exe\", \"explorer.exe\", \"msdt.exe\") and\n not (process.name : \"powershell.exe\" and process.args : \"-ExecutionPolicy\" and process.args : \"?:\\\\TeamCity\\\\buildAgent\\\\work\\\\*.ps1\") and\n not (process.name : \"cmd.exe\" and process.args : \"dir\" and process.args : \"/-c\")\n",
+    "references": [
+      "https://www.trendmicro.com/en_us/research/24/c/teamcity-vulnerability-exploits-lead-to-jasmin-ransomware.html"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^1.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.executable",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "730ed57d-ae0f-444f-af50-78708b57edd5",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Initial Access",
+      "Data Source: Elastic Endgame",
+      "Use Case: Vulnerability",
+      "Data Source: Elastic Defend",
+      "Data Source: Microsoft Defender for Endpoint",
+      "Data Source: System",
+      "Data Source: Sysmon",
+      "Data Source: SentinelOne"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0001",
+          "name": "Initial Access",
+          "reference": "https://attack.mitre.org/tactics/TA0001/"
+        },
+        "technique": [
+          {
+            "id": "T1190",
+            "name": "Exploit Public-Facing Application",
+            "reference": "https://attack.mitre.org/techniques/T1190/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1059",
+            "name": "Command and Scripting Interpreter",
+            "reference": "https://attack.mitre.org/techniques/T1059/",
+            "subtechnique": [
+              {
+                "id": "T1059.001",
+                "name": "PowerShell",
+                "reference": "https://attack.mitre.org/techniques/T1059/001/"
+              },
+              {
+                "id": "T1059.003",
+                "name": "Windows Command Shell",
+                "reference": "https://attack.mitre.org/techniques/T1059/003/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 103
+  },
+  "id": "730ed57d-ae0f-444f-af50-78708b57edd5_103",
+  "type": "security-rule"
+}

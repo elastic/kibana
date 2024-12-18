@@ -1,0 +1,94 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects sign-in events where authentication is carried out via a third-party Identity Provider (IdP).",
+        "from": "now-30m",
+        "index": [
+            "filebeat-*",
+            "logs-okta*"
+        ],
+        "interval": "15m",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Okta Sign-In Events via Third-Party IdP",
+        "note": "## Triage and analysis\n\n### Investigating Okta Sign-In Events via Third-Party IdP\n\nThis rule detects sign-in events where authentication is carried out via a third-party Identity Provider (IdP).\n\nAdversaries may attempt to add an unauthorized IdP to an Okta tenant to gain access to the tenant. Following this action, adversaries may attempt to sign in to the tenant using the unauthorized IdP. This rule detects both the addition of an unauthorized IdP and the subsequent sign-in attempt.\n\n#### Possible investigation steps:\n- Identify the third-party IdP by examining the `okta.authentication_context.issuer.id` field.\n- Once the third-party IdP is identified, determine if this IdP is authorized to be used by the tenant.\n- If the IdP is unauthorized, deactivate it immediately via the Okta console.\n- Identify the actor associated with the IdP creation by examining the `okta.actor.id`, `okta.actor.type`, `okta.actor.alternate_id`, and `okta.actor.display_name` fields in historical data.\n    - The `New Okta Identity Provider (IdP) Added by Admin` rule may be helpful in identifying the actor and the IdP creation event.\n- Determine the client used by the actor. Review the `okta.client.ip`, `okta.client.user_agent.raw_user_agent`, `okta.client.zone`, `okta.client.device`, and `okta.client.id` fields.\n- If the client is a device, check the `okta.device.id`, `okta.device.name`, `okta.device.os_platform`, `okta.device.os_version`, and `okta.device.managed` fields.\n- Review the past activities of the actor involved in this action by checking their previous actions logged in the `okta.target` field.\n- Examine the `okta.request.ip_chain` field to potentially determine if the actor used a proxy or VPN to perform this action.\n- Evaluate the actions that happened just before and after this event in the `okta.event_type` field to help understand the full context of the activity.\n\n### False positive analysis:\n- It might be a false positive if this IdP is authorized to be used by the tenant.\n- This may be a false positive if an authorized third-party IdP is used to sign in to the tenant but failures occurred due to an incorrect configuration.\n\n### Response and remediation:\n- If the IdP is unauthorized, deactivate it immediately via the Okta console.\n- Reset the effected user's password and enforce MFA re-enrollment, if applicable.\n- Mobile device forensics may be required to determine if the user's device is compromised.\n- If the IdP is authorized, ensure that the actor who created it is authorized to do so.\n- If the actor is unauthorized, deactivate their account via the Okta console.\n- If the actor is authorized, ensure that the actor's account is not compromised.\n\n- Block the IP address or device used in the attempts if they appear suspicious, using the data from the `okta.client.ip` and `okta.device.id` fields.\n- Conduct a review of Okta policies and ensure they are in accordance with security best practices.\n- If the deactivated IdP was crucial to the organization, consider adding a new IdP and removing the unauthorized IdP.",
+        "query": "event.dataset:okta.system and okta.debug_context.debug_data.request_uri:/oauth2/v1/authorize/callback and\n    (not okta.authentication_context.issuer.id:Okta and event.action:(user.authentication.auth_via_IDP\n        or user.authentication.auth_via_inbound_SAML\n        or user.authentication.auth_via_mfa\n        or user.authentication.auth_via_social)\n        or event.action:user.session.start) or\n    (event.action:user.authentication.auth_via_IDP and okta.outcome.result:FAILURE\n        and okta.outcome.reason:(\"A SAML assert with the same ID has already been processed by Okta for a previous request\"\n            or \"Unable to match transformed username\"\n            or \"Unable to resolve IdP endpoint\"\n            or \"Unable to validate SAML Response\"\n            or \"Unable to validate incoming SAML Assertion\"))\n",
+        "references": [
+            "https://blog.cloudflare.com/cloudflare-investigation-of-the-january-2022-okta-compromise/",
+            "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy",
+            "https://sec.okta.com/articles/2023/08/cross-tenant-impersonation-prevention-and-detection",
+            "https://unit42.paloaltonetworks.com/muddled-libra/"
+        ],
+        "related_integrations": [
+            {
+                "package": "okta",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "okta.authentication_context.issuer.id",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "okta.debug_context.debug_data.request_uri",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "okta.outcome.reason",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "okta.outcome.result",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "1ceb05c4-7d25-11ee-9562-f661ea17fbcd",
+        "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "medium",
+        "tags": [
+            "Use Case: Identity and Access Audit",
+            "Tactic: Initial Access",
+            "Data Source: Okta"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0001",
+                    "name": "Initial Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0001/"
+                },
+                "technique": [
+                    {
+                        "id": "T1199",
+                        "name": "Trusted Relationship",
+                        "reference": "https://attack.mitre.org/techniques/T1199/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 1
+    },
+    "id": "1ceb05c4-7d25-11ee-9562-f661ea17fbcd_1",
+    "type": "security-rule"
+}

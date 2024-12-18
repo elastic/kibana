@@ -1,0 +1,108 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule detects an SSH or SSHD process executed from inside a container. This includes both the client ssh binary and server ssh daemon process. SSH usage inside a container should be avoided and monitored closely when necessary. With valid credentials an attacker may move laterally to other containers or to the underlying host through container breakout. They may also use valid SSH credentials as a persistence mechanism.",
+        "false_positives": [
+            "SSH usage may be legitimate depending on the environment. Access patterns and follow-on activity should be analyzed to distinguish between authorized and potentially malicious behavior."
+        ],
+        "from": "now-6m",
+        "index": [
+            "logs-cloud_defend*"
+        ],
+        "interval": "5m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "SSH Process Launched From Inside A Container",
+        "query": "process where container.id: \"*\" and event.type== \"start\" and\nevent.action in (\"fork\", \"exec\") and event.action != \"end\" and \nprocess.name: (\"sshd\", \"ssh\", \"autossh\")\n",
+        "references": [
+            "https://microsoft.github.io/Threat-Matrix-for-Kubernetes/techniques/SSH%20server%20running%20inside%20container/",
+            "https://www.blackhillsinfosec.com/sshazam-hide-your-c2-inside-of-ssh/"
+        ],
+        "related_integrations": [
+            {
+                "package": "cloud_defend",
+                "version": "^1.0.5"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "container.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "03a514d9-500e-443e-b6a9-72718c548f6c",
+        "severity": "high",
+        "tags": [
+            "Elastic",
+            "Host",
+            "Linux",
+            "Threat Detection",
+            "Lateral Movement",
+            "Persistence",
+            "Container"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0008",
+                    "name": "Lateral Movement",
+                    "reference": "https://attack.mitre.org/tactics/TA0008/"
+                },
+                "technique": [
+                    {
+                        "id": "T1021",
+                        "name": "Remote Services",
+                        "reference": "https://attack.mitre.org/techniques/T1021/",
+                        "subtechnique": [
+                            {
+                                "id": "T1021.004",
+                                "name": "SSH",
+                                "reference": "https://attack.mitre.org/techniques/T1021/004/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1133",
+                        "name": "External Remote Services",
+                        "reference": "https://attack.mitre.org/techniques/T1133/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "03a514d9-500e-443e-b6a9-72718c548f6c_1",
+    "type": "security-rule"
+}

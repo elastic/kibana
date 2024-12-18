@@ -1,0 +1,96 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies attempts to disable/modify the code signing policy through the registry. Code signing provides authenticity on a program, and grants the user with the ability to check whether the program has been tampered with. By allowing the execution of unsigned or self-signed code, threat actors can craft and execute malicious code.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-endpoint.events.*",
+            "logs-windows.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Code Signing Policy Modification Through Registry",
+        "query": "registry where host.os.type == \"windows\" and event.type : (\"creation\", \"change\") and\n(\n  registry.path : \"HKEY_USERS\\\\*\\\\Software\\\\Policies\\\\Microsoft\\\\Windows NT\\\\Driver Signing\\\\BehaviorOnFailedVerify\" and\n  registry.value: \"BehaviorOnFailedVerify\" and\n  registry.data.strings : (\"0\", \"0x00000000\", \"1\", \"0x00000001\")\n)\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "registry.data.strings",
+                "type": "wildcard"
+            },
+            {
+                "ecs": true,
+                "name": "registry.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "registry.value",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "da7733b1-fe08-487e-b536-0a04c6d8b0cd",
+        "severity": "medium",
+        "tags": [
+            "Elastic",
+            "Host",
+            "Windows",
+            "Threat Detection",
+            "Defense Evasion",
+            "Elastic Endgame"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1553",
+                        "name": "Subvert Trust Controls",
+                        "reference": "https://attack.mitre.org/techniques/T1553/",
+                        "subtechnique": [
+                            {
+                                "id": "T1553.006",
+                                "name": "Code Signing Policy Modification",
+                                "reference": "https://attack.mitre.org/techniques/T1553/006/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "da7733b1-fe08-487e-b536-0a04c6d8b0cd_2",
+    "type": "security-rule"
+}

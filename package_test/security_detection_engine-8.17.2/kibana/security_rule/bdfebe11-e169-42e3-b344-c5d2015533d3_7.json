@@ -1,0 +1,64 @@
+{
+  "attributes": {
+    "anomaly_threshold": 75,
+    "author": [
+      "Elastic"
+    ],
+    "description": "A machine learning job combination has detected a set of one or more suspicious Windows processes with unusually high scores for malicious probability. These process(es) have been classified as malicious in several ways. The process(es) were predicted to be malicious by the ProblemChild supervised ML model. If the anomaly contains a cluster of suspicious processes, each process has the same host name, and the aggregate score of the event cluster was calculated to be unusually high by an unsupervised ML model. Such a cluster often contains suspicious or malicious activity, possibly involving LOLbins, that may be resistant to detection using conventional search rules.",
+    "from": "now-45m",
+    "interval": "15m",
+    "license": "Elastic License v2",
+    "machine_learning_job_id": "problem_child_high_sum_by_host",
+    "name": "Suspicious Windows Process Cluster Spawned by a Host",
+    "references": [
+      "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html",
+      "https://docs.elastic.co/en/integrations/problemchild",
+      "https://www.elastic.co/security-labs/detecting-living-off-the-land-attacks-with-new-elastic-integration"
+    ],
+    "related_integrations": [
+      {
+        "package": "problemchild",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "bdfebe11-e169-42e3-b344-c5d2015533d3",
+    "setup": "## Setup\n\nThe rule requires the Living off the Land (LotL) Attack Detection integration assets to be installed, as well as Windows process events collected by integrations such as Elastic Defend or Winlogbeat.  \n\n### LotL Attack Detection Setup\nThe LotL Attack Detection integration detects living-off-the-land activity in Windows process events.\n\n#### Prerequisite Requirements:\n- Fleet is required for LotL Attack Detection.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n- Windows process events collected by the [Elastic Defend](https://docs.elastic.co/en/integrations/endpoint) integration or Winlogbeat(https://www.elastic.co/guide/en/beats/winlogbeat/current/_winlogbeat_overview.html).\n- To install Elastic Defend, refer to the [documentation](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n- To set up and run Winlogbeat, follow [this](https://www.elastic.co/guide/en/beats/winlogbeat/current/winlogbeat-installation-configuration.html) guide.\n\n#### The following steps should be executed to install assets associated with the LotL Attack Detection integration:\n- Go to the Kibana homepage. Under Management, click Integrations.\n- In the query bar, search for Living off the Land Attack Detection and select the integration to see more details about it.\n- Follow the instructions under the **Installation** section.\n- For this rule to work, complete the instructions through **Add preconfigured anomaly detection jobs**.\n",
+    "severity": "low",
+    "tags": [
+      "Use Case: Living off the Land Attack Detection",
+      "Rule Type: ML",
+      "Rule Type: Machine Learning",
+      "Tactic: Defense Evasion"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1036",
+            "name": "Masquerading",
+            "reference": "https://attack.mitre.org/techniques/T1036/"
+          }
+        ]
+      }
+    ],
+    "type": "machine_learning",
+    "version": 7
+  },
+  "id": "bdfebe11-e169-42e3-b344-c5d2015533d3_7",
+  "type": "security-rule"
+}

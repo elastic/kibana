@@ -1,0 +1,98 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects potential exploitation of curl CVE-2023-38545 by monitoring for vulnerable command line arguments in conjunction with an unusual command line length. A flaw in curl version \u003c= 8.3 makes curl vulnerable to a heap based buffer overflow during the SOCKS5 proxy handshake. Upgrade to curl version \u003e= 8.4 to patch this vulnerability. This exploit can be executed with and without the use of environment variables. For increased visibility, enable the collection of http_proxy, HTTPS_PROXY and ALL_PROXY environment variables based on the instructions provided in the setup guide of this rule.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential curl CVE-2023-38545 Exploitation",
+        "query": "process where host.os.type == \"linux\" and event.action == \"exec\" and event.type == \"start\" and process.name == \"curl\" \nand (\n  process.args : (\"--socks5-hostname\", \"--proxy\", \"--preproxy\", \"socks5*\") or \n  process.env_vars: (\"http_proxy=socks5h://*\", \"HTTPS_PROXY=socks5h://*\", \"ALL_PROXY=socks5h://*\")\n) and length(process.command_line) \u003e 255\n",
+        "references": [
+            "https://curl.se/docs/CVE-2023-38545.html",
+            "https://daniel.haxx.se/blog/2023/10/11/curl-8-4-0/",
+            "https://twitter.com/_JohnHammond/status/1711986412554531015"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.command_line",
+                "type": "wildcard"
+            },
+            {
+                "ecs": true,
+                "name": "process.env_vars",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "f41296b4-9975-44d6-9486-514c6f635b2d",
+        "setup": "\nThis rule requires data coming in from Elastic Defend.\n\n### Elastic Defend Integration Setup\nElastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows\nthe Elastic Agent to monitor events on your host and send data to the Elastic Security app.\n\n#### Prerequisite Requirements:\n- Fleet is required for Elastic Defend.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n\n#### The following steps should be executed in order to add the Elastic Defend integration on a Linux System:\n- Go to the Kibana home page and click Add integrations.\n- In the query bar, search for Elastic Defend and select the integration to see more details about it.\n- Click Add Elastic Defend.\n- Configure the integration name and optionally add a description.\n- Select the type of environment you want to protect, either Traditional Endpoints or Cloud Workloads.\n- Select a configuration preset. Each preset comes with different default settings for Elastic Agent, you can further customize these later by configuring the Elastic Defend integration policy. [Helper guide](https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html).\n- We suggest to select \"Complete EDR (Endpoint Detection and Response)\" as a configuration setting, that provides \"All events; all preventions\"\n- Enter a name for the agent policy in New agent policy name. If other agent policies already exist, you can click the Existing hosts tab and select an existing policy instead.\nFor more details on Elastic Agent configuration settings, refer to the [helper guide](https://www.elastic.co/guide/en/fleet/8.10/agent-policy.html).\n- Click Save and Continue.\n- To complete the integration, select Add Elastic Agent to your hosts and continue to the next section to install the Elastic Agent on your hosts.\nFor more details on Elastic Defend refer to the [helper guide](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n\nElastic Defend integration does not collect environment variable logging by default.\nIn order to capture this behavior, this rule requires a specific configuration option set within the advanced settings of the Elastic Defend integration.\n #### To set up environment variable capture for an Elastic Agent policy:\n- Go to Security \u2192 Manage \u2192 Policies.\n- Select an Elastic Agent policy.\n- Click Show advanced settings.\n- Scroll down or search for linux.advanced.capture_env_vars.\n- Enter the names of env vars you want to capture, separated by commas.\n- For this rule the linux.advanced.capture_env_vars variable should be set to \"http_proxy,HTTPS_PROXY,ALL_PROXY\".\n- Click Save.\nAfter saving the integration change, the Elastic Agents running this policy will be updated and\nthe rule will function properly.\nFor more information on capturing environment variables refer the [helper guide](https://www.elastic.co/guide/en/security/current/environment-variable-capture.html).\n\n",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Use Case: Vulnerability",
+            "Tactic: Execution",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1203",
+                        "name": "Exploitation for Client Execution",
+                        "reference": "https://attack.mitre.org/techniques/T1203/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "f41296b4-9975-44d6-9486-514c6f635b2d_2",
+    "type": "security-rule"
+}

@@ -1,0 +1,96 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects the usage of gpresult.exe to query group policy objects. Attackers may query group policy objects during the reconnaissance phase after compromising a system to gain a better understanding of the active directory environment and possible methods to escalate privileges or move laterally.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-endpoint.events.process-*",
+      "logs-windows.*",
+      "endgame-*",
+      "logs-system.security*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Group Policy Discovery via Microsoft GPResult Utility",
+    "note": "## Triage and analysis\n\n### Investigating Group Policy Discovery via Microsoft GPResult Utility\n\nGroup Policy is a Windows feature that allows administrators to manage and configure settings for users and computers in an Active Directory environment. The Microsoft GPResult utility (gpresult.exe) is a command-line tool used to query and display Group Policy Objects (GPOs) applied to a system. Attackers may abuse this utility to gain insights into the active directory environment and identify potential privilege escalation or lateral movement opportunities.\n\nThe detection rule 'Group Policy Discovery via Microsoft GPResult Utility' is designed to identify the usage of gpresult.exe with specific arguments (\"/z\", \"/v\", \"/r\", \"/x\") that are commonly used by adversaries during the reconnaissance phase to perform group policy discovery.\n\n#### Possible investigation steps\n\n- Review the alert details to understand the context of the gpresult.exe usage, such as the user account, system, and time of execution.\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Investigate any abnormal account behavior, such as command executions, file creations or modifications, and network connections.\n- Inspect the host for suspicious or abnormal behavior in the alert timeframe.\n- Validate the activity is not related to planned patches, updates, network administrator activity, or legitimate software installations.\n- Investigate any abnormal behavior by the parent process, such as network connections, registry or file modifications, and any other spawned child processes.\n\n### False positive analysis\n\n- Discovery activities are not inherently malicious if they occur in isolation. As long as the analyst did not identify suspicious activity related to the user or host, such alerts can be dismissed.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved hosts to prevent further post-compromise behavior.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Reimage the host operating system or restore the compromised files to clean versions.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection via the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+    "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n(process.name: \"gpresult.exe\" or ?process.pe.original_file_name == \"gprslt.exe\") and process.args: (\"/z\", \"/v\", \"/r\", \"/x\")\n",
+    "related_integrations": [
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.pe.original_file_name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "94a401ba-4fa2-455c-b7ae-b6e037afc0b7",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Discovery",
+      "Data Source: Elastic Endgame",
+      "Data Source: Elastic Defend",
+      "Data Source: System"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0007",
+          "name": "Discovery",
+          "reference": "https://attack.mitre.org/tactics/TA0007/"
+        },
+        "technique": [
+          {
+            "id": "T1615",
+            "name": "Group Policy Discovery",
+            "reference": "https://attack.mitre.org/techniques/T1615/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 10
+  },
+  "id": "94a401ba-4fa2-455c-b7ae-b6e037afc0b7_10",
+  "type": "security-rule"
+}

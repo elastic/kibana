@@ -1,0 +1,87 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies suspicious file download activity from a Google Drive URL. This could indicate an attempt to deliver phishing payloads via a trusted webservice.",
+    "false_positives": [
+      "Approved third-party applications that use Google Drive download URLs.",
+      "Legitimate publicly shared files from Google Drive."
+    ],
+    "from": "now-9m",
+    "index": [
+      "auditbeat-*",
+      "logs-endpoint*",
+      "logs-system.security*",
+      "winlogbeat-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Suspicious File Downloaded from Google Drive",
+    "query": "process where\n\n    /* common browser processes  */\n    event.action in (\"exec\", \"fork\", \"start\") and \n\n    process.name : (\"Microsoft Edge\", \"chrome.exe\", \"Google Chrome\", \"google-chrome-stable\", \n                    \"google-chrome-beta\", \"google-chrome\", \"msedge.exe\", \"firefox.exe\", \"brave.exe\", \n                    \"whale.exe\", \"browser.exe\", \"dragon.exe\", \"vivaldi.exe\", \"opera.exe\", \"firefox\", \n                    \"powershell.exe\", \"curl\", \"curl.exe\", \"wget\", \"wget.exe\") and \n\n    /* Look for Google Drive download URL with AV flag skipping */\n    (process.command_line : \"*drive.google.com*\" and process.command_line : \"*export=download*\" and process.command_line : \"*confirm=no_antivirus*\")\n",
+    "references": [
+      "https://intelligence.abnormalsecurity.com/blog/google-drive-matanbuchus-malware"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.command_line",
+        "type": "wildcard"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "a8afdce2-0ec1-11ee-b843-f661ea17fbcd",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Linux",
+      "OS: Windows",
+      "OS: macOS",
+      "Use Case: Threat Detection",
+      "Tactic: Command and Control",
+      "Data Source: System"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0011",
+          "name": "Command and Control",
+          "reference": "https://attack.mitre.org/tactics/TA0011/"
+        },
+        "technique": [
+          {
+            "id": "T1105",
+            "name": "Ingress Tool Transfer",
+            "reference": "https://attack.mitre.org/techniques/T1105/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 4
+  },
+  "id": "a8afdce2-0ec1-11ee-b843-f661ea17fbcd_4",
+  "type": "security-rule"
+}

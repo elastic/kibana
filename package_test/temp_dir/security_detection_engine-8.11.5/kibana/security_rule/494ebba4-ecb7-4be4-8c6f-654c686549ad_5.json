@@ -1,0 +1,93 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies the attempt to create a new backdoor user by setting the user's UID to 0. Attackers may alter a user's UID to 0 to establish persistence on a system.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Linux Backdoor User Account Creation",
+        "note": "## Triage and analysis\n\n### Investigating Potential Linux Backdoor User Account Creation\n\nThe `usermod` command is used to modify user account attributes and settings in Linux-based operating systems.\n\nAttackers may create new accounts with a UID of 0 to maintain root access to target systems without leveraging the root user account.\n\nThis rule identifies the usage of the `usermod` command to set a user's UID to 0, indicating that the user becomes a root account. \n\n\u003e **Note**:\n\u003e This investigation guide uses the [Osquery Markdown Plugin](https://www.elastic.co/guide/en/security/master/invest-guide-run-osquery.html) introduced in Elastic Stack version 8.5.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n\u003e This investigation guide uses [placeholder fields](https://www.elastic.co/guide/en/security/current/osquery-placeholder-fields.html) to dynamically pass alert data into Osquery queries. Placeholder fields were introduced in Elastic Stack version 8.7.0. If you're using Elastic Stack version 8.6.0 or earlier, you'll need to manually adjust this investigation guide's queries to ensure they properly run.\n\n#### Possible investigation steps\n- Investigate the user account that got assigned a uid of 0, and analyze its corresponding attributes.\n  - !{osquery{\"label\":\"Osquery - Retrieve User Accounts with a UID of 0\",\"query\":\"SELECT description, gid, gid_signed, shell, uid, uid_signed, username FROM users WHERE username != 'root' AND uid LIKE '0'\"}}\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence and whether they are located in expected locations.\n  - !{osquery{\"label\":\"Osquery - Retrieve Running Processes by User\",\"query\":\"SELECT pid, username, name FROM processes p JOIN users u ON u.uid = p.uid ORDER BY username\"}}\n- Identify the user account that performed the action, analyze it, and check whether it should perform this kind of action.\n  - !{osquery{\"label\":\"Osquery - Retrieve Information for a Specific User\",\"query\":\"SELECT * FROM users WHERE username = {{user.name}}\"}}\n- Investigate whether the user is currently logged in and active.\n  - !{osquery{\"label\":\"Osquery - Investigate the Account Authentication Status\",\"query\":\"SELECT * FROM logged_in_users WHERE user = {{user.name}}\"}}\n- Identify if the account was added to privileged groups or assigned special privileges after creation.\n  - !{osquery{\"label\":\"Osquery - Retrieve Information for a Specific Group\",\"query\":\"SELECT * FROM groups WHERE groupname = {{group.name}}\"}}\n- Investigate other alerts associated with the user/host during the past 48 hours.\n\n### False positive analysis\n\n- This activity is unlikely to happen legitimately. Any activity that triggered the alert and is not inherently malicious must be monitored by the security team.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors like reverse shells, reverse proxies, or droppers that attackers could use to reinfect the system.\n- Remove and block malicious artifacts identified during triage.\n- Review the privileges assigned to the involved users to ensure that the least privilege principle is being followed.\n- Delete the created account.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Leverage the incident response data and logging to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n\n",
+        "query": "process where host.os.type == \"linux\" and event.type == \"start\" and\nevent.action in (\"exec\", \"exec_event\") and process.name == \"usermod\" and\nprocess.args : \"-u\" and process.args : \"0\" and process.args : \"-o\"\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "494ebba4-ecb7-4be4-8c6f-654c686549ad",
+        "setup": "\nThis rule requires data coming in from Elastic Defend.\n\n### Elastic Defend Integration Setup\nElastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.\n\n#### Prerequisite Requirements:\n- Fleet is required for Elastic Defend.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n\n#### The following steps should be executed in order to add the Elastic Defend integration on a Linux System:\n- Go to the Kibana home page and click \"Add integrations\".\n- In the query bar, search for \"Elastic Defend\" and select the integration to see more details about it.\n- Click \"Add Elastic Defend\".\n- Configure the integration name and optionally add a description.\n- Select the type of environment you want to protect, either \"Traditional Endpoints\" or \"Cloud Workloads\".\n- Select a configuration preset. Each preset comes with different default settings for Elastic Agent, you can further customize these later by configuring the Elastic Defend integration policy. [Helper guide](https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html).\n- We suggest selecting \"Complete EDR (Endpoint Detection and Response)\" as a configuration setting, that provides \"All events; all preventions\"\n- Enter a name for the agent policy in \"New agent policy name\". If other agent policies already exist, you can click the \"Existing hosts\" tab and select an existing policy instead.\nFor more details on Elastic Agent configuration settings, refer to the [helper guide](https://www.elastic.co/guide/en/fleet/8.10/agent-policy.html).\n- Click \"Save and Continue\".\n- To complete the integration, select \"Add Elastic Agent to your hosts\" and continue to the next section to install the Elastic Agent on your hosts.\nFor more details on Elastic Defend refer to the [helper guide](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n\n",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Data Source: Elastic Endgame",
+            "Resources: Investigation Guide",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1136",
+                        "name": "Create Account",
+                        "reference": "https://attack.mitre.org/techniques/T1136/",
+                        "subtechnique": [
+                            {
+                                "id": "T1136.001",
+                                "name": "Local Account",
+                                "reference": "https://attack.mitre.org/techniques/T1136/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 5
+    },
+    "id": "494ebba4-ecb7-4be4-8c6f-654c686549ad_5",
+    "type": "security-rule"
+}

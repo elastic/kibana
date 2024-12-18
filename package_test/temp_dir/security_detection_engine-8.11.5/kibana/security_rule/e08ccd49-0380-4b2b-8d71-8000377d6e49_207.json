@@ -1,0 +1,79 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic",
+            "@BenB196",
+            "Austin Songer"
+        ],
+        "description": "Identifies when an Okta user account is locked out 3 times within a 3 hour window. An adversary may attempt a brute force or password spraying attack to obtain unauthorized access to user accounts. The default Okta authentication policy ensures that a user account is locked out after 10 failed authentication attempts.",
+        "from": "now-180m",
+        "index": [
+            "filebeat-*",
+            "logs-okta*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Attempts to Brute Force an Okta User Account",
+        "note": "## Triage and analysis\n\n### Investigating Attempts to Brute Force an Okta User Account\n\nBrute force attacks aim to guess user credentials through exhaustive trial-and-error attempts. In this context, Okta accounts are targeted.\n\nThis rule fires when an Okta user account has been locked out 3 times within a 3-hour window. This could indicate an attempted brute force or password spraying attack to gain unauthorized access to the user account. Okta's default authentication policy locks a user account after 10 failed authentication attempts.\n\n#### Possible investigation steps:\n\n- Identify the actor related to the alert by reviewing `okta.actor.alternate_id` field in the alert. This should give the username of the account being targeted.\n- Review the `okta.event_type` field to understand the nature of the events that led to the account lockout.\n- Check the `okta.severity` and `okta.display_message` fields for more context around the lockout events.\n- Look for correlation of events from the same IP address. Multiple lockouts from the same IP address might indicate a single source for the attack.\n- If the IP is not familiar, investigate it. The IP could be a proxy, VPN, Tor node, cloud datacenter, or a legitimate IP turned malicious.\n- Determine if the lockout events occurred during the user's regular activity hours. Unusual timing may indicate malicious activity.\n- Examine the authentication methods used during the lockout events by checking the `okta.authentication_context.credential_type` field.\n\n### False positive analysis:\n\n- Determine whether the account owner or an internal user made repeated mistakes in entering their credentials, leading to the account lockout.\n- Ensure there are no known network or application issues that might cause these events.\n\n### Response and remediation:\n\n- Alert the user and your IT department immediately.\n- If unauthorized access is confirmed, initiate your incident response process.\n- Investigate the source of the attack. If a specific machine or network is compromised, additional steps may need to be taken to address the issue.\n- Require the affected user to change their password.\n- If the attack is ongoing, consider blocking the IP address initiating the brute force attack.\n- Implement account lockout policies to limit the impact of brute force attacks.\n- Encourage users to use complex, unique passwords and consider implementing multi-factor authentication.\n- Check if the compromised account was used to access or alter any sensitive data or systems.",
+        "query": "event.dataset:okta.system and event.action:user.account.lock\n",
+        "references": [
+            "https://developer.okta.com/docs/reference/api/system-log/",
+            "https://developer.okta.com/docs/reference/api/event-types/",
+            "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy"
+        ],
+        "related_integrations": [
+            {
+                "package": "okta",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "e08ccd49-0380-4b2b-8d71-8000377d6e49",
+        "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "medium",
+        "tags": [
+            "Use Case: Identity and Access Audit",
+            "Tactic: Credential Access",
+            "Data Source: Okta"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1110",
+                        "name": "Brute Force",
+                        "reference": "https://attack.mitre.org/techniques/T1110/"
+                    }
+                ]
+            }
+        ],
+        "threshold": {
+            "field": [
+                "okta.actor.alternate_id"
+            ],
+            "value": 3
+        },
+        "type": "threshold",
+        "version": 207
+    },
+    "id": "e08ccd49-0380-4b2b-8d71-8000377d6e49_207",
+    "type": "security-rule"
+}

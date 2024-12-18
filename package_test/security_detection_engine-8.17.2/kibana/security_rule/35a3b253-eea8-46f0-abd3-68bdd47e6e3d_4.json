@@ -1,0 +1,60 @@
+{
+  "attributes": {
+    "anomaly_threshold": 75,
+    "author": [
+      "Elastic"
+    ],
+    "description": "A machine learning job has detected high bytes of data written to an external device. In a typical operational setting, there is usually a predictable pattern or a certain range of data that is written to external devices. An unusually large amount of data being written is anomalous and can signal illicit data copying or transfer activities.",
+    "from": "now-2h",
+    "interval": "15m",
+    "license": "Elastic License v2",
+    "machine_learning_job_id": "ded_high_bytes_written_to_external_device",
+    "name": "Spike in Bytes Sent to an External Device",
+    "references": [
+      "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html",
+      "https://docs.elastic.co/en/integrations/ded",
+      "https://www.elastic.co/blog/detect-data-exfiltration-activity-with-kibanas-new-integration"
+    ],
+    "related_integrations": [
+      {
+        "package": "ded",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "35a3b253-eea8-46f0-abd3-68bdd47e6e3d",
+    "setup": "## Setup\n\nThe rule requires the Data Exfiltration Detection integration assets to be installed, as well as network and file events collected by integrations such as Elastic Defend and Network Packet Capture (for network events only).  \n\n### Data Exfiltration Detection Setup\nThe Data Exfiltration Detection integration detects data exfiltration activity by identifying abnormalities in network and file events. Anomalies are detected using Elastic's Anomaly Detection feature. \n\n#### Prerequisite Requirements:\n- Fleet is required for Data Exfiltration Detection.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n- File events collected by the Elastic Defend integration.\n- To install Elastic Defend, refer to the [documentation](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n\n#### The following steps should be executed to install assets associated with the Data Exfiltration Detection integration:\n- Go to the Kibana homepage. Under Management, click Integrations.\n- In the query bar, search for Data Exfiltration Detection and select the integration to see more details about it.\n- Follow the instructions under the **Installation** section.\n- For this rule to work, complete the instructions through **Add preconfigured anomaly detection jobs**.\n",
+    "severity": "low",
+    "tags": [
+      "Use Case: Data Exfiltration Detection",
+      "Rule Type: ML",
+      "Rule Type: Machine Learning",
+      "Tactic: Exfiltration"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0010",
+          "name": "Exfiltration",
+          "reference": "https://attack.mitre.org/tactics/TA0010/"
+        },
+        "technique": [
+          {
+            "id": "T1052",
+            "name": "Exfiltration Over Physical Medium",
+            "reference": "https://attack.mitre.org/techniques/T1052/"
+          }
+        ]
+      }
+    ],
+    "type": "machine_learning",
+    "version": 4
+  },
+  "id": "35a3b253-eea8-46f0-abd3-68bdd47e6e3d_4",
+  "type": "security-rule"
+}

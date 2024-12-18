@@ -1,0 +1,98 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects the creation of a systemd timer within any of the default systemd timer directories. Systemd timers can be used by an attacker to gain persistence, by scheduling the execution of a command or script. Similarly to cron/at, systemd timers can be set up to execute on boot time, or on a specific point in time, which allows attackers to regain access in case the connection to the infected asset was lost.",
+        "from": "now-9m",
+        "history_window_start": "now-7d",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "New Systemd Timer Created",
+        "new_terms_fields": [
+            "file.path",
+            "process.name"
+        ],
+        "query": "host.os.type : \"linux\" and event.action : (\"creation\" or \"file_create_event\") and file.extension : \"timer\" and\nfile.path : (/etc/systemd/system/* or /usr/local/lib/systemd/system/* or /lib/systemd/system/* or \n/usr/lib/systemd/system/* or /home/*/.config/systemd/user/*) and not \nprocess.executable : (\"/usr/bin/dpkg\" or \"/usr/bin/dockerd\" or \"/bin/rpm\")\n",
+        "references": [
+            "https://opensource.com/article/20/7/systemd-timers",
+            "https://pberba.github.io/security/2022/01/30/linux-threat-hunting-for-persistence-systemd-timers-cron/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.extension",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "7fb500fa-8e24-4bd1-9480-2a819352602c",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Data Source: Elastic Endgame"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1053",
+                        "name": "Scheduled Task/Job",
+                        "reference": "https://attack.mitre.org/techniques/T1053/",
+                        "subtechnique": [
+                            {
+                                "id": "T1053.006",
+                                "name": "Systemd Timers",
+                                "reference": "https://attack.mitre.org/techniques/T1053/006/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "new_terms",
+        "version": 2
+    },
+    "id": "7fb500fa-8e24-4bd1-9480-2a819352602c_2",
+    "type": "security-rule"
+}

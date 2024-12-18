@@ -1,0 +1,61 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects when a single AWS resource is running multiple `Describe` and `List` API calls in a 10-second window. This behavior could indicate an actor attempting to discover the AWS infrastructure using compromised credentials or a compromised instance. Adversaries may use this information to identify potential targets for further exploitation or to gain a better understanding of the target's infrastructure.",
+    "false_positives": [
+      "Administrators or automated systems may legitimately perform multiple `Describe` and `List` API calls in a short time frame. Verify the user identity and the purpose of the API calls to determine if the behavior is expected."
+    ],
+    "from": "now-9m",
+    "investigation_fields": {
+      "field_names": [
+        "time_window",
+        "aws.cloudtrail.user_identity.arn",
+        "unique_api_count"
+      ]
+    },
+    "language": "esql",
+    "license": "Elastic License v2",
+    "name": "AWS Discovery API Calls via CLI from a Single Resource",
+    "note": "## Triage and Analysis\n\n### Investigating AWS Discovery API Calls via CLI from a Single Resource\n\nThis rule detects multiple discovery-related API calls (`Describe`, `List`, or `Get` actions) within a short time window (30 seconds) from a single AWS resource. High volumes of such calls may indicate attempts to enumerate AWS infrastructure for reconnaissance purposes, which is often a tactic used by adversaries with compromised credentials or unauthorized access.\n\n#### Possible Investigation Steps\n\n- **Identify the Actor and Resource**:\n  - **User Identity and Resource**: Examine `aws.cloudtrail.user_identity.arn` to identify the actor making the discovery requests. Verify the user or resource associated with these actions to ensure they are recognized and expected.\n  - **User Agent and Tooling**: Check `user_agent.name` to confirm whether the `aws-cli` tool was used for these requests. Use of the CLI in an atypical context might indicate unauthorized or automated access.\n\n- **Evaluate the Context and Scope of API Calls**:\n  - **API Action Types**: Look into the specific actions under `event.action` for API calls like `Describe*`, `List*`, or `Get*`. Note if these calls are targeting sensitive services, such as `EC2`, `IAM`, or `S3`, which may suggest an attempt to identify high-value assets.\n  - **Time Pattern Analysis**: Review the `time_window` and `unique_api_count` to assess whether the frequency of these calls is consistent with normal patterns for this resource or user.\n\n- **Analyze Potential Compromise Indicators**:\n  - **Identity Type**: Review `aws.cloudtrail.user_identity.type` to determine if the calls originated from an assumed role, a root user, or a service role. Unusual identity types for discovery operations may suggest misuse or compromise.\n  - **Source IP and Geographic Location**: Examine the `source.ip` and `source.geo` fields to identify any unusual IP addresses or locations associated with the activity, which may help confirm or rule out external access.\n\n- **Examine Related CloudTrail Events**:\n  - **Pivot for Related Events**: Identify any additional IAM or CloudTrail events tied to the same actor ARN. Activities such as `AssumeRole`, `GetSessionToken`, or `CreateAccessKey` in proximity to these discovery calls may signal an attempt to escalate privileges.\n  - **Look for Anomalous Patterns**: Determine if this actor or resource has performed similar discovery actions previously, or if these actions coincide with other alerts related to credential use or privilege escalation.\n\n### False Positive Analysis\n\n- **Expected Discovery Activity**: Regular discovery or enumeration API calls may be conducted by security, automation, or monitoring scripts to maintain an inventory of resources. Validate if this activity aligns with known automation or inventory tasks.\n- **Routine Admin or Automated Access**: If specific roles or resources, such as automation tools or monitoring services, regularly trigger this rule, consider adding exceptions for these known, benign users to reduce false positives.\n\n### Response and Remediation\n\n- **Confirm Authorized Access**: If the discovery activity appears unauthorized, consider immediate steps to restrict the user or resource’s permissions.\n- **Review and Remove Unauthorized API Calls**: If the actor is not authorized to perform discovery actions, investigate and potentially disable their permissions or access keys to prevent further misuse.\n- **Enhance Monitoring for Discovery Patterns**: Consider additional logging or alerting for high-frequency discovery API calls, especially if triggered from new or unrecognized resources.\n- **Policy Review and Updates**: Review IAM policies associated with the actor, ensuring restrictive permissions and MFA enforcement where possible to prevent unauthorized discovery.\n\n### Additional Information\n\nFor further guidance on AWS infrastructure discovery and best practices, refer to [AWS CloudTrail documentation](https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-event-reference.html) and MITRE ATT&CK’s [Cloud Infrastructure Discovery](https://attack.mitre.org/techniques/T1580/).\n",
+    "query": "from logs-aws.cloudtrail*\n\n// create time window buckets of 10 seconds\n| eval time_window = date_trunc(10 seconds, @timestamp)\n| where\n    event.dataset == \"aws.cloudtrail\"\n\n    // filter on CloudTrail audit logs for IAM, EC2, and S3 events only\n    and event.provider in (\n      \"iam.amazonaws.com\",\n      \"ec2.amazonaws.com\",\n      \"s3.amazonaws.com\",\n      \"rds.amazonaws.com\",\n      \"lambda.amazonaws.com\",\n      \"dynamodb.amazonaws.com\",\n      \"kms.amazonaws.com\",\n      \"cloudfront.amazonaws.com\",\n      \"elasticloadbalancing.amazonaws.com\",\n      \"cloudfront.amazonaws.com\"\n    )\n\n    // ignore AWS service actions\n    and aws.cloudtrail.user_identity.type != \"AWSService\"\n\n    // filter for aws-cli specifically\n    and user_agent.name == \"aws-cli\"\n\n    // exclude DescribeCapacityReservations events related to AWS Config\n    and not event.action in (\"DescribeCapacityReservations\")\n\n// filter for Describe, Get, List, and Generate API calls\n| where true in (\n    starts_with(event.action, \"Describe\"),\n    starts_with(event.action, \"Get\"),\n    starts_with(event.action, \"List\"),\n    starts_with(event.action, \"Generate\")\n)\n// extract owner, identity type, and actor from the ARN\n| dissect aws.cloudtrail.user_identity.arn \"%{}::%{owner}:%{identity_type}/%{actor}\"\n| where starts_with(actor, \"AWSServiceRoleForConfig\") != true\n| keep @timestamp, time_window, event.action, aws.cloudtrail.user_identity.arn\n| stats\n    // count the number of unique API calls per time window and actor\n    unique_api_count = count_distinct(event.action) by time_window, aws.cloudtrail.user_identity.arn\n\n// filter for more than 5 unique API calls per time window\n| where unique_api_count > 5\n\n// sort the results by the number of unique API calls in descending order\n| sort unique_api_count desc\n",
+    "references": [
+      "https://stratus-red-team.cloud/attack-techniques/AWS/aws.discovery.ec2-enumerate-from-instance/"
+    ],
+    "risk_score": 21,
+    "rule_id": "74f45152-9aee-11ef-b0a5-f661ea17fbcd",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: AWS EC2",
+      "Data Source: AWS IAM",
+      "Data Source: AWS S3",
+      "Use Case: Threat Detection",
+      "Tactic: Discovery"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0007",
+          "name": "Discovery",
+          "reference": "https://attack.mitre.org/tactics/TA0007/"
+        },
+        "technique": [
+          {
+            "id": "T1580",
+            "name": "Cloud Infrastructure Discovery",
+            "reference": "https://attack.mitre.org/techniques/T1580/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "esql",
+    "version": 1
+  },
+  "id": "74f45152-9aee-11ef-b0a5-f661ea17fbcd_1",
+  "type": "security-rule"
+}

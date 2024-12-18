@@ -1,0 +1,117 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies a potential forced authentication using related SMB named pipes. Attackers may attempt to force targets to authenticate to a host controlled by them to capture hashes or enable relay attacks.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.network-*",
+      "logs-system.security-*",
+      "winlogbeat-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Active Directory Forced Authentication from Linux Host - SMB Named Pipes",
+    "query": "sequence with maxspan=15s\n[network where host.os.type == \"linux\" and event.action == \"connection_attempted\" and destination.port == 445 and not startswith~(string(destination.ip), string(host.ip))] by host.ip, data_stream.namespace\n[file where host.os.type == \"windows\" and event.code == \"5145\" and file.name : (\"Spoolss\", \"netdfs\", \"lsarpc\", \"lsass\", \"netlogon\", \"samr\", \"efsrpc\", \"FssagentRpc\")] by source.ip, data_stream.namespace\n",
+    "references": [
+      "https://github.com/p0dalirius/windows-coerced-authentication-methods",
+      "https://www.thehacker.recipes/a-d/movement/mitm-and-coerced-authentications",
+      "https://attack.mitre.org/techniques/T1187/"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "data_stream.namespace",
+        "type": "constant_keyword"
+      },
+      {
+        "ecs": true,
+        "name": "destination.ip",
+        "type": "ip"
+      },
+      {
+        "ecs": true,
+        "name": "destination.port",
+        "type": "long"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.code",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "file.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.ip",
+        "type": "ip"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "source.ip",
+        "type": "ip"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "c24e9a43-f67e-431d-991b-09cdb83b3c0c",
+    "setup": "## Setup\n\nThis rule uses Elastic Endpoint network events from Linux hosts and system integration events from Domain controllers\nfor correlation. Both data sources should be collected from the hosts for this detection to work.\n\nThe 'Audit Detailed File Share' audit policy must be configured (Success Failure).\nSteps to implement the logging policy with Advanced Audit Configuration:\n```\nComputer Configuration >\nPolicies >\nWindows Settings >\nSecurity Settings >\nAdvanced Audit Policies Configuration >\nAudit Policies >\nObject Access >\nAudit Detailed File Share (Success,Failure)\n```\n",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Credential Access",
+      "Data Source: Elastic Defend",
+      "Data Source: Active Directory",
+      "Use Case: Active Directory Monitoring",
+      "Data Source: System"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1187",
+            "name": "Forced Authentication",
+            "reference": "https://attack.mitre.org/techniques/T1187/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 3
+  },
+  "id": "c24e9a43-f67e-431d-991b-09cdb83b3c0c_3",
+  "type": "security-rule"
+}

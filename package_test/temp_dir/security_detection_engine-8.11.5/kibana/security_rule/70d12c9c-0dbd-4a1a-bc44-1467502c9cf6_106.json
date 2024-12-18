@@ -1,0 +1,117 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies use of the Windows Management Instrumentation StdRegProv (registry provider) to modify commonly abused registry locations for persistence.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Persistence via WMI Standard Registry Provider",
+        "note": "## Triage and analysis\n\n### Investigating Persistence via WMI Standard Registry Provider\n\nThe Windows Management Instrumentation (WMI) StdRegProv is a registry provider that allows users to manage registry keys and values on Windows systems. Adversaries may abuse this functionality to modify registry locations commonly used for persistence, enabling them to maintain unauthorized access to a system.\n\nThis rule identifies instances where the WMI StdRegProv is used to modify specific registry paths associated with persistence mechanisms.\n\n\u003e **Note**:\n\u003e This investigation guide uses the [Osquery Markdown Plugin](https://www.elastic.co/guide/en/security/master/invest-guide-run-osquery.html) introduced in Elastic Stack version 8.5.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n\n### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Validate if the activity is not related to planned patches, updates, network administrator activity, or legitimate software installations.\n- Assess whether this behavior is prevalent in the environment by looking for similar occurrences across hosts.\n- Identify which process triggered this behavior.\n- Verify whether the file specified in the run key is signed.\n- Examine the host for derived artifacts that indicate suspicious activities:\n  - Examine the file specified in the run key using a private sandboxed analysis system.\n  - Observe and collect information about the following activities in both the sandbox and the alert subject host:\n    - Attempts to contact external domains and addresses.\n      - Use the Elastic Defend network events to determine domains and addresses contacted by the subject process by filtering by the process' `process.entity_id`.\n      - Examine the DNS cache for suspicious or anomalous entries.\n        - !{osquery{\"label\":\"Osquery - Retrieve DNS Cache\",\"query\":\"SELECT * FROM dns_cache\"}}\n    - Use the Elastic Defend registry events to examine registry keys accessed, modified, or created by the related processes in the process tree.\n    - Examine the host services for suspicious or anomalous entries.\n      - !{osquery{\"label\":\"Osquery - Retrieve All Services\",\"query\":\"SELECT description, display_name, name, path, pid, service_type, start_type, status, user_account FROM services\"}}\n      - !{osquery{\"label\":\"Osquery - Retrieve Services Running on User Accounts\",\"query\":\"SELECT description, display_name, name, path, pid, service_type, start_type, status, user_account FROM services WHERE\\nNOT (user_account LIKE '%LocalSystem' OR user_account LIKE '%LocalService' OR user_account LIKE '%NetworkService' OR\\nuser_account == null)\\n\"}}\n      - !{osquery{\"label\":\"Osquery - Retrieve Service Unsigned Executables with Virustotal Link\",\"query\":\"SELECT concat('https://www.virustotal.com/gui/file/', sha1) AS VtLink, name, description, start_type, status, pid,\\nservices.path FROM services JOIN authenticode ON services.path = authenticode.path OR services.module_path =\\nauthenticode.path JOIN hash ON services.path = hash.path WHERE authenticode.result != 'trusted'\\n\"}}\n  - Retrieve the files' SHA-256 hash values using the PowerShell `Get-FileHash` cmdlet and search for the existence and reputation of the hashes in resources like VirusTotal, Hybrid-Analysis, CISCO Talos, Any.run, etc.\n\n### False positive analysis\n\n- This activity is unlikely to happen legitimately. Benign true positives (B-TPs) can be added as exceptions if necessary.\n\n### Response and Remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors like reverse shells, reverse proxies, or droppers that attackers could use to reinfect the system.\n- Remove and block malicious artifacts identified during triage.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+        "query": "registry where host.os.type == \"windows\" and\n registry.data.strings != null and process.name : \"WmiPrvSe.exe\" and\n registry.path : (\n                  \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\\*\",\n                  \"HKLM\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\\*\",\n                  \"HKLM\\\\Software\\\\WOW6432Node\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\\*\",\n                  \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\Explorer\\\\Run\\\\*\",\n                  \"HKLM\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\Explorer\\\\Run\\\\*\",\n                  \"HKLM\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\RunOnce\\\\*\",\n                  \"HKLM\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\RunOnceEx\\\\*\",\n                  \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\RunOnce\\\\*\",\n                  \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\RunOnceEx\\\\*\",\n                  \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Services\\\\*\\\\ServiceDLL\",\n                  \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Services\\\\*\\\\ImagePath\",\n                  \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Winlogon\\\\Shell\\\\*\",\n                  \"HKEY_USERS\\\\*\\\\Environment\\\\UserInitMprLogonScript\",\n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Windows\\\\Load\",\n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Winlogon\\\\Shell\",\n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\\\\Shell\",\n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Policies\\\\Microsoft\\\\Windows\\\\System\\\\Scripts\\\\Logoff\\\\Script\",\n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Policies\\\\Microsoft\\\\Windows\\\\System\\\\Scripts\\\\Logon\\\\Script\",\n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Policies\\\\Microsoft\\\\Windows\\\\System\\\\Scripts\\\\Shutdown\\\\Script\",\n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Policies\\\\Microsoft\\\\Windows\\\\System\\\\Scripts\\\\Startup\\\\Script\",\n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Ctf\\\\LangBarAddin\\\\*\\\\FilePath\",\n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Internet Explorer\\\\Extensions\\\\*\\\\Exec\",\n                  \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Internet Explorer\\\\Extensions\\\\*\\\\Script\",\n                  \"\\\\REGISTRY\\\\USER\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Command Processor\\\\Autorun\",\n                  \"\\\\REGISTRY\\\\USER\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\\*\",\n                  \"\\\\REGISTRY\\\\MACHINE\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\\*\",\n                  \"\\\\REGISTRY\\\\MACHINE\\\\Software\\\\WOW6432Node\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\\*\",\n                  \"\\\\REGISTRY\\\\USER\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\Explorer\\\\Run\\\\*\",\n                  \"\\\\REGISTRY\\\\MACHINE\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\Explorer\\\\Run\\\\*\",\n                  \"\\\\REGISTRY\\\\MACHINE\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\RunOnce\\\\*\",\n                  \"\\\\REGISTRY\\\\MACHINE\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\RunOnceEx\\\\*\",\n                  \"\\\\REGISTRY\\\\USER\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\RunOnce\\\\*\",\n                  \"\\\\REGISTRY\\\\USER\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\RunOnceEx\\\\*\",\n                  \"\\\\REGISTRY\\\\MACHINE\\\\SYSTEM\\\\*ControlSet*\\\\Services\\\\*\\\\ServiceDLL\",\n                  \"\\\\REGISTRY\\\\MACHINE\\\\SYSTEM\\\\*ControlSet*\\\\Services\\\\*\\\\ImagePath\",\n                  \"\\\\REGISTRY\\\\USER\\\\*\\\\Software\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Winlogon\\\\Shell\\\\*\",\n                  \"\\\\REGISTRY\\\\USER\\\\*\\\\Environment\\\\UserInitMprLogonScript\",\n                  \"\\\\REGISTRY\\\\USER\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Windows\\\\Load\",\n                  \"\\\\REGISTRY\\\\USER\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Winlogon\\\\Shell\",\n                  \"\\\\REGISTRY\\\\USER\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\\\\Shell\",\n                  \"\\\\REGISTRY\\\\USER\\\\*\\\\SOFTWARE\\\\Policies\\\\Microsoft\\\\Windows\\\\System\\\\Scripts\\\\Logoff\\\\Script\",\n                  \"\\\\REGISTRY\\\\USER\\\\*\\\\SOFTWARE\\\\Policies\\\\Microsoft\\\\Windows\\\\System\\\\Scripts\\\\Logon\\\\Script\",\n                  \"\\\\REGISTRY\\\\USER\\\\*\\\\SOFTWARE\\\\Policies\\\\Microsoft\\\\Windows\\\\System\\\\Scripts\\\\Shutdown\\\\Script\",\n                  \"\\\\REGISTRY\\\\USER\\\\*\\\\SOFTWARE\\\\Policies\\\\Microsoft\\\\Windows\\\\System\\\\Scripts\\\\Startup\\\\Script\",\n                  \"\\\\REGISTRY\\\\USER\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Ctf\\\\LangBarAddin\\\\*\\\\FilePath\",\n                  \"\\\\REGISTRY\\\\USER\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Internet Explorer\\\\Extensions\\\\*\\\\Exec\",\n                  \"\\\\REGISTRY\\\\USER\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Internet Explorer\\\\Extensions\\\\*\\\\Script\",\n                  \"\\\\REGISTRY\\\\USER\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Command Processor\\\\Autorun\"\n                  )\n",
+        "references": [
+            "https://docs.microsoft.com/en-us/previous-versions/windows/desktop/regprov/stdregprov",
+            "https://www.elastic.co/security-labs/hunting-for-persistence-using-elastic-security-part-1"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "registry.data.strings",
+                "type": "wildcard"
+            },
+            {
+                "ecs": true,
+                "name": "registry.path",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "70d12c9c-0dbd-4a1a-bc44-1467502c9cf6",
+        "severity": "high",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Data Source: Elastic Endgame",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1543",
+                        "name": "Create or Modify System Process",
+                        "reference": "https://attack.mitre.org/techniques/T1543/",
+                        "subtechnique": [
+                            {
+                                "id": "T1543.003",
+                                "name": "Windows Service",
+                                "reference": "https://attack.mitre.org/techniques/T1543/003/"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "T1547",
+                        "name": "Boot or Logon Autostart Execution",
+                        "reference": "https://attack.mitre.org/techniques/T1547/",
+                        "subtechnique": [
+                            {
+                                "id": "T1547.001",
+                                "name": "Registry Run Keys / Startup Folder",
+                                "reference": "https://attack.mitre.org/techniques/T1547/001/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1047",
+                        "name": "Windows Management Instrumentation",
+                        "reference": "https://attack.mitre.org/techniques/T1047/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 106
+    },
+    "id": "70d12c9c-0dbd-4a1a-bc44-1467502c9cf6_106",
+    "type": "security-rule"
+}

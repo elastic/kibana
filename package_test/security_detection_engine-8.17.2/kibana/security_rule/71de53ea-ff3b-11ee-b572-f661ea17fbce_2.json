@@ -1,0 +1,101 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies when an AWS IAM Roles Anywhere Trust Anchor with an external certificate authority is created. AWS Roles Anywhere profiles are legitimate profiles that can be created by administrators to allow access from any location. This rule detects when a trust anchor is created with an external certificate authority that is not managed by AWS Certificate Manager Private Certificate Authority (ACM PCA). Adversaries may accomplish this to maintain persistence in the environment.",
+    "false_positives": [
+      "AWS IAM Roles Anywhere Trust Anchors are legitimate profiles that can be created by administrators to allow access from any location. Ensure that the trust anchor is created by a legitimate administrator and that the external certificate authority is authorized."
+    ],
+    "from": "now-30m",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "interval": "10m",
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "AWS IAM Roles Anywhere Trust Anchor Created with External CA",
+    "note": "## Triage and Analysis\n\n### Investigating AWS IAM Roles Anywhere Trust Anchor Created with External CA\n\nThis rule detects when an AWS IAM Roles Anywhere Trust Anchor with an external certificate authority is created. AWS Roles Anywhere profiles are legitimate profiles that can be created by administrators to allow access from any location. This rule identifies when a trust anchor is created with an external certificate authority that is not managed by AWS Certificate Manager Private Certificate Authority (ACM PCA). Adversaries may accomplish this to maintain persistence in the environment.\n\n#### Possible Investigation Steps:\n\n- **Identify the Actor**: Review the `aws.cloudtrail.user_identity.arn` and `aws.cloudtrail.user_identity.access_key_id` fields to identify who made the change. Verify if this actor typically performs such actions and if they have the necessary permissions.\n- **Review the Request Details**: Examine the `aws.cloudtrail.request_parameters` to understand the specific details of the trust anchor creation. Look for any unusual parameters that could suggest unauthorized or malicious modifications.\n- **Analyze the Source of the Request**: Investigate the `source.ip` and `source.geo` fields to determine the geographical origin of the request. An external or unexpected location might indicate compromised credentials or unauthorized access.\n- **Contextualize with Timestamp**: Use the `@timestamp` field to check when the trust anchor was created. Changes during non-business hours or outside regular maintenance windows might require further scrutiny.\n- **Correlate with Other Activities**: Search for related CloudTrail events before and after this change to see if the same actor or IP address engaged in other potentially suspicious activities.\n- **Verify the Certificate Authority**: Ensure that the external certificate authority used is authorized and recognized. Unauthorized external CAs can be a red flag for malicious activity.\n\n### False Positive Analysis:\n\n- **Legitimate Administrative Actions**: Confirm if the trust anchor creation aligns with scheduled updates, development activities, or legitimate administrative tasks documented in change management systems.\n- **Consistency Check**: Compare the action against historical data of similar actions performed by the user or within the organization. If the action is consistent with past legitimate activities, it might indicate a false alarm.\n- **Verify through Outcomes**: Check the `aws.cloudtrail.response_elements` and the `event.outcome` to confirm if the creation was successful and intended according to policy.\n\n### Response and Remediation:\n\n- **Immediate Review and Reversal if Necessary**: If the creation was unauthorized, remove the trust anchor and revoke any associated permissions.\n- **Enhance Monitoring and Alerts**: Adjust monitoring systems to alert on similar actions, especially those involving the creation of trust anchors with external certificate authorities.\n- **Educate and Train**: Provide additional training to users with administrative rights on the importance of security best practices concerning IAM Roles Anywhere and the use of certificate authorities.\n- **Audit IAM Roles and Policies**: Conduct a comprehensive audit of all IAM roles and associated policies to ensure they adhere to the principle of least privilege.\n- **Incident Response**: If there's an indication of malicious intent or a security breach, initiate the incident response protocol to mitigate any damage and prevent future occurrences.\n\n### Additional Information:\n\nFor further guidance on managing IAM Roles Anywhere and securing AWS environments, refer to the [AWS IAM Roles Anywhere documentation](https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html) and AWS best practices for security. Additionally, consult the following resources for specific details on IAM roles and trust anchors:\n- [AWS IAM Roles Anywhere Introduction](https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html)\n- [Ermetic Blog on IAM Users and Third Parties](https://ermetic.com/blog/aws/keep-your-iam-users-close-keep-your-third-parties-even-closer-part-1/)\n",
+    "query": "event.dataset: aws.cloudtrail\n    and event.provider: rolesanywhere.amazonaws.com\n    and event.action: CreateTrustAnchor\n    and event.outcome: success\n    and not aws.cloudtrail.request_parameters: *sourceType=AWS_ACM_PCA*\n",
+    "references": [
+      "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html",
+      "https://ermetic.com/blog/aws/keep-your-iam-users-close-keep-your-third-parties-even-closer-part-1/",
+      "https://docs.aws.amazon.com/rolesanywhere/latest/APIReference/API_CreateTrustAnchor.html"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.request_parameters",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "71de53ea-ff3b-11ee-b572-f661ea17fbce",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS IAM",
+      "Use Case: Identity and Access Audit",
+      "Tactic: Persistence"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1098",
+            "name": "Account Manipulation",
+            "reference": "https://attack.mitre.org/techniques/T1098/",
+            "subtechnique": [
+              {
+                "id": "T1098.003",
+                "name": "Additional Cloud Roles",
+                "reference": "https://attack.mitre.org/techniques/T1098/003/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 2
+  },
+  "id": "71de53ea-ff3b-11ee-b572-f661ea17fbce_2",
+  "type": "security-rule"
+}

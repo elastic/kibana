@@ -1,0 +1,152 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects the successful hijack of Microsoft Compatibility Appraiser scheduled task to establish persistence with an integrity level of system.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-endpoint.events.process-*",
+      "logs-windows.forwarded*",
+      "logs-windows.sysmon_operational-*",
+      "endgame-*",
+      "logs-system.security*",
+      "logs-m365_defender.event-*",
+      "logs-sentinel_one_cloud_funnel.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Persistence via TelemetryController Scheduled Task Hijack",
+    "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n  process.parent.name : \"CompatTelRunner.exe\" and process.args : \"-cv*\" and\n  not process.name : (\"conhost.exe\",\n                      \"DeviceCensus.exe\",\n                      \"CompatTelRunner.exe\",\n                      \"DismHost.exe\",\n                      \"rundll32.exe\",\n                      \"powershell.exe\")\n",
+    "references": [
+      "https://www.trustedsec.com/blog/abusing-windows-telemetry-for-persistence"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^1.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "68921d85-d0dc-48b3-865f-43291ca2c4f2",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Persistence",
+      "Tactic: Privilege Escalation",
+      "Data Source: Elastic Endgame",
+      "Data Source: Elastic Defend",
+      "Data Source: System",
+      "Data Source: Microsoft Defender for Endpoint",
+      "Data Source: Sysmon",
+      "Data Source: SentinelOne"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1053",
+            "name": "Scheduled Task/Job",
+            "reference": "https://attack.mitre.org/techniques/T1053/",
+            "subtechnique": [
+              {
+                "id": "T1053.005",
+                "name": "Scheduled Task",
+                "reference": "https://attack.mitre.org/techniques/T1053/005/"
+              }
+            ]
+          },
+          {
+            "id": "T1574",
+            "name": "Hijack Execution Flow",
+            "reference": "https://attack.mitre.org/techniques/T1574/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": [
+          {
+            "id": "T1053",
+            "name": "Scheduled Task/Job",
+            "reference": "https://attack.mitre.org/techniques/T1053/",
+            "subtechnique": [
+              {
+                "id": "T1053.005",
+                "name": "Scheduled Task",
+                "reference": "https://attack.mitre.org/techniques/T1053/005/"
+              }
+            ]
+          },
+          {
+            "id": "T1574",
+            "name": "Hijack Execution Flow",
+            "reference": "https://attack.mitre.org/techniques/T1574/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 211
+  },
+  "id": "68921d85-d0dc-48b3-865f-43291ca2c4f2_211",
+  "type": "security-rule"
+}

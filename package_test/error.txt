@@ -1,0 +1,71 @@
+Installing package security_detection_engine version 8.13.1
+Installing all rules
+Installing the latest package
+Reviewing upgrade
+Performing upgrade
+Error processing version 8.13.1: AxiosError: Request failed with status code 502
+
+<--- Last few GCs --->
+
+[38238:0x148008000] 10550599 ms: Scavenge 8004.3 (8197.0) -> 7996.3 (8197.2) MB, 9.25 / 0.00 ms  (average mu = 0.054, current mu = 0.010) allocation failure;
+[38238:0x148008000] 10550624 ms: Scavenge 8009.1 (8197.5) -> 8001.2 (8199.2) MB, 10.29 / 0.00 ms  (average mu = 0.054, current mu = 0.010) allocation failure;
+[38238:0x148008000] 10551378 ms: Scavenge (reduce) 8013.8 (8199.2) -> 8006.0 (8179.0) MB, 13.96 / 0.00 ms  (average mu = 0.054, current mu = 0.010) allocation failure;
+
+
+<--- JS stacktrace --->
+
+FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 0x100568c58 node::OOMErrorHandler(char const*, v8::OOMDetails const&) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+ 2: 0x1006f0920 v8::internal::V8::FatalProcessOutOfMemory(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+ 3: 0x1008c4ff4 v8::internal::Heap::GarbageCollectionReasonToString(v8::internal::GarbageCollectionReason) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+ 4: 0x1008c8ea8 v8::internal::Heap::CollectGarbageShared(v8::internal::LocalHeap*, v8::internal::GarbageCollectionReason) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+ 5: 0x1008c590c v8::internal::Heap::PerformGarbageCollection(v8::internal::GarbageCollector, v8::internal::GarbageCollectionReason, char const*) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+ 6: 0x1008c3694 v8::internal::Heap::CollectGarbage(v8::internal::AllocationSpace, v8::internal::GarbageCollectionReason, v8::GCCallbackFlags) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+ 7: 0x1008c2cb8 v8::internal::Heap::HandleGCRequest() [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+ 8: 0x10085b6d8 v8::internal::StackGuard::HandleInterrupts() [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+ 9: 0x100c874a4 v8::internal::Runtime_StackGuard(int, unsigned long*, v8::internal::Isolate*) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+10: 0x100fe4c44 Builtins_CEntry_Return1_ArgvOnStack_NoBuiltinExit [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+11: 0x1078b1afc
+12: 0x106c8924c
+13: 0x10712361c
+14: 0x1076a2c34
+15: 0x107766f9c
+16: 0x10100bfb4 Builtins_ArrayReduce [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+17: 0x100f5c3e4 Builtins_InterpreterEntryTrampoline [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+18: 0x100f5c3e4 Builtins_InterpreterEntryTrampoline [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+19: 0x100f5c3e4 Builtins_InterpreterEntryTrampoline [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+20: 0x1078f6078
+21: 0x100f93210 Builtins_AsyncFunctionAwaitResolveClosure [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+22: 0x101040fb8 Builtins_PromiseFulfillReactionJob [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+23: 0x100f82b94 Builtins_RunMicrotasks [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+24: 0x100f5a3f4 Builtins_JSRunMicrotasksEntry [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+25: 0x100832474 v8::internal::(anonymous namespace)::Invoke(v8::internal::Isolate*, v8::internal::(anonymous namespace)::InvokeParams const&) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+26: 0x100832960 v8::internal::(anonymous namespace)::InvokeWithTryCatch(v8::internal::Isolate*, v8::internal::(anonymous namespace)::InvokeParams const&) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+27: 0x100832b3c v8::internal::Execution::TryRunMicrotasks(v8::internal::Isolate*, v8::internal::MicrotaskQueue*) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+28: 0x100859d08 v8::internal::MicrotaskQueue::RunMicrotasks(v8::internal::Isolate*) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+29: 0x10085a4a4 v8::internal::MicrotaskQueue::PerformCheckpoint(v8::Isolate*) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+30: 0x100f5def0 Builtins_CallApiCallback [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+31: 0x106b1b94c
+32: 0x100f5a50c Builtins_JSEntryTrampoline [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+33: 0x100f5a1f4 Builtins_JSEntry [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+34: 0x10083249c v8::internal::(anonymous namespace)::Invoke(v8::internal::Isolate*, v8::internal::(anonymous namespace)::InvokeParams const&) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+35: 0x1008318e8 v8::internal::Execution::Call(v8::internal::Isolate*, v8::internal::Handle<v8::internal::Object>, v8::internal::Handle<v8::internal::Object>, int, v8::internal::Handle<v8::internal::Object>*) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+36: 0x10070c1d8 v8::Function::Call(v8::Local<v8::Context>, v8::Local<v8::Value>, int, v8::Local<v8::Value>*) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+37: 0x100494d24 node::InternalCallbackScope::Close() [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+38: 0x100494fe4 node::InternalMakeCallback(node::Environment*, v8::Local<v8::Object>, v8::Local<v8::Object>, v8::Local<v8::Function>, int, v8::Local<v8::Value>*, node::async_context) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+39: 0x1004ab104 node::AsyncWrap::MakeCallback(v8::Local<v8::Function>, int, v8::Local<v8::Value>*) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+40: 0x100635178 node::StreamBase::CallJSOnreadMethod(long, v8::Local<v8::ArrayBuffer>, unsigned long, node::StreamBase::StreamBaseJSChecks) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+41: 0x100636804 node::EmitToJSStreamListener::OnStreamRead(long, uv_buf_t const&) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+42: 0x10063aaf0 node::LibuvStreamWrap::OnUvRead(long, uv_buf_t const*) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+43: 0x10063b224 node::LibuvStreamWrap::ReadStart()::$_1::__invoke(uv_stream_s*, long, uv_buf_t const*) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+44: 0x100f465f8 uv__stream_io [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+45: 0x100f4defc uv__io_poll [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+46: 0x100f3c3e8 uv_run [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+47: 0x1004956f0 node::SpinEventLoopInternal(node::Environment*) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+48: 0x1005a89bc node::NodeMainInstance::Run(node::ExitCode*, node::Environment*) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+49: 0x1005a86d0 node::NodeMainInstance::Run() [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+50: 0x100530800 node::Start(int, char**) [/Users/dmitryshevchenko/.nvm/versions/node/v20.15.1/bin/node]
+51: 0x183d98274 start [/usr/lib/dyld]
+ please hold  Kibana server is not ready so requests have been paused

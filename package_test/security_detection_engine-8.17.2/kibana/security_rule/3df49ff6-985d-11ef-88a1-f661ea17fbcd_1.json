@@ -1,0 +1,108 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies when an SNS topic is subscribed to by an email address of a user who does not typically perform this action. Adversaries may subscribe to an SNS topic to collect sensitive information or exfiltrate data via an external email address.",
+    "false_positives": [
+      "Legitimate users may subscribe to SNS topics for legitimate purposes. Ensure that the subscription is authorized and the subscription email address is known before taking action."
+    ],
+    "from": "now-9m",
+    "history_window_start": "now-14d",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "investigation_fields": {
+      "field_names": [
+        "@timestamp",
+        "user.name",
+        "source.address",
+        "aws.cloudtrail.user_identity.arn",
+        "aws.cloudtrail.user_identity.type",
+        "user_agent.original",
+        "event.action",
+        "event.outcome",
+        "cloud.region",
+        "aws.cloudtrail.flattened.request_parameters.protocol",
+        "aws.cloudtrail.flattened.request_parameters.topicArn",
+        "aws.cloudtrail.flattened.response_elements.subscriptionArn",
+        "aws.cloudtrail.request_parameters"
+      ]
+    },
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "AWS SNS Email Subscription by Rare User",
+    "new_terms_fields": [
+      "aws.cloudtrail.user_identity.arn"
+    ],
+    "note": "## Triage and Analysis\n\n### Investigating AWS SNS Email Subscription by Rare User\n\nThis rule identifies when an SNS topic is subscribed to by an email address of a user who does not typically perform this action. While subscribing to SNS topics is a common practice, adversaries may exploit this feature to collect sensitive information or exfiltrate data via an external email address.\n\n#### Possible Investigation Steps\n\n- **Identify the Actor**: Review the `aws.cloudtrail.user_identity.arn` field to identify the user who requested the subscription. Verify if this actor typically performs such actions and has the necessary permissions. It may be unusual for this activity to originate from certain user types, such as an assumed role or federated user.\n- **Review the SNS Subscription Event**: Analyze the specifics of the `Subscribe` action in CloudTrail logs:\n  - **Topic**: Look at the `aws.cloudtrail.request_parameters.topicArn` field to identify the SNS topic involved in the subscription.\n  - **Protocol and Endpoint**: Review the `aws.cloudtrail.request_parameters.protocol` and `aws.cloudtrail.request_parameters.endpoint` fields to confirm the subscription's protocol and email address. Confirm if this endpoint is associated with a known or trusted entity.\n  - **Subscription Status**: Check the `aws.cloudtrail.response_elements.subscriptionArn` field for the subscription's current status, noting if it requires confirmation.\n- **Verify Authorization**: Evaluate whether the user typically engages in SNS subscription actions and if they are authorized to do so for the specified topic.\n- **Contextualize with Related Events**: Review related CloudTrail logs around the event time for other actions by the same user or IP address. Look for activities involving other AWS services, such as S3 or IAM, that may indicate further suspicious behavior.\n- **Evaluate the Subscription Endpoint**: Determine whether the email endpoint is legitimate or associated with any known entity. This may require checking internal documentation or reaching out to relevant AWS account administrators.\n- **Check for Publish Actions**: Investigate for any subsequent `Publish` actions on the same SNS topic that may indicate exfiltration attempts or data leakage. If Publish actions are detected, further investigate the contents of the messages.\n- **Review IAM Policies**: Examine the user or role's IAM policies to ensure that the subscription action is within the scope of their permissions or should be.\n\n### False Positive Analysis\n\n- **Historical User Actions**: Verify if the user has a history of performing similar actions on SNS topics. Consistent, repetitive actions may suggest legitimate usage.\n- **Scheduled or Automated Tasks**: Confirm if the subscription action aligns with scheduled tasks or automated notifications authorized by your organization.\n\n### Response and Remediation\n\n- **Immediate Review and Reversal**: If the subscription was unauthorized, take appropriate action to cancel it and adjust SNS permissions as necessary.\n- **Strengthen Monitoring and Alerts**: Configure monitoring systems to flag similar actions involving sensitive topics or unapproved endpoints.\n- **Policy Review**: Review and update policies related to SNS subscriptions and access, tightening control as needed to prevent unauthorized subscriptions.\n- **Incident Response**: If there is evidence of malicious intent, treat the event as a potential data exfiltration incident and follow incident response protocols, including further investigation, containment, and recovery.\n\n### Additional Information\n\nFor further guidance on managing and securing SNS topics in AWS environments, refer to the [AWS SNS documentation](https://docs.aws.amazon.com/sns/latest/dg/welcome.html) and AWS best practices for security.\n\n",
+    "query": "event.dataset: \"aws.cloudtrail\"\n    and event.provider: \"sns.amazonaws.com\"\n    and event.action: \"Subscribe\"\n    and aws.cloudtrail.request_parameters: *protocol=email*\n",
+    "references": [
+      "https://docs.aws.amazon.com/sns/latest/api/API_Subscribe.html"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.request_parameters",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "3df49ff6-985d-11ef-88a1-f661ea17fbcd",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS SNS",
+      "Resources: Investigation Guide",
+      "Use Case: Threat Detection",
+      "Tactic: Exfiltration"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0010",
+          "name": "Exfiltration",
+          "reference": "https://attack.mitre.org/tactics/TA0010/"
+        },
+        "technique": [
+          {
+            "id": "T1567",
+            "name": "Exfiltration Over Web Service",
+            "reference": "https://attack.mitre.org/techniques/T1567/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 1
+  },
+  "id": "3df49ff6-985d-11ef-88a1-f661ea17fbcd_1",
+  "type": "security-rule"
+}

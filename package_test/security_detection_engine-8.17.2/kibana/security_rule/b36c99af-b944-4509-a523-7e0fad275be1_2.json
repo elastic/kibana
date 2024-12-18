@@ -1,0 +1,91 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the deletion of an AWS RDS DB snapshot. Snapshots contain a full backup of an entire DB instance. Unauthorized deletion of snapshots can make it impossible to recover critical or sensitive data. This rule detects deleted snapshots and instances modified so that backupRetentionPeriod is set to 0 which disables automated backups and is functionally similar to deleting the system snapshot.",
+    "false_positives": [
+      "Snapshots may be deleted by a system administrator. Verify whether the user identity should be making changes in your environment. Snapshot deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    ],
+    "from": "now-6m",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "AWS RDS Snapshot Deleted",
+    "query": "any where event.dataset == \"aws.cloudtrail\"\n    and event.provider == \"rds.amazonaws.com\"\n    and event.outcome == \"success\"\n    and (\n        event.action in (\"DeleteDBSnapshot\", \"DeleteDBClusterSnapshot\") or \n        (event.action == \"ModifyDBInstance\" and stringContains(aws.cloudtrail.request_parameters, \"backupRetentionPeriod=0\"))\n    )\n",
+    "references": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_DeleteSnapshot.html",
+      "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_DeleteDBSnapshot.html"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.request_parameters",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "b36c99af-b944-4509-a523-7e0fad275be1",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS RDS",
+      "Use Case: Asset Visibility",
+      "Tactic: Impact"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0040",
+          "name": "Impact",
+          "reference": "https://attack.mitre.org/tactics/TA0040/"
+        },
+        "technique": [
+          {
+            "id": "T1485",
+            "name": "Data Destruction",
+            "reference": "https://attack.mitre.org/techniques/T1485/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 2
+  },
+  "id": "b36c99af-b944-4509-a523-7e0fad275be1_2",
+  "type": "security-rule"
+}

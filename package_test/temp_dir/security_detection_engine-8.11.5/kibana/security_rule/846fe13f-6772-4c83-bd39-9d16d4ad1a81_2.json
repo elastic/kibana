@@ -1,0 +1,110 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies the use of Cmdlets and methods related to Microsoft Exchange Transport Agents install. Adversaries may leverage malicious Microsoft Exchange Transport Agents to execute tasks in response to adversary-defined criteria, establishing persistence.",
+        "from": "now-119m",
+        "index": [
+            "winlogbeat-*",
+            "logs-windows.*"
+        ],
+        "interval": "60m",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Microsoft Exchange Transport Agent Install Script",
+        "query": "event.category: \"process\" and host.os.type:windows and\n  powershell.file.script_block_text : (\n    (\n    \"Install-TransportAgent\" or\n    \"Enable-TransportAgent\"\n    )\n  ) and not user.id : \"S-1-5-18\"\n",
+        "related_integrations": [
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "powershell.file.script_block_text",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "846fe13f-6772-4c83-bd39-9d16d4ad1a81",
+        "setup": "\nThe 'PowerShell Script Block Logging' logging policy must be enabled.\nSteps to implement the logging policy with Advanced Audit Configuration:\n```\nComputer Configuration \u003e\nAdministrative Templates \u003e\nWindows PowerShell \u003e\nTurn on PowerShell Script Block Logging (Enable)\n```\nSteps to implement the logging policy via registry:\n```\nreg add \"hklm\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging\" /v EnableScriptBlockLogging /t REG_DWORD /d 1\n```\n",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Data Source: PowerShell Logs",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1505",
+                        "name": "Server Software Component",
+                        "reference": "https://attack.mitre.org/techniques/T1505/",
+                        "subtechnique": [
+                            {
+                                "id": "T1505.002",
+                                "name": "Transport Agent",
+                                "reference": "https://attack.mitre.org/techniques/T1505/002/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1059",
+                        "name": "Command and Scripting Interpreter",
+                        "reference": "https://attack.mitre.org/techniques/T1059/",
+                        "subtechnique": [
+                            {
+                                "id": "T1059.001",
+                                "name": "PowerShell",
+                                "reference": "https://attack.mitre.org/techniques/T1059/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 2
+    },
+    "id": "846fe13f-6772-4c83-bd39-9d16d4ad1a81_2",
+    "type": "security-rule"
+}

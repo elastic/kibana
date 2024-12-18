@@ -1,0 +1,41 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects repeated high-confidence 'BLOCKED' actions coupled with specific violation codes such as 'MISCONDUCT', indicating persistent misuse or attempts to probe the model's ethical boundaries.",
+    "false_positives": [
+      "New model deployments.",
+      "Testing updates to compliance policies."
+    ],
+    "from": "now-60m",
+    "interval": "10m",
+    "language": "esql",
+    "license": "Elastic License v2",
+    "name": "Unusual High Confidence Misconduct Blocks Detected",
+    "query": "from logs-aws_bedrock.invocation-*\n| where gen_ai.policy.confidence == \"HIGH\" and gen_ai.policy.action == \"BLOCKED\" and gen_ai.compliance.violation_code == \"MISCONDUCT\"\n| stats high_confidence_blocks = count() by user.id\n| where high_confidence_blocks > 5\n| sort high_confidence_blocks desc\n",
+    "references": [
+      "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-components.html",
+      "https://atlas.mitre.org/techniques/AML.T0051",
+      "https://atlas.mitre.org/techniques/AML.T0054",
+      "https://www.elastic.co/security-labs/elastic-advances-llm-security"
+    ],
+    "risk_score": 73,
+    "rule_id": "4f855297-c8e0-4097-9d97-d653f7e471c4",
+    "setup": "## Setup\n\nThis rule requires that guardrails are configured in AWS Bedrock. For more information, see the AWS Bedrock documentation:\n\nhttps://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-create.html\n",
+    "severity": "high",
+    "tags": [
+      "Domain: LLM",
+      "Data Source: AWS Bedrock",
+      "Data Source: AWS S3",
+      "Use Case: Policy Violation",
+      "Mitre Atlas: T0051",
+      "Mitre Atlas: T0054"
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "esql",
+    "version": 1
+  },
+  "id": "4f855297-c8e0-4097-9d97-d653f7e471c4_1",
+  "type": "security-rule"
+}

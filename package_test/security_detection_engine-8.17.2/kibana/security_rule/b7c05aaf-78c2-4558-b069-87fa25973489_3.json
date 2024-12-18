@@ -1,0 +1,90 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects potential buffer overflow attacks by querying the \"Segfault Detected\" pre-built rule signal index, through a threshold rule, with a minimum number of 100 segfault alerts in a short timespan. A large amount of segfaults in a short time interval could indicate application exploitation attempts.",
+    "from": "now-9m",
+    "index": [
+      ".alerts-security.*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Potential Buffer Overflow Attack Detected",
+    "query": "kibana.alert.rule.rule_id:\"5c81fc9d-1eae-437f-ba07-268472967013\" and host.os.type:linux and event.kind:signal\n",
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.kind",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "kibana.alert.rule.rule_id",
+        "type": "unknown"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "b7c05aaf-78c2-4558-b069-87fa25973489",
+    "setup": "## Setup\n\n\nThis rule leverages alert data from other prebuilt detection rules to function correctly. \n\n### Dependent Elastic Detection Rule Enablement\nAs a higher-order rule (based on other detections), this rule also requires the following prerequisite Elastic detection rule to be installed and enabled:\n- Segfault Detected (5c81fc9d-1eae-437f-ba07-268472967013)\n",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Privilege Escalation",
+      "Tactic: Initial Access",
+      "Use Case: Vulnerability",
+      "Rule Type: Higher-Order Rule"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": [
+          {
+            "id": "T1068",
+            "name": "Exploitation for Privilege Escalation",
+            "reference": "https://attack.mitre.org/techniques/T1068/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0001",
+          "name": "Initial Access",
+          "reference": "https://attack.mitre.org/tactics/TA0001/"
+        },
+        "technique": [
+          {
+            "id": "T1190",
+            "name": "Exploit Public-Facing Application",
+            "reference": "https://attack.mitre.org/techniques/T1190/"
+          }
+        ]
+      }
+    ],
+    "threshold": {
+      "field": [
+        "event.kind",
+        "host.id"
+      ],
+      "value": 100
+    },
+    "timestamp_override": "event.ingested",
+    "type": "threshold",
+    "version": 3
+  },
+  "id": "b7c05aaf-78c2-4558-b069-87fa25973489_3",
+  "type": "security-rule"
+}

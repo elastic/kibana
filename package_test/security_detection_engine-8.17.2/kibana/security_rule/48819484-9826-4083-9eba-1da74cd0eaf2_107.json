@@ -1,0 +1,98 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies when a Microsoft 365 Mailbox is accessed by a ClientAppId that was observed for the fist time during the last 10 days.",
+    "false_positives": [
+      "User using a new mail client."
+    ],
+    "from": "now-30m",
+    "history_window_start": "now-25d",
+    "index": [
+      "filebeat-*",
+      "logs-o365*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Suspicious Microsoft 365 Mail Access by ClientAppId",
+    "new_terms_fields": [
+      "o365.audit.ClientAppId"
+    ],
+    "note": "## Triage and analysis\n\n### Investigating Suspicious Microsoft 365 Mail Access by ClientAppId\n\n- Verify the ClientAppId, source.ip and geolocation associated with Mail Access.\n- Verify the total number of used ClientAppId by that specific user.id.\n- Verify if the mailbox owner was on leave and just resumed working or not.\n- Verify if there are other alerts associated with the same user.id.\n- Verify the total number of connections from that ClientAppId, if it's accessing other mailboxes and with a high frequency there is a high chance it's a false positive.\n\n### False positive analysis\n\n- Legit Microsoft or third party ClientAppId.\n- User changing of ClientAppId or new connection post an extended period of leave.\n- If the total number of accessed Mailboxes by ClientAppId is too high there is a high chance it's a false positive.\n",
+    "query": "event.dataset:o365.audit and event.provider:Exchange and event.category:web and event.action:MailItemsAccessed and event.outcome:success and \nnot o365.audit.ClientAppId : (\"13937bba-652e-4c46-b222-3003f4d1ff97\" or \"6326e366-9d6d-4c70-b22a-34c7ea72d73d\" or \n \"a3883eba-fbe9-48bd-9ed3-dca3e0e84250\" or \"d3590ed6-52b3-4102-aeff-aad2292ab01c\" or \"27922004-5251-4030-b22d-91ecd9a37ea4\" or \n \"1fec8e78-bce4-4aaf-ab1b-5451cc387264\" or \"26a7ee05-5602-4d76-a7ba-eae8b7b67941\" or \"00000002-0000-0000-c000-000000000000\" or \n \"00000002-0000-0ff1-ce00-000000000000\" or \"ffcb16e8-f789-467c-8ce9-f826a080d987\" or \"00000003-0000-0ff1-ce00-000000000000\" or \n \"00000004-0000-0ff1-ce00-000000000000\" or \"00000005-0000-0ff1-ce00-000000000000\" or  \"00000006-0000-0ff1-ce00-000000000000\" or \n \"00000007-0000-0000-c000-000000000000\" or \"00000007-0000-0ff1-ce00-000000000000\" or \n \"00000009-0000-0000-c000-000000000000\" or \"0000000c-0000-0000-c000-000000000000\" or \"00000015-0000-0000-c000-000000000000\" or \n \"0000001a-0000-0000-c000-000000000000\" or \"00b41c95-dab0-4487-9791-b9d2c32c80f2\" or \"022907d3-0f1b-48f7-badc-1ba6abab6d66\" or \n \"04b07795-8ddb-461a-bbee-02f9e1bf7b46\" or \"08e18876-6177-487e-b8b5-cf950c1e598c\" or \"0cb7b9ec-5336-483b-bc31-b15b5788de71\" or \n \"0cd196ee-71bf-4fd6-a57c-b491ffd4fb1e\" or \"0f698dd4-f011-4d23-a33e-b36416dcb1e6\" or \"13937bba-652e-4c46-b222-3003f4d1ff97\" or \n \"14d82eec-204b-4c2f-b7e8-296a70dab67e\" or \"16aeb910-ce68-41d1-9ac3-9e1673ac9575\" or \"1786c5ed-9644-47b2-8aa0-7201292175b6\" or \n \"17d5e35f-655b-4fb0-8ae6-86356e9a49f5\" or \"18fbca16-2224-45f6-85b0-f7bf2b39b3f3\" or \"1950a258-227b-4e31-a9cf-717495945fc2\" or \n \"1b3c667f-cde3-4090-b60b-3d2abd0117f0\" or \"1fec8e78-bce4-4aaf-ab1b-5451cc387264\" or \"20a11fe0-faa8-4df5-baf2-f965f8f9972e\" or \n \"23523755-3a2b-41ca-9315-f81f3f566a95\" or \"243c63a3-247d-41c5-9d83-7788c43f1c43\" or \"268761a2-03f3-40df-8a8b-c3db24145b6b\" or \n \"26a7ee05-5602-4d76-a7ba-eae8b7b67941\" or \"26abc9a8-24f0-4b11-8234-e86ede698878\" or \"27922004-5251-4030-b22d-91ecd9a37ea4\" or \n \"28b567f6-162c-4f54-99a0-6887f387bbcc\" or \"29d9ed98-a469-4536-ade2-f981bc1d605e\" or \"2abdc806-e091-4495-9b10-b04d93c3f040\" or \n \"2d4d3d8e-2be3-4bef-9f87-7875a61c29de\" or \"2d7f3606-b07d-41d1-b9d2-0d0c9296a6e8\" or \"3090ab82-f1c1-4cdf-af2c-5d7a6f3e2cc7\" or \n \"35d54a08-36c9-4847-9018-93934c62740c\" or \"37182072-3c9c-4f6a-a4b3-b3f91cacffce\" or \"38049638-cc2c-4cde-abe4-4479d721ed44\" or \n \"3c896ded-22c5-450f-91f6-3d1ef0848f6e\" or \"4345a7b9-9a63-4910-a426-35363201d503\" or \"45a330b1-b1ec-4cc1-9161-9f03992aa49f\" or \n \"4765445b-32c6-49b0-83e6-1d93765276ca\" or \"497effe9-df71-4043-a8bb-14cf78c4b63b\" or  \"4b233688-031c-404b-9a80-a4f3f2351f90\" or \n \"4d5c2d63-cf83-4365-853c-925fd1a64357\" or \"51be292c-a17e-4f17-9a7e-4b661fb16dd2\" or \n \"5572c4c0-d078-44ce-b81c-6cbf8d3ed39e\" or \"5e3ce6c0-2b1f-4285-8d4b-75ee78787346\" or \"60c8bde5-3167-4f92-8fdb-059f6176dc0f\" or \n \"61109738-7d2b-4a0b-9fe3-660b1ff83505\" or \"62256cef-54c0-4cb4-bcac-4c67989bdc40\" or \"6253bca8-faf2-4587-8f2f-b056d80998a7\" or \n \"65d91a3d-ab74-42e6-8a2f-0add61688c74\" or \"66a88757-258c-4c72-893c-3e8bed4d6899\" or \"67e3df25-268a-4324-a550-0de1c7f97287\" or \n \"69893ee3-dd10-4b1c-832d-4870354be3d8\" or \"74658136-14ec-4630-ad9b-26e160ff0fc6\" or \"74bcdadc-2fdc-4bb3-8459-76d06952a0e9\" or \n \"797f4846-ba00-4fd7-ba43-dac1f8f63013\" or \"7ab7862c-4c57-491e-8a45-d52a7e023983\" or \"7ae974c5-1af7-4923-af3a-fb1fd14dcb7e\" or \n \"7b7531ad-5926-4f2d-8a1d-38495ad33e17\" or \"80ccca67-54bd-44ab-8625-4b79c4dc7775\" or \"835b2a73-6e10-4aa5-a979-21dfda45231c\" or \n \"871c010f-5e61-4fb1-83ac-98610a7e9110\" or \"89bee1f7-5e6e-4d8a-9f3d-ecd601259da7\" or \"8edd93e1-2103-40b4-bd70-6e34e586362d\" or \n \"905fcf26-4eb7-48a0-9ff0-8dcc7194b5ba\" or \"91ca2ca5-3b3e-41dd-ab65-809fa3dffffa\" or \"93625bc8-bfe2-437a-97e0-3d0060024faa\" or \n \"93d53678-613d-4013-afc1-62e9e444a0a5\" or \"944f0bd1-117b-4b1c-af26-804ed95e767e\" or \"94c63fef-13a3-47bc-8074-75af8c65887a\" or \n \"95de633a-083e-42f5-b444-a4295d8e9314\" or \"97cb1f73-50df-47d1-8fb0-0271f2728514\" or \"98db8bd6-0cc0-4e67-9de5-f187f1cd1b41\" or \n \"99b904fd-a1fe-455c-b86c-2f9fb1da7687\" or \"9ea1ad79-fdb6-4f9a-8bc3-2b70f96e34c7\" or \"a3475900-ccec-4a69-98f5-a65cd5dc5306\" or \n \"a3b79187-70b2-4139-83f9-6016c58cd27b\" or \"a57aca87-cbc0-4f3c-8b9e-dc095fdc8978\" or \"a970bac6-63fe-4ec5-8884-8536862c42d4\" or \n \"a9b49b65-0a12-430b-9540-c80b3332c127\" or \"ab9b8c07-8f02-4f72-87fa-80105867a763\" or \"ae8e128e-080f-4086-b0e3-4c19301ada69\" or \n \"b23dd4db-9142-4734-867f-3577f640ad0c\" or \"b4bddae8-ab25-483e-8670-df09b9f1d0ea\" or \"b669c6ea-1adf-453f-b8bc-6d526592b419\" or \n \"b6e69c34-5f1f-4c34-8cdf-7fea120b8670\" or \"bb2a2e3a-c5e7-4f0a-88e0-8e01fd3fc1f4\" or \"bdd48c81-3a58-4ea9-849c-ebea7f6b6360\" or \n \"c1c74fed-04c9-4704-80dc-9f79a2e515cb\" or \"c35cb2ba-f88b-4d15-aa9d-37bd443522e1\" or \"c44b4083-3bb0-49c1-b47d-974e53cbdf3c\" or \n \"c9a559d2-7aab-4f13-a6ed-e7e9c52aec87\" or \"cc15fd57-2c6c-4117-a88c-83b1d56b4bbe\" or \"cf36b471-5b44-428c-9ce7-313bf84528de\" or \n \"cf53fce8-def6-4aeb-8d30-b158e7b1cf83\" or \"d176f6e7-38e5-40c9-8a78-3998aab820e7\" or \"d3590ed6-52b3-4102-aeff-aad2292ab01c\" or \n \"d73f4b35-55c9-48c7-8b10-651f6f2acb2e\" or \"d9b8ec3a-1e4e-4e08-b3c2-5baf00c0fcb0\" or \"de8bc8b5-d9f9-48b1-a8ad-b748da725064\" or \n \"dfe74da8-9279-44ec-8fb2-2aed9e1c73d0\" or \"e1ef36fd-b883-4dbf-97f0-9ece4b576fc6\" or \"e64aa8bc-8eb4-40e2-898b-cf261a25954f\" or \n \"e9f49c6b-5ce5-44c8-925d-015017e9f7ad\" or \"ee272b19-4411-433f-8f28-5c13cb6fd407\" or \"f5eaa862-7f08-448c-9c4e-f4047d4d4521\" or \n \"fb78d390-0c51-40cd-8e17-fdbfab77341b\" or \"fc0f3af4-6835-4174-b806-f7db311fd2f3\" or \"fdf9885b-dd37-42bf-82e5-c3129ef5a302\"\n)\n",
+    "references": [
+      "https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-193a"
+    ],
+    "related_integrations": [
+      {
+        "package": "o365",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "o365.audit.ClientAppId",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "48819484-9826-4083-9eba-1da74cd0eaf2",
+    "setup": "## Setup\n\nThe Office 365 Logs Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.\n",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: Microsoft 365",
+      "Use Case: Configuration Audit",
+      "Tactic: Initial Access"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0001",
+          "name": "Initial Access",
+          "reference": "https://attack.mitre.org/tactics/TA0001/"
+        },
+        "technique": [
+          {
+            "id": "T1078",
+            "name": "Valid Accounts",
+            "reference": "https://attack.mitre.org/techniques/T1078/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 107
+  },
+  "id": "48819484-9826-4083-9eba-1da74cd0eaf2_107",
+  "type": "security-rule"
+}

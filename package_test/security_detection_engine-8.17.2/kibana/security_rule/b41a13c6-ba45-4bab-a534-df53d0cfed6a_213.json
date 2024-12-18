@@ -1,0 +1,116 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "A suspicious Endpoint Security parent process was detected. This may indicate a process hollowing or other form of code injection.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-endpoint.events.process-*",
+      "logs-windows.forwarded*",
+      "logs-windows.sysmon_operational-*",
+      "endgame-*",
+      "logs-system.security*",
+      "logs-m365_defender.event-*",
+      "logs-sentinel_one_cloud_funnel.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Suspicious Endpoint Security Parent Process",
+    "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n  process.name : (\"esensor.exe\", \"elastic-endpoint.exe\") and\n  process.parent.executable != null and\n  /* add FPs here */\n  not process.parent.executable : (\n        \"?:\\\\Program Files\\\\Elastic\\\\*\",\n        \"?:\\\\Windows\\\\System32\\\\services.exe\",\n        \"?:\\\\Windows\\\\System32\\\\WerFault*.exe\",\n        \"?:\\\\Windows\\\\System32\\\\wermgr.exe\",\n        \"?:\\\\Windows\\\\explorer.exe\"\n  ) and\n  not (\n    process.parent.executable : (\n        \"?:\\\\Windows\\\\System32\\\\cmd.exe\",\n        \"?:\\\\Windows\\\\System32\\\\SecurityHealthHost.exe\",\n        \"?:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\"\n    ) and\n    process.args : (\n        \"test\", \"version\",\n        \"top\", \"run\",\n        \"*help\", \"status\",\n        \"upgrade\", \"/launch\",\n        \"/enable\"\n    )\n  )\n",
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^1.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.executable",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "b41a13c6-ba45-4bab-a534-df53d0cfed6a",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Defense Evasion",
+      "Data Source: Elastic Endgame",
+      "Data Source: Elastic Defend",
+      "Data Source: System",
+      "Data Source: Microsoft Defender for Endpoint",
+      "Data Source: Sysmon",
+      "Data Source: SentinelOne"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1036",
+            "name": "Masquerading",
+            "reference": "https://attack.mitre.org/techniques/T1036/",
+            "subtechnique": [
+              {
+                "id": "T1036.005",
+                "name": "Match Legitimate Name or Location",
+                "reference": "https://attack.mitre.org/techniques/T1036/005/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 213
+  },
+  "id": "b41a13c6-ba45-4bab-a534-df53d0cfed6a_213",
+  "type": "security-rule"
+}

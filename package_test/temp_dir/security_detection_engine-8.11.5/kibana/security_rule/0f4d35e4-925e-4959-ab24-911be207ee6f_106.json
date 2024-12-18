@@ -1,0 +1,106 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule monitors the creation/alteration of the rc.local file by a previously unknown process executable through the use of the new terms rule type. The /etc/rc.local file is used to start custom applications, services, scripts or commands during start-up. The rc.local file has mostly been replaced by Systemd. However, through the \"systemd-rc-local-generator\", rc.local files can be converted to services that run at boot. Adversaries may alter rc.local to execute malicious code at start-up, and gain persistence onto the system.",
+        "from": "now-9m",
+        "history_window_start": "now-7d",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Potential Persistence Through Run Control Detected",
+        "new_terms_fields": [
+            "host.id",
+            "process.executable"
+        ],
+        "note": "## Triage and analysis\n\n### Investigating Potential Persistence Through Run Control Detected\n\nThe `rc.local` file executes custom commands or scripts during system startup on Linux systems. `rc.local` has been deprecated in favor of the use of `systemd services`, and more recent Unix distributions no longer leverage this method of on-boot script execution. \n\nThere might still be users that use `rc.local` in a benign matter, so investigation to see whether the file is malicious is vital. \n\nDetection alerts from this rule indicate the creation of a new `/etc/rc.local` file. \n\n\u003e **Note**:\n\u003e This investigation guide uses the [Osquery Markdown Plugin](https://www.elastic.co/guide/en/security/master/invest-guide-run-osquery.html) introduced in Elastic Stack version 8.5.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n\u003e This investigation guide uses [placeholder fields](https://www.elastic.co/guide/en/security/current/osquery-placeholder-fields.html) to dynamically pass alert data into Osquery queries. Placeholder fields were introduced in Elastic Stack version 8.7.0. If you're using Elastic Stack version 8.6.0 or earlier, you'll need to manually adjust this investigation guide's queries to ensure they properly run.\n\n#### Possible Investigation Steps\n\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Investigate the file that was created or modified.\n  - !{osquery{\"label\":\"Osquery - Retrieve File Information\",\"query\":\"SELECT * FROM file WHERE path = {{file.path}}\"}}\n- Investigate the script execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence and whether they are located in expected locations.\n  - !{osquery{\"label\":\"Osquery - Retrieve Running Processes by User\",\"query\":\"SELECT pid, username, name FROM processes p JOIN users u ON u.uid = p.uid ORDER BY username\"}}\n- Investigate whether the `/lib/systemd/system/rc-local.service` and `/run/systemd/generator/multi-user.target.wants/rc-local.service` files were created through the `systemd-rc-local-generator` located at `/usr/lib/systemd/system-generators/systemd-rc-local-generator`.\n  - !{osquery{\"label\":\"Osquery - Retrieve rc-local.service File Information\",\"query\":\"SELECT * FROM file WHERE (path = '/run/systemd/generator/multi-user.target.wants/rc-local.service' OR path = '/run/systemd/generator/multi-user.target.wants/rc-local.service')\"}}\n  - In case the file is not present here, `sudo systemctl status rc-local` can be executed to find the location of the rc-local unit file.\n  - If `rc-local.service` is found, manual investigation is required to check for the rc script execution. Systemd will generate syslogs in case of the execution of the rc-local service. `sudo cat /var/log/syslog | grep \"rc-local.service|/etc/rc.local Compatibility\"` can be executed to check for the execution of the service.\n    - If logs are found, it's likely that the contents of the `rc.local` file have been executed. Analyze the logs. In case several syslog log files are available, use a wildcard to search through all of the available logs.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Validate whether this activity is related to planned patches, updates, network administrator activity, or legitimate software installations.\n- Investigate whether the altered scripts call other malicious scripts elsewhere on the file system. \n  - If scripts or executables were dropped, retrieve the files and determine if they are malicious:\n    - Use a private sandboxed malware analysis system to perform analysis.\n      - Observe and collect information about the following activities:\n        - Attempts to contact external domains and addresses.\n          - Check if the domain is newly registered or unexpected.\n          - Check the reputation of the domain or IP address.\n        - File access, modification, and creation activities.\n        - Cron jobs, services and other persistence mechanisms.\n            - !{osquery{\"label\":\"Osquery - Retrieve Crontab Information\",\"query\":\"SELECT * FROM crontab\"}}\n\n### False Positive Analysis\n\n- If this activity is related to new benign software installation activity, consider adding exceptions \u2014 preferably with a combination of user and command line conditions.\n- If this activity is related to a system administrator who uses `rc.local` for administrative purposes, consider adding exceptions for this specific administrator user account. \n- Try to understand the context of the execution by thinking about the user, machine, or business purpose. A small number of endpoints, such as servers with unique software, might appear unusual but satisfy a specific business need.\n\n### Response and remediation\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors like reverse shells, reverse proxies, or droppers that attackers could use to reinfect the system.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Delete the `service/rc.local` files or restore their original configuration.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Leverage the incident response data and logging to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+        "query": "host.os.type : \"linux\" and event.category : \"file\" and \nevent.type : (\"change\" or \"file_modify_event\" or \"creation\" or \"file_create_event\") and\nfile.path : \"/etc/rc.local\" and not process.name : (\"dockerd\" or \"docker\" or \"dnf\" or \"yum\" or \"rpm\" or \"dpkg\") and not file.extension : (\"swp\" or \"swx\")\n",
+        "references": [
+            "https://www.intezer.com/blog/malware-analysis/hiddenwasp-malware-targeting-linux-systems/",
+            "https://pberba.github.io/security/2022/02/06/linux-threat-hunting-for-persistence-initialization-scripts-and-shell-configuration/#8-boot-or-logon-initialization-scripts-rc-scripts",
+            "https://www.cyberciti.biz/faq/how-to-enable-rc-local-shell-script-on-systemd-while-booting-linux-system/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.extension",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "0f4d35e4-925e-4959-ab24-911be207ee6f",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Data Source: Elastic Endgame",
+            "Resources: Investigation Guide",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1037",
+                        "name": "Boot or Logon Initialization Scripts",
+                        "reference": "https://attack.mitre.org/techniques/T1037/",
+                        "subtechnique": [
+                            {
+                                "id": "T1037.004",
+                                "name": "RC Scripts",
+                                "reference": "https://attack.mitre.org/techniques/T1037/004/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "type": "new_terms",
+        "version": 106
+    },
+    "id": "0f4d35e4-925e-4959-ab24-911be207ee6f_106",
+    "type": "security-rule"
+}

@@ -1,0 +1,55 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "This rule uses alert data to determine when a malware signature is triggered in multiple hosts. Analysts can use this to prioritize triage and response, as this can potentially indicate a widespread malware infection.",
+    "from": "now-9m",
+    "language": "esql",
+    "license": "Elastic License v2",
+    "name": "Potential Widespread Malware Infection Across Multiple Hosts",
+    "query": "from logs-endpoint.alerts-*\n| where event.code in (\"malicious_file\", \"memory_signature\", \"shellcode_thread\") and rule.name is not null\n| stats hosts = count_distinct(host.id) by rule.name, event.code\n| where hosts >= 3\n",
+    "references": [
+      "https://github.com/elastic/protections-artifacts/tree/main/yara/rules"
+    ],
+    "risk_score": 73,
+    "rule_id": "28371aa1-14ed-46cf-ab5b-2fc7d1942278",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "Data Source: Elastic Defend",
+      "Use Case: Threat Detection",
+      "Tactic: Execution",
+      "Rule Type: Higher-Order Rule"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1204",
+            "name": "User Execution",
+            "reference": "https://attack.mitre.org/techniques/T1204/",
+            "subtechnique": [
+              {
+                "id": "T1204.002",
+                "name": "Malicious File",
+                "reference": "https://attack.mitre.org/techniques/T1204/002/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "esql",
+    "version": 1
+  },
+  "id": "28371aa1-14ed-46cf-ab5b-2fc7d1942278_1",
+  "type": "security-rule"
+}

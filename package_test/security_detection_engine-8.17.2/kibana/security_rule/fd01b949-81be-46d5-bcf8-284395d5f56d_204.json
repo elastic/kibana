@@ -1,0 +1,70 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects the deletion of a GitHub app either from a repo or an organization.",
+    "from": "now-9m",
+    "index": [
+      "logs-github.audit-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "GitHub App Deleted",
+    "query": "configuration where event.dataset == \"github.audit\" and github.category == \"integration_installation\" and event.type == \"deletion\"\n",
+    "related_integrations": [
+      {
+        "package": "github",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "github.category",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "fd01b949-81be-46d5-bcf8-284395d5f56d",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Use Case: Threat Detection",
+      "Tactic: Execution",
+      "Data Source: Github"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1648",
+            "name": "Serverless Execution",
+            "reference": "https://attack.mitre.org/techniques/T1648/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 204
+  },
+  "id": "fd01b949-81be-46d5-bcf8-284395d5f56d_204",
+  "type": "security-rule"
+}

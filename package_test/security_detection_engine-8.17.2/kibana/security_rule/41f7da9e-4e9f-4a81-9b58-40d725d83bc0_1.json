@@ -1,0 +1,85 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "This rule detects the use of the mount utility from inside a privileged container. The mount command is used to make a device or file system accessible to the system, and then to connect its root directory to a specified mount point on the local file system. When launched inside a privileged container--a container deployed with all the capabilities of the host machine-- an attacker can access sensitive host level files which could be used for further privilege escalation and container escapes to the host machine. Any usage of mount inside a running privileged container should be further investigated.",
+    "from": "now-6m",
+    "index": [
+      "logs-cloud_defend*"
+    ],
+    "interval": "5m",
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Mount Launched Inside a Privileged Container",
+    "query": "process where event.module == \"cloud_defend\" and  event.type== \"start\" and \n(process.name== \"mount\" or process.args== \"mount\") and container.security_context.privileged == true\n",
+    "references": [
+      "https://book.hacktricks.xyz/linux-hardening/privilege-escalation/docker-security/docker-breakout-privilege-escalation#privileged"
+    ],
+    "related_integrations": [
+      {
+        "package": "cloud_defend",
+        "version": "^1.0.5"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "container.security_context.privileged",
+        "type": "boolean"
+      },
+      {
+        "ecs": true,
+        "name": "event.module",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "41f7da9e-4e9f-4a81-9b58-40d725d83bc0",
+    "severity": "low",
+    "tags": [
+      "Data Source: Elastic Defend for Containers",
+      "Domain: Container",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Privilege Escalation"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": [
+          {
+            "id": "T1611",
+            "name": "Escape to Host",
+            "reference": "https://attack.mitre.org/techniques/T1611/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "41f7da9e-4e9f-4a81-9b58-40d725d83bc0_1",
+  "type": "security-rule"
+}

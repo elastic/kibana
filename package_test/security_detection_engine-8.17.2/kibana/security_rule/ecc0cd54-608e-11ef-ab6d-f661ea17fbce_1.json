@@ -1,0 +1,131 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "This rule identifies potentially malicious processes attempting to access the cloud service provider's instance metadata service (IMDS) API endpoint, which can be used to retrieve sensitive instance-specific information such as instance ID, public IP address, and even temporary security credentials if role's are assumed by that instance. The rule monitors for various tools and scripts like curl, wget, python, and perl that might be used to interact with the metadata API.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Unusual Instance Metadata Service (IMDS) API Request",
+    "query": "sequence by host.id,  process.parent.entity_id with maxspan=1s\n[process where host.os.type == \"linux\" and event.type == \"start\" and event.action == \"exec\" and process.name : (\n    \"curl\", \"wget\", \"python*\", \"perl*\", \"php*\", \"ruby*\", \"lua*\", \"telnet\", \"pwsh\",\n    \"openssl\", \"nc\", \"ncat\", \"netcat\", \"awk\", \"gawk\", \"mawk\", \"nawk\", \"socat\", \"node\"\n    ) or process.executable : (\n      \"./*\", \"/tmp/*\", \"/var/tmp/*\", \"/var/www/*\", \"/dev/shm/*\", \"/etc/init.d/*\", \"/etc/rc*.d/*\",\n      \"/etc/cron*\", \"/etc/update-motd.d/*\", \"/boot/*\", \"/srv/*\", \"/run/*\", \"/etc/rc.local\"\n    ) or\n    process.command_line: \"*169.254.169.254*\" and\n    not process.working_directory: (\n      \"/opt/rapid7*\",\n      \"/opt/nessus*\",\n      \"/snap/amazon-ssm-agent*\",\n      \"/srv/snp/docker/overlay2*\",\n      \"/var/log/amazon/ssm*\"\n    )]\n[network where host.os.type == \"linux\" and event.action == \"connection_attempted\" and destination.ip == \"169.254.169.254\"]\n",
+    "references": [
+      "https://hackingthe.cloud/aws/general-knowledge/intro_metadata_service/"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "destination.ip",
+        "type": "ip"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.id",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.command_line",
+        "type": "wildcard"
+      },
+      {
+        "ecs": true,
+        "name": "process.executable",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.entity_id",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.working_directory",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "ecc0cd54-608e-11ef-ab6d-f661ea17fbce",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Credential Access",
+      "Tactic: Discovery",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1552",
+            "name": "Unsecured Credentials",
+            "reference": "https://attack.mitre.org/techniques/T1552/",
+            "subtechnique": [
+              {
+                "id": "T1552.005",
+                "name": "Cloud Instance Metadata API",
+                "reference": "https://attack.mitre.org/techniques/T1552/005/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0007",
+          "name": "Discovery",
+          "reference": "https://attack.mitre.org/tactics/TA0007/"
+        },
+        "technique": [
+          {
+            "id": "T1580",
+            "name": "Cloud Infrastructure Discovery",
+            "reference": "https://attack.mitre.org/techniques/T1580/"
+          }
+        ]
+      }
+    ],
+    "type": "eql",
+    "version": 1
+  },
+  "id": "ecc0cd54-608e-11ef-ab6d-f661ea17fbce_1",
+  "type": "security-rule"
+}

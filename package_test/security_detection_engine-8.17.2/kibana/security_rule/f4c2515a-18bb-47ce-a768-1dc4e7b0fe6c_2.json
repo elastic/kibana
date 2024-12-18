@@ -1,0 +1,41 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies multiple violations of AWS Bedrock guardrails within a single request, resulting in a block action, increasing the likelihood of malicious intent. Multiple violations implies that a user may be intentionally attempting to cirvumvent security controls, access sensitive information, or possibly exploit a vulnerability in the system.",
+    "false_positives": [
+      "Legitimate misunderstanding by users or overly strict policies"
+    ],
+    "from": "now-60m",
+    "interval": "10m",
+    "language": "esql",
+    "license": "Elastic License v2",
+    "name": "AWS Bedrock Guardrails Detected Multiple Policy Violations Within a Single Blocked Request",
+    "query": "from logs-aws_bedrock.invocation-*\n| where gen_ai.policy.action == \"BLOCKED\"\n| eval policy_violations = mv_count(gen_ai.policy.name)\n| where policy_violations > 1\n| keep gen_ai.policy.action, policy_violations, user.id, gen_ai.request.model.id, cloud.account.id, user.id\n| stats total_unique_request_violations = count(*) by policy_violations, user.id, gen_ai.request.model.id, cloud.account.id\n| sort total_unique_request_violations desc\n",
+    "references": [
+      "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-components.html",
+      "https://atlas.mitre.org/techniques/AML.T0051",
+      "https://atlas.mitre.org/techniques/AML.T0054",
+      "https://www.elastic.co/security-labs/elastic-advances-llm-security"
+    ],
+    "risk_score": 21,
+    "rule_id": "f4c2515a-18bb-47ce-a768-1dc4e7b0fe6c",
+    "setup": "## Setup\n\nThis rule requires that guardrails are configured in AWS Bedrock. For more information, see the AWS Bedrock documentation:\n\nhttps://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-create.html\n",
+    "severity": "low",
+    "tags": [
+      "Domain: LLM",
+      "Data Source: AWS Bedrock",
+      "Data Source: AWS S3",
+      "Resources: Investigation Guide",
+      "Use Case: Policy Violation",
+      "Mitre Atlas: T0051",
+      "Mitre Atlas: T0054"
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "esql",
+    "version": 2
+  },
+  "id": "f4c2515a-18bb-47ce-a768-1dc4e7b0fe6c_2",
+  "type": "security-rule"
+}

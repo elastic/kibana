@@ -1,0 +1,80 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects when an attacker abuses the Multi-Factor authentication mechanism by repeatedly issuing login requests until the user eventually accepts the Okta push notification. An adversary may attempt to bypass the Okta MFA policies configured for an organization to obtain unauthorized access.",
+        "index": [
+            "filebeat-*",
+            "logs-okta*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Abuse of Repeated MFA Push Notifications",
+        "note": "",
+        "query": "sequence by user.email with maxspan=10m\n  [any where event.dataset == \"okta.system\" and event.module == \"okta\" and event.action == \"user.mfa.okta_verify.deny_push\"]\n  [any where event.dataset == \"okta.system\" and event.module == \"okta\" and event.action == \"user.mfa.okta_verify.deny_push\"]\n  [any where event.dataset == \"okta.system\" and event.module == \"okta\" and event.action == \"user.authentication.sso\"]\n",
+        "references": [
+            "https://www.mandiant.com/resources/russian-targeting-gov-business",
+            "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy"
+        ],
+        "related_integrations": [
+            {
+                "package": "okta",
+                "version": "^1.3.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.module",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.email",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "97a8e584-fd3b-421f-9b9d-9c9d9e57e9d7",
+        "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "high",
+        "tags": [
+            "Use Case: Identity and Access Audit",
+            "Data Source: Okta",
+            "Use Case: Identity and Access Audit",
+            "Tactic: Credential Access"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1110",
+                        "name": "Brute Force",
+                        "reference": "https://attack.mitre.org/techniques/T1110/"
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 103
+    },
+    "id": "97a8e584-fd3b-421f-9b9d-9c9d9e57e9d7_103",
+    "type": "security-rule"
+}

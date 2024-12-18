@@ -1,0 +1,105 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule leverages auditd to monitor for processes scanning different processes within the /proc directory using the openat syscall. This is a strong indication for the usage of the pspy utility. Attackers may leverage the pspy process monitoring utility to monitor system processes without requiring root permissions, in order to find potential privilege escalation vectors.",
+        "from": "now-9m",
+        "index": [
+            "logs-auditd_manager.auditd-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Pspy Process Monitoring Detected",
+        "note": "## Setup\nThis rule requires the use of the `auditd_manager` integration. `Auditd_manager` is a tool designed to simplify and enhance the management of the audit subsystem in Linux systems. It provides a user-friendly interface and automation capabilities for configuring and monitoring system auditing through the auditd daemon. With `auditd_manager`, administrators can easily define audit rules, track system events, and generate comprehensive audit reports, improving overall security and compliance in the system. The following steps should be executed in order to install and deploy `auditd_manager` on a Linux system. \n\n```\nKibana --\u003e\nManagement --\u003e\nIntegrations --\u003e\nAuditd Manager --\u003e\nAdd Auditd Manager\n```\n\n`Auditd_manager` subscribes to the kernel and receives events as they occur without any additional configuration. However, if more advanced configuration is required to detect specific behavior, audit rules can be added to the integration in either the \"audit rules\" configuration box or the \"auditd rule files\" box by specifying a file to read the audit rules from. \n\nFor this detection rule to trigger, the following additional audit rules are required to be added to the integration:\n```\n-w /proc/ -p r -k audit_proc\n```\n\nAdd the newly installed `auditd manager` to an agent policy, and deploy the agent on a Linux system from which auditd log files are desirable.",
+        "query": "sequence by process.pid, host.id with maxspan=5s\n[ file where host.os.type == \"linux\" and event.dataset == \"auditd_manager.auditd\" and \n  auditd.data.syscall == \"openat\" and file.path == \"/proc\" and auditd.data.a0 : (\"ffffffffffffff9c\", \"ffffff9c\") and \n  auditd.data.a2 : (\"80000\", \"88000\") ] with runs=10\n",
+        "references": [
+            "https://github.com/DominicBreuker/pspy"
+        ],
+        "related_integrations": [
+            {
+                "integration": "auditd",
+                "package": "auditd_manager",
+                "version": "^1.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": false,
+                "name": "auditd.data.a0",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "auditd.data.a2",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "auditd.data.syscall",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.pid",
+                "type": "long"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "bdb04043-f0e3-4efa-bdee-7d9d13fa9edc",
+        "setup": "This rule requires the use of the `auditd_manager` integration. `Auditd_manager` is a tool designed to simplify and enhance the management of the audit subsystem in Linux systems. It provides a user-friendly interface and automation capabilities for configuring and monitoring system auditing through the auditd daemon. With `auditd_manager`, administrators can easily define audit rules, track system events, and generate comprehensive audit reports, improving overall security and compliance in the system. The following steps should be executed in order to install and deploy `auditd_manager` on a Linux system.\n\n```\nKibana --\u003e\nManagement --\u003e\nIntegrations --\u003e\nAuditd Manager --\u003e\nAdd Auditd Manager\n```\n\n`Auditd_manager` subscribes to the kernel and receives events as they occur without any additional configuration. However, if more advanced configuration is required to detect specific behavior, audit rules can be added to the integration in either the \"audit rules\" configuration box or the \"auditd rule files\" box by specifying a file to read the audit rules from.\n\nFor this detection rule to trigger, the following additional audit rules are required to be added to the integration:\n```\n-w /proc/ -p r -k audit_proc\n```\n\nAdd the newly installed `auditd manager` to an agent policy, and deploy the agent on a Linux system from which auditd log files are desirable.",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Discovery"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0007",
+                    "name": "Discovery",
+                    "reference": "https://attack.mitre.org/tactics/TA0007/"
+                },
+                "technique": [
+                    {
+                        "id": "T1057",
+                        "name": "Process Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1057/"
+                    },
+                    {
+                        "id": "T1082",
+                        "name": "System Information Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1082/"
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 1
+    },
+    "id": "bdb04043-f0e3-4efa-bdee-7d9d13fa9edc_1",
+    "type": "security-rule"
+}

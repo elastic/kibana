@@ -1,0 +1,119 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies potential malicious file download and execution from Google Drive. The rule checks for download activity from Google Drive URL, followed by the creation of files commonly leveraged by or for malware. This could indicate an attempt to run malicious scripts, executables or payloads.",
+        "false_positives": [
+            "Approved third-party applications that use Google Drive download URLs.",
+            "Legitimate publicly shared files from Google Drive."
+        ],
+        "from": "now-9m",
+        "index": [
+            "auditbeat-*",
+            "logs-endpoint*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Malicious File Downloaded from Google Drive",
+        "query": "sequence by host.id, process.entity_id with maxspan=30s\n[any where\n\n    /* Look for processes started or libraries loaded from untrusted or unsigned Windows, Linux or macOS binaries */\n    (event.action in (\"exec\", \"fork\", \"start\", \"load\")) or\n\n    /* Look for Google Drive download URL with AV flag skipping */\n    (process.args : \"*drive.google.com*\" and process.args : \"*export=download*\" and process.args : \"*confirm=no_antivirus*\")\n\n    /* ignore trusted processes */\n    and not (\n        process.code_signature.trusted == true and\n        process.code_signature.subject_name:\n            (\"Mozilla Corporation\",\n            \"Google LLC\",\n            \"Google Inc\",\n            \"Bitdefender SRL\",\n            \"Microsoft Corporation\",\n            \"Netskope, Inc.\",\n            \"Avast Software s.r.o.\",\n            \"Microsoft Windows\",\n            \"AVG Technologies USA, LLC\",\n            \"Symantec Corporation\",\n            \"Trend Micro, Inc.\",\n            \"Palo Alto Networks (Netherlands) B.V.\",\n            \"Docker Inc\"))\n\n    /* ignore common benign processes */\n    and not process.executable:\n        (\"/bin/terraform\",\n        \"*/bin/dockerd\",\n        \"/usr/local/bin/docker-init\",\n        \"*/bin/go\",\n        \"?:\\\\Program Files*\\\\Mozilla Firefox\\firefox.exe\",\n        \"?:\\\\Program Files*\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\")\n\n    /* ignore shellscripts + go install from legitimate repository*/\n    and not (process.executable == \"/bin/sh\" and process.args : \"go install google.golang.org*\")]\n\n[network where\n    /* Look for DNS requests for Google Drive */\n    (dns.question.name : \"drive.google.com\" and dns.question.type : \"A\") or\n\n    /* Look for connection attempts to address that resolves to Google */\n    (destination.as.organization.name : \"GOOGLE\" and event.action == \"connection_attempted\")]\n\n/* Identify the creation of files following Google Drive connection with extensions commonly used for executables or libraries */\n[file where event.action == \"creation\" and\n    file.extension :\n        (\"exe\", \"dll\", \"scr\", \"jar\", \"pif\", \"app\", \"dmg\",\n        \"pkg\", \"elf\", \"so\", \"bin\", \"deb\", \"rpm\",\"sh\",\"hta\",\"lnk\")]\n",
+        "references": [
+            "https://intelligence.abnormalsecurity.com/blog/google-drive-matanbuchus-malware"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "destination.as.organization.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "dns.question.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "dns.question.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.extension",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.subject_name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.trusted",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.entity_id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "a8afdce2-0ec1-11ee-b843-f661ea17fbcd",
+        "severity": "high",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "OS: Windows",
+            "OS: macOS",
+            "Use Case: Threat Detection",
+            "Tactic: Command and Control"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0011",
+                    "name": "Command and Control",
+                    "reference": "https://attack.mitre.org/tactics/TA0011/"
+                },
+                "technique": [
+                    {
+                        "id": "T1105",
+                        "name": "Ingress Tool Transfer",
+                        "reference": "https://attack.mitre.org/techniques/T1105/"
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 2
+    },
+    "id": "a8afdce2-0ec1-11ee-b843-f661ea17fbcd_2",
+    "type": "security-rule"
+}

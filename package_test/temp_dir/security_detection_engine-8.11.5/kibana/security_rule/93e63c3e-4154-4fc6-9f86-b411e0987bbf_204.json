@@ -1,0 +1,89 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects when a custom admin role is deleted. An adversary may delete a custom admin role in order to impact the permissions or capabilities of system administrators.",
+        "false_positives": [
+            "Google Workspace admin roles may be deleted by system administrators. Verify that the configuration change was expected. Exceptions can be added to this rule to filter expected behavior."
+        ],
+        "from": "now-130m",
+        "index": [
+            "filebeat-*",
+            "logs-google_workspace*"
+        ],
+        "interval": "10m",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Google Workspace Admin Role Deletion",
+        "note": "## Triage and analysis\n\n### Investigating Google Workspace Admin Role Deletion\n\nGoogle Workspace roles allow administrators to assign specific permissions to users or groups where the principle of least privilege (PoLP) is recommended. Admin roles in Google Workspace grant users access to the Google Admin console, where further domain-wide settings are accessible. Google Workspace contains prebuilt administrator roles for performing business functions related to users, groups, and services. Custom administrator roles can be created where prebuilt roles are not preferred.\n\nDeleted administrator roles may render some user accounts inaccessible or cause operational failure where these roles are relied upon to perform daily administrative tasks. The deletion of roles may also hinder the response and remediation actions of administrators responding to security-related alerts and events. Without specific roles assigned, users will inherit the permissions and privileges of the root organizational unit.\n\nThis rule identifies when a Google Workspace administrative role is deleted within the Google Admin console.\n\n#### Possible investigation steps\n\n- Identify the associated user accounts by reviewing `user.name` or `user.email` fields in the alert.\n- Identify the role deleted by reviewing `google_workspace.admin.role.name` in the alert.\n- With the user identified, verify if he has administrative privileges to disable or delete administrative roles.\n- To identify other users affected by this role removed, search for `event.action: ASSIGN_ROLE`.\n    - Add `google_workspace.admin.role.name` with the role deleted as an additional filter.\n    - Adjust the relative time accordingly to identify all users that were assigned this admin role.\n\n### False positive analysis\n\n- After identifying the user account that disabled the admin role, verify the action was intentional.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Discuss with the user the affected users as a result of this action to mitigate operational discrepencies.\n- Disable or limit the account during the investigation and response.\n- Identify the possible impact of the incident and prioritize accordingly; the following actions can help you gain context:\n    - Identify the account role in the cloud environment.\n    - Assess the criticality of affected services and servers.\n    - Work with your IT team to identify and minimize the impact on users.\n    - Identify if the attacker is moving laterally and compromising other accounts, servers, or services.\n    - Identify any regulatory or legal ramifications related to this activity.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords or delete API keys as needed to revoke the attacker's access to the environment. Work with your IT teams to minimize the impact on business operations during these actions.\n- Review the permissions assigned to the implicated user to ensure that the least privilege principle is being followed.\n- Implement security best practices [outlined](https://support.google.com/a/answer/7587183) by Google.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection via the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n\n\n\n### Important Information Regarding Google Workspace Event Lag Times\n- As per Google's documentation, Google Workspace administrators may observe lag times ranging from minutes up to 3 days between the time of an event's occurrence and the event being visible in the Google Workspace admin/audit logs.\n- This rule is configured to run every 10 minutes with a lookback time of 130 minutes.\n- To reduce the risk of false negatives, consider reducing the interval that the Google Workspace (formerly G Suite) Filebeat module polls Google's reporting API for new events.\n- By default, `var.interval` is set to 2 hours (2h). Consider changing this interval to a lower value, such as 10 minutes (10m).\n- See the following references for further information:\n  - https://support.google.com/a/answer/7061566\n  - https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-google_workspace.html",
+        "query": "event.dataset:google_workspace.admin and event.provider:admin and event.category:iam and event.action:DELETE_ROLE\n",
+        "references": [
+            "https://support.google.com/a/answer/2406043?hl=en"
+        ],
+        "related_integrations": [
+            {
+                "package": "google_workspace",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.provider",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "93e63c3e-4154-4fc6-9f86-b411e0987bbf",
+        "setup": "The Google Workspace Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "medium",
+        "tags": [
+            "Elastic",
+            "Cloud",
+            "Google Workspace",
+            "Continuous Monitoring",
+            "SecOps",
+            "Identity and Access",
+            "Impact",
+            "Investigation Guide"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0040",
+                    "name": "Impact",
+                    "reference": "https://attack.mitre.org/tactics/TA0040/"
+                },
+                "technique": [
+                    {
+                        "id": "T1531",
+                        "name": "Account Access Removal",
+                        "reference": "https://attack.mitre.org/techniques/T1531/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 204
+    },
+    "id": "93e63c3e-4154-4fc6-9f86-b411e0987bbf_204",
+    "type": "security-rule"
+}

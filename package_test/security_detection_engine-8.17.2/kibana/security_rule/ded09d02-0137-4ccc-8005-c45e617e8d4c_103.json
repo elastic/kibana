@@ -1,0 +1,89 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "This rule identifies the execution of commands that can be used to query the Windows Registry. Adversaries may query the registry to gain situational awareness about the host, like installed security software, programs and settings.",
+    "from": "now-24h",
+    "history_window_start": "now-7d",
+    "index": [
+      "logs-endpoint.events.process*"
+    ],
+    "interval": "24h",
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Query Registry using Built-in Tools",
+    "new_terms_fields": [
+      "host.id",
+      "user.id"
+    ],
+    "query": "host.os.type:windows and event.category:process and event.type:start and\n  (\n    (process.name.caseless:\"reg.exe\" and process.args:\"query\") or\n    (process.name.caseless:(\"powershell.exe\" or \"powershell_ise.exe\" or \"pwsh.exe\") and\n     process.args:(\n       (\"get-childitem\" or \"Get-ChildItem\" or \"gci\" or \"dir\" or \"ls\" or\n        \"get-item\" or \"Get-Item\" or \"gi\" or\n        \"get-itemproperty\" or \"Get-ItemProperty\" or \"gp\") and\n       (\"hkcu\" or \"HKCU\" or \"hkey_current_user\" or \"HKEY_CURRENT_USER\" or\n        \"hkey_local_machine\" or \"HKEY_LOCAL_MACHINE\" or\n        \"hklm\" or \"HKLM\" or registry\\:\\:*)\n      )\n    )\n  )\n",
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "process.name.caseless",
+        "type": "unknown"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "ded09d02-0137-4ccc-8005-c45e617e8d4c",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Discovery",
+      "Rule Type: BBR",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0007",
+          "name": "Discovery",
+          "reference": "https://attack.mitre.org/tactics/TA0007/"
+        },
+        "technique": [
+          {
+            "id": "T1012",
+            "name": "Query Registry",
+            "reference": "https://attack.mitre.org/techniques/T1012/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 103
+  },
+  "id": "ded09d02-0137-4ccc-8005-c45e617e8d4c_103",
+  "type": "security-rule"
+}

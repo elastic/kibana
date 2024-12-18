@@ -1,0 +1,92 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies attempts to add a user to a privileged group. Attackers may add users to a privileged group in order to establish persistence on a system.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Linux User Added to Privileged Group",
+        "note": "## Triage and analysis\n\n### Investigating Linux User User Added to Privileged Group\n\nThe `usermod`, `adduser`, and `gpasswd` commands can be used to assign user accounts to new groups in Linux-based operating systems.\n\nAttackers may add users to a privileged group in order to escalate privileges or establish persistence on a system or domain.\n\nThis rule identifies the usages of `usermod`, `adduser` and `gpasswd` to assign user accounts to a privileged group.\n\n\u003e **Note**:\n\u003e This investigation guide uses the [Osquery Markdown Plugin](https://www.elastic.co/guide/en/security/master/invest-guide-run-osquery.html) introduced in Elastic Stack version 8.5.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n\u003e This investigation guide uses [placeholder fields](https://www.elastic.co/guide/en/security/current/osquery-placeholder-fields.html) to dynamically pass alert data into Osquery queries. Placeholder fields were introduced in Elastic Stack version 8.7.0. If you're using Elastic Stack version 8.6.0 or earlier, you'll need to manually adjust this investigation guide's queries to ensure they properly run.\n\n#### Possible investigation steps\n\n- Investigate whether the user was succesfully added to the privileged group.\n  - !{osquery{\"label\":\"Osquery - Retrieve Information for a Specific User\",\"query\":\"SELECT * FROM users WHERE username = {{user.name}}\"}}\n- Investigate whether the user is currently logged in and active.\n  - !{osquery{\"label\":\"Osquery - Investigate the Account Authentication Status\",\"query\":\"SELECT * FROM logged_in_users WHERE user = {{user.name}}\"}}\n- Retrieve information about the privileged group to which the user was added.\n  - !{osquery{\"label\":\"Osquery - Retrieve Information for a Specific Group\",\"query\":\"SELECT * FROM groups WHERE groupname = {{group.name}}\"}}\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence and whether they are located in expected locations.\n  - !{osquery{\"label\":\"Osquery - Retrieve Running Processes by User\",\"query\":\"SELECT pid, username, name FROM processes p JOIN users u ON u.uid = p.uid ORDER BY username\"}}\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n\n### False positive analysis\n\n- Adding accounts to a group is a common administrative task, so there is a high chance of the activity being legitimate. Before investigating further, verify that this activity is not benign.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors like reverse shells, reverse proxies, or droppers that attackers could use to reinfect the system.\n- Review the privileges assigned to the involved users to ensure that the least privilege principle is being followed.\n- Delete the account that seems to be involved in malicious activity.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+        "query": "process where host.os.type == \"linux\" and event.type == \"start\" and\nprocess.parent.name == \"sudo\" and\nprocess.args in (\"root\", \"admin\", \"wheel\", \"staff\", \"sudo\",\n                             \"disk\", \"video\", \"shadow\", \"lxc\", \"lxd\") and\n(\n  process.name in (\"usermod\", \"adduser\") or\n  process.name == \"gpasswd\" and \n  process.args in (\"-a\", \"--add\", \"-M\", \"--members\") \n)\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "43d6ec12-2b1c-47b5-8f35-e9de65551d3b",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Data Source: Elastic Endgame",
+            "Resources: Investigation Guide",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1136",
+                        "name": "Create Account",
+                        "reference": "https://attack.mitre.org/techniques/T1136/",
+                        "subtechnique": [
+                            {
+                                "id": "T1136.001",
+                                "name": "Local Account",
+                                "reference": "https://attack.mitre.org/techniques/T1136/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 3
+    },
+    "id": "43d6ec12-2b1c-47b5-8f35-e9de65551d3b_3",
+    "type": "security-rule"
+}

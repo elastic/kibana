@@ -1,0 +1,88 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects the creation of a WMI Event Subscription. Attackers can abuse this mechanism for persistence or to elevate to SYSTEM privileges.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-windows.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Suspicious WMI Event Subscription Created",
+        "query": "any where event.dataset == \"windows.sysmon_operational\" and event.code == \"21\" and\n    winlog.event_data.Operation : \"Created\" and winlog.event_data.Consumer : (\"*subscription:CommandLineEventConsumer*\", \"*subscription:ActiveScriptEventConsumer*\")\n",
+        "references": [
+            "https://www.blackhat.com/docs/us-15/materials/us-15-Graeber-Abusing-Windows-Management-Instrumentation-WMI-To-Build-A-Persistent%20Asynchronous-And-Fileless-Backdoor-wp.pdf",
+            "https://medium.com/threatpunter/detecting-removing-wmi-persistence-60ccbb7dff96"
+        ],
+        "related_integrations": [
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.code",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.event_data.Consumer",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.event_data.Operation",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "e72f87d0-a70e-4f8d-8443-a6407bc34643",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Data Source: Sysmon Only"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1546",
+                        "name": "Event Triggered Execution",
+                        "reference": "https://attack.mitre.org/techniques/T1546/",
+                        "subtechnique": [
+                            {
+                                "id": "T1546.003",
+                                "name": "Windows Management Instrumentation Event Subscription",
+                                "reference": "https://attack.mitre.org/techniques/T1546/003/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 4
+    },
+    "id": "e72f87d0-a70e-4f8d-8443-a6407bc34643_4",
+    "type": "security-rule"
+}

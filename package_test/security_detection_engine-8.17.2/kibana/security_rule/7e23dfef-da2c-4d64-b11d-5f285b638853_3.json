@@ -1,0 +1,134 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies attempts to open a Microsoft Management Console File from untrusted paths. Adversaries may use MSC files for initial access and execution.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.process-*",
+      "winlogbeat-*",
+      "logs-windows.*",
+      "endgame-*",
+      "logs-system.security*",
+      "logs-sentinel_one_cloud_funnel.*",
+      "logs-m365_defender.event-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Microsoft Management Console File from Unusual Path",
+    "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n  process.executable : \"?:\\\\Windows\\\\System32\\\\mmc.exe\" and process.args : \"*.msc\" and\n  not process.args : (\"?:\\\\Windows\\\\System32\\\\*.msc\", \"?:\\\\Windows\\\\SysWOW64\\\\*.msc\", \"?:\\\\Program files\\\\*.msc\", \"?:\\\\Program Files (x86)\\\\*.msc\")\n",
+    "references": [
+      "https://www.elastic.co/security-labs/grimresource"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^0.1.0"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.executable",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "7e23dfef-da2c-4d64-b11d-5f285b638853",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Execution",
+      "Data Source: Elastic Endgame",
+      "Data Source: Elastic Defend",
+      "Data Source: SentinelOne",
+      "Data Source: Microsoft Defender for Endpoint"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1059",
+            "name": "Command and Scripting Interpreter",
+            "reference": "https://attack.mitre.org/techniques/T1059/",
+            "subtechnique": [
+              {
+                "id": "T1059.005",
+                "name": "Visual Basic",
+                "reference": "https://attack.mitre.org/techniques/T1059/005/"
+              },
+              {
+                "id": "T1059.007",
+                "name": "JavaScript",
+                "reference": "https://attack.mitre.org/techniques/T1059/007/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1218",
+            "name": "System Binary Proxy Execution",
+            "reference": "https://attack.mitre.org/techniques/T1218/",
+            "subtechnique": [
+              {
+                "id": "T1218.014",
+                "name": "MMC",
+                "reference": "https://attack.mitre.org/techniques/T1218/014/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 3
+  },
+  "id": "7e23dfef-da2c-4d64-b11d-5f285b638853_3",
+  "type": "security-rule"
+}
