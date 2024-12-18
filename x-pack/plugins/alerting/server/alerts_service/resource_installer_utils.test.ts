@@ -44,7 +44,6 @@ describe('getIndexTemplateAndPattern', () => {
         '.alerts-',
         '.internal.preview.alerts-',
         '.preview.alerts-',
-        '.reindexed-v8-',
       ],
       name: '.internal.alerts-test.alerts-default-000001',
     });
@@ -62,7 +61,6 @@ describe('getIndexTemplateAndPattern', () => {
         '.alerts-',
         '.internal.preview.alerts-',
         '.preview.alerts-',
-        '.reindexed-v8-',
       ],
       name: '.internal.alerts-test.alerts-special-000001',
     });
@@ -87,7 +85,6 @@ describe('getIndexTemplateAndPattern', () => {
         '.alerts-',
         '.internal.preview.alerts-',
         '.preview.alerts-',
-        '.reindexed-v8-',
       ],
       secondaryAlias: `siem.signals-special`,
     });

@@ -19,7 +19,6 @@ export const VALID_ALERT_INDEX_PREFIXES = [
   '.alerts-',
   '.internal.preview.alerts-',
   '.preview.alerts-',
-  '.reindexed-v8-',
 ];
 
 export const getComponentTemplateName = ({ context, name }: GetComponentTemplateNameOpts = {}) =>
