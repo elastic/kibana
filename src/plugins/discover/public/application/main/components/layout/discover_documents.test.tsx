@@ -45,6 +45,12 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   stateContainer.appState.update({
     dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
   });
+  stateContainer.internalState.transitions.setRequestState({
+    appState: {
+      dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
+    },
+  });
+
   stateContainer.dataState.data$.documents$ = documents$;
 
   const props = {

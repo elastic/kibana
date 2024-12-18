@@ -104,6 +104,14 @@ async function mountComponent(
     query,
   });
   stateContainer.internalState.transitions.setDataView(dataView);
+  stateContainer.internalState.transitions.setRequestState({
+    timeRangeAbs: time,
+    timeRangeRel: time,
+    query: {
+      language: 'kuery',
+      query: '',
+    },
+  });
 
   const props = {
     dataView,

@@ -14,9 +14,18 @@ import {
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
+import type { DiscoverAppState } from '../../..';
+
+interface InternalStateRequestParams {
+  timeRangeAbs?: TimeRange;
+  timeRangeRel?: TimeRange;
+  filters?: Filter[];
+  query?: AggregateQuery | Query | undefined;
+  appState?: DiscoverAppState;
+}
 
 export interface InternalState {
   dataView: DataView | undefined;
@@ -33,6 +42,7 @@ export interface InternalState {
     rowHeight: boolean;
     breakdownField: boolean;
   };
+  requestParams: InternalStateRequestParams;
 }
 
 export interface InternalStateTransitions {
@@ -65,6 +75,7 @@ export interface InternalStateTransitions {
   ) => (
     resetDefaultProfileState: Omit<InternalState['resetDefaultProfileState'], 'resetId'>
   ) => InternalState;
+  setRequestState: (state: InternalState) => (params: InternalStateRequestParams) => InternalState;
 }
 
 export type DiscoverInternalStateContainer = ReduxLikeStateContainer<
@@ -91,6 +102,7 @@ export function getInternalStateContainer() {
         rowHeight: false,
         breakdownField: false,
       },
+      requestParams: {},
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
@@ -161,6 +173,10 @@ export function getInternalStateContainer() {
         ...prevState,
         overriddenVisContextAfterInvalidation: undefined,
         expandedDoc: undefined,
+      }),
+      setRequestState: (prevState: InternalState) => (params: InternalStateRequestParams) => ({
+        ...prevState,
+        requestParams: params,
       }),
       setResetDefaultProfileState:
         (prevState: InternalState) =>

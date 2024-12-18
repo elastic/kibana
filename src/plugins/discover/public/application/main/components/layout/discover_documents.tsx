@@ -45,12 +45,9 @@ import {
 import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { useQuerySubscriber } from '@kbn/unified-field-list';
-import { map } from 'rxjs';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -112,7 +109,11 @@ function DiscoverDocumentsComponent({
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings, uiActions, ebtManager, fieldsMetadata } = services;
-  const [
+
+  const requestParams = useInternalStateSelector((state) => state.requestParams);
+  const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
+
+  const {
     dataSource,
     query,
     sort,
@@ -121,23 +122,9 @@ function DiscoverDocumentsComponent({
     rowsPerPage,
     grid,
     columns,
-    sampleSizeState,
+    sampleSize: sampleSizeState,
     density,
-  ] = useAppStateSelector((state) => {
-    return [
-      state.dataSource,
-      state.query,
-      state.sort,
-      state.rowHeight,
-      state.headerRowHeight,
-      state.rowsPerPage,
-      state.grid,
-      state.columns,
-      state.sampleSize,
-      state.density,
-    ];
-  });
-  const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
+  } = requestParams.appState || {};
   const isEsqlMode = useIsEsqlMode();
   const documentState = useDataState(documents$);
   const isDataLoading =
@@ -270,19 +257,12 @@ function DiscoverDocumentsComponent({
     [documentState.esqlQueryColumns]
   );
 
-  const { filters } = useQuerySubscriber({ data: services.data });
-
-  const timeRange = useObservable(
-    services.timefilter.getTimeUpdate$().pipe(map(() => services.timefilter.getTime())),
-    services.timefilter.getTime()
-  );
-
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
     dataView,
     query,
-    filters,
-    timeRange,
+    filters: requestParams.filters,
+    timeRange: requestParams.timeRangeAbs,
   });
 
   const renderDocumentView = useCallback(

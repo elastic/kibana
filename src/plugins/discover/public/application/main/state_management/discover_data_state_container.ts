@@ -254,10 +254,17 @@ export function getDataStateContainer({
             return;
           }
 
+          internalStateContainer.transitions.setRequestState({
+            timeRangeAbs: timefilter.getAbsoluteTime(),
+            timeRangeRel: timefilter.getTime(),
+            filters: data.query.filterManager.getFilters(),
+            query: data.query.queryString.getQuery(),
+          });
+
           await profilesManager.resolveDataSourceProfile({
             dataSource: appStateContainer.getState().dataSource,
             dataView: getSavedSearch().searchSource.getField('index'),
-            query: appStateContainer.getState().query,
+            query: data.query.queryString.getQuery(),
           });
 
           const { resetDefaultProfileState, dataView } = internalStateContainer.getState();
