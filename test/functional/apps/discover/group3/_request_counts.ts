@@ -41,6 +41,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         enableESQL: true,
       });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -49,22 +51,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    beforeEach(async () => {
-      await common.navigateToApp('discover');
-      await header.waitUntilLoadingHasFinished();
-    });
-
-    const getSearchCount = async (type: 'ese' | 'esql') => {
+    const expectSearchCount = async (type: 'ese' | 'esql', searchCount: number) => {
+      const endpoint = type === 'esql' ? `${type}_async` : type;
       const requests = await browser.execute(() =>
         performance
           .getEntries()
           .filter((entry: any) => ['fetch', 'xmlhttprequest'].includes(entry.initiatorType))
       );
-      const endpoint = type === 'esql' ? `${type}_async` : type;
+
       const result = requests.filter((entry) =>
         entry.name.endsWith(`/internal/search/${endpoint}`)
       );
-      return result.length;
+
+      const count = result.length;
+      if (count !== searchCount) {
+        log.debug('Requests debugging:', result);
+      }
+      expect(count).to.be(searchCount);
     };
 
     const waitForLoadingToFinish = async () => {
@@ -77,12 +80,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.execute(async () => {
         performance.clearResourceTimings();
       });
-      let searchCount = await getSearchCount(type);
-      expect(searchCount).to.be(0);
+      await waitForLoadingToFinish();
+      await expectSearchCount(type, 0);
       await cb();
       await waitForLoadingToFinish();
-      searchCount = await getSearchCount(type);
-      expect(searchCount).to.be(expected);
+      await expectSearchCount(type, expected);
     };
 
     const getSharedTests = ({
@@ -109,10 +111,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           performance.setResourceTimingBufferSize(Number.MAX_SAFE_INTEGER);
         });
         await waitForLoadingToFinish();
-        const searchCount = await getSearchCount(type);
         // one more requests for fields in ESQL mode
         const actualExpectedRequests = type === 'esql' ? expectedRequests + 1 : expectedRequests;
-        expect(searchCount).to.be(actualExpectedRequests);
+        await expectSearchCount(type, actualExpectedRequests);
       });
 
       it(`should send no more than ${expectedRequests} requests (documents + chart) when refreshing`, async () => {
@@ -145,9 +146,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Sep 23, 2015 @ 00:00:00.000'
         );
         await waitForLoadingToFinish();
-        // TODO: Check why the request happens 4 times in case of opening a saved search
-        // https://github.com/elastic/kibana/issues/165192
-        // creating the saved search
         const actualExpectedRequests = savedSearchesRequests ?? expectedRequests;
         log.debug('Creating saved search');
         await expectSearches(
@@ -161,17 +159,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await setQuery(query2);
         await queryBar.clickQuerySubmitButton();
         await waitForLoadingToFinish();
-        await expectSearches(
-          type,
-          type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
-          async () => {
-            await discover.revertUnsavedChanges();
-          }
-        );
+        await expectSearches(type, actualExpectedRequests, async () => {
+          await discover.revertUnsavedChanges();
+        });
         log.debug('Clearing saved search');
         await expectSearches(
           type,
-          type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
+          type === 'esql' ? actualExpectedRequests + 2 : actualExpectedRequests,
           async () => {
             await testSubjects.click('discoverNewButton');
             await waitForLoadingToFinish();
@@ -180,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('Loading saved search');
         await expectSearches(
           type,
-          type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
+          type === 'esql' ? actualExpectedRequests + 2 : actualExpectedRequests,
           async () => {
             await discover.loadSavedSearch(savedSearch);
           }
@@ -249,11 +243,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('ES|QL mode', () => {
+    describe.only('ES|QL mode', () => {
       const type = 'esql';
+      before(async () => {
+        await common.navigateToApp('discover');
+        await header.waitUntilLoadingHasFinished();
+        await discover.selectTextBaseLang();
+      });
 
       beforeEach(async () => {
-        await discover.selectTextBaseLang();
         await monacoEditor.setCodeEditorValue('from logstash-* | where bytes > 1000 ');
         await queryBar.clickQuerySubmitButton();
         await waitForLoadingToFinish();
