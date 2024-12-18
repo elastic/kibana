@@ -6,7 +6,7 @@
  */
 
 import { Chart, isMetricElementEvent, Metric, MetricTrendShape, Settings } from '@elastic/charts';
-import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
+import { EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -20,9 +20,9 @@ import moment from 'moment';
 import React, { useState } from 'react';
 import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { useResetSlo } from '../../../../hooks/use_reset_slo';
 import { BurnRateRuleParams } from '../../../../typings';
-import { useKibana } from '../../../../hooks/use_kibana';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
 import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
@@ -44,11 +44,12 @@ export interface Props {
 }
 
 export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
+  const { euiTheme } = useEuiTheme();
   const colors = {
-    DEGRADING: useEuiBackgroundColor('warning'),
-    VIOLATED: useEuiBackgroundColor('danger'),
-    HEALTHY: useEuiBackgroundColor('success'),
-    NO_DATA: useEuiBackgroundColor('subdued'),
+    DEGRADING: euiTheme.colors.backgroundBaseWarning,
+    VIOLATED: euiTheme.colors.backgroundBaseDanger,
+    HEALTHY: euiTheme.colors.backgroundBaseSuccess,
+    NO_DATA: euiTheme.colors.backgroundBaseSubdued,
   };
 
   return { cardColor: colors[status ?? 'NO_DATA'], colors };

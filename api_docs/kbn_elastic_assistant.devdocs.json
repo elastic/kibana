@@ -163,14 +163,6 @@
             "path": "x-pack/platform/plugins/shared/integration_assistant/public/components/create_integration/create_integration_assistant/header/header.tsx"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/view/details/components/insights/workflow_insights_scan.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/view/details/components/insights/workflow_insights_scan.tsx"
-          },
-          {
             "plugin": "@kbn/ecs-data-quality-dashboard",
             "path": "x-pack/solutions/security/packages/ecs_data_quality_dashboard/impl/data_quality_panel/actions/chat/index.tsx"
           },
@@ -180,103 +172,111 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/assistant/get_comments/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/assistant/get_comments/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/assistant/get_comments/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/assistant/get_comments/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/assistant/get_comments/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/assistant/get_comments/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/assistant/header_link.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/assistant/header_link.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/assistant/header_link.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/assistant/header_link.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/attack_discovery/pages/results/attack_discovery_panel/view_in_ai_assistant/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/view/details/components/insights/workflow_insights_scan.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/attack_discovery/pages/results/attack_discovery_panel/view_in_ai_assistant/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/view/details/components/insights/workflow_insights_scan.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/attack_discovery/pages/results/attack_discovery_panel/title/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/attack_discovery_panel/view_in_ai_assistant/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/attack_discovery/pages/results/attack_discovery_panel/title/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/attack_discovery_panel/view_in_ai_assistant/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/attack_discovery/pages/results/empty_states/empty_prompt/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/attack_discovery_panel/title/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/attack_discovery/pages/results/empty_states/empty_prompt/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/attack_discovery_panel/title/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/attack_discovery/pages/results/empty_states/no_alerts/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/empty_states/empty_prompt/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/attack_discovery/pages/results/empty_states/no_alerts/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/empty_states/empty_prompt/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/attack_discovery/pages/results/empty_states/welcome/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/empty_states/no_alerts/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/attack_discovery/pages/results/empty_states/welcome/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/empty_states/no_alerts/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/onboarding/components/onboarding_body/cards/assistant/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/empty_states/welcome/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/onboarding/components/onboarding_body/cards/assistant/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/results/empty_states/welcome/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/ai_assistant/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/assistant/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/ai_assistant/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/assistant/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/siem_migrations/rules/components/rule_details_flyout/tabs/summary/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation_ui/components/ai_assistant/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/siem_migrations/rules/components/rule_details_flyout/tabs/summary/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation_ui/components/ai_assistant/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/onboarding/components/onboarding_body/cards/siem_migrations/ai_connector/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/siem_migrations/rules/components/rule_details_flyout/tabs/summary/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/onboarding/components/onboarding_body/cards/siem_migrations/ai_connector/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/siem_migrations/rules/components/rule_details_flyout/tabs/summary/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/onboarding/components/onboarding_body/cards/siem_migrations/start_migration/panels/migration_result_panel.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/siem_migrations/ai_connector/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/onboarding/components/onboarding_body/cards/siem_migrations/start_migration/panels/migration_result_panel.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/siem_migrations/ai_connector/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/siem_migrations/start_migration/panels/migration_result_panel.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/siem_migrations/start_migration/panels/migration_result_panel.tsx"
           }
         ],
         "children": [
@@ -2841,7 +2841,7 @@
         "tags": [],
         "label": "PromptContextTemplate",
         "description": [
-          "\nThis interface is used to pass a default or base set of contexts to the Elastic AI Assistant when\ninitializing it. This is used to provide 'category' options when users create Quick Prompts.\nAlso, useful for collating all of a solutions' prompts in one place.\n\ne.g. see Security Solution's x-pack/plugins/security_solution/public/assistant/prompt_contexts/index.tsx"
+          "\nThis interface is used to pass a default or base set of contexts to the Elastic AI Assistant when\ninitializing it. This is used to provide 'category' options when users create Quick Prompts.\nAlso, useful for collating all of a solutions' prompts in one place.\n\ne.g. see Security Solution's x-pack/solutions/security/plugins/security_solution/public/assistant/prompt_contexts/index.tsx"
         ],
         "signature": [
           "{ description: string; category: string; tooltip: React.ReactNode; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; suggestedUserPrompt?: string | undefined; }"
