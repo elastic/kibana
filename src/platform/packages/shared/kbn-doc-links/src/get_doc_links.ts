@@ -470,7 +470,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       configureAlertSuppression: `${SECURITY_SOLUTION_DOCS}alert-suppression.html#_configure_alert_suppression`,
     },
     server: {
-      protocol: `${KIBANA_DOCS}settings.html#server-protocol`
+      protocol: `${KIBANA_DOCS}settings.html#server-protocol`,
     },
     securitySolution: {
       artifactControl: `${SECURITY_SOLUTION_DOCS}artifact-control.html`,
