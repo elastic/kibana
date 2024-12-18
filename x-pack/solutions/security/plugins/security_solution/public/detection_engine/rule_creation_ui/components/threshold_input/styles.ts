@@ -9,8 +9,6 @@ import { css, cx } from '@emotion/css';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 const CONTAINER_BREAKPOINT = 500;
-const OPERATOR_WIDTH = 40;
-const INPUT_WIDTH = 100;
 
 export const mainContainer = css`
   container-type: inline-size;
@@ -25,10 +23,7 @@ export const dropdownContainer = cx(
   css`
     @container (min-width: ${CONTAINER_BREAKPOINT}px) {
       flex: 1;
-      max-width: calc(
-        100% - ${OPERATOR_WIDTH}px - ${INPUT_WIDTH}px - ${euiThemeVars.euiSizeL} -
-          ${euiThemeVars.euiSizeL}
-      );
+      min-width: 0; /* Allows the dropdown to shrink */
     }
   `
 );
@@ -42,7 +37,7 @@ export const operatorContainer = cx(
     @container (min-width: ${CONTAINER_BREAKPOINT}px) {
       margin-top: ${euiThemeVars.euiSizeXL};
       justify-content: flex-start;
-      flex: 0 0 40px;
+      flex: 0 0 auto;
     }
   `
 );
@@ -51,16 +46,17 @@ export const input = cx(
   baseStyle,
   css`
     @container (min-width: ${CONTAINER_BREAKPOINT}px) {
-      flex: 0 0 100px;
+      flex: 0 0 auto;
     }
   `
 );
 
 export const fieldSection = css`
-  flex-wrap: wrap;
   gap: ${euiThemeVars.euiSizeS};
+  flex-wrap: wrap;
 
   @container (min-width: ${CONTAINER_BREAKPOINT}px) {
+    flex-wrap: nowrap;
     gap: ${euiThemeVars.euiSizeL};
   }
 `;
