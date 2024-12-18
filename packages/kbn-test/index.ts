@@ -26,7 +26,12 @@ export {
 } from './src/functional_tests/lib';
 
 export { initLogsDir } from './src/functional_tests/lib';
-export { SamlSessionManager, type SamlSessionManagerOptions, type HostOptions } from './src/auth';
+export {
+  SamlSessionManager,
+  type SamlSessionManagerOptions,
+  type HostOptions,
+  type GetCookieOptions,
+} from './src/auth';
 
 export type {
   CreateTestEsClusterOptions,
