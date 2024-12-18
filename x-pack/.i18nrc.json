@@ -29,7 +29,7 @@
       "packages/kbn-cloud-security-posture"
     ],
     "xpack.customBranding": "plugins/custom_branding",
-    "xpack.dashboard": "plugins/dashboard_enhanced",
+    "xpack.dashboard": "platform/plugins/shared/dashboard_enhanced",
     "xpack.dataQuality": "plugins/data_quality",
     "xpack.datasetQuality": "plugins/observability_solution/dataset_quality",
     "xpack.dataUsage": "platform/plugins/private/data_usage",
