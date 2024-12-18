@@ -22,11 +22,11 @@ const actionTypeOptions = [
 const SentinelOneParamsFields: React.FunctionComponent<
   ActionParamsProps<SentinelOneActionParams>
 > = ({ editAction, index }) => {
-  const [subActionValue] = useState<string | undefined>(SUB_ACTION.GET_AGENTS);
+  const [subAction] = useState<string | undefined>(SUB_ACTION.GET_AGENTS);
 
   useEffect(() => {
     editAction('subActionParams', {}, index);
-    editAction('subAction', subActionValue, index);
+    editAction('subAction', subAction, index);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -37,8 +37,9 @@ const SentinelOneParamsFields: React.FunctionComponent<
           <EuiSuperSelect
             fullWidth
             options={actionTypeOptions}
-            valueOfSelected={subActionValue}
+            valueOfSelected={subAction}
             readOnly={true}
+            data-test-subj="actionTypeSelect"
           />
         </EuiFormRow>
       </EuiFlexItem>

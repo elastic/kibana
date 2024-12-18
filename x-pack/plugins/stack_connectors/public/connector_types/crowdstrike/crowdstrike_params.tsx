@@ -73,6 +73,7 @@ const CrowdstrikeParamsFields: React.FunctionComponent<
             options={actionTypeOptions}
             valueOfSelected={subActionValue}
             readOnly={true}
+            data-test-subj="actionTypeSelect"
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -99,6 +100,7 @@ const CrowdstrikeParamsFields: React.FunctionComponent<
               }
             }}
             isClearable={true}
+            data-test-subj="agentIdSelect"
           />
         </EuiFormRow>
       </EuiFlexItem>
