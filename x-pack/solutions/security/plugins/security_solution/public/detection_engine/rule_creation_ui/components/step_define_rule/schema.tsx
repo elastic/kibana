@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import React from 'react';
@@ -18,7 +17,6 @@ import {
 import {
   isEsqlRule,
   isThreatMatchRule,
-  isThresholdRule,
   isSuppressionRuleConfiguredWithGroupBy,
 } from '../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -139,46 +137,8 @@ export const schema: FormSchema<DefineStepRule> = {
     ),
     validations: [],
   },
-  anomalyThreshold: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldAnomalyThresholdLabel',
-      {
-        defaultMessage: 'Anomaly score threshold',
-      }
-    ),
-    validations: [],
-  },
-  machineLearningJobId: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldMachineLearningJobIdLabel',
-      {
-        defaultMessage: 'Machine Learning job',
-      }
-    ),
-    validations: [
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ formData }] = args;
-          const needsValidation = isMlRule(formData.ruleType);
-
-          if (!needsValidation) {
-            return;
-          }
-
-          return fieldValidators.emptyField(
-            i18n.translate(
-              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningJobIdRequired',
-              {
-                defaultMessage: 'A Machine Learning job is required.',
-              }
-            )
-          )(...args);
-        },
-      },
-    ],
-  },
+  anomalyThreshold: {},
+  machineLearningJobId: {},
   relatedIntegrations: {
     type: FIELD_TYPES.JSON,
     label: i18n.translate(
@@ -216,163 +176,7 @@ export const schema: FormSchema<DefineStepRule> = {
       }
     ),
   },
-  threshold: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdLabel',
-      {
-        defaultMessage: 'Threshold',
-      }
-    ),
-    field: {
-      type: FIELD_TYPES.COMBO_BOX,
-      label: i18n.translate(
-        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldLabel',
-        {
-          defaultMessage: 'Group by',
-        }
-      ),
-      helpText: i18n.translate(
-        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldHelpText',
-        {
-          defaultMessage: "Select fields to group by. Fields are joined together with 'AND'",
-        }
-      ),
-      validations: [
-        {
-          validator: (
-            ...args: Parameters<ValidationFunc>
-          ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-            const [{ formData }] = args;
-            const needsValidation = isThresholdRule(formData.ruleType);
-            if (!needsValidation) {
-              return;
-            }
-            return fieldValidators.maxLengthField({
-              length: 3,
-              message: i18n.translate(
-                'xpack.securitySolution.detectionEngine.validations.thresholdFieldFieldData.arrayLengthGreaterThanMaxErrorMessage',
-                {
-                  defaultMessage: 'Number of fields must be 3 or less.',
-                }
-              ),
-            })(...args);
-          },
-        },
-      ],
-    },
-    value: {
-      type: FIELD_TYPES.NUMBER,
-      label: i18n.translate(
-        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdValueLabel',
-        {
-          defaultMessage: 'Threshold',
-        }
-      ),
-      validations: [
-        {
-          validator: (
-            ...args: Parameters<ValidationFunc>
-          ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-            const [{ formData }] = args;
-            const needsValidation = isThresholdRule(formData.ruleType);
-            if (!needsValidation) {
-              return;
-            }
-            return fieldValidators.numberGreaterThanField({
-              than: 1,
-              message: i18n.translate(
-                'xpack.securitySolution.detectionEngine.validations.thresholdValueFieldData.numberGreaterThanOrEqualOneErrorMessage',
-                {
-                  defaultMessage: 'Value must be greater than or equal to one.',
-                }
-              ),
-              allowEquality: true,
-            })(...args);
-          },
-        },
-      ],
-    },
-    cardinality: {
-      field: {
-        defaultValue: [],
-        fieldsToValidateOnChange: ['threshold.cardinality.field', 'threshold.cardinality.value'],
-        type: FIELD_TYPES.COMBO_BOX,
-        label: i18n.translate(
-          'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdCardinalityFieldLabel',
-          {
-            defaultMessage: 'Count',
-          }
-        ),
-        validations: [
-          {
-            validator: (
-              ...args: Parameters<ValidationFunc>
-            ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-              const [{ formData }] = args;
-              const needsValidation = isThresholdRule(formData.ruleType);
-              if (!needsValidation) {
-                return;
-              }
-              if (
-                isEmpty(formData['threshold.cardinality.field']) &&
-                !isEmpty(formData['threshold.cardinality.value'])
-              ) {
-                return fieldValidators.emptyField(
-                  i18n.translate(
-                    'xpack.securitySolution.detectionEngine.validations.thresholdCardinalityFieldFieldData.thresholdCardinalityFieldNotSuppliedMessage',
-                    {
-                      defaultMessage: 'A Cardinality Field is required.',
-                    }
-                  )
-                )(...args);
-              }
-            },
-          },
-        ],
-        helpText: i18n.translate(
-          'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdFieldCardinalityFieldHelpText',
-          {
-            defaultMessage: 'Select a field to check cardinality',
-          }
-        ),
-      },
-      value: {
-        fieldsToValidateOnChange: ['threshold.cardinality.field', 'threshold.cardinality.value'],
-        type: FIELD_TYPES.NUMBER,
-        label: i18n.translate(
-          'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdCardinalityValueFieldLabel',
-          {
-            defaultMessage: 'Unique values',
-          }
-        ),
-        validations: [
-          {
-            validator: (
-              ...args: Parameters<ValidationFunc>
-            ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-              const [{ formData }] = args;
-              const needsValidation = isThresholdRule(formData.ruleType);
-              if (!needsValidation) {
-                return;
-              }
-              if (!isEmpty(formData['threshold.cardinality.field'])) {
-                return fieldValidators.numberGreaterThanField({
-                  than: 1,
-                  message: i18n.translate(
-                    'xpack.securitySolution.detectionEngine.validations.thresholdCardinalityValueFieldData.numberGreaterThanOrEqualOneErrorMessage',
-                    {
-                      defaultMessage: 'Value must be greater than or equal to one.',
-                    }
-                  ),
-                  allowEquality: true,
-                })(...args);
-              }
-            },
-          },
-        ],
-      },
-    },
-  },
+  threshold: {},
   threatIndex: {
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(

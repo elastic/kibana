@@ -72,8 +72,11 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
+import { THRESHOLD_VALUE_LABEL } from '../../../rule_creation/components/threshold_edit/translations';
 import { NEW_TERMS_FIELDS_LABEL } from '../../../rule_creation/components/new_terms_fields_edit/translations';
 import { HISTORY_WINDOW_START_LABEL } from '../../../rule_creation/components/history_window_start_edit/translations';
+import { MACHINE_LEARNING_JOB_ID_LABEL } from '../../../rule_creation/components/machine_learning_job_id_edit/translations';
+import { ANOMALY_THRESHOLD_LABEL } from '../../../rule_creation/components/anomaly_threshold_edit/translations';
 import type { FieldValueQueryBar } from '../query_bar_field';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
@@ -108,10 +111,7 @@ export const StepRuleDescriptionComponent = <T,>({
     if (key === 'machineLearningJobId') {
       return [
         ...acc,
-        buildMlJobsDescription(
-          get(key, data) as string[],
-          (get(key, schema) as { label: string }).label
-        ),
+        buildMlJobsDescription(get(key, data) as string[], MACHINE_LEARNING_JOB_ID_LABEL),
       ];
     }
 
@@ -286,7 +286,7 @@ export const getDescriptionItem = (
     return buildThreatDescription({ label, threat: filterEmptyThreats(threats) });
   } else if (field === 'threshold') {
     const threshold = get(field, data);
-    return buildThresholdDescription(label, threshold);
+    return buildThresholdDescription(THRESHOLD_VALUE_LABEL, threshold);
   } else if (field === 'references') {
     const urls: string[] = get(field, data);
     return buildUrlsDescription(label, urls);
@@ -362,6 +362,9 @@ export const getDescriptionItem = (
   } else if (field === 'maxSignals') {
     const value: number | undefined = get(field, data);
     return value ? [{ title: label, description: value }] : [];
+  } else if (field === 'anomalyThreshold') {
+    const value: number | undefined = get(field, data);
+    return value ? [{ title: ANOMALY_THRESHOLD_LABEL, description: value }] : [];
   } else if (field === 'historyWindowSize') {
     const value: number = get(field, data);
     return value ? [{ title: HISTORY_WINDOW_START_LABEL, description: value }] : [];
