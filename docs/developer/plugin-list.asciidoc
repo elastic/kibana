@@ -264,7 +264,7 @@ to link individual management section into it. This plugin does not contain any 
 management section itself.
 
 
-|{kib-repo}blob/{branch}/src/plugins/maps_ems/README.md[mapsEms]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/maps_ems/README.md[mapsEms]
 |Utility plugin:
 
 

@@ -6257,7 +6257,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/maps-ems-plugin@link:src/plugins/maps_ems":
+"@kbn/maps-ems-plugin@link:src/platform/plugins/private/maps_ems":
   version "0.0.0"
   uid ""
 
