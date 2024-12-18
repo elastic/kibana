@@ -40,6 +40,7 @@ export const AppearanceSelector = ({ security, core, closePopover, isServerless 
 function AppearanceSelectorUI({ security, core, closePopover, isServerless }: Props) {
   const { isVisible } = useAppearance({
     uiSettingsClient: core.uiSettings,
+    defaultColorMode: 'space_default',
   });
 
   const modalRef = useRef<OverlayRef | null>(null);

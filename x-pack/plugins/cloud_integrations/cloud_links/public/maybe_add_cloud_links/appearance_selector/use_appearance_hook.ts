@@ -15,9 +15,10 @@ import {
 
 interface Deps {
   uiSettingsClient: IUiSettingsClient;
+  defaultColorMode: ColorMode;
 }
 
-export const useAppearance = ({ uiSettingsClient }: Deps) => {
+export const useAppearance = ({ uiSettingsClient, defaultColorMode }: Deps) => {
   // If a value is set in kibana.yml (uiSettings.overrides.theme:darkMode)
   // we don't allow the user to change the theme color.
   const valueSetInKibanaConfig = uiSettingsClient.isOverridden('theme:darkMode');
@@ -39,7 +40,7 @@ export const useAppearance = ({ uiSettingsClient }: Deps) => {
     },
   });
 
-  const { userSettings: { darkMode: colorModeUserProfile = 'space_default' } = {} } =
+  const { userSettings: { darkMode: colorModeUserProfile = defaultColorMode } = {} } =
     userProfileData ?? {
       userSettings: {},
     };

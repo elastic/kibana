@@ -78,6 +78,7 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient, isSer
 
   const { onChange, colorMode, isLoading } = useAppearance({
     uiSettingsClient,
+    defaultColorMode: isServerless ? 'system' : 'space_default',
   });
 
   return (
