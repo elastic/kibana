@@ -23,6 +23,7 @@ import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
+import { i18n } from '@kbn/i18n';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -58,10 +59,19 @@ import {
   databaseSearchGuideConfig,
 } from '../common/guided_onboarding/search_guide_config';
 
-import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
+import {
+  AS_TELEMETRY_NAME,
+  registerTelemetryUsageCollector as registerASTelemetryUsageCollector,
+} from './collectors/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerCNTelemetryUsageCollector } from './collectors/connectors/telemetry';
-import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } from './collectors/enterprise_search/telemetry';
-import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
+import {
+  ES_TELEMETRY_NAME,
+  registerTelemetryUsageCollector as registerESTelemetryUsageCollector,
+} from './collectors/enterprise_search/telemetry';
+import {
+  WS_TELEMETRY_NAME,
+  registerTelemetryUsageCollector as registerWSTelemetryUsageCollector,
+} from './collectors/workplace_search/telemetry';
 import { registerEnterpriseSearchIntegrations } from './integrations';
 
 import { checkAccess } from './lib/check_access';
@@ -169,12 +179,11 @@ export class EnterpriseSearchPlugin implements Plugin {
       ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
       ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
       ELASTICSEARCH_PLUGIN.ID,
-      ANALYTICS_PLUGIN.ID,
-      ...(config.canDeployEntSearch ? [APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID] : []),
+      APP_SEARCH_PLUGIN.ID,
+      WORKPLACE_SEARCH_PLUGIN.ID,
       SEARCH_EXPERIENCES_PLUGIN.ID,
       VECTOR_SEARCH_PLUGIN.ID,
       SEMANTIC_SEARCH_PLUGIN.ID,
-      APPLICATIONS_PLUGIN.ID,
       AI_SEARCH_PLUGIN.ID,
     ];
     const isCloud = !!cloud?.cloudId;
@@ -209,6 +218,66 @@ export class EnterpriseSearchPlugin implements Plugin {
           app: ['kibana', ...PLUGIN_IDS],
           api: [],
           catalogue: PLUGIN_IDS,
+          savedObject: {
+            all: [ES_TELEMETRY_NAME, AS_TELEMETRY_NAME, WS_TELEMETRY_NAME],
+            read: [ES_TELEMETRY_NAME, AS_TELEMETRY_NAME, WS_TELEMETRY_NAME],
+          },
+          ui: [],
+        },
+        read: {
+          disabled: true,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
+    });
+    features.registerKibanaFeature({
+      id: APPLICATIONS_PLUGIN.ID,
+      name: i18n.translate('xpack.enterpriseSearch.applications.featureName', {
+        defaultMessage: 'Search Applications',
+      }),
+      order: 3,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+      app: ['kibana', APPLICATIONS_PLUGIN.ID],
+      catalogue: [APPLICATIONS_PLUGIN.ID],
+      privileges: {
+        all: {
+          app: ['kibana', APPLICATIONS_PLUGIN.ID],
+          api: [],
+          catalogue: [APPLICATIONS_PLUGIN.ID],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+        read: {
+          disabled: true,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
+    });
+    features.registerKibanaFeature({
+      id: ANALYTICS_PLUGIN.ID,
+      name: ANALYTICS_PLUGIN.NAME,
+      order: 4,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+      app: ['kibana', ANALYTICS_PLUGIN.ID],
+      catalogue: [ANALYTICS_PLUGIN.ID],
+      privileges: {
+        all: {
+          app: ['kibana', ANALYTICS_PLUGIN.ID],
+          api: [],
+          catalogue: [ANALYTICS_PLUGIN.ID],
           savedObject: {
             all: [],
             read: [],
@@ -251,12 +320,12 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return {
           navLinks: {
-            appSearch: hasAppSearchAccess && config.canDeployEntSearch,
-            workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
+            appSearch: hasAppSearchAccess,
+            workplaceSearch: hasWorkplaceSearchAccess,
           },
           catalogue: {
-            appSearch: hasAppSearchAccess && config.canDeployEntSearch,
-            workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
+            appSearch: hasAppSearchAccess,
+            workplaceSearch: hasWorkplaceSearchAccess,
           },
         };
       },
@@ -281,9 +350,9 @@ export class EnterpriseSearchPlugin implements Plugin {
     };
 
     registerConfigDataRoute(dependencies);
-    if (config.canDeployEntSearch) registerAppSearchRoutes(dependencies);
+    registerAppSearchRoutes(dependencies);
     registerEnterpriseSearchRoutes(dependencies);
-    if (config.canDeployEntSearch) registerWorkplaceSearchRoutes(dependencies);
+    registerWorkplaceSearchRoutes(dependencies);
     // Enterprise Search Routes
     if (config.hasConnectors) registerConnectorRoutes(dependencies);
     if (config.hasWebCrawler) registerCrawlerRoutes(dependencies);
@@ -300,10 +369,8 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Bootstrap the routes, saved objects, and collector for telemetry
      */
     savedObjects.registerType(enterpriseSearchTelemetryType);
-    if (config.canDeployEntSearch) {
-      savedObjects.registerType(appSearchTelemetryType);
-      savedObjects.registerType(workplaceSearchTelemetryType);
-    }
+    savedObjects.registerType(appSearchTelemetryType);
+    savedObjects.registerType(workplaceSearchTelemetryType);
     let savedObjectsStarted: SavedObjectsServiceStart;
 
     void getStartServices().then(([coreStart]) => {
@@ -312,10 +379,8 @@ export class EnterpriseSearchPlugin implements Plugin {
       if (usageCollection) {
         registerESTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
         registerCNTelemetryUsageCollector(usageCollection, this.logger);
-        if (config.canDeployEntSearch) {
-          registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
-          registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
-        }
+        registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
+        registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
       }
     });
     registerTelemetryRoute({ ...dependencies, getSavedObjectsService: () => savedObjectsStarted });
@@ -351,9 +416,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     /**
      * Register a config for the search guide
      */
-    if (config.canDeployEntSearch) {
-      guidedOnboarding?.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
-    }
+    guidedOnboarding?.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
     if (config.hasWebCrawler) {
       guidedOnboarding?.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
     }

@@ -372,8 +372,10 @@ export interface DocLinks {
       readonly riskScorePrerequisites: string;
       readonly entityRiskScoring: string;
       readonly assetCriticality: string;
+      readonly legacyRiskScoreModuleDeprecation: string;
     };
     readonly detectionEngineOverview: string;
+    readonly signalsMigrationApi: string;
   };
   readonly query: {
     readonly eql: string;
@@ -478,6 +480,7 @@ export interface DocLinks {
     teamsAction: string;
     connectors: string;
     legacyRuleApiDeprecations: string;
+    legacyRbacExemption: string;
   }>;
   readonly taskManager: Readonly<{
     healthMonitoring: string;
