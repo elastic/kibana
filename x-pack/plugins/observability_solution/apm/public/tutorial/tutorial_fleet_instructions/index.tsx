@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { HttpStart } from '@kbn/core/public';
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { APIReturnType } from '../../services/rest/create_call_apm_api';
 
 interface Props {

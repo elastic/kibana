@@ -81,6 +81,7 @@
     "@kbn/llm-tasks-plugin",
     "@kbn/product-doc-common",
     "@kbn/charts-theme",
+    "@kbn/ai-assistant-icon",
   ],
   "exclude": [
     "target/**/*"

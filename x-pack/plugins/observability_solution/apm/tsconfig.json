@@ -130,6 +130,7 @@
     "@kbn/saved-search-component",
     "@kbn/saved-search-plugin",
     "@kbn/charts-theme",
+    "@kbn/entityManager-plugin",
   ],
   "exclude": ["target/**/*"]
 }
