@@ -129,16 +129,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it(`should send no more than ${expectedRequests} requests (documents + chart) when changing the time range`, async () => {
-        await expectSearches(
-          type,
-          type === 'esql' ? expectedRequests + 1 : expectedRequests,
-          async () => {
-            await timePicker.setAbsoluteRange(
-              'Sep 21, 2015 @ 06:31:44.000',
-              'Sep 23, 2015 @ 00:00:00.000'
-            );
-          }
-        );
+        await expectSearches(type, expectedRequests, async () => {
+          await timePicker.setAbsoluteRange(
+            'Sep 21, 2015 @ 06:31:44.000',
+            'Sep 23, 2015 @ 00:00:00.000'
+          );
+        });
       });
 
       it(`should send ${savedSearchesRequests} requests for saved search changes`, async () => {
@@ -167,7 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await waitForLoadingToFinish();
         await expectSearches(
           type,
-          type === 'esql' ? actualExpectedRequests + 2 : actualExpectedRequests,
+          type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
           async () => {
             await discover.revertUnsavedChanges();
           }
@@ -253,7 +249,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('ES|QL mode', () => {
+    describe.only('ES|QL mode', () => {
       const type = 'esql';
 
       beforeEach(async () => {

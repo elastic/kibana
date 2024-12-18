@@ -258,13 +258,13 @@ export function getDataStateContainer({
             timeRangeAbs: timefilter.getAbsoluteTime(),
             timeRangeRel: timefilter.getTime(),
             filters: data.query.filterManager.getFilters(),
-            query: data.query.queryString.getQuery(),
+            query: appStateContainer.getState().query,
           });
 
           await profilesManager.resolveDataSourceProfile({
             dataSource: appStateContainer.getState().dataSource,
             dataView: getSavedSearch().searchSource.getField('index'),
-            query: data.query.queryString.getQuery(),
+            query: appStateContainer.getState().query,
           });
 
           const { resetDefaultProfileState, dataView } = internalStateContainer.getState();
