@@ -12,11 +12,13 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiTextArea, EuiFormRow, EuiSpacer, EuiSelect } from '@elastic/eui';
 import type { RuleFormParamsErrors } from '@kbn/response-ops-rule-form';
+import { ActionVariable } from '@kbn/alerting-types';
 import {
   ChatCompleteParams,
   RerankParams,
   SparseEmbeddingParams,
   TextEmbeddingParams,
+  UnifiedChatCompleteParams,
 } from '../../../common/inference/types';
 import { DEFAULTS_BY_TASK_TYPE } from './constants';
 import * as i18n from './translations';
@@ -25,28 +27,38 @@ import { InferenceActionConnector, InferenceActionParams } from './types';
 
 const InferenceServiceParamsFields: React.FunctionComponent<
   ActionParamsProps<InferenceActionParams>
-> = ({ actionParams, editAction, index, errors, actionConnector }) => {
+> = ({ actionParams, editAction, index, errors, actionConnector, messageVariables }) => {
   const { subAction, subActionParams } = actionParams;
 
-  const { taskType } = (actionConnector as unknown as InferenceActionConnector).config;
+  const { taskType, provider } = (actionConnector as unknown as InferenceActionConnector).config;
 
   useEffect(() => {
     if (!subAction) {
-      editAction('subAction', taskType, index);
+      editAction(
+        'subAction',
+        provider === 'openai' && taskType === 'completion'
+          ? SUB_ACTION.UNIFIED_COMPLETION
+          : taskType,
+        index
+      );
     }
-  }, [editAction, index, subAction, taskType]);
+  }, [editAction, index, provider, subAction, taskType]);
 
   useEffect(() => {
     if (!subActionParams) {
       editAction(
         'subActionParams',
         {
-          ...(DEFAULTS_BY_TASK_TYPE[taskType] ?? {}),
+          ...(DEFAULTS_BY_TASK_TYPE[
+            provider === 'openai' && taskType === 'completion'
+              ? SUB_ACTION.UNIFIED_COMPLETION
+              : taskType
+          ] ?? {}),
         },
         index
       );
     }
-  }, [editAction, index, subActionParams, taskType]);
+  }, [editAction, index, provider, subActionParams, taskType]);
 
   const editSubActionParams = useCallback(
     (params: Partial<InferenceActionParams['subActionParams']>) => {
@@ -54,6 +66,28 @@ const InferenceServiceParamsFields: React.FunctionComponent<
     },
     [editAction, index, subActionParams]
   );
+
+  if (subAction === SUB_ACTION.UNIFIED_COMPLETION) {
+    return (
+      <UnifiedCompletionParamsFields
+        errors={errors}
+        messageVariables={messageVariables}
+        editSubActionParams={editSubActionParams}
+        subActionParams={subActionParams as UnifiedChatCompleteParams}
+      />
+    );
+  }
+
+  if (subAction === SUB_ACTION.UNIFIED_COMPLETION_ASYNC_ITERATOR) {
+    return (
+      <UnifiedCompletionParamsFields
+        errors={errors}
+        messageVariables={messageVariables}
+        editSubActionParams={editSubActionParams}
+        subActionParams={subActionParams as UnifiedChatCompleteParams}
+      />
+    );
+  }
 
   if (subAction === SUB_ACTION.COMPLETION) {
     return (
@@ -116,6 +150,36 @@ const InferenceInput: React.FunctionComponent<{
         fullWidth={true}
       />
     </EuiFormRow>
+  );
+};
+
+const UnifiedCompletionParamsFields: React.FunctionComponent<{
+  subActionParams: UnifiedChatCompleteParams;
+  errors: RuleFormParamsErrors;
+  editSubActionParams: (params: Partial<InferenceActionParams['subActionParams']>) => void;
+  messageVariables: ActionVariable[] | undefined;
+}> = ({ subActionParams, editSubActionParams, errors, messageVariables }) => {
+  const { body } = subActionParams ?? {};
+
+  return (
+    <>
+      <JsonEditorWithMessageVariables
+        messageVariables={messageVariables}
+        paramsProperty={'body'}
+        inputTargetValue={JSON.stringify(body)}
+        label={i18n.BODY}
+        errors={errors.body as string[]}
+        onDocumentsChange={(json: string) => {
+          editSubActionParams({ body: JSON.parse(json) });
+        }}
+        onBlur={() => {
+          if (!subActionParams.body) {
+            editSubActionParams({ body: { messages: [] } });
+          }
+        }}
+        dataTestSubj="inference-bodyJsonEditor"
+      />
+    </>
   );
 };
 
