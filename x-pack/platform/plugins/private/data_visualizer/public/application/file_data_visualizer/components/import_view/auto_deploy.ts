@@ -26,12 +26,7 @@ export class AutoDeploy {
       // we'll know when it's ready from polling the inference endpoints
       // looking for num_allocations
       const status = e.response?.status;
-      // eslint-disable-next-line no-console
-      console.dir(e.response);
-      // eslint-disable-next-line no-console
-      console.dir(e.response.body);
-
-      if (status === 408 || status === 504 || status === 502) {
+      if (status === 408 || status === 504 || status === 502 || status === 500) {
         return;
       }
       this.inferError = e;
