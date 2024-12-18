@@ -60,8 +60,6 @@ export function getConnectorType(): ConnectorTypeModel<
       return { errors };
     },
     actionConnectorFields: lazy(() => import('./crowdstrike_connector')),
-    actionParamsFields: lazy(() => import('./crowdstrike_params_empty')),
-    // TODO: Enable once we add support for automated response actions
-    // actionParamsFields: lazy(() => import('./crowdstrike_params')),
+    actionParamsFields: lazy(() => import('./crowdstrike_params')),
   };
 }
