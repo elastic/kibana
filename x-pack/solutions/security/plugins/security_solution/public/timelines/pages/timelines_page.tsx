@@ -23,7 +23,7 @@ import { EmptyPrompt } from '../../common/components/empty_prompt';
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
 export const TimelinesPage = React.memo(() => {
-  const { tabName, pageName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
+  const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
 
   const { indicesExist } = useSourcererDataView();
   const capabilitiesCanUserCRUD: boolean =
