@@ -20,8 +20,6 @@ jest.mock('./get_latest_entity', () => ({
   getLatestEntity: jest.fn(),
 }));
 
-type EntityType = 'host' | 'container';
-
 describe('getDataStreamTypes', () => {
   let infraMetricsClient: jest.Mocked<InfraMetricsClient>;
   let obsEsClient: jest.Mocked<ObservabilityElasticsearchClient>;
@@ -40,7 +38,7 @@ describe('getDataStreamTypes', () => {
 
     const params = {
       entityId: 'entity123',
-      entityType: 'host' as EntityType,
+      entityType: 'built_in_hosts_from_ecs_data',
       entityCentricExperienceEnabled: false,
       infraMetricsClient,
       obsEsClient,
@@ -65,7 +63,7 @@ describe('getDataStreamTypes', () => {
 
     const params = {
       entityId: 'entity123',
-      entityType: 'container' as EntityType,
+      entityType: 'built_in_containers_from_ecs_data',
       entityCentricExperienceEnabled: false,
       infraMetricsClient,
       obsEsClient,
@@ -87,7 +85,7 @@ describe('getDataStreamTypes', () => {
 
     const params = {
       entityId: 'entity123',
-      entityType: 'host' as EntityType,
+      entityType: 'built_in_hosts_from_ecs_data',
       entityCentricExperienceEnabled: true,
       infraMetricsClient,
       obsEsClient,
@@ -103,7 +101,7 @@ describe('getDataStreamTypes', () => {
     expect(getHasMetricsData).toHaveBeenCalled();
     expect(getLatestEntity).toHaveBeenCalledWith({
       entityId: 'entity123',
-      entityType: 'host',
+      entityType: 'built_in_hosts_from_ecs_data',
       entityManagerClient,
       logger,
       from: '2024-12-09T10:49:15Z',
@@ -117,7 +115,7 @@ describe('getDataStreamTypes', () => {
 
     const params = {
       entityId: 'entity123',
-      entityType: 'host' as EntityType,
+      entityType: 'built_in_hosts_from_ecs_data',
       entityCentricExperienceEnabled: true,
       infraMetricsClient,
       obsEsClient,
@@ -139,7 +137,7 @@ describe('getDataStreamTypes', () => {
 
     const params = {
       entityId: 'entity123',
-      entityType: 'host' as EntityType,
+      entityType: 'built_in_hosts_from_ecs_data',
       entityCentricExperienceEnabled: true,
       infraMetricsClient,
       obsEsClient,

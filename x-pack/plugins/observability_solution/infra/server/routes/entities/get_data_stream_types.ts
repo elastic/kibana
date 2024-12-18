@@ -6,7 +6,7 @@
  */
 
 import { type EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
-import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { InventoryItemType, findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { EntityDataStreamType } from '@kbn/observability-shared-plugin/common';
 import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { castArray } from 'lodash';
@@ -17,7 +17,7 @@ import { getLatestEntity } from './get_latest_entity';
 
 interface Params {
   entityId: string;
-  entityType: 'host' | 'container';
+  entityType: string;
   entityCentricExperienceEnabled: boolean;
   infraMetricsClient: InfraMetricsClient;
   obsEsClient: ObservabilityElasticsearchClient;
@@ -40,7 +40,7 @@ export async function getDataStreamTypes({
   const hasMetricsData = await getHasMetricsData({
     infraMetricsClient,
     entityId,
-    field: findInventoryFields(entityType).id,
+    field: findInventoryFields(entityType as InventoryItemType).id,
   });
 
   const sourceDataStreams = new Set(hasMetricsData ? [EntityDataStreamType.METRICS] : []);

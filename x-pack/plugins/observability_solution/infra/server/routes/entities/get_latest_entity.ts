@@ -21,7 +21,7 @@ export async function getLatestEntity({
   to,
   logger,
 }: {
-  entityType: 'host' | 'container';
+  entityType: string;
   entityId: string;
   entityManagerClient: EntityClient;
   from: string;
@@ -38,7 +38,7 @@ export async function getLatestEntity({
       return undefined;
     }
 
-    const entities = await entityManagerClient.v2.searchEntities({
+    const { entities } = await entityManagerClient.v2.searchEntities({
       type: entityType,
       limit: 1,
       metadata_fields: ['data_stream.type'],
