@@ -9,7 +9,6 @@
 
 import { SavedObjectAttributes } from '@kbn/core/public';
 import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
-import { IContainer } from '..';
 import { EmbeddableFactory } from './embeddable_factory';
 import { EmbeddableStateWithType } from '../../../common/types';
 import { EmbeddableFactoryDefinition } from './embeddable_factory_definition';
@@ -41,7 +40,7 @@ export const defaultEmbeddableFactoryProvider = <
       : () => Promise.resolve({}),
     createFromSavedObject: def.createFromSavedObject
       ? def.createFromSavedObject.bind(def)
-      : (savedObjectId: string, input: Partial<I>, parent?: IContainer) => {
+      : (savedObjectId: string, input: Partial<I>, parent?: unknown) => {
           throw new Error(`Creation from saved object not supported by type ${def.type}`);
         },
     create: (...args) => {
