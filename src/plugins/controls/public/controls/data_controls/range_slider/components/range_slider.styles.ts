@@ -30,7 +30,6 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       }
 
       .euiFormControlLayout {
-        background-color: transparent;
         border: none;
         border-radius: 0;
       }
@@ -50,11 +49,6 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       /* But restore the danger color for truly invalid inputs (e.g. min larger than max) */
       &:has(input:invalid) {
         --euiFormControlStateColor: ${euiTheme.colors.danger};
-      }
-
-      /* Remove the append background so the caution icon looks more natural */
-      .euiFormControlLayout__append {
-        background-color: transparent;
       }
     `,
 
