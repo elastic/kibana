@@ -153,7 +153,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
   return (
     <EuiAccordion
       id="inferenceAdditionalOptions"
-      data-test-subj="add-inference-endpoint-additional-options"
+      data-test-subj="inference-endpoint-additional-options"
       buttonProps={{ css: buttonCss }}
       css={css`
         .euiAccordion__triggerWrapper {
@@ -252,6 +252,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                 }
               >
                 <EuiFieldText
+                  data-test-subj="inference-endpoint-input-field"
                   fullWidth
                   value={config.inferenceId}
                   onChange={(e) => {
