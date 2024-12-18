@@ -51,7 +51,7 @@ NOTE: `package.json` files are irrelevant to and ignored by {kib} for discoverin
 
 *[2] `public/index.ts`* is the entry point into the client-side code of
 this plugin. It must export a function named `plugin`, which will
-receive {kib-repo}blob/{branch}/packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts[a standard set of core capabilities] as an argument.
+receive {kib-repo}blob/{branch}/src/core/packages/plugins/browser/src/plugin_initializer.ts[a standard set of core capabilities] as an argument.
 It should return an instance of its plugin class for
 {kib} to load.
 
@@ -222,7 +222,7 @@ These are the contracts exposed by the core services for each lifecycle:
 |lifecycle |server contract|browser contract
 |_constructor_
 |{kib-repo}blob/{branch}/packages/core/plugins/core-plugins-server/src/types.ts[PluginInitializerContext]
-|{kib-repo}blob/{branch}/packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts[PluginInitializerContext]
+|{kib-repo}blob/{branch}/src/core/packages/plugins/browser/src/plugin_initializer.ts[PluginInitializerContext]
 
 |_setup_
 |{kib-repo}blob/{branch}/src/core/packages/lifecycle/server/src/core_setup.ts[CoreSetup]
