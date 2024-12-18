@@ -130,7 +130,6 @@ export const MaintenanceWindowsPage = React.memo(() => {
     [inputText]
   );
 
-
   return (
     <>
       <EuiPageHeader bottomBorder alignItems="top">
