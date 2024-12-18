@@ -319,7 +319,7 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
         title={i18n.translate(
           'xpack.security.accountManagement.userProfile.deprecatedSpaceDefaultTitle',
           {
-            defaultMessage: 'Space default settings will be deprecated in 10.0',
+            defaultMessage: 'Space default settings will be removed in a future version',
           }
         )}
         color="warning"

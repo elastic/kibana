@@ -131,7 +131,7 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient, isSer
               title={i18n.translate(
                 'xpack.cloudLinks.userMenuLinks.appearanceModalDeprecatedSpaceDefaultTitle',
                 {
-                  defaultMessage: 'Space default settings will be deprecated in 10.0',
+                  defaultMessage: 'Space default settings will be removed in a future version',
                 }
               )}
               color="warning"
