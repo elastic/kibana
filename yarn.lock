@@ -6581,7 +6581,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/panel-loader@link:packages/kbn-panel-loader":
+"@kbn/panel-loader@link:src/platform/packages/private/kbn-panel-loader":
   version "0.0.0"
   uid ""
 
