@@ -168,7 +168,11 @@ async function rewritePromptForConnector({
           : {}),
       },
       additionalProperties: false,
-      required: ['rewrittenUserPrompt', 'timestampFilter'],
+      required: [
+        'rewrittenUserPrompt',
+        ...(timestampFields.length > 0 ? ['timestampFilter'] : []),
+        ...(keywordFieldSchema.length > 0 ? ['keywordFilters'] : []),
+      ],
     } as const,
   };
 
