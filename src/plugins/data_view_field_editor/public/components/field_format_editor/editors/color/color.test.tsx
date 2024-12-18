@@ -57,6 +57,20 @@ describe('ColorFormatEditor', () => {
     expect(component).toMatchSnapshot();
   });
 
+  it('should render boolean type normally', async () => {
+    const component = shallowWithI18nProvider(
+      <ColorFormatEditor
+        fieldType={'boolean'}
+        format={format as unknown as FieldFormat}
+        formatParams={formatParams}
+        onChange={onChange}
+        onError={onError}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+
   it('should render other type normally (range field)', async () => {
     const component = shallowWithI18nProvider(
       <ColorFormatEditor

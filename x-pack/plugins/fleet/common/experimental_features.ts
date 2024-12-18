@@ -10,7 +10,6 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
 const _allowedExperimentalValues = {
   createPackagePolicyMultiPageLayout: true,
   packageVerification: true,
-  showDevtoolsRequest: true,
   diagnosticFileUploadEnabled: true,
   displayAgentMetrics: true,
   showIntegrationsSubcategories: true,
@@ -27,7 +26,7 @@ const _allowedExperimentalValues = {
   useSpaceAwareness: false,
   enableReusableIntegrationPolicies: true,
   asyncDeployPolicies: true,
-  enableExportCSV: false,
+  enableExportCSV: true,
 };
 
 /**

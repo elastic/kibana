@@ -20,11 +20,11 @@
     "xpack.canvas": "plugins/canvas",
     "xpack.cases": "plugins/cases",
     "xpack.cloud": "plugins/cloud",
-    "xpack.cloudDefend": "plugins/cloud_defend",
+    "xpack.cloudDefend": "solutions/security/plugins/cloud_defend",
     "xpack.cloudLinks": "plugins/cloud_integrations/cloud_links",
-    "xpack.cloudDataMigration": "plugins/cloud_integrations/cloud_data_migration",
+    "xpack.cloudDataMigration": "platform/plugins/private/cloud_integrations/cloud_data_migration",
     "xpack.csp": [
-      "plugins/cloud_security_posture",
+      "solutions/security/plugins/cloud_security_posture",
       "packages/kbn-cloud-security-posture-common",
       "packages/kbn-cloud-security-posture"
     ],
@@ -32,19 +32,19 @@
     "xpack.dashboard": "plugins/dashboard_enhanced",
     "xpack.dataQuality": "plugins/data_quality",
     "xpack.datasetQuality": "plugins/observability_solution/dataset_quality",
-    "xpack.dataUsage": "plugins/data_usage",
+    "xpack.dataUsage": "platform/plugins/private/data_usage",
     "xpack.discover": "plugins/discover_enhanced",
-    "xpack.crossClusterReplication": "plugins/cross_cluster_replication",
-    "xpack.elasticAssistant": "packages/kbn-elastic-assistant",
-    "xpack.elasticAssistantCommon": "packages/kbn-elastic-assistant-common",
-    "xpack.elasticAssistantPlugin": "plugins/elastic_assistant",
-    "xpack.ecsDataQualityDashboard": "plugins/ecs_data_quality_dashboard",
+    "xpack.crossClusterReplication": "platform/plugins/private/cross_cluster_replication",
+    "xpack.elasticAssistant": "platform/packages/shared/kbn-elastic-assistant",
+    "xpack.elasticAssistantCommon": "platform/packages/shared/kbn-elastic-assistant-common",
+    "xpack.elasticAssistantPlugin": "solutions/security/plugins/elastic_assistant",
+    "xpack.ecsDataQualityDashboard": "solutions/security/plugins/ecs_data_quality_dashboard",
     "xpack.embeddableEnhanced": "plugins/embeddable_enhanced",
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "plugins/enterprise_search",
     "xpack.features": "plugins/features",
     "xpack.dataVisualizer": "platform/plugins/private/data_visualizer",
-    "xpack.exploratoryView": "plugins/observability_solution/exploratory_view",
+    "xpack.exploratoryView": "solutions/observability/plugins/exploratory_view",
     "xpack.fileUpload": "plugins/file_upload",
     "xpack.globalSearch": [
       "plugins/global_search"
@@ -55,27 +55,27 @@
     "xpack.graph": [
       "plugins/graph"
     ],
-    "xpack.grokDebugger": "plugins/grokdebugger",
+    "xpack.grokDebugger": "platform/plugins/private/grokdebugger",
     "xpack.idxMgmt": "plugins/index_management",
     "xpack.idxMgmtPackage": "packages/index-management",
-    "xpack.indexLifecycleMgmt": "plugins/index_lifecycle_management",
+    "xpack.indexLifecycleMgmt": "platform/plugins/private/index_lifecycle_management",
     "xpack.infra": "plugins/observability_solution/infra",
     "xpack.logsDataAccess": "plugins/observability_solution/logs_data_access",
     "xpack.logsExplorer": "plugins/observability_solution/logs_explorer",
     "xpack.logsShared": "plugins/observability_solution/logs_shared",
     "xpack.fleet": "plugins/fleet",
-    "xpack.ingestPipelines": "plugins/ingest_pipelines",
-    "xpack.integrationAssistant": "plugins/integration_assistant",
+    "xpack.ingestPipelines": "platform/plugins/shared/ingest_pipelines",
+    "xpack.integrationAssistant": "platform/plugins/shared/integration_assistant",
     "xpack.inference": "platform/plugins/shared/inference",
     "xpack.inventory": "plugins/observability_solution/inventory",
-    "xpack.investigate": "plugins/observability_solution/investigate",
-    "xpack.investigateApp": "plugins/observability_solution/investigate_app",
-    "xpack.kubernetesSecurity": "plugins/kubernetes_security",
+    "xpack.investigate": "solutions/observability/plugins/investigate",
+    "xpack.investigateApp": "solutions/observability/plugins/investigate_app",
+    "xpack.kubernetesSecurity": "solutions/security/plugins/kubernetes_security",
     "xpack.lens": "plugins/lens",
-    "xpack.licenseApiGuard": "plugins/license_api_guard",
-    "xpack.licenseMgmt": "plugins/license_management",
+    "xpack.licenseApiGuard": "platform/plugins/private/license_api_guard",
+    "xpack.licenseMgmt": "platform/plugins/shared/license_management",
     "xpack.licensing": "plugins/licensing",
-    "xpack.lists": "plugins/lists",
+    "xpack.lists": "solutions/security/plugins/lists",
     "xpack.logstash": [
       "plugins/logstash"
     ],
@@ -100,12 +100,12 @@
     "xpack.monitoring": [
       "plugins/monitoring"
     ],
-    "xpack.observability": "plugins/observability_solution/observability",
+    "xpack.observability": "solutions/observability/plugins/observability",
     "xpack.observabilityAiAssistant": [
-      "plugins/observability_solution/observability_ai_assistant",
-      "plugins/observability_solution/observability_ai_assistant_app"
+      "platform/plugins/shared/observability_solution/observability_ai_assistant",
+      "solutions/observability/plugins/observability_ai_assistant_app"
     ],
-    "xpack.observabilityAiAssistantManagement": "plugins/observability_solution/observability_ai_assistant_management",
+    "xpack.observabilityAiAssistantManagement": "solutions/observability/plugins/observability_ai_assistant_management",
     "xpack.observabilityLogsExplorer": "plugins/observability_solution/observability_logs_explorer",
     "xpack.observability_onboarding": "plugins/observability_solution/observability_onboarding",
     "xpack.observabilityShared": "plugins/observability_solution/observability_shared",
@@ -113,22 +113,22 @@
       "packages/observability/logs_overview/src/components"
     ],
     "xpack.osquery": [
-      "plugins/osquery"
+      "platform/plugins/shared/osquery"
     ],
-    "xpack.painlessLab": "plugins/painless_lab",
+    "xpack.painlessLab": "platform/plugins/private/painless_lab",
     "xpack.profiling": [
       "plugins/observability_solution/profiling"
     ],
-    "xpack.remoteClusters": "plugins/remote_clusters",
+    "xpack.remoteClusters": "platform/plugins/private/remote_clusters",
     "xpack.reporting": [
       "plugins/reporting"
     ],
     "xpack.rollupJobs": [
-      "packages/rollup",
-      "plugins/rollup"
+      "platform/packages/private/rollup",
+      "platform/plugins/private/rollup"
     ],
-    "xpack.runtimeFields": "plugins/runtime_fields",
-    "xpack.screenshotting": "plugins/screenshotting",
+    "xpack.runtimeFields": "platform/plugins/private/runtime_fields",
+    "xpack.screenshotting": "platform/plugins/shared/screenshotting",
     "xpack.searchSharedUI": "packages/search/shared_ui",
     "xpack.searchHomepage": "plugins/search_homepage",
     "xpack.searchIndices": "plugins/search_indices",
@@ -137,7 +137,7 @@
     "xpack.searchPlayground": "plugins/search_playground",
     "xpack.searchInferenceEndpoints": "plugins/search_inference_endpoints",
     "xpack.searchAssistant": "plugins/search_assistant",
-    "xpack.searchProfiler": "plugins/searchprofiler",
+    "xpack.searchProfiler": "platform/plugins/shared/searchprofiler",
     "xpack.security": [
       "plugins/security",
       "packages/security"
@@ -145,37 +145,37 @@
     "xpack.server": "legacy/server",
     "xpack.serverless": "plugins/serverless",
     "xpack.serverlessSearch": "plugins/serverless_search",
-    "xpack.serverlessObservability": "plugins/serverless_observability",
-    "xpack.securitySolution": "plugins/security_solution",
-    "xpack.securitySolutionEss": "plugins/security_solution_ess",
-    "xpack.securitySolutionServerless": "plugins/security_solution_serverless",
-    "xpack.sessionView": "plugins/session_view",
+    "xpack.serverlessObservability": "solutions/observability/plugins/serverless_observability",
+    "xpack.securitySolution": "solutions/security/plugins/security_solution",
+    "xpack.securitySolutionEss": "solutions/security/plugins/security_solution_ess",
+    "xpack.securitySolutionServerless": "solutions/security/plugins/security_solution_serverless",
+    "xpack.sessionView": "solutions/security/plugins/session_view",
     "xpack.streams": [
-      "plugins/streams_app"
+      "solutions/observability/plugins/streams_app"
     ],
-    "xpack.slo": "plugins/observability_solution/slo",
-    "xpack.snapshotRestore": "plugins/snapshot_restore",
+    "xpack.slo": "solutions/observability/plugins/slo",
+    "xpack.snapshotRestore": "platform/plugins/private/snapshot_restore",
     "xpack.spaces": "plugins/spaces",
     "xpack.savedObjectsTagging": [
       "plugins/saved_objects_tagging"
     ],
     "xpack.taskManager": "legacy/plugins/task_manager",
-    "xpack.threatIntelligence": "plugins/threat_intelligence",
-    "xpack.timelines": "plugins/timelines",
+    "xpack.threatIntelligence": "solutions/security/plugins/threat_intelligence",
+    "xpack.timelines": "solutions/security/plugins/timelines",
     "xpack.transform": "platform/plugins/private/transform",
     "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
     "xpack.upgradeAssistant": "plugins/upgrade_assistant",
     "xpack.uptime": [
-      "plugins/observability_solution/uptime"
+      "solutions/observability/plugins/uptime"
     ],
     "xpack.synthetics": [
-      "plugins/observability_solution/synthetics"
+      "solutions/observability/plugins/synthetics"
     ],
     "xpack.ux": [
-      "plugins/observability_solution/ux"
+      "solutions/observability/plugins/ux"
     ],
     "xpack.urlDrilldown": "plugins/drilldowns/url_drilldown",
-    "xpack.watcher": "plugins/watcher"
+    "xpack.watcher": "platform/plugins/private/watcher"
   },
   "exclude": [
     "examples"
