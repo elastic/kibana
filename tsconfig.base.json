@@ -1360,8 +1360,8 @@
       "@kbn/open-telemetry-instrumented-plugin/*": ["test/common/plugins/otel_metrics/*"],
       "@kbn/openapi-bundler": ["packages/kbn-openapi-bundler"],
       "@kbn/openapi-bundler/*": ["packages/kbn-openapi-bundler/*"],
-      "@kbn/openapi-common": ["packages/kbn-openapi-common"],
-      "@kbn/openapi-common/*": ["packages/kbn-openapi-common/*"],
+      "@kbn/openapi-common": ["src/platform/packages/shared/kbn-openapi-common"],
+      "@kbn/openapi-common/*": ["src/platform/packages/shared/kbn-openapi-common/*"],
       "@kbn/openapi-generator": ["packages/kbn-openapi-generator"],
       "@kbn/openapi-generator/*": ["packages/kbn-openapi-generator/*"],
       "@kbn/optimizer": ["packages/kbn-optimizer"],
@@ -1564,8 +1564,8 @@
       "@kbn/screenshot-mode-plugin/*": ["src/plugins/screenshot_mode/*"],
       "@kbn/screenshotting-example-plugin": ["x-pack/examples/screenshotting_example"],
       "@kbn/screenshotting-example-plugin/*": ["x-pack/examples/screenshotting_example/*"],
-      "@kbn/screenshotting-plugin": ["x-pack/plugins/screenshotting"],
-      "@kbn/screenshotting-plugin/*": ["x-pack/plugins/screenshotting/*"],
+      "@kbn/screenshotting-plugin": ["x-pack/platform/plugins/shared/screenshotting"],
+      "@kbn/screenshotting-plugin/*": ["x-pack/platform/plugins/shared/screenshotting/*"],
       "@kbn/screenshotting-server": ["packages/kbn-screenshotting-server"],
       "@kbn/screenshotting-server/*": ["packages/kbn-screenshotting-server/*"],
       "@kbn/search-api-keys-components": ["packages/kbn-search-api-keys-components"],
@@ -2072,8 +2072,8 @@
       "@kbn/yarn-lock-validator/*": ["packages/kbn-yarn-lock-validator/*"],
       "@kbn/zod": ["packages/kbn-zod"],
       "@kbn/zod/*": ["packages/kbn-zod/*"],
-      "@kbn/zod-helpers": ["packages/kbn-zod-helpers"],
-      "@kbn/zod-helpers/*": ["packages/kbn-zod-helpers/*"],
+      "@kbn/zod-helpers": ["src/platform/packages/shared/kbn-zod-helpers"],
+      "@kbn/zod-helpers/*": ["src/platform/packages/shared/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
       "@emotion/core": ["typings/@emotion"]

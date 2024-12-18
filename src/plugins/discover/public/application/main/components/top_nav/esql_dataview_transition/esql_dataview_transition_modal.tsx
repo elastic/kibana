@@ -57,7 +57,7 @@ export default function ESQLToDataViewTransitionModal({
         <EuiText size="m">
           {i18n.translate('discover.esqlToDataviewTransitionModalBody', {
             defaultMessage:
-              'Switching data views removes the current ES|QL query. Save this search to avoid losing work.',
+              'Switching data views removes the current ES|QL query. Save this session to avoid losing work.',
           })}
         </EuiText>
         <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs">
