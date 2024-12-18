@@ -46,7 +46,10 @@ export const canvasWebpack = {
       // Exclude large-dependency, troublesome or irrelevant modules.
       {
         test: [
-          resolve(KIBANA_ROOT, 'x-pack/platform/plugins/private/canvas/public/components/embeddable_flyout'),
+          resolve(
+            KIBANA_ROOT,
+            'x-pack/platform/plugins/private/canvas/public/components/embeddable_flyout'
+          ),
           resolve(KIBANA_ROOT, 'x-pack/plugins/reporting/public'),
         ],
         use: 'null-loader',
