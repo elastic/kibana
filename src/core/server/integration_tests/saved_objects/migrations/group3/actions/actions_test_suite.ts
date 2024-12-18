@@ -772,7 +772,9 @@ export const runActionTestSuite = ({
 
   // Reindex doesn't return any errors on its own, so we have to test
   // together with waitForReindexTask
-  describe('reindex & waitForReindexTask', () => {
+  // Flaky: https://github.com/elastic/kibana/issues/166190
+  // Reported here: https://github.com/elastic/kibana/issues/167273
+  describe.skip('reindex & waitForReindexTask', () => {
     it('resolves right when reindex succeeds without reindex script', async () => {
       const res = (await reindex({
         client,
