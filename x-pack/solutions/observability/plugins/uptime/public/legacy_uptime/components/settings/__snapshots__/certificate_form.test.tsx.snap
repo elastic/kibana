@@ -1,39 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CertificateForm shallow renders expected elements for valid props 1`] = `
-<ContextProvider
-  value={
+<Router
+  history={
     Object {
-      "history": Object {
-        "action": "POP",
-        "block": [Function],
-        "canGo": [Function],
-        "createHref": [Function],
-        "entries": Array [
-          Object {
-            "hash": "",
-            "key": "TestKeyForTesting",
-            "pathname": "/",
-            "search": "",
-            "state": undefined,
-          },
-        ],
-        "go": [Function],
-        "goBack": [Function],
-        "goForward": [Function],
-        "index": 0,
-        "length": 1,
-        "listen": [Function],
-        "location": Object {
+      "action": "POP",
+      "block": [Function],
+      "canGo": [Function],
+      "createHref": [Function],
+      "entries": Array [
+        Object {
           "hash": "",
           "key": "TestKeyForTesting",
           "pathname": "/",
           "search": "",
           "state": undefined,
         },
-        "push": [Function],
-        "replace": [Function],
-      },
+      ],
+      "go": [Function],
+      "goBack": [Function],
+      "goForward": [Function],
+      "index": 0,
+      "length": 1,
+      "listen": [Function],
       "location": Object {
         "hash": "",
         "key": "TestKeyForTesting",
@@ -41,66 +30,24 @@ exports[`CertificateForm shallow renders expected elements for valid props 1`] =
         "search": "",
         "state": undefined,
       },
-      "match": Object {
-        "isExact": true,
-        "params": Object {},
-        "path": "/",
-        "url": "/",
-      },
-      "staticContext": undefined,
+      "push": [Function],
+      "replace": [Function],
     }
   }
 >
-  <ContextProvider
-    value={
+  <CertificateExpirationForm
+    fieldErrors={null}
+    formFields={
       Object {
-        "action": "POP",
-        "block": [Function],
-        "canGo": [Function],
-        "createHref": [Function],
-        "entries": Array [
-          Object {
-            "hash": "",
-            "key": "TestKeyForTesting",
-            "pathname": "/",
-            "search": "",
-            "state": undefined,
-          },
-        ],
-        "go": [Function],
-        "goBack": [Function],
-        "goForward": [Function],
-        "index": 0,
-        "length": 1,
-        "listen": [Function],
-        "location": Object {
-          "hash": "",
-          "key": "TestKeyForTesting",
-          "pathname": "/",
-          "search": "",
-          "state": undefined,
-        },
-        "push": [Function],
-        "replace": [Function],
+        "certAgeThreshold": 36,
+        "certExpirationThreshold": 7,
+        "defaultConnectors": Array [],
+        "heartbeatIndices": "heartbeat-8*",
       }
     }
-  >
-    <CompatRouter>
-      <CertificateExpirationForm
-        fieldErrors={null}
-        formFields={
-          Object {
-            "certAgeThreshold": 36,
-            "certExpirationThreshold": 7,
-            "defaultConnectors": Array [],
-            "heartbeatIndices": "heartbeat-8*",
-          }
-        }
-        isDisabled={false}
-        loading={false}
-        onChange={[MockFunction]}
-      />
-    </CompatRouter>
-  </ContextProvider>
-</ContextProvider>
+    isDisabled={false}
+    loading={false}
+    onChange={[MockFunction]}
+  />
+</Router>
 `;
