@@ -151,7 +151,7 @@ export class KibanaClient {
   }
 
   async installKnowledgeBase() {
-    this.log.debug('Checking to see whether knowledge base is installed');
+    this.log.info('Checking whether the knowledge base is installed');
 
     const {
       data: { ready },
@@ -160,7 +160,7 @@ export class KibanaClient {
     });
 
     if (ready) {
-      this.log.info('Knowledge base is installed');
+      this.log.info('Knowledge base is already installed');
       return;
     }
 
@@ -187,7 +187,7 @@ export class KibanaClient {
       return;
     }
 
-    this.log.debug(`Checking if space ${this.spaceId} exists`);
+    this.log.info(`Checking if space ${this.spaceId} exists`);
 
     const spaceExistsResponse = await this.callKibana<{
       id?: string;
@@ -207,7 +207,7 @@ export class KibanaClient {
     });
 
     if (spaceExistsResponse.data.id) {
-      this.log.debug(`Space id ${this.spaceId} found`);
+      this.log.info(`Space id ${this.spaceId} found`);
       return;
     }
 
@@ -366,7 +366,7 @@ export class KibanaClient {
       that.log.info('Chat', name);
 
       const chat$ = defer(() => {
-        that.log.info('Calling the chat API...');
+        that.log.info('Calling the /chat API');
         const params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat'>['params']['body'] =
           {
             name,
@@ -416,7 +416,7 @@ export class KibanaClient {
         return chat('chat', { messages, functions: [] });
       },
       complete: async (...args) => {
-        that.log.debug('Calling the chat complete API...');
+        that.log.info('Calling complete');
         let messagesArg: StringOrMessageList | undefined;
         let conversationId: string | undefined;
         let options: Options = {};
@@ -455,7 +455,7 @@ export class KibanaClient {
         ];
 
         const stream$ = defer(() => {
-          that.log.debug(`Calling /chat/complete API`);
+          that.log.info(`Calling /chat/complete API`);
           return from(
             that.axios.post(
               that.getUrl({
