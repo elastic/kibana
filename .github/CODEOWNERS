@@ -622,6 +622,7 @@ src/platform/plugins/shared/discover_shared @elastic/kibana-data-discovery @elas
 src/platform/plugins/shared/es_ui_shared @elastic/kibana-management
 src/platform/plugins/shared/esql @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
+src/platform/plugins/shared/field_formats @elastic/kibana-data-discovery
 src/platform/plugins/shared/management @elastic/kibana-management
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/bfetch @elastic/appex-sharedux
@@ -649,7 +650,6 @@ src/plugins/expression_repeat_image @elastic/kibana-presentation
 src/plugins/expression_reveal_image @elastic/kibana-presentation
 src/plugins/expression_shape @elastic/kibana-presentation
 src/plugins/expressions @elastic/kibana-visualizations
-src/plugins/field_formats @elastic/kibana-data-discovery
 src/plugins/files @elastic/appex-sharedux
 src/plugins/files_management @elastic/appex-sharedux
 src/plugins/ftr_apis @elastic/kibana-core

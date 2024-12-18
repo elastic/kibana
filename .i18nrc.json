@@ -59,7 +59,7 @@
     "eventAnnotationCommon": "packages/kbn-event-annotation-common",
     "eventAnnotationComponents": "packages/kbn-event-annotation-components",
     "fieldUtils": "packages/kbn-field-utils",
-    "fieldFormats": "src/plugins/field_formats",
+    "fieldFormats": "src/platform/plugins/shared/field_formats",
     "files": "src/plugins/files",
     "filesManagement": "src/plugins/files_management",
     "flot": "packages/kbn-flot-charts/lib",
