@@ -128,10 +128,12 @@ HostNameGroupContent.displayName = 'HostNameGroupContent';
 const UserNameGroupContent = React.memo<{ userName: string | string[]; nullGroupMessage?: string }>(
   ({ userName, nullGroupMessage }) => {
     const userNameValue = firstNonNullValue(userName) ?? '-';
+    const { euiTheme } = useEuiTheme();
+
     return (
       <EuiFlexGroup data-test-subj="user-name-group-renderer" gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiAvatar name={userNameValue} color={euiThemeVars.euiColorVis0} />
+          <EuiAvatar name={userNameValue} color={euiTheme.colors.accentSecondary} />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
