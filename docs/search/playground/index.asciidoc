@@ -20,7 +20,7 @@ Refer to the following for more advanced topics:
 * <<playground-query>>
 * <<playground-troubleshooting>>
 
-.Getting started videos
+.🍿 Getting started videos
 ***********************
 Watch these video tutorials to help you get started:
 
