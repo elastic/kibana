@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { useContext } from 'react';
-import { ThemeContext } from 'styled-components';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { ToolingLog } from '@kbn/tooling-log';
 
-export function useTheme(): EuiTheme {
-  const theme = useContext(ThemeContext);
-  return theme;
-}
+export const log: ToolingLog = new ToolingLog({
+  level: 'info',
+  writeTo: process.stdout,
+});
