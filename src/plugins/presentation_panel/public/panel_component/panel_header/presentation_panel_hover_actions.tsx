@@ -122,14 +122,8 @@ export const PresentationPanelHoverActions = ({
 
   const { euiTheme } = useEuiTheme();
 
-  const EDIT_MODE_OUTLINE = useMemo(
-    () => `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseFormsControl}`,
-    [euiTheme.border.width.thin, euiTheme.colors.borderBaseFormsControl]
-  );
-  const VIEW_MODE_OUTLINE = useMemo(
-    () => `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-    [euiTheme.border.width.thin, euiTheme.colors.borderBasePlain]
-  );
+  const EDIT_MODE_OUTLINE = `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseFormsControl}`;
+  const VIEW_MODE_OUTLINE = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`;
 
   const ALL_ROUNDED_CORNERS = `
   border-radius: ${euiTheme.border.radius.medium};
@@ -481,63 +475,6 @@ export const PresentationPanelHoverActions = ({
   );
 
   const hasHoverActions = quickActionElements.length || contextMenuPanels.lastIndexOf.length;
-
-  const presentationPanelHoverActionsAnchorStyles = useMemo(
-    () => `
-        border-radius: ${euiTheme.border.radius.medium};
-        position: relative;
-        height: 100%;
-
-        .embPanel {
-          ${
-            showBorder
-              ? `
-              outline: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
-            `
-              : ''
-          }
-        }
-
-        .embPanel__hoverActions {
-          opacity: 0;
-          padding: calc(${euiTheme.size.xs} - 1px);
-          display: flex;
-          flex-wrap: nowrap;
-
-          background-color: ${euiTheme.colors.backgroundBasePlain};
-          height: ${euiTheme.size.xl};
-
-          pointer-events: all; // Re-enable pointer-events for hover actions
-        }
-
-        &:hover,
-        &:focus-within,
-        &.embPanel__hoverActionsAnchor--lockHoverActions {
-          .embPanel {
-            outline: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
-            z-index: ${euiTheme.levels.menu};
-          }
-          .embPanel__hoverActionsWrapper {
-            z-index: ${euiTheme.levels.toast};
-            top: -${euiTheme.size.xl};
-
-            .embPanel__hoverActions {
-              opacity: 1;
-            }
-          }
-        }
-      `,
-    [
-      euiTheme.border.radius.medium,
-      euiTheme.size.xs,
-      EDIT_MODE_OUTLINE,
-      VIEW_MODE_OUTLINE,
-      euiTheme.colors.backgroundBasePlain,
-      euiTheme.size.xl,
-      euiTheme.levels.menu,
-      euiTheme.levels.toast,
-    ]
-  );
 
   return (
     <div
