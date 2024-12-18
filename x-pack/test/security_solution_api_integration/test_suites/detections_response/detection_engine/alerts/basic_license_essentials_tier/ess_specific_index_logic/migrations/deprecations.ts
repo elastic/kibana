@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return deprecations.find(({ title }) => title === 'Found not migrated detection alerts');
   };
 
-  describe.only('@ess Alerts migration deprecations API', () => {
+  describe('@ess Alerts migration deprecations API', () => {
     describe('no siem legacy indices exist', () => {
       it('should return empty siem signals deprecation', async () => {
         const deprecation = await getLegacyIndicesDeprecation();
