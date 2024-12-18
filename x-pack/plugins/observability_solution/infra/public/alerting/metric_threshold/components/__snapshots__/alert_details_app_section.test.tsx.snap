@@ -17,7 +17,7 @@ Array [
         "type": "manual",
       },
       Object {
-        "color": "#F04E9833",
+        "color": "rgba(189,39,30,0.2)",
         "id": "metric_threshold_active_alert_range_annotation",
         "key": Object {
           "endTimestamp": "2024-06-13T07:00:33.381Z",

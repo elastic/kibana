@@ -10095,7 +10095,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.ts"
               }
             ],
             "children": [],
@@ -10421,19 +10421,19 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "inputControlVis",
@@ -26835,7 +26835,7 @@
             "references": [
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/hooks/eql/api.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/hooks/eql/api.ts"
               }
             ]
           }

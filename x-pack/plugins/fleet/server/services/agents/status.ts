@@ -271,7 +271,7 @@ export async function getIncomingDataByAgentsId({
   } catch (error) {
     logger.debug(`Error getting incoming data for agents: ${error}`);
     throw new FleetError(
-      `Unable to retrive incoming data for agents due to error: ${error.message}`
+      `Unable to retrieve incoming data for agents due to error: ${error.message}`
     );
   }
 }
