@@ -6665,7 +6665,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/react-field@link:packages/kbn-react-field":
+"@kbn/react-field@link:src/platform/packages/shared/kbn-react-field":
   version "0.0.0"
   uid ""
 
