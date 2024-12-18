@@ -14,12 +14,13 @@ import {
 } from '@langchain/core/prompts';
 import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { DataStreamWriter, createDataStream } from 'ai';
+import { createDataStream } from 'ai';
+import type { DataStreamWriter } from 'ai';
+import type { DataStreamString } from '@ai-sdk/ui-utils';
 import { BaseLanguageModel } from '@langchain/core/language_models/base';
 import { BaseMessage } from '@langchain/core/messages';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';
 import { LangChainAdapter } from 'ai';
-import type { DataStreamString } from '@ai-sdk/ui-utils';
 import { ChatMessage } from '../types';
 import { ElasticsearchRetriever } from './elasticsearch_retriever';
 import { renderTemplate } from '../utils/render_template';
