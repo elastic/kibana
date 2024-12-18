@@ -23,7 +23,16 @@ import {
 } from '../openai';
 
 export const inferenceAdapter: InferenceConnectorAdapter = {
-  chatComplete: ({ executor, system, messages, toolChoice, tools, functionCalling, logger }) => {
+  chatComplete: ({
+    executor,
+    system,
+    messages,
+    toolChoice,
+    tools,
+    functionCalling,
+    logger,
+    abortSignal,
+  }) => {
     const simulatedFunctionCalling = functionCalling === 'simulated';
 
     let request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string };
@@ -47,9 +56,10 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
 
     return from(
       executor.invoke({
-        subAction: 'unified_stream',
+        subAction: 'unified_completion_stream',
         subActionParams: {
           body: request,
+          signal: abortSignal,
         },
       })
     ).pipe(

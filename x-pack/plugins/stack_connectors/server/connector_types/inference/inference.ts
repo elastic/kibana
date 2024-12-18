@@ -189,6 +189,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       },
       {
         asStream: true,
+        signal: params.signal,
       }
     );
   }
