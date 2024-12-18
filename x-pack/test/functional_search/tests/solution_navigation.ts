@@ -18,10 +18,8 @@ export default function searchSolutionNavigation({
   ]);
   const spaces = getService('spaces');
   const browser = getService('browser');
-  const kibanaServer = getService('kibanaServer');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/201037
-  describe.skip('Search Solution Navigation', () => {
+  describe('Search Solution Navigation', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
@@ -32,20 +30,14 @@ export default function searchSolutionNavigation({
       });
 
       // Create a space with the search solution and navigate to its home page
-      ({ cleanUp, space: spaceCreated } = await spaces.create({ solution: 'es' }));
+      ({ cleanUp, space: spaceCreated } = await spaces.create({
+        name: 'search-ftr',
+        solution: 'es',
+      }));
       await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
-
-      // canvas application is only available when installation contains canvas workpads
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
-      );
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
-      );
-
       // Clean up space created
       await cleanUp();
     });
@@ -215,6 +207,7 @@ export default function searchSolutionNavigation({
 
       // Other tools
       await solutionNavigation.sidenav.openSection('search_project_nav.otherTools');
+      await solutionNavigation.sidenav.expectSectionOpen('search_project_nav.otherTools');
       // > Maps
       await solutionNavigation.sidenav.clickLink({
         deepLinkId: 'maps',
@@ -228,20 +221,6 @@ export default function searchSolutionNavigation({
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'maps',
-      });
-      // > Canvas
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'canvas',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'canvas',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Other tools' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Canvas',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'canvas',
       });
       // > Graph
       await solutionNavigation.sidenav.clickLink({
@@ -272,6 +251,9 @@ export default function searchSolutionNavigation({
     it('renders only expected items', async () => {
       await solutionNavigation.sidenav.openSection('search_project_nav.otherTools');
       await solutionNavigation.sidenav.openSection('project_settings_project_nav');
+      await solutionNavigation.sidenav.expectSectionOpen('search_project_nav.otherTools');
+      await solutionNavigation.sidenav.expectSectionOpen('project_settings_project_nav');
+
       await solutionNavigation.sidenav.expectOnlyDefinedLinks([
         'search_project_nav',
         'enterpriseSearch',
@@ -291,7 +273,6 @@ export default function searchSolutionNavigation({
         'searchInferenceEndpoints:inferenceEndpoints',
         'otherTools',
         'maps',
-        'canvas',
         'graph',
         'project_settings_project_nav',
         'ml:modelManagement',

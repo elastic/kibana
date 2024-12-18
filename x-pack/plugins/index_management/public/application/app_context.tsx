@@ -86,6 +86,7 @@ export interface AppDependencies {
     monitor: boolean;
     manageEnrich: boolean;
     monitorEnrich: boolean;
+    manageIndexTemplates: boolean;
   };
 }
 

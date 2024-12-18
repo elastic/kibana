@@ -60,10 +60,19 @@ import {
   databaseSearchGuideConfig,
 } from '../common/guided_onboarding/search_guide_config';
 
-import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
+import {
+  AS_TELEMETRY_NAME,
+  registerTelemetryUsageCollector as registerASTelemetryUsageCollector,
+} from './collectors/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerCNTelemetryUsageCollector } from './collectors/connectors/telemetry';
-import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } from './collectors/enterprise_search/telemetry';
-import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
+import {
+  ES_TELEMETRY_NAME,
+  registerTelemetryUsageCollector as registerESTelemetryUsageCollector,
+} from './collectors/enterprise_search/telemetry';
+import {
+  WS_TELEMETRY_NAME,
+  registerTelemetryUsageCollector as registerWSTelemetryUsageCollector,
+} from './collectors/workplace_search/telemetry';
 import { registerEnterpriseSearchIntegrations } from './integrations';
 
 import { entSearchHttpAgent } from './lib/enterprise_search_http_agent';
@@ -162,7 +171,8 @@ export class EnterpriseSearchPlugin implements Plugin {
       ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
       ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
       ELASTICSEARCH_PLUGIN.ID,
-      ...(config.canDeployEntSearch ? [APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID] : []),
+      APP_SEARCH_PLUGIN.ID,
+      WORKPLACE_SEARCH_PLUGIN.ID,
       SEARCH_EXPERIENCES_PLUGIN.ID,
       VECTOR_SEARCH_PLUGIN.ID,
       SEMANTIC_SEARCH_PLUGIN.ID,
@@ -198,8 +208,8 @@ export class EnterpriseSearchPlugin implements Plugin {
           api: [],
           catalogue: PLUGIN_IDS,
           savedObject: {
-            all: [],
-            read: [],
+            all: [ES_TELEMETRY_NAME, AS_TELEMETRY_NAME, WS_TELEMETRY_NAME],
+            read: [ES_TELEMETRY_NAME, AS_TELEMETRY_NAME, WS_TELEMETRY_NAME],
           },
           ui: [],
         },
@@ -295,9 +305,9 @@ export class EnterpriseSearchPlugin implements Plugin {
     };
 
     registerConfigDataRoute(dependencies);
-    if (config.canDeployEntSearch) registerAppSearchRoutes(dependencies);
+    registerAppSearchRoutes(dependencies);
     registerEnterpriseSearchRoutes(dependencies);
-    if (config.canDeployEntSearch) registerWorkplaceSearchRoutes(dependencies);
+    registerWorkplaceSearchRoutes(dependencies);
     // Enterprise Search Routes
     if (config.hasConnectors) registerConnectorRoutes(dependencies);
     if (config.hasWebCrawler) registerCrawlerRoutes(dependencies);
@@ -314,10 +324,8 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Bootstrap the routes, saved objects, and collector for telemetry
      */
     savedObjects.registerType(enterpriseSearchTelemetryType);
-    if (config.canDeployEntSearch) {
-      savedObjects.registerType(appSearchTelemetryType);
-      savedObjects.registerType(workplaceSearchTelemetryType);
-    }
+    savedObjects.registerType(appSearchTelemetryType);
+    savedObjects.registerType(workplaceSearchTelemetryType);
     let savedObjectsStarted: SavedObjectsServiceStart;
 
     void getStartServices().then(([coreStart]) => {
@@ -326,10 +334,8 @@ export class EnterpriseSearchPlugin implements Plugin {
       if (usageCollection) {
         registerESTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
         registerCNTelemetryUsageCollector(usageCollection, this.logger);
-        if (config.canDeployEntSearch) {
-          registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
-          registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
-        }
+        registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
+        registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
       }
     });
     registerTelemetryRoute({ ...dependencies, getSavedObjectsService: () => savedObjectsStarted });
@@ -365,9 +371,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     /**
      * Register a config for the search guide
      */
-    if (config.canDeployEntSearch) {
-      guidedOnboarding?.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
-    }
+    guidedOnboarding?.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
     if (config.hasWebCrawler) {
       guidedOnboarding?.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
     }
