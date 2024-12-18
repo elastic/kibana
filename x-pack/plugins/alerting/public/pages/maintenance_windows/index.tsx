@@ -131,9 +131,6 @@ export const MaintenanceWindowsPage = React.memo(() => {
     [inputText]
   );
 
-  if (isInitialLoading) {
-    return <CenterJustifiedSpinner />;
-  }
 
   return (
     <>
@@ -177,7 +174,7 @@ export const MaintenanceWindowsPage = React.memo(() => {
           <MaintenanceWindowsList
             readOnly={readOnly}
             refreshData={refreshData}
-            isLoading={isLoading}
+            isLoading={isLoading || isInitialLoading}
             items={data.maintenanceWindows}
             page={page}
             perPage={perPage}
