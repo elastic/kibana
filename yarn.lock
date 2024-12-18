@@ -3925,7 +3925,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerts-grouping@link:packages/kbn-alerts-grouping":
+"@kbn/alerts-grouping@link:x-pack/solutions/observability/packages/kbn-alerts-grouping":
   version "0.0.0"
   uid ""
 

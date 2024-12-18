@@ -177,7 +177,7 @@
     "@kbn/alerting-state-types": "link:x-pack/platform/packages/private/kbn-alerting-state-types",
     "@kbn/alerting-types": "link:src/platform/packages/shared/kbn-alerting-types",
     "@kbn/alerts-as-data-utils": "link:src/platform/packages/shared/kbn-alerts-as-data-utils",
-    "@kbn/alerts-grouping": "link:packages/kbn-alerts-grouping",
+    "@kbn/alerts-grouping": "link:x-pack/solutions/observability/packages/kbn-alerts-grouping",
     "@kbn/alerts-restricted-fixtures-plugin": "link:x-pack/test/alerting_api_integration/common/plugins/alerts_restricted",
     "@kbn/alerts-ui-shared": "link:packages/kbn-alerts-ui-shared",
     "@kbn/analytics": "link:packages/kbn-analytics",

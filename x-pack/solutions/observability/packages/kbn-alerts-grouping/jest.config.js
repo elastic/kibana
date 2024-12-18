@@ -9,7 +9,7 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-alerts-grouping'],
-  setupFilesAfterEnv: ['<rootDir>/packages/kbn-alerts-grouping/setup_tests.ts'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/observability/packages/kbn-alerts-grouping'],
+  setupFilesAfterEnv: ['<rootDir>/x-pack/solutions/observability/packages/kbn-alerts-grouping/setup_tests.ts'],
 };
