@@ -38,11 +38,7 @@ interface TestResult {
   context: TransformHealthAlertContext;
 }
 
-type Transform = estypes.TransformGetTransformTransformSummary & {
-  id: string;
-  description?: string;
-  sync: object;
-};
+type Transform = estypes.TransformGetTransformTransformSummary;
 
 type TransformWithAlertingRules = Transform & { alerting_rules: TransformHealthAlertRule[] };
 
@@ -63,40 +59,44 @@ export function transformHealthServiceProvider({
    * Resolves result transform selection. Only continuously running transforms are included.
    * @param includeTransforms
    * @param excludeTransforms
-   * @param skipIDsCheck
    */
   const getResultsTransformIds = async (
     includeTransforms: string[],
-    excludeTransforms: string[] | null,
-    skipIDsCheck = false
+    excludeTransforms: string[] | null
   ): Promise<Set<string>> => {
     const includeAll = includeTransforms.some((id) => id === ALL_TRANSFORMS_SELECTION);
 
     let resultTransformIds: string[] = [];
 
-    if (skipIDsCheck) {
-      resultTransformIds = includeTransforms;
-    } else {
-      // Fetch transforms to make sure assigned transforms exists.
-      const transformsResponse = (
-        await esClient.transform.getTransform({
-          ...(includeAll ? {} : { transform_id: includeTransforms.join(',') }),
-          allow_no_match: true,
-          size: 1000,
-        })
-      ).transforms as Transform[];
+    // Fetch transforms to make sure assigned transforms exists.
+    const transformsResponse = (
+      await esClient.transform.getTransform({
+        ...(includeAll ? {} : { transform_id: includeTransforms.join(',') }),
+        allow_no_match: true,
+        size: 1000,
+      })
+    ).transforms as Transform[];
 
-      transformsResponse.forEach((t) => {
-        transformsDict.set(t.id, t);
-        // Include only continuously running transforms.
-        if (t.sync) {
-          resultTransformIds.push(t.id);
-        }
-      });
-    }
+    transformsResponse.forEach((t) => {
+      transformsDict.set(t.id, t);
+      // Include only continuously running transforms.
+      if (isContinuousTransform(t)) {
+        resultTransformIds.push(t.id);
+      }
+    });
 
     if (excludeTransforms && excludeTransforms.length > 0) {
-      const excludeIdsSet = new Set(excludeTransforms);
+      let excludeIdsSet = new Set(excludeTransforms);
+      if (excludeTransforms.some((id) => id.includes('*'))) {
+        const excludeTransformResponse = (
+          await esClient.transform.getTransform({
+            transform_id: excludeTransforms.join(','),
+            allow_no_match: true,
+            size: 1000,
+          })
+        ).transforms as Transform[];
+        excludeIdsSet = new Set(excludeTransformResponse.map((t) => t.id));
+      }
       resultTransformIds = resultTransformIds.filter((id) => !excludeIdsSet.has(id));
     }
 
@@ -381,13 +381,19 @@ export function transformHealthServiceProvider({
     async populateTransformsWithAssignedRules(
       transforms: Transform[]
     ): Promise<TransformWithAlertingRules[]> {
-      const newList = transforms.filter(isContinuousTransform) as TransformWithAlertingRules[];
+      const continuousTransforms = transforms.filter(
+        isContinuousTransform
+      ) as TransformWithAlertingRules[];
 
       if (!rulesClient) {
         throw new Error('Rules client is missing');
       }
 
-      const transformMap = keyBy(newList, 'id');
+      if (!continuousTransforms.length) {
+        return transforms as TransformWithAlertingRules[];
+      }
+
+      const transformMap = keyBy(continuousTransforms, 'id');
 
       const transformAlertingRules = await rulesClient.find<TransformHealthRuleParams>({
         options: {
@@ -398,12 +404,23 @@ export function transformHealthServiceProvider({
 
       for (const ruleInstance of transformAlertingRules.data) {
         // Retrieve result transform IDs
-        const resultTransformIds = await getResultsTransformIds(
-          ruleInstance.params.includeTransforms.includes(ALL_TRANSFORMS_SELECTION)
-            ? Object.keys(transformMap)
-            : ruleInstance.params.includeTransforms,
-          ruleInstance.params.excludeTransforms,
-          true
+        const { includeTransforms, excludeTransforms } = ruleInstance.params;
+
+        const resultTransformIds = new Set(
+          transforms
+            .filter(
+              (t) =>
+                includeTransforms.some((includedTransformId) =>
+                  new RegExp(includedTransformId.replace(/\*/g, '.*')).test(t.id)
+                ) &&
+                (Array.isArray(excludeTransforms) && excludeTransforms.length > 0
+                  ? excludeTransforms.every(
+                      (excludedTransformId) =>
+                        new RegExp(excludedTransformId.replace(/\*/g, '.*')).test(t.id) === false
+                    )
+                  : true)
+            )
+            .map((t) => t.id)
         );
 
         resultTransformIds.forEach((transformId) => {
@@ -419,7 +436,7 @@ export function transformHealthServiceProvider({
         });
       }
 
-      return newList;
+      return continuousTransforms;
     },
   };
 }
