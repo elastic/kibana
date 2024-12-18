@@ -4289,7 +4289,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-server-internal@link:packages/core/analytics/core-analytics-server-internal":
+"@kbn/core-analytics-server-internal@link:src/core/packages/analytics/server-internal":
   version "0.0.0"
   uid ""
 
