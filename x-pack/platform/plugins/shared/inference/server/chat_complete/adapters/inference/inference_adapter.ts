@@ -64,6 +64,13 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
       })
     ).pipe(
       switchMap((response) => {
+        if (response.status === 'error') {
+          return throwError(() =>
+            createInferenceInternalError('Error calling the inference API', {
+              rootError: response.serviceMessage,
+            })
+          );
+        }
         if (isReadable(response.data as any)) {
           return eventSourceStreamIntoObservable(response.data as Readable);
         }
