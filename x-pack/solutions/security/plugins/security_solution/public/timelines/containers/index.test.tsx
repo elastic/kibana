@@ -70,7 +70,7 @@ const props: UseTimelineEventsProps = {
   id: TimelineId.active,
   indexNames: ['filebeat-*'],
   fields: ['@timestamp', 'event.kind'],
-  filterQuery: '',
+  filterQuery: '*',
   startDate,
   limit: 25,
   runtimeMappings: {},

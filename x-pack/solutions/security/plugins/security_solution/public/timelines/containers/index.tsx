@@ -463,6 +463,31 @@ export const useTimelineEventsHandler = ({
     runtimeMappings,
   ]);
 
+  /*
+    cleanup timeline events response when the filters were removed completely
+    to avoid displaying previous query results
+  */
+  useEffect(() => {
+    if (isEmpty(filterQuery)) {
+      setTimelineResponse({
+        id,
+        inspect: {
+          dsl: [],
+          response: [],
+        },
+        refetch: refetchGrid,
+        totalCount: -1,
+        pageInfo: {
+          activePage: 0,
+          querySize: 0,
+        },
+        events: [],
+        loadNextBatch,
+        refreshedAt: 0,
+      });
+    }
+  }, [filterQuery, id, refetchGrid, loadNextBatch]);
+
   const timelineSearchHandler = useCallback(
     async (onNextHandler?: OnNextResponseHandler) => {
       if (
