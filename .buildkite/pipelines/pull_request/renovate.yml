@@ -1,5 +1,3 @@
-env:
-  IGNORE_SHIP_CI_STATS_ERROR: 'true'
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
@@ -8,6 +6,16 @@ steps:
       machineType: n2-standard-2
 
   - wait
+
+  - command: .buildkite/scripts/steps/ci_stats_ready.sh
+    label: Mark CI Stats as ready
+    agents:
+      machineType: n2-standard-2
+    timeout_in_minutes: 10
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
   - command: .buildkite/scripts/steps/renovate.sh
     label: 'Renovate validation'
