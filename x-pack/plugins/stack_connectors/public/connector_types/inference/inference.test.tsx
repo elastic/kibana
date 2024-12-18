@@ -48,6 +48,14 @@ describe('OpenAI action params validation', () => {
       subActionParams: { body: { messages: [{ role: 'user', content: 'What is Elastic?' }] } },
     },
     {
+      subAction: SUB_ACTION.UNIFIED_COMPLETION_STREAM,
+      subActionParams: { body: { messages: [{ role: 'user', content: 'What is Elastic?' }] } },
+    },
+    {
+      subAction: SUB_ACTION.UNIFIED_COMPLETION_ASYNC_ITERATOR,
+      subActionParams: { body: { messages: [{ role: 'user', content: 'What is Elastic?' }] } },
+    },
+    {
       subAction: SUB_ACTION.TEXT_EMBEDDING,
       subActionParams: { input: 'message test', inputType: 'foobar' },
     },
@@ -56,7 +64,7 @@ describe('OpenAI action params validation', () => {
       subActionParams: { input: 'message test' },
     },
     {
-      subAction: SUB_ACTION.UNIFIED_COMPLETION,
+      subAction: SUB_ACTION.COMPLETION,
       subActionParams: { input: 'message test' },
     },
   ])(
@@ -67,7 +75,7 @@ describe('OpenAI action params validation', () => {
         subActionParams,
       };
       expect(await actionTypeModel.validateParams(actionParams)).toEqual({
-        errors: { input: [], subAction: [], inputType: [], query: [] },
+        errors: { body: [], input: [], subAction: [], inputType: [], query: [] },
       });
     }
   );
@@ -79,7 +87,13 @@ describe('OpenAI action params validation', () => {
     };
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { input: ['Input is required.'], inputType: [], query: [], subAction: [] },
+      errors: {
+        body: ['Messages is required.'],
+        inputType: [],
+        query: [],
+        subAction: [],
+        input: [],
+      },
     });
   });
 
@@ -90,6 +104,7 @@ describe('OpenAI action params validation', () => {
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
+        body: [],
         input: [],
         inputType: [],
         query: [],
@@ -106,6 +121,7 @@ describe('OpenAI action params validation', () => {
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
+        body: [],
         input: [],
         inputType: [],
         query: [],
@@ -122,6 +138,7 @@ describe('OpenAI action params validation', () => {
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
+        body: [],
         input: ['Input is required.', 'Input does not have a valid Array format.'],
         inputType: [],
         query: ['Query is required.'],
@@ -138,6 +155,7 @@ describe('OpenAI action params validation', () => {
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
+        body: [],
         input: [],
         inputType: ['Input type is required.'],
         query: [],

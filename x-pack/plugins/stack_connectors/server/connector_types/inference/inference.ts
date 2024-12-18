@@ -19,6 +19,7 @@ import { filter, from, identity, map, mergeMap, Observable, tap } from 'rxjs';
 import OpenAI from 'openai';
 import { ChatCompletionChunk } from 'openai/resources';
 import {
+  ChatCompleteParamsSchema,
   RerankParamsSchema,
   SparseEmbeddingParamsSchema,
   TextEmbeddingParamsSchema,
@@ -37,6 +38,8 @@ import {
   UnifiedChatCompleteResponse,
   DashboardActionParams,
   DashboardActionResponse,
+  ChatCompleteParams,
+  ChatCompleteResponse,
 } from '../../../common/inference/types';
 import { SUB_ACTION } from '../../../common/inference/constants';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
@@ -102,6 +105,12 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       name: SUB_ACTION.TEXT_EMBEDDING,
       method: 'performApiTextEmbedding',
       schema: TextEmbeddingParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.COMPLETION,
+      method: 'performApiCompletion',
+      schema: ChatCompleteParamsSchema,
     });
   }
 
@@ -306,6 +315,23 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       this.logger.error(`error perform inference endpoint API: ${err}`);
       throw err;
     }
+  }
+
+  /**
+   * responsible for making a esClient inference method to perform chat completetion task endpoint and returning the service response data
+   * @param input the text on which you want to perform the inference task.
+   * @signal abort signal
+   */
+  public async performApiCompletion({
+    input,
+    signal,
+  }: ChatCompleteParams & { signal?: AbortSignal }): Promise<ChatCompleteResponse> {
+    const response = await this.performInferenceApi(
+      { inference_id: this.inferenceId, input, task_type: 'completion' },
+      false,
+      signal
+    );
+    return response.completion!;
   }
 
   /**

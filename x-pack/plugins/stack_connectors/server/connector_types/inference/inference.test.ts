@@ -9,7 +9,7 @@ import { InferenceConnector } from './inference';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { PassThrough, Transform } from 'stream';
+import { Readable, Transform } from 'stream';
 import {} from '@kbn/actions-plugin/server/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { InferenceInferenceResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -29,7 +29,7 @@ describe('InferenceConnector', () => {
     ],
   };
 
-  describe('performApiCompletion', () => {
+  describe('performApiUnifiedCompletion', () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
 
     beforeEach(() => {
@@ -60,9 +60,11 @@ describe('InferenceConnector', () => {
     });
 
     it('uses the completion task_type is supplied', async () => {
-      mockEsClient.transport.request.mockImplementationOnce(() =>
-        Promise.resolve(new PassThrough())
-      );
+      const stream = Readable.from([
+        `data: {"id":"chatcmpl-AbLKRuRMZCAcMMQdl96KMTUgAfZNg","choices":[{"delta":{"content":" you"},"index":0}],"model":"gpt-4o-2024-08-06","object":"chat.completion.chunk"}\n\n`,
+        `data: [DONE]\n\n`,
+      ]);
+      mockEsClient.transport.request.mockResolvedValue(stream);
 
       const response = await connector.performApiUnifiedCompletion({
         body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
@@ -70,13 +72,21 @@ describe('InferenceConnector', () => {
       expect(mockEsClient.transport.request).toBeCalledTimes(1);
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
         {
-          inference_id: 'test',
-          input: 'What is Elastic?',
-          task_type: 'completion',
+          body: {
+            messages: [
+              {
+                content: 'What is Elastic?',
+                role: 'user',
+              },
+            ],
+            n: undefined,
+          },
+          method: 'POST',
+          path: '_inference/completion/test/_unified',
         },
-        { asStream: false }
+        { asStream: true }
       );
-      expect(response).toEqual(mockResponse.completion);
+      expect(response.choices[0].message.content).toEqual(' you');
     });
 
     it('errors during API calls are properly handled', async () => {
@@ -229,6 +239,7 @@ describe('InferenceConnector', () => {
     };
 
     beforeEach(() => {
+      jest.clearAllMocks();
       // @ts-ignore
       mockStream();
     });
@@ -244,7 +255,7 @@ describe('InferenceConnector', () => {
         },
         provider: 'elasticsearch',
         taskType: 'completion',
-        inferenceId: '',
+        inferenceId: 'test',
         taskTypeConfig: {},
       },
       secrets: { providerSecrets: {} },
@@ -256,12 +267,20 @@ describe('InferenceConnector', () => {
       await connector.performApiUnifiedCompletionStream({
         body: { messages: [{ content: 'Hello world', role: 'user' }] },
       });
-      expect(mockEsClient.inference.inference).toBeCalledTimes(1);
-      expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
+      expect(mockEsClient.transport.request).toBeCalledTimes(1);
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
         {
-          inference_id: '',
-          input: 'Hello world',
-          task_type: 'completion',
+          body: {
+            messages: [
+              {
+                content: 'Hello world',
+                role: 'user',
+              },
+            ],
+            n: undefined,
+          },
+          method: 'POST',
+          path: '_inference/completion/test/_unified',
         },
         { asStream: true }
       );
@@ -274,19 +293,19 @@ describe('InferenceConnector', () => {
         signal,
       });
 
-      expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
         {
-          inference_id: '',
-          input: 'Hello world',
-          task_type: 'completion',
+          body: { messages: [{ content: 'Hello world', role: 'user' }], n: undefined },
+          method: 'POST',
+          path: '_inference/completion/test/_unified',
         },
-        { asStream: true, signal }
+        { asStream: true }
       );
     });
 
     it('errors during API calls are properly handled', async () => {
       // @ts-ignore
-      mockEsClient.inference.inference = mockError;
+      mockEsClient.transport.request = mockError;
 
       await expect(
         connector.performApiUnifiedCompletionStream({
@@ -296,10 +315,15 @@ describe('InferenceConnector', () => {
     });
 
     it('responds with a readable stream', async () => {
-      const response = await connector.performApiUnifiedCompletion({
+      const stream = Readable.from([
+        `data: {"id":"chatcmpl-AbLKRuRMZCAcMMQdl96KMTUgAfZNg","choices":[{"delta":{"content":" you"},"index":0}],"model":"gpt-4o-2024-08-06","object":"chat.completion.chunk"}\n\n`,
+        `data: [DONE]\n\n`,
+      ]);
+      mockEsClient.transport.request.mockResolvedValue(stream);
+      const response = await connector.performApiUnifiedCompletionStream({
         body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
       });
-      expect(response).toEqual(true);
+      expect(response instanceof Readable).toEqual(true);
     });
   });
 });
