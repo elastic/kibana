@@ -8,8 +8,7 @@
 import React from 'react';
 import { mount, render } from 'enzyme';
 import { FieldValueSelection } from './field_value_selection';
-import { EuiSelectableList } from '@elastic/eui';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { EuiSelectableList, EuiThemeProvider } from '@elastic/eui';
 
 const values = [
   { label: 'elastic co frontend', count: 1 },
