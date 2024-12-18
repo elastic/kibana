@@ -235,6 +235,7 @@
     "@kbn/index-adapter",
     "@kbn/core-http-server-utils",
     "@kbn/core-chrome-browser-mocks",
-    "@kbn/ai-assistant-icon"
+    "@kbn/ai-assistant-icon",
+    "@kbn/llm-tasks-plugin"
   ]
 }
