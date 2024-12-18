@@ -170,6 +170,7 @@ describe('bedrockClaudeAdapter', () => {
             ],
           },
           {
+            name: 'my_function',
             role: MessageRole.Tool,
             toolCallId: '0',
             response: {
@@ -323,6 +324,25 @@ describe('bedrockClaudeAdapter', () => {
       expect(toolChoice).toBeUndefined();
       expect(tools).toEqual([]);
       expect(system).toEqual(addNoToolUsageDirective('some system instruction'));
+    });
+
+    it('propagates the abort signal when provided', () => {
+      const abortController = new AbortController();
+
+      bedrockClaudeAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        abortSignal: abortController.signal,
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'invokeStream',
+        subActionParams: expect.objectContaining({
+          signal: abortController.signal,
+        }),
+      });
     });
   });
 });

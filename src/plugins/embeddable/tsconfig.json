@@ -7,10 +7,8 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/inspector-plugin",
-    "@kbn/saved-objects-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/i18n-react",
     "@kbn/utility-types",
     "@kbn/es-query",
     "@kbn/i18n",

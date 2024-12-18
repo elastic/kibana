@@ -16,7 +16,12 @@ import {
   SecurityException,
 } from '../../lib/streams/errors';
 import { createServerRoute } from '../create_server_route';
-import { syncStream, readStream, deleteStreamObjects } from '../../lib/streams/stream_crud';
+import {
+  syncStream,
+  readStream,
+  deleteStreamObjects,
+  deleteUnmanagedStreamObjects,
+} from '../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
 import { getParentId } from '../../lib/streams/helpers/hierarchy';
 
@@ -47,14 +52,6 @@ export const deleteStreamRoute = createServerRoute({
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
 
-      const parentId = getParentId(params.path.id);
-      if (!parentId) {
-        throw new MalformedStreamId('Cannot delete root stream');
-      }
-
-      // need to update parent first to cut off documents streaming down
-      await updateParentStream(scopedClusterClient, params.path.id, parentId, logger);
-
       await deleteStream(scopedClusterClient, params.path.id, logger);
 
       return { acknowledged: true };
@@ -83,6 +80,18 @@ export async function deleteStream(
 ) {
   try {
     const { definition } = await readStream({ scopedClusterClient, id });
+    if (!definition.managed) {
+      await deleteUnmanagedStreamObjects({ scopedClusterClient, id, logger });
+      return;
+    }
+
+    const parentId = getParentId(id);
+    if (!parentId) {
+      throw new MalformedStreamId('Cannot delete root stream');
+    }
+
+    // need to update parent first to cut off documents streaming down
+    await updateParentStream(scopedClusterClient, id, parentId, logger);
     for (const child of definition.children) {
       await deleteStream(scopedClusterClient, child.id, logger);
     }
