@@ -1011,7 +1011,7 @@
     "@kbn/vis-default-editor-plugin": "link:src/plugins/vis_default_editor",
     "@kbn/vis-type-gauge-plugin": "link:src/plugins/vis_types/gauge",
     "@kbn/vis-type-heatmap-plugin": "link:src/plugins/vis_types/heatmap",
-    "@kbn/vis-type-markdown-plugin": "link:src/plugins/vis_type_markdown",
+    "@kbn/vis-type-markdown-plugin": "link:src/platform/plugins/private/vis_type_markdown",
     "@kbn/vis-type-metric-plugin": "link:src/plugins/vis_types/metric",
     "@kbn/vis-type-pie-plugin": "link:src/plugins/vis_types/pie",
     "@kbn/vis-type-table-plugin": "link:src/plugins/vis_types/table",

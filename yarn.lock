@@ -7893,7 +7893,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-markdown-plugin@link:src/plugins/vis_type_markdown":
+"@kbn/vis-type-markdown-plugin@link:src/platform/plugins/private/vis_type_markdown":
   version "0.0.0"
   uid ""
 
