@@ -395,7 +395,6 @@ packages/kbn-monaco @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
 packages/kbn-object-versioning-utils @elastic/appex-sharedux
 packages/kbn-openapi-bundler @elastic/security-detection-rule-management
-packages/kbn-openapi-common @elastic/security-detection-rule-management
 packages/kbn-openapi-generator @elastic/security-detection-rule-management
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
@@ -437,7 +436,6 @@ packages/kbn-rison @elastic/kibana-operations
 packages/kbn-router-to-openapispec @elastic/kibana-core
 packages/kbn-router-utils @elastic/obs-ux-logs-team
 packages/kbn-rrule @elastic/response-ops
-packages/kbn-rule-data-utils @elastic/security-detections-response @elastic/response-ops @elastic/obs-ux-management-team
 packages/kbn-safer-lodash-set @elastic/kibana-security
 packages/kbn-saved-objects-settings @elastic/appex-sharedux
 packages/kbn-saved-search-component @elastic/obs-ux-logs-team
@@ -499,7 +497,6 @@ packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 packages/kbn-xstate-utils @elastic/obs-ux-logs-team
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 packages/kbn-zod @elastic/kibana-core
-packages/kbn-zod-helpers @elastic/security-detection-rule-management
 packages/presentation/presentation_containers @elastic/kibana-presentation
 packages/presentation/presentation_publishing @elastic/kibana-presentation
 packages/react/kibana_context/common @elastic/appex-sharedux
@@ -595,7 +592,9 @@ src/platform/packages/shared/kbn-management/settings/components/field_row @elast
 src/platform/packages/shared/kbn-management/settings/field_definition @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/types @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/utilities @elastic/kibana-management
+src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
+src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detections-response @elastic/response-ops @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
 src/platform/packages/shared/kbn-securitysolution-es-utils @elastic/security-detection-engine
 src/platform/packages/shared/kbn-securitysolution-io-ts-types @elastic/security-detection-engine
@@ -609,6 +608,7 @@ src/platform/packages/shared/kbn-sse-utils-client @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-sse-utils-server @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
+src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-management
 src/platform/packages/shared/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/platform/plugins/shared/console @elastic/kibana-management
@@ -938,7 +938,7 @@ x-pack/plugins/stack_connectors @elastic/response-ops
 x-pack/plugins/task_manager @elastic/response-ops
 x-pack/plugins/telemetry_collection_xpack @elastic/kibana-core
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
-x-pack/plugins/upgrade_assistant @elastic/kibana-management
+x-pack/plugins/upgrade_assistant @elastic/kibana-core
 x-pack/solutions/observability/packages/alert_details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting_test_data @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/get_padded_alert_time_range_util @elastic/obs-ux-management-team
@@ -2638,7 +2638,14 @@ oas_docs/kibana.info.yaml                     @elastic/platform-docs
 
 # Plugin manifests
 /src/plugins/**/kibana.jsonc @elastic/kibana-core
+/src/platform/plugins/shared/**/kibana.jsonc @elastic/kibana-core
+/src/platform/plugins/private/**/kibana.jsonc @elastic/kibana-core
 /x-pack/plugins/**/kibana.jsonc @elastic/kibana-core
+/x-pack/platform/plugins/shared/**/kibana.jsonc @elastic/kibana-core
+/x-pack/platform/plugins/private/**/kibana.jsonc @elastic/kibana-core
+/x-pack//solutions/observability/plugins/**/kibana.jsonc @elastic/kibana-core
+/x-pack//solutions/search/plugins/**/kibana.jsonc @elastic/kibana-core
+/x-pack//solutions/security/plugins/**/kibana.jsonc @elastic/kibana-core
 
 # Temporary Encrypted Saved Objects (ESO) guarding
 # This additional code-ownership is meant to be a temporary precaution to notify the Kibana platform security team
