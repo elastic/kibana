@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 
 import { EuiText, EuiBasicTable, EuiSpacer } from '@elastic/eui';
 
@@ -20,7 +20,7 @@ interface Props {
   title: string;
 }
 
-const StyledText = euiStyled(EuiText)`
+const StyledText = styled(EuiText)`
   width: 100%;
 `;
 

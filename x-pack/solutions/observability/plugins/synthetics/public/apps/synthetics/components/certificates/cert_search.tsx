@@ -7,13 +7,9 @@
 
 import React, { ChangeEvent, useState } from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
-import styled from 'styled-components';
 import useDebounce from 'react-use/lib/useDebounce';
+import { css } from '@emotion/react';
 import * as labels from './translations';
-
-const WrapFieldSearch = styled('div')`
-  max-width: 700px;
-`;
 
 interface Props {
   setSearch: (val: string) => void;
@@ -35,7 +31,11 @@ export const CertificateSearch: React.FC<Props> = ({ setSearch }) => {
   );
 
   return (
-    <WrapFieldSearch>
+    <div
+      css={css`
+        max-width: 700px;
+      `}
+    >
       <EuiFieldSearch
         data-test-subj="uptimeCertSearch"
         placeholder={labels.SEARCH_CERTS}
@@ -44,6 +44,6 @@ export const CertificateSearch: React.FC<Props> = ({ setSearch }) => {
         aria-label={labels.SEARCH_CERTS}
         fullWidth={true}
       />
-    </WrapFieldSearch>
+    </div>
   );
 };

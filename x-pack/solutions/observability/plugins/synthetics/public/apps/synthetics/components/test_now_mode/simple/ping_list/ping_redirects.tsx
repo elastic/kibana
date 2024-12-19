@@ -7,17 +7,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { EuiListGroup, EuiListGroupItemProps, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { Ping } from '../../../../../../../common/runtime_types';
-
-const ListGroup = styled(EuiListGroup)`
-  &&& {
-    a {
-      padding-left: 0;
-    }
-  }
-`;
 
 interface Props {
   monitorStatus: Ping | null;
@@ -92,7 +84,17 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
         </EuiText>
       }
       <EuiSpacer size="s" />
-      <ListGroup gutterSize={'none'} listItems={listOfRedirects} />
+      <EuiListGroup
+        css={css`
+          &&& {
+            a {
+              padding-left: 0;
+            }
+          }
+        `}
+        gutterSize={'none'}
+        listItems={listOfRedirects}
+      />
     </Panel>
   ) : null;
 };

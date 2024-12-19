@@ -19,8 +19,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { css } from '@emotion/react';
 import { useBreadcrumbs, useEnablement, useLocations } from '../../hooks';
 import { usePrivateLocationsAPI } from '../settings/private_locations/hooks/use_locations_api';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
@@ -89,7 +89,16 @@ export const GettingStartedPage = () => {
   }, [setScreenContext, hasNoLocations, locations]);
 
   return !loading ? (
-    <Wrapper>
+    <div
+      css={css`
+        &&& {
+          .euiEmptyPrompt__content {
+            max-width: 40em;
+            padding: 0;
+          }
+        }
+      `}
+    >
       {hasNoLocations ? (
         <GettingStartedOnPrem />
       ) : (
@@ -120,7 +129,7 @@ export const GettingStartedPage = () => {
           footer={<GettingStartedLink />}
         />
       )}
-    </Wrapper>
+    </div>
   ) : (
     <LoadingState />
   );
@@ -204,15 +213,6 @@ export const GettingStartedLink = () => (
     </EuiLink>
   </>
 );
-
-const Wrapper = styled.div`
-  &&& {
-    .euiEmptyPrompt__content {
-      max-width: 40em;
-      padding: 0;
-    }
-  }
-`;
 
 const FOR_MORE_INFO_LABEL = i18n.translate('xpack.synthetics.gettingStarted.forMoreInfo', {
   defaultMessage: 'For more information, read our',

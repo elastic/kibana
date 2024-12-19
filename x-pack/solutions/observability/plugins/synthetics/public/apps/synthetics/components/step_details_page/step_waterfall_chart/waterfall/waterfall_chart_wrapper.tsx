@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiHealth } from '@elastic/eui';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { JourneyStep, NetworkEvent } from '../../../../../../../common/runtime_types';
 import { useDateFormat } from '../../../../../../hooks/use_date_format';
 import { getSeriesAndDomain, getSidebarItems } from '../../common/network_data/data_formatting';
@@ -107,48 +108,50 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
   );
 
   return (
-    <WaterfallProvider
-      activeStep={activeStep}
-      markerItems={markerItems}
-      totalNetworkRequests={total}
-      fetchedNetworkRequests={networkData.length}
-      highlightedNetworkRequests={totalHighlightedRequests}
-      data={series}
-      onElementClick={useCallback(onBarClick, [onBarClick])}
-      onProjectionClick={useCallback(onProjectionClick, [onProjectionClick])}
-      onSidebarClick={onSidebarClick}
-      showOnlyHighlightedNetworkRequests={onlyHighlighted ?? false}
-      showCustomMarks={showCustomMarks ?? false}
-      sidebarItems={sidebarItems}
-      metadata={metadata}
-      activeFilters={activeFilters}
-      setActiveFilters={setActiveFilters}
-      setOnlyHighlighted={setOnlyHighlighted}
-      setShowCustomMarks={setShowCustomMarks}
-      query={query}
-      setQuery={setQuery}
-      renderTooltipItem={useCallback((tooltipProps: any) => {
-        return <EuiHealth color={String(tooltipProps?.colour)}>{tooltipProps?.value}</EuiHealth>;
-      }, [])}
-    >
-      <WaterfallChart
-        tickFormat={useCallback((d: number) => `${Number(d).toFixed(0)} ms`, [])}
-        domain={domain}
-        barStyleAccessor={useCallback(({ datum }: any) => {
-          if (!datum.config?.isHighlighted) {
-            return {
-              rect: {
-                fill: datum.config?.colour,
-                opacity: '0.1',
-              },
-            };
-          }
-          return datum.config.colour;
+    <EuiThemeProvider>
+      <WaterfallProvider
+        activeStep={activeStep}
+        markerItems={markerItems}
+        totalNetworkRequests={total}
+        fetchedNetworkRequests={networkData.length}
+        highlightedNetworkRequests={totalHighlightedRequests}
+        data={series}
+        onElementClick={useCallback(onBarClick, [onBarClick])}
+        onProjectionClick={useCallback(onProjectionClick, [onProjectionClick])}
+        onSidebarClick={onSidebarClick}
+        showOnlyHighlightedNetworkRequests={onlyHighlighted ?? false}
+        showCustomMarks={showCustomMarks ?? false}
+        sidebarItems={sidebarItems}
+        metadata={metadata}
+        activeFilters={activeFilters}
+        setActiveFilters={setActiveFilters}
+        setOnlyHighlighted={setOnlyHighlighted}
+        setShowCustomMarks={setShowCustomMarks}
+        query={query}
+        setQuery={setQuery}
+        renderTooltipItem={useCallback((tooltipProps: any) => {
+          return <EuiHealth color={String(tooltipProps?.colour)}>{tooltipProps?.value}</EuiHealth>;
         }, [])}
-        renderSidebarItem={renderSidebarItem}
-        renderLegendItem={renderLegendItem}
-        renderFlyout={renderFlyout}
-      />
-    </WaterfallProvider>
+      >
+        <WaterfallChart
+          tickFormat={useCallback((d: number) => `${Number(d).toFixed(0)} ms`, [])}
+          domain={domain}
+          barStyleAccessor={useCallback(({ datum }: any) => {
+            if (!datum.config?.isHighlighted) {
+              return {
+                rect: {
+                  fill: datum.config?.colour,
+                  opacity: '0.1',
+                },
+              };
+            }
+            return datum.config.colour;
+          }, [])}
+          renderSidebarItem={renderSidebarItem}
+          renderLegendItem={renderLegendItem}
+          renderFlyout={renderFlyout}
+        />
+      </WaterfallProvider>
+    </EuiThemeProvider>
   );
 };

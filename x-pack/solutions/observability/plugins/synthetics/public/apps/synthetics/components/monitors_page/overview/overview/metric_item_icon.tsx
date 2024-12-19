@@ -14,31 +14,23 @@ import {
   EuiPopoverTitle,
   EuiPopoverFooter,
   EuiButton,
-  useEuiShadow,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useRef } from 'react';
+import { css } from '@emotion/react';
+
 import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
 import { useErrorDetailsLink } from '../../../common/links/error_details_link';
 import { OverviewPing, OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { isTestRunning, manualTestRunSelector } from '../../../../state/manual_test_runs';
 import { useDateFormat } from '../../../../../../hooks/use_date_format';
-
-const Container = styled.div`
-  display: inline-block;
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  z-index: 1;
-`;
 
 export const MetricItemIcon = ({
   monitor,
@@ -71,18 +63,28 @@ export const MetricItemIcon = ({
     stateId: ping?.state?.id!,
     locationId: monitor.locationId,
   });
-  const euiShadow = useEuiShadow('s');
+  // const euiShadow = useEuiShadow('s');
+
+  const theme = useEuiTheme();
 
   const formatter = useDateFormat();
   const testTime = formatter(timestamp);
 
   if (inProgress) {
     return (
-      <Container>
+      <div
+        css={css`
+          display: inline-block;
+          position: absolute;
+          right: 10px;
+          top: 10px;
+          z-index: 1;
+        `}
+      >
         <EuiToolTip position="top" content={TEST_IN_PROGRESS}>
           <EuiLoadingSpinner />
         </EuiToolTip>
-      </Container>
+      </div>
     );
   }
 
@@ -92,10 +94,34 @@ export const MetricItemIcon = ({
 
   if (status === 'down') {
     return (
-      <Container>
+      <div
+        css={css`
+          display: inline-block;
+          position: absolute;
+          right: 10px;
+          top: 10px;
+          z-index: 1;
+        `}
+      >
         <EuiPopover
           button={
-            <StyledIcon
+            <div
+              // ${({ boxShadow }) => boxShadow//}
+              css={css`
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+                width: 32px;
+                height: 32px;
+                background: ${theme.euiTheme.colors.lightestShade};
+                border: 1px solid ${theme.euiTheme.colors.lightShade};
+                border-radius: 16px;
+                flex: none;
+                order: 0;
+                flex-grow: 0;
+              `}
               onMouseEnter={() => {
                 // show popover with delay
                 if (timer.current) {
@@ -112,7 +138,6 @@ export const MetricItemIcon = ({
                   clearTimeout(timer.current);
                 }
               }}
-              boxShadow={euiShadow}
               onClick={() => {
                 if (configIdByLocation === isPopoverOpen) {
                   dispatch(toggleErrorPopoverOpen(null));
@@ -128,7 +153,7 @@ export const MetricItemIcon = ({
                 size="m"
                 aria-label={ERROR_DETAILS}
               />
-            </StyledIcon>
+            </div>
           }
           isOpen={configIdByLocation === isPopoverOpen}
           closePopover={closePopover}
@@ -178,12 +203,20 @@ export const MetricItemIcon = ({
             </EuiButton>
           </EuiPopoverFooter>
         </EuiPopover>
-      </Container>
+      </div>
     );
   } else {
     if (ping?.url) {
       return (
-        <Container>
+        <div
+          css={css`
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            z-index: 1;
+          `}
+        >
           <EuiButtonIcon
             title={ping.url.full}
             color="text"
@@ -195,7 +228,7 @@ export const MetricItemIcon = ({
               defaultMessage: 'Monitor url',
             })}
           />
-        </Container>
+        </div>
       );
     }
     return null;
@@ -209,22 +242,3 @@ const ERROR_DETAILS = i18n.translate('xpack.synthetics.errorDetails.label', {
 const TEST_IN_PROGRESS = i18n.translate('xpack.synthetics.inProgress.label', {
   defaultMessage: 'Manual test run is in progress.',
 });
-
-const StyledIcon = euiStyled.div<{ boxShadow: string }>`
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  width: 32px;
-  height: 32px;
-  background: ${({ theme }) =>
-    theme.darkMode ? theme.eui.euiColorDarkestShade : theme.eui.euiColorLightestShade};
-  border: 1px solid ${({ theme }) =>
-    theme.darkMode ? theme.eui.euiColorDarkShade : theme.eui.euiColorLightShade};
-  ${({ boxShadow }) => boxShadow}
-  border-radius: 16px;
-  flex: none;
-  order: 0;
-  flex-grow: 0;
-`;

@@ -15,6 +15,9 @@ interface WaterfallChartOuterContainerProps {
 }
 
 const StyledScrollDiv = euiStyled.div`
+  height: auto;
+  overflow: hidden;
+  z-index: 50;
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
     width: ${({ theme }) => theme.eui.euiScrollBar};

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useEsSearch, useTheme } from '@kbn/observability-shared-plugin/public';
+import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { useLocations } from './use_locations';
 import { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../common/runtime_types';
 import {
@@ -25,7 +26,7 @@ export function useStatusByLocation({
   configId: string;
   monitorLocations?: EncryptedSyntheticsSavedMonitor['locations'];
 }) {
-  const theme = useTheme();
+  const theme = useEuiTheme().euiTheme;
 
   const { lastRefresh } = useSyntheticsRefreshContext();
 
@@ -76,9 +77,9 @@ export function useStatusByLocation({
     const getColor = (status: string) => {
       switch (status) {
         case 'up':
-          return theme.eui.euiColorVis0;
+          return theme.colors.vis.euiColorVis0;
         case 'down':
-          return theme.eui.euiColorVis9;
+          return theme.colors.vis.euiColorVis9;
         default:
           return 'subdued';
       }
@@ -112,7 +113,7 @@ export function useStatusByLocation({
     data?.aggregations?.locations.buckets,
     loading,
     monitorLocations,
-    theme.eui.euiColorVis0,
-    theme.eui.euiColorVis9,
+    theme.colors.vis.euiColorVis0,
+    theme.colors.vis.euiColorVis9,
   ]);
 }

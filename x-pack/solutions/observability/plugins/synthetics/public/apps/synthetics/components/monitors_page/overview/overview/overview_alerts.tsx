@@ -6,9 +6,15 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
 import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
@@ -62,7 +68,7 @@ export const OverviewAlerts = () => {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
-  const theme = useTheme();
+  const theme = useEuiTheme().euiTheme;
   const filters = useMonitorFilters({ forAlerts: true });
 
   const { locations } = useGetUrlParams();
@@ -99,7 +105,7 @@ export const OverviewAlerts = () => {
                   { field: 'kibana.alert.status', values: ['active', 'recovered'] },
                   ...filters,
                 ],
-                color: theme.eui.euiColorVis1,
+                color: theme.colors.vis.euiColorVis1,
               },
             ]}
           />
@@ -129,7 +135,7 @@ export const OverviewAlerts = () => {
                   { field: 'kibana.alert.status', values: ['active', 'recovered'] },
                   ...filters,
                 ],
-                color: theme.eui.euiColorVis1_behindText,
+                color: theme.colors.vis.euiColorVis1,
               },
             ]}
           />

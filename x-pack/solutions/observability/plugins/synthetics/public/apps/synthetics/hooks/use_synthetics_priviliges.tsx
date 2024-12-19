@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { selectOverviewStatus } from '../state/overview_status';
 import { useCanReadSyntheticsIndex } from '../../../hooks/use_capabilities';
@@ -91,9 +90,7 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
     }
     footer={
       <EuiMarkdownFormat
-        css={css`
-          text-align: initial;
-        `}
+        style={{ textAlign: 'initial' }}
         children={
           i18n.translate(
             'xpack.synthetics.noFindingsStates.unprivileged.unprivilegedFooterMarkdown',

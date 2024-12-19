@@ -41,7 +41,8 @@
       "bfetch",
       "uiActions",
       "unifiedSearch",
-      "presentationUtil"
+      "presentationUtil",
+      "charts"
     ],
     "optionalPlugins": [
       "cloud",

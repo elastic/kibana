@@ -8,7 +8,7 @@
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
+import { useEuiTheme } from '@elastic/eui';
 import { MEDIAN_DURATION_LABEL } from './duration_panel';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 import { ClientPluginsStart } from '../../../../../plugin';
@@ -26,7 +26,7 @@ export const DurationSparklines = (props: DurationSparklinesProps) => {
     },
   } = useKibana<ClientPluginsStart>();
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
-  const theme = useTheme();
+  const theme = useEuiTheme().euiTheme;
 
   if (!queryIdFilter) {
     return null;
@@ -49,7 +49,7 @@ export const DurationSparklines = (props: DurationSparklinesProps) => {
             selectedMetricField: 'monitor.duration.us',
             reportDefinitions: queryIdFilter,
             filters: locationFilter,
-            color: theme.eui.euiColorVis1,
+            color: theme.colors.vis.euiColorVis1,
           },
         ]}
       />

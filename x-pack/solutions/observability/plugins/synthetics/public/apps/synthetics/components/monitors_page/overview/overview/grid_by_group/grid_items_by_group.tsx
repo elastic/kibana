@@ -9,8 +9,8 @@ import { EuiFocusTrap, EuiOverlayMask, EuiPanel, EuiSpacer, EuiLoadingSpinner } 
 import React, { useRef, useState, FC, PropsWithChildren } from 'react';
 import { useSelector } from 'react-redux';
 import { get, invert, orderBy } from 'lodash';
-import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { OverviewLoader } from '../overview_loader';
 import {
   getSyntheticsFilterDisplayValues,
@@ -177,44 +177,48 @@ const WrappedPanel: FC<PropsWithChildren<{ isFullScreen: boolean }>> = ({
 
   if (!isFullScreen) {
     return (
-      <StyledPanel hasShadow={false} hasBorder>
+      <EuiPanel
+        css={css`
+          &&& {
+            .fullScreenButton {
+              visibility: hidden;
+            }
+            :hover {
+              .fullScreenButton {
+                visibility: visible;
+              }
+            }
+          }
+        `}
+        hasShadow={false}
+        hasBorder
+      >
         {children}
-      </StyledPanel>
+      </EuiPanel>
     );
   }
   return (
     <EuiOverlayMask>
       <EuiFocusTrap clickOutsideDisables={true}>
         <div ref={ref}>
-          <FullScreenPanel hasShadow={false} hasBorder>
+          <EuiPanel
+            css={css`
+              &&& {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                overflow: auto;
+              }
+            `}
+            hasShadow={false}
+            hasBorder
+          >
             {children}
-          </FullScreenPanel>
+          </EuiPanel>
         </div>
       </EuiFocusTrap>
     </EuiOverlayMask>
   );
 };
-
-const StyledPanel = styled(EuiPanel)`
-  &&& {
-    .fullScreenButton {
-      visibility: hidden;
-    }
-    :hover {
-      .fullScreenButton {
-        visibility: visible;
-      }
-    }
-  }
-`;
-
-const FullScreenPanel = styled(EuiPanel)`
-  &&& {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-  }
-`;

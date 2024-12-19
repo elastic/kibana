@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { Provider as ReduxProvider } from 'react-redux';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Subject } from 'rxjs';
@@ -41,26 +40,25 @@ export const SyntheticsSharedContext: React.FC<
         embeddable: startPlugins.embeddable,
         slo: startPlugins.slo,
         serverless: startPlugins.serverless,
+        charts: startPlugins.charts,
       }}
     >
-      <EuiThemeProvider darkMode={darkMode}>
-        <ReduxProvider store={reduxStore ?? store}>
-          <SyntheticsRefreshContextProvider reload$={reload$}>
-            <SyntheticsDataViewContextProvider dataViews={startPlugins.dataViews}>
-              <RedirectAppLinks
-                coreStart={{
-                  application: coreStart.application,
-                }}
-                style={{
-                  height: '100%',
-                }}
-              >
-                {children}
-              </RedirectAppLinks>
-            </SyntheticsDataViewContextProvider>
-          </SyntheticsRefreshContextProvider>
-        </ReduxProvider>
-      </EuiThemeProvider>
+      <ReduxProvider store={reduxStore ?? store}>
+        <SyntheticsRefreshContextProvider reload$={reload$}>
+          <SyntheticsDataViewContextProvider dataViews={startPlugins.dataViews}>
+            <RedirectAppLinks
+              coreStart={{
+                application: coreStart.application,
+              }}
+              style={{
+                height: '100%',
+              }}
+            >
+              {children}
+            </RedirectAppLinks>
+          </SyntheticsDataViewContextProvider>
+        </SyntheticsRefreshContextProvider>
+      </ReduxProvider>
     </KibanaContextProvider>
   );
 };

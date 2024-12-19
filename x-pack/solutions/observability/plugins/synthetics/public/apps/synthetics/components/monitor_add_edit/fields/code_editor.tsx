@@ -6,19 +6,13 @@
  */
 import React from 'react';
 
-import styled from 'styled-components';
 import useThrottle from 'react-use/lib/useThrottle';
 
 import { EuiPanel } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { CodeEditor as MonacoCodeEditor } from '@kbn/code-editor';
-
+import { css } from '@emotion/react';
 import { MonacoEditorLangId } from '../types';
 import { useDimensions } from '../../../hooks';
-
-const CodeEditorContainer = styled(EuiPanel)`
-  padding: 0;
-`;
 
 export interface CodeEditorProps {
   ariaLabel: string;
@@ -46,16 +40,24 @@ export const CodeEditor = ({
 
   return (
     <>
-      <CodeEditorContainer
+      <EuiPanel
         panelRef={containerRef as React.Ref<HTMLDivElement>}
         borderRadius="none"
         hasShadow={false}
         hasBorder={true}
+        css={css`
+          padding: 0;
+        `}
       >
-        <MonacoCodeContainer
+        <div
           id={`${id}-editor`}
           aria-label={ariaLabel}
           data-test-subj="codeEditorContainer"
+          css={css`
+            & > .kibanaCodeEditor {
+              z-index: 0;
+            }
+          `}
         >
           <MonacoCodeEditor
             languageId={languageId}
@@ -71,17 +73,11 @@ export const CodeEditor = ({
             allowFullScreen={true}
             placeholder={placeholder}
           />
-        </MonacoCodeContainer>
-      </CodeEditorContainer>
+        </div>
+      </EuiPanel>
     </>
   );
 };
-
-const MonacoCodeContainer = euiStyled.div`
-  & > .kibanaCodeEditor {
-    z-index: 0;
-  }
-`;
 
 export const JSONEditor = (props: any) => {
   return <CodeEditor languageId={MonacoEditorLangId.JSON} {...props} />;

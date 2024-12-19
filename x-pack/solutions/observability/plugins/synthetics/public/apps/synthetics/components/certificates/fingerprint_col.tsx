@@ -7,13 +7,9 @@
 
 import React from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiCopy, EuiToolTip } from '@elastic/eui';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { Cert } from '../../../../../common/runtime_types';
 import { COPY_FINGERPRINT } from './translations';
-
-const StyledSpan = styled.span`
-  margin-right: 8px;
-`;
 
 interface Props {
   cert: Cert;
@@ -22,7 +18,13 @@ interface Props {
 export const FingerprintCol: React.FC<Props> = ({ cert }) => {
   const ShaComponent = ({ text, val }: { text: string; val: string }) => {
     return (
-      <StyledSpan data-test-subj={val} className="eui-textNoWrap">
+      <span
+        css={css`
+          margin-right: 8px;
+        `}
+        data-test-subj={val}
+        className="eui-textNoWrap"
+      >
         <EuiToolTip content={val}>
           <EuiButtonEmpty data-test-subj="syntheticsShaComponentButton" flush="right">
             {text}{' '}
@@ -39,7 +41,7 @@ export const FingerprintCol: React.FC<Props> = ({ cert }) => {
             />
           )}
         </EuiCopy>
-      </StyledSpan>
+      </span>
     );
   };
   return (

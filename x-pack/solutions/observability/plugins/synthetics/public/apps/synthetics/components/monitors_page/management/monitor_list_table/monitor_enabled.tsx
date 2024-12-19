@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiSwitch, EuiSwitchEvent, EuiLoadingSpinner } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { ConfigKey, EncryptedSyntheticsMonitor } from '../../../../../../../common/runtime_types';
 import {
@@ -74,7 +74,7 @@ export const MonitorEnabled = ({
           canEditSynthetics={canEditSynthetics}
           canUsePublicLocations={canUsePublicLocations}
         >
-          <SwitchWithCursor
+          <EuiSwitch
             compressed={true}
             checked={enabled}
             disabled={
@@ -92,11 +92,3 @@ export const MonitorEnabled = ({
     </>
   );
 };
-
-// data-* is the DOM compatible prop format
-const SwitchWithCursor = euiStyled(EuiSwitch)<{ 'data-is-switchable': boolean }>`
-  & > button {
-    cursor: ${({ 'data-is-switchable': isSwitchable }) =>
-      isSwitchable ? undefined : 'not-allowed'};
-  }
-`;

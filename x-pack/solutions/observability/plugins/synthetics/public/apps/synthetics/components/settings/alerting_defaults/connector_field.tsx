@@ -8,8 +8,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { useGetUrlParams, useUrlParams } from '../../../hooks';
 import { useAlertingDefaults } from './hooks/use_alerting_defaults';
 import { alertFormI18n } from './translations';
@@ -59,7 +59,12 @@ export function DefaultConnectorField({
   };
 
   return (
-    <RowWrapper
+    <EuiFormRow
+      css={css`
+        &&& > .euiFormRow__labelWrapper {
+          align-items: baseline;
+        }
+      `}
       describedByIds={['defaultConnectors']}
       error={error}
       fullWidth
@@ -98,15 +103,9 @@ export function DefaultConnectorField({
         }}
         onSearchChange={onSearchChange}
       />
-    </RowWrapper>
+    </EuiFormRow>
   );
 }
-
-const RowWrapper = styled(EuiFormRow)`
-  &&& > .euiFormRow__labelWrapper {
-    align-items: baseline;
-  }
-`;
 
 export const TAGS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.paramForm.tagsLabel', {
   defaultMessage: 'Tags',

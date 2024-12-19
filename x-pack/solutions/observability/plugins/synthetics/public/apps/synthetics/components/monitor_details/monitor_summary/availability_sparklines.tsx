@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
+import { useEuiTheme } from '@elastic/eui';
 import { AVAILABILITY_LABEL } from './availability_panel';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
@@ -27,7 +27,7 @@ export const AvailabilitySparklines = (props: AvailabilitySparklinesProps) => {
   } = useKibana<ClientPluginsStart>();
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
 
-  const theme = useTheme();
+  const theme = useEuiTheme().euiTheme;
 
   if (!queryIdFilter) {
     return null;
@@ -50,7 +50,7 @@ export const AvailabilitySparklines = (props: AvailabilitySparklinesProps) => {
           selectedMetricField: 'monitor_availability',
           reportDefinitions: queryIdFilter,
           filters: locationFilter,
-          color: theme.eui.euiColorVis1,
+          color: theme.colors.vis.euiColorVis1,
         },
       ]}
     />
