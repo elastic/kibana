@@ -34,7 +34,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { EntityType } from '../../../common/entity_analytics/types';
-import { EntityType, type StoreStatus } from '../../../common/api/entity_analytics';
+import { type StoreStatus } from '../../../common/api/entity_analytics';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../common/entity_analytics/asset_criticality';
 import { useKibana } from '../../common/lib/kibana';

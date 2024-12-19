@@ -223,13 +223,17 @@ export const RiskInputsTab = <T extends EntityType>({
         itemId="_id"
       />
       <EuiSpacer size="s" />
-      <ExtraAlertsMessage<T> riskScore={riskScore} alerts={alerts} />
+      <ExtraAlertsMessage<T> riskScore={riskScore} alerts={alerts} entityType={entityType} />
     </>
   );
 
   return (
     <>
-      <ContextsSection loading={loadingRiskScore} riskScore={riskScore} />
+      <ContextsSection<T>
+        loading={loadingRiskScore}
+        riskScore={riskScore}
+        entityType={entityType}
+      />
       <EuiSpacer size="m" />
       {riskInputsAlertSection}
     </>
@@ -244,7 +248,6 @@ interface ContextsSectionProps<T extends EntityType> {
   loading: boolean;
 }
 
-// TODO how to add generix to react.fc?
 const ContextsSection = <T extends EntityType>({
   riskScore,
   loading,

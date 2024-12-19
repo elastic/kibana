@@ -76,14 +76,18 @@ const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
 
   const openEntityOnExpandableFlyout = useCallback(
     (entityName: string) => {
-      openRightPanel({
-        id: EntityPanelKeyByType[riskEntity],
-        params: {
-          [EntityPanelParamByType[riskEntity]]: entityName,
-          contextID: ENTITY_RISK_SCORE_TABLE_ID,
-          scopeId: ENTITY_RISK_SCORE_TABLE_ID,
-        },
-      });
+      const panelKey = EntityPanelKeyByType[riskEntity];
+      const panelParam = EntityPanelParamByType[riskEntity];
+      if (panelKey && panelParam) {
+        openRightPanel({
+          id: panelKey,
+          params: {
+            [panelParam]: entityName,
+            contextID: ENTITY_RISK_SCORE_TABLE_ID,
+            scopeId: ENTITY_RISK_SCORE_TABLE_ID,
+          },
+        });
+      }
     },
     [openRightPanel, riskEntity]
   );

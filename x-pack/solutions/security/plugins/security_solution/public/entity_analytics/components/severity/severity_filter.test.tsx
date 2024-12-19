@@ -7,9 +7,10 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { SeverityFilter } from './severity_filter';
-import { EntityType, RiskSeverity } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import { TestProviders } from '../../../common/mock';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
+import { RiskSeverity } from '../../../../common/search_strategy';
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../common/lib/kibana', () => {
