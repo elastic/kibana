@@ -30,7 +30,8 @@ describe('class Screenshots', () => {
   let mockLogger: Logger;
   let mockScreenshotModeSetup: ScreenshotModePluginSetup;
 
-  const mockBinaryPath = '/kibana/x-pack/plugins/screenshotting/chromium/linux/headless_shell';
+  const mockBinaryPath =
+    '/kibana/x-pack/platform/plugins/shared/screenshotting/chromium/linux/headless_shell';
   const mockBasePath = '/kibanaTest1';
 
   beforeEach(() => {

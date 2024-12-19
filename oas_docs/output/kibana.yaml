@@ -6229,7 +6229,7 @@ paths:
         - APM sourcemaps
   /api/asset_criticality:
     delete:
-      description: Delete the asset criticality record for a specific asset if it exists.
+      description: Delete the asset criticality record for a specific entity.
       operationId: DeleteAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
@@ -6271,11 +6271,11 @@ paths:
           description: Successful response
         '400':
           description: Invalid request
-      summary: Delete Criticality Record
+      summary: Delete an asset criticality record
       tags:
         - Security Entity Analytics API
     get:
-      description: Get the criticality record for a specific asset.
+      description: Get the asset criticality record for a specific entity.
       operationId: GetAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
@@ -6302,11 +6302,14 @@ paths:
           description: Invalid request
         '404':
           description: Criticality record not found
-      summary: Get Criticality Record
+      summary: Get an asset criticality record
       tags:
         - Security Entity Analytics API
     post:
-      description: Create or update a criticality record for a specific asset.
+      description: |
+        Create or update an asset criticality record for a specific entity.
+
+        If a record already exists for the specified entity, that record is overwritten with the specified value. If a record doesn't exist for the specified entity, a new record is created.
       operationId: CreateAssetCriticalityRecord
       requestBody:
         content:
@@ -6331,12 +6334,15 @@ paths:
           description: Successful response
         '400':
           description: Invalid request
-      summary: Upsert Criticality Record
+      summary: Upsert an asset criticality record
       tags:
         - Security Entity Analytics API
   /api/asset_criticality/bulk:
     post:
-      description: Bulk upsert up to 1000 asset criticality records, creating or updating them as needed.
+      description: |
+        Bulk upsert up to 1000 asset criticality records.
+
+        If asset criticality records already exist for the specified entities, those records are overwritten with the specified values. If asset criticality records don't exist for the specified entities, new records are created.
       operationId: BulkUpsertAssetCriticalityRecords
       requestBody:
         content:
@@ -6387,7 +6393,7 @@ paths:
           description: Bulk upload successful
         '413':
           description: File too large
-      summary: Bulk Upsert Asset Criticality Records
+      summary: Bulk upsert asset criticality records
       tags:
         - Security Entity Analytics API
   /api/asset_criticality/list:
@@ -6463,7 +6469,7 @@ paths:
                   - per_page
                   - total
           description: Bulk upload successful
-      summary: List Asset Criticality Records
+      summary: List asset criticality records
       tags:
         - Security Entity Analytics API
   /api/cases:
@@ -19523,6 +19529,7 @@ paths:
         - ml
   /api/note:
     delete:
+      description: Delete a note from a Timeline using the note ID.
       operationId: DeleteNote
       requestBody:
         content:
@@ -19546,7 +19553,7 @@ paths:
                       type: array
                   required:
                     - noteIds
-        description: The id of the note to delete.
+        description: The ID of the note to delete.
         required: true
       responses:
         '200':
@@ -19558,11 +19565,11 @@ paths:
                   data:
                     type: object
           description: Indicates the note was successfully deleted.
-      summary: Deletes a note from a timeline.
+      summary: Delete a note
       tags:
         - Security Timeline API
     get:
-      description: Gets notes
+      description: Get all notes for a given document.
       operationId: GetNotes
       parameters:
         - in: query
@@ -19621,10 +19628,11 @@ paths:
                   - $ref: '#/components/schemas/Security_Timeline_API_GetNotesResult'
                   - type: object
           description: Indicates the requested notes were returned.
-      summary: Get all notes for a given document.
+      summary: Get notes
       tags:
         - Security Timeline API
     patch:
+      description: Add a note to a Timeline or update an existing note.
       operationId: PersistNoteRoute
       requestBody:
         content:
@@ -19654,7 +19662,7 @@ paths:
                   type: string
               required:
                 - note
-        description: The note to persist or update along with additional metadata.
+        description: The note to add or update, along with additional metadata.
         required: true
       responses:
         '200':
@@ -19673,7 +19681,7 @@ paths:
                 required:
                   - data
           description: Indicates the note was successfully created.
-      summary: Persists a note to a timeline.
+      summary: Add or update a note
       tags:
         - Security Timeline API
   /api/osquery/live_queries:
@@ -19984,6 +19992,7 @@ paths:
         - Security Osquery API
   /api/pinned_event:
     patch:
+      description: Pin an event to an existing Timeline.
       operationId: PersistPinnedEventRoute
       requestBody:
         content:
@@ -20001,7 +20010,7 @@ paths:
               required:
                 - eventId
                 - timelineId
-        description: The pinned event to persist or update along with additional metadata.
+        description: The pinned event to add or update, along with additional metadata.
         required: true
       responses:
         '200':
@@ -20019,8 +20028,8 @@ paths:
                       - persistPinnedEventOnTimeline
                 required:
                   - data
-          description: Indicate the event was successfully pinned in the timeline.
-      summary: Persists a pinned event to a timeline.
+          description: Indicates the event was successfully pinned to the Timeline.
+      summary: Pin an event
       tags:
         - Security Timeline API
   /api/risk_score/engine/dangerously_delete_data:
@@ -20054,6 +20063,7 @@ paths:
         - Security Entity Analytics API
   /api/risk_score/engine/schedule_now:
     post:
+      description: Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
       operationId: ScheduleRiskEngineNow
       requestBody:
         content:
@@ -20077,7 +20087,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse'
           description: Unexpected error
-      summary: Schedule the risk engine to run as soon as possible
+      summary: Run the risk scoring engine
       tags:
         - Security Entity Analytics API
   /api/saved_objects/_bulk_create:
@@ -21820,7 +21830,7 @@ paths:
         - roles
   /api/spaces/_copy_saved_objects:
     post:
-      description: 'It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved searches, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: ALL of [copySavedObjectsToSpaces].'
+      description: 'It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved Discover sessions, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: ALL of [copySavedObjectsToSpaces].'
       operationId: post-spaces-copy-saved-objects
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -22399,6 +22409,7 @@ paths:
         - system
   /api/timeline:
     delete:
+      description: Delete one or more Timelines or Timeline templates.
       operationId: DeleteTimelines
       requestBody:
         content:
@@ -22417,7 +22428,7 @@ paths:
                   type: array
               required:
                 - savedObjectIds
-        description: The ids of the timelines or timeline templates to delete.
+        description: The IDs of the Timelines or Timeline templates to delete.
         required: true
       responses:
         '200':
@@ -22435,11 +22446,12 @@ paths:
                       - deleteTimeline
                 required:
                   - data
-          description: Indicates the timeline was successfully deleted.
-      summary: Deletes one or more timelines or timeline templates.
+          description: Indicates the Timeline was successfully deleted.
+      summary: Delete Timelines or Timeline templates
       tags:
         - Security Timeline API
     get:
+      description: Get the details of an existing saved Timeline or Timeline template.
       operationId: GetTimeline
       parameters:
         - description: The ID of the template timeline to retrieve
@@ -22447,7 +22459,7 @@ paths:
           name: template_timeline_id
           schema:
             type: string
-        - description: The ID of the timeline to retrieve
+        - description: The ID of the Timeline to retrieve.
           in: query
           name: id
           schema:
@@ -22471,12 +22483,12 @@ paths:
                       - data
                   - additionalProperties: false
                     type: object
-          description: Indicates that the (template) timeline was found and returned.
-      summary: Get an existing saved timeline or timeline template. This API is used to retrieve an existing saved timeline or timeline template.
+          description: Indicates that the (template) Timeline was found and returned.
+      summary: Get Timeline or Timeline template details
       tags:
         - Security Timeline API
     patch:
-      description: Updates an existing timeline. This API is used to update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing timeline.
+      description: Update an existing Timeline. You can update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing Timeline.
       operationId: PatchTimeline
       requestBody:
         content:
@@ -22496,7 +22508,7 @@ paths:
                 - timelineId
                 - version
                 - timeline
-        description: The timeline updates along with the timeline ID and version.
+        description: The Timeline updates, along with the Timeline ID and version.
         required: true
       responses:
         '200':
@@ -22504,7 +22516,7 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
-          description: Indicates that the draft timeline was successfully created. In the event the user already has a draft timeline, the existing draft timeline is cleared and returned.
+          description: Indicates that the draft Timeline was successfully created. In the event the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
         '405':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -22515,11 +22527,12 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates that the user does not have the required access to create a draft timeline.
-      summary: Updates an existing timeline.
+          description: Indicates that the user does not have the required access to create a draft Timeline.
+      summary: Update a Timeline
       tags:
         - Security Timeline API
     post:
+      description: Create a new Timeline or Timeline template.
       operationId: CreateTimelines
       requestBody:
         content:
@@ -22549,7 +22562,7 @@ paths:
                   type: string
               required:
                 - timeline
-        description: The required timeline fields used to create a new timeline along with optional fields that will be created if not provided.
+        description: The required Timeline fields used to create a new Timeline, along with optional fields that will be created if not provided.
         required: true
       responses:
         '200':
@@ -22557,7 +22570,7 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
-          description: Indicates the timeline was successfully created.
+          description: Indicates the Timeline was successfully created.
         '405':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -22568,8 +22581,8 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates that there was an error in the timeline creation.
-      summary: Creates a new timeline.
+          description: Indicates that there was an error in the Timeline creation.
+      summary: Create a Timeline or Timeline template
       tags:
         - Security Timeline API
   /api/timeline/_copy:
@@ -22603,6 +22616,7 @@ paths:
         - Security Timeline API
   /api/timeline/_draft:
     get:
+      description: Get the details of the draft Timeline  or Timeline template for the current user. If the user doesn't have a draft Timeline, an empty Timeline is returned.
       operationId: GetDraftTimelines
       parameters:
         - in: query
@@ -22616,7 +22630,7 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
-          description: Indicates that the draft timeline was successfully retrieved.
+          description: Indicates that the draft Timeline was successfully retrieved.
         '403':
           content:
             application:json; Elastic-Api-Version=2023-10-31:
@@ -22627,7 +22641,7 @@ paths:
                     type: string
                   status_code:
                     type: number
-          description: If a draft timeline was not found and we attempted to create one, it indicates that the user does not have the required permissions to create a draft timeline.
+          description: If a draft Timeline was not found and we attempted to create one, it indicates that the user does not have the required permissions to create a draft Timeline.
         '409':
           content:
             application:json; Elastic-Api-Version=2023-10-31:
@@ -22638,13 +22652,15 @@ paths:
                     type: string
                   status_code:
                     type: number
-          description: This should never happen, but if a draft timeline was not found and we attempted to create one, it indicates that there is already a draft timeline with the given timelineId.
-      summary: Retrieves the draft timeline for the current user. If the user does not have a draft timeline, an empty timeline is returned.
+          description: This should never happen, but if a draft Timeline was not found and we attempted to create one, it indicates that there is already a draft Timeline with the given `timelineId`.
+      summary: Get draft Timeline or Timeline template details
       tags:
         - Security Timeline API
     post:
       description: |
-        Retrieves a clean draft timeline. If a draft timeline does not exist, it is created and returned.
+        Create a clean draft Timeline or Timeline template for the current user.
+        > info
+        > If the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
       operationId: CleanDraftTimelines
       requestBody:
         content:
@@ -22656,7 +22672,7 @@ paths:
                   $ref: '#/components/schemas/Security_Timeline_API_TimelineType'
               required:
                 - timelineType
-        description: The type of timeline to create. Valid values are `default` and `template`.
+        description: The type of Timeline to create. Valid values are `default` and `template`.
         required: true
       responses:
         '200':
@@ -22664,7 +22680,7 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
-          description: Indicates that the draft timeline was successfully created. In the event the user already has a draft timeline, the existing draft timeline is cleared and returned.
+          description: Indicates that the draft Timeline was successfully created. In the event the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
         '403':
           content:
             application:json; Elastic-Api-Version=2023-10-31:
@@ -22675,7 +22691,7 @@ paths:
                     type: string
                   status_code:
                     type: number
-          description: Indicates that the user does not have the required permissions to create a draft timeline.
+          description: Indicates that the user does not have the required permissions to create a draft Timeline.
         '409':
           content:
             application:json; Elastic-Api-Version=2023-10-31:
@@ -22686,12 +22702,13 @@ paths:
                     type: string
                   status_code:
                     type: number
-          description: Indicates that there is already a draft timeline with the given timelineId.
-      summary: Retrieves a draft timeline or timeline template.
+          description: Indicates that there is already a draft Timeline with the given `timelineId`.
+      summary: Create a clean draft Timeline or Timeline template
       tags:
         - Security Timeline API
   /api/timeline/_export:
     post:
+      description: Export Timelines as an NDJSON file.
       operationId: ExportTimelines
       parameters:
         - description: The name of the file to export
@@ -22711,16 +22728,16 @@ paths:
                     type: string
                   nullable: true
                   type: array
-        description: The ids of the timelines to export
+        description: The IDs of the Timelines to export.
         required: true
       responses:
         '200':
           content:
             application/ndjson; Elastic-Api-Version=2023-10-31:
               schema:
-                description: NDJSON of the exported timelines
+                description: NDJSON of the exported Timelines
                 type: string
-          description: Indicates the timelines were successfully exported
+          description: Indicates the Timelines were successfully exported.
         '400':
           content:
             application/ndjson; Elastic-Api-Version=2023-10-31:
@@ -22731,12 +22748,13 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates that the export size limit was exceeded
-      summary: Exports timelines as an NDJSON file
+          description: Indicates that the export size limit was exceeded.
+      summary: Export Timelines
       tags:
         - Security Timeline API
   /api/timeline/_favorite:
     patch:
+      description: Favorite a Timeline or Timeline template for the current user.
       operationId: PersistFavoriteRoute
       requestBody:
         content:
@@ -22761,7 +22779,7 @@ paths:
                 - templateTimelineId
                 - templateTimelineVersion
                 - timelineType
-        description: The required fields used to favorite a (template) timeline.
+        description: The required fields used to favorite a (template) Timeline.
         required: true
       responses:
         '200':
@@ -22791,11 +22809,12 @@ paths:
                   statusCode:
                     type: number
           description: Indicates the user does not have the required permissions to persist the favorite status.
-      summary: Persists a given users favorite status of a timeline.
+      summary: Favorite a Timeline or Timeline template
       tags:
         - Security Timeline API
   /api/timeline/_import:
     post:
+      description: Import Timelines.
       operationId: ImportTimelines
       requestBody:
         content:
@@ -22811,7 +22830,7 @@ paths:
                   type: string
               required:
                 - file
-        description: The timelines to import as a readable stream.
+        description: The Timelines to import as a readable stream.
         required: true
       responses:
         '200':
@@ -22819,7 +22838,7 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_ImportTimelineResult'
-          description: Indicates the import of timelines was successful.
+          description: Indicates the import of Timelines was successful.
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -22832,7 +22851,7 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates the import of timelines was unsuccessful because of an invalid file extension.
+          description: Indicates the import of Timelines was unsuccessful because of an invalid file extension.
         '404':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -22856,12 +22875,13 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates the import of timelines was unsuccessful.
-      summary: Imports timelines.
+          description: Indicates the import of Timelines was unsuccessful.
+      summary: Import Timelines
       tags:
         - Security Timeline API
   /api/timeline/_prepackaged:
     post:
+      description: Install or update prepackaged Timelines.
       operationId: InstallPrepackedTimelines
       requestBody:
         content:
@@ -22888,7 +22908,7 @@ paths:
                 - timelinesToInstall
                 - timelinesToUpdate
                 - prepackagedTimelines
-        description: The timelines to install or update.
+        description: The Timelines to install or update.
         required: true
       responses:
         '200':
@@ -22896,7 +22916,7 @@ paths:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_ImportTimelineResult'
-          description: Indicates the installation of prepackaged timelines was successful.
+          description: Indicates the installation of prepackaged Timelines was successful.
         '500':
           content:
             application:json; Elastic-Api-Version=2023-10-31:
@@ -22907,8 +22927,8 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates the installation of prepackaged timelines was unsuccessful.
-      summary: Installs prepackaged timelines.
+          description: Indicates the installation of prepackaged Timelines was unsuccessful.
+      summary: Install prepackaged Timelines
       tags:
         - Security Timeline API
   /api/timeline/resolve:
@@ -22939,16 +22959,17 @@ paths:
                       - data
                   - additionalProperties: false
                     type: object
-          description: The (template) timeline has been found
+          description: The (template) Timeline has been found
         '400':
           description: The request is missing parameters
         '404':
-          description: The (template) timeline was not found
-      summary: Get an existing saved timeline or timeline template.
+          description: The (template) Timeline was not found
+      summary: Get an existing saved Timeline or Timeline template
       tags:
         - Security Timeline API
   /api/timelines:
     get:
+      description: Get a list of all saved Timelines or Timeline templates.
       operationId: GetTimelines
       parameters:
         - description: If true, only timelines that are marked as favorites by the user are returned.
@@ -23022,7 +23043,7 @@ paths:
                 required:
                   - timeline
                   - totalCount
-          description: Indicates that the (template) timelines were found and returned.
+          description: Indicates that the (template) Timelines were found and returned.
         '400':
           content:
             application:json; Elastic-Api-Version=2023-10-31:
@@ -23034,7 +23055,7 @@ paths:
                   statusCode:
                     type: number
           description: Bad request. The user supplied invalid data.
-      summary: This API is used to retrieve a list of existing saved timelines or timeline templates.
+      summary: Get Timelines or Timeline templates
       tags:
         - Security Timeline API
   /s/{spaceId}/api/observability/slos:

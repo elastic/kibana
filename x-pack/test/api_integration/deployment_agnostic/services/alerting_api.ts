@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  AggregationsAggregate,
-  SearchResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
 import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';

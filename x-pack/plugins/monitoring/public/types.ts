@@ -16,6 +16,7 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { FleetStart } from '@kbn/fleet-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
+import { ReactNode } from 'react';
 
 export interface MonitoringStartPluginDependencies {
   navigation: NavigationStart;
@@ -41,3 +42,9 @@ export type LegacyMonitoringStartPluginDependencies = MonitoringStartPluginDepen
   LegacyStartDependencies;
 
 export type MonitoringStartServices = CoreStart & MonitoringStartPluginDependencies;
+
+export interface HeaderMenuPortalProps {
+  children: ReactNode;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  theme$: AppMountParameters['theme$'];
+}
