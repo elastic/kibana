@@ -106,7 +106,7 @@ export interface DiscoverDataStateContainer {
   /**
    * resetting all data observable to initial state
    */
-  reset: () => void;
+  reset: (status?: FetchStatus) => void;
 
   /**
    * cancels the running queries
@@ -366,8 +366,9 @@ export function getDataStateContainer({
     return refetch$;
   };
 
-  const reset = () => {
-    sendResetMsg(dataSubjects, getInitialFetchStatus());
+  const reset = (status?: FetchStatus) => {
+    const fetchStatus = status || getInitialFetchStatus();
+    sendResetMsg(dataSubjects, fetchStatus);
   };
 
   const cancel = () => {
