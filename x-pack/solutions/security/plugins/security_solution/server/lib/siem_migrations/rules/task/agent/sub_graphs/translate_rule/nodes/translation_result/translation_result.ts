@@ -9,32 +9,32 @@ import { RuleTranslationResult } from '../../../../../../../../../../common/siem
 import type { GraphNode } from '../../types';
 
 export const translationResultNode: GraphNode = async (state) => {
-  const query = state.elastic_rule?.query;
+  // Set defaults
+  const elasticRule = {
+    title: state.original_rule.title,
+    description: state.original_rule.description || state.original_rule.title,
+    severity: 'low',
+    ...state.elastic_rule,
+  };
 
-  if (query) {
-    /**
-     * When rule translation happens without any related integrations found we reuse the logs-* pattern to make validation easier.
-     * However we want to replace this with a value to notify the end user that it needs to be replaced.
-     */
-    if (query.includes(' logs-*')) {
-      const newQuery = query.replace('logs-*', '[indexPattern]');
-      return {
-        elastic_rule: { ...state.elastic_rule, query: newQuery },
-        translation_result: RuleTranslationResult.PARTIAL,
-      };
-    }
-    /**
-     * When rule translation misses macro or lookup a placeholder is added to the query
-     * to notify the user that it needs to be provided/replaced.
-     */
-    if (query.match(/\[(macro|lookup):/)) {
-      return { translation_result: RuleTranslationResult.PARTIAL };
+  const query = elasticRule.query;
+  let translationResult;
+
+  if (!query) {
+    translationResult = RuleTranslationResult.UNTRANSLATABLE;
+  } else {
+    if (state.validation_errors?.esql_errors) {
+      translationResult = RuleTranslationResult.PARTIAL;
+    } else if (query.startsWith('FROM logs-*')) {
+      elasticRule.query = query.replace('FROM logs-*', 'FROM [indexPattern]');
+      translationResult = RuleTranslationResult.PARTIAL;
+    } else if (query.match(/\[(macro|lookup):.*?\]/)) {
+      translationResult = RuleTranslationResult.PARTIAL;
     }
   }
 
-  if (!state.translation_result) {
-    return { translation_result: RuleTranslationResult.UNTRANSLATABLE };
-  }
-
-  return {};
+  return {
+    elastic_rule: elasticRule,
+    translation_result: translationResult,
+  };
 };

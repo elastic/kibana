@@ -23,6 +23,12 @@ export const getInlineQueryNode = ({
 }: GetInlineQueryNodeParams): GraphNode => {
   return async (state) => {
     let query = state.original_rule.query;
+
+    // Check before to avoid unnecessary LLM calls
+    if (!isSupported(query)) {
+      return {};
+    }
+
     const resources = await ruleMigrationsRetriever.resources.getResources(state.original_rule);
     if (!isEmpty(resources)) {
       const replaceQueryParser = new StringOutputParser();
@@ -38,7 +44,19 @@ export const getInlineQueryNode = ({
       if (splQuery) {
         query = splQuery;
       }
+
+      // Check after replacing in case the replacements made it untranslatable
+      if (!isSupported(query)) {
+        return {};
+      }
     }
     return { inline_query: query };
   };
+};
+
+const isSupported = (query: string) => {
+  if (query.includes(' inputlookup ')) {
+    return false;
+  }
+  return true;
 };

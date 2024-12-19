@@ -53,9 +53,6 @@ export function getRuleMigrationAgent({
   return graph;
 }
 
-/*
- * If the original splunk rule has no prebuilt rule match, we will start processing the query, unless it is related to input/outputlookups.
- */
 const matchedPrebuiltRuleConditional = (state: MigrateRuleState) => {
   if (state.elastic_rule?.prebuilt_rule_id) {
     return END;

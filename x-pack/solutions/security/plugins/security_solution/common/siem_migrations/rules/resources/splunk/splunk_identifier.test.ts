@@ -53,20 +53,6 @@ describe('splResourceIdentifier', () => {
     ]);
   });
 
-  it('should extract lookup from inputlookup tables correctly', () => {
-    const query = 'inputlookup my_lookup_table WHERE field="value"';
-
-    const result = splResourceIdentifier(query);
-    expect(result).toEqual([{ type: 'lookup', name: 'my_lookup_table' }]);
-  });
-
-  it('should extract lookup from inputlookup with modifiers correctly', () => {
-    const query = 'inputlookup append=T start=10 my_lookup_table WHERE field="value"';
-
-    const result = splResourceIdentifier(query);
-    expect(result).toEqual([{ type: 'lookup', name: 'my_lookup_table' }]);
-  });
-
   it('should extract both macros and lookup tables correctly', () => {
     const query =
       '`macro_one` some search command | lookup my_lookup_table field AS alias OUTPUT new_field | lookup other_lookup_list | lookup third_lookup';

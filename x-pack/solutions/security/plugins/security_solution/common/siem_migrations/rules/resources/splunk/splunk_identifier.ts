@@ -11,11 +11,10 @@
  * Please make sure to test all regular expressions them before using them.
  * At the time of writing, this tool can be used to test it: https://devina.io/redos-checker
  */
-
 import type { RuleMigrationResourceBase } from '../../../model/rule_migration.gen';
 import type { ResourceIdentifier } from '../types';
 
-const lookupRegex = /\b(?:lookup|inputlookup)\s+([\w-]+)\b/g; // Captures only the lookup name
+const lookupRegex = /\b(?:lookup)\s+([\w-]+)\b/g; // Captures only the lookup name
 const macrosRegex = /`([\w-]+)(?:\(([^`]*?)\))?`/g; // Captures only the macro name and arguments
 
 export const splResourceIdentifier: ResourceIdentifier = (input) => {
@@ -34,7 +33,7 @@ export const splResourceIdentifier: ResourceIdentifier = (input) => {
 
   let lookupMatch;
   while ((lookupMatch = lookupRegex.exec(sanitizedInput)) !== null) {
-    resources.push({ type: 'lookup', name: lookupMatch[1].replace(/_lookup$/, '') }); // Remove _lookup suffix
+    resources.push({ type: 'lookup', name: lookupMatch[1].replace(/_lookup$/, '') });
   }
 
   return resources;
@@ -45,16 +44,13 @@ const commentRegex = /```.*?```/g;
 // Literal strings should be replaced with a placeholder to avoid matching macro and lookup names inside them
 const doubleQuoteStrRegex = /".*?"/g;
 const singleQuoteStrRegex = /'.*?'/g;
-// inputlookup operator can have modifiers like appent=T before the lookup name, we need to remove them
-const inputlookupModifiers = /\binputlookup\b(\s+\w+=\w+)*/gi;
 // lookup operator can have modifiers like local=true or update=false before the lookup name, we need to remove them
-const lookupModifiers = /\blookup\b(\s+\w+=\w+)*/gi;
+const lookupModifiers = /\blookup\b\s+((local|update)=\s*(?:true|false)\s*)+/gi;
 
 const sanitizeInput = (query: string) => {
   return query
     .replaceAll(commentRegex, '')
     .replaceAll(doubleQuoteStrRegex, '"literal"')
     .replaceAll(singleQuoteStrRegex, "'literal'")
-    .replaceAll(lookupModifiers, 'lookup ')
-    .replaceAll(inputlookupModifiers, 'inputlookup ');
+    .replaceAll(lookupModifiers, 'lookup ');
 };

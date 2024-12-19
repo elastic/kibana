@@ -7,7 +7,6 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
-import { RuleTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import { getEsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base_caller';
 import type { GraphNode } from '../../types';
 import { ESQL_SYNTAX_TRANSLATION_PROMPT } from './prompts';
@@ -42,15 +41,12 @@ export const getTranslateRuleNode = ({
     });
     const response = await esqlKnowledgeBaseCaller(prompt);
 
-    const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1] ?? '';
+    const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1].trim() ?? '';
     const translationSummary = response.match(/## Translation Summary[\s\S]*$/)?.[0] ?? '';
-
-    const translationResult = getTranslationResult(esqlQuery);
 
     return {
       response,
       comments: [translationSummary],
-      translation_result: translationResult,
       elastic_rule: {
         title: state.original_rule.title,
         integration_id: integrationId,
@@ -61,11 +57,4 @@ export const getTranslateRuleNode = ({
       },
     };
   };
-};
-
-const getTranslationResult = (esqlQuery: string): RuleTranslationResult => {
-  if (esqlQuery.match(/\[(macro|lookup):[\s\S]*\]/)) {
-    return RuleTranslationResult.PARTIAL;
-  }
-  return RuleTranslationResult.FULL;
 };

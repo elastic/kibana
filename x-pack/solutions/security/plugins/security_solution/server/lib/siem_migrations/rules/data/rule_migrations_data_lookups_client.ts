@@ -19,7 +19,7 @@ export class RuleMigrationsDataLookupsClient {
   ) {}
 
   async create(lookupName: string, data: LookupData): Promise<string> {
-    const indexName = `lookup-${lookupName}`;
+    const indexName = `lookup_${lookupName}`;
     try {
       await this.executeEs(() =>
         this.esClient.indices.create({

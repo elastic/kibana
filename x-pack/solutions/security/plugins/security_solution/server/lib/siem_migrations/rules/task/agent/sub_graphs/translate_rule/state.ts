@@ -38,9 +38,9 @@ export const translateRuleState = Annotation.Root({
     reducer: (current, value) => value ?? current,
     default: () => '',
   }),
-  elastic_rule: Annotation<ElasticRule>({
+  elastic_rule: Annotation<Partial<ElasticRule>>({
     reducer: (state, action) => ({ ...state, ...action }),
-    default: () => ({} as ElasticRule),
+    default: () => ({}),
   }),
   validation_errors: Annotation<TranslateRuleValidationErrors>({
     reducer: (current, value) => value ?? current,

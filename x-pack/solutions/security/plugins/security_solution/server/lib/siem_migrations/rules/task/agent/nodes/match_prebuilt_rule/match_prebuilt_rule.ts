@@ -21,6 +21,7 @@ interface GetMatchPrebuiltRuleNodeParams {
 
 interface GetMatchedRuleResponse {
   match: string;
+  summary: string;
 }
 
 export const getMatchPrebuiltRuleNode = ({
@@ -35,6 +36,9 @@ export const getMatchPrebuiltRuleNode = ({
       query,
       techniqueIds.join(',')
     );
+    if (prebuiltRules.length === 0) {
+      return {};
+    }
 
     const outputParser = new JsonOutputParser();
     const mostRelevantRule = MATCH_PREBUILT_RULE_PROMPT.pipe(model).pipe(outputParser);
@@ -62,6 +66,7 @@ export const getMatchPrebuiltRuleNode = ({
       const matchedRule = prebuiltRules.find((r) => r.name === response.match);
       if (matchedRule) {
         return {
+          comments: [response.summary],
           elastic_rule: {
             title: matchedRule.name,
             description: matchedRule.description,

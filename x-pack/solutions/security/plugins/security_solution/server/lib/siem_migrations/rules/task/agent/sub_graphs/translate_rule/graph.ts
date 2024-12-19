@@ -47,10 +47,13 @@ export function getTranslateRuleGraph({
     .addNode('validation', validationNode)
     .addNode('fixQueryErrors', fixQueryErrorsNode)
     .addNode('ecsMapping', ecsMappingNode)
-    .addNode('translationResultNode', translationResultNode)
+    .addNode('translationResult', translationResultNode)
     // Edges
     .addEdge(START, 'inlineQuery')
-    .addEdge('inlineQuery', 'retrieveIntegrations')
+    .addConditionalEdges('inlineQuery', translatableRouter, [
+      'retrieveIntegrations',
+      'translationResult',
+    ])
     .addEdge('retrieveIntegrations', 'translateRule')
     .addEdge('translateRule', 'validation')
     .addEdge('fixQueryErrors', 'validation')
@@ -58,14 +61,21 @@ export function getTranslateRuleGraph({
     .addConditionalEdges('validation', validationRouter, [
       'fixQueryErrors',
       'ecsMapping',
-      'translationResultNode',
+      'translationResult',
     ])
-    .addEdge('translationResultNode', END);
+    .addEdge('translationResult', END);
 
   const graph = translateRuleGraph.compile();
   graph.name = 'Translate Rule Graph';
   return graph;
 }
+
+const translatableRouter = (state: TranslateRuleState) => {
+  if (!state.inline_query) {
+    return 'translationResult';
+  }
+  return 'retrieveIntegrations';
+};
 
 const validationRouter = (state: TranslateRuleState) => {
   if (
@@ -79,5 +89,5 @@ const validationRouter = (state: TranslateRuleState) => {
       return 'ecsMapping';
     }
   }
-  return 'translationResultNode';
+  return 'translationResult';
 };

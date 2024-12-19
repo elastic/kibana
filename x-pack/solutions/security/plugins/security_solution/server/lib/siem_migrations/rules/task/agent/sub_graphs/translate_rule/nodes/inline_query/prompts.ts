@@ -90,33 +90,29 @@ Always follow the below guidelines when replacing lookups:
 - Divide the query up into separate sections and go through each section one at a time to identify the lookups used that need to be replaced, using one of two scenarios:
   - The lookup is provided in the list of available lookups: Replace the lookup name using its correct name provided.
   - Remember the "_lookup" suffix in the lookup name in the query can be ignored when checking the list of available lookups
-  - If the inputlookup or outputlookup command is used, replace it with the correct lookup name.
   - The lookup is not in the list of available lookups: add a placeholder ("missing placeholder" from now on) in the query with the format [lookup:<lookup_name>] including the [] keys,
     Example: "lookup users uid OUTPUTNEW username, department" -> "[lookup:users]"
   - The lookup is in the list but has empty name: omit the lookup from the query entirely, as if it was empty. To do so you can use the EVAL command to set the fields to empty strings.
 
 Having the following lookups:
-  "some_table": "lookup-some_table"
-  "another": "lookup-another-2"
+  "some_list": "lookup_some_list"
+  "another": "lookup_another-2"
   "lookupName3": ""
-  "someOutputLookup": "lookup-output"
 
 And the following SPL query:
   \`\`\`spl
-  inputlookup some_table
+  | lookup some_list name OUTPUT title
   | lookup another_lookup name OUTPUT description
   | lookup yetAnotherLookup id OUTPUTNEW someField
   | lookup lookupName3 uuid OUTPUTNEW group, name
-  | outputlookup append=T key_field=_key someOutputLookup
   \`\`\`
 
 The correct replacement would be:
   \`\`\`spl
-  inputlookup lookup-some_table
-  | lookup lookup-another-2 name OUTPUT description
+  | lookup lookup_some_list name OUTPUT title
+  | lookup lookup_another-2 name OUTPUTNEW description
   | [lookup:yetAnotherLookup]
   | EVAL group="", name=""
-  | outputlookup append=T key_field=_key lookup-output
   \`\`\`
 </lookup_guidelines>
 
