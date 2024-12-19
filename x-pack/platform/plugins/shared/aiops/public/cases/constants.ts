@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 /**
  * Titles for the cases toast messages
  */
-export const TITLES = {
+export const CASES_TOAST_MESSAGES_TITLES = {
   CHANGE_POINT_DETECTION: (viewType: ChangePointDetectionViewType, chartsCount: number) =>
     viewType === 'table'
       ? i18n.translate('xpack.aiops.cases.changePointDetectionTableTitle', {

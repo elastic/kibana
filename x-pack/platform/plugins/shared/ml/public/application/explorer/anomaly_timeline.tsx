@@ -66,7 +66,7 @@ import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { getTimeBoundsFromSelection } from './hooks/use_selected_cells';
 import { SwimLaneWrapper } from './alerts';
 import { Y_AXIS_LABEL_WIDTH } from './constants';
-import { TITLES } from '../../cases/constants';
+import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
 import type { ExplorerState } from './explorer_data';
 import { useJobSelection } from './hooks/use_job_selection';
 
@@ -190,7 +190,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const openCasesModalCallback = useCasesModal(
       ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-      TITLES.ANOMALY_TIMELINE
+      CASES_TOAST_MESSAGES_TITLES.ANOMALY_TIMELINE
     );
 
     const openCasesModal = useCallback(

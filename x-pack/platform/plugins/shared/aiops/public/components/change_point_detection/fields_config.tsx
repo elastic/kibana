@@ -56,7 +56,7 @@ import {
 import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
 import { ViewTypeSelector } from './view_type_selector';
-import { TITLES } from '../../cases/constants';
+import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
 
 const selectControlCss = { width: '350px' };
 
@@ -222,7 +222,10 @@ const FieldPanel: FC<FieldPanelProps> = ({
 
   const openCasesModalCallback = useCasesModal(
     EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-    TITLES.CHANGE_POINT_DETECTION(caseAttachment.viewType, selectedPartitions.length)
+    CASES_TOAST_MESSAGES_TITLES.CHANGE_POINT_DETECTION(
+      caseAttachment.viewType,
+      selectedPartitions.length
+    )
   );
 
   const caseAttachmentButtonDisabled =

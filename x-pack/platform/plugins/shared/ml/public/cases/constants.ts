@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 /**
  * Titles for the cases toast messages
  */
-export const TITLES = {
+export const CASES_TOAST_MESSAGES_TITLES = {
   ANOMALY_TIMELINE: i18n.translate('xpack.ml.cases.anomalyTimelineTitle', {
     defaultMessage: 'Anomaly timeline',
   }),
