@@ -13,6 +13,7 @@ import {
   DataViewField,
   DataViewListItem,
   DataViewType,
+  DataViewLazy,
 } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ROLLUP_DEPRECATION_BADGE_LABEL } from '@kbn/rollup';
@@ -65,7 +66,7 @@ export async function getIndexPatterns(defaultIndex: string, dataViewsService: D
 }
 
 export const getTags = (
-  indexPattern: DataViewListItem | DataView,
+  indexPattern: DataViewListItem | DataViewLazy,
   isDefault: boolean,
   rollupsEnabled: boolean
 ) => {
