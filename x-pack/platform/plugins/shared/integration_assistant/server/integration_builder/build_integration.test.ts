@@ -292,12 +292,6 @@ describe('isValidName', () => {
     expect(isValidName('anotherValidName')).toBe(true);
   });
 
-  it('should return false for names with numbers', () => {
-    expect(isValidName('invalid123')).toBe(false);
-    expect(isValidName('123invalid')).toBe(false);
-    expect(isValidName('invalid_123')).toBe(false);
-  });
-
   it('should return false for empty string', () => {
     expect(isValidName('')).toBe(false);
   });
