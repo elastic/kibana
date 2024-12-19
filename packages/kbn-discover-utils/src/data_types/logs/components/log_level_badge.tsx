@@ -8,14 +8,13 @@
  */
 
 import React, { ReactElement } from 'react';
-import { EuiBadge, EuiBadgeProps, mathWithUnits, useEuiTheme } from '@elastic/eui';
-import { CSSObject } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiBadge, EuiBadgeProps, useEuiTheme, UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { getLogLevelCoalescedValue, getLogLevelColor } from '../utils';
 
-const badgeCss: CSSObject = {
-  maxWidth: mathWithUnits(euiThemeVars.euiSize, (size) => size * 7.5),
-};
+const badgeCss = ({ euiTheme }: UseEuiTheme) => css`
+  max-width: calc(${euiTheme.size.base} * 7.5);
+`;
 
 export const LogLevelBadge = ({
   logLevel,
