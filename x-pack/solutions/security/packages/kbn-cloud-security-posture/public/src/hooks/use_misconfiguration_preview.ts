@@ -35,8 +35,11 @@ export const useMisconfigurationPreview = (options: UseCspOptions) => {
         rawResponse: { aggregations },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          params: buildMisconfigurationsFindingsQuery(options, rulesStates!),
+          params: buildMisconfigurationsFindingsQuery(
+            options,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            rulesStates!
+          ) as LatestFindingsRequest['params'],
         })
       );
       if (!aggregations && options.ignore_unavailable === false)
