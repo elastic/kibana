@@ -13,10 +13,15 @@ import { combineLatest, skip } from 'rxjs';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { GridLayoutStateManager, PanelInteractionEvent } from '../types';
+import { GridLayoutStateManager } from '../types';
 import { getKeysInOrder } from '../utils/resolve_grid_row';
 import { DragHandle, DragHandleApi } from './drag_handle';
 import { ResizeHandle } from './resize_handle';
+
+export type InteractionStart = (
+  type: 'resize' | 'drag' | 'keyboardDrag' | 'keyboardResize' | 'drop',
+  e: React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLButtonElement>
+) => void;
 
 export interface GridPanelProps {
   panelId: string;
@@ -25,10 +30,7 @@ export interface GridPanelProps {
     panelId: string,
     setDragHandles?: (refs: Array<HTMLElement | null>) => void
   ) => React.ReactNode;
-  interactionStart: (
-    type: PanelInteractionEvent['type'] | 'drop',
-    e: MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => void;
+  interactionStart: InteractionStart;
   gridLayoutStateManager: GridLayoutStateManager;
 }
 
@@ -102,13 +104,16 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
             if (!ref || !panel) return;
 
             const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
-
+            // console.log('happens');
             if (panelId === activePanel?.id) {
               // if the current panel is active, give it fixed positioning depending on the interaction event
               const { position: draggingPosition } = activePanel;
 
               ref.style.zIndex = `${euiThemeVars.euiZModal}`;
-              if (currentInteractionEvent?.type === 'resize') {
+              if (
+                currentInteractionEvent?.type === 'resize' ||
+                currentInteractionEvent?.type === 'keyboardResize'
+              ) {
                 // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
                 ref.style.width = `${Math.max(
                   draggingPosition.right - draggingPosition.left,
