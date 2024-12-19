@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { LogoProps } from '../types';
 
-const Logo = (props: LogoProps) => (
+const Gemini = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
@@ -29,4 +28,4 @@ const Logo = (props: LogoProps) => (
 );
 
 // eslint-disable-next-line import/no-default-export
-export { Logo as default };
+export { Gemini as default };

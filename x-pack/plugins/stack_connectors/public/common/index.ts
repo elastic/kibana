@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import OpenAILogo from '../connector_types/openai/logo';
-import BedrockLogo from '../connector_types/bedrock/logo';
-import GeminiLogo from '../connector_types/bedrock/logo';
+import { getReactComponentLogo } from '@kbn/ai-service-providers';
 
 export { GEMINI_CONNECTOR_ID } from '../../common/gemini/constants';
+export const GeminiLogo = getReactComponentLogo('gemini');
 
 export { OPENAI_CONNECTOR_ID, OpenAiProviderType } from '../../common/openai/constants';
-export { OpenAILogo };
-export { GeminiLogo };
+export const OpenAILogo = getReactComponentLogo('openai');
+
+export { BEDROCK_CONNECTOR_ID } from '../../common/bedrock/constants';
+export const BedrockLogo = getReactComponentLogo('bedrock');
 
 import SentinelOneLogo from '../connector_types/sentinelone/logo';
 
@@ -27,6 +28,3 @@ export {
   SUB_ACTION as CROWDSTRIKE_SUB_ACTION,
 } from '../../common/crowdstrike/constants';
 export { CrowdstrikeLogo };
-
-export { BEDROCK_CONNECTOR_ID } from '../../common/bedrock/constants';
-export { BedrockLogo };
