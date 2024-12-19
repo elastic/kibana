@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { isEmpty } from 'lodash';
 import type { OverrideBodyQuery } from '../types';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -154,38 +154,32 @@ export const buildEventsSearchQuery = ({
 
   const searchQuery = {
     allow_no_indices: true,
-    runtime_mappings: runtimeMappings,
     index,
     size,
     ignore_unavailable: true,
     track_total_hits: trackTotalHits,
-    body: {
-      query: {
-        bool: {
-          filter: filterWithTime,
-        },
+    query: {
+      bool: {
+        filter: filterWithTime,
       },
-      fields: [
-        {
-          field: '*',
-          include_unmapped: true,
-        },
-        ...docFields,
-      ],
-      ...(aggregations ? { aggregations } : {}),
-      runtime_mappings: runtimeMappings,
-      sort,
-      ...overrideBody,
     },
+    fields: [
+      {
+        field: '*',
+        include_unmapped: true,
+      },
+      ...docFields,
+    ],
+    ...(aggregations ? { aggregations } : {}),
+    runtime_mappings: runtimeMappings,
+    sort,
+    ...overrideBody,
   };
 
   if (searchAfterSortIds != null && !isEmpty(searchAfterSortIds)) {
     return {
       ...searchQuery,
-      body: {
-        ...searchQuery.body,
-        search_after: searchAfterSortIds,
-      },
+      search_after: searchAfterSortIds,
     };
   }
   return searchQuery;

@@ -7,7 +7,7 @@
 
 import { firstValueFrom } from 'rxjs';
 
-import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { uniq, chunk } from 'lodash/fp';
 
