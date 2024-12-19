@@ -84,7 +84,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('does not return cases similar to given case if the owner does not match', async () => {
         const [caseA, caseB] = await Promise.all([
-          createCase(supertest, { ...getPostCaseRequest(), owner: 'securitySolution' }),
+          createCase(supertest, { ...getPostCaseRequest(), owner: 'observabilityFixture' }),
           createCase(supertest, getPostCaseRequest()),
           createCase(supertest, getPostCaseRequest()),
         ]);
