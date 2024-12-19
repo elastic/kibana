@@ -4281,7 +4281,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-browser-internal@link:packages/core/analytics/core-analytics-browser-internal":
+"@kbn/core-analytics-browser-internal@link:src/core/packages/analytics/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4289,11 +4289,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-browser@link:packages/core/analytics/core-analytics-browser":
+"@kbn/core-analytics-browser@link:src/core/packages/analytics/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-server-internal@link:packages/core/analytics/core-analytics-server-internal":
+"@kbn/core-analytics-server-internal@link:src/core/packages/analytics/server-internal":
   version "0.0.0"
   uid ""
 
@@ -4301,7 +4301,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-server@link:packages/core/analytics/core-analytics-server":
+"@kbn/core-analytics-server@link:src/core/packages/analytics/server":
   version "0.0.0"
   uid ""
 
@@ -4309,7 +4309,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-application-browser-internal@link:packages/core/application/core-application-browser-internal":
+"@kbn/core-application-browser-internal@link:src/core/packages/application/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4317,15 +4317,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-application-browser@link:packages/core/application/core-application-browser":
+"@kbn/core-application-browser@link:src/core/packages/application/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-application-common@link:packages/core/application/core-application-common":
+"@kbn/core-application-common@link:src/core/packages/application/common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-apps-browser-internal@link:packages/core/apps/core-apps-browser-internal":
+"@kbn/core-apps-browser-internal@link:src/core/packages/apps/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4333,11 +4333,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-apps-server-internal@link:packages/core/apps/core-apps-server-internal":
+"@kbn/core-apps-server-internal@link:src/core/packages/apps/server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-browser-internal@link:packages/core/base/core-base-browser-internal":
+"@kbn/core-base-browser-internal@link:src/core/packages/base/browser-internal":
   version "0.0.0"
   uid ""
 
@@ -4349,7 +4349,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-common@link:packages/core/base/core-base-common":
+"@kbn/core-base-common@link:src/core/packages/base/common":
   version "0.0.0"
   uid ""
 
