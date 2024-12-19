@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { ADDITIONAL_CHARGES_MESSAGE } from '../../upselling/translations';
 
-export const EnablementModalCallout: React.FC = () => {
+export const AdditionalChargesMessage: React.FC = () => {
   return (
     <div>
       <EuiText>{ADDITIONAL_CHARGES_MESSAGE}</EuiText>
@@ -18,4 +18,4 @@ export const EnablementModalCallout: React.FC = () => {
 };
 
 // eslint-disable-next-line import/no-default-export
-export default EnablementModalCallout;
+export default AdditionalChargesMessage;
