@@ -9,7 +9,7 @@ import { forEach, keys, sortBy, reduce, size } from 'lodash';
 import { flatMap, flow, groupBy, values as valuesFP, map, pickBy } from 'lodash/fp';
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export type FieldCapsList = FieldCapsResponse['fields'];
