@@ -11,7 +11,12 @@ import { IngestPipeline, IngestProcessorContainer } from '@elastic/elasticsearch
 import { set } from '@kbn/safer-lodash-set';
 import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { STREAMS_INDEX } from '../../../common/constants';
-import { FieldDefinition, ReadStreamDefinition, StreamDefinition, StreamLifecycle } from '../../../common/types';
+import {
+  FieldDefinition,
+  ReadStreamDefinition,
+  StreamDefinition,
+  StreamLifecycle,
+} from '../../../common/types';
 import { generateLayer } from './component_templates/generate_layer';
 import { deleteComponent, upsertComponent } from './component_templates/manage_component_templates';
 import { getComponentTemplateName } from './component_templates/name';
