@@ -74,7 +74,7 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
             />
           </>
         ) : null}
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
         {!observableTypes.length ? (
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false} data-test-subj="empty-observable-types">
@@ -105,6 +105,8 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
       </EuiPanel>
     </EuiDescribedFormGroup>
   );
