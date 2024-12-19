@@ -6,6 +6,11 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  AggregationsDateHistogramAggregation,
+  AggregationsMaxAggregation,
+  AggregationsTermsAggregation,
+} from '@elastic/elasticsearch/lib/api/types';
 import { DegradedFieldResponse } from '../../../../common/api_types';
 import { MAX_DEGRADED_FIELDS } from '../../../../common/constants';
 import { INDEX, TIMESTAMP, _IGNORED } from '../../../../common/es_fields';
@@ -31,7 +36,16 @@ export async function getDegradedFields({
 
   const mustQuery = [...existsQuery(_IGNORED)];
 
-  const aggs = {
+  const aggs: {
+    degradedFields: {
+      terms: AggregationsTermsAggregation;
+      aggs: {
+        lastOccurrence: { max: AggregationsMaxAggregation };
+        index: { terms: AggregationsTermsAggregation };
+        timeSeries: { date_histogram: AggregationsDateHistogramAggregation };
+      };
+    };
+  } = {
     degradedFields: {
       terms: {
         size: MAX_DEGRADED_FIELDS,
