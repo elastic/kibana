@@ -49,7 +49,7 @@ import {
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
 
-import { useFleetCustomUI } from '../../custom_ui_context';
+import { useFleetForm } from '../../fleet_form_context';
 
 import { useAgentless } from './setup_technology';
 
@@ -158,7 +158,7 @@ export function useOnSubmit({
   const confirmForceInstall = useConfirmForceInstall();
   const spaceSettings = useSpaceSettingsContext();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
-  const { validate: customUIValidation } = useFleetCustomUI();
+  const { validate: customUIValidation } = useFleetForm();
 
   // only used to store the resulting package policy once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
@@ -185,7 +185,18 @@ export function useOnSubmit({
   const { isAgentlessIntegration, isAgentlessAgentPolicy } = useAgentless();
 
   const setFormState = (state: PackagePolicyFormState) => {
-    setFormStatus(state);
+    setFormStatus((prevState) => {
+      if (prevState === state) {
+        return prevState;
+      }
+      const customUIValidationResult = customUIValidation();
+
+      console.log('setFormState customUIValidationResult', customUIValidationResult);
+      console.log('setFormState state', state);
+      console.log('setFormState returned', customUIValidationResult ? state : 'INVALID');
+      console.log('------------------');
+      return customUIValidationResult ? state : 'INVALID';
+    });
   };
 
   // Update agent policy method

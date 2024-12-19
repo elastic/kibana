@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import {
   EuiCallOut,
   EuiFormRow,
@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
-import { useFleetCustomUI } from '@kbn/fleet-plugin/public';
+import { useFleetForm } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -228,10 +228,12 @@ export const AwsCredentialsForm = ({
     setIsValid,
     updatePolicy,
   });
-  const { resetValidationRules } = useFleetCustomUI();
+  const { addValidationRules } = useFleetForm();
   // we would likelessly reset the validation rules higher up in the Fleet chain
   // when we switch between the setup formats
-  resetValidationRules();
+  useEffect(() => {
+    addValidationRules([]);
+  }, [addValidationRules]);
 
   return (
     <>

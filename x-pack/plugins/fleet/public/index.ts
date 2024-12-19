@@ -90,4 +90,4 @@ export const AvailablePackagesHook = () => {
   );
 };
 
-export { useFleetCustomUI } from './applications/fleet/sections/agent_policy/create_package_policy_page/custom_ui_context';
+export { useFleetForm } from './applications/fleet/sections/agent_policy/create_package_policy_page/fleet_form_context';
