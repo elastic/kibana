@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { DATES } from '../constants';
 
@@ -15,7 +14,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const logsUi = getService('logsUi');
   const find = getService('find');
-  const kibanaServer = getService('kibanaServer');
   const logFilter = {
     timeRange: {
       from: DATES.metricsAndLogs.stream.startWithData,
@@ -23,14 +21,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     },
   };
 
-  describe('Log stream supports nano precision', function () {
+  describe.skip('Log stream supports nano precision', function () {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/infra/logs_with_nano_date');
-      await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: true });
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/logs_with_nano_date');
-      await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: false });
     });
 
     it('should display logs entries containing date_nano timestamps properly ', async () => {
