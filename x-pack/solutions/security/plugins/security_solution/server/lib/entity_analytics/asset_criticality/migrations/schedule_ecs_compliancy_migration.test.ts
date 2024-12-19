@@ -21,7 +21,7 @@ const mockMigrateEcsData = jest.fn().mockResolvedValue({
   failures: [],
 });
 jest.mock('../asset_criticality_migration_client', () => ({
-  AssetCriticalityEcsMigrationClient: jest.fn().mockImplementation(() => ({
+  AssetCriticalityMigrationClient: jest.fn().mockImplementation(() => ({
     isEcsDataMigrationRequired: mockIsEcsDataMigrationRequired,
     migrateEcsData: mockMigrateEcsData,
   })),

@@ -20,7 +20,7 @@ const emptySearchResponse = {
   hits: { hits: [] },
 };
 
-describe('AssetCriticalityEcsMigrationClient', () => {
+describe('AssetCriticalityMigrationClient', () => {
   let logger: Logger;
   let auditLogger: AuditLogger | undefined;
   let esClient: ElasticsearchClient;
@@ -43,7 +43,7 @@ describe('AssetCriticalityEcsMigrationClient', () => {
     migrationClient = new AssetCriticalityMigrationClient({ logger, auditLogger, esClient });
   });
 
-  describe('isEcsMappingsMigrationRequired', () => {
+  describe('isMappingsMigrationRequired', () => {
     it('should return true if versions are different', async () => {
       assetCriticalityDataClient.getIndexMappings.mockResolvedValue({
         index1: { mappings: { properties: {} } },
@@ -85,7 +85,7 @@ describe('AssetCriticalityEcsMigrationClient', () => {
     });
   });
 
-  describe('migrateEcsMappings', () => {
+  describe('migrateMappings', () => {
     it('should call createOrUpdateIndex on assetCriticalityDataClient', async () => {
       await migrationClient.migrateMappings();
       expect(assetCriticalityDataClient.createOrUpdateIndex).toHaveBeenCalled();

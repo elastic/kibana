@@ -230,6 +230,19 @@ const assertTransform = (namespace: string) => {
       },
       source: {
         index: [`risk-score.risk-score-${namespace}`],
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-24h',
+                  },
+                },
+              },
+            ],
+          },
+        },
       },
       sync: {
         time: {

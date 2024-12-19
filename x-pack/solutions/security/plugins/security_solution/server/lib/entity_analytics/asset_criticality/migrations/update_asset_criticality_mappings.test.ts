@@ -8,13 +8,13 @@
 import { updateAssetCriticalityMappings } from './update_asset_criticality_mappings';
 import type { Logger } from '@kbn/core/server';
 
-const mockIsEcsMappingsMigrationRequired = jest.fn();
-const mockMigrateEcsMappings = jest.fn();
+const mockisMappingsMigrationRequired = jest.fn();
+const mockmigrateMappings = jest.fn();
 
 jest.mock('../asset_criticality_migration_client', () => ({
-  AssetCriticalityEcsMigrationClient: jest.fn().mockImplementation(() => ({
-    isEcsMappingsMigrationRequired: () => mockIsEcsMappingsMigrationRequired(),
-    migrateEcsMappings: () => mockMigrateEcsMappings(),
+  AssetCriticalityMigrationClient: jest.fn().mockImplementation(() => ({
+    isMappingsMigrationRequired: () => mockisMappingsMigrationRequired(),
+    migrateMappings: () => mockmigrateMappings(),
   })),
 }));
 
@@ -29,7 +29,7 @@ describe('updateAssetCriticalityMappings', () => {
   });
 
   it('should migrate mappings if migration is required', async () => {
-    mockIsEcsMappingsMigrationRequired.mockResolvedValue(true);
+    mockisMappingsMigrationRequired.mockResolvedValue(true);
 
     await updateAssetCriticalityMappings({
       auditLogger: undefined,
@@ -39,11 +39,11 @@ describe('updateAssetCriticalityMappings', () => {
     });
 
     expect(mockLogger.info).toHaveBeenCalledWith('Migrating Asset Criticality mappings');
-    expect(mockMigrateEcsMappings).toHaveBeenCalled();
+    expect(mockmigrateMappings).toHaveBeenCalled();
   });
 
   it('should not migrate mappings if migration is not required', async () => {
-    mockIsEcsMappingsMigrationRequired.mockResolvedValue(false);
+    mockisMappingsMigrationRequired.mockResolvedValue(false);
 
     await updateAssetCriticalityMappings({
       auditLogger: undefined,
@@ -52,7 +52,7 @@ describe('updateAssetCriticalityMappings', () => {
       kibanaVersion: '8.0.0',
     });
 
-    expect(mockIsEcsMappingsMigrationRequired).toHaveBeenCalled();
+    expect(mockisMappingsMigrationRequired).toHaveBeenCalled();
     expect(mockLogger.info).not.toHaveBeenCalledWith('Migrating Asset Criticality mappings');
   });
 });
