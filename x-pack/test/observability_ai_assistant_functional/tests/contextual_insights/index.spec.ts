@@ -6,7 +6,7 @@
  */
 
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import moment from 'moment';
 import {
   createLlmProxy,

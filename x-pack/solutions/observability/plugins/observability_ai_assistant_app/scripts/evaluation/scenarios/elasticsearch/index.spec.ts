@@ -7,11 +7,17 @@
 
 /// <reference types="@kbn/ambient-ftr-types"/>
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { chatClient, esClient } from '../../services';
 
-describe('elasticsearch functions', () => {
+describe('Elasticsearch functions', () => {
+  // using 'all' for elasticsearch scenarios enables the LLM correctly pick
+  // elasticsearch functions when querying for data
+  before(() => {
+    chatClient.setScopes(['all']);
+  });
+
   describe('health', () => {
     it('returns the cluster health state', async () => {
       const conversation = await chatClient.complete(
@@ -99,7 +105,7 @@ describe('elasticsearch functions', () => {
     describe('assistant created index', () => {
       it('creates index, adds documents and deletes index', async () => {
         let conversation = await chatClient.complete(
-          'Create a new index called testing_ai_assistant what will have two documents, one for the test_suite alerts with message "This test is for alerts" and another one for the test_suite esql with the message "This test is for esql"'
+          'Create a new index called testing_ai_assistant that will have two documents, one for the test_suite alerts with message "This test is for alerts" and another one for the test_suite esql with the message "This test is for esql"'
         );
 
         conversation = await chatClient.complete(
@@ -129,6 +135,7 @@ describe('elasticsearch functions', () => {
       });
     });
   });
+
   describe('other', () => {
     it('returns clusters license', async () => {
       const conversation = await chatClient.complete('What is my clusters license?');
@@ -140,5 +147,9 @@ describe('elasticsearch functions', () => {
 
       expect(result.passed).to.be(true);
     });
+  });
+
+  after(() => {
+    chatClient.setScopes(['observability']);
   });
 });
