@@ -29,7 +29,7 @@ const AnimatedCounterComponent: React.FC<Props> = ({ animationDurationMs = 1000 
         .append('text')
         .attr('x', 3)
         .attr('y', 26)
-        .attr('fill', euiTheme.colors.text)
+        .attr('fill', euiTheme.colors.textParagraph)
         .text(zero);
 
       text
@@ -45,7 +45,7 @@ const AnimatedCounterComponent: React.FC<Props> = ({ animationDurationMs = 1000 
         })
         .duration(animationDurationMs);
     }
-  }, [animationDurationMs, count, euiTheme.colors.text]);
+  }, [animationDurationMs, count, euiTheme.colors.textParagraph]);
 
   return (
     <svg

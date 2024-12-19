@@ -47,7 +47,7 @@ const pageHeaderStyles = css`
 `;
 
 const getFlexItemStyles = (euiTheme: EuiThemeComputed) => css`
-  background: ${euiTheme.colors.lightestShade};
+  background: ${euiTheme.colors.backgroundBaseSubdued};
   padding: 20px;
 `;
 

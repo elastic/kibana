@@ -24,14 +24,14 @@ export const useCardPanelStyles = () => {
     .onboardingCardIcon {
       padding: ${euiTheme.size.m};
       border-radius: 50%;
-      background-color: ${isDarkMode ? euiTheme.colors.body : euiTheme.colors.lightestShade};
+      background-color: ${isDarkMode ? euiTheme.colors.backgroundBasePlain : euiTheme.colors.backgroundBaseSubdued};
     }
     .onboardingCardHeaderTitle {
       font-weight: ${euiTheme.font.weight.semiBold};
     }
     .onboardingCardHeaderCompleteBadge {
       background-color: ${successBackgroundColor};
-      color: ${euiTheme.colors.successText};
+      color: ${euiTheme.colors.textSuccess};
     }
     .onboardingCardContentWrapper {
       display: grid;
@@ -65,8 +65,8 @@ export const useCardPanelStyles = () => {
 export const useDarkPanelStyles = (isDarkMode: boolean) => {
   const { euiTheme } = useEuiTheme();
   const darkPanelStyles = css`
-    background-color: ${euiTheme.colors.lightestShade};
-    border-color: ${euiTheme.colors.mediumShade};
+    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    border-color: ${euiTheme.colors.borderBaseSubdued};
   `;
   return isDarkMode ? darkPanelStyles : '';
 };
