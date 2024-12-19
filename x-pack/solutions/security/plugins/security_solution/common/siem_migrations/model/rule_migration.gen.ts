@@ -356,24 +356,28 @@ export const UpdateRuleMigrationData = z.object({
  * The type of the rule migration resource.
  */
 export type RuleMigrationResourceType = z.infer<typeof RuleMigrationResourceType>;
-export const RuleMigrationResourceType = z.enum(['macro', 'list']);
+export const RuleMigrationResourceType = z.enum(['macro', 'lookup']);
 export type RuleMigrationResourceTypeEnum = typeof RuleMigrationResourceType.enum;
 export const RuleMigrationResourceTypeEnum = RuleMigrationResourceType.enum;
 
 /**
- * The rule migration resource data provided by the vendor.
+ * The rule migration resource basic information.
  */
-export type RuleMigrationResourceData = z.infer<typeof RuleMigrationResourceData>;
-export const RuleMigrationResourceData = z.object({
+export type RuleMigrationResourceBase = z.infer<typeof RuleMigrationResourceBase>;
+export const RuleMigrationResourceBase = z.object({
   type: RuleMigrationResourceType,
   /**
    * The resource name identifier.
    */
   name: z.string(),
+});
+
+export type RuleMigrationResourceContent = z.infer<typeof RuleMigrationResourceContent>;
+export const RuleMigrationResourceContent = z.object({
   /**
-   * The resource content value.
+   * The resource content value. Can be an empty string.
    */
-  content: z.string().optional(),
+  content: z.string(),
   /**
    * The resource arbitrary metadata.
    */
@@ -381,10 +385,20 @@ export const RuleMigrationResourceData = z.object({
 });
 
 /**
+ * The rule migration resource data.
+ */
+export type RuleMigrationResourceData = z.infer<typeof RuleMigrationResourceData>;
+export const RuleMigrationResourceData = RuleMigrationResourceBase.merge(
+  RuleMigrationResourceContent
+);
+
+/**
  * The rule migration resource document object.
  */
 export type RuleMigrationResource = z.infer<typeof RuleMigrationResource>;
-export const RuleMigrationResource = RuleMigrationResourceData.merge(
+export const RuleMigrationResource = RuleMigrationResourceBase.merge(
+  RuleMigrationResourceContent.partial()
+).merge(
   z.object({
     /**
      * The rule resource migration id

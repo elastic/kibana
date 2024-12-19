@@ -21,7 +21,7 @@ export type RuleMigrationResources = Partial<
 >;
 interface ExistingResources {
   macro: Record<string, RuleMigrationDefinedResource>;
-  list: Record<string, RuleMigrationDefinedResource>;
+  lookup: Record<string, RuleMigrationDefinedResource>;
 }
 
 export class RuleResourceRetriever {
@@ -35,10 +35,10 @@ export class RuleResourceRetriever {
   public async initialize(): Promise<void> {
     const batches = this.dataClient.resources.searchBatches<RuleMigrationDefinedResource>(
       this.migrationId,
-      { filters: { hasContent: true } }
+      { filters: { hasContent: true } } // filters out missing (undefined) content resources, empty strings content will be included
     );
 
-    const existingRuleResources: ExistingResources = { macro: {}, list: {} };
+    const existingRuleResources: ExistingResources = { macro: {}, lookup: {} };
     let resources;
     do {
       resources = await batches.next();
@@ -60,19 +60,19 @@ export class RuleResourceRetriever {
     const resourcesIdentifiedFromRule = resourceIdentifier.fromOriginalRule(originalRule);
 
     const macrosFound = new Map<string, RuleMigrationDefinedResource>();
-    const listsFound = new Map<string, RuleMigrationDefinedResource>();
+    const lookupsFound = new Map<string, RuleMigrationDefinedResource>();
     resourcesIdentifiedFromRule.forEach((resource) => {
       const existingResource = existingResources[resource.type][resource.name];
       if (existingResource) {
         if (resource.type === 'macro') {
           macrosFound.set(resource.name, existingResource);
-        } else if (resource.type === 'list') {
-          listsFound.set(resource.name, existingResource);
+        } else if (resource.type === 'lookup') {
+          lookupsFound.set(resource.name, existingResource);
         }
       }
     });
 
-    const resourcesFound = [...macrosFound.values(), ...listsFound.values()];
+    const resourcesFound = [...macrosFound.values(), ...lookupsFound.values()];
     if (!resourcesFound.length) {
       return {};
     }
@@ -88,8 +88,8 @@ export class RuleResourceRetriever {
           nestedResourcesFound.push(existingResource);
           if (resource.type === 'macro') {
             macrosFound.set(resource.name, existingResource);
-          } else if (resource.type === 'list') {
-            listsFound.set(resource.name, existingResource);
+          } else if (resource.type === 'lookup') {
+            lookupsFound.set(resource.name, existingResource);
           }
         }
       });
@@ -97,7 +97,7 @@ export class RuleResourceRetriever {
 
     return {
       ...(macrosFound.size > 0 ? { macro: Array.from(macrosFound.values()) } : {}),
-      ...(listsFound.size > 0 ? { list: Array.from(listsFound.values()) } : {}),
+      ...(lookupsFound.size > 0 ? { lookup: Array.from(lookupsFound.values()) } : {}),
     };
   }
 }

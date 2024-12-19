@@ -55,10 +55,10 @@ describe('RuleResourceRetriever', () => {
     expect(result).toEqual({});
   });
 
-  it('returns matching macro and list resources', async () => {
+  it('returns matching macro and lookup resources', async () => {
     const mockExistingResources = {
       macro: { macro1: { name: 'macro1', type: 'macro' } },
-      list: { list1: { name: 'list1', type: 'list' } },
+      lookup: { lookup1: { name: 'lookup1', type: 'lookup' } },
     };
     // Inject existing resources manually
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -66,7 +66,7 @@ describe('RuleResourceRetriever', () => {
 
     const mockResourcesIdentified = [
       { name: 'macro1', type: 'macro' as const },
-      { name: 'list1', type: 'list' as const },
+      { name: 'lookup1', type: 'lookup' as const },
     ];
     MockResourceIdentifier.mockImplementation(() => ({
       fromOriginalRule: jest.fn().mockReturnValue(mockResourcesIdentified),
@@ -78,7 +78,7 @@ describe('RuleResourceRetriever', () => {
     const result = await retriever.getResources(originalRule);
     expect(result).toEqual({
       macro: [{ name: 'macro1', type: 'macro' }],
-      list: [{ name: 'list1', type: 'list' }],
+      lookup: [{ name: 'lookup1', type: 'lookup' }],
     });
   });
 
@@ -90,9 +90,9 @@ describe('RuleResourceRetriever', () => {
         macro1: { name: 'macro1', type: 'macro' },
         macro2: { name: 'macro2', type: 'macro' },
       },
-      list: {
-        list1: { name: 'list1', type: 'list' },
-        list2: { name: 'list2', type: 'list' },
+      lookup: {
+        lookup1: { name: 'lookup1', type: 'lookup' },
+        lookup2: { name: 'lookup2', type: 'lookup' },
       },
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -100,12 +100,12 @@ describe('RuleResourceRetriever', () => {
 
     const mockResourcesIdentifiedFromRule = [
       { name: 'macro1', type: 'macro' as const },
-      { name: 'list1', type: 'list' as const },
+      { name: 'lookup1', type: 'lookup' as const },
     ];
 
     const mockNestedResources = [
       { name: 'macro2', type: 'macro' as const },
-      { name: 'list2', type: 'list' as const },
+      { name: 'lookup2', type: 'lookup' as const },
     ];
 
     MockResourceIdentifier.mockImplementation(() => ({
@@ -119,9 +119,9 @@ describe('RuleResourceRetriever', () => {
         { name: 'macro1', type: 'macro' },
         { name: 'macro2', type: 'macro' },
       ],
-      list: [
-        { name: 'list1', type: 'list' },
-        { name: 'list2', type: 'list' },
+      lookup: [
+        { name: 'lookup1', type: 'lookup' },
+        { name: 'lookup2', type: 'lookup' },
       ],
     });
   });

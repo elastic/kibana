@@ -72,16 +72,6 @@ export const getMatchPrebuiltRuleNode = ({
         };
       }
     }
-    const lookupTypes = ['inputlookup', 'outputlookup'];
-    if (
-      state.original_rule?.query &&
-      lookupTypes.some((type) => state.original_rule.query.includes(type))
-    ) {
-      logger.debug(
-        `Rule: ${state.original_rule?.title} did not match any prebuilt rule, but contains inputlookup, dropping`
-      );
-      return { translation_result: RuleTranslationResult.UNTRANSLATABLE };
-    }
     return {};
   };
 };

@@ -59,7 +59,7 @@ export const getEcsMappingNode = ({
 };
 
 const getTranslationResult = (esqlQuery: string): RuleTranslationResult => {
-  if (esqlQuery.match(/\[(macro):[\s\S]*\]/)) {
+  if (esqlQuery.match(/\[(macro|lookup):[\s\S]*\]/)) {
     return RuleTranslationResult.PARTIAL;
   }
   return RuleTranslationResult.FULL;

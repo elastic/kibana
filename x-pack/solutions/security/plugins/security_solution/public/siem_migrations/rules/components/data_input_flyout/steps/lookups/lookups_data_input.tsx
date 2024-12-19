@@ -15,7 +15,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EMPTY_RESOURCE_PLACEHOLDER } from '../../../../../../../common/siem_migrations/constants';
 import type {
   RuleMigrationResourceData,
   RuleMigrationTaskStats,
@@ -101,14 +100,12 @@ export const LookupsDataInputSubSteps = React.memo<LookupsDataInputSubStepsProps
     const addUploadedLookups = useCallback<AddUploadedLookups>((lookups) => {
       setUploadedLookups((prevUploadedLookups) => ({
         ...prevUploadedLookups,
-        ...Object.fromEntries(
-          lookups.map((lookup) => [lookup.name, lookup.content ?? EMPTY_RESOURCE_PLACEHOLDER])
-        ),
+        ...Object.fromEntries(lookups.map((lookup) => [lookup.name, lookup.content])),
       }));
     }, []);
 
     useEffect(() => {
-      if (missingLookups.every((lookupName) => uploadedLookups[lookupName])) {
+      if (missingLookups.every((lookupName) => uploadedLookups[lookupName] != null)) {
         setSubStep(END);
         onAllLookupsCreated();
       }

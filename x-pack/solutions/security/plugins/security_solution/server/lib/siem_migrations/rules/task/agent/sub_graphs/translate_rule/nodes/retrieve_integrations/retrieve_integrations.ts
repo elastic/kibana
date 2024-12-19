@@ -28,6 +28,9 @@ export const getRetrieveIntegrationsNode = ({
     const query = state.semantic_query;
 
     const integrations = await ruleMigrationsRetriever.integrations.getIntegrations(query);
+    if (integrations.length === 0) {
+      return {};
+    }
 
     const outputParser = new JsonOutputParser();
     const mostRelevantIntegration = MATCH_INTEGRATION_PROMPT.pipe(model).pipe(outputParser);
