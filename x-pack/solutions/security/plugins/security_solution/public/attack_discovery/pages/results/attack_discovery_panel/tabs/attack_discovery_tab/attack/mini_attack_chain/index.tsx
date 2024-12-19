@@ -50,7 +50,7 @@ const MiniAttackChainComponent: React.FC<Props> = ({ attackDiscovery }) => {
           <EuiFlexItem grow={false} key={name}>
             <EuiText
               css={css`
-                color: ${detected ? euiTheme.colors?.danger : euiTheme.colors?.subduedText};
+                color: ${detected ? euiTheme.colors?.danger : euiTheme.colors?.textSubdued};
                 font-size: ${detected ? '14px' : '8px'};
                 font-weight: ${detected ? euiTheme.font.weight.bold : euiTheme.font.weight.regular};
                 margin-right: ${euiTheme.size.xs};
