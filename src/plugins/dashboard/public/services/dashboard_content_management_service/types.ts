@@ -84,7 +84,7 @@ export interface SaveDashboardProps {
   dashboardState: DashboardState;
   saveOptions: SavedDashboardSaveOpts;
   panelReferences?: Reference[];
-  searchSourceReferences: Reference[];
+  searchSourceReferences?: Reference[];
   lastSavedId?: string;
 }
 

@@ -51,9 +51,9 @@ describe('getSerializedState', () => {
     jest.clearAllMocks();
   });
 
-  it('should return the current state attributes and references', async () => {
+  it('should return the current state attributes and references', () => {
     const dashboardState = getSampleDashboardState();
-    const result = await getSerializedState({
+    const result = getSerializedState({
       controlGroupReferences: [],
       generateNewIds: false,
       dashboardState,
@@ -93,12 +93,12 @@ describe('getSerializedState', () => {
     expect(result.references).toEqual([]);
   });
 
-  it('should generate new IDs for panels and references when generateNewIds is true', async () => {
+  it('should generate new IDs for panels and references when generateNewIds is true', () => {
     const dashboardState = {
       ...getSampleDashboardState(),
       panels: { oldPanelId: { type: 'visualization' } as unknown as DashboardPanelState },
     };
-    const result = await getSerializedState({
+    const result = getSerializedState({
       controlGroupReferences: [],
       generateNewIds: true,
       dashboardState,
@@ -136,12 +136,12 @@ describe('getSerializedState', () => {
     `);
   });
 
-  it('should include control group references', async () => {
+  it('should include control group references', () => {
     const dashboardState = getSampleDashboardState();
     const controlGroupReferences = [
       { name: 'control1:indexpattern', type: 'index-pattern', id: 'foobar' },
     ];
-    const result = await getSerializedState({
+    const result = getSerializedState({
       controlGroupReferences,
       generateNewIds: false,
       dashboardState,
@@ -152,12 +152,12 @@ describe('getSerializedState', () => {
     expect(result.references).toEqual(controlGroupReferences);
   });
 
-  it('should include panel references', async () => {
+  it('should include panel references', () => {
     const dashboardState = getSampleDashboardState();
     const panelReferences = [
       { name: 'panel1:boogiewoogie', type: 'index-pattern', id: 'fizzbuzz' },
     ];
-    const result = await getSerializedState({
+    const result = getSerializedState({
       controlGroupReferences: [],
       generateNewIds: false,
       dashboardState,

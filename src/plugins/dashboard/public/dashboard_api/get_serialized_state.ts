@@ -45,7 +45,7 @@ export const getSerializedState = ({
   generateNewIds?: boolean;
   dashboardState: DashboardState;
   panelReferences?: Reference[];
-  searchSourceReferences: Reference[];
+  searchSourceReferences?: Reference[];
 }) => {
   const {
     query: {
