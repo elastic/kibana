@@ -621,9 +621,6 @@ export const ConfigureCases: React.FC = React.memo(() => {
       </CommonFlyout>
     ) : null;
 
-  const observableTypesDisabled =
-    !hasMinimumLicensePermissionsForObservables || isLoadingCaseConfiguration;
-
   return (
     <EuiPageSection restrictWidth={true}>
       <HeaderPage
@@ -719,22 +716,26 @@ export const ConfigureCases: React.FC = React.memo(() => {
             </EuiFlexItem>
           </div>
 
-          <EuiSpacer size="xl" />
+          {hasMinimumLicensePermissionsForObservables && (
+            <>
+              <EuiSpacer size="xl" />
 
-          <div css={sectionWrapperCss}>
-            <EuiFlexItem grow={false}>
-              <ObservableTypes
-                observableTypes={observableTypes}
-                isLoading={isLoadingCaseConfiguration}
-                disabled={observableTypesDisabled}
-                handleAddObservableType={() =>
-                  setFlyOutVisibility({ type: 'observableTypes', visible: true })
-                }
-                handleDeleteObservableType={onDeleteObservableType}
-                handleEditObservableType={onEditObservableType}
-              />
-            </EuiFlexItem>
-          </div>
+              <div css={sectionWrapperCss}>
+                <EuiFlexItem grow={false}>
+                  <ObservableTypes
+                    observableTypes={observableTypes}
+                    isLoading={isLoadingCaseConfiguration}
+                    disabled={isLoadingCaseConfiguration}
+                    handleAddObservableType={() =>
+                      setFlyOutVisibility({ type: 'observableTypes', visible: true })
+                    }
+                    handleDeleteObservableType={onDeleteObservableType}
+                    handleEditObservableType={onEditObservableType}
+                  />
+                </EuiFlexItem>
+              </div>
+            </>
+          )}
 
           <EuiSpacer size="xl" />
 
