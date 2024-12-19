@@ -22,17 +22,15 @@ export const buildAggregationSearchRequest = (
   query?: QueryDslQueryContainer
 ): IEsSearchRequest => ({
   params: {
-    body: {
-      query,
-      aggs: {
-        [key]: {
-          terms: {
-            field,
-            size: 1000, // setting a high size to get as close as possible to all unique values
-          },
+    query,
+    aggs: {
+      [key]: {
+        terms: {
+          field,
+          size: 1000, // setting a high size to get as close as possible to all unique values
         },
       },
-      size: 0,
     },
+    size: 0,
   },
 });
