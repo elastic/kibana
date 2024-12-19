@@ -239,7 +239,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
             ? route.security
             : validRouteSecurity(route.security as DeepPartial<RouteSecurity>, route.options),
           validationSchemas: route.validate,
-          // @ts-ignore using isVersioned: false in the type instead of boolean
+          // @ts-expect-error using isVersioned: false in the type instead of boolean
           // for typeguarding between versioned and unversioned RouterRoute types
           isVersioned,
         });
