@@ -9,7 +9,7 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { HttpInfoSummaryItem } from '.';
 import * as exampleTransactions from '../__fixtures__/transactions';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { EuiThemeProvider } from '@elastic/eui';
 
 describe('HttpInfoSummaryItem', () => {
   describe('render', () => {
