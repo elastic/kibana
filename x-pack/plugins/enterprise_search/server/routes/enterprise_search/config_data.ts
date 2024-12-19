@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
-import { callEnterpriseSearchConfigAPI } from '../../lib/enterprise_search_config_api';
 import { RouteDependencies } from '../../plugin';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
-
-const errorMessage = i18n.translate(
-  'xpack.enterpriseSearch.server.routes.configData.errorMessage',
-  {
-    defaultMessage: 'Error fetching data from Enterprise Search',
-  }
-);
 
 export function registerConfigDataRoute({
   router,
@@ -29,25 +21,23 @@ export function registerConfigDataRoute({
       path: '/internal/enterprise_search/config_data',
       validate: false,
     },
-    elasticsearchErrorHandler(log, async (context, request, response) => {
-      const data = await callEnterpriseSearchConfigAPI({ config, log, request });
+    elasticsearchErrorHandler(log, async (_context, _request, response) => {
+      const data = {
+        features: {
+          hasConnectors: config.hasConnectors,
+          hasDefaultIngestPipeline: config.hasDefaultIngestPipeline,
+          hasDocumentLevelSecurityEnabled: config.hasDocumentLevelSecurityEnabled,
+          hasIncrementalSyncEnabled: config.hasIncrementalSyncEnabled,
+          hasNativeConnectors: config.hasNativeConnectors,
+          hasWebCrawler: config.hasWebCrawler,
+        },
+        kibanaVersion: kibanaPackageJson.version,
+      };
 
-      if ('responseStatus' in data) {
-        return response.customError({
-          body: errorMessage,
-          statusCode: data.responseStatus,
-        });
-      } else if (!Object.keys(data).length) {
-        return response.customError({
-          body: errorMessage,
-          statusCode: 502,
-        });
-      } else {
-        return response.ok({
-          body: data,
-          headers: { 'content-type': 'application/json' },
-        });
-      }
+      return response.ok({
+        body: data,
+        headers: { 'content-type': 'application/json' },
+      });
     })
   );
 
