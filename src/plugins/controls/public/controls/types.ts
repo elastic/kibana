@@ -26,7 +26,7 @@ import {
 
 import { ControlWidth, DefaultControlState } from '../../common/types';
 import { ControlGroupApi } from '../control_group/types';
-import { CanClearSelections } from '../types';
+import { CanClearSelections, CanClearVariables } from '../types';
 
 export interface HasCustomPrepend {
   CustomPrependComponent: React.FC<{}>;
@@ -37,6 +37,7 @@ export type DefaultControlApi = PublishesDataLoading &
   PublishesUnsavedChanges &
   Partial<PublishesPanelTitle & PublishesDisabledActionIds & HasCustomPrepend> &
   CanClearSelections &
+  CanClearVariables &
   HasType &
   HasUniqueId &
   HasSerializableState<DefaultControlState> &
@@ -45,6 +46,9 @@ export type DefaultControlApi = PublishesDataLoading &
     setBlockingError: (error: Error | undefined) => void;
     grow: PublishingSubject<boolean | undefined>;
     width: PublishingSubject<ControlWidth | undefined>;
+    getTypeDisplayName?: () => string;
+    isEditingEnabled?: () => boolean;
+    onEdit?: () => void;
   };
 
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<

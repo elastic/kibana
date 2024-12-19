@@ -9,6 +9,7 @@ import React, { useMemo, useCallback, useRef, useEffect, useState } from 'react'
 import { isEqual } from 'lodash';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { v4 as uuidv4 } from 'uuid';
 import {
   EuiTitle,
   EuiAccordion,
@@ -28,8 +29,11 @@ import {
   getLanguageDisplayName,
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import { esqlVariablesService } from '@kbn/esql-variables/common';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
@@ -77,12 +81,19 @@ export function LensEditConfigurationFlyout({
   onApply: onApplyCallback,
   onCancel: onCancelCallback,
   hideTimeFilterInfo,
+  dashboardApi,
+  panelId,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
   const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
   const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
+
+  const [esqlVariables, setEsqlVariables] = useState<ESQLControlVariable[]>(
+    esqlVariablesService.getVariables()
+  );
+
   const [errors, setErrors] = useState<Error[] | undefined>();
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
@@ -93,6 +104,9 @@ export function LensEditConfigurationFlyout({
   const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeDatasource = datasourceMap[datasourceId];
+
+  const dashboardPanels = useStateFromPublishingSubject(dashboardApi?.children$);
+  const controlGroupApi = useStateFromPublishingSubject(dashboardApi?.controlGroupApi$);
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
@@ -113,6 +127,84 @@ export function LensEditConfigurationFlyout({
 
   // needed for text based languages mode which works ONLY with adHoc dataviews
   const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
+
+  esqlVariablesService?.esqlVariables$.subscribe((nextVariables) => {
+    if (nextVariables.length && !isEqual(nextVariables, esqlVariables)) {
+      setEsqlVariables(nextVariables);
+    }
+  });
+
+  const panel = useMemo(() => {
+    if (!panelId) {
+      return;
+    }
+    return dashboardPanels?.[panelId] as {
+      updateAttributes: (attributes: TypedLensSerializedState['attributes']) => void;
+      onEdit: () => Promise<void>;
+    };
+  }, [dashboardPanels, panelId]);
+
+  const onSaveControlCb = useCallback(
+    async (controlState: Record<string, unknown>, updatedQuery: string) => {
+      if (!panelId) {
+        return;
+      }
+
+      // add a new control
+      controlGroupApi?.addNewPanel({
+        panelType: 'esqlControl',
+        initialState: {
+          ...controlState,
+          id: uuidv4(),
+        },
+      });
+      if (panel && updatedQuery) {
+        const abortController = new AbortController();
+        const newVariables = esqlVariablesService.getVariables();
+        const attrs = await getSuggestions(
+          { esql: updatedQuery },
+          startDependencies,
+          datasourceMap,
+          visualizationMap,
+          adHocDataViews,
+          setErrors,
+          abortController,
+          setDataGridAttrs,
+          newVariables
+        );
+        if (attrs) {
+          panel.updateAttributes(attrs);
+        } else {
+          panel.updateAttributes({
+            ...attributes,
+            state: {
+              ...attributes.state,
+              query: { esql: updatedQuery },
+            },
+          });
+        }
+        // open the edit flyout to continue editing
+        await panel.onEdit();
+      }
+    },
+    [
+      adHocDataViews,
+      attributes,
+      controlGroupApi,
+      datasourceMap,
+      panel,
+      panelId,
+      startDependencies,
+      visualizationMap,
+    ]
+  );
+
+  const onCancelControlCb = useCallback(() => {
+    closeFlyout?.();
+    if (panel) {
+      panel.onEdit();
+    }
+  }, [closeFlyout, panel]);
 
   const dispatch = useLensDispatch();
   useEffect(() => {
@@ -147,7 +239,8 @@ export function LensEditConfigurationFlyout({
           query,
           adHocDataViews,
           startDependencies,
-          abortController
+          abortController,
+          esqlVariables
         );
 
         setDataGridAttrs({
@@ -158,7 +251,7 @@ export function LensEditConfigurationFlyout({
       }
     };
     getESQLGridAttrs();
-  }, [adHocDataViews, dataGridAttrs, query, startDependencies]);
+  }, [adHocDataViews, dataGridAttrs, esqlVariables, query, startDependencies]);
 
   const attributesChanged: boolean = useMemo(() => {
     const previousAttrs = previousAttributes.current;
@@ -332,7 +425,8 @@ export function LensEditConfigurationFlyout({
         adHocDataViews,
         setErrors,
         abortController,
-        setDataGridAttrs
+        setDataGridAttrs,
+        esqlVariables
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -349,6 +443,7 @@ export function LensEditConfigurationFlyout({
       adHocDataViews,
       setCurrentAttributes,
       updateSuggestion,
+      esqlVariables,
     ]
   );
 
@@ -508,6 +603,7 @@ export function LensEditConfigurationFlyout({
                     : undefined
                 }
                 editorIsInline
+                supportsControls
                 hideRunQueryText
                 onTextLangQuerySubmit={async (q, a) => {
                   // do not run the suggestions if the query is the same as the previous one
@@ -519,6 +615,8 @@ export function LensEditConfigurationFlyout({
                 isDisabled={false}
                 allowQueryCancellation
                 isLoading={isVisualizationLoading}
+                onSaveControlCb={onSaveControlCb}
+                onCancelControlCb={onCancelControlCb}
               />
             </EuiFlexItem>
           )}
