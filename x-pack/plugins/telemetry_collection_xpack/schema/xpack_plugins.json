@@ -9929,40 +9929,6 @@
         }
       }
     },
-    "app_search": {
-      "properties": {
-        "ui_viewed": {
-          "properties": {
-            "setup_guide": {
-              "type": "long"
-            },
-            "engines_overview": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_error": {
-          "properties": {
-            "cannot_connect": {
-              "type": "long"
-            },
-            "not_found": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_clicked": {
-          "properties": {
-            "create_first_engine_button": {
-              "type": "long"
-            },
-            "engine_table_link": {
-              "type": "long"
-            }
-          }
-        }
-      }
-    },
     "canvas": {
       "properties": {
         "workpads": {
@@ -14660,46 +14626,6 @@
                   }
                 }
               }
-            }
-          }
-        }
-      }
-    },
-    "workplace_search": {
-      "properties": {
-        "ui_viewed": {
-          "properties": {
-            "setup_guide": {
-              "type": "long"
-            },
-            "overview": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_error": {
-          "properties": {
-            "cannot_connect": {
-              "type": "long"
-            },
-            "not_found": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_clicked": {
-          "properties": {
-            "header_launch_button": {
-              "type": "long"
-            },
-            "org_name_change_button": {
-              "type": "long"
-            },
-            "onboarding_card_button": {
-              "type": "long"
-            },
-            "recent_activity_source_details_link": {
-              "type": "long"
             }
           }
         }
