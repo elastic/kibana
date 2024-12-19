@@ -23,12 +23,23 @@ export const mockRequestHandler = {
 
 export const mockMl = mlPluginServerMock.createSetupContract();
 
-export const mockConfig = {
+export const mockConfig: ConfigType = {
+  enabled: true,
+  ui: {
+    enabled: true,
+  },
+  isCloud: false,
   host: 'http://localhost:3002',
   accessCheckTimeout: 5000,
   accessCheckTimeoutWarning: 300,
-  ssl: {},
-} as ConfigType;
+  ssl: {} as ConfigType['ssl'],
+  hasConnectors: true,
+  hasDefaultIngestPipeline: true,
+  hasDocumentLevelSecurityEnabled: true,
+  hasIncrementalSyncEnabled: true,
+  hasNativeConnectors: true,
+  hasWebCrawler: true,
+};
 
 /**
  * This is useful for tests that don't use either config or log,

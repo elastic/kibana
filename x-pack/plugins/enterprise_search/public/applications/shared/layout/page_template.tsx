@@ -10,14 +10,9 @@ import React, { useLayoutEffect } from 'react';
 import classNames from 'classnames';
 import { useValues } from 'kea';
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-
-import { i18n } from '@kbn/i18n';
-
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 
 import { FlashMessages } from '../flash_messages';
-import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
 import { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
 import { Loading } from '../loading';
@@ -65,7 +60,6 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
   hideEmbeddedConsole = false,
   ...pageTemplateProps
 }) => {
-  const { readOnlyMode } = useValues(HttpLogic);
   const { renderHeaderActions, consolePlugin } = useValues(KibanaLogic);
 
   const hasCustomEmptyState = !!emptyState;
@@ -96,19 +90,6 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
       solutionNav={solutionNav && solutionNav.items ? { icon: navIcon, ...solutionNav } : undefined}
     >
       {setPageChrome}
-      {readOnlyMode && (
-        <>
-          <EuiCallOut
-            color="warning"
-            iconType="lock"
-            title={i18n.translate('xpack.enterpriseSearch.readOnlyMode.warning', {
-              defaultMessage:
-                'Enterprise Search is in read-only mode. You will be unable to make changes such as creating, editing, or deleting.',
-            })}
-          />
-          <EuiSpacer />
-        </>
-      )}
       {!hideFlashMessages && <FlashMessages />}
       {isLoading ? (
         <Loading />

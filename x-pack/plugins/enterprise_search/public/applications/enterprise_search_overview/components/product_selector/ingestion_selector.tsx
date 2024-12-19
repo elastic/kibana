@@ -31,24 +31,20 @@ import languageClientsLogo from '../../../../assets/images/search_language_clien
 import { IngestionCard } from '../../../enterprise_search_content/components/shared/ingestion_card/ingestion_card';
 import {
   NEW_API_PATH,
-  NEW_CRAWLER_PATH,
   NEW_INDEX_SELECT_CONNECTOR_PATH,
 } from '../../../enterprise_search_content/routes';
-import { HttpLogic } from '../../../shared/http/http_logic';
 
 import { ConnectorIcon } from '../../../shared/icons/connector';
-import { CrawlerIcon } from '../../../shared/icons/crawler';
+
 import { GithubIcon } from '../../../shared/icons/github_icon';
 import { KibanaLogic } from '../../../shared/kibana';
 
 export const IngestionSelector: React.FC = () => {
   const {
     application: { navigateToApp },
-    config,
     productFeatures,
   } = useValues(KibanaLogic);
-  const { errorConnectingMessage } = useValues(HttpLogic);
-  const crawlerDisabled = Boolean(errorConnectingMessage || !config.host);
+  const crawlerDisabled = true;
   return (
     <>
       <EuiFlexGroup>
@@ -78,22 +74,13 @@ export const IngestionSelector: React.FC = () => {
         {productFeatures.hasWebCrawler && (
           <EuiFlexItem>
             <IngestionCard
-              buttonLabel={
-                crawlerDisabled
-                  ? i18n.translate(
-                      'xpack.enterpriseSearch.ingestSelector.method.sourceCodeButtonLabel',
-                      {
-                        defaultMessage: 'Source code',
-                      }
-                    )
-                  : i18n.translate(
-                      'xpack.enterpriseSearch.ingestSelector.method.crawler.description',
-                      {
-                        defaultMessage: 'Crawl URL',
-                      }
-                    )
-              }
-              buttonIcon={crawlerDisabled ? GithubIcon : CrawlerIcon}
+              buttonLabel={i18n.translate(
+                'xpack.enterpriseSearch.ingestSelector.method.sourceCodeButtonLabel',
+                {
+                  defaultMessage: 'Source code',
+                }
+              )}
+              buttonIcon={GithubIcon}
               description={i18n.translate(
                 'xpack.enterpriseSearch.ingestSelector.method.crawler.description',
                 {
@@ -101,11 +88,7 @@ export const IngestionSelector: React.FC = () => {
                     'Discover, extract, and index searchable content from websites and knowledge bases.',
                 }
               )}
-              href={
-                crawlerDisabled
-                  ? CRAWLER.github_repo
-                  : generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_CRAWLER_PATH)
-              }
+              href={CRAWLER.github_repo}
               isBeta={crawlerDisabled}
               logo={crawlerLogo}
               title={i18n.translate('xpack.enterpriseSearch.ingestSelector.method.crawler', {

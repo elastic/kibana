@@ -54,10 +54,6 @@ export const mockKibanaValues = {
     }),
   } as unknown as LensPublicStart,
   navigateToUrl: jest.fn(),
-  productAccess: {
-    hasAppSearchAccess: true,
-    hasWorkplaceSearchAccess: true,
-  },
   productFeatures: {
     hasDocumentLevelSecurityEnabled: true,
     hasIncrementalSyncEnabled: true,

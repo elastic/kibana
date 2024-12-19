@@ -16,7 +16,6 @@ import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
 
 import { ProductFeatures } from '../../../../../common/types';
 
-import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
 import { NEW_API_PATH, NEW_CRAWLER_PATH, NEW_INDEX_SELECT_CONNECTOR_PATH } from '../../routes';
@@ -34,9 +33,9 @@ const getAvailableMethodOptions = (productFeatures: ProductFeatures): INGESTION_
 };
 
 export const NewIndex: React.FC = () => {
-  const { config, productFeatures } = useValues(KibanaLogic);
+  const { productFeatures } = useValues(KibanaLogic);
   const availableIngestionMethodOptions = getAvailableMethodOptions(productFeatures);
-  const { errorConnectingMessage } = useValues(HttpLogic);
+  const hasElasticCrawler = false; // temp variable replacing checking error connecting to entSearch node
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -64,10 +63,7 @@ export const NewIndex: React.FC = () => {
             {availableIngestionMethodOptions.map((type) => (
               <EuiFlexItem key={type}>
                 <NewIndexCard
-                  disabled={Boolean(
-                    type === INGESTION_METHOD_IDS.CRAWLER &&
-                      (errorConnectingMessage || !config.host)
-                  )}
+                  disabled={Boolean(type === INGESTION_METHOD_IDS.CRAWLER && !hasElasticCrawler)}
                   type={type}
                   onSelect={() => {
                     if (type === INGESTION_METHOD_IDS.CONNECTOR) {

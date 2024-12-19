@@ -26,7 +26,7 @@ import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
 
 jest.mock('../../../shared/kibana/kibana_logic', () => ({
-  KibanaLogic: { values: { productAccess: { hasDocumentLevelSecurityEnabled: true } } },
+  KibanaLogic: { values: { productFeatures: { hasDocumentLevelSecurityEnabled: true } } },
 }));
 
 // We can't test fetchTimeOutId because this will get set whenever the logic is created

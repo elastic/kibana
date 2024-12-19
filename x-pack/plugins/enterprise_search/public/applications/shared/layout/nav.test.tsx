@@ -20,7 +20,6 @@ import { renderHook } from '@testing-library/react';
 import { EuiSideNavItemType } from '@elastic/eui';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../../../common/constants';
-import { ProductAccess } from '../../../../common/types';
 
 import {
   useEnterpriseSearchNav,
@@ -28,10 +27,6 @@ import {
   useEnterpriseSearchAnalyticsNav,
 } from './nav';
 
-const DEFAULT_PRODUCT_ACCESS: ProductAccess = {
-  hasAppSearchAccess: true,
-  hasWorkplaceSearchAccess: true,
-};
 const baseNavItems = [
   expect.objectContaining({
     'data-test-subj': 'searchSideNav-Home',
@@ -211,7 +206,6 @@ const mockNavLinks = [
 const defaultMockValues = {
   hasEnterpriseLicense: true,
   isSidebarEnabled: true,
-  productAccess: DEFAULT_PRODUCT_ACCESS,
   productFeatures: DEFAULT_PRODUCT_FEATURES,
 };
 
@@ -223,10 +217,8 @@ describe('useEnterpriseSearchContentNav', () => {
   });
 
   it('returns an array of top-level Enterprise Search nav items', () => {
-    const fullProductAccess: ProductAccess = DEFAULT_PRODUCT_ACCESS;
     setMockValues({
       ...defaultMockValues,
-      productAccess: fullProductAccess,
     });
 
     const { result } = renderHook(() => useEnterpriseSearchNav());
