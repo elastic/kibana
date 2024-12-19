@@ -8,7 +8,7 @@
 import styled from 'styled-components';
 import React from 'react';
 import type { EuiBasicTableProps } from '@elastic/eui';
-import { EuiAccordion, EuiToolTip, EuiText, EuiBasicTable } from '@elastic/eui';
+import { EuiAccordion, EuiToolTip, EuiText, EuiBasicTable, useEuiTheme } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import moment from 'moment';
 
@@ -33,6 +33,7 @@ const TruncatedEuiText = styled(EuiText)`
 
 export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ action }) => {
   const coreStart = useStartServices();
+  const theme = useEuiTheme();
 
   const getLogsButton = (agentId: string, timestamp: string) => {
     const start = moment(timestamp).subtract(5, 'm').toISOString();
@@ -70,7 +71,11 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
       }),
       render: (error: string) => (
         <EuiToolTip content={error}>
-          <TruncatedEuiText size="s" color="red" data-test-subj="errorText">
+          <TruncatedEuiText
+            size="s"
+            color={theme.euiTheme.colors.textDanger}
+            data-test-subj="errorText"
+          >
             {error}
           </TruncatedEuiText>
         </EuiToolTip>
