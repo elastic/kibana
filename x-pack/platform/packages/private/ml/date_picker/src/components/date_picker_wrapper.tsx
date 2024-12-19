@@ -88,7 +88,7 @@ interface DatePickerWrapperProps {
    */
   width?: EuiSuperDatePickerProps['width'];
   /**
-   * Boolean flag to set use of flex group wrapper
+   * Boolean flag to disable the date picker
    */
   isDisabled?: boolean;
   /**
