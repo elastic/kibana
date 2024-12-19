@@ -366,7 +366,6 @@ const getLogsNavigationEntries = ({
     });
   }
 
-  // Display Stream nav entry when Logs Stream is enabled
   // Display always Logs Anomalies and Logs Categories entries
   entries.push(createNavEntryFromRoute(routes.logsAnomalies));
   entries.push(createNavEntryFromRoute(routes.logsCategories));
