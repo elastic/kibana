@@ -188,6 +188,30 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.createInferenceRequestAbortedError",
+        "type": "Function",
+        "tags": [],
+        "label": "createInferenceRequestAbortedError",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceTaskAbortedError",
+            "text": "InferenceTaskAbortedError"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.createInferenceRequestError",
         "type": "Function",
         "tags": [],
@@ -478,7 +502,9 @@
         "type": "Function",
         "tags": [],
         "label": "isInferenceError",
-        "description": [],
+        "description": [
+          "\nCheck if the given error is an {@link InferenceTaskError}"
+        ],
         "signature": [
           "(error: unknown) => boolean"
         ],
@@ -511,7 +537,9 @@
         "type": "Function",
         "tags": [],
         "label": "isInferenceInternalError",
-        "description": [],
+        "description": [
+          "\nCheck if the given error is an {@link InferenceTaskInternalError}"
+        ],
         "signature": [
           "(error: unknown) => boolean"
         ],
@@ -540,11 +568,48 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.isInferenceRequestAbortedError",
+        "type": "Function",
+        "tags": [],
+        "label": "isInferenceRequestAbortedError",
+        "description": [
+          "\nCheck if the given error is an {@link InferenceTaskAbortedError}"
+        ],
+        "signature": [
+          "(error: unknown) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.isInferenceRequestAbortedError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.isInferenceRequestError",
         "type": "Function",
         "tags": [],
         "label": "isInferenceRequestError",
-        "description": [],
+        "description": [
+          "\nCheck if the given error is an {@link InferenceTaskRequestError}"
+        ],
         "signature": [
           "(error: unknown) => boolean"
         ],
@@ -1346,6 +1411,22 @@
           },
           {
             "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.OutputOptions.abortSignal",
+            "type": "Object",
+            "tags": [],
+            "label": "abortSignal",
+            "description": [
+              "\nOptional signal that can be used to forcefully abort the request."
+            ],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/output/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
             "id": "def-common.OutputOptions.retry",
             "type": "Object",
             "tags": [],
@@ -1858,7 +1939,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "{ [P in \"system\" | \"stream\" | \"messages\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
+              "{ [P in \"abortSignal\" | \"system\" | \"stream\" | \"messages\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -1953,7 +2034,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "{ id: TId; input: string; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; previousMessages?: ",
+              "{ id: TId; input: string; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; abortSignal?: AbortSignal | undefined; system?: string | undefined; stream?: TStream | undefined; previousMessages?: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -2068,7 +2149,7 @@
                 "section": "def-common.FunctionCallingMode",
                 "text": "FunctionCallingMode"
               },
-              " | undefined; } & TToolOptions"
+              " | undefined; abortSignal?: AbortSignal | undefined; } & TToolOptions"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
             "deprecated": false,
@@ -2136,7 +2217,7 @@
             "section": "def-common.FunctionCallingMode",
             "text": "FunctionCallingMode"
           },
-          " | undefined; } & TToolOptions"
+          " | undefined; abortSignal?: AbortSignal | undefined; } & TToolOptions"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
         "deprecated": false,
@@ -2471,6 +2552,38 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.InferenceTaskAbortedError",
+        "type": "Type",
+        "tags": [],
+        "label": "InferenceTaskAbortedError",
+        "description": [
+          "\nInference error thrown when the request was aborted.\n\nRequest abortion occurs when providing an abort signal and firing it\nbefore the call to the LLM completes."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceTaskError",
+            "text": "InferenceTaskError"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceTaskErrorCode",
+            "text": "InferenceTaskErrorCode"
+          },
+          ".abortedError, { status: number; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.InferenceTaskErrorEvent",
         "type": "Type",
         "tags": [],
@@ -2539,7 +2652,9 @@
         "type": "Type",
         "tags": [],
         "label": "InferenceTaskInternalError",
-        "description": [],
+        "description": [
+          "\nInference error thrown when an unexpected internal error occurs while handling the request."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/inference-common",
@@ -2569,7 +2684,9 @@
         "type": "Type",
         "tags": [],
         "label": "InferenceTaskRequestError",
-        "description": [],
+        "description": [
+          "\nInference error thrown when the request was considered invalid.\n\nSome example of reasons for invalid requests would be:\n- no connector matching the provided connectorId\n- invalid connector type for the provided connectorId"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/inference-common",
@@ -3084,7 +3201,7 @@
           "\nOptions used to call the {@link BoundChatCompleteAPI}"
         ],
         "signature": [
-          "{ [P in \"system\" | \"stream\" | \"messages\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
+          "{ [P in \"abortSignal\" | \"system\" | \"stream\" | \"messages\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -3109,7 +3226,7 @@
           "\nOptions used to call the {@link BoundOutputAPI}"
         ],
         "signature": [
-          "{ id: TId; input: string; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; previousMessages?: ",
+          "{ id: TId; input: string; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; abortSignal?: AbortSignal | undefined; system?: string | undefined; stream?: TStream | undefined; previousMessages?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",

@@ -960,20 +960,20 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "observabilityShared",
-            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
-          },
-          {
-            "plugin": "observabilityShared",
-            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
-          },
-          {
             "plugin": "monitoring",
             "path": "x-pack/plugins/monitoring/public/components/header_menu/header_menu_portal.tsx"
           },
           {
             "plugin": "monitoring",
             "path": "x-pack/plugins/monitoring/public/components/header_menu/header_menu_portal.tsx"
+          },
+          {
+            "plugin": "observabilityShared",
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
+          },
+          {
+            "plugin": "observabilityShared",
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
           }
         ],
         "children": [

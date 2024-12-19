@@ -543,7 +543,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
+          "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -551,7 +551,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; savedObjectId?: string | undefined; renderMode?: ",
+          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -887,7 +887,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
+          "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -895,7 +895,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; savedObjectId?: string | undefined; renderMode?: ",
+          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1119,7 +1119,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
+          "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -1127,7 +1127,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; savedObjectId?: string | undefined; renderMode?: ",
+          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -6852,7 +6852,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
+              "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
               {
                 "pluginId": "uiActionsEnhanced",
                 "scope": "common",
@@ -6860,7 +6860,7 @@
                 "section": "def-common.DynamicActionsState",
                 "text": "DynamicActionsState"
               },
-              "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; savedObjectId?: string | undefined; renderMode?: ",
+              "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "public",
@@ -7651,7 +7651,7 @@
                     "section": "def-common.PaletteOutput",
                     "text": "PaletteOutput"
                   },
-                  "<{ [key: string]: unknown; }> | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
+                  "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
                   {
                     "pluginId": "uiActionsEnhanced",
                     "scope": "common",
@@ -7659,7 +7659,7 @@
                     "section": "def-common.DynamicActionsState",
                     "text": "DynamicActionsState"
                   },
-                  "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; savedObjectId?: string | undefined; renderMode?: ",
+                  "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
                   {
                     "pluginId": "@kbn/presentation-publishing",
                     "scope": "public",
@@ -16052,7 +16052,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
+          "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -16060,7 +16060,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; savedObjectId?: string | undefined; renderMode?: ",
+          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16836,7 +16836,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
+          "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -16844,7 +16844,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; savedObjectId?: string | undefined; renderMode?: ",
+          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18167,7 +18167,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
+          "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -18175,7 +18175,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; savedObjectId?: string | undefined; renderMode?: ",
+          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18511,7 +18511,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
+          "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -18519,7 +18519,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; savedObjectId?: string | undefined; renderMode?: ",
+          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18743,7 +18743,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
+          "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -18751,7 +18751,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; savedObjectId?: string | undefined; renderMode?: ",
+          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -19272,7 +19272,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
+          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -19280,7 +19280,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; savedObjectId?: string | undefined; onFilter?: ((data: { data: { table: Pick<",
+          "; } | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; onFilter?: ((data: { data: { table: Pick<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -20073,7 +20073,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
+          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -20081,7 +20081,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; onFilter?: ((data: { data: { table: Pick<",
+          "; } | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; onFilter?: ((data: { data: { table: Pick<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -20721,7 +20721,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
+          "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -20729,7 +20729,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; savedObjectId?: string | undefined; renderMode?: ",
+          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -21065,7 +21065,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
+          "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -21073,7 +21073,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; savedObjectId?: string | undefined; renderMode?: ",
+          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -21297,7 +21297,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
+          "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -21305,7 +21305,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; savedObjectId?: string | undefined; renderMode?: ",
+          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -21802,7 +21802,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
+          "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -21810,7 +21810,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; savedObjectId?: string | undefined; renderMode?: ",
+          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -22595,7 +22595,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
+          "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -22603,7 +22603,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; savedObjectId?: string | undefined; renderMode?: ",
+          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -25195,7 +25195,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
+          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -25203,7 +25203,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; onFilter?: ((data: { data: { table: Pick<",
+          "; } | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; onFilter?: ((data: { data: { table: Pick<",
           {
             "pluginId": "expressions",
             "scope": "common",

@@ -629,6 +629,76 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.TransactionDetailsByTraceIdLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "TransactionDetailsByTraceIdLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.TransactionDetailsByTraceIdLocatorParams",
+            "text": "TransactionDetailsByTraceIdLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.TransactionDetailsByTraceIdLocatorParams.rangeFrom",
+            "type": "string",
+            "tags": [],
+            "label": "rangeFrom",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.TransactionDetailsByTraceIdLocatorParams.rangeTo",
+            "type": "string",
+            "tags": [],
+            "label": "rangeTo",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.TransactionDetailsByTraceIdLocatorParams.traceId",
+            "type": "string",
+            "tags": [],
+            "label": "traceId",
+            "description": [],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
         "id": "def-common.UptimeOverviewLocatorInfraParams",
         "type": "Interface",
         "tags": [],
@@ -1233,6 +1303,21 @@
           "{ type: \"smart-field\"; smartField: \"content\" | \"resource\"; width?: number | undefined; }"
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/logs_explorer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

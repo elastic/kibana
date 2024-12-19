@@ -100,7 +100,15 @@
             "section": "def-public.AnalyticsServiceStart",
             "text": "AnalyticsServiceStart"
           },
-          ", \"reportEvent\"> | undefined; theme: ",
+          ", \"reportEvent\"> | undefined; executionContext?: ",
+          {
+            "pluginId": "@kbn/core-execution-context-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
+            "section": "def-public.ExecutionContextSetup",
+            "text": "ExecutionContextSetup"
+          },
+          " | undefined; theme: ",
           {
             "pluginId": "@kbn/react-kibana-context-common",
             "scope": "common",

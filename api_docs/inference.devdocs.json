@@ -125,7 +125,7 @@
                   "section": "def-common.FunctionCallingMode",
                   "text": "FunctionCallingMode"
                 },
-                " | undefined; } & TToolOptions"
+                " | undefined; abortSignal?: AbortSignal | undefined; } & TToolOptions"
               ],
               "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
               "deprecated": false,
@@ -329,7 +329,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ [P in \"system\" | \"stream\" | \"messages\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
+                  "{ [P in \"abortSignal\" | \"system\" | \"stream\" | \"messages\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
                   {
                     "pluginId": "@kbn/inference-common",
                     "scope": "common",
@@ -390,7 +390,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ id: TId; input: string; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; previousMessages?: ",
+                  "{ id: TId; input: string; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; abortSignal?: AbortSignal | undefined; system?: string | undefined; stream?: TStream | undefined; previousMessages?: ",
                   {
                     "pluginId": "@kbn/inference-common",
                     "scope": "common",
@@ -531,7 +531,7 @@
                     "section": "def-common.FunctionCallingMode",
                     "text": "FunctionCallingMode"
                   },
-                  " | undefined; } & TToolOptions"
+                  " | undefined; abortSignal?: AbortSignal | undefined; } & TToolOptions"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
                 "deprecated": false,
@@ -837,7 +837,7 @@
             "section": "def-common.ChatCompleteAPI",
             "text": "ChatCompleteAPI"
           },
-          ") => ({ id, connectorId, input, schema, system, previousMessages, functionCalling, stream, retry, }: DefaultOutputOptions) => Promise<",
+          ") => ({ id, connectorId, input, schema, system, previousMessages, functionCalling, stream, abortSignal, retry, }: DefaultOutputOptions) => Promise<",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
