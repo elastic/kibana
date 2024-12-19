@@ -61,7 +61,7 @@ relies on additional index data that is not available by default. To make these 
 the `GET /indices` request, an index data enricher can be registered. A data enricher is essentially an extra request that is
 done for the array of indices and the information is added to the response. Currently, 3 data enrichers are registered 
 by the ILM, Rollup and CCR plugins. Before adding a data enricher, the cost of the additional request should be taken 
-in consideration (see [this file](https://github.com/elastic/kibana/blob/main/x-pack/plugins/index_management/server/services/index_data_enricher.ts) for more details).
+in consideration (see [this file](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/index_management/server/services/index_data_enricher.ts) for more details).
 
 ## Indices tab
 

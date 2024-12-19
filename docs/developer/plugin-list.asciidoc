@@ -640,7 +640,7 @@ which are particularly useful for ingesting logs.
 Index Management by running this series of requests in Console:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/index_management/README.md[indexManagement]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/index_management/README.md[indexManagement]
 |This service is exposed from the Index Management setup contract and can be used to add content to the indices list and the index details page.
 
 

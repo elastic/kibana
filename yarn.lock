@@ -5933,7 +5933,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/index-management-plugin@link:x-pack/plugins/index_management":
+"@kbn/index-management-plugin@link:x-pack/platform/plugins/shared/index_management":
   version "0.0.0"
   uid ""
 
