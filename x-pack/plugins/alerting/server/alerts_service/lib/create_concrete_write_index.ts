@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { get, sortBy } from 'lodash';
 import { IIndexPatternString } from '../resource_installer_utils';
