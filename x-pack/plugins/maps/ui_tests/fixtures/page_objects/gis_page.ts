@@ -11,14 +11,6 @@ const RENDER_COMPLETE_SELECTOR = '[data-render-complete="true"]';
 export class GisPage {
   constructor(private readonly page: ScoutPage) {}
 
-  async clickFullScreenMode() {
-    await this.page.testSubj.click('mapsFullScreenMode');
-  }
-
-  async clickExitFullScreenTextButton() {
-    await this.page.testSubj.click('exitFullScreenModeText');
-  }
-
   async goto() {
     await this.page.gotoApp('maps');
     await this.waitForRenderCompletion();

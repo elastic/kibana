@@ -24,14 +24,14 @@ test.describe('Maps full screen mode', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
     expect(
       await page.testSubj.locator('kbnAppWrapper visibleChrome').waitFor({ state: 'visible' })
     );
-    await pageObjects.gis.clickFullScreenMode();
+    await page.testSubj.click('mapsFullScreenMode');
     expect(await page.testSubj.locator('kbnAppWrapper hiddenChrome').waitFor({ state: 'visible' }));
   });
   test('layer control is visible', async ({ page }) => {
     expect(await page.testSubj.locator('addLayerButton').waitFor({ state: 'visible' }));
   });
-  test('displays exit full screen logo button', async ({ page, pageObjects }) => {
-    await pageObjects.gis.clickFullScreenMode();
+  test('displays reenMode();exit full screen logo button', async ({ page, pageObjects }) => {
+    await page.testSubj.click('mapsFullScreenMode');
     const sel = 'exitFullScreenModeButton';
     await expect(
       page.testSubj.locator(sel),
@@ -43,8 +43,8 @@ test.describe('Maps full screen mode', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
     page,
     pageObjects,
   }) => {
-    await pageObjects.gis.clickFullScreenMode();
-    await pageObjects.gis.clickExitFullScreenTextButton();
+    await page.testSubj.click('mapsFullScreenMode');
+    await page.testSubj.click('exitFullScreenModeText');
     expect(
       await page.testSubj.locator('kbnAppWrapper visibleChrome').waitFor({ state: 'visible' })
     );
