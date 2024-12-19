@@ -445,6 +445,7 @@ export const ExplorerChartsContainerUI = ({
             return (
               <EuiFlexItem
                 key={chartId}
+                data-test-subj="mlExplorerChartContainerItem"
                 css={cssMlExplorerChartContainer}
                 style={{ minWidth: chartsWidth }}
               >
