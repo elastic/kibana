@@ -52,7 +52,7 @@ describe('ObservableTypesList', () => {
     expect(
       await screen.findByTestId(`observable-type-${observableTypes[0].key}`)
     ).toBeInTheDocument();
-    expect((await screen.findAllByText('Test Observable Type')).length).toBe(1);
+    expect((await screen.findByText('Test Observable Type'))).toBeInTheDocument();
     expect(
       await screen.findByTestId(`observable-type-${observableTypes[1].key}`)
     ).toBeInTheDocument();
