@@ -187,7 +187,7 @@ Migrate to runtime fields or ES|QL instead of creating new scripted fields. Exis
 
 [discrete]
 [[known-issue-204384]]
-.Make HTTP/2 the default protocol when TLS is enabled and add a deprecation warning if HTTP/2 is not enabled or TLS is not configured (9.0.0)
+.Now HTTP/2 is the default protocol when TLS is enabled and a deprecation warning appears if HTTP/2 is not enabled or TLS is not configured (9.0.0)
 [%collapsible]
 ====
 *Details* +
