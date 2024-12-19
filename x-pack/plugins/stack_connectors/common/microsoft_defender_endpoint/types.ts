@@ -83,7 +83,12 @@ export interface MicrosoftDefenderEndpointMachine {
   /** The value of the device. Possible values are: Normal, Low, and High. */
   deviceValue?: 'Normal' | 'Low' | 'High';
   /** Set of IpAddress objects. See Get machines API. */
-  ipAddresses: string[];
+  ipAddresses: Array<{
+    ipAddress: string;
+    macAddress: string;
+    type: string;
+    operationalStatus: string;
+  }>;
   /** Operating system architecture. Possible values are: 32-bit, 64-bit. Use this property instead of osProcessor. */
   osArchitecture: string;
 }
