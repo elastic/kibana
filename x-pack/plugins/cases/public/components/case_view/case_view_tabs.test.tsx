@@ -313,7 +313,7 @@ describe('CaseViewTabs', () => {
       expect(badge).toHaveTextContent('0');
     });
 
-    it('do not show observables on the files tab if the call isLoading', async () => {
+    it('do not show count on the observables tab if the call isLoading', async () => {
       useGetCaseObservablesMock.mockReturnValue({ isLoading: true, observables: [] });
 
       appMockRenderer.render(
