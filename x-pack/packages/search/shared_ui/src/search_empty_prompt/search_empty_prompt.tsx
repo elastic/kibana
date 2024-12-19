@@ -28,6 +28,7 @@ interface SearchEmptyPromptProps {
   description?: string;
   icon?: string;
   isComingSoon?: boolean;
+  comingSoonLabel?: string;
   title: string;
 }
 
@@ -38,6 +39,7 @@ export const SearchEmptyPrompt: React.FC<SearchEmptyPromptProps> = ({
   description,
   icon,
   isComingSoon,
+  comingSoonLabel,
   title,
 }) => {
   return (
@@ -66,7 +68,7 @@ export const SearchEmptyPrompt: React.FC<SearchEmptyPromptProps> = ({
         </EuiFlexItem>
         {isComingSoon && (
           <EuiFlexItem>
-            <EuiBadge color="accent">Coming soon</EuiBadge>
+            <EuiBadge color="accent">{comingSoonLabel}</EuiBadge>
           </EuiFlexItem>
         )}
         {description && (

@@ -27,6 +27,7 @@ import { useCreateConnector } from '../../hooks/api/use_create_connector';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useConnectors } from '../../hooks/api/use_connectors';
 import { ELASTIC_MANAGED_CONNECTOR_PATH, BASE_CONNECTORS_PATH } from '../../constants';
+import { BACK_LABEL } from '../../../../common/i18n_string';
 
 export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
   const connectorTypes = useConnectorTypes();
@@ -244,7 +245,7 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="accent">Coming soon</EuiBadge>
+                <EuiBadge color="accent">{BACK_LABEL}</EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
