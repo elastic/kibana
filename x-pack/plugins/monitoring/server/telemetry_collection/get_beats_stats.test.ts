@@ -37,7 +37,7 @@ describe('Get Beats Stats', () => {
       searchMock.returns(Promise.resolve({}));
       await fetchBeatsStats(callCluster, clusterUuids, start, end, {} as any);
       const { args } = searchMock.firstCall;
-      const [{ body }] = args;
+      const [body] = args;
 
       expect(body.from).toEqual(0);
       expect(body.size).toEqual(10000);
@@ -47,7 +47,7 @@ describe('Get Beats Stats', () => {
       searchMock.returns(Promise.resolve({}));
       await fetchBeatsStats(callCluster, clusterUuids, start, end, { page: 1 } as any);
       const { args } = searchMock.firstCall;
-      const [{ body }] = args;
+      const [body] = args;
 
       expect(body.from).toEqual(10000);
       expect(body.size).toEqual(10000);
@@ -57,7 +57,7 @@ describe('Get Beats Stats', () => {
       searchMock.returns(Promise.resolve({}));
       await fetchBeatsStats(callCluster, clusterUuids, start, end, { page: 2 } as any);
       const { args } = searchMock.firstCall;
-      const [{ body }] = args;
+      const [body] = args;
 
       expect(body.from).toEqual(20000);
       expect(body.size).toEqual(10000);
