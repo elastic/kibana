@@ -119,7 +119,7 @@ export const emailValidator = (...args: Parameters<ValidationFunc>) => {
     return notStringError(path);
   }
 
-  const emailAddresses = parseAddressList(value as string);
+  const emailAddresses = parseAddressList(value);
 
   if (emailAddresses == null) {
     return { message: i18n.INVALID_EMAIL, code: 'ERR_NOT_EMAIL', path };
