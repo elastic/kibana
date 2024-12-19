@@ -1289,9 +1289,7 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
-      expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent(
-        i18n.ADD_OBSERVABLE_TYPE
-      );
+      expect(await screen.findByText(i18n.ADD_OBSERVABLE_TYPE)).toBeInTheDocument();
     });
 
     it('closes fly out for when click on cancel', async () => {
