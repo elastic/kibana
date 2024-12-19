@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
@@ -23,8 +23,11 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
-import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { useNavigateEntityInsight } from '../../hooks/use_entity_insight';
+import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import {
+  CspInsightLeftPanelSubTab,
+  EntityDetailsLeftPanelTab,
+} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
 const VulnerabilitiesCount = ({
   vulnerabilitiesTotal,
@@ -63,10 +66,14 @@ export const VulnerabilitiesPreview = ({
   value,
   field,
   isPreviewMode,
+  isLinkEnabled,
+  openDetailsPanel,
 }: {
   value: string;
   field: 'host.name' | 'user.name';
   isPreviewMode?: boolean;
+  isLinkEnabled: boolean;
+  openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
   useEffect(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW);
@@ -93,15 +100,16 @@ export const VulnerabilitiesPreview = ({
 
   const { euiTheme } = useEuiTheme();
 
-  const { goToEntityInsightTab } = useNavigateEntityInsight({
-    field,
-    value,
-    queryIdExtension: 'VULNERABILITIES_PREVIEW',
-    subTab: CspInsightLeftPanelSubTab.VULNERABILITIES,
-  });
+  const goToEntityInsightTab = useCallback(() => {
+    openDetailsPanel({
+      tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+      subTab: CspInsightLeftPanelSubTab.VULNERABILITIES,
+    });
+  }, [openDetailsPanel]);
+
   const link = useMemo(
     () =>
-      !isPreviewMode
+      isLinkEnabled
         ? {
             callback: goToEntityInsightTab,
             tooltip: (
@@ -112,7 +120,7 @@ export const VulnerabilitiesPreview = ({
             ),
           }
         : undefined,
-    [isPreviewMode, goToEntityInsightTab]
+    [isLinkEnabled, goToEntityInsightTab]
   );
   return (
     <ExpandablePanel

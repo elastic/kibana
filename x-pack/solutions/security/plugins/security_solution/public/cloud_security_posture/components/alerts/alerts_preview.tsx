@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { capitalize } from 'lodash';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
@@ -18,8 +18,11 @@ import type {
 } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import { getSeverityColor } from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
-import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { useNavigateEntityInsight } from '../../hooks/use_entity_insight';
+import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import {
+  CspInsightLeftPanelSubTab,
+  EntityDetailsLeftPanelTab,
+} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
 const AlertsCount = ({
   alertsTotal,
@@ -58,14 +61,14 @@ const AlertsCount = ({
 
 export const AlertsPreview = ({
   alertsData,
-  field,
-  value,
   isPreviewMode,
+  openDetailsPanel,
+  isLinkEnabled,
 }: {
   alertsData: ParsedAlertsData;
-  field: 'host.name' | 'user.name';
-  value: string;
   isPreviewMode?: boolean;
+  openDetailsPanel: (path: EntityDetailsPath) => void;
+  isLinkEnabled: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -90,15 +93,16 @@ export const AlertsPreview = ({
 
   const hasNonClosedAlerts = totalAlertsCount > 0;
 
-  const { goToEntityInsightTab } = useNavigateEntityInsight({
-    field,
-    value,
-    queryIdExtension: isPreviewMode ? 'ALERTS_PREVIEW_TRUE' : 'ALERTS_PREVIEW_FALSE',
-    subTab: CspInsightLeftPanelSubTab.ALERTS,
-  });
+  const goToEntityInsightTab = useCallback(() => {
+    openDetailsPanel({
+      tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+      subTab: CspInsightLeftPanelSubTab.ALERTS,
+    });
+  }, [openDetailsPanel]);
+
   const link = useMemo(
     () =>
-      !isPreviewMode
+      isLinkEnabled
         ? {
             callback: goToEntityInsightTab,
             tooltip: (
@@ -109,7 +113,7 @@ export const AlertsPreview = ({
             ),
           }
         : undefined,
-    [isPreviewMode, goToEntityInsightTab]
+    [isLinkEnabled, goToEntityInsightTab]
   );
   return (
     <ExpandablePanel

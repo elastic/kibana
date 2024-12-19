@@ -23,6 +23,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { ONE_WEEK_IN_HOURS } from '../../../flyout/entity_details/shared/constants';
@@ -49,7 +50,8 @@ export interface RiskSummaryProps<T extends RiskScoreEntity> {
   riskScoreData: RiskScoreState<T>;
   recalculatingScore: boolean;
   queryId: string;
-  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
+  openDetailsPanel: (path: EntityDetailsPath) => void;
+  isLinkEnabled: boolean;
   isPreviewMode?: boolean;
 }
 
@@ -58,6 +60,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
   recalculatingScore,
   queryId,
   openDetailsPanel,
+  isLinkEnabled,
   isPreviewMode,
 }: RiskSummaryProps<T>) => {
   const { telemetry } = useKibana().services;
@@ -178,8 +181,8 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
           link: riskScoreData.loading
             ? undefined
             : {
-                callback: openDetailsPanel
-                  ? () => openDetailsPanel(EntityDetailsLeftPanelTab.RISK_INPUTS)
+                callback: isLinkEnabled
+                  ? () => openDetailsPanel({ tab: EntityDetailsLeftPanelTab.RISK_INPUTS })
                   : undefined,
                 tooltip: (
                   <FormattedMessage
