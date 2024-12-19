@@ -54,12 +54,12 @@ describe('isInternalURL', () => {
     });
 
     it('should return `true` if relative path does not escape base path', () => {
-      const href = `${basePath}/app/kibana/../../../../../management`;
+      const href = `${basePath}/app/kibana/../../management`;
       expect(isInternalURL(href, basePath)).toBe(true);
     });
 
     it('should return `false` if relative path escapes base path', () => {
-      const href = `${basePath}/app/kibana/../../../../../../management`;
+      const href = `${basePath}/app/kibana/../../../management`;
       expect(isInternalURL(href, basePath)).toBe(false);
     });
 
