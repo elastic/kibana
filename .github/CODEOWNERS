@@ -866,6 +866,7 @@ x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
 x-pack/platform/plugins/shared/integration_assistant @elastic/security-scalability
 x-pack/platform/plugins/shared/license_management @elastic/kibana-management
 x-pack/platform/plugins/shared/ml @elastic/ml-ui
+x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
 x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant @elastic/obs-ai-assistant
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 x-pack/platform/plugins/shared/screenshotting @elastic/kibana-reporting-services
@@ -900,7 +901,6 @@ x-pack/plugins/logstash @elastic/logstash
 x-pack/plugins/maps @elastic/kibana-presentation
 x-pack/plugins/monitoring @elastic/stack-monitoring
 x-pack/plugins/monitoring_collection @elastic/stack-monitoring
-x-pack/plugins/notifications @elastic/appex-sharedux
 x-pack/plugins/observability_solution/apm @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/apm_data_access @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/apm/ftr_e2e @elastic/obs-ux-infra_services-team

@@ -7,9 +7,9 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/notifications'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/notifications',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/notifications'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/notifications',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/notifications/{common,server}/**/*.{js,ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/platform/plugins/shared/notifications/{common,server}/**/*.{js,ts,tsx}'],
 };
