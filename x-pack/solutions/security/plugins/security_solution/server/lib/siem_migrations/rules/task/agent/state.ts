@@ -7,7 +7,7 @@
 
 import type { BaseMessage } from '@langchain/core/messages';
 import { Annotation, messagesStateReducer } from '@langchain/langgraph';
-import type { SiemMigrationRuleTranslationResult } from '../../../../../../common/siem_migrations/constants';
+import type { RuleTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import type {
   ElasticRule,
   OriginalRule,
@@ -31,7 +31,7 @@ export const migrateRuleState = Annotation.Root({
     reducer: (current, value) => value ?? current,
     default: () => '',
   }),
-  translation_result: Annotation<SiemMigrationRuleTranslationResult>(),
+  translation_result: Annotation<RuleTranslationResult>(),
   comments: Annotation<RuleMigration['comments']>({
     reducer: (current, value) => (value ? (current ?? []).concat(value) : current),
     default: () => [],
