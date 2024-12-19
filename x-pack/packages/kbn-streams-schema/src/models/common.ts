@@ -99,5 +99,13 @@ export const streamChildSchema = z.object({
   name: z.string(),
   condition: z.optional(conditionSchema),
 });
-
 export type StreamChild = z.infer<typeof streamChildSchema>;
+
+export const elasticsearchAssetSchema = z.array(
+  z.object({
+    type: z.enum(['ingest_pipeline', 'component_template', 'index_template', 'data_stream']),
+    id: z.string(),
+  })
+);
+
+export type ElasticsearchAsset = z.infer<typeof elasticsearchAssetSchema>;

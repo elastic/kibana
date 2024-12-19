@@ -6,14 +6,12 @@
  */
 
 import { z } from '@kbn/zod';
-import { fieldDefinitionConfigSchema } from '../common';
+import { fieldDefinitionSchema } from '../common';
 import { ingestStreamDefinitonSchema } from '../streams';
 
 export const ingestReadStreamDefinitonSchema = ingestStreamDefinitonSchema
   .extend({
-    inherited_fields: z
-      .record(z.string(), fieldDefinitionConfigSchema.extend({ from: z.string() }))
-      .default({}),
+    inherited_fields: fieldDefinitionSchema.default({}),
   })
   .strict();
 

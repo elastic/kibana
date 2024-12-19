@@ -7,18 +7,12 @@
 
 import { z } from '@kbn/zod';
 import { ingestStreamConfigDefinitonSchema } from '../stream_config';
+import { elasticsearchAssetSchema } from '../common';
 
 export const ingestStreamDefinitonSchema = z
   .object({
     name: z.string(),
-    elasticsearch_assets: z.optional(
-      z.array(
-        z.object({
-          type: z.enum(['ingest_pipeline', 'component_template', 'index_template', 'data_stream']),
-          id: z.string(),
-        })
-      )
-    ),
+    elasticsearch_assets: z.optional(elasticsearchAssetSchema),
     stream: ingestStreamConfigDefinitonSchema,
   })
   .strict();
