@@ -9,8 +9,9 @@ import type { FC, ChangeEvent } from 'react';
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
+import { css } from '@emotion/css';
 import deepEqual from 'fast-deep-equal';
-import { EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiTextArea, useEuiTheme } from '@elastic/eui';
 import type { DataViewBase } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
 
@@ -24,17 +25,6 @@ import { EQL_ERROR_CODES } from '../../../../common/hooks/eql/api';
 import type { EqlQueryBarFooterProps } from './footer';
 import { EqlQueryBarFooter } from './footer';
 import * as i18n from './translations';
-
-const TextArea = styled(EuiTextArea)`
-  display: block;
-  border: 0;
-  box-shadow: none;
-  border-radius: 0px;
-  min-height: ${({ theme }) => theme.eui.euiFormControlHeight};
-  &:focus {
-    box-shadow: none;
-  }
-`;
 
 const StyledFormRow = styled(EuiFormRow)`
   border: ${({ theme }) => theme.eui.euiBorderThin};
@@ -80,11 +70,21 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   onValidityChange,
   onValidatingChange,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { addError } = useAppToasts();
   const { uiSettings } = useKibana().services;
   const filterManager = useRef<FilterManager>(new FilterManager(uiSettings));
   const { isValidating, value: fieldValue, setValue: setFieldValue, isValid, errors } = field;
   const errorMessages = useMemo(() => errors.map((x) => x.message), [errors]);
+
+  const textAreaStyles = useMemo(
+    () => css`
+      box-shadow: none;
+      border-radius: 0;
+      min-height: ${euiTheme.size.xl};
+    `,
+    [euiTheme.size.xl]
+  );
 
   // Bubbles up field validity to parent.
   // Using something like form `getErrors` does
@@ -184,8 +184,9 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
       describedByIds={idAria ? [idAria] : undefined}
     >
       <>
-        <TextArea
+        <EuiTextArea
           data-test-subj="eqlQueryBarTextInput"
+          className={textAreaStyles}
           fullWidth
           isInvalid={!isValid && !isValidating}
           value={fieldValue.query.query as string}
