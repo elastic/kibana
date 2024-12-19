@@ -623,6 +623,7 @@ src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
 src/platform/plugins/shared/files @elastic/appex-sharedux
 src/platform/plugins/shared/guided_onboarding @elastic/appex-sharedux
 src/platform/plugins/shared/home @elastic/appex-sharedux
+src/platform/plugins/shared/kibana_react @elastic/appex-sharedux
 src/platform/plugins/shared/management @elastic/kibana-management
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/bfetch @elastic/appex-sharedux
@@ -660,7 +661,6 @@ src/plugins/ftr_apis @elastic/kibana-core
 src/plugins/input_control_vis @elastic/kibana-presentation
 src/plugins/inspector @elastic/kibana-presentation
 src/plugins/interactive_setup @elastic/kibana-security
-src/plugins/kibana_react @elastic/appex-sharedux
 src/plugins/kibana_usage_collection @elastic/kibana-core
 src/plugins/kibana_utils @elastic/appex-sharedux
 src/plugins/links @elastic/kibana-presentation
@@ -1234,7 +1234,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/saved_object_tagging/ @elastic/appex-sharedux
 
 ### Kibana React (to be deprecated)
-/src/plugins/kibana_react/public/ @elastic/appex-sharedux @elastic/kibana-presentation
+/src/platform/plugins/shared/kibana_react/public/ @elastic/appex-sharedux @elastic/kibana-presentation
 
 ### Home Plugin and Packages
 /src/platform/plugins/shared/home/public @elastic/appex-sharedux
@@ -1495,7 +1495,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test_serverless/functional/test_suites/search/dashboards/ @elastic/kibana-presentation
 /test/plugin_functional/test_suites/panel_actions @elastic/kibana-presentation
 /x-pack/test/functional/es_archives/canvas/logstash_lens @elastic/kibana-presentation
-#CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
+#CC# /src/platform/plugins/shared/kibana_react/public/code_editor/ @elastic/kibana-presentation
 /x-pack/test/upgrade/services/maps_upgrade_services.ts @elastic/kibana-presentation
 /x-pack/test/stack_functional_integration/apps/maps @elastic/kibana-presentation
 /x-pack/test/functional/page_objects/geo_file_upload.ts @elastic/kibana-presentation
@@ -2565,7 +2565,7 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 #CC# /x-pack/plugins/logstash/ @elastic/logstash
 
 # EUI team
-/src/plugins/kibana_react/public/page_template/ @elastic/eui-team @elastic/appex-sharedux
+/src/platform/plugins/shared/kibana_react/public/page_template/ @elastic/eui-team @elastic/appex-sharedux
 
 # Landing page for guided onboarding in Home plugin
 /src/platform/plugins/shared/home/public/application/components/guided_onboarding @elastic/appex-sharedux

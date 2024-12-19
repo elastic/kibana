@@ -283,7 +283,7 @@ module.exports = {
      * Temporarily disable some react rules for specific plugins, remove in separate PRs
      */
     {
-      files: ['src/plugins/kibana_react/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/platform/plugins/shared/kibana_react/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'off',
         'react-hooks/exhaustive-deps': 'off',
