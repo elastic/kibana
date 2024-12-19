@@ -11,7 +11,12 @@ import { IngestPipeline, IngestProcessorContainer } from '@elastic/elasticsearch
 import { set } from '@kbn/safer-lodash-set';
 import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { STREAMS_INDEX } from '../../../common/constants';
-import { FieldDefinition, ReadStreamDefinition, StreamDefinition, StreamLifecycle } from '../../../common/types';
+import {
+  FieldDefinition,
+  ReadStreamDefinition,
+  StreamDefinition,
+  StreamLifecycle,
+} from '../../../common/types';
 import { generateLayer } from './component_templates/generate_layer';
 import { deleteComponent, upsertComponent } from './component_templates/manage_component_templates';
 import { getComponentTemplateName } from './component_templates/name';
@@ -36,7 +41,6 @@ import {
   upsertIngestPipeline,
 } from './ingest_pipelines/manage_ingest_pipelines';
 import { getProcessingPipelineName, getReroutePipelineName } from './ingest_pipelines/name';
-import { logsSettings } from './component_templates/logs_layer';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
@@ -169,7 +173,6 @@ export async function listStreams({
   const dataStreams = await listDataStreamsAsStreams({ scopedClusterClient });
   let definitions: StreamDefinition[] = response.hits.hits.map((hit) => ({
     ...hit._source!,
-    lifecycle: { type: 'ilm' as const, policy: logsSettings.index!.lifecycle!.name! },
   }));
   const hasAccess = await Promise.all(
     definitions.map((definition) => checkReadAccess({ id: definition.id, scopedClusterClient }))
@@ -213,7 +216,6 @@ export async function listDataStreamsAsStreams({
     .filter((dataStream) => dataStream.template.endsWith('@stream') === false)
     .map((dataStream) => ({
       id: dataStream.name,
-      lifecycle: getDataStreamLifecycle(dataStream),
       managed: false,
       children: [],
       fields: [],

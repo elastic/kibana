@@ -101,21 +101,18 @@ export function EntityDetailViewWithoutParams({
           title={
             <StreamsAppPageHeaderTitle
               title={
-                <>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
                   {entity.displayName}
                   {definition && !definition.managed ? (
-                    <>
-                      {' '}
-                      <EuiBadge>
-                        {i18n.translate(
-                          'xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel',
-                          { defaultMessage: 'Classic' }
-                        )}
-                      </EuiBadge>
-                    </>
+                    <EuiBadge>
+                      {i18n.translate(
+                        'xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel',
+                        { defaultMessage: 'Classic' }
+                      )}
+                    </EuiBadge>
                   ) : null}
                   {definition && <LifecycleBadge lifecycle={definition.lifecycle} />}
-                </>
+                </EuiFlexGroup>
               }
             />
           }
@@ -146,28 +143,25 @@ function LifecycleBadge({ lifecycle }: { lifecycle: StreamLifecycle }) {
   const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
   if (lifecycle.type === 'ilm') {
     return (
-      <>
-        {' '}
-        <EuiBadge>
-          <EuiLink
-            color="text"
-            href={ilmLocator?.getRedirectUrl({ page: 'policy_edit', policyName: lifecycle.policy })}
-          >
-            {i18n.translate('xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel', {
-              defaultMessage: 'ILM Policy: {name}',
-              values: { name: lifecycle.policy },
-            })}
-          </EuiLink>
-        </EuiBadge>
-      </>
+      <EuiBadge color="hollow">
+        <EuiLink
+          color="text"
+          href={ilmLocator?.getRedirectUrl({ page: 'policy_edit', policyName: lifecycle.policy })}
+        >
+          {i18n.translate('xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel', {
+            defaultMessage: 'ILM Policy: {name}',
+            values: { name: lifecycle.policy },
+          })}
+        </EuiLink>
+      </EuiBadge>
     );
   }
 
   return (
-    <EuiBadge>
+    <EuiBadge color="hollow">
       {i18n.translate('xpack.streams.entityDetailViewWithoutParams.dlmBadgeLabel', {
         defaultMessage: 'Retention: {retention}',
-        values: { retention: lifecycle.data_retention },
+        values: { retention: lifecycle.data_retention || '∞' },
       })}
     </EuiBadge>
   );
