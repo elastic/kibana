@@ -396,7 +396,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_type_markdown/README.md[visTypeMarkdown]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/vis_type_markdown/README.md[visTypeMarkdown]
 |The markdown visualization that can be used to place text panels on dashboards.
 
 
