@@ -10850,7 +10850,7 @@
                 "label": "value",
                 "description": [],
                 "signature": [
-                  "true"
+                  "false"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
