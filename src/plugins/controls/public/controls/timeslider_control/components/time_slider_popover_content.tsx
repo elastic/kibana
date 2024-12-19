@@ -40,15 +40,16 @@ export function TimeSliderPopoverContent({
   timeRangeMax,
   compressed,
 }: Props) {
-  const [displayedValue, setDisplayedValue] = useState<Timeslice>(value ?? [0, 0]);
+  const [displayedValue, setDisplayedValue] = useState<Timeslice>(value);
 
   const debouncedOnChange = useMemo(
     () =>
       debounce((updateTimeslice: Timeslice | undefined) => {
         onChange(updateTimeslice);
-      }, 350),
+      }, 750),
     [onChange]
   );
+  
   /**
    * The following `useEffect` ensures that the changes to the value that come from the embeddable (for example,
    * from the `clear` button on the dashboard) are reflected in the displayed value
