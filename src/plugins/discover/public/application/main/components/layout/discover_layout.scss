@@ -13,6 +13,10 @@ discover-app {
   overflow: hidden;
   padding: 0;
 
+  .kbnBody--hasEmbeddableConsole & {
+    padding-bottom: $euiSizeXXL;
+  }
+
   @include euiBreakpoint('m', 'l', 'xl') {
     @include kibanaFullBodyHeight();
 

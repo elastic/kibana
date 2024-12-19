@@ -49,6 +49,7 @@
       "aiops",
       "fieldsMetadata",
       "logsDataAccess",
+      "console"
     ],
     "requiredBundles": [
       "kibanaUtils",
