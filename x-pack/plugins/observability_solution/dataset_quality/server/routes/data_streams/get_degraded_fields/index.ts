@@ -7,6 +7,11 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { rangeQuery, existsQuery } from '@kbn/observability-plugin/server';
+import type {
+  AggregationsDateHistogramAggregation,
+  AggregationsMaxAggregation,
+  AggregationsTermsAggregation,
+} from '@elastic/elasticsearch/lib/api/types';
 import { DegradedFieldResponse } from '../../../../common/api_types';
 import { MAX_DEGRADED_FIELDS } from '../../../../common/constants';
 import { createDatasetQualityESClient } from '../../../utils';
@@ -31,7 +36,16 @@ export async function getDegradedFields({
 
   const mustQuery = [...existsQuery(_IGNORED)];
 
-  const aggs = {
+  const aggs: {
+    degradedFields: {
+      terms: AggregationsTermsAggregation;
+      aggs: {
+        lastOccurrence: { max: AggregationsMaxAggregation };
+        index: { terms: AggregationsTermsAggregation };
+        timeSeries: { date_histogram: AggregationsDateHistogramAggregation };
+      };
+    };
+  } = {
     degradedFields: {
       terms: {
         size: MAX_DEGRADED_FIELDS,

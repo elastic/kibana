@@ -7,7 +7,10 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
+import {
+  type AggregationsCompositeAggregation,
+  QueryDslBoolQuery,
+} from '@elastic/elasticsearch/lib/api/types';
 import { DataStreamDocsStat } from '../../../common/api_types';
 import { createDatasetQualityESClient } from '../../utils';
 
@@ -32,7 +35,9 @@ export async function getAggregatedDatasetPaginatedResults(options: {
 
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 
-  const aggs = (afterKey?: Dataset) => ({
+  const aggs = (
+    afterKey?: Dataset
+  ): { datasets: { composite: AggregationsCompositeAggregation } } => ({
     datasets: {
       composite: {
         ...(afterKey ? { after: afterKey } : {}),
@@ -65,6 +70,7 @@ export async function getAggregatedDatasetPaginatedResults(options: {
 
   const currResults =
     response.aggregations?.datasets.buckets.map((bucket) => ({
+      // @ts-expect-error types above don't infer these bucket.key types
       dataset: `${bucket.key.type}-${bucket.key.dataset}-${bucket.key.namespace}`,
       count: bucket.doc_count,
     })) ?? [];

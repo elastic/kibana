@@ -6,7 +6,7 @@
  */
 
 import createContainer from 'constate';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { useMemo } from 'react';
 import { IdFormat } from '../../../../../../common/http_api/latest';
 import { useLogAnalysisModule } from '../../log_analysis_module';
