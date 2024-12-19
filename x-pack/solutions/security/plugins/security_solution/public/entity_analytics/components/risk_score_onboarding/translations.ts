@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { RiskScoreEntityType } from '../../../../common/entity_analytics/risk_engine';
+import type { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import { getRiskEntityTranslation } from '../risk_score/translations';
 
 export const BETA = i18n.translate('xpack.securitySolution.riskScore.technicalPreviewLabel', {

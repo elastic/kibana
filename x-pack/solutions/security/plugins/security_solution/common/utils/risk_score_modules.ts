@@ -6,7 +6,8 @@
  */
 
 import { DEFAULT_ALERTS_INDEX } from '../constants';
-import { RiskScoreEntityType, RiskScoreFields } from '../search_strategy';
+import { RiskScoreEntityType } from '../entity_analytics/types';
+import { RiskScoreFields } from '../search_strategy';
 import type { Pipeline, Processor } from '../types/risk_scores';
 
 /**

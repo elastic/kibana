@@ -25,7 +25,6 @@ import { getCriteriaFromUsersType } from '../../../common/components/ml/criteria
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
-import { RiskScoreEntityType } from '../../../../common/entity_analytics/risk_engine';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelContent } from './content';
@@ -36,6 +35,7 @@ import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_
 import { UserPreviewPanelFooter } from '../user_preview/footer';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;

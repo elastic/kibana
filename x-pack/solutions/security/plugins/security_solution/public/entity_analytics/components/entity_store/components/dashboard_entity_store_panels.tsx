@@ -16,7 +16,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
-import { RiskScoreEntityType } from '../../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../../common/entity_analytics/types';
 import { EntitiesList } from '../entities_list';
 import { useEntityStoreStatus } from '../hooks/use_entity_store';
 import { EntityAnalyticsRiskScores } from '../../entity_analytics_risk_score';

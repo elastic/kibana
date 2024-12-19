@@ -10,11 +10,12 @@ import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { buildUserNamesFilter, RiskScoreEntityType } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import type { DescriptionList } from '../../../../common/utility_types';
 import { useDarkMode } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';

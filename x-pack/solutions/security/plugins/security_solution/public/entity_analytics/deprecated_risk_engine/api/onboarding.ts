@@ -10,7 +10,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import type { StartRenderServices } from '../../../types';
 import { INTERNAL_RISK_SCORE_URL } from '../../../../common/constants';
 
-import { RiskScoreEntityType } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import {
   HOST_RISK_SCORES_ENABLED_TITLE,
   INSTALLATION_ERROR,

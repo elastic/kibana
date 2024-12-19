@@ -30,8 +30,8 @@ import type { EntityRiskScore } from '../../../../../../common/search_strategy';
 import {
   buildHostNamesFilter,
   buildUserNamesFilter,
+  RiskScoreEntityType,
 } from '../../../../../../common/search_strategy';
-import { RiskScoreEntityType } from '../../../../../../common/entity_analytics/risk_engine';
 import { AssetCriticalityBadge } from '../../../asset_criticality';
 import { RiskInputsUtilityBar } from '../../components/utility_bar';
 import { ActionColumn } from '../../components/action_column';

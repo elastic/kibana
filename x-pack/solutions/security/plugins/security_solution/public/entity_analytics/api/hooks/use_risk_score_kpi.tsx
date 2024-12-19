@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EntityRiskQueries } from '../../../../common/api/search_strategy';
-import type { RiskScoreEntityType } from '../../../../common/search_strategy';
+import type { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import { RiskSeverity, EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import type { ESQuery } from '../../../../common/typed_json';

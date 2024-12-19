@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RiskScoreEntityType } from '../../../../common/search_strategy/security_solution/risk_score/common';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import type { HostPanelExpandableFlyoutProps } from '../host_right';
 import type { UserPanelExpandableFlyoutProps } from '../user_right';
 

@@ -8,7 +8,7 @@
 import React from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { RiskScoreEntityType } from '../../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../../common/entity_analytics/types';
 import { RiskDetailsTabBody } from '../../../../entity_analytics/components/risk_details_tab_body';
 import { HostsType, HostsTableType } from '../../store/model';
 import { AnomaliesQueryTabBody } from '../../../../common/containers/anomalies/anomalies_query_tab_body';

@@ -16,7 +16,7 @@ import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_sum
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { ManagedUser } from './components/managed_user';
 import type { ManagedUserData } from './types';
-import type { RiskScoreEntityType, UserItem } from '../../../../common/search_strategy';
+import type { RiskScoreEntityType, UserItem } from '../../../../common/entity_analytics/types';
 import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ObservedEntity } from '../shared/components/observed_entity';

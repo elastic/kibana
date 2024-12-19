@@ -11,7 +11,7 @@ import type { SyntheticEvent, MouseEvent } from 'react';
 import React, { useMemo, useCallback } from 'react';
 import { isArray, isNil } from 'lodash/fp';
 import type { NavigateToAppOptions } from '@kbn/core-application-browser';
-import { RiskScoreEntityType } from '../../../../common/search_strategy/security_solution/risk_score/common';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
 import { encodeIpv6 } from '../../lib/helpers';
 import {

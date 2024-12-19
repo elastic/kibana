@@ -10,13 +10,13 @@ import { get, getOr } from 'lodash/fp';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { AggregationsMinAggregate, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { EntityTypeToNameField } from '../../../../../../common/entity_analytics/types';
 import type { EntityRiskQueries } from '../../../../../../common/api/search_strategy';
 import type { SecuritySolutionFactory } from '../../types';
-import {
-  EntityTypeToNameField,
-  type BucketItem,
-  type HostRiskScore,
-  type UserRiskScore,
+import type {
+  BucketItem,
+  HostRiskScore,
+  UserRiskScore,
 } from '../../../../../../common/search_strategy';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildRiskScoreQuery } from './query.risk_score.dsl';

@@ -35,7 +35,7 @@ import type {
   RiskSeverity,
   UserRiskScore,
 } from '../../../../common/search_strategy';
-import { RiskScoreEntityType } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import { RiskInformationButtonEmpty } from '../risk_information';
 
 export const rowItems: ItemsPerRow[] = [

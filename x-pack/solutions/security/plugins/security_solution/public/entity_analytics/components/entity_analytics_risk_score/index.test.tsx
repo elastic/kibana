@@ -9,7 +9,7 @@ import { render, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { EntityAnalyticsRiskScores } from '.';
-import { RiskScoreEntityType, RiskSeverity } from '../../../../common/search_strategy';
+import { RiskScoreEntityType, RiskSeverity } from '../../../../common/entity_analytics/types';
 import type { SeverityCount } from '../severity/types';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';

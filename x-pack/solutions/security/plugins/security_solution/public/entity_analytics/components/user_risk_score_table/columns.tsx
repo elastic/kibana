@@ -18,7 +18,7 @@ import type { UserRiskScoreColumns } from '.';
 import * as i18n from './translations';
 import { RiskScoreLevel } from '../severity/common';
 import type { Maybe, RiskSeverity } from '../../../../common/search_strategy';
-import { RiskScoreEntityType, RiskScoreFields } from '../../../../common/search_strategy';
+import { RiskScoreEntityType, RiskScoreFields } from '../../../../common/entity_analytics/types';
 import { UserDetailsLink } from '../../../common/components/links';
 import { UsersTableType } from '../../../explore/users/store/model';
 import { ENTITY_RISK_LEVEL } from '../risk_score/translations';

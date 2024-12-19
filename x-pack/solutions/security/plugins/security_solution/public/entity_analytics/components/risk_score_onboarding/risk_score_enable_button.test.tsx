@@ -6,7 +6,7 @@
  */
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { RiskScoreEntityType } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import { TestProviders } from '../../../common/mock';
 
 import { RiskScoreEnableButton } from './risk_score_enable_button';

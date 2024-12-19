@@ -7,7 +7,7 @@
 import type { MouseEventHandler } from 'react';
 import React, { useMemo } from 'react';
 import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { RiskSeverity, RiskScoreEntityType } from '../../../../common/search_strategy';
+import type { RiskSeverity, RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import { SeverityFilter } from '../severity/severity_filter';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../common/components/links';
 import type { SecurityPageName } from '../../../../common/constants';

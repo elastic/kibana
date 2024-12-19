@@ -23,6 +23,7 @@ import moment from 'moment';
 import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { estypes } from '@elastic/elasticsearch';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import type { ExperimentalFeatures } from '../../../../common';
 import type {
   GetEntityStoreStatusRequestQuery,
@@ -33,10 +34,7 @@ import type {
   InitEntityStoreResponse,
 } from '../../../../common/api/entity_analytics/entity_store/enable.gen';
 import type { AppClient } from '../../..';
-import {
-  EngineComponentResourceEnum,
-  EntityTypeEnum,
-} from '../../../../common/api/entity_analytics';
+import { EngineComponentResourceEnum } from '../../../../common/api/entity_analytics';
 import type {
   Entity,
   EngineDataviewUpdateResult,
@@ -213,8 +211,8 @@ export class EntityStoreDataClient {
 
     const { experimentalFeatures } = this.options;
     const enginesTypes = experimentalFeatures.serviceEntityStoreEnabled
-      ? [EntityTypeEnum.host, EntityTypeEnum.user, EntityTypeEnum.service]
-      : [EntityTypeEnum.host, EntityTypeEnum.user];
+      ? [RiskScoreEntityType.host, RiskScoreEntityType.user, RiskScoreEntityType.service]
+      : [RiskScoreEntityType.host, RiskScoreEntityType.user];
 
     const promises = enginesTypes.map((entity) =>
       run(() =>

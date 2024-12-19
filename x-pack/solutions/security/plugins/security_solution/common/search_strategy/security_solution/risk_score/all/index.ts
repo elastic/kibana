@@ -7,10 +7,10 @@
 
 import type { IEsSearchResponse } from '@kbn/search-types';
 
+import { EntityIdentifierFields, RiskScoreEntityType } from '../../../../entity_analytics/types';
 import { EntityRiskLevels, EntityRiskLevelsEnum } from '../../../../api/entity_analytics/common';
 import type { EntityRiskScoreRecord } from '../../../../api/entity_analytics/common';
 import type { Inspect, Maybe, SortField } from '../../../common';
-import { RiskScoreEntityType } from '../common';
 
 export interface RiskScoreStrategyResponse<T extends RiskScoreEntityType>
   extends IEsSearchResponse {
@@ -47,13 +47,13 @@ export type RiskScoreSortField = SortField<RiskScoreFields>;
 
 export enum RiskScoreFields {
   timestamp = '@timestamp',
-  hostName = 'host.name',
+  hostName = EntityIdentifierFields.hostName,
   hostRiskScore = 'host.risk.calculated_score_norm',
   hostRisk = 'host.risk.calculated_level',
-  userName = 'user.name',
+  userName = EntityIdentifierFields.userName,
   userRiskScore = 'user.risk.calculated_score_norm',
   userRisk = 'user.risk.calculated_level',
-  serviceName = 'service.name',
+  serviceName = EntityIdentifierFields.serviceName,
   serviceRiskScore = 'service.risk.calculated_score_norm',
   serviceRisk = 'service.risk.calculated_level',
   alertsCount = 'alertsCount',
@@ -84,12 +84,6 @@ export const EMPTY_SEVERITY_COUNT = {
   [EntityRiskLevelsEnum.Low]: 0,
   [EntityRiskLevelsEnum.Moderate]: 0,
   [EntityRiskLevelsEnum.Unknown]: 0,
-};
-
-export const EntityTypeToNameField: Record<RiskScoreEntityType, RiskScoreFields> = {
-  [RiskScoreEntityType.host]: RiskScoreFields.hostName,
-  [RiskScoreEntityType.user]: RiskScoreFields.userName,
-  [RiskScoreEntityType.service]: RiskScoreFields.serviceName,
 };
 
 export const EntityTypeToLevelField: Record<RiskScoreEntityType, RiskScoreFields> = {

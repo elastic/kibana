@@ -33,7 +33,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import { EntityType, EntityTypeEnum, type StoreStatus } from '../../../common/api/entity_analytics';
+import { RiskScoreEntityType } from '../../../common/entity_analytics/types';
+import { EntityType, type StoreStatus } from '../../../common/api/entity_analytics';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../common/entity_analytics/asset_criticality';
 import { useKibana } from '../../common/lib/kibana';
@@ -78,7 +79,7 @@ export const EntityStoreManagementPage = () => {
 
   const entityTypes = isServiceEntityStoreEnabled
     ? allEntityTypes
-    : allEntityTypes.filter((value) => value !== EntityTypeEnum.service);
+    : allEntityTypes.filter((value) => value !== RiskScoreEntityType.service);
 
   const enableStoreMutation = useEnableEntityStoreMutation();
   const stopEntityEngineMutation = useStopEntityEngineMutation(entityTypes);

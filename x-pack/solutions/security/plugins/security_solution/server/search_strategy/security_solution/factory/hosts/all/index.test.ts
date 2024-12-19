@@ -7,7 +7,6 @@
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
-import { RiskScoreEntityType } from '../../../../../../common/search_strategy/security_solution';
 import * as buildQuery from './query.all_hosts.dsl';
 import * as buildRiskQuery from '../../risk_score/all/query.risk_score.dsl';
 import { allHosts } from '.';
@@ -19,6 +18,7 @@ import {
 } from './__mocks__';
 import { get } from 'lodash/fp';
 import type { HostsRequestOptions } from '../../../../../../common/api/search_strategy';
+import { RiskScoreEntityType } from '../../../../../../common/entity_analytics/types';
 
 class IndexNotFoundException extends Error {
   meta: { body: { error: { type: string } } };

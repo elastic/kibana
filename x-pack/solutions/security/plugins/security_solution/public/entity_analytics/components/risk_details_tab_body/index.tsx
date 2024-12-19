@@ -23,8 +23,12 @@ import { RiskScoreOverTime } from '../risk_score_over_time';
 import { TopRiskScoreContributors } from '../top_risk_score_contributors';
 import { TopRiskScoreContributorsAlerts } from '../top_risk_score_contributors_alerts';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
-import { buildEntityNameFilter, RiskScoreEntityType } from '../../../../common/search_strategy';
+import {
+  buildEntityNameFilter,
+  type HostRiskScore,
+  type UserRiskScore,
+} from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import type { UsersComponentsQueryProps } from '../../../explore/users/pages/navigation/types';
 import type { HostsComponentsQueryProps } from '../../../explore/hosts/pages/navigation/types';
 import { useDashboardHref } from '../../../common/hooks/use_dashboard_href';

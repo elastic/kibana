@@ -6,12 +6,9 @@
  */
 
 import type { Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { EntityTypeToNameField } from '../../../../../../common/entity_analytics/types';
 import type { RiskScoreRequestOptions } from '../../../../../../common/api/search_strategy';
-import {
-  Direction,
-  EntityTypeToNameField,
-  RiskScoreFields,
-} from '../../../../../../common/search_strategy';
+import { Direction, RiskScoreFields } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 export const QUERY_SIZE = 10;

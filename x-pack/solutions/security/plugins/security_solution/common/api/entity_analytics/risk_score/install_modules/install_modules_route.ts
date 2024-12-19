@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RiskScoreEntityType } from '../../../../search_strategy';
+import { RiskScoreEntityType } from '../../../../entity_analytics/types';
 
 export const onboardingRiskScoreRequestBody = {
   body: schema.object({

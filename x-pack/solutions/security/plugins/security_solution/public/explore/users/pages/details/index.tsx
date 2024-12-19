@@ -20,6 +20,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
+import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import {
@@ -62,7 +63,7 @@ import {
 } from '../../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { LastEventTime } from '../../../../common/components/last_event_time';
-import { LastEventIndexKey, RiskScoreEntityType } from '../../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../../common/entity_analytics/types';
 
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import type { UserSummaryProps } from '../../../../overview/components/user_overview';

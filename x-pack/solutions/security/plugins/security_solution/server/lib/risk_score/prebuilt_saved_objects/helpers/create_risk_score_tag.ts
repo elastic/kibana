@@ -8,7 +8,7 @@ import type { Logger } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { i18n } from '@kbn/i18n';
-import type { RiskScoreEntityType } from '../../../../../common/search_strategy';
+import type { RiskScoreEntityType } from '../../../../../common/entity_analytics/types';
 import { RISK_SCORE_TAG_DESCRIPTION, getRiskScoreTagName } from './utils';
 import type { BulkCreateSavedObjectsResult } from '../types';
 import { createTag, findTagsByName } from '../../../tags/saved_objects';

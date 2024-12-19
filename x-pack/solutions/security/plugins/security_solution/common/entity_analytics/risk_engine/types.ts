@@ -7,12 +7,6 @@
 
 import type { EntityRiskScoreRecord, RiskScoreInput } from '../../api/entity_analytics/common';
 
-export enum RiskScoreEntityType {
-  host = 'host',
-  user = 'user',
-  service = 'service',
-}
-
 export interface InitRiskEngineResult {
   legacyRiskEngineDisabled: boolean;
   riskEngineResourcesInstalled: boolean;

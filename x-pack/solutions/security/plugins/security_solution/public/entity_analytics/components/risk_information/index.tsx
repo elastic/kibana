@@ -31,7 +31,7 @@ import { css } from '@emotion/react';
 import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../helper_hooks';
 import { RiskScoreLevel } from '../severity/common';
-import type { RiskScoreEntityType } from '../../../../common/search_strategy';
+import type { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import { RiskSeverity } from '../../../../common/search_strategy';
 import {
   CriticalityLevels,

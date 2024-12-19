@@ -7,8 +7,8 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IconType } from '@elastic/eui';
-import type { EntityType } from '../../../../common/api/entity_analytics';
-import { EntityTypeEnum } from '../../../../common/api/entity_analytics';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+
 import {
   ASSET_CRITICALITY_INDEX_PATTERN,
   RISK_SCORE_INDEX_PATTERN,
@@ -20,24 +20,24 @@ import type {
   ServiceEntity,
 } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 
-export const getEntityType = (record: Entity): EntityType => {
+export const getEntityType = (record: Entity): RiskScoreEntityType => {
   if ((record as UserEntity)?.user) {
-    return EntityTypeEnum.user;
+    return RiskScoreEntityType.user;
   }
   if ((record as HostEntity)?.host) {
-    return EntityTypeEnum.host;
+    return RiskScoreEntityType.host;
   }
 
   if ((record as ServiceEntity)?.service) {
-    return EntityTypeEnum.service;
+    return RiskScoreEntityType.service;
   }
   throw new Error(`Unexpected entity: ${JSON.stringify(record)}`);
 };
 
-export const EntityIconByType: Record<EntityType, IconType> = {
-  [EntityTypeEnum.user]: 'user',
-  [EntityTypeEnum.host]: 'storage',
-  [EntityTypeEnum.service]: 'console',
+export const EntityIconByType: Record<RiskScoreEntityType, IconType> = {
+  [RiskScoreEntityType.user]: 'user',
+  [RiskScoreEntityType.host]: 'storage',
+  [RiskScoreEntityType.service]: 'console',
 };
 
 export const sourceFieldToText = (source: string) => {

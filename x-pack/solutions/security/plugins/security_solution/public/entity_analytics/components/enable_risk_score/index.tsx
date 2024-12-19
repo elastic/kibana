@@ -6,7 +6,7 @@
  */
 import { EuiEmptyPrompt, EuiPanel, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import type { RiskScoreEntityType } from '../../../../common/search_strategy';
+import type { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import { useCheckSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_check_signal_index';
 import type { inputsModel } from '../../../common/store';
 import { RiskScoreHeaderTitle } from '../risk_score_onboarding/risk_score_header_title';

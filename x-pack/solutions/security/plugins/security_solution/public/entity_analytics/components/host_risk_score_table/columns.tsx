@@ -18,7 +18,7 @@ import type { HostRiskScoreColumns } from '.';
 import * as i18n from './translations';
 import { HostsTableType } from '../../../explore/hosts/store/model';
 import type { Maybe, RiskSeverity } from '../../../../common/search_strategy';
-import { RiskScoreFields, RiskScoreEntityType } from '../../../../common/search_strategy';
+import { RiskScoreFields, RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import { RiskScoreLevel } from '../severity/common';
 import { ENTITY_RISK_LEVEL } from '../risk_score/translations';
 import { CELL_ACTIONS_TELEMETRY } from '../risk_score/constants';

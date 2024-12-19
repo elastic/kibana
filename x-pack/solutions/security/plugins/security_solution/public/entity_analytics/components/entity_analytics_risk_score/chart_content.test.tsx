@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { RiskScoreEntityType, RiskSeverity } from '../../../../common/search_strategy';
+import { RiskScoreEntityType, RiskSeverity } from '../../../../common/entity_analytics/types';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useSpaceId } from '../../../common/hooks/use_space_id';

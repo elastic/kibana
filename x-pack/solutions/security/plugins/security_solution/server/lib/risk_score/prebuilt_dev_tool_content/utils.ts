@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RiskScoreEntityType } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import {
   getCreateLatestTransformOptions,
   getCreateMLHostPivotTransformOptions,

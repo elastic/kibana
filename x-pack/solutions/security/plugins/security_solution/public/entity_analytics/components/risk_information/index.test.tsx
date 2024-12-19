@@ -9,7 +9,7 @@ import { render, fireEvent, within } from '@testing-library/react';
 import React from 'react';
 import { RiskInformationButtonEmpty } from '.';
 import { TestProviders } from '../../../common/mock';
-import { RiskScoreEntityType } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 
 describe.each([RiskScoreEntityType.host, RiskScoreEntityType.user])(
   'Risk Information entityType: %s',

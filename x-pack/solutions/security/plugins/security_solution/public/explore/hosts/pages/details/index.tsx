@@ -35,8 +35,8 @@ import { AlertsByStatus } from '../../../../overview/components/detection_respon
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-import type { HostItem } from '../../../../../common/search_strategy';
-import { LastEventIndexKey, RiskScoreEntityType } from '../../../../../common/search_strategy';
+import { LastEventIndexKey, type HostItem } from '../../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../../common/entity_analytics/types';
 import { SecurityPageName } from '../../../../app/types';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { HeaderPage } from '../../../../common/components/header_page';

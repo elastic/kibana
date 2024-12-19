@@ -12,6 +12,7 @@ import { EuiLink } from '@elastic/eui';
 import styled from 'styled-components';
 import { get } from 'lodash/fp';
 
+import { EntityTypeToNameField } from '../../../../common/entity_analytics/types';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { EntityDetailsLink } from '../../../common/components/links';
 import { RiskScoreLevel } from '../severity/common';
@@ -24,7 +25,6 @@ import type {
 } from '../../../../common/search_strategy';
 import {
   EntityTypeToLevelField,
-  EntityTypeToNameField,
   EntityTypeToScoreField,
   RiskScoreFields,
 } from '../../../../common/search_strategy';

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RiskScoreEntityType } from '../../../common/entity_analytics/risk_engine';
 import { renderHook } from '@testing-library/react-hooks';
 import { getRiskScoreSummaryAttributes } from './risk_score_summary';
 import { RiskSeverity } from '../../../common/search_strategy';
@@ -13,6 +12,7 @@ import type { MetricVisualizationState } from '@kbn/lens-plugin/public';
 import { wrapper } from '../../common/components/visualization_actions/mocks';
 import { useLensAttributes } from '../../common/components/visualization_actions/use_lens_attributes';
 import type { Query } from '@kbn/es-query';
+import { RiskScoreEntityType } from '../../../common/entity_analytics/types';
 
 jest.mock('../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({

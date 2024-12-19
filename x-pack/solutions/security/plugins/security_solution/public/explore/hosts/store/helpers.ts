@@ -6,7 +6,7 @@
  */
 
 import { EntityTypeToLevelField } from '../../../../common/search_strategy';
-import type { RiskSeverity, RiskScoreEntityType } from '../../../../common/search_strategy';
+import type { RiskSeverity, RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import { DEFAULT_TABLE_ACTIVE_PAGE } from '../../../common/store/constants';
 
 import type { HostsModel, Queries } from './model';

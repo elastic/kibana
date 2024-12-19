@@ -17,8 +17,11 @@ import { EnableRiskScore } from '../enable_risk_score';
 import { getRiskScoreColumns } from './columns';
 import { LastUpdatedAt } from '../../../common/components/last_updated_at';
 import { HeaderSection } from '../../../common/components/header_section';
-import type { RiskSeverity, RiskScoreEntityType } from '../../../../common/search_strategy';
-import { EntityTypeToNameField } from '../../../../common/search_strategy';
+import {
+  type RiskSeverity,
+  type RiskScoreEntityType,
+  EntityTypeToNameField,
+} from '../../../../common/entity_analytics/types';
 import { generateSeverityFilter } from '../../../explore/hosts/store/helpers';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { InspectButtonContainer } from '../../../common/components/inspect';

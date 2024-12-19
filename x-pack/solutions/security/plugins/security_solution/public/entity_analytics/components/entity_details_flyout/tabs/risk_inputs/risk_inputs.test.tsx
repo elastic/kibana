@@ -12,7 +12,7 @@ import { times } from 'lodash/fp';
 import { EXPAND_ALERT_TEST_ID, RiskInputsTab } from './risk_inputs_tab';
 import { alertInputDataMock } from '../../mocks';
 import { RiskSeverity } from '../../../../../../common/search_strategy';
-import { RiskScoreEntityType } from '../../../../../../common/entity_analytics/risk_engine';
+import { RiskScoreEntityType } from '../../../../../../common/entity_analytics/types';
 
 const mockUseRiskContributingAlerts = jest.fn().mockReturnValue({ loading: false, data: [] });
 

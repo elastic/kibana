@@ -20,7 +20,7 @@ import type { State } from '../../common/store';
 import { UserRiskScoreTable } from './user_risk_score_table';
 import { usersSelectors } from '../../explore/users/store';
 import { useQueryToggle } from '../../common/containers/query_toggle';
-import { EMPTY_SEVERITY_COUNT, RiskScoreEntityType } from '../../../common/search_strategy';
+import { EMPTY_SEVERITY_COUNT, RiskScoreEntityType } from '../../../common/entity_analytics/types';
 import { RiskScoresNoDataDetected } from './risk_score_onboarding/risk_score_no_data_detected';
 import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { RiskScoreUpdatePanel } from './risk_score_update_panel';

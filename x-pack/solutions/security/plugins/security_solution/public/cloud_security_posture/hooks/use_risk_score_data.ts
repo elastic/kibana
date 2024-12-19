@@ -7,7 +7,6 @@
 
 import { useMemo } from 'react';
 import {
-  RiskScoreEntityType,
   type HostRiskScore,
   type UserRiskScore,
   buildHostNamesFilter,
@@ -15,6 +14,7 @@ import {
 } from '../../../common/search_strategy';
 import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
 import { FIRST_RECORD_PAGINATION } from '../../entity_analytics/common';
+import { RiskScoreEntityType } from '../../../common/entity_analytics/types';
 
 export const useHasRiskScore = ({
   field,

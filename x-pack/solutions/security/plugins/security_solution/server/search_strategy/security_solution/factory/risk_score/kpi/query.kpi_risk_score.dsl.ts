@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  EntityTypeToLevelField,
-  EntityTypeToNameField,
-} from '../../../../../../common/search_strategy';
+import { EntityTypeToNameField } from '../../../../../../common/entity_analytics/types';
+import { EntityTypeToLevelField } from '../../../../../../common/search_strategy';
 import type { RiskScoreKpiRequestOptions } from '../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 

@@ -5,13 +5,12 @@
  * 2.0.
  */
 import { useDispatch } from 'react-redux';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import { getTabsOnUsersUrl } from '../../../common/components/link_to/redirect_to_users';
 import { UsersTableType } from '../../../explore/users/store/model';
 
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 import { HostsTableType, HostsType } from '../../../explore/hosts/store/model';
-
-import { RiskScoreEntityType } from '../../../../common/search_strategy/security_solution/risk_score';
 import { usersActions } from '../../../explore/users/store';
 import { hostsActions } from '../../../explore/hosts/store';
 import { SecurityPageName } from '../../../app/types';

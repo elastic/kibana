@@ -5,14 +5,13 @@
  * 2.0.
  */
 
+import { EntityTypeToNameField, RiskScoreEntityType } from '../../../../entity_analytics/types';
 import type { ESQuery } from '../../../../typed_json';
 import { RISKY_HOSTS_INDEX_PREFIX, RISKY_USERS_INDEX_PREFIX } from '../../../../constants';
 import {
-  RiskScoreEntityType,
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,
 } from '../../../../entity_analytics/risk_engine';
-import { EntityTypeToNameField } from '../all';
 
 /**
  * Make sure this aligns with the index in step 6, 9 in

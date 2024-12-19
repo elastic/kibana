@@ -8,7 +8,7 @@
 import type { HttpSetup } from '@kbn/core/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { StartRenderServices } from '../../../types';
-import { RiskScoreEntityType } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import * as utils from '../../../../common/utils/risk_score_modules';
 import type { inputsModel } from '../../../common/store';
 

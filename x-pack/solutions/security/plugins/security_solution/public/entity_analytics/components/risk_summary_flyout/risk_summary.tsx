@@ -23,13 +23,13 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash/fp';
-import { IDENTITY_FIELD_MAP } from '../../../../common/entity_analytics/entity_store/constants';
+import type { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+import { EntityTypeToNameField } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { ONE_WEEK_IN_HOURS } from '../../../flyout/entity_details/shared/constants';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
-import type { RiskScoreEntityType } from '../../../../common/entity_analytics/risk_engine';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
@@ -71,7 +71,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntityType>({
 
   const lensAttributes = useMemo(() => {
     const entityName = entityData?.name ?? '';
-    const fieldName = IDENTITY_FIELD_MAP[entityType];
+    const fieldName = EntityTypeToNameField[entityType];
 
     return getRiskScoreSummaryAttributes({
       severity: entityData?.risk?.calculated_level,

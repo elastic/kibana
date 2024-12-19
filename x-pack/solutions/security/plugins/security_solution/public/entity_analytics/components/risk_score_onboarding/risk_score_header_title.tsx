@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { capitalize } from 'lodash/fp';
-import type { RiskScoreEntityType } from '../../../../common/search_strategy';
+import type { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 
 const RiskScoreHeaderTitleComponent = ({
   riskScoreEntity,

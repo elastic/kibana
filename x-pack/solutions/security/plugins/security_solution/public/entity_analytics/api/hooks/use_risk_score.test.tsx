@@ -13,7 +13,7 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../common/hooks/use_app_toasts.mock';
 import { useRiskScoreFeatureStatus } from './use_risk_score_feature_status';
 import { useIsNewRiskScoreModuleInstalled } from './use_risk_engine_status';
-import { RiskScoreEntityType } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));

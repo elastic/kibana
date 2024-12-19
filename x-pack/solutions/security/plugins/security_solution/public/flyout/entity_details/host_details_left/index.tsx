@@ -7,6 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import {
   getRiskInputTab,
   getInsightsInputTab,
@@ -17,7 +18,6 @@ import {
   EntityDetailsLeftPanelTab,
   LeftPanelHeader,
 } from '../shared/components/left_panel/left_panel_header';
-import { RiskScoreEntityType } from '../../../../common/entity_analytics/risk_engine';
 
 export interface HostDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;

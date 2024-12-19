@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { SeverityFilter } from './severity_filter';
-import { RiskScoreEntityType, RiskSeverity } from '../../../../common/search_strategy';
+import { RiskScoreEntityType, RiskSeverity } from '../../../../common/entity_analytics/types';
 import { TestProviders } from '../../../common/mock';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 

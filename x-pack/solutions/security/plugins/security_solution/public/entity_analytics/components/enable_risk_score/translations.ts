@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { RiskScoreEntityType } from '../../../../common/search_strategy';
+import type { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import { getRiskEntityTranslation } from '../risk_score/translations';
 
 export const ENABLE_RISK_SCORE_POPOVER = i18n.translate(

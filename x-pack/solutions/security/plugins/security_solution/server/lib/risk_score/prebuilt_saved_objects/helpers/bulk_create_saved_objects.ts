@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/core/server';
 
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
-import { RiskScoreEntityType } from '../../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../../common/entity_analytics/types';
 import * as savedObjectsToCreate from '../saved_object';
 import type { BulkCreateSavedObjectsResult, SavedObjectTemplate } from '../types';
 import { createRiskScoreTag } from './create_risk_score_tag';

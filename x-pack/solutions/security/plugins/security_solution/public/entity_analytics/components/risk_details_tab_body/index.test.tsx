@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { RiskDetailsTabBody } from '.';
-import { RiskScoreEntityType } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import { HostsType } from '../../../explore/hosts/store/model';
 import { UsersType } from '../../../explore/users/store/model';
 import { useRiskScore } from '../../api/hooks/use_risk_score';

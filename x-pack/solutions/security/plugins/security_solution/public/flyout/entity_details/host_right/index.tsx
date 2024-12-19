@@ -25,7 +25,6 @@ import { useQueryInspector } from '../../../common/components/page/manage_query'
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
-import { RiskScoreEntityType } from '../../../../common/entity_analytics/risk_engine';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { HostPanelContent } from './content';
@@ -37,6 +36,8 @@ import { HostDetailsPanelKey } from '../host_details_left';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { HostPreviewPanelFooter } from '../host_preview/footer';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;

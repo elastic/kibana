@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { RiskScoreOverTime } from '.';
 import { TestProviders } from '../../../common/mock';
-import { RiskScoreEntityType } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;

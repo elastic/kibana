@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { getRiskEntityTranslation } from '../risk_score/translations';
-import type { RiskScoreEntityType } from '../../../../common/search_strategy';
+import type { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 export * from '../risk_score/translations';
 
 export const ENTITY_NAME = (riskEntity: RiskScoreEntityType) =>

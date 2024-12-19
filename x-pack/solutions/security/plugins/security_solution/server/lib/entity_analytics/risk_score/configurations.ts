@@ -6,11 +6,12 @@
  */
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
-import type { IdentifierType } from '../../../../common/entity_analytics/risk_engine';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import {
-  RiskScoreEntityType,
   riskScoreBaseIndexName,
+  type IdentifierType,
 } from '../../../../common/entity_analytics/risk_engine';
+
 import type { IIndexPatternString } from '../utils/create_datastream';
 
 const commonRiskFields: FieldMap = {

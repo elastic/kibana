@@ -26,7 +26,7 @@ import type {
   RiskSeverity,
   RiskScoreFields,
 } from '../../../../common/search_strategy';
-import { RiskScoreEntityType } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import type { State } from '../../../common/store';
 import * as i18n from '../../../explore/hosts/components/hosts_table/translations';
 import * as i18nHosts from './translations';

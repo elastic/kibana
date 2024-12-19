@@ -16,7 +16,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { consoleMappings } from '../console_mappings';
 import { readConsoleRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 
-import { RiskScoreEntityType } from '../../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../../common/entity_analytics/types';
 import { getView } from '../utils';
 
 const getReadables = (dataPath: string) => fs.promises.readFile(dataPath, { encoding: 'utf-8' });

@@ -19,7 +19,7 @@ import {
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,
 } from '../../../../common/entity_analytics/risk_engine';
-import { RiskScoreEntityType } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import {
   getRiskScorePivotTransformId,
   getRiskScoreLatestTransformId,

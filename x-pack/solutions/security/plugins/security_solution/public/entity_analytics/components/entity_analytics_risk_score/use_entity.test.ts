@@ -6,8 +6,8 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { RiskScoreEntityType } from '../../../../common/search_strategy/security_solution/risk_score';
 import { useEntityInfo } from './use_entity';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 
 jest.mock('react-redux', () => {
   const actual = jest.requireActual('react-redux');

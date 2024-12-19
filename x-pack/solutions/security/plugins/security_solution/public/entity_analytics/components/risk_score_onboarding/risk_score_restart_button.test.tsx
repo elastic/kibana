@@ -7,7 +7,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import React from 'react';
-import { RiskScoreEntityType } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import { TestProviders } from '../../../common/mock';
 import { RiskScoreRestartButton } from './risk_score_restart_button';
 

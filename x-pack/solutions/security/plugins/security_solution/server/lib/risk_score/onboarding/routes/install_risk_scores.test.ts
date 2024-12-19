@@ -12,7 +12,7 @@ import {
   requestMock,
 } from '../../../detection_engine/routes/__mocks__';
 import { INTERNAL_RISK_SCORE_URL } from '../../../../../common/constants';
-import { RiskScoreEntityType } from '../../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../../common/entity_analytics/types';
 import { installRiskScoresRoute } from './install_risk_scores';
 import { createIngestPipeline } from '../helpers/ingest_pipeline';
 import { createStoredScript } from '../../stored_scripts/lib/create_script';

@@ -7,7 +7,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { HttpSetup } from '@kbn/core/public';
-import { RiskScoreEntityType } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 import {
   getIngestPipelineName,
   getLegacyIngestPipelineName,

@@ -28,7 +28,7 @@ import type {
   AssetCriticalityRecord,
   EntityAnalyticsPrivileges,
 } from '../../../common/api/entity_analytics';
-import type { RiskScoreEntityType } from '../../../common/search_strategy';
+import type { RiskScoreEntityType } from '../../../common/entity_analytics/types';
 import {
   RISK_ENGINE_STATUS_URL,
   RISK_SCORE_PREVIEW_URL,

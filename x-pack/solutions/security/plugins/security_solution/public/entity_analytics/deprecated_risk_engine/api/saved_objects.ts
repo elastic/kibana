@@ -18,7 +18,7 @@ import {
   prebuiltSavedObjectsBulkDeleteUrl,
 } from '../../../../common/constants';
 
-import { RiskScoreEntityType } from '../../../../common/search_strategy';
+import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
 
 import {
   DELETE_SAVED_OBJECTS_FAILURE,
