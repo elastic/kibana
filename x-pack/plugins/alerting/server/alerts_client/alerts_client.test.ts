@@ -1675,6 +1675,43 @@ describe('Alerts Client', () => {
           expect(clusterClient.bulk).not.toHaveBeenCalled();
           expect(maintenanceWindowsService.getMaintenanceWindows).not.toHaveBeenCalled();
         });
+
+        test('should throw an error in case of cluster_block_exception', async () => {
+          clusterClient.bulk.mockResponseOnce({
+            errors: true,
+            took: 201,
+            items: [
+              {
+                index: {
+                  _index: '.internal.alerts-default.alerts-default-000001',
+                  _id: '933de4e7-6f99-4df9-b66d-d34b7670d471',
+                  status: 403,
+                  error: {
+                    type: 'cluster_block_exception',
+                    reason:
+                      'index [.internal.alerts-default.alerts-default-000001] blocked by: [FORBIDDEN/8/index write (api)];',
+                  },
+                },
+              },
+            ],
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+
+          await alertsClient.processAlerts(processAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await expect(alertsClient.persistAlerts()).rejects.toThrowError(
+            'index [.internal.alerts-default.alerts-default-000001] blocked by: [FORBIDDEN/8/index write (api)];'
+          );
+        });
       });
 
       describe('getSummarizedAlerts', () => {
