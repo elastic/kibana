@@ -40,6 +40,19 @@ describe('getTransformOptions', () => {
           "index": Array [
             "source",
           ],
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "now-24h",
+                    },
+                  },
+                },
+              ],
+            },
+          },
         },
         "sync": Object {
           "time": Object {

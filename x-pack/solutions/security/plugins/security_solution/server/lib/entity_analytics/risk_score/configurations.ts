@@ -181,6 +181,7 @@ export const getTransformOptions = ({
           {
             range: {
               '@timestamp': {
+                // It prevents the transform from processing too much data on reinstall
                 gte: 'now-24h',
               },
             },
