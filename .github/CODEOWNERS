@@ -306,7 +306,6 @@ packages/kbn-shared-ux-utility @elastic/appex-sharedux
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-sort-predicates @elastic/kibana-visualizations
-packages/kbn-std @elastic/kibana-core
 packages/kbn-stdio-dev-helpers @elastic/kibana-operations
 packages/kbn-storybook @elastic/kibana-operations
 packages/kbn-telemetry-tools @elastic/kibana-core
@@ -606,6 +605,7 @@ src/platform/packages/shared/kbn-server-route-repository-utils @elastic/obs-know
 src/platform/packages/shared/kbn-sse-utils @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-sse-utils-client @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-sse-utils-server @elastic/obs-knowledge-team
+src/platform/packages/shared/kbn-std @elastic/kibana-core
 src/platform/packages/shared/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
 src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-management
@@ -1890,10 +1890,10 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /src/dev/eslint/security_eslint_rule_tests.ts @elastic/kibana-security
 /src/core/server/integration_tests/config/check_dynamic_config.test.ts @elastic/kibana-security
 /src/plugins/telemetry/server/config/telemetry_labels.ts @elastic/kibana-security
-/packages/kbn-std/src/is_internal_url.test.ts @elastic/kibana-core @elastic/kibana-security
-/packages/kbn-std/src/is_internal_url.ts @elastic/kibana-core @elastic/kibana-security
-/packages/kbn-std/src/parse_next_url.test.ts @elastic/kibana-core @elastic/kibana-security
-/packages/kbn-std/src/parse_next_url.ts @elastic/kibana-core @elastic/kibana-security
+/src/platform/packages/shared/kbn-std/src/is_internal_url.test.ts @elastic/kibana-core @elastic/kibana-security
+/src/platform/packages/shared/kbn-std/src/is_internal_url.ts @elastic/kibana-core @elastic/kibana-security
+/src/platform/packages/shared/kbn-std/src/parse_next_url.test.ts @elastic/kibana-core @elastic/kibana-security
+/src/platform/packages/shared/kbn-std/src/parse_next_url.ts @elastic/kibana-core @elastic/kibana-security
 /test/interactive_setup_api_integration/ @elastic/kibana-security
 /test/interactive_setup_functional/ @elastic/kibana-security
 /test/plugin_functional/plugins/hardening @elastic/kibana-security
