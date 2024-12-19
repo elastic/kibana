@@ -81,7 +81,7 @@ describe('test fetchAll', () => {
           rowHeight: false,
           breakdownField: false,
         },
-        requestParams: {},
+        dataRequestParams: {},
       }),
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
@@ -274,7 +274,7 @@ describe('test fetchAll', () => {
           rowHeight: false,
           breakdownField: false,
         },
-        requestParams: {},
+        dataRequestParams: {},
       }),
     };
     fetchAll(subjects, false, deps);
@@ -398,7 +398,7 @@ describe('test fetchAll', () => {
             rowHeight: false,
             breakdownField: false,
           },
-          requestParams: {},
+          dataRequestParams: {},
         }),
       };
       fetchAll(subjects, false, deps);

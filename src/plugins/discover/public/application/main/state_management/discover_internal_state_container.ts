@@ -14,17 +14,13 @@ import {
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
-import type { DiscoverAppState } from '../../..';
 
-interface InternalStateRequestParams {
+interface InternalStateDataRequestParams {
   timeRangeAbs?: TimeRange;
   timeRangeRel?: TimeRange;
-  filters?: Filter[];
-  query?: AggregateQuery | Query | undefined;
-  appState?: DiscoverAppState;
 }
 
 export interface InternalState {
@@ -42,7 +38,7 @@ export interface InternalState {
     rowHeight: boolean;
     breakdownField: boolean;
   };
-  requestParams: InternalStateRequestParams;
+  dataRequestParams: InternalStateDataRequestParams;
 }
 
 export interface InternalStateTransitions {
@@ -75,7 +71,9 @@ export interface InternalStateTransitions {
   ) => (
     resetDefaultProfileState: Omit<InternalState['resetDefaultProfileState'], 'resetId'>
   ) => InternalState;
-  setRequestState: (state: InternalState) => (params: InternalStateRequestParams) => InternalState;
+  setDataRequestParams: (
+    state: InternalState
+  ) => (params: InternalStateDataRequestParams) => InternalState;
 }
 
 export type DiscoverInternalStateContainer = ReduxLikeStateContainer<
@@ -102,7 +100,7 @@ export function getInternalStateContainer() {
         rowHeight: false,
         breakdownField: false,
       },
-      requestParams: {},
+      dataRequestParams: {},
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
@@ -174,10 +172,11 @@ export function getInternalStateContainer() {
         overriddenVisContextAfterInvalidation: undefined,
         expandedDoc: undefined,
       }),
-      setRequestState: (prevState: InternalState) => (params: InternalStateRequestParams) => ({
-        ...prevState,
-        requestParams: params,
-      }),
+      setDataRequestParams:
+        (prevState: InternalState) => (params: InternalStateDataRequestParams) => ({
+          ...prevState,
+          dataRequestParams: params,
+        }),
       setResetDefaultProfileState:
         (prevState: InternalState) =>
         (resetDefaultProfileState: Omit<InternalState['resetDefaultProfileState'], 'resetId'>) => ({

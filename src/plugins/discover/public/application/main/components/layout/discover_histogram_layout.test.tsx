@@ -47,7 +47,7 @@ function getStateContainer(savedSearch?: SavedSearch) {
   stateContainer.appState.update(appState);
 
   stateContainer.internalState.transitions.setDataView(dataView);
-  stateContainer.internalState.transitions.setRequestState({
+  stateContainer.internalState.transitions.setDataRequestParams({
     timeRangeAbs: {
       from: '2020-05-14T11:05:13.590',
       to: '2020-05-14T11:20:13.590',
@@ -56,11 +56,6 @@ function getStateContainer(savedSearch?: SavedSearch) {
       from: '2020-05-14T11:05:13.590',
       to: '2020-05-14T11:20:13.590',
     },
-    query: {
-      language: 'kuery',
-      query: '',
-    },
-    appState,
   });
 
   return stateContainer;

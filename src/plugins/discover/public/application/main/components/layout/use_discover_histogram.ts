@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
 import {
   canImportVisContext,
   UnifiedHistogramApi,
@@ -215,14 +216,10 @@ export const useDiscoverHistogram = ({
   /**
    * Request params
    */
-  const requestParams = useInternalStateSelector((state) => state.requestParams);
+  const { query, filters } = useQuerySubscriber({ data: services.data });
+  const requestParams = useInternalStateSelector((state) => state.dataRequestParams);
   const customFilters = useInternalStateSelector((state) => state.customFilters);
-  const {
-    timeRangeRel: relativeTimeRange,
-    timeRangeAbs: timeRange,
-    query,
-    filters,
-  } = requestParams;
+  const { timeRangeRel: relativeTimeRange, timeRangeAbs: timeRange } = requestParams;
   // When in ES|QL mode, update the data view, query, and
   // columns only when documents are done fetching so the Lens suggestions
   // don't frequently change, such as when the user modifies the table
