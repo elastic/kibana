@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { without } from 'lodash';
 import { GridPanelData, GridRowData } from '../types';
 
 const collides = (panelA: GridPanelData, panelB: GridPanelData) => {
@@ -77,32 +78,109 @@ const compactGridRow = (originalLayout: GridRowData) => {
   return nextRowData;
 };
 
+/**
+ * Our collision resolution algorithm works as follows:
+ * - Start by creating a 2D grid that contains arrays of panel IDs (i.e. a 3D array)
+ *      - If a panel occupies a cell, then its panel ID is pushed into the cell array
+ * - Once you have this representation, row by row, resolve the collisions; i.e.
+ *      - for each row,
+ *           - while there are collisions
+ *                - for each colliding panel, in reverse order,
+ *                     - move the panel down by a single row
+ *                     - if no collisions, break; otherwise, proceed to next panel
+ *  Notes:
+ *      - We know there is a collision if the panel ID array of a cell contains more than one ID
+ *      - Pushing panels down is done in reverse order in order to maintain the original order of panels
+ *           - i.e. the bottom-right-most panel is pushed down **first**
+ */
 export const resolveGridRow = (
   originalRowData: GridRowData,
+  columnCount: number,
   dragRequest?: GridPanelData
 ): GridRowData => {
   const nextRowData = { ...originalRowData, panels: { ...originalRowData.panels } };
-
-  // Apply drag request
+  // apply drag request
   if (dragRequest) {
     nextRowData.panels[dragRequest.id] = dragRequest;
   }
-  // return nextRowData;
 
-  // push all panels down if they collide with another panel
+  // build an empty 2D array representing the current grid
+  const panelRows = Object.values(nextRowData.panels).map(
+    ({ row: panelRow, height: panelHeight }) => panelRow + panelHeight
+  );
+  if (panelRows.length === 0) return nextRowData;
+  const rowCount = Math.max(...panelRows);
+  const collisionGrid: string[][][] = new Array(rowCount)
+    .fill(null)
+    .map(() => new Array(columnCount).fill(null).map(() => new Array(0)));
+
+  // for each panel, push its ID into the grid cells that it occupies
   const sortedKeys = getKeysInOrder(nextRowData.panels, dragRequest?.id);
-
-  for (const key of sortedKeys) {
-    const panel = nextRowData.panels[key];
-    const collisions = getAllCollisionsWithPanel(panel, nextRowData, sortedKeys);
-
-    for (const collision of collisions) {
-      const rowOverlap = panel.row + panel.height - collision.row;
-      if (rowOverlap > 0) {
-        collision.row += rowOverlap;
+  sortedKeys.forEach((panelKey) => {
+    const panel = nextRowData.panels[panelKey];
+    for (let row = panel.row; row < panel.row + panel.height; row++) {
+      for (let column = panel.column; column < panel.column + panel.width; column++) {
+        collisionGrid[row][column].push(panelKey);
       }
     }
+  });
+
+  // move panels in reverse order to maintain the original order of panels
+  const orderToMove: { [panelKey: string]: number } = sortedKeys
+    .reverse()
+    .reduce((prev, panelKey, index) => {
+      return { ...prev, [panelKey]: index };
+    }, {});
+
+  const getCollisionsInOrder = (row: number) => {
+    const collisions: string[] = [];
+    collisionGrid[row].forEach((collisionArray) => {
+      if (collisionArray.length > 1) {
+        for (const panelKey of collisionArray) {
+          if (collisions.indexOf(panelKey) === -1 && panelKey !== dragRequest?.id) {
+            collisions.push(panelKey);
+          }
+        }
+      }
+    });
+    return collisions.sort((key1, key2) => orderToMove[key1] - orderToMove[key2]);
+  };
+
+  // handle all collisions, row by row
+  for (let row = dragRequest?.row ?? 0; row < collisionGrid.length; row++) {
+    let collisions = getCollisionsInOrder(row);
+
+    // continue pushing panels down until all collisions in this row have been resolved
+    while (collisions.length > 0) {
+      const panelKey = collisions.shift();
+      if (!panelKey) break;
+
+      // move the current colliding panel down
+      const panel = nextRowData.panels[panelKey];
+      nextRowData.panels[panelKey].row += 1;
+
+      // update the collision grid to keep it in sync
+      const currentGridHeight = collisionGrid.length;
+      if (row + panel.height >= currentGridHeight) {
+        collisionGrid.push(new Array(columnCount).fill(null).map(() => new Array(0)));
+      }
+      for (
+        let panelColumn = panel.column;
+        panelColumn < panel.column + panel.width;
+        panelColumn++
+      ) {
+        collisionGrid[panel.row - 1][panelColumn] = without(
+          collisionGrid[panel.row - 1][panelColumn],
+          panelKey
+        );
+        collisionGrid[panel.row + panel.height - 1][panelColumn].push(panelKey);
+      }
+
+      // re-check if the current row has collisions now that the panel has been moved down
+      collisions = getCollisionsInOrder(row);
+    }
   }
+
   const compactedGrid = compactGridRow(nextRowData);
   return compactedGrid;
 };
