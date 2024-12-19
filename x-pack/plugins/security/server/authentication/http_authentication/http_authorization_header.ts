@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { ScopeableRequest } from '@kbn/core/server';
 
 export class HTTPAuthorizationHeader {
   /**
@@ -30,7 +30,7 @@ export class HTTPAuthorizationHeader {
    * @param [headerName] Optional name of the HTTP header to extract authentication information from. By default, the
    * authentication information is extracted from the `Authorization` HTTP header.
    */
-  static parseFromRequest(request: KibanaRequest, headerName = 'authorization') {
+  static parseFromRequest(request: ScopeableRequest, headerName = 'authorization') {
     const authorizationHeaderValue = request.headers[headerName.toLowerCase()];
     if (!authorizationHeaderValue || typeof authorizationHeaderValue !== 'string') {
       return null;
