@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSpacer } from '@elastic/eui';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSpacer, useEuiTheme } from '@elastic/eui';
 
 import { ThresholdIndicator } from '../../common/components/thershold_indicator';
 import { useNetworkTimingsPrevious24Hours } from '../hooks/use_network_timings_prev';
@@ -19,7 +18,7 @@ export const BreakdownLegend = () => {
 
   const { timingsWithLabels: prevTimingsWithLabels, loading } = useNetworkTimingsPrevious24Hours();
 
-  const theme = useTheme();
+  const theme = useEuiTheme().euiTheme;
 
   return (
     <>
@@ -34,7 +33,9 @@ export const BreakdownLegend = () => {
               <EuiFlexItem grow={true}>
                 <EuiHealth
                   color={
-                    (theme.eui as unknown as Record<string, string>)[`euiColorVis${index + 1}`]
+                    (theme.colors.vis as unknown as Record<string, string>)[
+                      `euiColorVis${index + 1}`
+                    ]
                   }
                 >
                   {label}

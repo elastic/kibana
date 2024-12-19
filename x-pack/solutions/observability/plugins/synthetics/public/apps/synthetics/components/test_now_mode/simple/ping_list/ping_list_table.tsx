@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { useExpandedPingList } from './use_ping_expanded';
 import { formatDuration } from '../../../../utils/formatting';
 import { Ping } from '../../../../../../../common/runtime_types';
@@ -91,7 +91,15 @@ export function PingListTable({ loading, error, pings, onChange }: Props) {
           {
             field: 'http.response.status_code',
             align: 'right',
-            name: <SpanWithMargin>{RES_CODE_LABEL}</SpanWithMargin>,
+            name: (
+              <span
+                css={css`
+                  margin-right: 16px;
+                `}
+              >
+                {RES_CODE_LABEL}
+              </span>
+            ),
             render: (statusCode: string) => <ResponseCodeColumn statusCode={statusCode} />,
           },
         ]
@@ -132,7 +140,3 @@ export function PingListTable({ loading, error, pings, onChange }: Props) {
     />
   );
 }
-
-export const SpanWithMargin = styled.span`
-  margin-right: 16px;
-`;

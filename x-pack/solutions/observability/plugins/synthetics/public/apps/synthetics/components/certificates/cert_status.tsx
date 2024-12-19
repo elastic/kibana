@@ -7,9 +7,9 @@
 
 import React from 'react';
 import moment from 'moment';
-import styled from 'styled-components';
 import { EuiHealth, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { useCertStatus } from './use_cert_status';
 import { CERT_STATUS, DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
 import { Cert } from '../../../../../common/runtime_types';
@@ -18,11 +18,6 @@ import * as labels from './translations';
 interface Props {
   cert: Cert;
 }
-
-const DateText = styled(EuiText)`
-  display: inline-block;
-  margin-left: 5px;
-`;
 
 export const CertStatus: React.FC<Props> = ({ cert }) => {
   const certStatus = useCertStatus(cert?.not_after, cert?.not_before);
@@ -35,9 +30,16 @@ export const CertStatus: React.FC<Props> = ({ cert }) => {
         <span>
           {labels.EXPIRES_SOON}
           {'  '}
-          <DateText color="subdued" size="xs">
+          <EuiText
+            color="subdued"
+            size="xs"
+            css={css`
+              display: inline-block;
+              margin-left: 5px;
+            `}
+          >
             {relativeDate}
-          </DateText>
+          </EuiText>
         </span>
       </EuiHealth>
     );
@@ -48,9 +50,16 @@ export const CertStatus: React.FC<Props> = ({ cert }) => {
         <span>
           {labels.EXPIRED}
           {'  '}
-          <DateText color="subdued" size="xs">
+          <EuiText
+            css={css`
+              display: inline-block;
+              margin-left: 5px;
+            `}
+            color="subdued"
+            size="xs"
+          >
             {relativeDate}
-          </DateText>
+          </EuiText>
         </span>
       </EuiHealth>
     );
@@ -65,9 +74,16 @@ export const CertStatus: React.FC<Props> = ({ cert }) => {
       <EuiHealth color="danger">
         <span>
           {labels.TOO_OLD}
-          <DateText color="subdued" size="xs">
+          <EuiText
+            css={css`
+              display: inline-block;
+              margin-left: 5px;
+            `}
+            color="subdued"
+            size="xs"
+          >
             {oldRelativeDate}
-          </DateText>
+          </EuiText>
         </span>
       </EuiHealth>
     );
@@ -80,7 +96,14 @@ export const CertStatus: React.FC<Props> = ({ cert }) => {
       <span>
         {labels.OK}
         {'  '}
-        <DateText color="subdued" size="xs">
+        <EuiText
+          css={css`
+            display: inline-block;
+            margin-left: 5px;
+          `}
+          color="subdued"
+          size="xs"
+        >
           <FormattedMessage
             id="xpack.synthetics.certs.status.ok.label"
             defaultMessage=" for {okRelativeDate}"
@@ -89,7 +112,7 @@ export const CertStatus: React.FC<Props> = ({ cert }) => {
               okRelativeDate,
             }}
           />
-        </DateText>
+        </EuiText>
       </span>
     </EuiHealth>
   );

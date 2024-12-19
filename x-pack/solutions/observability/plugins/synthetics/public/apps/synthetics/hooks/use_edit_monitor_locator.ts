@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
 import { LocatorClient } from '@kbn/share-plugin/common/url_service/locators';
 import { syntheticsEditMonitorLocatorID } from '@kbn/observability-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useKibanaSpace } from '../../../hooks/use_kibana_space';
 import { ClientPluginsStart } from '../../../plugin';
 
@@ -23,20 +23,15 @@ export function useEditMonitorLocator({
 }) {
   const { space } = useKibanaSpace();
 
-  const [editUrl, setEditUrl] = useState<string | undefined>(undefined);
   const syntheticsLocators = useKibana<ClientPluginsStart>().services.share?.url.locators;
   const locator = (locators || syntheticsLocators)?.get(syntheticsEditMonitorLocatorID);
 
-  useEffect(() => {
-    async function generateUrl() {
-      const url = await locator?.getUrl({
-        configId,
-        ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
-      });
-      setEditUrl(url);
-    }
-    generateUrl();
+  const { data } = useFetcher(() => {
+    return locator?.getUrl({
+      configId,
+      ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
+    });
   }, [locator, configId, space, spaceId]);
 
-  return editUrl;
+  return data;
 }

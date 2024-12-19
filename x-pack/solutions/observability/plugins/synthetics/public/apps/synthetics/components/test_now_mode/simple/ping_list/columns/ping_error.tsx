@@ -6,15 +6,8 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { Ping } from '../../../../../../../../common/runtime_types';
-
-const StyledSpan = styled.span`
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  overflow: hidden;
-`;
 
 interface Props {
   errorType: string;
@@ -26,8 +19,15 @@ export const PingErrorCol = ({ errorType, ping }: Props) => {
     return <>--</>;
   }
   return (
-    <StyledSpan>
+    <span
+      css={css`
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        overflow: hidden;
+      `}
+    >
       {errorType}:{ping.error?.message}
-    </StyledSpan>
+    </span>
   );
 };

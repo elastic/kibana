@@ -10,8 +10,9 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { AllSeries, createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { css } from '@emotion/react';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { JourneyStep } from '../../../../../../common/runtime_types';
@@ -66,7 +67,17 @@ export function StepFieldTrend({
   );
 
   return (
-    <Wrapper>
+    <div
+      css={css`
+        height: 200px;
+        width: 400px;
+        &&& {
+          .expExpressionRenderer__expression {
+            padding-bottom: 0 !important;
+          }
+        }
+      `}
+    >
       <EmbeddableExpView
         title={title}
         appendTitle={
@@ -89,20 +100,10 @@ export function StepFieldTrend({
         }}
         withActions={false}
       />
-    </Wrapper>
+    </div>
   );
 }
 
 export const EXPLORE_LABEL = i18n.translate('xpack.synthetics.synthetics.markers.explore', {
   defaultMessage: 'Explore',
 });
-
-const Wrapper = euiStyled.div`
-  height: 200px;
-  width: 400px;
-  &&& {
-    .expExpressionRenderer__expression {
-      padding-bottom: 0 !important;
-    }
-  }
-`;

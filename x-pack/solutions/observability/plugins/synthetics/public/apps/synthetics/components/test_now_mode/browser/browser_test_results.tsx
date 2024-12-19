@@ -19,7 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { FAILED_TO_SCHEDULE } from '../manual_test_run_mode/browser_test_results';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
 import {
@@ -69,7 +69,12 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
         const isDownMonitor = summaryDoc?.monitor?.status === 'down';
 
         return (
-          <AccordionWrapper
+          <EuiAccordion
+            css={css`
+              .euiAccordion__buttonContent {
+                width: 100%;
+              }
+            `}
             key={'accordion-' + checkGroupId}
             id={'accordion-' + checkGroupId}
             element="fieldset"
@@ -134,18 +139,12 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
                 />
               </>
             )}
-          </AccordionWrapper>
+          </EuiAccordion>
         );
       })}
     </>
   );
 };
-
-const AccordionWrapper = styled(EuiAccordion)`
-  .euiAccordion__buttonContent {
-    width: 100%;
-  }
-`;
 
 function getButtonContent({
   journeyDoc,

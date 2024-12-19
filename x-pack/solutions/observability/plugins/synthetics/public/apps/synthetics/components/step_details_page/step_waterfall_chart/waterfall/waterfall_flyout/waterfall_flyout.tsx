@@ -7,8 +7,6 @@
 
 import React, { useEffect, useRef } from 'react';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -16,9 +14,11 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiFlexItem,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { css } from '@emotion/react';
 import { Table } from './waterfall_flyout_table';
 import { MiddleTruncatedText } from '../middle_truncated_text';
 import { WaterfallMetadataEntry } from '../../../common/network_data/types';
@@ -49,10 +49,6 @@ export const RESPONSE_HEADERS = i18n.translate(
   }
 );
 
-const FlyoutContainer = euiStyled(EuiFlyout)`
-  z-index: ${(props) => props.theme.eui.euiZLevel5};
-`;
-
 export interface WaterfallFlyoutProps {
   flyoutData?: WaterfallMetadataEntry;
   onFlyoutClose: OnFlyoutClose;
@@ -66,6 +62,8 @@ export const WaterfallFlyout = ({
 }: WaterfallFlyoutProps) => {
   const flyoutRef = useRef<HTMLDivElement>(null);
   const trackMetric = useUiTracker({ app: 'uptime' });
+
+  const theme = useEuiTheme().euiTheme;
 
   useEffect(() => {
     if (isFlyoutVisible && flyoutData && flyoutRef.current) {
@@ -88,7 +86,13 @@ export const WaterfallFlyout = ({
       data-test-subj="waterfallFlyout"
       aria-labelledby="flyoutTitle"
     >
-      <FlyoutContainer size="s" onClose={onFlyoutClose}>
+      <EuiFlyout
+        css={css`
+          z-index: ${theme.levels.content};
+        `}
+        size="s"
+        onClose={onFlyoutClose}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h2 id="flyoutTitle">
@@ -119,7 +123,7 @@ export const WaterfallFlyout = ({
             </>
           )}
         </EuiFlyoutBody>
-      </FlyoutContainer>
+      </EuiFlyout>
     </div>
   );
 };

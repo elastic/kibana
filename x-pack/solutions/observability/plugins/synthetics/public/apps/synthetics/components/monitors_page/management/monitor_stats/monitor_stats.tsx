@@ -15,8 +15,8 @@ import {
   EuiText,
   EuiFlexItem,
 } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
+import { css } from '@emotion/react';
 import { OverviewStatusState } from '../../../../../../../common/runtime_types';
 
 import * as labels from '../labels';
@@ -84,16 +84,6 @@ export const MonitorStats = ({
   );
 };
 
-const EuiStatStyled = euiStyled(EuiStat)`
-  &&& {
-  color: ${({ theme }) => theme.eui.euiTitleColor};
-    .euiStat__title {
-        color: ${({ theme }) => theme.eui.euiTitleColor};
-        font-size: ${({ theme }) => theme.eui.euiFontSizeXL};
-    }
-  }
-`;
-
 const MonitorStat = ({
   description,
   value,
@@ -105,7 +95,14 @@ const MonitorStat = ({
   const statValue = (value as number) ?? undefined;
 
   return (
-    <EuiStatStyled
+    <EuiStat
+      css={css`
+        color: ${euiTheme.colors.title};
+        .euiStat__title {
+          color: ${euiTheme.colors.title};
+          font-size: ${euiTheme.font.title};
+        }
+      `}
       description={description}
       isLoading={isNaN(statValue)}
       title={<EuiI18nNumber css={{ fontSize: euiTheme.size.m }} value={statValue} />}

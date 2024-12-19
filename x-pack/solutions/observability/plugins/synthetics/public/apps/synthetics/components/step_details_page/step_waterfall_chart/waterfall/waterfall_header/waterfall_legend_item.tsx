@@ -7,8 +7,8 @@
 
 import { EuiFlexGroup, EuiIcon, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { AriaRole, MouseEventHandler, useCallback, useState } from 'react';
+import styled from '@emotion/styled';
 
 export function WaterfallLegendItem<T = string>({
   id,
@@ -59,7 +59,7 @@ export function WaterfallLegendItem<T = string>({
   );
 }
 
-const StyledLegendItem = euiStyled.div<{ role: AriaRole }>`
+const StyledLegendItem = styled.div<{ role: AriaRole }>`
   flex-grow: 0;
   flex-shrink: 0;
   &:active {

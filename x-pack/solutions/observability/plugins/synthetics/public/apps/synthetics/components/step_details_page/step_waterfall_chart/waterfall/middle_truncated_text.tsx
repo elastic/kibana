@@ -16,7 +16,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { WaterfallTooltipContent } from './waterfall_tooltip_content';
 import { WaterfallChartTooltip } from './styles';
 import { FIXED_AXIS_HEIGHT, RESOURCE_TITLE_FONT_SIZE } from './constants';
@@ -31,7 +31,7 @@ interface Props {
   url: string;
 }
 
-const OuterContainer = euiStyled.span`
+const OuterContainer = styled.span`
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -40,13 +40,13 @@ const OuterContainer = euiStyled.span`
   }
 `; // NOTE: min-width: 0 ensures flexbox and no-wrap children can co-exist
 
-const InnerContainer = euiStyled.span`
+const InnerContainer = styled.span`
   overflow: hidden;
   display: flex;
   align-items: center;
 `;
 
-const IndexNumber = euiStyled(EuiText)`
+const IndexNumber = styled(EuiText)`
   font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
   margin-right: ${(props) => props.theme.eui.euiSizeS};
   line-height: ${FIXED_AXIS_HEIGHT}px;
@@ -56,7 +56,7 @@ const IndexNumber = euiStyled(EuiText)`
   color: ${(props) => props.theme.eui.euiColorDarkShade};
 `;
 
-const FirstChunk = euiStyled.span`
+const FirstChunk = styled.span`
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -65,14 +65,14 @@ const FirstChunk = euiStyled.span`
   text-align: left;
 `; // safari doesn't auto align text left in some cases
 
-const LastChunk = euiStyled.span`
+const LastChunk = styled.span`
   flex-shrink: 0;
   line-height: ${FIXED_AXIS_HEIGHT}px;
   font-size: ${RESOURCE_TITLE_FONT_SIZE}px;
   text-align: left;
 `; // safari doesn't auto align text left in some cases
 
-const StyledButton = euiStyled(EuiButtonEmpty)`
+const StyledButton = styled(EuiButtonEmpty)`
   &&& {
     border: none;
 
@@ -83,7 +83,7 @@ const StyledButton = euiStyled(EuiButtonEmpty)`
   }
 `;
 
-const SecureIcon = euiStyled(EuiIcon)`
+const SecureIcon = styled(EuiIcon)`
   margin-right: ${(props) => props.theme.eui.euiSizeXS};
 `;
 

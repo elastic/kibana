@@ -23,13 +23,13 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  useEuiTheme,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { FlyoutParamProps } from './types';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
 import { useOverviewStatus } from '../../hooks/use_overview_status';
@@ -89,7 +89,7 @@ function DetailFlyoutDurationChart({
   | 'previousDurationChartFrom'
   | 'previousDurationChartTo'
 >) {
-  const theme = useTheme();
+  const theme = useEuiTheme().euiTheme;
 
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
@@ -108,7 +108,7 @@ function DetailFlyoutDurationChart({
         attributes={[
           {
             seriesType: 'area',
-            color: theme?.eui?.euiColorVis1,
+            color: theme?.colors.vis?.euiColorVis1,
             time: {
               from: currentDurationChartFrom ?? DEFAULT_DURATION_CHART_FROM,
               to: currentDurationChartTo ?? DEFAULT_CURRENT_DURATION_CHART_TO,
@@ -130,7 +130,7 @@ function DetailFlyoutDurationChart({
           },
           {
             seriesType: 'line',
-            color: theme?.eui?.euiColorVis7,
+            color: theme?.colors.vis?.euiColorVis7,
             time: {
               from: previousDurationChartFrom ?? DEFAULT_PREVIOUS_DURATION_CHART_FROM,
               to: previousDurationChartTo ?? DEFAULT_PREVIOUS_DURATION_CHART_TO,

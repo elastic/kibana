@@ -8,8 +8,8 @@
 import React, { useMemo } from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
 
+import { useEuiTheme } from '@elastic/eui';
 import { useMonitorQueryFilters } from '../../hooks/use_monitor_query_filters';
 import { useMonitorFilters } from '../../hooks/use_monitor_filters';
 import { useRefreshedRange } from '../../../../hooks';
@@ -21,7 +21,7 @@ export const MonitorTestRunsSparkline = () => {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
-  const theme = useTheme();
+  const theme = useEuiTheme().euiTheme;
 
   const { from, to } = useRefreshedRange(30, 'days');
   const filters = useMonitorFilters({});
@@ -39,12 +39,12 @@ export const MonitorTestRunsSparkline = () => {
         selectedMetricField: 'total_test_runs',
         filters,
         name: labels.TEST_RUNS_LABEL,
-        color: theme.eui.euiColorVis1,
+        color: theme.colors.vis.euiColorVis1,
         operationType: 'count',
       },
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, theme.eui.euiColorVis1, to]);
+  }, [from, theme.colors.vis.euiColorVis1, to]);
 
   return (
     <ExploratoryViewEmbeddable

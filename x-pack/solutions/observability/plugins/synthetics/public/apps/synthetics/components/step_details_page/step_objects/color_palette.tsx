@@ -13,8 +13,8 @@ import {
   EuiSkeletonRectangle,
   EuiIcon,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { colourPalette } from '../common/network_data/data_formatting';
 
@@ -116,7 +116,7 @@ export const ColorPaletteFlexItem = ({
   percent: number;
   loading: boolean;
 }) => {
-  const { eui } = useTheme();
+  const theme = useEuiTheme().euiTheme;
 
   const [value, setVal] = useState(0);
 
@@ -146,7 +146,7 @@ export const ColorPaletteFlexItem = ({
         overflow: 'hidden',
       }}
     >
-      <EuiFlexItem grow={true} style={{ backgroundColor: eui.euiColorLightShade }}>
+      <EuiFlexItem grow={true} style={{ backgroundColor: theme.colors.lightShade }}>
         <span
           style={{
             backgroundColor: (colourPalette as Record<string, string>)[mimeType],

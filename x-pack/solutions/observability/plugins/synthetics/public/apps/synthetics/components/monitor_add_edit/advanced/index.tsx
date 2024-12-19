@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiDescribedFormGroup, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { FORM_CONFIG } from '../form/form_config';
 import { Field } from '../form/field';
 import { ConfigKey, FormMonitorType } from '../types';
@@ -33,7 +33,12 @@ export const AdvancedConfig = ({ readOnly }: { readOnly: boolean }) => {
         <EuiSpacer />
         {formConfig.advanced?.map((configGroup) => {
           return (
-            <DescribedFormGroup
+            <EuiDescribedFormGroup
+              css={css`
+                > div.euiFlexGroup {
+                  flex-wrap: wrap;
+                }
+              `}
               description={configGroup.description}
               title={<h3>{configGroup.title}</h3>}
               fullWidth
@@ -45,16 +50,10 @@ export const AdvancedConfig = ({ readOnly }: { readOnly: boolean }) => {
               {configGroup.components.map((field) => {
                 return <Field {...field} key={field.fieldKey} />;
               })}
-            </DescribedFormGroup>
+            </EuiDescribedFormGroup>
           );
         })}
       </EuiAccordion>
     </EuiPanel>
   ) : null;
 };
-
-const DescribedFormGroup = styled(EuiDescribedFormGroup)`
-  > div.euiFlexGroup {
-    flex-wrap: wrap;
-  }
-`;

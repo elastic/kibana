@@ -27,8 +27,8 @@ import {
   EuiOutsideClickDetector,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
+import { css } from '@emotion/react';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 import { SyntheticsSettingsContext } from '../../../contexts';
 import { useRetrieveStepImage } from '../monitor_test_result/use_retrieve_step_image';
@@ -118,7 +118,19 @@ export const JourneyScreenshotDialog = ({
         }}
         onKeyDown={onKeyDown}
       >
-        <ModalBodyStyled css={{ display: 'flex' }}>
+        <EuiModalBody
+          css={css`
+            display: flex;
+            &&& {
+              & > div {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-top: 24px;
+              }
+            }
+          `}
+        >
           <ScreenshotImage
             label={i18n.translate('xpack.synthetics.monitor.screenshotImageLabel', {
               defaultMessage: '"{stepName}", {stepNumber} of {totalSteps}',
@@ -134,7 +146,7 @@ export const JourneyScreenshotDialog = ({
             hasBorder={false}
             size={'full'}
           />
-        </ModalBodyStyled>
+        </EuiModalBody>
 
         <EuiModalFooter
           css={{
@@ -220,17 +232,6 @@ export const JourneyScreenshotDialog = ({
     </EuiOutsideClickDetector>
   ) : null;
 };
-
-const ModalBodyStyled = euiStyled(EuiModalBody)`
-  &&& {
-    & > div {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-top: 24px;
-    }
-  }
-`;
 
 export const getScreenshotUrl = ({
   basePath,

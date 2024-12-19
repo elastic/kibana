@@ -13,10 +13,10 @@ import {
   EuiPanel,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
@@ -40,7 +40,7 @@ export const MonitorAlerts = ({
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
-  const theme = useTheme();
+  const theme = useEuiTheme().euiTheme;
 
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
   const selectedLocation = useSelectedLocation();
@@ -145,7 +145,7 @@ export const MonitorAlerts = ({
                   { field: 'kibana.alert.status', values: ['active'] },
                   ...(locationFilter ?? []),
                 ],
-                color: theme.eui.euiColorVis7_behindText,
+                color: theme.colors.vis.euiColorVis7,
               },
             ]}
           />
@@ -198,7 +198,7 @@ export const MonitorAlerts = ({
                   { field: 'kibana.alert.status', values: ['recovered'] },
                   ...(locationFilter ?? []),
                 ],
-                color: theme.eui.euiColorVis0_behindText,
+                color: theme.colors.vis.euiColorVis0,
               },
             ]}
           />

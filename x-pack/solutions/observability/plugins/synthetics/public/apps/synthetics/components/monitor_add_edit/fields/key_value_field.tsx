@@ -6,7 +6,6 @@
  */
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -20,26 +19,7 @@ import {
   EuiFormFieldset,
   EuiSpacer,
 } from '@elastic/eui';
-
-const StyledFieldset = styled(EuiFormFieldset)`
-  &&& {
-    legend {
-      width: calc(100% - 52px); // right margin + flex item padding
-      margin-right: 40px;
-    }
-    .euiFlexGroup {
-      margin-left: 0;
-    }
-    .euiFlexItem {
-      margin-left: 0;
-      padding-left: 12px;
-    }
-  }
-`;
-
-const StyledField = styled(EuiFieldText)`
-  text-align: left;
-`;
+import { css } from '@emotion/react';
 
 export type Pair = [
   string, // key
@@ -118,7 +98,22 @@ export const KeyValuePairsField = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <StyledFieldset
+      <EuiFormFieldset
+        css={css`
+          &&& {
+            legend {
+              width: calc(100% - 52px); // right margin + flex item padding
+              margin-right: 40px;
+            }
+            .euiFlexGroup {
+              margin-left: 0;
+            }
+            .euiFlexItem {
+              margin-left: 0;
+              padding-left: 12px;
+            }
+          }
+        `}
         legend={
           !!pairs.length
             ? {
@@ -171,7 +166,10 @@ export const KeyValuePairsField = ({
                   </EuiFormLabel>
                 }
                 startControl={
-                  <StyledField
+                  <EuiFieldText
+                    css={css`
+                      text-align: left;
+                    `}
                     controlOnly
                     aria-label={i18n.translate(
                       'xpack.synthetics.keyValuePairsField.key.ariaLabel',
@@ -187,7 +185,10 @@ export const KeyValuePairsField = ({
                   />
                 }
                 endControl={
-                  <StyledField
+                  <EuiFieldText
+                    css={css`
+                      text-align: left;
+                    `}
                     controlOnly
                     aria-label={i18n.translate(
                       'xpack.synthetics.keyValuePairsField.value.ariaLabel',
@@ -208,7 +209,7 @@ export const KeyValuePairsField = ({
             </Fragment>
           );
         })}
-      </StyledFieldset>
+      </EuiFormFieldset>
     </div>
   );
 };

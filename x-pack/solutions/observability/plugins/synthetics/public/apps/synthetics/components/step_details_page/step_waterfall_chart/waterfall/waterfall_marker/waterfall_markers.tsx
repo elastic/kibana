@@ -8,9 +8,9 @@
 import React, { useMemo } from 'react';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { MarkerItems, useWaterfallContext } from '../context/waterfall_context';
 import { WaterfallMarkerIcon } from './waterfall_marker_icon';
 import { formatMillisecond } from '../../../common/network_data/data_formatting';
@@ -22,7 +22,7 @@ export const FIELD_SYNTHETICS_DCL = 'browser.experience.dcl.us';
 export const LAYOUT_SHIFT = 'layoutShift';
 
 export function WaterfallChartMarkers() {
-  const theme = useTheme();
+  const theme = useEuiTheme().euiTheme;
   const { markerItems, showCustomMarks } = useWaterfallContext();
 
   const markerItemsByOffset = useMemo(
@@ -41,7 +41,7 @@ export function WaterfallChartMarkers() {
         // Remove unrecognized marks e.g. custom marks if `showCustomMarks` is false
         const vitalMarkers = showCustomMarks
           ? items
-          : items.filter(({ id }) => getMarkersInfo(id, theme) !== undefined);
+          : items.filter(({ id }) => getMarkersInfo(id, theme.colors.mediumShade) !== undefined);
 
         const hasMultipleMarksAtOffset = vitalMarkers.some(({ id }) => id !== LAYOUT_SHIFT);
         const isLastOffsetTooClose = lastOffset && Math.abs(offset - lastOffset) < 100; // 100ms
@@ -67,16 +67,18 @@ export function WaterfallChartMarkers() {
         .map(({ id }) => id)
         .filter((id, index, arr) => arr.indexOf(id) === index);
 
-      const label = uniqueIds.map((id) => getMarkersInfo(id, theme)?.label ?? id).join(' / ');
+      const label = uniqueIds
+        .map((id) => getMarkersInfo(id, theme.colors.mediumShade)?.label ?? id)
+        .join(' / ');
       const id = uniqueIds[0];
-      const markersInfo = getMarkersInfo(id, theme);
+      const markersInfo = getMarkersInfo(id, theme.colors.mediumShade);
 
       return {
         id,
         offset,
         label,
         field: markersInfo?.field ?? '',
-        color: markersInfo?.color ?? theme.eui.euiColorMediumShade,
+        color: markersInfo?.color ?? theme.colors.mediumShade,
         strokeWidth: markersInfo?.strokeWidth ?? 1,
         dash: markersInfo?.dash,
       };
@@ -88,7 +90,15 @@ export function WaterfallChartMarkers() {
   }
 
   return (
-    <Wrapper>
+    <span
+      css={css`
+        &&& {
+          > .echAnnotation__icon {
+            top: 8px;
+          }
+        }
+      `}
+    >
       {annotations.map(({ id, offset, label, field, color, strokeWidth, dash }) => {
         const key = `${id}-${offset}`;
 
@@ -113,20 +123,20 @@ export function WaterfallChartMarkers() {
                 dash,
               },
             }}
-            zIndex={theme.eui.euiZLevel0}
+            zIndex={theme.levels.content}
           />
         );
       })}
-    </Wrapper>
+    </span>
   );
 }
 
-function getMarkersInfo(id: string, theme: ReturnType<typeof useTheme>) {
+function getMarkersInfo(id: string, euiColorMediumShade: string) {
   switch (id) {
     case 'domContentLoaded':
       return {
         label: DOCUMENT_CONTENT_LOADED_LABEL,
-        color: theme.eui.euiColorMediumShade,
+        color: euiColorMediumShade,
         field: FIELD_SYNTHETICS_DCL,
         strokeWidth: 1,
         dash: undefined,
@@ -134,7 +144,7 @@ function getMarkersInfo(id: string, theme: ReturnType<typeof useTheme>) {
     case 'firstContentfulPaint':
       return {
         label: FCP_LABEL,
-        color: theme.eui.euiColorMediumShade,
+        color: euiColorMediumShade,
         field: FIELD_SYNTHETICS_FCP,
         strokeWidth: 1,
         dash: undefined,
@@ -142,7 +152,7 @@ function getMarkersInfo(id: string, theme: ReturnType<typeof useTheme>) {
     case 'largestContentfulPaint':
       return {
         label: LCP_LABEL,
-        color: theme.eui.euiColorMediumShade,
+        color: euiColorMediumShade,
         field: FIELD_SYNTHETICS_LCP,
         strokeWidth: 1,
         dash: undefined,
@@ -150,7 +160,7 @@ function getMarkersInfo(id: string, theme: ReturnType<typeof useTheme>) {
     case 'layoutShift':
       return {
         label: LAYOUT_SHIFT_LABEL,
-        color: theme.eui.euiColorMediumShade,
+        color: euiColorMediumShade,
         field: '',
         strokeWidth: 1,
         dash: [5, 5],
@@ -158,7 +168,7 @@ function getMarkersInfo(id: string, theme: ReturnType<typeof useTheme>) {
     case 'loadEvent':
       return {
         label: LOAD_EVENT_LABEL,
-        color: theme.eui.euiColorMediumShade,
+        color: euiColorMediumShade,
         field: FIELD_SYNTHETICS_DOCUMENT_ONLOAD,
         strokeWidth: 1,
         dash: undefined,
@@ -167,14 +177,6 @@ function getMarkersInfo(id: string, theme: ReturnType<typeof useTheme>) {
 
   return undefined;
 }
-
-const Wrapper = euiStyled.span`
-  &&& {
-    > .echAnnotation__icon {
-      top: 8px;
-    }
-  }
-`;
 
 export const FCP_LABEL = i18n.translate('xpack.synthetics.synthetics.waterfall.fcpLabel', {
   defaultMessage: 'First contentful paint',

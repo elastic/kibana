@@ -11,7 +11,6 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { Router } from '@kbn/shared-ux-router';
 
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
@@ -50,31 +49,21 @@ const Application = (props: SyntheticsAppProps) => {
 
   return (
     <KibanaRenderContextProvider {...coreStart}>
-      <KibanaThemeProvider
-        theme={coreStart.theme}
-        modify={{
-          breakpoint: {
-            xxl: 1600,
-            xxxl: 2000,
-          },
-        }}
-      >
-        <SyntheticsSharedContext {...props}>
-          <Router history={appMountParameters.history}>
-            <SyntheticsSettingsContextProvider {...props}>
-              <PerformanceContextProvider>
-                <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
-                  <InspectorContextProvider>
-                    <PageRouter />
-                    <ActionMenu appMountParameters={appMountParameters} />
-                    <TestNowModeFlyoutContainer />
-                  </InspectorContextProvider>
-                </div>
-              </PerformanceContextProvider>
-            </SyntheticsSettingsContextProvider>
-          </Router>
-        </SyntheticsSharedContext>
-      </KibanaThemeProvider>
+      <SyntheticsSharedContext {...props}>
+        <Router history={appMountParameters.history}>
+          <SyntheticsSettingsContextProvider {...props}>
+            <PerformanceContextProvider>
+              <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
+                <InspectorContextProvider>
+                  <PageRouter />
+                  <ActionMenu appMountParameters={appMountParameters} />
+                  <TestNowModeFlyoutContainer />
+                </InspectorContextProvider>
+              </div>
+            </PerformanceContextProvider>
+          </SyntheticsSettingsContextProvider>
+        </Router>
+      </SyntheticsSharedContext>
     </KibanaRenderContextProvider>
   );
 };

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
 import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useKibanaSpace } from '../../../hooks/use_kibana_space';
 import { ClientPluginsStart } from '../../../plugin';
 
@@ -21,22 +21,17 @@ export function useMonitorDetailLocator({
   spaceId?: string;
 }) {
   const { space } = useKibanaSpace();
-  const [monitorUrl, setMonitorUrl] = useState<string | undefined>(undefined);
   const locator = useKibana<ClientPluginsStart>().services?.share?.url.locators.get(
     syntheticsMonitorDetailLocatorID
   );
 
-  useEffect(() => {
-    async function generateUrl() {
-      const url = await locator?.getUrl({
-        configId,
-        locationId,
-        ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
-      });
-      setMonitorUrl(url);
-    }
-    generateUrl();
-  }, [locator, configId, locationId, spaceId, space?.id]);
+  const { data } = useFetcher(async () => {
+    return locator?.getUrl({
+      configId,
+      locationId,
+      ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
+    });
+  }, []);
 
-  return monitorUrl;
+  return data;
 }

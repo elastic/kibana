@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
+import { useEuiTheme } from '@elastic/eui';
 import { LocationStatusBadges } from '../../../common/components/location_status_badges';
 import { ServiceLocations, OverviewStatusState } from '../../../../../../../common/runtime_types';
 
@@ -17,15 +17,14 @@ interface Props {
 }
 
 export const MonitorLocations = ({ locations, monitorId, overviewStatus }: Props) => {
-  const {
-    eui: { euiColorVis9, euiColorVis0, euiColorDisabled },
-  } = useTheme();
+  const theme = useEuiTheme().euiTheme;
+  const { euiColorVis9, euiColorVis0 } = theme.colors.vis;
 
   const locationsToDisplay = locations.map((loc) => {
     const locById = `${monitorId}-${loc.id}`;
 
     let status: string = 'unknown';
-    let color = euiColorDisabled;
+    let color = theme.colors.disabled;
 
     if (overviewStatus?.downConfigs[locById]) {
       status = 'down';

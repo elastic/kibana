@@ -23,8 +23,8 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { formatMillisecond } from '../common/network_data/data_formatting';
 
 import { useNetworkTimings } from '../hooks/use_network_timings';
@@ -46,7 +46,7 @@ const themeOverrides: PartialTheme = {
 export const NetworkTimingsDonut = () => {
   const networkTimings = useNetworkTimings();
 
-  const theme = useTheme();
+  const theme = useEuiTheme().euiTheme;
 
   if (!networkTimings) {
     return <EuiLoadingSpinner size="xl" />;
@@ -87,7 +87,7 @@ export const NetworkTimingsDonut = () => {
               nodeLabel: (d: Datum) => d,
               shape: {
                 fillColor: (dataName, index) => {
-                  return (theme.eui as unknown as Record<string, string>)[
+                  return (theme.colors.vis as unknown as Record<string, string>)[
                     `euiColorVis${index + 1}`
                   ];
                 },

@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { css } from '@emotion/react';
 import { useCreateSLO } from '../../hooks/use_create_slo';
 import { TEST_SCHEDULED_LABEL } from '../../../monitor_add_edit/form/run_test_btn';
 import { useCanUsePublicLocById } from '../../hooks/use_can_use_public_loc_id';
@@ -39,29 +39,6 @@ import { NoPermissionsTooltip } from '../../../common/components/permissions';
 
 type PopoverPosition = 'relative' | 'default';
 
-interface ActionContainerProps {
-  boxShadow: string;
-  position: PopoverPosition;
-}
-
-const Container = styled.div<ActionContainerProps>`
-  ${({ position }) =>
-    position === 'relative'
-      ? // custom styles used to overlay the popover button on `MetricItem`
-        `
-  display: inline-block;
-  position: relative;
-  bottom: 42px;
-  left: 12px;
-  z-index: 1;
-`
-      : // otherwise, no custom position needed
-        ''}
-
-  border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-  ${({ boxShadow, position }) => (position === 'relative' ? boxShadow : '')}
-`;
-
 interface Props {
   isPopoverOpen: boolean;
   isInspectView?: boolean;
@@ -73,24 +50,12 @@ interface Props {
   locationId: string;
 }
 
-const CustomShadowPanel = styled(EuiPanel)<{ shadow: string }>`
-  ${(props) => props.shadow}
-`;
-
 function IconPanel({ children, hasPanel }: { children: JSX.Element; hasPanel: boolean }) {
-  const shadow = useEuiShadow('s');
   if (!hasPanel) return children;
   return (
-    <CustomShadowPanel
-      color="plain"
-      element="button"
-      grow={false}
-      paddingSize="none"
-      hasShadow={false}
-      shadow={shadow}
-    >
+    <EuiPanel color="plain" element="button" grow={false} paddingSize="none" hasShadow={false}>
       {children}
-    </CustomShadowPanel>
+    </EuiPanel>
   );
 }
 
@@ -296,40 +261,49 @@ export function ActionsPopover({
 
   return (
     <>
-      <Container boxShadow={euiShadow} position={position}>
-        <EuiPopover
-          button={
-            <IconPanel hasPanel={iconHasPanel}>
-              <EuiButtonIcon
-                data-test-subj="syntheticsActionsPopoverButton"
-                aria-label={openActionsMenuAria}
-                iconType="boxesHorizontal"
-                color="primary"
-                size={iconSize}
-                display="empty"
-                onClick={() => setIsPopoverOpen((b: boolean) => !b)}
-                title={openActionsMenuAria}
-              />
-            </IconPanel>
-          }
-          color="lightestShade"
-          isOpen={isPopoverOpen}
-          closePopover={() => setIsPopoverOpen(false)}
-          anchorPosition="rightUp"
-          panelPaddingSize="none"
-        >
-          <EuiContextMenu
-            initialPanelId={0}
-            panels={[
-              {
-                id: '0',
-                title: actionsMenuTitle,
-                items: popoverItems,
-              },
-            ]}
-          />
-        </EuiPopover>
-      </Container>
+      <EuiPopover
+        button={
+          <IconPanel hasPanel={iconHasPanel}>
+            <EuiButtonIcon
+              css={
+                css`
+                  display: inline-block;
+                  position: relative;
+                  bottom: 42px;
+                  left: 12px;
+                  z-index: 1;
+                `
+                // border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
+                // ${({ boxShadow, position }) => (position === 'relative' ? boxShadow : '')}
+              }
+              data-test-subj="syntheticsActionsPopoverButton"
+              aria-label={openActionsMenuAria}
+              iconType="boxesHorizontal"
+              color="primary"
+              size={iconSize}
+              display="empty"
+              onClick={() => setIsPopoverOpen((b: boolean) => !b)}
+              title={openActionsMenuAria}
+            />
+          </IconPanel>
+        }
+        color="lightestShade"
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
+        anchorPosition="rightUp"
+        panelPaddingSize="none"
+      >
+        <EuiContextMenu
+          initialPanelId={0}
+          panels={[
+            {
+              id: '0',
+              title: actionsMenuTitle,
+              items: popoverItems,
+            },
+          ]}
+        />
+      </EuiPopover>
       {CreateSLOFlyout}
     </>
   );

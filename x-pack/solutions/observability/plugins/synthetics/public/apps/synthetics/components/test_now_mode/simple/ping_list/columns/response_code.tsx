@@ -6,20 +6,20 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
 import { EuiBadge } from '@elastic/eui';
-
-const SpanWithMargin = styled.span`
-  margin-right: 16px;
-`;
+import { css } from '@emotion/react';
 
 interface Props {
   statusCode: string;
 }
 export const ResponseCodeColumn = ({ statusCode }: Props) => {
   return (
-    <SpanWithMargin>
+    <span
+      css={css`
+        margin-right: 16px;
+      `}
+    >
       {statusCode ? <EuiBadge data-test-subj="pingResponseCode">{statusCode}</EuiBadge> : '--'}
-    </SpanWithMargin>
+    </span>
   );
 };

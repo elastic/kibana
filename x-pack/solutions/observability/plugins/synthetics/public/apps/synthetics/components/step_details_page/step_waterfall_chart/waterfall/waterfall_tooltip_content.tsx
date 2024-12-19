@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, useEuiTheme } from '@elastic/eui';
+
+import { css } from '@emotion/react';
 import { useWaterfallContext } from './context/waterfall_context';
 
 interface Props {
@@ -16,14 +17,6 @@ interface Props {
   index: number;
 }
 
-const StyledText = euiStyled(EuiText)`
-  font-weight: bold;
-`;
-
-const StyledHorizontalRule = euiStyled(EuiHorizontalRule)`
-  background-color: ${(props) => props.theme.eui.euiColorDarkShade};
-`;
-
 export const WaterfallTooltipContent: React.FC<Props> = ({ text, url, index }) => {
   const { renderTooltipItem, metadata } = useWaterfallContext();
   // the passed index is base 1, so we need to subtract 1 to get the correct index
@@ -31,14 +24,28 @@ export const WaterfallTooltipContent: React.FC<Props> = ({ text, url, index }) =
   const tooltipItems = metadataEntry?.networkItemTooltipProps;
   const showTooltip = metadataEntry?.showTooltip;
 
+  const theme = useEuiTheme().euiTheme;
+
   if (!tooltipItems || !showTooltip) {
     return null;
   }
 
   return (
     <div style={{ maxWidth: 500, height: '100%' }}>
-      <StyledText size="xs">{text}</StyledText>
-      <StyledHorizontalRule margin="none" />
+      <EuiText
+        size="xs"
+        css={css`
+          font-weight: bold;
+        `}
+      >
+        {text}
+      </EuiText>
+      <EuiHorizontalRule
+        margin="none"
+        css={css`
+          background-color: ${theme.colors.darkShade};
+        `}
+      />
       <EuiFlexGroup direction="column" gutterSize="none">
         {tooltipItems.map((item, idx) => (
           <EuiFlexItem key={idx}>{renderTooltipItem(item)}</EuiFlexItem>

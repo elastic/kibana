@@ -4,55 +4,50 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
+import { EuiPanel, EuiSpacer, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
-import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
-import { DARK_THEME } from '@elastic/charts';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
 import moment from 'moment';
-import { useSelector, useDispatch } from 'react-redux';
-
-import { FlyoutParamProps } from './types';
-import { MetricItemBody } from './metric_item/metric_item_body';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { css } from '@emotion/react';
+import { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
+import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
 import {
   selectErrorPopoverState,
   selectOverviewTrends,
   toggleErrorPopoverOpen,
 } from '../../../../state';
-import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
-import { formatDuration } from '../../../../utils/formatting';
-import { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
-import { ActionsPopover } from './actions_popover';
 import {
   hideTestNowFlyoutAction,
   manualTestRunInProgressSelector,
   toggleTestNowFlyoutAction,
 } from '../../../../state/manual_test_runs';
-import { MetricItemIcon } from './metric_item_icon';
+import { formatDuration } from '../../../../utils/formatting';
+import { ActionsPopover } from './actions_popover';
+import { MetricItemBody } from './metric_item/metric_item_body';
 import { MetricItemExtra } from './metric_item/metric_item_extra';
+import { MetricItemIcon } from './metric_item_icon';
+import { FlyoutParamProps } from './types';
+import { ClientPluginsStart } from '../../../../../../plugin';
 
-const METRIC_ITEM_HEIGHT = 160;
+const METRIC_ITEM_HEIGHT = 172;
 
-export const getColor = (
-  theme: ReturnType<typeof useTheme>,
-  isEnabled: boolean,
-  status?: string
-) => {
+export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?: string) => {
   if (!isEnabled) {
-    return theme.eui.euiColorLightestShade;
+    return euiTheme.colors.lightestShade;
   }
   switch (status) {
     case 'down':
-      return theme.eui.euiColorVis9_behindText;
+      return euiTheme.colors.vis.euiColorVis6;
     case 'up':
-      return theme.eui.euiColorVis0_behindText;
+      return euiTheme.colors.success;
     case 'unknown':
-      return theme.eui.euiColorGhost;
+      return euiTheme.colors.ghost;
     default:
-      return theme.eui.euiColorVis0_behindText;
+      return euiTheme.colors.success;
   }
 };
 
@@ -65,6 +60,7 @@ export const MetricItem = ({
   style?: React.CSSProperties;
   onClick: (params: FlyoutParamProps) => void;
 }) => {
+  const { euiTheme } = useEuiTheme();
   const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.locationId];
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
@@ -73,8 +69,8 @@ export const MetricItem = ({
     configId: monitor.configId,
     locationId: monitor.locationId,
   });
-  const theme = useTheme();
 
+  const { charts } = useKibana<ClientPluginsStart>().services;
   const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
 
   const dispatch = useDispatch();
@@ -112,7 +108,11 @@ export const MetricItem = ({
         `}
         title={moment(timestamp).format('LLL')}
       >
-        <Chart>
+        <Chart
+          size={{
+            height: 170,
+          }}
+        >
           <Settings
             onElementClick={() => {
               if (testInProgress) {
@@ -132,8 +132,7 @@ export const MetricItem = ({
                 });
               }
             }}
-            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-            baseTheme={DARK_THEME}
+            baseTheme={charts.theme.useChartsBaseTheme()}
             locale={i18n.getLocale()}
           />
           <Metric
@@ -157,15 +156,13 @@ export const MetricItem = ({
                         }}
                       />
                     ) : trendData === 'loading' ? (
-                      <div>
-                        <FormattedMessage
-                          defaultMessage="Loading metrics"
-                          id="xpack.synthetics.overview.metricItem.loadingMessage"
-                        />
-                      </div>
+                      <FormattedMessage
+                        defaultMessage="Loading metrics"
+                        id="xpack.synthetics.overview.metricItem.loadingMessage"
+                      />
                     ) : undefined,
                   valueFormatter: (d: number) => formatDuration(d),
-                  color: getColor(theme, monitor.isEnabled, status),
+                  color: getColor(euiTheme, monitor.isEnabled, status),
                   body: <MetricItemBody monitor={monitor} />,
                 },
               ],
