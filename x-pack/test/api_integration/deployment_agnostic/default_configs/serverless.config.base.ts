@@ -117,6 +117,11 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           ...(options.serverlessProject !== 'oblt'
             ? ['--xpack.security.roleManagementEnabled=true']
             : []),
+          // defined in MKI control plane. Necessary for Synthetics app testing
+          '--xpack.uptime.service.password=test',
+          '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+          '--xpack.uptime.service.devUrl=mockDevUrl',
+          '--xpack.uptime.service.manifestUrl=mockDevUrl',
         ],
       },
       testFiles: options.testFiles,
