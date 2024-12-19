@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext, kbnTestConfig, kibanaTestUser } from '@kbn/test';
 import { services as baseServices } from './services';
@@ -85,6 +87,11 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
             'riskScoringPersistence',
             'riskScoringRoutesEnabled',
           ])}`,
+          `--plugin-path=${path.resolve(
+            __dirname,
+            '../../../../../test/analytics/plugins/analytics_ftr_helpers'
+          )}`,
+
           '--xpack.task_manager.poll_interval=1000',
           `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_ACTION_CONNECTORS)}`,
           ...(ssl
