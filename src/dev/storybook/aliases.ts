@@ -59,7 +59,14 @@ export const storybookAliases = {
     'x-pack/solutions/observability/plugins/observability_ai_assistant_app/.storybook',
   observability_inventory: 'x-pack/plugins/observability_solution/inventory/.storybook',
   observability_shared: 'x-pack/plugins/observability_solution/observability_shared/.storybook',
-  observability_slo: 'x-pack/solutions/observability/plugins/slo/.storybook',
+  // This one is failing with build errors like:
+  //
+  //     ERROR in ./node_modules/@emotion/react/dist/emotion-react.cjs.mjs 1:0-15:32
+  //     Can't reexport the named export 'withEmotionCache' from non EcmaScript module (only default export is available)
+  //
+  // Since this is making the build fail, it's commented out until we fix it.
+  // To enable it, uncomment the line below and run `yarn kbn bootstrap`.
+  // observability_slo: 'x-pack/solutions/observability/plugins/slo/.storybook',
   presentation: 'src/plugins/presentation_util/storybook',
   random_sampling: 'x-pack/packages/kbn-random-sampling/.storybook',
   esql_editor: 'src/platform/packages/private/kbn-esql-editor/.storybook',
