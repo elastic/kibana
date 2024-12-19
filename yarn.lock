@@ -6841,7 +6841,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/router-utils@link:packages/kbn-router-utils":
+"@kbn/router-utils@link:src/platform/packages/shared/kbn-router-utils":
   version "0.0.0"
   uid ""
 
