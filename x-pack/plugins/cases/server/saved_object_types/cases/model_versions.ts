@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
-import { casesSchemaV1 } from './schemas';
+import { casesSchemaV1, casesSchemaV2 } from './schemas';
 
 /**
  * Adds custom fields to the cases SO.
@@ -82,4 +82,7 @@ export const modelVersion2: SavedObjectsModelVersion = {
       },
     },
   ],
+  schemas: {
+    forwardCompatibility: casesSchemaV2.extends({}, { unknowns: 'ignore' }),
+  },
 };
