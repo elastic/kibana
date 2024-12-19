@@ -8,7 +8,7 @@
 import type {
   MigrationDeprecationsResponse,
   MigrationDeprecationsDeprecation,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import _ from 'lodash';
 import { EnrichedDeprecationInfo } from '../../../common/types';
