@@ -18,10 +18,10 @@ import {
 import { calculateAuto } from '@kbn/calculate-auto';
 import { i18n } from '@kbn/i18n';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
-import { StreamDefinition } from '@kbn/streams-plugin/common';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
+import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
 import illustration from '../assets/illustration.png';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
@@ -37,7 +37,7 @@ const formatNumber = (val: number) => {
   });
 };
 
-export function StreamDetailOverview({ definition }: { definition?: StreamDefinition }) {
+export function StreamDetailOverview({ definition }: { definition?: ReadStreamDefinition }) {
   const {
     dependencies: {
       start: {
@@ -264,7 +264,7 @@ export function StreamDetailOverview({ definition }: { definition?: StreamDefini
   );
 }
 
-function ChildStreamList({ stream }: { stream?: StreamDefinition }) {
+function ChildStreamList({ stream }: { stream?: ReadStreamDefinition }) {
   const {
     dependencies: {
       start: {

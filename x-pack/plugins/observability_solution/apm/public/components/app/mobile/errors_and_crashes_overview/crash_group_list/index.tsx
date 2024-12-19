@@ -7,7 +7,7 @@
 
 import { EuiToolTip, RIGHT_ALIGNMENT, LEFT_ALIGNMENT, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import React, { useMemo } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { asInteger } from '../../../../../../common/utils/formatters';
@@ -25,20 +25,20 @@ import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
 import { TimestampTooltip } from '../../../../shared/timestamp_tooltip';
 import { isTimeComparison } from '../../../../shared/time_comparison/get_comparison_options';
 
-const MessageAndCulpritCell = euiStyled.div`
+const MessageAndCulpritCell = styled.div`
   ${truncate('100%')};
 `;
 
-const ErrorLink = euiStyled(ErrorOverviewLink)`
+const ErrorLink = styled(ErrorOverviewLink)`
   ${truncate('100%')};
 `;
 
-const GroupIdLink = euiStyled(CrashDetailLink)`
-  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
+const GroupIdLink = styled(CrashDetailLink)`
+  font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
 `;
 
-const MessageLink = euiStyled(CrashDetailLink)`
-  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
+const MessageLink = styled(CrashDetailLink)`
+  font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
   ${truncate('100%')};
 `;
 

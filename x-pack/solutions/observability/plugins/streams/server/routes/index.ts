@@ -16,6 +16,8 @@ import { listStreamsRoute } from './streams/list';
 import { readStreamRoute } from './streams/read';
 import { resyncStreamsRoute } from './streams/resync';
 import { sampleStreamRoute } from './streams/sample';
+import { schemaFieldsSimulationRoute } from './streams/schema/fields_simulation';
+import { unmappedFieldsRoute } from './streams/schema/unmapped_fields';
 import { streamsStatusRoutes } from './streams/settings';
 
 export const streamsRouteRepository = {
@@ -31,6 +33,8 @@ export const streamsRouteRepository = {
   ...disableStreamsRoute,
   ...sampleStreamRoute,
   ...streamDetailRoute,
+  ...unmappedFieldsRoute,
+  ...schemaFieldsSimulationRoute,
 };
 
 export type StreamsRouteRepository = typeof streamsRouteRepository;

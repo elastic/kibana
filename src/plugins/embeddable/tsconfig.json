@@ -7,7 +7,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/inspector-plugin",
-    "@kbn/saved-objects-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/utility-types",
@@ -20,7 +19,6 @@
     "@kbn/saved-objects-finder-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/content-management-plugin",
-    "@kbn/data-views-plugin",
     "@kbn/presentation-panel-plugin",
     "@kbn/presentation-publishing",
     "@kbn/presentation-containers",

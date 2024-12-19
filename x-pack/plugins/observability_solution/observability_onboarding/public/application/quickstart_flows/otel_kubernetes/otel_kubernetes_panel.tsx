@@ -18,11 +18,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  EuiAccordion,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { css } from '@emotion/react';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { GetStartedPanel } from '../shared/get_started_panel';
 import { FeedbackButtons } from '../shared/feedback_buttons';
@@ -44,6 +47,7 @@ export const OtelKubernetesPanel: React.FC = () => {
   } = useKibana<ObservabilityOnboardingContextValue>();
   const apmLocator = share.url.locators.get('APM_LOCATOR');
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
+  const theme = useEuiTheme();
 
   if (error) {
     return (
@@ -187,7 +191,7 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                     'xpack.observability_onboarding.otelKubernetesPanel.theOperatorAutomatesTheLabel',
                     {
                       defaultMessage:
-                        'Enable automatic instrumentation for your applications by annotating the pods template (spec.template.metadata.annotations) in your Deployment or relevant workload object (StatefulSet, Job, CronJob, etc.)',
+                        'The Operator automates the injection of auto-instrumentation libraries into the annotated pods for some languages.',
                     }
                   )}
                 </p>
@@ -225,9 +229,27 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                   ]}
                 />
                 <EuiSpacer />
-                <EuiCodeBlock paddingSize="m" language="yaml">
-                  {`# To annotate specific deployment Pods modify its manifest
-apiVersion: apps/v1
+                <p
+                  css={css`
+                    font-weight: ${theme.euiTheme.font.weight.bold};
+                  `}
+                >
+                  {i18n.translate(
+                    'xpack.observability_onboarding.otelKubernetesPanel.step3a.title',
+                    { defaultMessage: '3(a) - Start with one of these annotations methods:' }
+                  )}
+                </p>
+                <EuiSpacer />
+                <EuiAccordion
+                  id={'otelKubernetesAccordionSingleDeployment'}
+                  paddingSize="s"
+                  buttonContent={i18n.translate(
+                    'xpack.observability_onboarding.otelKubernetesPanel.annotation.deployment',
+                    { defaultMessage: 'Annotate specific deployment Pods modifying its manifest' }
+                  )}
+                >
+                  <EuiCodeBlock paddingSize="m" language="yaml" isCopyable={true}>
+                    {`apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: myapp
@@ -242,23 +264,42 @@ spec:
       containers:
       - image: myapplication-image
         name: app
-      ...
+      ...`}
+                  </EuiCodeBlock>
+                </EuiAccordion>
+                <EuiSpacer />
+                <EuiAccordion
+                  id={'otelKubernetesAccordionAllResources'}
+                  paddingSize="s"
+                  buttonContent={i18n.translate(
+                    'xpack.observability_onboarding.otelKubernetesPanel.annotation.resources',
+                    { defaultMessage: 'Annotate all resources in a namespace' }
+                  )}
+                >
+                  <EuiCodeBlock paddingSize="m" language="bash" isCopyable={true}>
+                    {`kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${idSelected}="${namespace}/elastic-instrumentation"`}
+                  </EuiCodeBlock>
+                </EuiAccordion>
+                <EuiSpacer />
+                <p
+                  css={css`
+                    font-weight: ${theme.euiTheme.font.weight.bold};
+                  `}
+                >
+                  {i18n.translate(
+                    'xpack.observability_onboarding.otelKubernetesPanel.step3b.title',
+                    {
+                      defaultMessage:
+                        '3(b) - Restart deployment and ensure the annotations are applied and the auto-instrumentation library is injected:',
+                    }
+                  )}
+                </p>
+                <EuiSpacer />
+                <EuiCodeBlock paddingSize="m" language="bash" isCopyable={true}>
+                  {`kubectl rollout restart deployment myapp -n my-namespace
 
-# To annotate all resources in a namespace
-kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${idSelected}="${namespace}/elastic-instrumentation"
-
-# Restart your deployment
-kubectl rollout restart deployment myapp -n my-namespace
-
-# Check annotations have been applied correctly and auto-instrumentation library is injected
 kubectl describe pod <myapp-pod-name> -n my-namespace`}
                 </EuiCodeBlock>
-                <EuiSpacer />
-                <CopyToClipboardButton
-                  textToCopy={`annotations:
-    instrumentation.opentelemetry.io/inject-${idSelected}: "${namespace}/elastic-instrumentation"`}
-                  data-test-subj={`observabilityOnboardingOtelKubernetesInstrumentApplicationCopyToClipboard-${idSelected}`}
-                />
                 <EuiSpacer />
                 <p>
                   <FormattedMessage

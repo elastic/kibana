@@ -12,11 +12,9 @@ import { EmbeddablePublicPlugin } from './plugin';
 
 export { useAddFromLibraryTypes } from './add_from_library/registry';
 export { openAddFromLibraryFlyout } from './add_from_library/open_add_from_library_flyout';
-export { EmbeddablePanel } from './embeddable_panel';
 export {
   cellValueTrigger,
   CELL_VALUE_TRIGGER,
-  Container,
   contextMenuTrigger,
   CONTEXT_MENU_TRIGGER,
   defaultEmbeddableFactoryProvider,
@@ -55,12 +53,8 @@ export {
   withEmbeddableSubscription,
 } from './lib';
 export type {
-  Adapters,
   CellValueContext,
   ChartActionContext,
-  ContainerInput,
-  ContainerOutput,
-  EmbeddableContainerSettings,
   EmbeddableContext,
   EmbeddableEditorState,
   EmbeddableFactory,
@@ -70,11 +64,9 @@ export type {
   EmbeddableOutput,
   EmbeddablePackageState,
   FilterableEmbeddable,
-  IContainer,
   IEmbeddable,
   MultiValueClickContext,
   OutputSpec,
-  PanelState,
   PropertySpec,
   RangeSelectContext,
   ReferenceOrValueEmbeddable,
@@ -82,7 +74,6 @@ export type {
   SelfStyledEmbeddable,
   ValueClickContext,
 } from './lib';
-export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
 export type {
   EmbeddableSetup,
   EmbeddableSetupDependencies,
@@ -100,10 +91,5 @@ export {
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
-
-export {
-  embeddableInputToSubject,
-  embeddableOutputToSubject,
-} from './lib/embeddables/compatibility/embeddable_compatibility_utils';
 
 export { COMMON_EMBEDDABLE_GROUPING } from './lib/embeddables/common/constants';
