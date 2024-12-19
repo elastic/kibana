@@ -25,6 +25,7 @@ import {
   INTERNAL_CASE_OBSERVABLES_URL,
   INTERNAL_CASE_OBSERVABLES_PATCH_URL,
   INTERNAL_CASE_SIMILAR_CASES_URL,
+  INTERNAL_CASE_OBSERVABLES_DELETE_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {
@@ -106,11 +107,11 @@ export const getCaseUpdateObservableUrl = (id: string, observableId: string): st
 };
 
 export const getCaseDeleteObservableUrl = (id: string, observableId: string): string => {
-return INTERNAL_CASE_OBSERVABLES_DELETE_URL.replace('{case_id}', id).replace(
+  return INTERNAL_CASE_OBSERVABLES_DELETE_URL.replace('{case_id}', id).replace(
     '{observable_id}',
     observableId
   );
-}
+};
 
 export const getCaseSimilarCasesUrl = (caseId: string) => {
   return INTERNAL_CASE_SIMILAR_CASES_URL.replace('{case_id}', caseId);
