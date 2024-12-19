@@ -3575,7 +3575,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.ts"
               }
             ],
             "children": [],
@@ -3901,19 +3901,19 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "inputControlVis",
@@ -8074,6 +8074,10 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+              },
+              {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
@@ -8084,10 +8088,6 @@
               {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -8112,102 +8112,6 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/read_pack_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/usage/detections/rules/get_metrics.mocks.ts"
               },
               {
                 "plugin": "alerting",
@@ -8248,6 +8152,102 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.test.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/usage/detections/rules/get_metrics.mocks.ts"
               }
             ]
           },
@@ -11730,7 +11730,7 @@
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/public/common/mock/endpoint/dependencies_start_mock.ts"
+              "path": "x-pack/solutions/security/plugins/security_solution/public/common/mock/endpoint/dependencies_start_mock.ts"
             }
           ]
         },
@@ -12661,12 +12661,12 @@
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
               },
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "graph",
@@ -19196,12 +19196,12 @@
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
               },
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "graph",
@@ -24611,6 +24611,10 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+              },
+              {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
@@ -24621,10 +24625,6 @@
               {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -24649,102 +24649,6 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/read_pack_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/usage/detections/rules/get_metrics.mocks.ts"
               },
               {
                 "plugin": "alerting",
@@ -24785,6 +24689,102 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.test.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/usage/detections/rules/get_metrics.mocks.ts"
               }
             ]
           },

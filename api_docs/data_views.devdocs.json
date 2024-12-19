@@ -428,12 +428,12 @@
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
               },
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "graph",
@@ -8302,12 +8302,12 @@
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
               },
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "graph",
@@ -14131,20 +14131,20 @@
                 "path": "x-pack/platform/plugins/shared/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/models/job_service/new_job_caps/rollup.ts"
-              },
-              {
-                "plugin": "@kbn/ml-data-view-utils",
-                "path": "x-pack/platform/packages/private/ml/data_view_utils/actions/data_view_handler.ts"
-              },
-              {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.ts"
               },
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/models/job_service/new_job_caps/rollup.ts"
+              },
+              {
+                "plugin": "@kbn/ml-data-view-utils",
+                "path": "x-pack/platform/packages/private/ml/data_view_utils/actions/data_view_handler.ts"
               },
               {
                 "plugin": "graph",
@@ -14159,34 +14159,6 @@
                 "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
               },
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/observability_solution/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
                 "plugin": "stackAlerts",
                 "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/boundary_form.tsx"
               },
@@ -14199,22 +14171,6 @@
                 "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
-              },
-              {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
-              },
-              {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
               },
@@ -14223,16 +14179,32 @@
                 "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
               },
               {
-                "plugin": "uptime",
-                "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/components/overview/filter_group/filter_group.tsx"
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
               },
               {
-                "plugin": "uptime",
-                "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
               },
               {
-                "plugin": "ux",
-                "path": "x-pack/plugins/observability_solution/ux/public/components/app/rum_dashboard/local_uifilters/use_data_view.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
               },
               {
                 "plugin": "maps",
@@ -14243,38 +14215,6 @@
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.test.ts"
               },
               {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_kpi.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/mobile_test_attribute.ts"
-              },
-              {
-                "plugin": "exploratoryView",
-                "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
-              },
-              {
                 "plugin": "transform",
                 "path": "x-pack/platform/plugins/private/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
               },
@@ -14283,12 +14223,72 @@
                 "path": "x-pack/platform/plugins/private/transform/public/app/hooks/use_data_view_exists.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/solutions/security/plugins/timelines/server/search_strategy/index_fields/index.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/public/application/services/new_job_capabilities/remove_nested_field_children.test.ts"
               },
               {
                 "plugin": "transform",
                 "path": "x-pack/platform/plugins/private/transform/public/app/sections/create_transform/components/step_define/common/common.test.ts"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/components/overview/filter_group/filter_group.tsx"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
+              },
+              {
+                "plugin": "ux",
+                "path": "x-pack/solutions/observability/plugins/ux/public/components/app/rum_dashboard/local_uifilters/use_data_view.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_kpi.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/mobile_test_attribute.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -16825,12 +16825,12 @@
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
               },
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "graph",
@@ -26029,6 +26029,10 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+              },
+              {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
@@ -26039,10 +26043,6 @@
               {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -26067,102 +26067,6 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/read_pack_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/usage/detections/rules/get_metrics.mocks.ts"
               },
               {
                 "plugin": "alerting",
@@ -26203,6 +26107,102 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.test.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/usage/detections/rules/get_metrics.mocks.ts"
               }
             ]
           },

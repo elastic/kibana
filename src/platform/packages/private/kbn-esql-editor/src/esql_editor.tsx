@@ -84,6 +84,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   hideQueryHistory,
   hasOutline,
   displayDocumentationAsFlyout,
+  disableAutoFocus,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -169,25 +170,25 @@ export const ESQLEditor = memo(function ESQLEditor({
     const currentSelection = editor1?.current?.getSelection();
     const startLineNumber = currentSelection?.startLineNumber;
     const endLineNumber = currentSelection?.endLineNumber;
+    const edits = [];
     if (startLineNumber && endLineNumber) {
       for (let lineNumber = startLineNumber; lineNumber <= endLineNumber; lineNumber++) {
         const lineContent = editorModel.current?.getLineContent(lineNumber) ?? '';
         const hasComment = lineContent?.startsWith('//');
         const commentedLine = hasComment ? lineContent?.replace('//', '') : `//${lineContent}`;
 
-        // executeEdits allows to keep edit in history
-        editor1.current?.executeEdits('comment', [
-          {
-            range: {
-              startLineNumber: lineNumber,
-              startColumn: 0,
-              endLineNumber: lineNumber,
-              endColumn: (lineContent?.length ?? 0) + 1,
-            },
-            text: commentedLine,
+        edits.push({
+          range: {
+            startLineNumber: lineNumber,
+            startColumn: 0,
+            endLineNumber: lineNumber,
+            endColumn: (lineContent?.length ?? 0) + 1,
           },
-        ]);
+          text: commentedLine,
+        });
       }
+      // executeEdits allows to keep edit in history
+      editor1.current?.executeEdits('comment', edits);
     }
   }, []);
 
@@ -727,8 +728,10 @@ export const ESQLEditor = memo(function ESQLEditor({
                     editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
 
                     // Auto-focus the editor and move the cursor to the end.
-                    editor.focus();
-                    editor.setPosition({ column: Infinity, lineNumber: Infinity });
+                    if (!disableAutoFocus) {
+                      editor.focus();
+                      editor.setPosition({ column: Infinity, lineNumber: Infinity });
+                    }
                   }}
                 />
               </div>

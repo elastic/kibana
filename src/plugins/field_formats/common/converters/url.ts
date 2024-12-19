@@ -86,6 +86,7 @@ export class UrlFormat extends FieldFormat {
     return this.compileTemplate(template)({
       value,
       url,
+      rawValue: value,
     });
   }
 
