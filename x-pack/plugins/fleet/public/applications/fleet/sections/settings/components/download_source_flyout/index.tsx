@@ -104,7 +104,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
               <FormattedMessage
                 data-test-subj="editDownloadSourcesFlyout.hostHelpText"
                 id="xpack.fleet.settings.editDownloadSourcesFlyout.hostsInputDescription"
-                defaultMessage="Address that your agents will use to download their binary from. Specify the path to the directory containing the binary. {guideLink}"
+                defaultMessage="Enter the address of the directory containing the binaries to download. {guideLink}"
                 values={{
                   guideLink: (
                     <EuiLink href={docLinks.links.fleet.settings} target="_blank" external>
@@ -132,7 +132,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
               placeholder={i18n.translate(
                 'xpack.fleet.settings.editDownloadSourcesFlyout.hostsInputPlaceholder',
                 {
-                  defaultMessage: 'Specify host',
+                  defaultMessage: 'https://artifacts.elastic.co/downloads/',
                 }
               )}
             />
