@@ -186,12 +186,15 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       [actions, readOnly]
     );
 
-    const onInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearch(e.target.value);
-      if (e.target.value === '') {
-        onSearchChange(e.target.value);
-      }
-    }, []);
+    const onInputChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value);
+        if (e.target.value === '') {
+          onSearchChange(e.target.value);
+        }
+      },
+      [onSearchChange]
+    );
 
     return (
       <>
