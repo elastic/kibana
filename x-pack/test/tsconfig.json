@@ -25,7 +25,8 @@
     "*/packages/**/*",
     "*/*/packages/**/*",
     "security_solution_api_integration/**/*",
-    "security_solution_endpoint/**/*"
+    "security_solution_endpoint/**/*",
+    "security_solution_playwright/**/*"
   ],
   "kbn_references": [
     "@kbn/test-suites-src",
