@@ -19,13 +19,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
+import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import { EnrichmentEmptyPrompt } from './enrichment_empty_prompt';
 import { AddProcessorButton } from './add_processor_button';
 import { AddProcessorFlyout } from './flyout';
-import { DraggableProcessorListItem, SortableProcessorsList } from './processors_list';
+import { DraggableProcessorListItem } from './processors_list';
 import { ProcessorDefinition } from './types';
 import { ManagementBottomBar } from '../management_bottom_bar';
 import { useKibana } from '../../hooks/use_kibana';
+import { SortableList } from './sortable_list';
 
 export function StreamDetailEnrichmentContent({
   definition,
@@ -83,7 +85,7 @@ export function StreamDetailEnrichmentContent({
     <EuiPanel paddingSize="none">
       <ProcessorsHeader />
       <EuiSpacer size="l" />
-      <SortableProcessorsList onDragItem={handlerItemDrag}>
+      <SortableList onDragItem={handlerItemDrag}>
         {processors.map((processor, idx) => (
           <DraggableProcessorListItem
             key={processor.id}
@@ -92,7 +94,7 @@ export function StreamDetailEnrichmentContent({
             processor={processor}
           />
         ))}
-      </SortableProcessorsList>
+      </SortableList>
       <EuiSpacer size="m" />
       <AddProcessorButton onClick={openAddProcessor} />
       {addProcessorFlyout}
@@ -125,6 +127,8 @@ const ProcessorsHeader = () => {
 
 const useProcessorsList = (definition: ReadStreamDefinition, refreshDefinition: () => void) => {
   const { core, dependencies } = useKibana();
+  const abortController = useAbortController();
+
   const { toasts } = core.notifications;
   const { streamsRepositoryClient } = dependencies.start.streams;
 
@@ -148,6 +152,7 @@ const useProcessorsList = (definition: ReadStreamDefinition, refreshDefinition: 
   const saveChanges = async () => {
     try {
       await streamsRepositoryClient.fetch(`PUT /api/streams/{id}`, {
+        signal: abortController.signal,
         params: {
           path: {
             id: definition.id,

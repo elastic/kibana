@@ -20,37 +20,11 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { ClassNames } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
 import { EditProcessorFlyout } from './flyout';
 import { ProcessorDefinition } from './types';
-
-interface SortableProcessorsListProps {
-  onDragItem: DragDropContextProps['onDragEnd'];
-  children: EuiDroppableProps['children'];
-}
-
-export const SortableProcessorsList = ({ onDragItem, children }: SortableProcessorsListProps) => {
-  return (
-    <EuiDragDropContext onDragEnd={onDragItem}>
-      <ClassNames>
-        {({ css, theme }) => (
-          <EuiDroppable
-            droppableId="processors-droppable-area"
-            className={css`
-              background-color: ${theme.euiTheme.colors.backgroundBasePlain};
-              max-width: min(800px, 100%);
-            `}
-          >
-            {children}
-          </EuiDroppable>
-        )}
-      </ClassNames>
-    </EuiDragDropContext>
-  );
-};
 
 export const DraggableProcessorListItem = ({
   processor,

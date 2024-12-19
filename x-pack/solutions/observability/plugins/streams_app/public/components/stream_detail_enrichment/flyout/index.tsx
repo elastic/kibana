@@ -20,7 +20,15 @@ import {
   EuiFlyoutFooter,
   EuiButtonEmpty,
   EuiButton,
-  EuiLink,
+  EuiIcon,
+  EuiButtonIcon,
+  EuiFlexItem,
+  EuiText,
+  EuiFieldText,
+  EuiPanel,
+  euiDragDropReorder,
+  DragDropContextProps,
+  EuiDraggable,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
@@ -31,22 +39,22 @@ import {
   ReadStreamDefinition,
 } from '@kbn/streams-plugin/common';
 import React, { PropsWithChildren, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { type } from 'io-ts';
 import { DiscardChangesModal } from '../discard_changes_modal';
-import { useKibana } from '../../../hooks/use_kibana';
+import { ProcessorType } from '../types';
+import { ProcessorTypeSelector } from './processor_type_selector';
+import { SortableList } from '../sortable_list';
 
 interface ProcessorFlyoutProps {
   definition: ReadStreamDefinition;
   onClose: () => void;
 }
 
-type ProcessorType = ProcessingDefinition['config']['type'];
-
 export function AddProcessorFlyout({ definition, onClose }: ProcessorFlyoutProps) {
   const { fields, inheritedFields } = definition;
 
-  const [selectedField, setSelectedField] = useState('');
   const [selectedType, setSelectedType] = useState<ProcessorType>('grok');
+  const [selectedField, setSelectedField] = useState('message');
 
   const mergedFields = [...fields, ...inheritedFields];
 
@@ -76,6 +84,7 @@ export function AddProcessorFlyout({ definition, onClose }: ProcessorFlyoutProps
           value={selectedField}
           onChange={setSelectedField}
         />
+        {selectedType === 'grok' && <GrokProcessorFields />}
       </EuiForm>
     </ProcessorFlyout>
   );
@@ -214,85 +223,58 @@ const ProcessorFieldSelector = ({ fields, value, onChange }: ProcessorFieldSelec
   );
 };
 
-interface TAvailableProcessor {
-  value: ProcessorType;
-  inputDisplay: string;
-  getDocUrl: (esDocUrl: string) => React.ReactNode;
+interface GrokEditorProps {
+  value: string[];
+  onChange: (value: string[]) => void;
 }
 
-type TAvailableProcessors = Record<ProcessorType, TAvailableProcessor>;
+const GrokProcessorFields = ({ processor }) => {
+  const [patterns, setPatterns] = useState(processor?.config.patterns ?? []);
 
-const availableProcessors: TAvailableProcessors = {
-  dissect: {
-    value: 'dissect',
-    inputDisplay: 'Dissect',
-    getDocUrl: (esDocUrl: string) => (
-      <FormattedMessage
-        id="xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.dissectHelpText"
-        defaultMessage="Uses {dissectLink} patterns to extract matches from a field."
-        values={{
-          dissectLink: (
-            <EuiLink external target="_blank" href={esDocUrl + 'dissect-processor.html'}>
-              dissect
-            </EuiLink>
-          ),
-        }}
-      />
-    ),
-  },
-  grok: {
-    value: 'grok',
-    inputDisplay: 'Grok',
-    getDocUrl: (esDocUrl: string) => (
-      <FormattedMessage
-        id="xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokHelpText"
-        defaultMessage="Uses {grokLink} expressions to extract matches from a field."
-        values={{
-          grokLink: (
-            <EuiLink external target="_blank" href={esDocUrl + 'grok-processor.html'}>
-              grok
-            </EuiLink>
-          ),
-        }}
-      />
-    ),
-  },
+  return (
+    <>
+      <GrokEditor patterns={patterns} onChange={setPatterns} />
+    </>
+  );
 };
 
-const getProcessorDescription = (esDocUrl: string) => (type: ProcessorType) =>
-  availableProcessors[type].getDocUrl(esDocUrl);
-
-const processorTypeSelectorOptions = Object.values(availableProcessors).map(
-  ({ value, inputDisplay }) => ({ value, inputDisplay })
-);
-
-interface ProcessorTypeSelectorProps {
-  value: ProcessorType;
-  onChange: EuiSuperSelectProps<ProcessorType>['onChange'];
-}
-
-const ProcessorTypeSelector = ({ value, onChange }: ProcessorTypeSelectorProps) => {
-  const { core } = useKibana();
-  const esDocUrl = core.docLinks.links.elasticsearch.docsBase;
+const GrokEditor = ({ patterns, onChange }: GrokEditorProps) => {
+  const handlerPatternDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
+    if (source && destination) {
+      const items = euiDragDropReorder(patterns, source.index, destination.index);
+      onChange(items);
+    }
+  };
 
   return (
     <EuiFormRow
       label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.typeSelectorLabel',
-        { defaultMessage: 'Processor' }
+        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokEditorLabel',
+        { defaultMessage: 'Grok pattern editor' }
       )}
-      helpText={getProcessorDescription(esDocUrl)(value)}
     >
-      <EuiSuperSelect
-        options={processorTypeSelectorOptions}
-        valueOfSelected={value}
-        onChange={onChange}
-        fullWidth
-        placeholder={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.typeSelectorPlaceholder',
-          { defaultMessage: 'Grok, Dissect ...' }
-        )}
-      />
+      <EuiPanel color="subdued" paddingSize="m">
+        <SortableList onDragItem={handlerPatternDrag}>
+          {patterns.map((pattern, idx) => (
+            <EuiDraggable
+              key={pattern}
+              index={idx}
+              spacing="m"
+              draggableId={pattern}
+              hasInteractiveChildren
+              style={{
+                paddingLeft: 0,
+                paddingRight: 0,
+              }}
+            >
+              <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
+                <EuiIcon type="grab" />
+                <EuiFieldText compressed />
+              </EuiFlexGroup>
+            </EuiDraggable>
+          ))}
+        </SortableList>
+      </EuiPanel>
     </EuiFormRow>
   );
 };
