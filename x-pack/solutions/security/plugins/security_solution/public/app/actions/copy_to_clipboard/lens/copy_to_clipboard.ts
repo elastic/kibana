@@ -9,9 +9,9 @@ import type { CellValueContext, IEmbeddable } from '@kbn/embeddable-plugin/publi
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import copy from 'copy-to-clipboard';
+import { isLensApi } from '@kbn/lens-plugin/public';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import { fieldHasCellActions, isCountField, isInSecurityApp } from '../../utils';
-import { isLensApi } from '@kbn/lens-plugin/public';
 import { COPY_TO_CLIPBOARD, COPY_TO_CLIPBOARD_ICON, COPY_TO_CLIPBOARD_SUCCESS } from '../constants';
 
 export const ACTION_ID = 'embeddable_copyToClipboard';
