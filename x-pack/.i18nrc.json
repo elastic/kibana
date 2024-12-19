@@ -175,7 +175,9 @@
       "solutions/observability/plugins/ux"
     ],
     "xpack.urlDrilldown": "plugins/drilldowns/url_drilldown",
-    "xpack.watcher": "platform/plugins/private/watcher"
+    "xpack.watcher": "platform/plugins/private/watcher",
+    "xpack.eventStacktrace": "platform/packages/shared/kbn-event-stacktrace"
+
   },
   "exclude": [
     "examples"
