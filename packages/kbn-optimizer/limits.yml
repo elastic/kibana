@@ -10,13 +10,13 @@ pageLoadAssetSize:
   canvas: 29355
   cases: 180037
   charts: 55000
-  cloud: 21076
+  cloud: 31800
   cloudDataMigration: 19170
   cloudDefend: 18697
   cloudExperiments: 109746
   cloudFullStory: 18493
   cloudLinks: 55984
-  cloudSecurityPosture: 19109
+  cloudSecurityPosture: 20200
   console: 46091
   contentManagement: 16254
   controls: 60000
@@ -32,7 +32,7 @@ pageLoadAssetSize:
   dataViewEditor: 28082
   dataViewFieldEditor: 42021
   dataViewManagement: 5370
-  dataViews: 65000
+  dataViews: 65400
   dataVisualizer: 30000
   devTools: 38637
   discover: 99999
@@ -64,12 +64,12 @@ pageLoadAssetSize:
   expressionTagcloud: 27505
   expressionXY: 45000
   features: 21723
-  fieldFormats: 65209
+  fieldFormats: 66300
   fieldsMetadata: 21885
   files: 22673
   filesManagement: 18683
   fileUpload: 25664
-  fleet: 190461
+  fleet: 203800
   globalSearch: 29696
   globalSearchBar: 50403
   globalSearchProviders: 25554
@@ -120,7 +120,7 @@ pageLoadAssetSize:
   observabilityAiAssistantManagement: 19279
   observabilityLogsExplorer: 46650
   observabilityOnboarding: 19573
-  observabilityShared: 111036
+  observabilityShared: 113100
   osquery: 107090
   painlessLab: 179748
   presentationPanel: 55463
@@ -152,7 +152,7 @@ pageLoadAssetSize:
   securitySolution: 98429
   securitySolutionEss: 31781
   securitySolutionServerless: 62488
-  serverless: 16573
+  serverless: 16700
   serverlessObservability: 68747
   serverlessSearch: 72995
   sessionView: 77750
