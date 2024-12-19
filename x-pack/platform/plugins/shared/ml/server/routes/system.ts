@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
@@ -314,7 +314,7 @@ export function systemRoutes(
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
         const reindexRequest = {
-          body: request.body,
+          ...request.body,
           // Create a task and return task id instead of blocking until complete
           wait_for_completion: false,
         } as estypes.ReindexRequest;

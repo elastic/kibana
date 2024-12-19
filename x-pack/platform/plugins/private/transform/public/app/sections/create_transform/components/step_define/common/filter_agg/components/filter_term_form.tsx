@@ -16,7 +16,7 @@ import React, {
 } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';

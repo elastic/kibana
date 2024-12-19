@@ -9,7 +9,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
 import type { Moment } from 'moment';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';

@@ -14,7 +14,7 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
-import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import {
   ALERT_DURATION,
   ALERT_END,

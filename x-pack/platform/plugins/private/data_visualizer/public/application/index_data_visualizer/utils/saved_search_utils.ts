@@ -11,7 +11,7 @@ import { cloneDeep } from 'lodash';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { Query, Filter, AggregateQuery } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getEsQueryConfig, SearchSource } from '@kbn/data-plugin/common';

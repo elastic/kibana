@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { TimeRange } from '@kbn/es-query';
 import { CreateJob } from './create_job';
 
