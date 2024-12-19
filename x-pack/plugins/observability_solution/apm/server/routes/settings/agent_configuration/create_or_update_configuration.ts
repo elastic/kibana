@@ -28,7 +28,7 @@ export function createOrUpdateConfiguration({
   const params: APMIndexDocumentParams<AgentConfiguration> = {
     refresh: 'wait_for' as const,
     index: APM_AGENT_CONFIGURATION_INDEX,
-    body: {
+    document: {
       agent_name: configurationIntake.agent_name,
       service: {
         name: configurationIntake.service.name,

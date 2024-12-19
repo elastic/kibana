@@ -47,18 +47,16 @@ async function fetchLinkedChildrenOfSpan({
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
     _source: [SPAN_LINKS],
-    body: {
-      fields: [...requiredFields, ...optionalFields],
-      track_total_hits: false,
-      size: 1000,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(startWithBuffer, endWithBuffer),
-            { term: { [SPAN_LINKS_TRACE_ID]: traceId } },
-            ...(spanId ? [{ term: { [SPAN_LINKS_SPAN_ID]: spanId } }] : []),
-          ],
-        },
+    fields: [...requiredFields, ...optionalFields],
+    track_total_hits: false,
+    size: 1000,
+    query: {
+      bool: {
+        filter: [
+          ...rangeQuery(startWithBuffer, endWithBuffer),
+          { term: { [SPAN_LINKS_TRACE_ID]: traceId } },
+          ...(spanId ? [{ term: { [SPAN_LINKS_SPAN_ID]: spanId } }] : []),
+        ],
       },
     },
   });

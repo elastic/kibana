@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { ProfilingESField } from '@kbn/profiling-utils';
 

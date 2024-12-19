@@ -25,10 +25,8 @@ export function createOrUpdateCustomLink({
   const params: APMIndexDocumentParams<CustomLinkES> = {
     refresh: 'wait_for' as const,
     index: APM_CUSTOM_LINK_INDEX,
-    body: {
-      '@timestamp': Date.now(),
-      ...toESFormat(customLink),
-    },
+    '@timestamp': Date.now(),
+    ...toESFormat(customLink),
   };
 
   // by specifying an id elasticsearch will delete the previous doc and insert the updated doc

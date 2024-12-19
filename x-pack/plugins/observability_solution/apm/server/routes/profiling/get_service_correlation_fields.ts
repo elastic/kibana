@@ -45,36 +45,34 @@ export async function getServiceCorrelationFields({
     apm: {
       sources: [{ documentType, rollupInterval }],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-          ],
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+        ],
+      },
+    },
+    aggs: {
+      hostHostNames: {
+        terms: {
+          field: HOST_HOSTNAME,
+          size: 500,
         },
       },
-      aggs: {
-        hostHostNames: {
-          terms: {
-            field: HOST_HOSTNAME,
-            size: 500,
-          },
+      hostNames: {
+        terms: {
+          field: HOST_NAME,
+          size: 500,
         },
-        hostNames: {
-          terms: {
-            field: HOST_NAME,
-            size: 500,
-          },
-        },
-        containerIds: {
-          terms: {
-            field: CONTAINER_ID,
-            size: 500,
-          },
+      },
+      containerIds: {
+        terms: {
+          field: CONTAINER_ID,
+          size: 500,
         },
       },
     },

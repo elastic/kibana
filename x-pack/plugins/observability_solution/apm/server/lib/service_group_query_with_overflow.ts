@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { SERVICE_NAME } from '../../common/es_fields/apm';
 import { ServiceGroup } from '../../common/service_groups';

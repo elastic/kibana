@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { Lifecycle } from '@hapi/hapi';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -84,7 +84,7 @@ export interface CallWithRequestParams extends estypes.RequestBase {
   allow_no_indices?: boolean;
   size?: number;
   terminate_after?: number;
-  fields?: estypes.Fields;
+  fields?: estypes.SearchRequest['fields'];
   path?: string;
   query?: string | object;
   track_total_hits?: boolean | number;

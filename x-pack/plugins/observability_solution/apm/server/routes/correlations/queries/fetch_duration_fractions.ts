@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
@@ -34,22 +34,20 @@ export const fetchDurationFractions = async ({
     apm: {
       events: [eventType],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: getCommonCorrelationsQuery({
-        start,
-        end,
-        environment,
-        kuery,
-        query,
-      }),
-      aggs: {
-        latency_ranges: {
-          range: {
-            field: eventType === ProcessorEvent.span ? SPAN_DURATION : TRANSACTION_DURATION,
-            ranges,
-          },
+    track_total_hits: false,
+    size: 0,
+    query: getCommonCorrelationsQuery({
+      start,
+      end,
+      environment,
+      kuery,
+      query,
+    }),
+    aggs: {
+      latency_ranges: {
+        range: {
+          field: eventType === ProcessorEvent.span ? SPAN_DURATION : TRANSACTION_DURATION,
+          ranges,
         },
       },
     },

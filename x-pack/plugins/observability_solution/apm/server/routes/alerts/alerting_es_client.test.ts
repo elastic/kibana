@@ -18,12 +18,10 @@ describe('alertingEsClient', () => {
   let uiSettingsClientMock: jest.Mocked<IUiSettingsClient>;
 
   const params = {
-    body: {
-      size: 10,
-      track_total_hits: true,
-      query: {
-        match: { field: 'value' },
-      },
+    size: 10,
+    track_total_hits: true,
+    query: {
+      match: { field: 'value' },
     },
   };
 
@@ -72,7 +70,7 @@ describe('alertingEsClient', () => {
 
     const searchParams = scopedClusterClientMock.asCurrentUser.search.mock
       .calls[0][0] as APMEventESSearchRequestParams;
-    expect(searchParams.body?.query).toEqual({ match: { field: 'value' } });
+    expect(searchParams.query).toEqual({ match: { field: 'value' } });
   });
 
   it('should call search with filters containing excluded data tiers', async () => {
@@ -83,7 +81,7 @@ describe('alertingEsClient', () => {
 
     const searchParams = scopedClusterClientMock.asCurrentUser.search.mock
       .calls[0][0] as APMEventESSearchRequestParams;
-    expect(searchParams.body?.query?.bool).toEqual({
+    expect(searchParams.query?.bool).toEqual({
       must: [
         { match: { field: 'value' } },
         { bool: { must_not: [{ terms: { _tier: ['data_warm', 'data_cold'] } }] } },
