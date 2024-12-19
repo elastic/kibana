@@ -64,17 +64,6 @@ import {
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryEdit } from '../../../rule_creation/components/eql_query_edit';
 import { DataViewSelectorField } from '../data_view_selector_field';
-<<<<<<< HEAD
-<<<<<<< HEAD
-import { ThreatMatchInput } from '../threatmatch_input';
-import { ThreatMatchIndexEdit } from '../../../rule_creation/components/threat_match_index_edit';
-import { ThreatMatchQueryEdit } from '../../../rule_creation/components/threat_match_query_edit';
-import { ThreatMatchMappingEdit } from '../../../rule_creation/components/threat_match_mapping_edit';
-=======
-import { ThreatMatchEdit } from '../threat_match_edit/threat_match_edit';
->>>>>>> 49853eaf618 (add threat mapping persistence functionality)
-=======
->>>>>>> 81726efc647 (post-rebase conflicts resolving)
 import { useFetchIndex } from '../../../../common/containers/source';
 import { RequiredFields } from '../../../rule_creation/components/required_fields';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
@@ -98,20 +87,13 @@ import { AnomalyThresholdEdit } from '../../../rule_creation/components/anomaly_
 import { HistoryWindowStartEdit } from '../../../rule_creation/components/history_window_start_edit';
 import { NewTermsFieldsEdit } from '../../../rule_creation/components/new_terms_fields_edit';
 import { EsqlQueryEdit } from '../../../rule_creation/components/esql_query_edit';
-<<<<<<< HEAD
 import { CreateCustomMlJobButton } from '../../../rule_creation/components/create_ml_job_button/create_ml_job_button';
 import { ThreatMatchEdit } from '../threat_match_edit';
 import { usePersistentNewTermsState } from './use_persistent_new_terms_state';
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 import { usePersistentThresholdState } from './use_persistent_threshold_state';
-=======
-import { ThreatMatchEdit } from '../threat_match_edit';
->>>>>>> 81726efc647 (post-rebase conflicts resolving)
 import { usePersistentQuery } from './use_persistent_query';
-<<<<<<< HEAD
 import { usePersistentMachineLearningState } from './use_persistent_machine_learning_state';
-=======
->>>>>>> 49853eaf618 (add threat mapping persistence functionality)
 import { usePersistentThreatMatchState } from './use_persistent_threat_match_state';
 
 const CommonUseField = getUseField({ component: Field });
@@ -246,8 +228,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     form,
   });
   usePersistentAlertSuppressionState({ form });
-<<<<<<< HEAD
-<<<<<<< HEAD
   usePersistentThresholdState({ form, ruleTypePath: 'ruleType', thresholdPath: 'threshold' });
   usePersistentMachineLearningState({
     form,
@@ -262,14 +242,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     historyWindowStartPath: 'historyWindowSize',
   });
   usePersistentThreatMatchState({ form });
-=======
-  usePersistentThreatMatchState({
-    form,
-  });
->>>>>>> 49853eaf618 (add threat mapping persistence functionality)
-=======
-  usePersistentThreatMatchState({ form });
->>>>>>> 30e3c9c1f35 (fix validation upon saving)
 
   const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
     ({ index: timelineIndex, queryBar: timelineQueryBar, eqlOptions }) => {
@@ -649,7 +621,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </RuleTypeEuiFormRow>
             </>
           )}
-<<<<<<< HEAD
           {isMlRule(ruleType) && (
             <EuiFormRow fullWidth>
               <>
@@ -672,52 +643,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               <ThresholdEdit esFields={indexPattern.fields as FieldSpec[]} path="threshold" />
             </EuiFormRow>
           )}
-=======
-          <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
-            <>
-              <UseField
-                path="machineLearningJobId"
-                component={MlJobSelect}
-                componentProps={{
-                  describedByIds: ['detectionEngineStepDefineRulemachineLearningJobId'],
-                }}
-              />
-              <UseField
-                path="anomalyThreshold"
-                component={AnomalyThresholdSlider}
-                componentProps={{
-                  describedByIds: ['detectionEngineStepDefineRuleAnomalyThreshold'],
-                }}
-              />
-            </>
-          </RuleTypeEuiFormRow>
-          <RuleTypeEuiFormRow
-            $isVisible={isThresholdRule}
-            data-test-subj="thresholdInput"
-            fullWidth
-          >
-            <>
-              <UseMultiFields
-                fields={{
-                  thresholdField: {
-                    path: 'threshold.field',
-                  },
-                  thresholdValue: {
-                    path: 'threshold.value',
-                  },
-                  thresholdCardinalityField: {
-                    path: 'threshold.cardinality.field',
-                  },
-                  thresholdCardinalityValue: {
-                    path: 'threshold.cardinality.value',
-                  },
-                }}
-              >
-                {ThresholdInputChildren}
-              </UseMultiFields>
-            </>
-          </RuleTypeEuiFormRow>
->>>>>>> 49853eaf618 (add threat mapping persistence functionality)
           {isThreatMatchRule(ruleType) && (
             <ThreatMatchEdit
               indexPatternPath="threatIndex"
@@ -727,7 +652,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               threatIndexPatterns={threatIndexPatterns}
               loading={threatIndexPatternsLoading}
             />
-<<<<<<< HEAD
           )}
           {isNewTermsRule(ruleType) && (
             <EuiFormRow data-test-subj="newTermsInput" fullWidth>
@@ -736,8 +660,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 <HistoryWindowStartEdit path="historyWindowSize" />
               </>
             </EuiFormRow>
-=======
->>>>>>> 49853eaf618 (add threat mapping persistence functionality)
           )}
           <EuiSpacer size="m" />
 

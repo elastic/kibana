@@ -76,11 +76,11 @@ import { NEW_TERMS_FIELDS_LABEL } from '../../../rule_creation/components/new_te
 import { HISTORY_WINDOW_START_LABEL } from '../../../rule_creation/components/history_window_start_edit/translations';
 import { MACHINE_LEARNING_JOB_ID_LABEL } from '../../../rule_creation/components/machine_learning_job_id_edit/translations';
 import { ANOMALY_THRESHOLD_LABEL } from '../../../rule_creation/components/anomaly_threshold_edit/translations';
-import type { FieldValueQueryBar } from '../query_bar_field';
 import { THREAT_MATCH_MAPPING_FIELD_LABEL } from '../../../rule_creation/components/threat_match_mapping_edit/translations';
 import { THREAT_MATCH_QUERY_FIELD_LABEL } from '../../../rule_creation/components/threat_match_query_edit/translations';
 import { THREAT_MATCH_INDEX_FIELD_LABEL } from '../../../rule_creation/components/threat_match_index_edit/translations';
 import { THREAT_MATCH_INDICATOR_PATH_FIELD_LABEL } from '../../../rule_creation/components/threat_match_indicator_path_edit/translations';
+import type { FieldValueQueryBar } from '../query_bar_field';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
@@ -348,12 +348,6 @@ export const getDescriptionItem = (
     });
   } else if (field === 'threatMapping') {
     const threatMap: ThreatMapping = get(field, data);
-<<<<<<< HEAD
-    return buildThreatMappingDescription(label, threatMap);
-  } else if (field === 'newTermsFields') {
-    const values: string[] = get(field, data);
-    return buildStringArrayDescription(NEW_TERMS_FIELDS_LABEL, field, values);
-=======
     return buildThreatMappingDescription(THREAT_MATCH_MAPPING_FIELD_LABEL, threatMap);
   } else if (field === 'threatIndicatorPath') {
     return [
@@ -362,7 +356,9 @@ export const getDescriptionItem = (
         description: get(field, data),
       },
     ];
->>>>>>> ab5ed90002e (fix Threat Match readonly labels)
+  } else if (field === 'newTermsFields') {
+    const values: string[] = get(field, data);
+    return buildStringArrayDescription(NEW_TERMS_FIELDS_LABEL, field, values);
   } else if (Array.isArray(get(field, data)) && field !== 'threatMapping') {
     const values: string[] = get(field, data);
     return buildStringArrayDescription(label, field, values);
