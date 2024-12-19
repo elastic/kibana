@@ -6,10 +6,11 @@
  */
 
 import { composeStories } from '@storybook/testing-react';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import React from 'react';
 import * as stories from './service_overview.stories';
 import * as useAdHocApmDataView from '../../../hooks/use_adhoc_apm_data_view';
+import { renderWithTheme } from '../../../utils/test_helpers';
 
 const { Example } = composeStories(stories);
 
@@ -32,7 +33,7 @@ describe('ServiceOverview', () => {
     jest.clearAllMocks();
   });
   it('renders', async () => {
-    render(<Example />);
+    renderWithTheme(<Example />);
 
     expect(await screen.findByRole('heading', { name: 'Latency' })).toBeInTheDocument();
   });

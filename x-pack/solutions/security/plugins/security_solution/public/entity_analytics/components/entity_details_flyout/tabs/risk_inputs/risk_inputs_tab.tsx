@@ -14,7 +14,6 @@ import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 
 import { get } from 'lodash/fp';
 import { AlertPreviewButton } from '../../../../../flyout/shared/components/alert_preview_button';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { formatRiskScore } from '../../../../common';
@@ -98,26 +97,20 @@ export const RiskInputsTab = ({ entityType, entityName, scopeId }: RiskInputsTab
     }),
     []
   );
-  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const inputColumns: Array<EuiBasicTableColumn<InputAlert>> = useMemo(
     () => [
-      ...(isPreviewEnabled
-        ? [
-            {
-              render: (data: InputAlert) => (
-                <AlertPreviewButton
-                  id={data._id}
-                  indexName={data.input.index}
-                  scopeId={scopeId}
-                  data-test-subj={EXPAND_ALERT_TEST_ID}
-                />
-              ),
-              width: '5%',
-            },
-          ]
-        : []),
-
+      {
+        render: (data: InputAlert) => (
+          <AlertPreviewButton
+            id={data._id}
+            indexName={data.input.index}
+            scopeId={scopeId}
+            data-test-subj={EXPAND_ALERT_TEST_ID}
+          />
+        ),
+        width: '5%',
+      },
       {
         name: (
           <FormattedMessage
@@ -172,7 +165,7 @@ export const RiskInputsTab = ({ entityType, entityName, scopeId }: RiskInputsTab
         render: formatContribution,
       },
     ],
-    [isPreviewEnabled, scopeId]
+    [scopeId]
   );
 
   if (riskScoreError) {
