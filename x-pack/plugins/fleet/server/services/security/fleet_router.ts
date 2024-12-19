@@ -14,7 +14,7 @@ import {
   type RequestHandler,
   type RouteMethod,
 } from '@kbn/core/server';
-import type { VersionedRouteConfig } from '@kbn/core-http-server';
+import type { RouteSecurity, VersionedRouteConfig } from '@kbn/core-http-server';
 
 import { PUBLIC_API_ACCESS } from '../../../common/constants';
 import type { FleetRequestHandlerContext } from '../..';
@@ -35,6 +35,14 @@ import {
   doesNotHaveRequiredFleetAuthz,
 } from './security';
 
+export const DEFAULT_FLEET_ROUTE_SECURITY: RouteSecurity = {
+  authz: {
+    enabled: false,
+    reason:
+      'This route is opted out from authorization because Fleet use his own authorization model.',
+  },
+};
+
 function withDefaultPublicAccess<Method extends RouteMethod>(
   options: FleetVersionedRouteConfig<Method>
 ): VersionedRouteConfig<Method> {
@@ -44,6 +52,7 @@ function withDefaultPublicAccess<Method extends RouteMethod>(
     return {
       ...options,
       access: PUBLIC_API_ACCESS,
+      security: DEFAULT_FLEET_ROUTE_SECURITY,
     };
   }
 }

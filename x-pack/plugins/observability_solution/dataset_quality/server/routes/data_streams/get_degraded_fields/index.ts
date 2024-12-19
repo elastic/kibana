@@ -6,7 +6,6 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { rangeQuery, existsQuery } from '@kbn/observability-plugin/server';
 import type {
   AggregationsDateHistogramAggregation,
   AggregationsMaxAggregation,
@@ -14,8 +13,9 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { DegradedFieldResponse } from '../../../../common/api_types';
 import { MAX_DEGRADED_FIELDS } from '../../../../common/constants';
+import { INDEX, TIMESTAMP, _IGNORED } from '../../../../common/es_fields';
 import { createDatasetQualityESClient } from '../../../utils';
-import { _IGNORED, INDEX, TIMESTAMP } from '../../../../common/es_fields';
+import { existsQuery, rangeQuery } from '../../../utils/queries';
 import { getFieldIntervalInSeconds } from './get_interval';
 
 export async function getDegradedFields({

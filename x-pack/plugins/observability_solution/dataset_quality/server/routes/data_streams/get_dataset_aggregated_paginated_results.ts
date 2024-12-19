@@ -6,13 +6,13 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { rangeQuery } from '@kbn/observability-plugin/server';
-import {
-  type AggregationsCompositeAggregation,
+import type {
+  AggregationsCompositeAggregation,
   QueryDslBoolQuery,
 } from '@elastic/elasticsearch/lib/api/types';
 import { DataStreamDocsStat } from '../../../common/api_types';
 import { createDatasetQualityESClient } from '../../utils';
+import { rangeQuery } from '../../utils/queries';
 
 interface Dataset {
   type: string;
