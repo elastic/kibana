@@ -129,12 +129,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
               data-test-subj="editDownloadSourcesFlyout.hostInput"
               fullWidth
               {...inputs.hostInput.props}
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.editDownloadSourcesFlyout.hostsInputPlaceholder',
-                {
-                  defaultMessage: 'https://artifacts.elastic.co/downloads/',
-                }
-              )}
+              placeholder="https://artifacts.elastic.co/downloads/"
             />
           </EuiFormRow>
           <EuiFormRow
