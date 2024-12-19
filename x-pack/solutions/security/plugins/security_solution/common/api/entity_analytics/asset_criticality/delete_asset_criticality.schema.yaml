@@ -9,8 +9,8 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: DeleteAssetCriticalityRecord
-      summary: Delete Criticality Record
-      description: Delete the asset criticality record for a specific asset if it exists.
+      summary: Delete an asset criticality record
+      description: Delete the asset criticality record for a specific entity.
       parameters:
         - name: id_value
           in: query
