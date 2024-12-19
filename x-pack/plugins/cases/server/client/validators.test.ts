@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { OBSERVABLE_TYPE_IPV4 } from '../../common/constants';
+import { createCasesClientMock } from './mocks';
 import {
   validateDuplicatedKeysInRequest,
   validateDuplicatedObservableTypesInRequest,
   validateDuplicatedObservablesInRequest,
+  validateObservableTypeKeyExists,
 } from './validators';
 
 describe('validators', () => {
@@ -152,6 +155,30 @@ describe('validators', () => {
           ],
         })
       ).not.toThrow();
+    });
+  });
+
+  describe('validateObservableTypeKeyExists', () => {
+    const mockCasesClient = createCasesClientMock();
+
+    it('does not throw if all observable type keys exist', async () => {
+      await expect(
+        validateObservableTypeKeyExists(mockCasesClient, {
+          caseOwner: 'securityFixture',
+          observableTypeKey: OBSERVABLE_TYPE_IPV4.key,
+        })
+      ).resolves.not.toThrow();
+    });
+
+    it('throws an error if any observable type key does not exist', async () => {
+      await expect(() =>
+        validateObservableTypeKeyExists(mockCasesClient, {
+          caseOwner: 'securityFixture',
+          observableTypeKey: 'random key',
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid observable type, key does not exist: random key"`
+      );
     });
   });
 });
