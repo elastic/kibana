@@ -18,7 +18,6 @@ module.exports = {
     /src[\/\\]plugins[\/\\]kibana_react[\/\\]/,
     /x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-elastic-assistant[\/\\]/,
     /x-pack[\/\\]plugins[\/\\]fleet[\/\\]/,
-    /x-pack[\/\\]plugins[\/\\]observability_solution[\/\\]apm[\/\\]/,
     /x-pack[\/\\]plugins[\/\\]observability_solution[\/\\]observability_shared[\/\\]/,
     /x-pack[\/\\]plugins[\/\\]security_solution[\/\\]/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]exploratory_view[\/\\]/,

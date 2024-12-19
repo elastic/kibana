@@ -8,15 +8,15 @@
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { truncate, unit } from '../../../../utils/style';
 import { HttpStatusBadge } from '../http_status_badge';
 
-const HttpInfoBadge = euiStyled(EuiBadge)`
-  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
+const HttpInfoBadge = styled(EuiBadge)`
+  margin-right: ${({ theme }) => theme.euiTheme.size.xs};
 `;
 
-const Url = euiStyled('span')`
+const Url = styled('span')`
   display: inline-block;
   vertical-align: bottom;
   ${truncate(unit * 24)};
@@ -27,7 +27,7 @@ interface HttpInfoProps {
   url: string;
 }
 
-const Span = euiStyled('span')`
+const Span = styled('span')`
   white-space: nowrap;
 `;
 
