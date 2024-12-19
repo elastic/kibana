@@ -840,6 +840,7 @@ x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
 x-pack/platform/packages/shared/observability/alerting_rule_utils @elastic/obs-ux-management-team
 x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration @elastic/kibana-management
 x-pack/platform/plugins/private/cross_cluster_replication @elastic/kibana-management
+x-pack/platform/plugins/private/custom_branding @elastic/appex-sharedux
 x-pack/platform/plugins/private/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 x-pack/platform/plugins/private/data_visualizer @elastic/ml-ui
 x-pack/platform/plugins/private/grokdebugger @elastic/kibana-management
@@ -876,7 +877,6 @@ x-pack/plugins/cloud_integrations/cloud_chat @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_experiments @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_full_story @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_links @elastic/kibana-core
-x-pack/plugins/custom_branding @elastic/appex-sharedux
 x-pack/plugins/dashboard_enhanced @elastic/kibana-presentation
 x-pack/plugins/data_quality @elastic/obs-ux-logs-team
 x-pack/plugins/discover_enhanced @elastic/kibana-data-discovery
