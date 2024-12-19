@@ -5197,7 +5197,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/custom-icons@link:packages/kbn-custom-icons":
+"@kbn/custom-icons@link:src/platform/packages/shared/kbn-custom-icons":
   version "0.0.0"
   uid ""
 
