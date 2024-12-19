@@ -76,6 +76,18 @@ export class SearchInferenceEndpointsPlugin
       visibleIn: [],
     });
 
+    core.application.register({
+      id: 'searchInferenceEndpointsRedirect',
+      title: PLUGIN_NAME,
+      appRoute: '/app/enterprise_search/relevance/inference_endpoints',
+      visibleIn: [],
+      async mount({}: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.application.navigateToApp('/elasticsearch/relevance/inference_endpoints');
+        return () => {};
+      },
+    });
+
     registerLocators(plugins.share);
 
     return {};

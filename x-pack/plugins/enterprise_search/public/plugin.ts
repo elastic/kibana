@@ -310,6 +310,19 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
+      id: 'searchElasticsearchRedirect',
+      title: ELASTICSEARCH_PLUGIN.NAME,
+      appRoute: '/app/enterprise_search/elasticsearch',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({}: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.application.navigateToApp('/elasticsearch/elasticsearch');
+        return () => {};
+      },
+    });
+
+    core.application.register({
       appRoute: VECTOR_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       euiIconType: VECTOR_SEARCH_PLUGIN.LOGO,
@@ -328,6 +341,19 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(EnterpriseSearchVectorSearch, kibanaDeps, pluginData);
       },
       title: VECTOR_SEARCH_PLUGIN.NAV_TITLE,
+    });
+
+    core.application.register({
+      id: 'searchVectorsearchRedirect',
+      title: VECTOR_SEARCH_PLUGIN.NAV_TITLE,
+      appRoute: '/app/enterprise_search/vector_search',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({}: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.application.navigateToApp('/elasticsearch/vector_search');
+        return () => {};
+      },
     });
 
     core.application.register({
@@ -352,6 +378,19 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
+      id: 'searchSemanticsearchRedirect',
+      title: SEMANTIC_SEARCH_PLUGIN.NAV_TITLE,
+      appRoute: '/app/enterprise_search/semantic_search',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({}: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.application.navigateToApp('/elasticsearch/semantic_search');
+        return () => {};
+      },
+    });
+
+    core.application.register({
       appRoute: AI_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       euiIconType: AI_SEARCH_PLUGIN.LOGO,
@@ -371,6 +410,19 @@ export class EnterpriseSearchPlugin implements Plugin {
       },
       title: AI_SEARCH_PLUGIN.NAV_TITLE,
       visibleIn: [],
+    });
+
+    core.application.register({
+      id: 'searchAIsearchRedirect',
+      title: AI_SEARCH_PLUGIN.NAV_TITLE,
+      appRoute: '/app/enterprise_search/ai_search',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({}: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.application.navigateToApp('/elasticsearch/ai_search');
+        return () => {};
+      },
     });
 
     core.application.register({
