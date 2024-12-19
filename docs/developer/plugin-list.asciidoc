@@ -649,7 +649,7 @@ Index Management by running this series of requests in Console:
 external LLM APIs. Its goals are:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/infra/README.md[infra]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/infra/README.md[infra]
 |This is the home of the infra plugin, which aims to provide a solution for
 the infrastructure monitoring use-case within Kibana.
 

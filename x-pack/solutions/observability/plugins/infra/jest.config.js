@@ -7,12 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/plugins/observability_solution/infra'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/observability/plugins/infra'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/observability_solution/infra',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/observability/plugins/infra',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/observability_solution/infra/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/solutions/observability/plugins/infra/{common,public,server}/**/*.{ts,tsx}',
   ],
 };
