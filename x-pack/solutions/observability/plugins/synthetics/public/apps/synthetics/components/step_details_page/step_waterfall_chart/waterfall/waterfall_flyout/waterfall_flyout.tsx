@@ -7,7 +7,7 @@
 
 import React, { useEffect, useRef } from 'react';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 
 import {
   EuiFlyout,
@@ -49,7 +49,7 @@ export const RESPONSE_HEADERS = i18n.translate(
   }
 );
 
-const FlyoutContainer = euiStyled(EuiFlyout)`
+const FlyoutContainer = styled(EuiFlyout)`
   z-index: ${(props) => props.theme.eui.euiZLevel5};
 `;
 

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { Ping } from '../../../../../../../../common/runtime_types';
 
 const StyledSpan = styled.span`

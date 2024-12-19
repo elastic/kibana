@@ -10,7 +10,7 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { AllSeries, createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
@@ -97,7 +97,7 @@ export const EXPLORE_LABEL = i18n.translate('xpack.synthetics.synthetics.markers
   defaultMessage: 'Explore',
 });
 
-const Wrapper = euiStyled.div`
+const Wrapper = styled.div`
   height: 200px;
   width: 400px;
   &&& {

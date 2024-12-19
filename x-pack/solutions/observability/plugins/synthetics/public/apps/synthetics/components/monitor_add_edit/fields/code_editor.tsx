@@ -6,11 +6,11 @@
  */
 import React from 'react';
 
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import useThrottle from 'react-use/lib/useThrottle';
 
 import { EuiPanel } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { CodeEditor as MonacoCodeEditor } from '@kbn/code-editor';
 
 import { MonacoEditorLangId } from '../types';
@@ -77,7 +77,7 @@ export const CodeEditor = ({
   );
 };
 
-const MonacoCodeContainer = euiStyled.div`
+const MonacoCodeContainer = styled.div`
   & > .kibanaCodeEditor {
     z-index: 0;
   }

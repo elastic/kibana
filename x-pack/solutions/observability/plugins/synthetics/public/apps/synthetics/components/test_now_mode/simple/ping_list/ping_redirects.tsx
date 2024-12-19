@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { EuiListGroup, EuiListGroupItemProps, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { Ping } from '../../../../../../../common/runtime_types';
 

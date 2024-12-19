@@ -22,9 +22,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useRef } from 'react';
 import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
 import { useErrorDetailsLink } from '../../../common/links/error_details_link';
@@ -210,7 +210,7 @@ const TEST_IN_PROGRESS = i18n.translate('xpack.synthetics.inProgress.label', {
   defaultMessage: 'Manual test run is in progress.',
 });
 
-const StyledIcon = euiStyled.div<{ boxShadow: string }>`
+const StyledIcon = styled.div<{ boxShadow: string }>`
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -220,8 +220,9 @@ const StyledIcon = euiStyled.div<{ boxShadow: string }>`
   height: 32px;
   background: ${({ theme }) =>
     theme.darkMode ? theme.eui.euiColorDarkestShade : theme.eui.euiColorLightestShade};
-  border: 1px solid ${({ theme }) =>
-    theme.darkMode ? theme.eui.euiColorDarkShade : theme.eui.euiColorLightShade};
+  border: 1px solid
+    ${({ theme }) =>
+      theme.darkMode ? theme.euiTheme.colors.darkShade : theme.eui.euiColorLightShade};
   ${({ boxShadow }) => boxShadow}
   border-radius: 16px;
   flex: none;

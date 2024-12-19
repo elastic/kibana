@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useExpandedPingList } from './use_ping_expanded';
 import { formatDuration } from '../../../../utils/formatting';
 import { Ping } from '../../../../../../../common/runtime_types';

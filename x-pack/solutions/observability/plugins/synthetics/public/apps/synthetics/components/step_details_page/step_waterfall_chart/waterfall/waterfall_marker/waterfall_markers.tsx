@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 
 import { MarkerItems, useWaterfallContext } from '../context/waterfall_context';
 import { WaterfallMarkerIcon } from './waterfall_marker_icon';
@@ -168,7 +168,7 @@ function getMarkersInfo(id: string, theme: ReturnType<typeof useTheme>) {
   return undefined;
 }
 
-const Wrapper = euiStyled.span`
+const Wrapper = styled.span`
   &&& {
     > .echAnnotation__icon {
       top: 8px;

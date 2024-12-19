@@ -7,7 +7,7 @@
 
 import React, { ChangeEvent, useState } from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import useDebounce from 'react-use/lib/useDebounce';
 import * as labels from './translations';
 

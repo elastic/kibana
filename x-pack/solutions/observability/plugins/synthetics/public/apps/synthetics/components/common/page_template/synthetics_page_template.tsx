@@ -7,7 +7,7 @@
 
 import { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { ClientPluginsStart } from '../../../../../plugin';
@@ -19,7 +19,7 @@ export const WrappedPageTemplate = (props: LazyObservabilityPageTemplateProps) =
   return <PageTemplateComponent {...props} />;
 };
 
-export const SyntheticsPageTemplateComponent = euiStyled(WrappedPageTemplate)`
+export const SyntheticsPageTemplateComponent = styled(WrappedPageTemplate)`
   &&& {
     .euiPageHeaderContent__top {
       flex-wrap: wrap;

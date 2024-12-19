@@ -7,7 +7,7 @@
 
 import React from 'react';
 import moment from 'moment';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { EuiHealth, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useCertStatus } from './use_cert_status';

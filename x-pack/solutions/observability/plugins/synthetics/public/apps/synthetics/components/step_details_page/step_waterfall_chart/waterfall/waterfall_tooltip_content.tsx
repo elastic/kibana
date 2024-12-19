@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useWaterfallContext } from './context/waterfall_context';
 
 interface Props {
@@ -16,12 +16,12 @@ interface Props {
   index: number;
 }
 
-const StyledText = euiStyled(EuiText)`
+const StyledText = styled(EuiText)`
   font-weight: bold;
 `;
 
-const StyledHorizontalRule = euiStyled(EuiHorizontalRule)`
-  background-color: ${(props) => props.theme.eui.euiColorDarkShade};
+const StyledHorizontalRule = styled(EuiHorizontalRule)`
+  background-color: ${(props) => props.theme.euiTheme.colors.darkShade};
 `;
 
 export const WaterfallTooltipContent: React.FC<Props> = ({ text, url, index }) => {

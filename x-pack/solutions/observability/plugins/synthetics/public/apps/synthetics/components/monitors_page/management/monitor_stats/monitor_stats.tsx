@@ -15,7 +15,7 @@ import {
   EuiText,
   EuiFlexItem,
 } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 
 import { OverviewStatusState } from '../../../../../../../common/runtime_types';
 
@@ -84,12 +84,12 @@ export const MonitorStats = ({
   );
 };
 
-const EuiStatStyled = euiStyled(EuiStat)`
+const EuiStatStyled = styled(EuiStat)`
   &&& {
-  color: ${({ theme }) => theme.eui.euiTitleColor};
+    color: ${({ theme }) => theme.eui.euiTitleColor};
     .euiStat__title {
-        color: ${({ theme }) => theme.eui.euiTitleColor};
-        font-size: ${({ theme }) => theme.eui.euiFontSizeXL};
+      color: ${({ theme }) => theme.eui.euiTitleColor};
+      font-size: ${({ theme }) => theme.eui.euiFontSizeXL};
     }
   }
 `;
