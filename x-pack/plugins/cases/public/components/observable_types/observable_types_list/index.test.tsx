@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { screen, within, waitFor } from '@testing-library/react';
-import userEvent, { type UserEvent } from '@testing-library/user-event';
+import userEvent from '@testing-library/user-event';
 
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
@@ -19,7 +19,6 @@ const observableTypes = [
 ];
 
 describe('ObservableTypesList', () => {
-  let user: UserEvent;
   let appMockRender: AppMockRenderer;
 
   const props: ObservableTypesListProps = {
@@ -29,11 +28,6 @@ describe('ObservableTypesList', () => {
   };
 
   beforeEach(() => {
-    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({
-      advanceTimers: jest.advanceTimersByTime,
-    });
-
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
   });
@@ -68,7 +62,7 @@ describe('ObservableTypesList', () => {
 
       const list = await screen.findByTestId('observable-types-list');
 
-      await user.click(
+      await userEvent.click(
         await within(list).findByTestId(`${observableTypes[0].key}-observable-type-delete`)
       );
 
@@ -80,13 +74,13 @@ describe('ObservableTypesList', () => {
 
       const list = await screen.findByTestId('observable-types-list');
 
-      await user.click(
+      await userEvent.click(
         await within(list).findByTestId(`${observableTypes[0].key}-observable-type-delete`)
       );
 
       expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
 
-      await user.click(await screen.findByText('Delete'));
+      await userEvent.click(await screen.findByText('Delete'));
 
       await waitFor(() => {
         expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
@@ -99,13 +93,13 @@ describe('ObservableTypesList', () => {
 
       const list = await screen.findByTestId('observable-types-list');
 
-      await user.click(
+      await userEvent.click(
         await within(list).findByTestId(`${observableTypes[0].key}-observable-type-delete`)
       );
 
       expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
 
-      await user.click(await screen.findByText('Cancel'));
+      await userEvent.click(await screen.findByText('Cancel'));
 
       await waitFor(() => {
         expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
@@ -124,7 +118,7 @@ describe('ObservableTypesList', () => {
 
       const list = await screen.findByTestId('observable-types-list');
 
-      await user.click(
+      await userEvent.click(
         await within(list).findByTestId(`${observableTypes[0].key}-observable-type-edit`)
       );
 
