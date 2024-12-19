@@ -24,7 +24,9 @@ export const useCardPanelStyles = () => {
     .onboardingCardIcon {
       padding: ${euiTheme.size.m};
       border-radius: 50%;
-      background-color: ${isDarkMode ? euiTheme.colors.backgroundBasePlain : euiTheme.colors.backgroundBaseSubdued};
+      background-color: ${isDarkMode
+        ? euiTheme.colors.backgroundBasePlain
+        : euiTheme.colors.backgroundBaseSubdued};
     }
     .onboardingCardHeaderTitle {
       font-weight: ${euiTheme.font.weight.semiBold};
