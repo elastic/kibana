@@ -78,7 +78,7 @@ export async function createAgentAction(
   await esClient.create({
     index: AGENT_ACTIONS_INDEX,
     id: uuidv4(),
-    body,
+    document: body,
     refresh: 'wait_for',
   });
 
@@ -112,7 +112,7 @@ export async function bulkCreateAgentActions(
   const messageSigningService = appContextService.getMessageSigningService();
   await esClient.bulk({
     index: AGENT_ACTIONS_INDEX,
-    body: await Promise.all(
+    operations: await Promise.all(
       actions.flatMap(async (action) => {
         const body: FleetServerAgentAction = {
           '@timestamp': new Date().toISOString(),
@@ -221,7 +221,7 @@ export async function bulkCreateAgentActionResults(
 
   await esClient.bulk({
     index: AGENT_ACTIONS_RESULTS_INDEX,
-    body: bulkBody,
+    operations: bulkBody,
     refresh: 'wait_for',
   });
 }

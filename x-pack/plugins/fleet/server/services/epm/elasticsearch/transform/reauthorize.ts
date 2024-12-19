@@ -11,7 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 
 import { sortBy, uniqBy } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { ErrorResponseBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ErrorResponseBase } from '@elastic/elasticsearch/lib/api/types';
 
 import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
