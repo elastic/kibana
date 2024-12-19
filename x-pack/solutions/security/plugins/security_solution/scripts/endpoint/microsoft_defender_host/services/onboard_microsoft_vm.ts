@@ -7,6 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
+import type { IndexResponse } from '@elastic/elasticsearch/lib/api/types';
 import { MicrosoftDefenderDataGenerator } from '../../../../common/endpoint/data_generators/microsoft_defender_data_generator';
 import { MICROSOFT_DEFENDER_INTEGRATION_PACKAGE_NAME } from './constants';
 import { installIntegration } from '../../common/fleet_services';
@@ -15,12 +16,16 @@ import { createToolingLogger } from '../../../../common/endpoint/data_loaders/ut
 export interface OnboardVmHostWithMicrosoftDefenderOptions {
   kbnClient: KbnClient;
   log?: ToolingLog;
+  vmName?: string;
+  forceNewHost?: boolean;
 }
 
 export const onboardVmHostWithMicrosoftDefender = async ({
   kbnClient,
   log = createToolingLogger(),
 }: OnboardVmHostWithMicrosoftDefenderOptions) => {
+  // FIXME:PT implement creation of new VM and connect it to MS Defender managment system
+
   log?.warning(`
   Creation of a VM host running Microsoft Defender for Endpoint is not yet implemented. However, an event
   will be indexed that will enable testing within Kibana only.
@@ -31,10 +36,10 @@ export const onboardVmHostWithMicrosoftDefender = async ({
   const indexName = 'logs-microsoft_defender_endpoint.log-default';
   const docToCreate = new MicrosoftDefenderDataGenerator().generateEndpointLog();
 
-  log.verbose(`Creating event in [l${indexName}]:\n ${JSON.stringify(docToCreate, null, 2)}`);
+  log.verbose(`Creating event in [${indexName}]:\n ${JSON.stringify(docToCreate, null, 2)}`);
 
   const indexedDoc = await kbnClient
-    .request({
+    .request<IndexResponse>({
       method: 'POST',
       path: 'api/console/proxy',
       headers: { 'elastic-api-version': '2023-10-31' },

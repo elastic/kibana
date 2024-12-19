@@ -143,7 +143,7 @@ const runCli: RunFn = async ({ log, flags }) => {
 
   const activeSpaceId = (await fetchActiveSpace(kbnClient)).id;
 
-  await onboardVmHostWithMicrosoftDefender({ kbnClient, log });
+  await onboardVmHostWithMicrosoftDefender({ kbnClient, log, vmName, forceNewHost });
 
   const {
     id: agentPolicyId,
@@ -199,8 +199,17 @@ const runCli: RunFn = async ({ log, flags }) => {
   }
 
   await Promise.all([
-    createMicrosoftDefenderForEndpointConnectorIfNeeded(),
-    createDetectionEngineMicrosoftDefenderRuleIfNeeded(),
+    createMicrosoftDefenderForEndpointConnectorIfNeeded({
+      kbnClient,
+      log,
+      tenantId,
+      clientId,
+      clientSecret,
+      oAuthServerUrl,
+      oAuthScope,
+      apiUrl,
+    }),
+    createDetectionEngineMicrosoftDefenderRuleIfNeeded(kbnClient, log, agentPolicyNamespace),
   ]);
 
   // FIXME:PT trigger alert in VM whenever that is implemented
