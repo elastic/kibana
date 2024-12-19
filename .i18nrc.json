@@ -15,7 +15,7 @@
     "contentManagement": "packages/content-management",
     "core": ["src/core", "packages/core"],
     "customIntegrations": "src/plugins/custom_integrations",
-    "customIntegrationsPackage": "packages/kbn-custom-integrations",
+    "customIntegrationsPackage": "x-pack/solutions/observability/packages/kbn-custom-integrations",
     "dashboard": "src/plugins/dashboard",
     "cloud": "packages/cloud",
     "domDragDrop": "packages/kbn-dom-drag-drop",
@@ -28,7 +28,7 @@
     "discover": [
       "src/plugins/discover",
       "packages/kbn-discover-utils",
-      "packages/kbn-discover-contextual-components"
+      "src/platform/packages/shared/kbn-discover-contextual-components"
     ],
     "savedSearch": "src/plugins/saved_search",
     "embeddableApi": "src/plugins/embeddable",
