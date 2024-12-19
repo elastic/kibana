@@ -20,6 +20,7 @@ describe('ManagedUser', () => {
     scopeId: '',
     isDraggable: false,
     openDetailsPanel: () => {},
+    isLinkEnabled: true,
   };
 
   it('renders', () => {

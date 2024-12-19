@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { CellValueContext, IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import copy from 'copy-to-clipboard';
+import { hasBlockingError } from '@kbn/presentation-publishing';
 import { isLensApi } from '@kbn/lens-plugin/public';
 import { isInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { KibanaServices } from '../../../../common/lib/kibana';
@@ -39,7 +39,7 @@ export const createCopyToClipboardLensAction = ({ order }: { order?: number }) =
     getIconType: () => COPY_TO_CLIPBOARD_ICON,
     getDisplayName: () => COPY_TO_CLIPBOARD,
     isCompatible: async ({ embeddable, data }) =>
-      !isErrorEmbeddable(embeddable as IEmbeddable) &&
+      !hasBlockingError(embeddable) &&
       isLensApi(embeddable) &&
       isDataColumnsValid(data) &&
       isInSecurityApp(currentAppId),
