@@ -15,9 +15,11 @@ import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { registerAnalyzeLogsRoutes } from './analyze_logs_routes';
 import { registerCelInputRoutes } from './cel_routes';
 import { ExperimentalFeatures } from '../../common/experimental_features';
+import { ValidateCelTask } from '../graphs/cel/validation/validate_task';
 
 export function registerRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>,
+  validateCelTask: ValidateCelTask,
   experimentalFeatures: ExperimentalFeatures
 ) {
   registerAnalyzeLogsRoutes(router);
@@ -27,7 +29,5 @@ export function registerRoutes(
   registerRelatedRoutes(router);
   registerPipelineRoutes(router);
 
-  if (experimentalFeatures.generateCel) {
-    registerCelInputRoutes(router);
-  }
+  registerCelInputRoutes(router, validateCelTask);
 }
