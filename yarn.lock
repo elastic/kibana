@@ -6781,7 +6781,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-plugin@link:x-pack/plugins/reporting":
+"@kbn/reporting-plugin@link:x-pack/platform/plugins/private/reporting":
   version "0.0.0"
   uid ""
 

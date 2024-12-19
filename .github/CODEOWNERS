@@ -850,6 +850,7 @@ x-pack/platform/plugins/private/index_lifecycle_management @elastic/kibana-manag
 x-pack/platform/plugins/private/license_api_guard @elastic/kibana-management
 x-pack/platform/plugins/private/painless_lab @elastic/kibana-management
 x-pack/platform/plugins/private/remote_clusters @elastic/kibana-management
+x-pack/platform/plugins/private/reporting @elastic/appex-sharedux
 x-pack/platform/plugins/private/rollup @elastic/kibana-management
 x-pack/platform/plugins/private/runtime_fields @elastic/kibana-management
 x-pack/platform/plugins/private/snapshot_restore @elastic/kibana-management
@@ -918,7 +919,6 @@ x-pack/plugins/observability_solution/observability_onboarding/e2e @elastic/obs-
 x-pack/plugins/observability_solution/observability_shared @elastic/observability-ui
 x-pack/plugins/observability_solution/profiling @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/profiling_data_access @elastic/obs-ux-infra_services-team
-x-pack/plugins/reporting @elastic/appex-sharedux
 x-pack/plugins/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 x-pack/plugins/saved_objects_tagging @elastic/appex-sharedux
 x-pack/plugins/search_assistant @elastic/search-kibana
@@ -1245,7 +1245,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 #CC# /src/platform/plugins/shared/home/public @elastic/appex-sharedux
 #CC# /src/platform/plugins/shared/home/server/services/ @elastic/appex-sharedux
 #CC# /src/platform/plugins/shared/home/ @elastic/appex-sharedux
-#CC# /x-pack/plugins/reporting/ @elastic/appex-sharedux
+#CC# /x-pack/platform/plugins/private/reporting/ @elastic/appex-sharedux
 #CC# /x-pack/solutions/security/plugins/security_solution_serverless/ @elastic/appex-sharedux
 
 
