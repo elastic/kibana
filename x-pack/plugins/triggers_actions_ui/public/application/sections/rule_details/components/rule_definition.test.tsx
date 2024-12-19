@@ -188,10 +188,10 @@ describe('Rule Definition', () => {
     expect(ruleDescription.find('div.euiText').text()).toEqual('Security detection rule');
   });
 
-  it('show rule conditions "', async () => {
+  it('show rule conditions only if the rule allows multiple conditions', async () => {
     const ruleConditions = wrapper.find('[data-test-subj="ruleSummaryRuleConditions"]');
     expect(ruleConditions).toBeTruthy();
-    expect(ruleConditions.find('div.euiText').text()).toEqual(`0 conditions`);
+    expect(ruleConditions.find('div.euiText').text()).toEqual('1 condition');
   });
 
   it('show rule interval with human readable value', async () => {
@@ -225,7 +225,24 @@ function mockRule(overwrite = {}): Rule {
     ruleTypeId: 'test_rule_type',
     schedule: { interval: '1s' },
     actions: [],
-    params: { name: 'test rule type name', description: 'siem description' },
+    params: {
+      name: 'test rule type name',
+      description: 'siem description',
+      criteria: [
+        {
+          comparator: '>',
+          metrics: [
+            {
+              name: 'A',
+              aggType: 'count',
+            },
+          ],
+          threshold: [100],
+          timeSize: 1,
+          timeUnit: 'm',
+        },
+      ],
+    },
     createdBy: null,
     updatedBy: null,
     apiKeyOwner: null,
