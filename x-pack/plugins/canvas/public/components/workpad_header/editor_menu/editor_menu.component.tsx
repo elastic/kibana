@@ -7,12 +7,7 @@
 
 import React, { FC, useCallback } from 'react';
 
-import {
-  EuiContextMenu,
-  EuiContextMenuItemIcon,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
-import { EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
+import { EuiContextMenu, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
 import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
@@ -28,21 +23,11 @@ const strings = {
     }),
 };
 
-interface FactoryGroup {
-  id: string;
-  appName: string;
-  icon: EuiContextMenuItemIcon;
-  panelId: number;
-  factories: EmbeddableFactoryDefinition[];
-}
-
 interface Props {
-  factories: EmbeddableFactoryDefinition[];
   addPanelActions: Action[];
   promotedVisTypes: BaseVisType[];
   visTypeAliases: VisTypeAlias[];
   createNewVisType: (visType?: BaseVisType | VisTypeAlias) => () => void;
-  createNewEmbeddableFromFactory: (factory: EmbeddableFactoryDefinition) => () => void;
   createNewEmbeddableFromAction: (
     action: Action,
     context: ActionExecutionContext<object>,
@@ -51,45 +36,13 @@ interface Props {
 }
 
 export const EditorMenu: FC<Props> = ({
-  factories,
   addPanelActions,
   promotedVisTypes,
   visTypeAliases,
   createNewVisType,
   createNewEmbeddableFromAction,
-  createNewEmbeddableFromFactory,
 }: Props) => {
-  const factoryGroupMap: Record<string, FactoryGroup> = {};
-  const ungroupedFactories: EmbeddableFactoryDefinition[] = [];
   const canvasApi = useCanvasApi();
-
-  let panelCount = 1;
-
-  // Maps factories with a group to create nested context menus for each group type
-  // and pushes ungrouped factories into a separate array
-  factories.forEach((factory: EmbeddableFactoryDefinition, index) => {
-    const { grouping } = factory;
-
-    if (grouping) {
-      grouping.forEach((group) => {
-        if (factoryGroupMap[group.id]) {
-          factoryGroupMap[group.id].factories.push(factory);
-        } else {
-          factoryGroupMap[group.id] = {
-            id: group.id,
-            appName: group.getDisplayName ? group.getDisplayName({}) : group.id,
-            icon: (group.getIconType ? group.getIconType({}) : 'empty') as EuiContextMenuItemIcon,
-            factories: [factory],
-            panelId: panelCount,
-          };
-
-          panelCount++;
-        }
-      });
-    } else {
-      ungroupedFactories.push(factory);
-    }
-  });
 
   const getVisTypeMenuItem = (visType: BaseVisType): EuiContextMenuPanelItemDescriptor => {
     const { name, title, titleInWizard, description, icon = 'empty' } = visType;
@@ -113,22 +66,6 @@ export const EditorMenu: FC<Props> = ({
       onClick: createNewVisType(visTypeAlias),
       'data-test-subj': `visType-${name}`,
       toolTipContent: description,
-    };
-  };
-
-  const getEmbeddableFactoryMenuItem = (
-    factory: EmbeddableFactoryDefinition
-  ): EuiContextMenuPanelItemDescriptor => {
-    const icon = factory?.getIconType ? factory.getIconType() : 'empty';
-
-    const toolTipContent = factory?.getDescription ? factory.getDescription() : undefined;
-
-    return {
-      name: factory.getDisplayName(),
-      icon,
-      toolTipContent,
-      onClick: createNewEmbeddableFromFactory(factory),
-      'data-test-subj': `createNew-${factory.type}`,
     };
   };
 
@@ -158,23 +95,9 @@ export const EditorMenu: FC<Props> = ({
       items: [
         ...visTypeAliases.map(getVisTypeAliasMenuItem),
         ...getAddPanelActionMenuItems(closePopover),
-        ...ungroupedFactories.map(getEmbeddableFactoryMenuItem),
         ...promotedVisTypes.map(getVisTypeMenuItem),
-        ...Object.values(factoryGroupMap).map(({ id, appName, icon, panelId }) => ({
-          name: appName,
-          icon,
-          panel: panelId,
-          'data-test-subj': `canvasEditorMenu-${id}Group`,
-        })),
       ],
     },
-    ...Object.values(factoryGroupMap).map(
-      ({ appName, panelId, factories: groupFactories }: FactoryGroup) => ({
-        id: panelId,
-        title: appName,
-        items: groupFactories.map(getEmbeddableFactoryMenuItem),
-      })
-    ),
   ];
 
   return (

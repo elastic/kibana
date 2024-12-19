@@ -8,8 +8,7 @@
 import React from 'react';
 import { mount, render } from 'enzyme';
 import { FieldValueSelection } from './field_value_selection';
-import { EuiSelectableList } from '@elastic/eui';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { EuiSelectableList, EuiThemeProvider } from '@elastic/eui';
 
 const values = [
   { label: 'elastic co frontend', count: 1 },
@@ -56,23 +55,23 @@ describe('FieldValueSelection', () => {
     expect((list.props() as any).visibleOptions).toMatchInlineSnapshot(`
       Array [
         Object {
-          "append": <styled.div>
+          "append": <Styled(div)>
             <EuiText
               size="xs"
             >
               1
             </EuiText>
-          </styled.div>,
+          </Styled(div)>,
           "label": "elastic co frontend",
         },
         Object {
-          "append": <styled.div>
+          "append": <Styled(div)>
             <EuiText
               size="xs"
             >
               2
             </EuiText>
-          </styled.div>,
+          </Styled(div)>,
           "label": "apm server",
         },
       ]

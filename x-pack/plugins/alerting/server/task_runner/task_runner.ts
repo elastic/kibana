@@ -72,9 +72,11 @@ import {
   processRunResults,
   clearExpiredSnoozes,
 } from './lib';
+import { isClusterBlockError } from '../lib/error_with_type';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
+const CLUSTER_BLOCKED_EXCEPTION_RETRY_INTERVAL = '1m';
 
 interface TaskRunnerConstructorParams<
   Params extends RuleTypeParams,
@@ -717,7 +719,7 @@ export class TaskRunner<
           const errorSource = isUserError(err) ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
           const errorSourceTag = `${errorSource}-error`;
 
-          if (isAlertSavedObjectNotFoundError(err, ruleId)) {
+          if (isAlertSavedObjectNotFoundError(err, ruleId) || isClusterBlockError(err)) {
             const message = `Executing Rule ${spaceId}:${
               this.ruleType.id
             }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
@@ -755,6 +757,10 @@ export class TaskRunner<
             parseDuration(retryInterval) > parseDuration(CONNECTIVITY_RETRY_INTERVAL)
               ? CONNECTIVITY_RETRY_INTERVAL
               : retryInterval;
+        }
+
+        if (isClusterBlockError(error)) {
+          retryInterval = CLUSTER_BLOCKED_EXCEPTION_RETRY_INTERVAL;
         }
 
         return { interval: retryInterval };

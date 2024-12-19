@@ -671,7 +671,7 @@ For area, line, and bar charts, press Shift, then click the series in the legend
 .*How do I visualize saved Discover sessions?*
 [%collapsible]
 ====
-Visualizing saved Discover sessions in unsupported.
+Visualizing saved Discover sessions is unsupported.
 ====
 
 [discrete]

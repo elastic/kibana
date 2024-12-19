@@ -15,7 +15,7 @@ import { injectBaseEmbeddableInput } from './migrate_base_input';
 export const getInjectFunction = (embeddables: CommonEmbeddableStartContract) => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
     const enhancements = state.enhancements || {};
-    const factory = embeddables.getEmbeddableFactory(state.type);
+    const factory = embeddables.getEmbeddableFactory?.(state.type);
 
     let updatedInput = injectBaseEmbeddableInput(state, references);
 

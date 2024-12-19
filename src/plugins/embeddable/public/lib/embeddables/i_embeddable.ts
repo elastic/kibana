@@ -8,9 +8,9 @@
  */
 
 import { ErrorLike } from '@kbn/expressions-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import { Observable } from 'rxjs';
 import { EmbeddableInput } from '../../../common/types';
-import { Adapters } from '../types';
 
 export type EmbeddableError = ErrorLike;
 export type { EmbeddableInput };

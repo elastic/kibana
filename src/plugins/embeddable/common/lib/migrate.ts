@@ -16,7 +16,7 @@ export type MigrateFunction = (state: SerializableRecord, version: string) => Se
 export const getMigrateFunction = (embeddables: CommonEmbeddableStartContract) => {
   const migrateFn: MigrateFunction = (state: SerializableRecord, version: string) => {
     const enhancements = (state.enhancements as SerializableRecord) || {};
-    const factory = embeddables.getEmbeddableFactory(state.type as string);
+    const factory = embeddables.getEmbeddableFactory?.(state.type as string);
 
     let updatedInput = baseEmbeddableMigrations[version]
       ? baseEmbeddableMigrations[version](state)

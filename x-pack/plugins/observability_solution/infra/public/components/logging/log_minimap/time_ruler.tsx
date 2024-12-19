@@ -60,7 +60,7 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({ end, height, start, tickCo
 TimeRuler.displayName = 'TimeRuler';
 
 const TimeRulerTickLabel = styled.text`
-  font-size: 9px;
+  font-size: ${() => useEuiFontSize('xxxs').fontSize};
   line-height: ${() => useEuiFontSize('s').lineHeight};
   fill: ${(props) => props.theme.euiTheme.colors.textSubdued};
   user-select: none;

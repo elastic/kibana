@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiToolTip, useEuiFontSize } from '@elastic/eui';
 import React from 'react';
 import styled from '@emotion/styled';
 import { InfraWaffleMapGroup, InfraWaffleMapOptions } from '../../../../../common/inventory/types';
@@ -58,7 +58,7 @@ export class GroupName extends React.PureComponent<Props, {}> {
 const GroupNameContainer = styled.div`
   position: relative;
   text-align: center;
-  font-size: 16px;
+  font-size: ${(props) => useEuiFontSize('m').fontSize};
   margin-bottom: 5px;
   top: 20px;
   display: flex;
@@ -96,6 +96,6 @@ const Count = styled.div`
   flex: 0 0 auto;
   border-left: ${(props) => props.theme.euiTheme.border.thin};
   padding: 6px 10px;
-  font-size: 0.85em;
+  font-size: ${() => useEuiFontSize('xs').fontSize};
   font-weight: normal;
 `;

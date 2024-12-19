@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiButtonEmpty, EuiPanel } from '@elastic/eui';
 
 import { BACK_LABEL } from '../../../../common/i18n_string';
-import { EmptyConnectorsPrompt } from '../connectors/empty_connectors_prompt';
+import { SelfManagedConnectorsEmptyPrompt } from '../connectors/self_managed_connectors_empty_prompt';
 
 interface ConnectorIndexEmptyPromptProps {
   indexName: string;
@@ -27,7 +27,7 @@ export const ConnectorIndexEmptyPrompt = ({ onBackClick }: ConnectorIndexEmptyPr
       >
         {BACK_LABEL}
       </EuiButtonEmpty>
-      <EmptyConnectorsPrompt />
+      <SelfManagedConnectorsEmptyPrompt />
     </EuiPanel>
   );
 };

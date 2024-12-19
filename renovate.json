@@ -519,7 +519,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "backport:skip",
+        "backport:prev-minor",
         "Team:Operations",
         "Team:Core"
       ],
@@ -610,7 +610,7 @@
       "labels": [
         "release_note:skip",
         "Team:Core",
-        "backport:skip"
+        "backport:prev-minor"
       ],
       "enabled": true
     },
@@ -628,7 +628,7 @@
       "labels": [
         "release_note:skip",
         "Team:Core",
-        "backport:skip"
+        "backport:prev-minor"
       ],
       "enabled": true
     },
@@ -665,7 +665,7 @@
       "labels": [
         "release_note:skip",
         "Team:Core",
-        "backport:all-open"
+        "backport:prev-minor"
       ],
       "enabled": true
     },
@@ -684,7 +684,7 @@
       "labels": [
         "release_note:skip",
         "Team:Core",
-        "backport:skip"
+        "backport:prev-minor"
       ],
       "enabled": true
     },
@@ -704,7 +704,7 @@
       "labels": [
         "release_note:skip",
         "Team:Core",
-        "backport:all-open"
+        "backport:prev-minor"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
