@@ -47,7 +47,7 @@ console.log(discoverUrl); // http://localhost:5601/bpr/s/space/app/discover
 const discoverUrlWithSomeState = core.http.basePath.prepend(`/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'2020-09-10T11:39:50.203Z',to:'2020-09-10T11:40:20.249Z'))&_a=(columns:!(_source),filters:!(),index:'90943e30-9a47-11e8-b64d-95841ca0b247',interval:auto,query:(language:kuery,query:''),sort:!())`);
 ----
 
-Instead, each app should expose {kib-repo}tree/{branch}/src/plugins/share/common/url_service/locators/README.md[a locator].
+Instead, each app should expose {kib-repo}tree/{branch}/src/platform/plugins/shared/share/common/url_service/locators/README.md[a locator].
 Other apps should use those locators for navigation or URL creation. 
 
 [source,typescript jsx]

@@ -164,8 +164,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       (await doAnyChangesMatch([
         /^x-pack\/platform\/packages\/shared\/ai-infra/,
-        /^x-pack\/platform\/plugins\/shared\/ai_infra/,
-        /^x-pack\/platform\/plugins\/shared\/inference/,
+        /^x-pack\/platform\/platform\/plugins\/shared\/shared\/ai_infra/,
+        /^x-pack\/platform\/platform\/plugins\/shared\/shared\/inference/,
         /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/bedrock/,
         /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/gemini/,
         /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/openai/,
@@ -323,8 +323,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^src\/plugins\/discover/,
         /^src\/plugins\/field_formats/,
         /^src\/plugins\/inspector/,
-        /^src\/platform\/plugins\/shared\/kibana_react/,
-        /^src\/platform\/plugins\/shared\/kibana_utils/,
+        /^src\/platform\/platform\/plugins\/shared\/shared\/kibana_react/,
+        /^src\/platform\/platform\/plugins\/shared\/shared\/kibana_utils/,
         /^src\/plugins\/saved_search/,
         /^src\/plugins\/ui_actions/,
         /^src\/plugins\/unified_histogram/,
@@ -358,7 +358,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       ((await doAnyChangesMatch([
-        /^x-pack\/platform\/plugins\/shared\/osquery/,
+        /^x-pack\/platform\/platform\/plugins\/shared\/shared\/osquery/,
         /^x-pack\/test\/osquery_cypress/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
       ])) ||
