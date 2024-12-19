@@ -20,6 +20,7 @@ import {
   EuiFlyoutFooter,
   EuiButtonEmpty,
   EuiButton,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
@@ -30,18 +31,22 @@ import {
   ReadStreamDefinition,
 } from '@kbn/streams-plugin/common';
 import React, { PropsWithChildren, useMemo, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DiscardChangesModal } from '../discard_changes_modal';
+import { useKibana } from '../../../hooks/use_kibana';
 
 interface ProcessorFlyoutProps {
   definition: ReadStreamDefinition;
   onClose: () => void;
 }
 
+type ProcessorType = ProcessingDefinition['config']['type'];
+
 export function AddProcessorFlyout({ definition, onClose }: ProcessorFlyoutProps) {
   const { fields, inheritedFields } = definition;
 
   const [selectedField, setSelectedField] = useState('');
-  const [selectedType, setSelectedType] = useState('');
+  const [selectedType, setSelectedType] = useState<ProcessorType>('grok');
 
   const mergedFields = [...fields, ...inheritedFields];
 
@@ -65,12 +70,12 @@ export function AddProcessorFlyout({ definition, onClose }: ProcessorFlyoutProps
       }
     >
       <EuiForm component="form" fullWidth>
+        <ProcessorTypeSelector value={selectedType} onChange={setSelectedType} />
         <ProcessorFieldSelector
           fields={mergedFields}
           value={selectedField}
           onChange={setSelectedField}
         />
-        <ProcessorTypeSelector value={selectedType} onChange={setSelectedType} />
       </EuiForm>
     </ProcessorFlyout>
   );
@@ -160,12 +165,9 @@ function ProcessorFlyout({
   );
 }
 
-interface BaseSelectorProps {
+interface ProcessorFieldSelectorProps {
   value: EuiSuperSelectProps['valueOfSelected'];
   onChange: EuiSuperSelectProps['onChange'];
-}
-
-interface ProcessorFieldSelectorProps extends BaseSelectorProps {
   fields: FieldDefinition[];
 }
 
@@ -191,7 +193,11 @@ const ProcessorFieldSelector = ({ fields, value, onChange }: ProcessorFieldSelec
     <EuiFormRow
       label={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.fieldSelectorLabel',
-        { defaultMessage: 'Field to process' }
+        { defaultMessage: 'Field' }
+      )}
+      helpText={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.fieldSelectorHelpText',
+        { defaultMessage: 'Field to search for matches.' }
       )}
     >
       <EuiSuperSelect
@@ -208,21 +214,77 @@ const ProcessorFieldSelector = ({ fields, value, onChange }: ProcessorFieldSelec
   );
 };
 
-const ProcessorTypeSelector = ({ value, onChange }: BaseSelectorProps) => {
-  const options: Array<EuiSuperSelectOption<string>> = [
-    { value: 'grok', inputDisplay: 'Grok' },
-    { value: 'dissect', inputDisplay: 'Dissect' },
-  ];
+interface TAvailableProcessor {
+  value: ProcessorType;
+  inputDisplay: string;
+  getDocUrl: (esDocUrl: string) => React.ReactNode;
+}
+
+type TAvailableProcessors = Record<ProcessorType, TAvailableProcessor>;
+
+const availableProcessors: TAvailableProcessors = {
+  dissect: {
+    value: 'dissect',
+    inputDisplay: 'Dissect',
+    getDocUrl: (esDocUrl: string) => (
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.dissectHelpText"
+        defaultMessage="Uses {dissectLink} patterns to extract matches from a field."
+        values={{
+          dissectLink: (
+            <EuiLink external target="_blank" href={esDocUrl + 'dissect-processor.html'}>
+              dissect
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
+  },
+  grok: {
+    value: 'grok',
+    inputDisplay: 'Grok',
+    getDocUrl: (esDocUrl: string) => (
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokHelpText"
+        defaultMessage="Uses {grokLink} expressions to extract matches from a field."
+        values={{
+          grokLink: (
+            <EuiLink external target="_blank" href={esDocUrl + 'grok-processor.html'}>
+              grok
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
+  },
+};
+
+const getProcessorDescription = (esDocUrl: string) => (type: ProcessorType) =>
+  availableProcessors[type].getDocUrl(esDocUrl);
+
+const processorTypeSelectorOptions = Object.values(availableProcessors).map(
+  ({ value, inputDisplay }) => ({ value, inputDisplay })
+);
+
+interface ProcessorTypeSelectorProps {
+  value: ProcessorType;
+  onChange: EuiSuperSelectProps<ProcessorType>['onChange'];
+}
+
+const ProcessorTypeSelector = ({ value, onChange }: ProcessorTypeSelectorProps) => {
+  const { core } = useKibana();
+  const esDocUrl = core.docLinks.links.elasticsearch.docsBase;
 
   return (
     <EuiFormRow
       label={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.typeSelectorLabel',
-        { defaultMessage: 'Processor type' }
+        { defaultMessage: 'Processor' }
       )}
+      helpText={getProcessorDescription(esDocUrl)(value)}
     >
       <EuiSuperSelect
-        options={options}
+        options={processorTypeSelectorOptions}
         valueOfSelected={value}
         onChange={onChange}
         fullWidth
