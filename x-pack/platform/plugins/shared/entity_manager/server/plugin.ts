@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import {
   CoreSetup,
   CoreStart,
@@ -174,8 +175,11 @@ export class EntityManagerServerPlugin
       logger: this.logger,
     }).catch((err) => this.logger.error(err));
 
-    // Disable v1 built-in definitions
-    disableManagedEntityDiscovery({ server: this.server! })
+    // Disable v1 built-in definitions.
+    // the api key invalidation requires a check against the cluster license
+    // which is lazily loaded. we ensure it gets loaded before the update
+    firstValueFrom(plugins.licensing.license$)
+      .then(() => disableManagedEntityDiscovery({ server: this.server! }))
       .then(() => this.logger.info(`Disabled managed entity discovery`))
       .catch((err) => this.logger.error(`Failed to disable managed entity discovery: ${err}`));
 
