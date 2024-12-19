@@ -50,7 +50,7 @@
       "plugins/global_search"
     ],
     "xpack.globalSearchBar": [
-      "plugins/global_search_bar"
+      "platform/plugins/private/global_search_bar"
     ],
     "xpack.graph": [
       "plugins/graph"
