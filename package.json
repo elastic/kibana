@@ -735,7 +735,7 @@
     "@kbn/profiling-utils": "link:packages/kbn-profiling-utils",
     "@kbn/random-sampling": "link:x-pack/packages/kbn-random-sampling",
     "@kbn/react-field": "link:packages/kbn-react-field",
-    "@kbn/react-hooks": "link:packages/kbn-react-hooks",
+    "@kbn/react-hooks": "link:src/platform/packages/shared/kbn-react-hooks",
     "@kbn/react-kibana-context-common": "link:packages/react/kibana_context/common",
     "@kbn/react-kibana-context-render": "link:packages/react/kibana_context/render",
     "@kbn/react-kibana-context-root": "link:packages/react/kibana_context/root",

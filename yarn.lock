@@ -6673,7 +6673,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/react-hooks@link:packages/kbn-react-hooks":
+"@kbn/react-hooks@link:src/platform/packages/shared/kbn-react-hooks":
   version "0.0.0"
   uid ""
 
