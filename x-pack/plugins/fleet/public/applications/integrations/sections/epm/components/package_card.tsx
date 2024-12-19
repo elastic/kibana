@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
 import {
   EuiBadge,
   EuiButton,
@@ -15,6 +14,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -43,15 +43,6 @@ import {
 
 export type PackageCardProps = IntegrationCardItem;
 
-// Min-height is roughly 3 lines of content.
-// This keeps the cards from looking overly unbalanced because of content differences.
-const Card = styled(EuiCard)<{ isquickstart?: boolean; $maxCardHeight?: number }>`
-  min-height: 127px;
-  border-color: ${({ isquickstart }) => (isquickstart ? '#ba3d76' : null)};
-  ${({ $maxCardHeight }) =>
-    $maxCardHeight ? `max-height: ${$maxCardHeight}px; overflow: hidden;` : ''};
-`;
-
 export function PackageCard({
   description,
   name,
@@ -78,6 +69,8 @@ export function PackageCard({
   descriptionLineClamp,
   maxCardHeight,
 }: PackageCardProps) {
+  const theme = useEuiTheme();
+
   let releaseBadge: React.ReactNode | null = null;
   if (release && release !== 'ga') {
     releaseBadge = (
@@ -202,8 +195,10 @@ export function PackageCard({
       tourOffset={10}
     >
       <TrackApplicationView viewId={testid}>
-        <Card
+        <EuiCard
           // EUI TODO: Custom component CSS
+          // Min-height is roughly 3 lines of content.
+          // This keeps the cards from looking overly unbalanced because of content differences.
           css={css`
             position: relative;
             [class*='euiCard__content'] {
@@ -224,9 +219,13 @@ export function PackageCard({
             [class*='euiCard__titleButton'] {
               ${getLineClampStyles(titleLineClamp)}
             }
+
+            min-height: 127px;
+            border-color: ${isQuickstart ? theme.euiTheme.colors.accent : null};
+            max-height: ${maxCardHeight ? `${maxCardHeight}px` : null};
+            overflow: ${maxCardHeight ? 'hidden' : null};
           `}
           data-test-subj={testid}
-          isquickstart={isQuickstart}
           betaBadgeProps={quickstartBadge(isQuickstart)}
           layout="horizontal"
           title={title || ''}
@@ -243,7 +242,6 @@ export function PackageCard({
             />
           }
           onClick={onClickProp ?? onCardClick}
-          $maxCardHeight={maxCardHeight}
         >
           <EuiFlexGroup gutterSize="xs" wrap={true}>
             {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
@@ -258,7 +256,7 @@ export function PackageCard({
               showInstallationStatus={showInstallationStatus}
             />
           </EuiFlexGroup>
-        </Card>
+        </EuiCard>
       </TrackApplicationView>
     </WithGuidedOnboardingTour>
   );

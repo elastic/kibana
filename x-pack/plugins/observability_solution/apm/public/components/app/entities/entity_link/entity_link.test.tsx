@@ -17,7 +17,6 @@ import { fromQuery } from '../../../shared/links/url_helpers';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { Redirect } from 'react-router-dom';
 import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
-import { ApmThemeProvider } from '../../../routing/app_root';
 import * as useEntityCentricExperienceSetting from '../../../../hooks/use_entity_centric_experience_setting';
 
 jest.mock('react-router-dom', () => ({
@@ -85,9 +84,7 @@ const renderEntityLink = ({
         } as unknown as ApmPluginContextValue
       }
     >
-      <ApmThemeProvider>
-        <EntityLink />
-      </ApmThemeProvider>
+      <EntityLink />
     </MockApmPluginContextWrapper>
   );
   return { rerender, ...tools };
@@ -173,7 +170,9 @@ describe('Entity link', () => {
     renderEntityLink({
       isEntityCentricExperienceEnabled: true,
       serviceEntitySummaryMockReturnValue: {
-        serviceEntitySummary: { dataStreamTypes: ['metrics'] } as unknown as ServiceEntitySummary,
+        serviceEntitySummary: {
+          ['data_stream.type']: ['metrics'],
+        } as unknown as ServiceEntitySummary,
         serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
       },
       hasApmDataFetcherMockReturnValue: {
@@ -200,7 +199,9 @@ describe('Entity link', () => {
     renderEntityLink({
       isEntityCentricExperienceEnabled: true,
       serviceEntitySummaryMockReturnValue: {
-        serviceEntitySummary: { dataStreamTypes: ['metrics'] } as unknown as ServiceEntitySummary,
+        serviceEntitySummary: {
+          ['data_stream.type']: ['metrics'],
+        } as unknown as ServiceEntitySummary,
         serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
       },
       hasApmDataFetcherMockReturnValue: {

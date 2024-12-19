@@ -15,8 +15,8 @@ describe('Inference Params Fields renders', () => {
     const { getByTestId } = render(
       <ParamsFields
         actionParams={{
-          subAction: SUB_ACTION.COMPLETION,
-          subActionParams: { input: 'What is Elastic?' },
+          subAction: SUB_ACTION.UNIFIED_COMPLETION,
+          subActionParams: { body: { messages: [{ role: 'user', content: 'What is Elastic?' }] } },
         }}
         actionConnector={{
           actionTypeId: '.inference',
@@ -35,8 +35,11 @@ describe('Inference Params Fields renders', () => {
         index={0}
       />
     );
-    expect(getByTestId('inferenceInput')).toBeInTheDocument();
-    expect(getByTestId('inferenceInput')).toHaveProperty('value', 'What is Elastic?');
+    expect(getByTestId('inference-bodyJsonEditor')).toBeInTheDocument();
+    expect(getByTestId('bodyJsonEditor')).toHaveProperty(
+      'value',
+      `{\"messages\":[{\"role\":\"user\",\"content\":\"What is Elastic?\"}]}`
+    );
   });
 
   test.each(['openai', 'googleaistudio'])(
@@ -76,15 +79,25 @@ describe('Inference Params Fields renders', () => {
         />
       );
       expect(editAction).toHaveBeenCalledTimes(2);
-      expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.COMPLETION, 0);
       if (provider === 'openai') {
+        expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.UNIFIED_COMPLETION, 0);
         expect(editAction).toHaveBeenCalledWith(
           'subActionParams',
-          { input: 'What is Elastic?' },
+          {
+            body: {
+              messages: [
+                {
+                  content: 'Hello world',
+                  role: 'user',
+                },
+              ],
+            },
+          },
           0
         );
       }
       if (provider === 'googleaistudio') {
+        expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.COMPLETION, 0);
         expect(editAction).toHaveBeenCalledWith(
           'subActionParams',
           { input: 'What is Elastic?' },

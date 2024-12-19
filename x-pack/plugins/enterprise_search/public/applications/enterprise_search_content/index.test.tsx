@@ -29,16 +29,9 @@ describe('EnterpriseSearchContent', () => {
 
   it('renders EnterpriseSearchContentConfigured when config.host is set & available', () => {
     setMockValues({
-      config: { canDeployEntSearch: true, host: 'some.url' },
+      config: { host: 'some.url' },
       errorConnectingMessage: '',
     });
-    const wrapper = shallow(<EnterpriseSearchContent />);
-
-    expect(wrapper.find(EnterpriseSearchContentConfigured)).toHaveLength(1);
-  });
-
-  it('renders EnterpriseSearchContentConfigured when config.host is not set & Ent Search cannot be deployed', () => {
-    setMockValues({ config: { canDeployEntSearch: false, host: '' }, errorConnectingMessage: '' });
     const wrapper = shallow(<EnterpriseSearchContent />);
 
     expect(wrapper.find(EnterpriseSearchContentConfigured)).toHaveLength(1);

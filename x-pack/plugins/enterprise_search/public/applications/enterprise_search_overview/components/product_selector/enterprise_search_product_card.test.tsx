@@ -17,7 +17,7 @@ import { WorkplaceSearchProductCard } from './workplace_search_product_card';
 
 describe('EnterpriseSearchProductCard', () => {
   beforeEach(() => {
-    setMockValues({ config: { canDeployEntSearch: true, host: 'localhost' } });
+    setMockValues({ config: { host: 'localhost' } });
   });
 
   it('renders both services with access', () => {

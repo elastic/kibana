@@ -185,6 +185,7 @@ export const AgentlessEnrollmentFlyout = ({
                   <AgentlessStepConfirmData
                     agent={agentData}
                     packagePolicy={packagePolicy}
+                    policyTemplates={packageInfoData?.item.policy_templates}
                     setConfirmDataStatus={setConfirmDataStatus}
                   />
                 ) : (

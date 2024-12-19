@@ -23,7 +23,7 @@ export function mergeEntities({
   entities: EntityLatestServiceRaw[];
 }): MergedServiceEntity[] {
   const mergedEntities = entities.reduce((map, current) => {
-    const key = current.service.name;
+    const key = current['service.name'];
     if (map.has(key)) {
       const existingEntity = map.get(key);
       map.set(key, mergeFunc(current, existingEntity));
@@ -33,28 +33,37 @@ export function mergeEntities({
     return map;
   }, new Map());
 
-  return [...mergedEntities.values()];
+  return [...new Set(mergedEntities.values())];
 }
 
 function mergeFunc(entity: EntityLatestServiceRaw, existingEntity?: MergedServiceEntity) {
   const commonEntityFields = {
-    serviceName: entity.service.name,
-    agentName: entity.agent.name[0],
-    lastSeenTimestamp: entity.entity.last_seen_timestamp,
+    serviceName: entity['service.name'],
+    agentName:
+      Array.isArray(entity['agent.name']) && entity['agent.name'].length > 0
+        ? entity['agent.name'][0]
+        : entity['agent.name'],
+    lastSeenTimestamp: entity['entity.last_seen_timestamp'],
   };
 
   if (!existingEntity) {
     return {
       ...commonEntityFields,
-      dataStreamTypes: entity.source_data_stream.type,
-      environments: compact([entity?.service.environment]),
+      dataStreamTypes: uniq(entity['data_stream.type']),
+      environments: uniq(
+        compact(
+          Array.isArray(entity['service.environment'])
+            ? entity['service.environment']
+            : [entity['service.environment']]
+        )
+      ),
     };
   }
   return {
     ...commonEntityFields,
     dataStreamTypes: uniq(
-      compact([...(existingEntity?.dataStreamTypes ?? []), ...entity.source_data_stream.type])
+      compact([...(existingEntity?.dataStreamTypes ?? []), ...entity['data_stream.type']])
     ),
-    environments: uniq(compact([...existingEntity?.environments, entity?.service.environment])),
+    environments: uniq(compact([...existingEntity?.environments, entity['service.environment']])),
   };
 }

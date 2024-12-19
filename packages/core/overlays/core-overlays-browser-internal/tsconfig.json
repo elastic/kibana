@@ -5,12 +5,14 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@emotion/react/types/css-prop"
     ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "../../../../typings/emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/i18n-react",
@@ -28,9 +30,9 @@
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-analytics-browser",
     "@kbn/core-user-profile-browser-mocks",
-    "@kbn/core-user-profile-browser",
+    "@kbn/core-user-profile-browser"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

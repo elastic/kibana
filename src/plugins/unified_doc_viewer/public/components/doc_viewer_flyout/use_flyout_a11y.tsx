@@ -37,7 +37,7 @@ export const useFlyoutA11y = ({ isXlScreen }: { isXlScreen: boolean }) => {
     a11yProps: {
       ref: setFlyoutEl,
       role: isXlScreen ? 'dialog' : undefined,
-      tabindex: isXlScreen ? 0 : undefined,
+      tabIndex: isXlScreen ? 0 : undefined,
       'aria-describedby': isXlScreen ? descriptionId : undefined,
       'data-no-focus-lock': isXlScreen || undefined,
     },

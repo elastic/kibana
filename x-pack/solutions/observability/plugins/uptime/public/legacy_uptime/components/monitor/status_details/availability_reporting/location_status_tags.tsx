@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import moment from 'moment';
 import styled from 'styled-components';
-import { UptimeThemeContext } from '../../../../contexts';
+import { useEuiTheme } from '@elastic/eui';
 import { MonitorLocation } from '../../../../../../common/runtime_types';
 import { SHORT_TIMESPAN_LOCALE, SHORT_TS_LOCALE } from '../../../../../../common/constants';
 import { AvailabilityReporting } from '..';
@@ -33,9 +33,9 @@ export interface StatusTag {
 }
 
 export const LocationStatusTags = ({ locations }: Props) => {
-  const {
-    colors: { gray, danger },
-  } = useContext(UptimeThemeContext);
+  const theme = useEuiTheme();
+  const danger = theme.euiTheme.colors.danger;
+  const gray = theme.euiTheme.colors.lightShade;
 
   const allLocations: StatusTag[] = [];
   const prevLocal: string = moment.locale() ?? 'en';

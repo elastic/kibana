@@ -35,6 +35,12 @@ export const LogAIAssistant = ({
       return undefined;
     }
 
+    const message = doc.fields.find((field) => field.field === 'message')?.value[0];
+
+    if (!message) {
+      return undefined;
+    }
+
     return getContextualInsightMessages({
       message:
         'Can you explain what this log message means? Where it could be coming from, whether it is expected and whether it is an issue.',
@@ -53,6 +59,10 @@ export const LogAIAssistant = ({
 
     const message = doc.fields.find((field) => field.field === 'message')?.value[0];
 
+    if (!message) {
+      return undefined;
+    }
+
     return getContextualInsightMessages({
       message: `I'm looking at a log entry. Can you construct a Kibana KQL query that I can enter in the search bar that gives me similar log entries, based on the message field?`,
       instructions: JSON.stringify({
@@ -61,7 +71,9 @@ export const LogAIAssistant = ({
     });
   }, [getContextualInsightMessages, doc]);
 
-  return (
+  const hasAtLeastOnePrompt = Boolean(explainLogMessageMessages || similarLogMessageMessages);
+
+  return hasAtLeastOnePrompt ? (
     <EuiFlexGroup direction="column" gutterSize="m">
       {ObservabilityAIAssistantContextualInsight && explainLogMessageMessages ? (
         <EuiFlexItem grow={false}>
@@ -82,7 +94,7 @@ export const LogAIAssistant = ({
         </EuiFlexItem>
       ) : null}
     </EuiFlexGroup>
-  );
+  ) : null;
 };
 
 // eslint-disable-next-line import/no-default-export

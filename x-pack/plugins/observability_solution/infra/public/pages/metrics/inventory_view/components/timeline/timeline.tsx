@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import { first, last } from 'lodash';
-import { EuiLoadingChart, EuiText, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import { EuiLoadingChart, EuiText, EuiEmptyPrompt, EuiButton, useEuiTheme } from '@elastic/eui';
 import {
   Axis,
   Chart,
@@ -56,7 +56,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   const { metric, nodeType, accountId, region } = useWaffleOptionsContext();
   const { currentTime, jumpToTime, stopAutoReload } = useWaffleTimeContext();
   const { filterQueryAsJson } = useWaffleFiltersContext();
-
+  const { euiTheme } = useEuiTheme();
   const chartTheme = useTimelineChartTheme();
 
   const { loading, error, startTime, endTime, timeseries, reload } = useTimeline(
@@ -238,7 +238,11 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
               <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
                 <EuiFlexItem
                   grow={false}
-                  style={{ backgroundColor: '#D36086', height: 5, width: 10 }}
+                  style={{
+                    backgroundColor: euiTheme.colors.backgroundFilledAccent,
+                    height: 5,
+                    width: 10,
+                  }}
                 />
                 <EuiFlexItem>
                   <EuiText size={'xs'}>
@@ -261,7 +265,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
               dataValues={generateAnnotationData(
                 anomalies.map((a) => [a.startTime, a.influencers])
               )}
-              style={{ fill: '#D36086' }}
+              style={{ fill: euiTheme.colors.backgroundFilledAccent }}
             />
           )}
           <MetricExplorerSeriesChart

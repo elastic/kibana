@@ -61,7 +61,7 @@ export class Plugin {
 }
 ```
 
-> The code above lives in `x-pack/plugins/security_solution/public/plugin.tsx`
+> The code above lives in `x-pack/solutions/security/plugins/security_solution/public/plugin.tsx`
 
 For a list of supported Fleet UI extensions, see the `UIExtensionPoint` and associated Union types defined here: `x-pack/plugins/fleet/public/types/ui_extensions.ts`.
 

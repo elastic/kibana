@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ViewMode } from '@kbn/embeddable-plugin/common';
 import type { DashboardContainerInput } from '../common';
 
 // ------------------------------------------------------------------
@@ -85,7 +84,7 @@ export const DASHBOARD_CACHE_TTL = 1000 * 60 * 5; // time to live = 5 minutes
 // Default State
 // ------------------------------------------------------------------
 export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerInput, 'id'> = {
-  viewMode: ViewMode.VIEW,
+  viewMode: 'view',
   timeRestore: false,
   query: { query: '', language: 'kuery' },
   description: '',

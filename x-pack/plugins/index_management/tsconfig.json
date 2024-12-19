@@ -40,7 +40,6 @@
     "@kbn/core-http-browser",
     "@kbn/search-api-panels",
     "@kbn/cloud-plugin",
-    "@kbn/ui-theme",
     "@kbn/code-editor",
     "@kbn/monaco",
     "@kbn/console-plugin",
@@ -55,6 +54,7 @@
     "@kbn/ml-error-utils",
     "@kbn/unsaved-changes-prompt",
     "@kbn/shared-ux-table-persist",
+    "@kbn/core-application-browser",
   ],
   "exclude": ["target/**/*"]
 }

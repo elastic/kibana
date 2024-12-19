@@ -80,7 +80,6 @@ import {
 import { getThroughput, ServiceThroughputResponse } from './get_throughput';
 import { getServiceEntitySummary } from '../entities/services/get_service_entity_summary';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { createEntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -106,13 +105,7 @@ const servicesRoute = createApmServerRoute({
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   async handler(resources): Promise<ServicesItemsResponse> {
-    const {
-      context,
-      params,
-      logger,
-      request,
-      plugins: { security },
-    } = resources;
+    const { context, params, logger, request, core } = resources;
 
     const {
       searchQuery,
@@ -128,6 +121,7 @@ const servicesRoute = createApmServerRoute({
     } = params.query;
     const savedObjectsClient = (await context.core).savedObjects.client;
 
+    const coreStart = await core.start();
     const [mlClient, apmEventClient, apmAlertsClient, serviceGroup, randomSampler] =
       await Promise.all([
         getMlClient(resources),
@@ -136,7 +130,7 @@ const servicesRoute = createApmServerRoute({
         serviceGroupId
           ? getServiceGroup({ savedObjectsClient, serviceGroupId })
           : Promise.resolve(null),
-        getRandomSampler({ security, request, probability }),
+        getRandomSampler({ coreStart, request, probability }),
       ]);
 
     return getServicesItems({
@@ -174,11 +168,7 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceTransactionDetailedStatPeriodsResponse> => {
-    const {
-      params,
-      request,
-      plugins: { security },
-    } = resources;
+    const { params, request, core } = resources;
 
     const {
       environment,
@@ -194,9 +184,10 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
 
     const { serviceNames } = params.body;
 
+    const coreStart = await core.start();
     const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(resources),
-      getRandomSampler({ security, request, probability }),
+      getRandomSampler({ coreStart, request, probability }),
     ]);
 
     if (!serviceNames.length) {
@@ -297,16 +288,11 @@ const serviceAgentRoute = createApmServerRoute({
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceAgentResponse> => {
-    const { context, request } = resources;
-    const coreContext = await context.core;
+    const { request, plugins } = resources;
+    const entityManagerStart = await plugins.entityManager.start();
 
-    const [apmEventClient, entitiesESClient] = await Promise.all([
-      getApmEventClient(resources),
-      createEntitiesESClient({
-        request,
-        esClient: coreContext.elasticsearch.client.asCurrentUser,
-      }),
-    ]);
+    const apmEventClient = await getApmEventClient(resources);
+    const entityManagerClient = await entityManagerStart.getScopedClient({ request });
     const { params } = resources;
     const { serviceName } = params.path;
     const { start, end } = params.query;
@@ -320,7 +306,7 @@ const serviceAgentRoute = createApmServerRoute({
       }),
       getServiceEntitySummary({
         serviceName,
-        entitiesESClient,
+        entityManagerClient,
         environment: ENVIRONMENT_ALL.value,
       }),
     ]);
@@ -792,15 +778,12 @@ export const serviceDependenciesRoute = createApmServerRoute({
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   async handler(resources): Promise<{ serviceDependencies: ServiceDependenciesResponse }> {
-    const {
-      params,
-      request,
-      plugins: { security },
-    } = resources;
+    const { params, request, core } = resources;
 
+    const coreStart = await core.start();
     const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(resources),
-      getRandomSampler({ security, request, probability: 1 }),
+      getRandomSampler({ coreStart, request, probability: 1 }),
     ]);
 
     const { serviceName } = params.path;
@@ -835,15 +818,12 @@ export const serviceDependenciesBreakdownRoute = createApmServerRoute({
   ): Promise<{
     breakdown: ServiceDependenciesBreakdownResponse;
   }> => {
-    const {
-      params,
-      request,
-      plugins: { security },
-    } = resources;
+    const { params, request, core } = resources;
 
+    const coreStart = await core.start();
     const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(resources),
-      getRandomSampler({ security, request, probability: 1 }),
+      getRandomSampler({ coreStart, request, probability: 1 }),
     ]);
 
     const { serviceName } = params.path;
