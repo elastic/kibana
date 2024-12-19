@@ -22,13 +22,7 @@ import {
 import fastIsEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
 import { getEditPath } from '../../common/constants';
-import type {
-  GetStateType,
-  LensApi,
-  LensInternalApi,
-  LensPublicCallbacks,
-  VisualizationContextHelper,
-} from './types';
+import type { GetStateType, LensApi, LensInternalApi, LensPublicCallbacks } from './types';
 import { getExpressionRendererParams } from './expressions/expression_params';
 import type { LensEmbeddableStartServices } from './types';
 import { prepareCallbacks } from './expressions/callbacks';
@@ -84,7 +78,6 @@ export function loadEmbeddableData(
   parentApi: unknown,
   internalApi: LensInternalApi,
   services: LensEmbeddableStartServices,
-  { getVisualizationContext, updateVisualizationContext }: VisualizationContextHelper,
   metaInfo?: SharingSavedObjectProps
 ) {
   const { onLoad, onBeforeBadgesRender, ...callbacks } = apiHasLensComponentCallbacks(parentApi)
@@ -103,7 +96,6 @@ export function loadEmbeddableData(
   } = buildUserMessagesHelpers(
     api,
     internalApi,
-    getVisualizationContext,
     services,
     onBeforeBadgesRender,
     services.spaces,
@@ -174,7 +166,7 @@ export function loadEmbeddableData(
     };
 
     const onDataCallback = (adapters: Partial<DefaultInspectorAdapters> | undefined) => {
-      updateVisualizationContext({
+      internalApi.updateVisualizationContext({
         activeData: adapters?.tables?.tables,
       });
       // data has loaded
@@ -243,8 +235,8 @@ export function loadEmbeddableData(
 
     // update the visualization context before anything else
     // as it will be used to compute blocking errors also in case of issues
-    updateVisualizationContext({
-      doc: currentState.attributes,
+    internalApi.updateVisualizationContext({
+      activeAttributes: currentState.attributes,
       mergedSearchContext: params?.searchContext || {},
       ...rest,
     });
