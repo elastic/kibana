@@ -17,7 +17,6 @@
     "@kbn/cloud-plugin",
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/features-plugin",
-    "@kbn/infra-plugin",
     "@kbn/licensing-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/expect",

@@ -4,7 +4,7 @@
   "owner": [
     "@elastic/stack-monitoring"
   ],
-  "group": "observability",
+  "group": "platform",
   "visibility": "private",
   "plugin": {
     "id": "monitoring",
@@ -23,7 +23,6 @@
       "share"
     ],
     "optionalPlugins": [
-      "infra",
       "usageCollection",
       "home",
       "cloud",
