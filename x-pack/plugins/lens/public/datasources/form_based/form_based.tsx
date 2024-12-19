@@ -450,7 +450,15 @@ export function getFormBasedDatasource({
       );
     },
 
-    toExpression: (state, layerId, indexPatterns, dateRange, nowInstant, searchSessionId) =>
+    toExpression: (
+      state,
+      layerId,
+      indexPatterns,
+      dateRange,
+      nowInstant,
+      searchSessionId,
+      forceDSL
+    ) =>
       toExpression(
         state,
         layerId,
@@ -458,7 +466,8 @@ export function getFormBasedDatasource({
         uiSettings,
         dateRange,
         nowInstant,
-        searchSessionId
+        searchSessionId,
+        forceDSL
       ),
 
     LayerSettingsComponent(props) {
