@@ -11,7 +11,7 @@ import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
 import dateMath from '@kbn/datemath';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';

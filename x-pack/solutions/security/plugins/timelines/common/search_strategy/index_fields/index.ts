@@ -6,7 +6,7 @@
  */
 
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import type { Maybe } from '../common';
