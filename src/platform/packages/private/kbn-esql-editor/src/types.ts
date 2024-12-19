@@ -66,6 +66,9 @@ export interface ESQLEditorProps {
 
   /** adds a documentation icon in the footer which opens the inline docs as a flyout **/
   displayDocumentationAsFlyout?: boolean;
+
+  /** The component by default focuses on the editor when it is mounted, this flag disables it**/
+  disableAutoFocus?: boolean;
 }
 
 export interface ESQLEditorDeps {
