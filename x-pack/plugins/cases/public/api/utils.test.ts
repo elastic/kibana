@@ -17,7 +17,7 @@ import {
   caseUserActionsWithRegisteredAttachments,
   caseUserActionsWithRegisteredAttachmentsSnake,
   similarCasesSnake,
-  similarCasesCamel,
+  similarCases,
 } from '../containers/mock';
 import {
   convertAllCasesToCamel,
@@ -126,7 +126,7 @@ describe('utils', () => {
 
   describe('convertSimilarCasesToCamel', () => {
     it('convert similar cases to camel case', () => {
-      expect(convertSimilarCasesToCamel(similarCasesSnake)).toEqual(similarCasesCamel);
+      expect(convertSimilarCasesToCamel(similarCasesSnake)).toEqual(similarCases);
     });
   });
 });
