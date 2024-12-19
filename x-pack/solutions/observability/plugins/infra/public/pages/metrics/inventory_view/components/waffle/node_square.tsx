@@ -199,7 +199,7 @@ export const NodeSquare = ({
           ) : (
             ellipsisMode && (
               <ValueInner aria-label={nodeAriaLabel}>
-                {/* eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n */}
+                {}
                 <Label color={color}>...</Label>
               </ValueInner>
             )

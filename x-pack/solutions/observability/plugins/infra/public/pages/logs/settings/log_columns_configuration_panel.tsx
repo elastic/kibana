@@ -190,7 +190,7 @@ const TimestampLogColumnConfigurationPanel: React.FunctionComponent<
         defaultMessage="This system field shows the log entry's time as determined by the {timestampSetting} field setting."
         values={{
           // this is a settings key and should not be translated
-          // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
+
           timestampSetting: <code>timestamp</code>,
         }}
       />
