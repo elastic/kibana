@@ -530,11 +530,11 @@ Plugin server-side only. Plugin has three main functions:
 |Adds drilldown capabilities to dashboard.  Owned by the Kibana App team.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/data_quality/README.md[dataQuality]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/data_quality/README.md[dataQuality]
 |Page where users can see the quality of their log data sets.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/dataset_quality/README.md[datasetQuality]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/dataset_quality/README.md[datasetQuality]
 |In order to make ongoing maintenance of log collection easy we want to introduce the concept of data set quality, where users can easily get an overview on the data sets they have with information such as integration, size, last activity, among others.
 
 
@@ -597,7 +597,7 @@ activities.
 |The features plugin enhance Kibana with a per-feature privilege system.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/fields_metadata/README.md[fieldsMetadata]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/fields_metadata/README.md[fieldsMetadata]
 |The @kbn/fields-metadata-plugin is designed to provide a centralized and asynchronous way to consume field metadata across Kibana. This plugin addresses the need for on-demand retrieval of field metadata from static ECS/Metadata definitions and integration manifests, with the flexibility to extend to additional resolution sources in the future.
 
 
@@ -645,7 +645,7 @@ Index Management by running this series of requests in Console:
 external LLM APIs. Its goals are:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/infra/README.md[infra]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/infra/README.md[infra]
 |This is the home of the infra plugin, which aims to provide a solution for
 the infrastructure monitoring use-case within Kibana.
 
@@ -699,15 +699,15 @@ using the CURL scripts in the scripts folder.
 |This plugin contains various LLM tasks.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/logs_data_access/README.md[logsDataAccess]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/logs_data_access/README.md[logsDataAccess]
 |Exposes services to access logs data.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/logs_explorer/README.md[logsExplorer]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/logs_explorer/README.md[logsExplorer]
 |This plugin is home to the <LogsExplorer /> component and related types. It implements several of the underlying concepts that the Observability Logs Explorer app builds upon.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/logs_shared/README.md[logsShared]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/logs_shared/README.md[logsShared]
 |Exposes the shared components and APIs to access and visualize logs.
 
 
@@ -756,11 +756,11 @@ Elastic.
 |The observabilityAiAssistantManagement plugin manages the Ai Assistant for Observability and Search management section.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_logs_explorer/README.md[observabilityLogsExplorer]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_logs_explorer/README.md[observabilityLogsExplorer]
 |This plugin provides an app based on the LogsExplorer component from the logs_explorer plugin, but adds observability-specific affordances.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_onboarding/README.md[observabilityOnboarding]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_onboarding/README.md[observabilityOnboarding]
 |This plugin provides an onboarding framework for observability solutions: Logs and APM.
 
 
