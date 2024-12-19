@@ -86,7 +86,7 @@ const esDocForUpdate = (
     if_seq_no: report._seq_no,
     if_primary_term: report._primary_term,
     refresh: 'wait_for' as estypes.Refresh,
-    body: { doc },
+    doc,
   };
 };
 

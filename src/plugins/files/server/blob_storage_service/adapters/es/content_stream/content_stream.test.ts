@@ -14,7 +14,7 @@ import { encode, decode } from '@kbn/cbor';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ContentStream, ContentStreamEncoding, ContentStreamParameters } from './content_stream';
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { FileDocument } from '../../../../file_client/file_metadata_client/adapters/es_index';
 import { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 
