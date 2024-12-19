@@ -43,22 +43,26 @@ export async function rewriteUserPromptForSearchConnectors({
 }): Promise<UserPromptAndFiltersForSearchConnector[]> {
   const connectorIndices = await getConnectorIndices({ esClient, uiSettingsClient, logger });
 
-  const values = await Promise.all(
-    connectorIndices.map((indexPattern) => {
-      return rewritePromptForConnector({
-        indexPattern,
-        esClient,
-        messages,
-        userPrompt,
-        screenDescription,
-        chat,
-        signal,
-        logger,
-      });
-    })
-  );
-
-  return values;
+  try {
+    const values = await Promise.all(
+      connectorIndices.map((indexPattern) => {
+        return rewritePromptForConnector({
+          indexPattern,
+          esClient,
+          messages,
+          userPrompt,
+          screenDescription,
+          chat,
+          signal,
+          logger,
+        });
+      })
+    );
+    return values;
+  } catch (error) {
+    logger.error(`Error rewriting prompt: ${error}`);
+    return [];
+  }
 }
 
 async function rewritePromptForConnector({
@@ -84,6 +88,8 @@ async function rewritePromptForConnector({
   const lowCardinalityKeywordFields = await getLowCardinalityKeywordFields({
     esClient,
     indexPattern,
+    chat,
+    signal,
     logger,
   });
 
@@ -91,6 +97,7 @@ async function rewritePromptForConnector({
 
   const keywordExample = lowCardinalityKeywordFields[0];
   const dateFieldExample = timestampFields[0];
+
   if (!keywordExample && !dateFieldExample) {
     logger.error(`No keyword fields and no date fields found for index pattern ${indexPattern}`);
     return {
@@ -102,11 +109,12 @@ async function rewritePromptForConnector({
 
   const queryFilterItems = compact([
     ...lowCardinalityKeywordFields.map(
-      ({ field, values }) =>
+      ({ field, values, description }) =>
         ({
           type: 'object' as const,
           properties: {
             field: { const: field },
+            description: { const: description },
             value: { enum: values },
           },
           required: ['field', 'value'],
@@ -157,7 +165,7 @@ async function rewritePromptForConnector({
             "queryFilters": [
               ${
                 keywordExample
-                  ? `{ field: "${keywordExample?.field}", value: ${keywordExample?.values[0]} }`
+                  ? `{ "field": "${keywordExample.field}", "description": "${keywordExample.description}, "value": ${keywordExample.values[0]} }`
                   : ''
               },
               ${
@@ -269,13 +277,19 @@ async function rewritePromptForConnector({
 async function getLowCardinalityKeywordFields({
   esClient,
   indexPattern,
+  chat,
+  signal,
   logger,
 }: {
   esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
   indexPattern: string;
+  chat: FunctionCallChatFunction;
+  signal: AbortSignal;
   logger: Logger;
-}): Promise<Array<{ field: string; values: string[] }>> {
+}): Promise<Array<{ field: string; description: string; values: string[] }>> {
   try {
+    const ADD_DESCRIPTION_FUNCTION_NAME = `add_description-${indexPattern}`;
+
     // Get all keyword fields using field_caps
     const fieldCapsResponse = await esClient.asCurrentUser.fieldCaps({
       index: indexPattern,
@@ -298,8 +312,109 @@ async function getLowCardinalityKeywordFields({
       })
     );
 
-    // Return the low-cardinality fields
-    return keywordItems.filter(({ values }) => values.length > 0 && values.length < 10);
+    const keywordExampleFiltered = keywordItems.filter(
+      ({ values }) => values.length > 0 && values.length < 10
+    );
+    if (!keywordExampleFiltered.length) return [];
+
+    try {
+      const _items = keywordExampleFiltered.map(
+        ({ field, values }) =>
+          ({
+            type: 'object' as const,
+            properties: {
+              field: { const: field },
+              value: { enum: values },
+            },
+            required: ['field', 'value'],
+            additionalProperties: true,
+          } as const)
+      );
+
+      const newUserMessage: Message = {
+        '@timestamp': new Date().toISOString(),
+        message: {
+          role: MessageRole.User,
+          content: dedent(
+            `
+            The description should explain what the field represents, keeping the example values in mind.
+  
+            Given the following list of filters, provide a concise description for each field. Ensure that:
+            - The description should explain what the field represents.
+            - keeping the example values in mind.
+  
+            queryFilters:
+            ${JSON.stringify(keywordExampleFiltered)}
+            `
+          ),
+        },
+      };
+
+      const addDescriptionFunction = {
+        strict: true,
+        name: ADD_DESCRIPTION_FUNCTION_NAME,
+        description: `add a description.
+    
+              ## Example
+              {
+                "queryFilters": [{
+                  "field": "type.enum",
+                  "values": ["file","folder"],
+                }]
+              }
+              ...
+  
+              Return value:
+              """
+              {
+                "queryFilters": [{
+                  "field": "type.enum",
+                  "values": ["file","folder"],
+                  "description": "The 'type.enum' field represents the type of object. This can be either 'file' or 'folder'."
+                }]
+              }
+              """
+            }
+    
+            `,
+        parameters: {
+          type: 'object',
+          additionalProperties: false,
+          required: [],
+          properties: {
+            queryFilters: {
+              type: 'array',
+              description:
+                'A list of Elasticsearch filters for exactly matching keyword fields. The filters are used to narrow down the search results based on user intent.',
+              items: {
+                type: 'object',
+                description:
+                  'A filter object for a named keyword field, filtered by a specific value.',
+              },
+            },
+          },
+        } as const,
+      };
+
+      const response = await lastValueFrom(
+        chat(`function call: ${ADD_DESCRIPTION_FUNCTION_NAME}`, {
+          messages: [newUserMessage],
+          functions: [addDescriptionFunction],
+          functionCall: ADD_DESCRIPTION_FUNCTION_NAME,
+          signal,
+        }).pipe(concatenateChatCompletionChunks())
+      );
+
+      // Return the low-cardinality fields
+      return JSON.parse(response.message.function_call.arguments).queryFilters;
+    } catch (error) {
+      logger.error(`Error retrieving low-cardinality fields: ${error.message}`);
+      return keywordExampleFiltered.map(({ field, values }) => ({
+        field,
+        values,
+        description: '',
+      }));
+    }
   } catch (error) {
     logger.error(`Error retrieving low-cardinality fields: ${error.message}`);
     return [];
