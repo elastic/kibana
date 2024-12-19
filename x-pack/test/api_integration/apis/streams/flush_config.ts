@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { deleteStream, enableStreams, indexDocument } from './helpers/requests';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { waitForDocumentInIndex } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
