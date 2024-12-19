@@ -10,7 +10,6 @@
 import { useMemo } from 'react';
 
 import { useEuiTheme } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { DashboardPanelMap } from '../../../../common';
@@ -30,14 +29,14 @@ export const useDashboardGridSettings = (panelsInOrder: string[], panels: Dashbo
   }, [panels, panelsInOrder]);
 
   const breakpoints = useMemo(
-    () => ({ lg: euiTheme.breakpoint.m, ...(viewMode === ViewMode.VIEW ? { sm: 0 } : {}) }),
+    () => ({ lg: euiTheme.breakpoint.m, ...(viewMode === 'view' ? { sm: 0 } : {}) }),
     [viewMode, euiTheme.breakpoint.m]
   );
 
   const columns = useMemo(
     () => ({
       lg: DASHBOARD_GRID_COLUMN_COUNT,
-      ...(viewMode === ViewMode.VIEW ? { sm: 1 } : {}),
+      ...(viewMode === 'view' ? { sm: 1 } : {}),
     }),
     [viewMode]
   );
