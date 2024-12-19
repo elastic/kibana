@@ -12,8 +12,8 @@ export const ingestStreamConfigDefinitonSchema = z
   .object({
     ingest: z.object({
       processing: z.array(processingDefinitionSchema).default([]),
+      routing: z.array(streamChildSchema).default([]),
     }),
-    routing: z.array(streamChildSchema).default([]),
   })
   .strict();
 

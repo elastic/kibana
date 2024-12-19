@@ -22,21 +22,21 @@ export const wiredStreamConfig = {
         },
       },
     ],
-  },
-  routing: [
-    {
-      name: 'logs.errors',
-      condition: {
-        field: 'log.level',
-        operator: 'eq',
-        value: 'error',
+    routing: [
+      {
+        name: 'logs.errors',
+        condition: {
+          field: 'log.level',
+          operator: 'eq',
+          value: 'error',
+        },
       },
-    },
-  ],
-  wired: {
-    fields: {
-      new_field: {
-        type: 'long',
+    ],
+    wired: {
+      fields: {
+        new_field: {
+          type: 'long',
+        },
       },
     },
   },

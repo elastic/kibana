@@ -57,7 +57,7 @@ export const readStreamRoute = createServerRoute({
       const body = {
         ...streamEntity,
         inherited_fields: ancestors.reduce((acc, def) => {
-          Object.entries(def.stream.wired.fields).forEach(([key, fieldDef]) => {
+          Object.entries(def.stream.ingest.wired.fields).forEach(([key, fieldDef]) => {
             acc[key] = { ...fieldDef, from: def.name };
           });
           return acc;

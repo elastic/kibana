@@ -21,7 +21,7 @@ export function generateLayer(
   definition: WiredStreamDefinition
 ): ClusterPutComponentTemplateRequest {
   const properties: Record<string, MappingProperty> = {};
-  Object.entries(definition.stream.wired.fields).forEach(([field, props]) => {
+  Object.entries(definition.stream.ingest.wired.fields).forEach(([field, props]) => {
     const property: MappingProperty = {
       type: props.type,
     };

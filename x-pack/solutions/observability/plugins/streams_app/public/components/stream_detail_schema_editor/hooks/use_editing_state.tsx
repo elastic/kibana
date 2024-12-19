@@ -108,17 +108,16 @@ export const useEditingState = ({
                 },
                 body: {
                   ingest: {
-                    processing: definition.stream.ingest.processing,
-                  },
-                  routing: definition.stream.routing,
-                  wired: {
-                    fields: {
-                      ...Object.fromEntries(
-                        Object.entries(definition.stream.wired.fields).filter(
-                          ([name, _field]) => name !== nextFieldDefinition.name
-                        )
-                      ),
-                      [nextFieldDefinition.name]: omit(nextFieldDefinition, 'name'),
+                    ...definition.stream.ingest,
+                    wired: {
+                      fields: {
+                        ...Object.fromEntries(
+                          Object.entries(definition.stream.ingest.wired.fields).filter(
+                            ([name, _field]) => name !== nextFieldDefinition.name
+                          )
+                        ),
+                        [nextFieldDefinition.name]: omit(nextFieldDefinition, 'name'),
+                      },
                     },
                   },
                 },

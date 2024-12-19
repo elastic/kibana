@@ -12,11 +12,11 @@ export const wiredStreamConfigDefinitonSchema = z
   .object({
     ingest: z.object({
       processing: z.array(processingDefinitionSchema).default([]),
+      wired: z.object({
+        fields: fieldDefinitionSchema.default({}),
+      }),
+      routing: z.array(streamChildSchema).default([]),
     }),
-    wired: z.object({
-      fields: fieldDefinitionSchema.default({}),
-    }),
-    routing: z.array(streamChildSchema).default([]),
   })
   .strict();
 

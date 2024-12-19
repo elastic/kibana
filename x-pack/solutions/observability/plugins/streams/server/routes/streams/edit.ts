@@ -69,13 +69,17 @@ export const editStreamRoute = createServerRoute({
         return { acknowledged: true };
       }
 
-      await validateStreamChildren(scopedClusterClient, params.path.id, params.body.routing);
+      await validateStreamChildren(scopedClusterClient, params.path.id, params.body.ingest.routing);
       if (isWiredStreamConfig(params.body)) {
-        await validateAncestorFields(scopedClusterClient, params.path.id, params.body.wired.fields);
+        await validateAncestorFields(
+          scopedClusterClient,
+          params.path.id,
+          params.body.ingest.wired.fields
+        );
         await validateDescendantFields(
           scopedClusterClient,
           params.path.id,
-          params.body.wired.fields
+          params.body.ingest.wired.fields
         );
       }
 
@@ -85,7 +89,7 @@ export const editStreamRoute = createServerRoute({
       // always need to go from the leaves to the parent when syncing ingest pipelines, otherwise data
       // will be routed before the data stream is ready
 
-      for (const child of streamDefinition.stream.routing) {
+      for (const child of streamDefinition.stream.ingest.routing) {
         const streamExists = await checkStreamExists({
           scopedClusterClient,
           id: child.name,
@@ -97,12 +101,12 @@ export const editStreamRoute = createServerRoute({
         const childDefinition: WiredStreamDefinition = {
           name: child.name,
           stream: {
-            wired: {
-              fields: {},
-            },
-            routing: [],
             ingest: {
               processing: [],
+              routing: [],
+              wired: {
+                fields: {},
+              },
             },
           },
         };
@@ -160,9 +164,9 @@ async function updateParentStream(
     id: parentId,
   });
 
-  if (!parentDefinition.stream.routing.some((child) => child.name === id)) {
+  if (!parentDefinition.stream.ingest.routing.some((child) => child.name === id)) {
     // add the child to the parent stream with an empty condition for now
-    parentDefinition.stream.routing.push({
+    parentDefinition.stream.ingest.routing.push({
       name: id,
       condition: undefined,
     });
@@ -179,14 +183,14 @@ async function updateParentStream(
 async function validateStreamChildren(
   scopedClusterClient: IScopedClusterClient,
   id: string,
-  children: WiredStreamConfigDefinition['routing']
+  children: WiredStreamConfigDefinition['ingest']['routing']
 ) {
   try {
     const oldDefinition = await readStream({
       scopedClusterClient,
       id,
     });
-    const oldChildren = oldDefinition.stream.routing.map((child) => child.name);
+    const oldChildren = oldDefinition.stream.ingest.routing.map((child) => child.name);
     const newChildren = new Set(children.map((child) => child.name));
     children.forEach((child) => {
       validateCondition(child.condition);

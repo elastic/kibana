@@ -89,6 +89,13 @@ export const fieldDefinitionSchema = z.record(z.string(), fieldDefinitionConfigS
 
 export type FieldDefinition = z.infer<typeof fieldDefinitionSchema>;
 
+export const inheritedFieldDefinitionSchema = z.record(
+  z.string(),
+  fieldDefinitionConfigSchema.extend({ from: z.string() })
+);
+
+export type InheritedFieldDefinition = z.infer<typeof inheritedFieldDefinitionSchema>;
+
 export const fieldDefinitionConfigWithNameSchema = fieldDefinitionConfigSchema.extend({
   name: z.string(),
 });

@@ -227,9 +227,12 @@ function ControlBar({
         },
         body: {
           ...stream,
-          routing: definition.stream.routing.map((child) =>
-            child.name === childUnderEdit.name ? childUnderEdit : child
-          ),
+          ingest: {
+            ...stream.ingest,
+            routing: definition.stream.ingest.routing.map((child) =>
+              child.name === childUnderEdit.name ? childUnderEdit : child
+            ),
+          },
         } as WiredStreamConfigDefinition,
       },
     });
@@ -551,7 +554,7 @@ function ChildStreamList({
       >
         <PreviousStreamEntry definition={definition} />
         <CurrentStreamEntry definition={definition} />
-        {definition.stream.routing.map((child, i) => (
+        {definition.stream.ingest.routing.map((child, i) => (
           <NestedView key={i}>
             <RoutingStreamEntry
               child={

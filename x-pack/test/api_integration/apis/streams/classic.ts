@@ -50,8 +50,8 @@ export default function ({ getService }: FtrProviderContext) {
         stream: {
           ingest: {
             processing: [],
+            routing: [],
           },
-          routing: [],
         },
       });
     });
@@ -71,8 +71,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           ],
+          routing: [],
         },
-        routing: [],
       });
       expect(response).to.have.property('acknowledged', true);
       const streamBody = await getStream(supertest, 'logs-test-default');
@@ -93,8 +93,8 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               },
             ],
+            routing: [],
           },
-          routing: [],
         },
       });
     });
@@ -129,8 +129,8 @@ export default function ({ getService }: FtrProviderContext) {
       const response = await putStream(supertest, 'logs-test-default', {
         ingest: {
           processing: [],
+          routing: [],
         },
-        routing: [],
       });
       expect(response).to.have.property('acknowledged', true);
     });

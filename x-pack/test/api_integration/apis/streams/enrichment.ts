@@ -75,8 +75,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           ],
+          routing: [],
         },
-        routing: [],
       };
       const response = await putStream(supertest, 'logs', body);
       expect(response).to.have.property('acknowledged', true);

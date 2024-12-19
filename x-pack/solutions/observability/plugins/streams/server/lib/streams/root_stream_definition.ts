@@ -12,21 +12,21 @@ export const rootStreamDefinition: WiredStreamDefinition = {
   stream: {
     ingest: {
       processing: [],
-    },
-    routing: [],
-    wired: {
-      fields: {
-        '@timestamp': {
-          type: 'date',
-        },
-        message: {
-          type: 'match_only_text',
-        },
-        'host.name': {
-          type: 'keyword',
-        },
-        'log.level': {
-          type: 'keyword',
+      routing: [],
+      wired: {
+        fields: {
+          '@timestamp': {
+            type: 'date',
+          },
+          message: {
+            type: 'match_only_text',
+          },
+          'host.name': {
+            type: 'keyword',
+          },
+          'log.level': {
+            type: 'keyword',
+          },
         },
       },
     },

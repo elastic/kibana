@@ -7,11 +7,11 @@
 
 import { z } from '@kbn/zod';
 import { wiredStreamDefinitonSchema } from '../streams';
-import { fieldDefinitionSchema } from '../common';
+import { inheritedFieldDefinitionSchema } from '../common';
 
 export const wiredReadStreamDefinitonSchema = wiredStreamDefinitonSchema
   .extend({
-    inherited_fields: fieldDefinitionSchema.default({}),
+    inherited_fields: inheritedFieldDefinitionSchema.default({}),
   })
   .strict();
 

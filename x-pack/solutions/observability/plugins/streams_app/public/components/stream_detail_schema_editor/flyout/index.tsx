@@ -57,9 +57,9 @@ export const SchemaEditorFlyout = (props: SchemaEditorFlyoutProps) => {
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column">
           <FieldSummary {...props} />
-          {isEditing && definition.stream.routing.length > 0 ? (
+          {isEditing && definition.stream.ingest.routing.length > 0 ? (
             <EuiFlexItem grow={false}>
-              <ChildrenAffectedCallout childStreams={definition.stream.routing} />
+              <ChildrenAffectedCallout childStreams={definition.stream.ingest.routing} />
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={false}>

@@ -92,7 +92,7 @@ export async function deleteStream(
 
     // need to update parent first to cut off documents streaming down
     await updateParentStream(scopedClusterClient, id, parentId, logger);
-    for (const child of definition.stream.routing) {
+    for (const child of definition.stream.ingest.routing) {
       await deleteStream(scopedClusterClient, child.name, logger);
     }
     await deleteStreamObjects({ scopedClusterClient, id, logger });
@@ -116,7 +116,7 @@ async function updateParentStream(
     id: parentId,
   });
 
-  parentDefinition.stream.routing = parentDefinition.stream.routing.filter(
+  parentDefinition.stream.ingest.routing = parentDefinition.stream.ingest.routing.filter(
     (child) => child.name !== id
   );
 

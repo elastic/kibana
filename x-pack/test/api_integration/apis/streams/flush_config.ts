@@ -19,49 +19,49 @@ const streams: StreamDefinition[] = [
     stream: {
       ingest: {
         processing: [],
+        wired: {
+          fields: {
+            '@timestamp': {
+              type: 'date',
+            },
+            message: {
+              type: 'match_only_text',
+            },
+            'host.name': {
+              type: 'keyword',
+            },
+            'log.level': {
+              type: 'keyword',
+            },
+          },
+        },
+        routing: [
+          {
+            name: 'logs.test',
+            condition: {
+              and: [
+                {
+                  field: 'numberfield',
+                  operator: 'gt',
+                  value: 15,
+                },
+              ],
+            },
+          },
+          {
+            name: 'logs.test2',
+            condition: {
+              and: [
+                {
+                  field: 'field2',
+                  operator: 'eq',
+                  value: 'abc',
+                },
+              ],
+            },
+          },
+        ],
       },
-      wired: {
-        fields: {
-          '@timestamp': {
-            type: 'date',
-          },
-          message: {
-            type: 'match_only_text',
-          },
-          'host.name': {
-            type: 'keyword',
-          },
-          'log.level': {
-            type: 'keyword',
-          },
-        },
-      },
-      routing: [
-        {
-          name: 'logs.test',
-          condition: {
-            and: [
-              {
-                field: 'numberfield',
-                operator: 'gt',
-                value: 15,
-              },
-            ],
-          },
-        },
-        {
-          name: 'logs.test2',
-          condition: {
-            and: [
-              {
-                field: 'field2',
-                operator: 'eq',
-                value: 'abc',
-              },
-            ],
-          },
-        },
-      ],
     },
   },
   {
@@ -69,11 +69,11 @@ const streams: StreamDefinition[] = [
     stream: {
       ingest: {
         processing: [],
+        wired: {
+          fields: {},
+        },
+        routing: [],
       },
-      wired: {
-        fields: {},
-      },
-      routing: [],
     },
   },
   {
@@ -90,15 +90,15 @@ const streams: StreamDefinition[] = [
             },
           },
         ],
-      },
-      wired: {
-        fields: {
-          numberfield: {
-            type: 'long',
+        wired: {
+          fields: {
+            numberfield: {
+              type: 'long',
+            },
           },
         },
+        routing: [],
       },
-      routing: [],
     },
   },
 ];

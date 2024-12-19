@@ -51,12 +51,11 @@ export const useUnpromotingState = ({
           },
           body: {
             ingest: {
-              processing: definition.stream.ingest.processing,
+              ...definition.stream.ingest,
+              wired: {
+                fields: omit(definition.stream.ingest.wired.fields, selectedField),
+              },
             },
-            wired: {
-              fields: omit(definition.stream.wired.fields, selectedField),
-            },
-            routing: definition.stream.routing,
           },
         },
       });
@@ -83,9 +82,7 @@ export const useUnpromotingState = ({
   }, [
     abortController.signal,
     definition.name,
-    definition.stream.wired.fields,
-    definition.stream.ingest.processing,
-    definition.stream.routing,
+    definition.stream.ingest,
     refreshDefinition,
     refreshUnmappedFields,
     selectedField,

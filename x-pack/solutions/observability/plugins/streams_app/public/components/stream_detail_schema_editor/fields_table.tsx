@@ -71,7 +71,6 @@ export const EMPTY_CONTENT = '-----';
 export const FieldsTableContainer = ({
   definition,
   unmappedFieldsResult,
-  isLoadingUnmappedFields,
   query,
   editingState,
   unpromotingState,
@@ -95,7 +94,7 @@ export const FieldsTableContainer = ({
 
   const mappedFields = useMemo(() => {
     if (isWiredStream(definition)) {
-      return Object.entries(definition.stream.wired.fields).map(([name, field]) => ({
+      return Object.entries(definition.stream.ingest.wired.fields).map(([name, field]) => ({
         name,
         type: field.type,
         format: field.format,

@@ -72,7 +72,9 @@ export const unmappedFieldsRoute = createServerRoute({
       const mappedFields = new Set<string>();
 
       if (isWiredStream(streamEntity)) {
-        Object.keys(streamEntity.stream.wired.fields).forEach((name) => mappedFields.add(name));
+        Object.keys(streamEntity.stream.ingest.wired.fields).forEach((name) =>
+          mappedFields.add(name)
+        );
       }
 
       const { ancestors } = await readAncestors({
@@ -81,7 +83,7 @@ export const unmappedFieldsRoute = createServerRoute({
       });
 
       for (const ancestor of ancestors) {
-        Object.keys(ancestor.stream.wired.fields).forEach((name) => mappedFields.add(name));
+        Object.keys(ancestor.stream.ingest.wired.fields).forEach((name) => mappedFields.add(name));
       }
 
       const unmappedFields = Array.from(sourceFields)

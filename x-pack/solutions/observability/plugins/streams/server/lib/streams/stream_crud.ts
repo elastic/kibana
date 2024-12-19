@@ -199,8 +199,8 @@ export async function listDataStreamsAsStreams({
       stream: {
         ingest: {
           processing: [],
+          routing: [],
         },
-        routing: [],
       },
     }));
 }
@@ -240,8 +240,8 @@ export async function readDataStreamAsStream({ id, scopedClusterClient }: ReadSt
   const definition: IngestStreamDefinition = {
     name: id,
     stream: {
-      routing: [],
       ingest: {
+        routing: [],
         processing: [],
       },
     },
@@ -381,7 +381,7 @@ export async function validateAncestorFields(
       if (
         Object.hasOwn(fields, name) &&
         isWiredStream(ancestor) &&
-        Object.entries(ancestor.stream.wired.fields).some(
+        Object.entries(ancestor.stream.ingest.wired.fields).some(
           ([ancestorFieldName, attr]) =>
             attr.type !== fields[name].type && ancestorFieldName === name
         )
@@ -407,7 +407,7 @@ export async function validateDescendantFields(
     for (const name in fields) {
       if (
         Object.hasOwn(fields, name) &&
-        Object.entries(descendant.stream.wired.fields).some(
+        Object.entries(descendant.stream.ingest.wired.fields).some(
           ([descendantFieldName, attr]) =>
             attr.type !== fields[name].type && descendantFieldName === name
         )
@@ -526,11 +526,11 @@ interface ExecutionPlanStep {
   body?: Record<string, unknown>;
 }
 
-async function syncUnmanagedStream({ scopedClusterClient, definition, logger }: SyncStreamParams) {
+async function syncUnmanagedStream({ scopedClusterClient, definition }: SyncStreamParams) {
   if (isWiredStream(definition)) {
     throw new Error('Got an unmanaged stream that is marked as managed');
   }
-  if (definition.stream.routing.length) {
+  if (definition.stream.ingest.routing.length) {
     throw new Error('Unmanaged streams cannot have managed children, coming soon');
   }
   const unmanagedAssets = await getUnmanagedElasticsearchAssets({

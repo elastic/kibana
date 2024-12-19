@@ -64,11 +64,13 @@ export const forkStreamsRoute = createServerRoute({
 
       const childDefinition: WiredStreamDefinition = {
         ...params.body.stream,
-        stream: { ingest: { processing: [] }, routing: [], wired: { fields: {} } },
+        stream: { ingest: { processing: [], routing: [], wired: { fields: {} } } },
       };
 
       // check whether root stream has a child of the given name already
-      if (rootDefinition.stream.routing.some((child) => child.name === childDefinition.name)) {
+      if (
+        rootDefinition.stream.ingest.routing.some((child) => child.name === childDefinition.name)
+      ) {
         throw new MalformedStreamId(
           `The stream with ID (${params.body.stream.name}) already exists as a child of the parent stream`
         );
@@ -83,7 +85,7 @@ export const forkStreamsRoute = createServerRoute({
       await validateAncestorFields(
         scopedClusterClient,
         childDefinition.name,
-        childDefinition.stream.wired.fields
+        childDefinition.stream.ingest.wired.fields
       );
 
       // need to create the child first, otherwise we risk streaming data even though the child data stream is not ready
@@ -94,7 +96,7 @@ export const forkStreamsRoute = createServerRoute({
         logger,
       });
 
-      rootDefinition.stream.routing.push({
+      rootDefinition.stream.ingest.routing.push({
         name: params.body.stream.name,
         condition: params.body.condition,
       });

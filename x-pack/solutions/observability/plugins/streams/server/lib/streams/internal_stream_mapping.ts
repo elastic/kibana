@@ -23,14 +23,6 @@ export function createStreamsIndex(scopedClusterClient: IScopedClusterClient) {
               type: 'object',
               enabled: false,
             },
-            wired: {
-              type: 'object',
-              enabled: false,
-            },
-            routing: {
-              type: 'object',
-              enabled: false,
-            },
           },
         },
       },
