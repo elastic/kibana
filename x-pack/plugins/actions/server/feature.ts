@@ -88,10 +88,7 @@ export const ACTIONS_FEATURE: KibanaFeatureConfig = {
                 defaultMessage: 'Execute',
               }),
               includeIn: 'all',
-              savedObject: {
-                all: [ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, CONNECTOR_TOKEN_SAVED_OBJECT_TYPE],
-                read: [ACTION_SAVED_OBJECT_TYPE],
-              },
+              savedObject: { all: [], read: [] },
               ui: ['edrExecute'],
             },
           ],
