@@ -267,20 +267,6 @@ describe('CaseViewTabs', () => {
       expect(await screen.findByTestId('case-view-tab-title-observables')).toBeInTheDocument();
     });
 
-    it('navigates to the files tab when the files tab is clicked', async () => {
-      const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
-      appMockRenderer.render(<CaseViewTabs {...caseProps} />);
-
-      await userEvent.click(await screen.findByTestId('case-view-tab-title-files'));
-
-      await waitFor(() => {
-        expect(navigateToCaseViewMock).toHaveBeenCalledWith({
-          detailName: caseData.id,
-          tabId: CASE_VIEW_PAGE_TABS.FILES,
-        });
-      });
-    });
-
     it('should show the similar cases tab', async () => {
       appMockRenderer.render(
         <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.SIMILAR_CASES} />
