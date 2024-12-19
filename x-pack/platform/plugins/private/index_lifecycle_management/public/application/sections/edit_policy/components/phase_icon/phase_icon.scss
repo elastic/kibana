@@ -6,31 +6,68 @@
   align-items: center;
   border-radius: 50%;
   background-color: $euiColorLightestShade;
+
   &--disabled {
     width: $euiSize;
     height: $euiSize;
     margin: $euiSizeS;
   }
+
   &--delete {
     background-color: $euiColorLightShade;
   }
+
   &__inner--hot {
-    fill: $euiColorVis9_behindText;
+    &--borealis {
+      fill: $euiColorVis6;
+    }
+
+    &--amsterdam {
+      fill: $euiColorVis9;
+    }
   }
+
   &__inner--warm {
-    fill: $euiColorVis5_behindText;
+    &--borealis {
+      fill: $euiColorVis9;
+    }
+
+    &--amsterdam {
+      fill: $euiColorVis5;
+    }
   }
+
   &__inner--cold {
-    fill: $euiColorVis1_behindText;
+    &--borealis {
+      fill: $euiColorVis2;
+    }
+
+    &--amsterdam {
+      fill: $euiColorVis1;
+    }
   }
+
   &__inner--frozen {
-    fill: $euiColorVis4_behindText;
+
+    &--borealis,
+    &--amsterdam {
+      fill: $euiColorVis4;
+    }
   }
+
   &__inner--delete {
-    fill: $euiColorDarkShade;
+
+    &--borealis,
+    &--amsterdam {
+      fill: $euiColorDarkShade;
+    }
   }
 
   &__inner--disabled {
-    fill: $euiColorMediumShade;
+
+    &--borealis,
+    &--amsterdam {
+      fill: $euiColorMediumShade;
+    }
   }
 }

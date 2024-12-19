@@ -9,7 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import React, { FunctionComponent, memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiIconTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiText,
+  EuiIconTip,
+  useEuiTheme,
+} from '@elastic/eui';
 
 import { useKibana } from '../../../../../shared_imports';
 
@@ -135,6 +142,10 @@ export const Timeline: FunctionComponent<Props> = memo(
         : undefined,
     };
 
+    const { euiTheme } = useEuiTheme();
+
+    const themeName = euiTheme.themeName === 'EUI_THEME_BOREALIS' ? 'borealis' : 'amsterdam';
+
     const phaseAgeInMilliseconds = calculateRelativeFromAbsoluteMilliseconds(absoluteTimings);
 
     const widths = calculateWidths(phaseAgeInMilliseconds);
@@ -188,7 +199,9 @@ export const Timeline: FunctionComponent<Props> = memo(
                     data-test-subj="ilmTimelinePhase-hot"
                     className="ilmTimeline__phasesContainer__phase ilmTimeline__hotPhase"
                   >
-                    <div className="ilmTimeline__colorBar ilmTimeline__hotPhase__colorBar" />
+                    <div
+                      className={`ilmTimeline__colorBar ilmTimeline__hotPhase__colorBar__${themeName}`}
+                    />
                     <TimelinePhaseText
                       phaseName={i18nTexts.hotPhase}
                       durationInPhase={getDurationInPhaseContent('hot')}
@@ -199,7 +212,9 @@ export const Timeline: FunctionComponent<Props> = memo(
                       data-test-subj="ilmTimelinePhase-warm"
                       className="ilmTimeline__phasesContainer__phase ilmTimeline__warmPhase"
                     >
-                      <div className="ilmTimeline__colorBar ilmTimeline__warmPhase__colorBar" />
+                      <div
+                        className={`ilmTimeline__colorBar ilmTimeline__warmPhase__colorBar__${themeName}`}
+                      />
                       <TimelinePhaseText
                         phaseName={i18nTexts.warmPhase}
                         durationInPhase={getDurationInPhaseContent('warm')}
@@ -211,7 +226,9 @@ export const Timeline: FunctionComponent<Props> = memo(
                       data-test-subj="ilmTimelinePhase-cold"
                       className="ilmTimeline__phasesContainer__phase ilmTimeline__coldPhase"
                     >
-                      <div className="ilmTimeline__colorBar ilmTimeline__coldPhase__colorBar" />
+                      <div
+                        className={`ilmTimeline__colorBar ilmTimeline__coldPhase__colorBar__${themeName}`}
+                      />
                       <TimelinePhaseText
                         phaseName={i18nTexts.coldPhase}
                         durationInPhase={getDurationInPhaseContent('cold')}
