@@ -45,43 +45,38 @@ export const PresentationPanelInternal = <
 
   const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
 
-  const viewModeSubject = (() => {
-    if (apiPublishesViewMode(api)) return api.viewMode;
-    if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) return api.parentApi.viewMode;
+  const viewMode$ = (() => {
+    if (apiPublishesViewMode(api)) return api.viewMode$;
+    if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) return api.parentApi.viewMode$;
   })();
 
   const [
     dataLoading,
     blockingError,
-    panelTitle,
-    hidePanelTitle,
-    panelDescription,
-    defaultPanelTitle,
-    defaultPanelDescription,
+    title,
+    hideTitle,
+    description,
+    defaultTitle,
+    defaultDescription,
     rawViewMode,
-    parentHidePanelTitle,
+    parentHideTitle,
   ] = useBatchedOptionalPublishingSubjects(
-    api?.dataLoading,
-    api?.blockingError,
-    api?.panelTitle,
-    api?.hidePanelTitle,
-    api?.panelDescription,
-    api?.defaultPanelTitle,
-    api?.defaultPanelDescription,
-    viewModeSubject,
-    api?.parentApi?.hidePanelTitle
+    api?.dataLoading$,
+    api?.blockingError$,
+    api?.title$,
+    api?.hideTitle$,
+    api?.description$,
+    api?.defaultTitle$,
+    api?.defaultDescription$,
+    viewMode$,
+    api?.parentApi?.hideTitle$
   );
   const viewMode = rawViewMode ?? 'view';
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
-  if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading))) {
+  if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading$))) {
     setInitialLoadComplete(true);
   }
-
-  const hideTitle =
-    Boolean(hidePanelTitle) ||
-    Boolean(parentHidePanelTitle) ||
-    !Boolean(panelTitle ?? defaultPanelTitle);
 
   const contentAttrs = useMemo(() => {
     const attrs: { [key: string]: boolean } = {};
@@ -132,12 +127,14 @@ export const PresentationPanelInternal = <
             setDragHandle={setDragHandle}
             headerId={headerId}
             viewMode={viewMode}
-            hideTitle={hideTitle}
+            hideTitle={
+              Boolean(hideTitle) || Boolean(parentHideTitle) || !Boolean(title ?? defaultTitle)
+            }
             showBadges={showBadges}
             getActions={getActions}
             showNotifications={showNotifications}
-            panelTitle={panelTitle ?? defaultPanelTitle}
-            panelDescription={panelDescription ?? defaultPanelDescription}
+            title={title ?? defaultTitle}
+            description={description ?? defaultDescription}
           />
         )}
         {blockingError && api && (

@@ -81,13 +81,13 @@ export const PresentationPanelTitle = ({
   api,
   viewMode,
   hideTitle,
-  panelTitle,
-  panelDescription,
+  title,
+  description,
 }: {
   api: unknown;
   hideTitle?: boolean;
-  panelTitle?: string;
-  panelDescription?: string;
+  title?: string;
+  description?: string;
   viewMode?: ViewMode;
 }) => {
   const [panelTitleElmRef, setPanelTitleElmRef] = useState<HTMLElement | null>(null);
@@ -95,11 +95,11 @@ export const PresentationPanelTitle = ({
     if (hideTitle) return null;
     const titleClassNames = classNames('embPanel__titleText', {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      embPanel__placeholderTitleText: !panelTitle,
+      embPanel__placeholderTitleText: !title,
     });
 
     if (viewMode !== 'edit' || !isApiCompatibleWithCustomizePanelAction(api)) {
-      return <span className={titleClassNames}>{panelTitle}</span>;
+      return <span className={titleClassNames}>{title}</span>;
     }
 
     return (
@@ -107,13 +107,13 @@ export const PresentationPanelTitle = ({
         color="text"
         ref={setPanelTitleElmRef}
         className={titleClassNames}
-        aria-label={getEditTitleAriaLabel(panelTitle)}
+        aria-label={getEditTitleAriaLabel(title)}
         data-test-subj={'embeddablePanelTitleLink'}
       >
-        {panelTitle || placeholderTitle}
+        {title || placeholderTitle}
       </EuiLink>
     );
-  }, [setPanelTitleElmRef, hideTitle, panelTitle, viewMode, api]);
+  }, [setPanelTitleElmRef, hideTitle, title, viewMode, api]);
 
   const onClick = usePresentationPanelTitleClickHandler(panelTitleElmRef);
 
@@ -132,7 +132,7 @@ export const PresentationPanelTitle = ({
 
   const describedPanelTitleElement = useMemo(() => {
     if (hideTitle) return null;
-    if (!panelDescription) {
+    if (!description) {
       return (
         <span data-test-subj="embeddablePanelTitleInner" className="embPanel__titleInner">
           {panelTitleElement}
@@ -141,8 +141,8 @@ export const PresentationPanelTitle = ({
     }
     return (
       <EuiToolTip
-        title={!hideTitle ? panelTitle || undefined : undefined}
-        content={panelDescription}
+        title={!hideTitle ? title || undefined : undefined}
+        content={description}
         delay="regular"
         position="top"
         anchorClassName="embPanel__titleTooltipAnchor"
@@ -158,7 +158,7 @@ export const PresentationPanelTitle = ({
         </span>
       </EuiToolTip>
     );
-  }, [hideTitle, panelDescription, panelTitle, panelTitleElement]);
+  }, [hideTitle, description, title, panelTitleElement]);
 
   return describedPanelTitleElement;
 };
