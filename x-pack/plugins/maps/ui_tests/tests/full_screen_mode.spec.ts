@@ -12,7 +12,7 @@ test.describe('Maps full screen mode', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
   const hiddenChrome = 'kbnAppWrapper hiddenChrome';
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin(); // add layer button not there when logged in as viewer
-    await pageObjects.gis.goto();
+    await pageObjects.maps.goto();
   });
   test('Full screen button should be visisble', async ({ page }) => {
     const sel = 'mapsFullScreenMode';

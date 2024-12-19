@@ -10,7 +10,7 @@
 import { ScoutPage } from '../fixtures/types';
 
 const RENDER_COMPLETE_SELECTOR = '[data-render-complete="true"]';
-export class Gis {
+export class MapsPage {
   constructor(private readonly page: ScoutPage) {}
 
   async goto() {
