@@ -24,7 +24,7 @@ webpack_cli(
     "//packages/kbn-ui-theme",
     "//packages/kbn-i18n",
     "//packages/kbn-i18n-react",
-    "//packages/kbn-ebt-tools",
+    "//src/platform/packages/shared/kbn-ebt-tools",
     "//src/platform/packages/shared/kbn-esql-ast",
     "//packages/kbn-monaco",
     "//packages/kbn-datemath",
