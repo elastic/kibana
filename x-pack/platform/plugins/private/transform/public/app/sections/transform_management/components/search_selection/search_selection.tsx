@@ -55,17 +55,17 @@ export const SearchSelection: FC<SearchSelectionProps> = ({
           noItemsMessage={i18n.translate(
             'xpack.transform.newTransform.searchSelection.notFoundLabel',
             {
-              defaultMessage: 'No matching indices or saved searches found.',
+              defaultMessage: 'No matching indices or saved Discover sessions found.',
             }
           )}
           savedObjectMetaData={[
             {
               type: 'search',
-              getIconForSavedObject: () => 'search',
+              getIconForSavedObject: () => 'discoverApp',
               name: i18n.translate(
-                'xpack.transform.newTransform.searchSelection.savedObjectType.search',
+                'xpack.transform.newTransform.searchSelection.savedObjectType.discoverSession',
                 {
-                  defaultMessage: 'Saved search',
+                  defaultMessage: 'Discover session',
                 }
               ),
               showSavedObject: (savedObject: SavedObject) =>

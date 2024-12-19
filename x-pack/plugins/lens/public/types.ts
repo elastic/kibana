@@ -73,6 +73,7 @@ export type StartServices = Pick<
   | 'analytics'
   | 'i18n'
   | 'theme'
+  | 'userProfile'
 >;
 
 export interface IndexPatternRef {
@@ -666,6 +667,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
     | 'analytics'
     | 'i18n'
     | 'theme'
+    | 'userProfile'
     | 'docLinks'
   >;
   dateRange: DateRange;

@@ -14,6 +14,7 @@
     "@kbn/cypress-config",
     "@kbn/observability-onboarding-plugin",
     "@kbn/ftr-common-functional-services",
-    "@kbn/ftr-common-functional-ui-services"
+    "@kbn/ftr-common-functional-ui-services",
+    "@kbn/tooling-log"
   ]
 }

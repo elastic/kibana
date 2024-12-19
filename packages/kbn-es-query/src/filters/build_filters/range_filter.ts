@@ -187,16 +187,16 @@ export const buildRangeFilter = (
   }
 };
 
-export const buildSimpleRangeFilter = (
+export const buildSimpleNumberRangeFilter = (
   fieldName: string,
   params: RangeFilterParams,
   value: string,
-  indexPatternId: string
+  dataViewId: string
 ) => {
   return buildRangeFilter(
     { name: fieldName, type: 'number' },
     params,
-    { id: indexPatternId, title: indexPatternId },
+    { id: dataViewId, title: dataViewId },
     value
   );
 };

@@ -41,7 +41,7 @@ export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.overview.description', {
     defaultMessage: 'Create search experiences with a refined set of APIs and tools.',
   }),
-  URL: '/app/enterprise_search/overview',
+  URL: '/app/elasticsearch/overview',
   LOGO: 'logoEnterpriseSearch',
 };
 
@@ -55,7 +55,7 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
     defaultMessage:
       'Enterprise search offers a number of ways to easily make your data searchable. Choose from the web crawler, Elasticsearch indices, API, direct uploads, or thrid party connectors.', // TODO: Make sure this content is correct.
   }),
-  URL: '/app/enterprise_search/content',
+  URL: '/app/elasticsearch/content',
   LOGO: 'logoEnterpriseSearch',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
@@ -235,7 +235,7 @@ export const ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT = 25;
 
 export const ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE = 'elastic-crawler';
 
-export const DEFAULT_PIPELINE_NAME = 'ent-search-generic-ingestion';
+export const DEFAULT_PIPELINE_NAME = 'search-default-ingestion';
 export const DEFAULT_PIPELINE_VALUES: IngestPipelineParams = {
   extract_binary_content: true,
   name: DEFAULT_PIPELINE_NAME,

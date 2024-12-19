@@ -17,6 +17,7 @@ import {
   INTERNAL_ALERTING_BACKFILL_FIND_API_PATH,
 } from '../../../../types';
 import { transformRequestV1, transformResponseV1 } from './transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const findBackfillRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -25,6 +26,7 @@ export const findBackfillRoute = (
   router.post(
     {
       path: `${INTERNAL_ALERTING_BACKFILL_FIND_API_PATH}`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       validate: {
         query: findQuerySchemaV1,
       },
