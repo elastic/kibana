@@ -9,8 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow, EuiRange, htmlIdGenerator } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiButtonGroup, EuiFormRow, EuiRange, htmlIdGenerator, useEuiTheme } from '@elastic/eui';
 
 export enum RowHeightMode {
   auto = 'auto',
@@ -40,6 +39,8 @@ export function RowHeightSettings({
   maxRowHeight,
   ['data-test-subj']: dataTestSubj,
 }: RowHeightSettingsProps) {
+  const { euiTheme } = useEuiTheme();
+
   const rowHeightModeOptions = [
     {
       id: `${idPrefix}${RowHeightMode.single}`,
@@ -95,7 +96,7 @@ export function RowHeightSettings({
               }}
               data-test-subj={`${dataTestSubj}_lineCountNumber`}
               css={{
-                marginTop: compressed ? euiThemeVars.euiSizeXS : euiThemeVars.euiSizeM,
+                marginTop: compressed ? euiTheme.size.xs : euiTheme.size.m,
               }}
             />
           ) : null}

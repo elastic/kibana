@@ -16,7 +16,6 @@ import {
 } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { capitalize } from 'lodash';
 import React from 'react';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
@@ -37,7 +36,9 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
         if (!level) {
           return (
             <span
-              css={{ color: euiThemeVars.euiTextSubduedColor }}
+              css={({ euiTheme }) => ({
+                color: euiTheme.colors.textSubdued,
+              })}
               data-test-subj="exampleDataSourceProfileLogLevelEmpty"
             >
               (None)
