@@ -43,6 +43,7 @@ export interface RuleMigrationFilters {
   ids?: string[];
   installable?: boolean;
   prebuilt?: boolean;
+  custom?: boolean;
   searchTerm?: string;
 }
 export interface RuleMigrationGetOptions {
@@ -397,7 +398,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
 
   private getFilterQuery(
     migrationId: string,
-    { status, ids, installable, prebuilt, searchTerm }: RuleMigrationFilters = {}
+    { status, ids, installable, prebuilt, custom, searchTerm }: RuleMigrationFilters = {}
   ): QueryDslQueryContainer {
     const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
     if (status) {
@@ -415,6 +416,9 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     }
     if (prebuilt) {
       filter.push(searchConditions.isPrebuilt());
+    }
+    if (custom) {
+      filter.push(searchConditions.isCustom());
     }
     if (searchTerm?.length) {
       filter.push(searchConditions.matchTitle(searchTerm));
