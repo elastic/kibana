@@ -26,6 +26,8 @@ import {
   createNonDataStreamIndex,
 } from './data_streams_tab.helpers';
 
+jest.mock('react-use/lib/useObservable', () => () => jest.fn());
+
 const nonBreakingSpace = ' ';
 
 const urlServiceMock = {
