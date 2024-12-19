@@ -6,8 +6,9 @@
  */
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import * as i18n from './translations';
+import type { ListCustomFieldOption } from '../../../common/types/domain';
 import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../common/constants';
+import * as i18n from './translations';
 
 const { emptyField, maxLengthField } = fieldValidators;
 
@@ -47,5 +48,23 @@ export const schema = {
   defaultValue: {
     label: i18n.DEFAULT_VALUE,
     validations: [],
+  },
+  options: {
+    label: i18n.FIELD_OPTIONS,
+    validations: [
+      {
+        validator: emptyField(i18n.REQUIRED_OPTIONS),
+      },
+      {
+        validator: ({ value }: { value: ListCustomFieldOption[] }) => {
+          const hasEmptyValue = value.some((val) => val.label.trim() === '');
+          if (hasEmptyValue) {
+            return {
+              message: i18n.EMPTY_OPTIONS,
+            };
+          }
+        },
+      },
+    ],
   },
 };
