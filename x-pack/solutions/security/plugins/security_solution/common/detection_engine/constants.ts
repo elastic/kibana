@@ -7,6 +7,8 @@
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
+export const DEFAULT_RULE_EXECUTION_LOOKBACK = '1m';
+
 export enum RULE_PREVIEW_INVOCATION_COUNT {
   HOUR = 12,
   DAY = 24,

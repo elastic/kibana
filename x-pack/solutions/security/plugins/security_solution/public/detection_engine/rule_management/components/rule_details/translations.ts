@@ -419,3 +419,11 @@ export const LUCENE_LANGUAGE_LABEL = i18n.translate(
     defaultMessage: 'Lucene',
   }
 );
+
+export const RULE_LOOKBACK_INCONSISTENCY_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.lookbackInconsistencyWarning',
+  {
+    defaultMessage:
+      'There is an inconsistency in rule schedule configuration. Rule may run with gaps. Please edit the rule to resolve it.',
+  }
+);

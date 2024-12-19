@@ -6,20 +6,23 @@
  */
 
 import React from 'react';
-import { EuiDescriptionList } from '@elastic/eui';
-import { parseDuration } from '@kbn/alerting-plugin/common';
+import { EuiDescriptionList, EuiFlexGroup, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import { DEFAULT_RULE_EXECUTION_LOOKBACK } from '../../../../../../../../../common/detection_engine/constants';
 import * as i18n from '../../../../translations';
 import type { RuleSchedule } from '../../../../../../../../../common/api/detection_engine';
 import { AccessibleTimeValue } from '../../../../rule_schedule_section';
-import { secondsToDurationString } from '../../../../../../../../detections/pages/detection_engine/rules/helpers';
+import { safeHumanizeLookbackDuration } from '../../../utils/safe_humanize_lookback';
+import { RULE_LOOKBACK_INCONSISTENCY_WARNING } from './translations';
 
 interface RuleScheduleReadOnlyProps {
   ruleSchedule: RuleSchedule;
 }
 
 export function RuleScheduleReadOnly({ ruleSchedule }: RuleScheduleReadOnlyProps) {
-  const lookbackSeconds = parseDuration(ruleSchedule.lookback) / 1000;
-  const lookbackHumanized = secondsToDurationString(lookbackSeconds);
+  const lookbackHumanized = safeHumanizeLookbackDuration(
+    ruleSchedule.lookback,
+    LOOKBACK_FALLBACK_VALUE
+  );
 
   return (
     <EuiDescriptionList
@@ -30,9 +33,25 @@ export function RuleScheduleReadOnly({ ruleSchedule }: RuleScheduleReadOnlyProps
         },
         {
           title: i18n.FROM_FIELD_LABEL,
-          description: <AccessibleTimeValue timeValue={lookbackHumanized} />,
+          description:
+            lookbackHumanized === LOOKBACK_FALLBACK_VALUE ? (
+              <EuiToolTip
+                content={RULE_LOOKBACK_INCONSISTENCY_WARNING(DEFAULT_RULE_EXECUTION_LOOKBACK)}
+              >
+                <EuiText color="warning">
+                  <EuiFlexGroup alignItems="center" gutterSize="s">
+                    <AccessibleTimeValue timeValue={ruleSchedule.lookback} />
+                    <EuiIcon type="warning" />
+                  </EuiFlexGroup>
+                </EuiText>
+              </EuiToolTip>
+            ) : (
+              <AccessibleTimeValue timeValue={lookbackHumanized} />
+            ),
         },
       ]}
     />
   );
 }
+
+const LOOKBACK_FALLBACK_VALUE = '-';
