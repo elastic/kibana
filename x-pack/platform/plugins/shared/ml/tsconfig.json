@@ -136,5 +136,6 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-ui-settings-server",
     "@kbn/core-security-server",
+    "@kbn/charts-theme",
   ]
 }

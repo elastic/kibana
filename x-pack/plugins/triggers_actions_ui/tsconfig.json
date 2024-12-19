@@ -74,7 +74,8 @@
     "@kbn/core-application-browser",
     "@kbn/cloud-plugin",
     "@kbn/response-ops-rule-form",
-    "@kbn/core-user-profile-browser-mocks"
+    "@kbn/core-user-profile-browser-mocks",
+    "@kbn/charts-theme"
   ],
   "exclude": ["target/**/*"]
 }

@@ -144,6 +144,8 @@
       "@kbn/chart-icons/*": ["packages/kbn-chart-icons/*"],
       "@kbn/charts-plugin": ["src/plugins/charts"],
       "@kbn/charts-plugin/*": ["src/plugins/charts/*"],
+      "@kbn/charts-theme": ["packages/kbn-charts-theme"],
+      "@kbn/charts-theme/*": ["packages/kbn-charts-theme/*"],
       "@kbn/check-mappings-update-cli": ["packages/kbn-check-mappings-update-cli"],
       "@kbn/check-mappings-update-cli/*": ["packages/kbn-check-mappings-update-cli/*"],
       "@kbn/check-prod-native-modules-cli": ["packages/kbn-check-prod-native-modules-cli"],
