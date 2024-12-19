@@ -34,7 +34,6 @@ interface PackageInstallerOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   productDocClient: ProductDocInstallClient;
-  endpointManager: InferenceEndpointManager;
   artifactRepositoryUrl: string;
   kibanaVersion: string;
 }
@@ -52,7 +51,6 @@ export class PackageInstaller {
     logger,
     esClient,
     productDocClient,
-    endpointManager,
     artifactRepositoryUrl,
     kibanaVersion,
   }: PackageInstallerOpts) {
