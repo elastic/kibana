@@ -182,10 +182,6 @@ describe('ruleActionsItem', () => {
           },
         },
       },
-      formData: {
-        notifyWhen: null,
-        throttle: null,
-      },
       connectors: mockConnectors,
       connectorTypes: mockActionTypes,
       aadTemplateFields: [],
@@ -384,54 +380,6 @@ describe('ruleActionsItem', () => {
     expect(mockOnChange).toHaveBeenCalledWith({
       payload: { uuid: 'uuid-action-1' },
       type: 'removeAction',
-    });
-  });
-
-  test('should allow to migrate rule level settings to action level', async () => {
-    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-    actionTypeRegistry.register(
-      getActionTypeModel('1', {
-        id: 'actionType-1',
-        defaultRecoveredActionParams: { recoveredParamKey: 'recoveredParamValue' },
-        defaultActionParams: { actionParamKey: 'actionParamValue' },
-        validateParams: mockValidate,
-      })
-    );
-    useRuleFormState.mockReturnValue({
-      plugins: {
-        actionTypeRegistry,
-        http: {
-          basePath: {
-            publicBaseUrl: 'publicUrl',
-          },
-        },
-      },
-      formData: {
-        notifyWhen: 'onThrottleInterval',
-        throttle: '5m',
-      },
-      connectors: mockConnectors,
-      connectorTypes: mockActionTypes,
-      aadTemplateFields: [],
-      actionsParamsErrors: {},
-      selectedRuleType: ruleType,
-      selectedRuleTypeModel: ruleModel,
-    });
-    useRuleFormDispatch.mockReturnValue(mockOnChange);
-    validateParamsForWarnings.mockReturnValue(null);
-    getAvailableActionVariables.mockReturnValue(['mockActionVariable']);
-
-    render(<RuleActionsItem action={getAction('1')} index={0} producerId="stackAlerts" />);
-
-    expect(mockOnChange).toHaveBeenCalledTimes(1);
-
-    expect(mockOnChange).toHaveBeenCalledWith({
-      payload: {
-        key: 'frequency',
-        uuid: 'uuid-action-1',
-        value: { notifyWhen: 'onThrottleInterval', summary: false, throttle: '5m' },
-      },
-      type: 'setActionProperty',
     });
   });
 });
