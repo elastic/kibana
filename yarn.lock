@@ -5877,7 +5877,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/home-plugin@link:src/plugins/home":
+"@kbn/home-plugin@link:src/platform/plugins/shared/home":
   version "0.0.0"
   uid ""
 

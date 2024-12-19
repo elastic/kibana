@@ -620,6 +620,7 @@ src/platform/plugins/shared/esql @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
 src/platform/plugins/shared/files @elastic/appex-sharedux
 src/platform/plugins/shared/guided_onboarding @elastic/appex-sharedux
+src/platform/plugins/shared/home @elastic/appex-sharedux
 src/platform/plugins/shared/management @elastic/kibana-management
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/bfetch @elastic/appex-sharedux
@@ -654,7 +655,6 @@ src/plugins/expression_shape @elastic/kibana-presentation
 src/plugins/expressions @elastic/kibana-visualizations
 src/plugins/field_formats @elastic/kibana-data-discovery
 src/plugins/ftr_apis @elastic/kibana-core
-src/plugins/home @elastic/appex-sharedux
 src/plugins/image_embeddable @elastic/appex-sharedux
 src/plugins/input_control_vis @elastic/kibana-presentation
 src/plugins/inspector @elastic/kibana-presentation
@@ -1237,14 +1237,14 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /src/plugins/kibana_react/public/ @elastic/appex-sharedux @elastic/kibana-presentation
 
 ### Home Plugin and Packages
-/src/plugins/home/public @elastic/appex-sharedux
-/src/plugins/home/server/*.ts @elastic/appex-sharedux
-/src/plugins/home/server/services/ @elastic/appex-sharedux
+/src/platform/plugins/shared/home/public @elastic/appex-sharedux
+/src/platform/plugins/shared/home/server/*.ts @elastic/appex-sharedux
+/src/platform/plugins/shared/home/server/services/ @elastic/appex-sharedux
 
 ### Code Coverage
-#CC# /src/plugins/home/public @elastic/appex-sharedux
-#CC# /src/plugins/home/server/services/ @elastic/appex-sharedux
-#CC# /src/plugins/home/ @elastic/appex-sharedux
+#CC# /src/platform/plugins/shared/home/public @elastic/appex-sharedux
+#CC# /src/platform/plugins/shared/home/server/services/ @elastic/appex-sharedux
+#CC# /src/platform/plugins/shared/home/ @elastic/appex-sharedux
 #CC# /x-pack/plugins/reporting/ @elastic/appex-sharedux
 #CC# /x-pack/solutions/security/plugins/security_solution_serverless/ @elastic/appex-sharedux
 
@@ -2568,7 +2568,7 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 /src/plugins/kibana_react/public/page_template/ @elastic/eui-team @elastic/appex-sharedux
 
 # Landing page for guided onboarding in Home plugin
-/src/plugins/home/public/application/components/guided_onboarding @elastic/appex-sharedux
+/src/platform/plugins/shared/home/public/application/components/guided_onboarding @elastic/appex-sharedux
 
 # Changes to translation files should not ping code reviewers
 x-pack/platform/plugins/private/translations/translations
