@@ -43,7 +43,7 @@
     "expressionError": "src/platform/plugins/shared/expression_error",
     "expressionGauge": "src/plugins/chart_expressions/expression_gauge",
     "expressionHeatmap": "src/plugins/chart_expressions/expression_heatmap",
-    "expressionImage": "src/plugins/expression_image",
+    "expressionImage": "src/platform/plugins/shared/expression_image",
     "expressionMetric": "src/plugins/expression_metric",
     "expressionMetricVis": "src/plugins/chart_expressions/expression_metric",
     "expressionLegacyMetricVis": "src/plugins/chart_expressions/expression_legacy_metric",
