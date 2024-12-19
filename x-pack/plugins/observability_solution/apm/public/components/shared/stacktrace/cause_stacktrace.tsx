@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiTitle } from '@elastic/eui';
+import { EuiAccordion, EuiTitle, useEuiFontSize } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from '@emotion/styled';
@@ -24,7 +24,7 @@ const CausedByContainer = styled('h5')`
 const CausedByHeading = styled('span')`
   color: ${({ theme }) => theme.euiTheme.colors.textSubdued};
   display: block;
-  font-size: ${({ theme }) => theme.euiTheme.size.xs};
+  font-size: ${() => useEuiFontSize('xs').fontSize};
   font-weight: ${({ theme }) => theme.euiTheme.font.weight.bold};
   text-transform: uppercase;
 `;
