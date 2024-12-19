@@ -269,7 +269,7 @@ describe('unenroll', () => {
       expect(resultIds).toEqual(onlyRegular);
 
       const action = esClient.create.mock.calls[0][0] as any;
-      expect(action.body.type).toEqual('FORCE_UNENROLL');
+      expect(action.document.type).toEqual('FORCE_UNENROLL');
     });
 
     it('can unenroll from hosted agent policy with force=true', async () => {
@@ -326,7 +326,7 @@ describe('unenroll', () => {
       expect(resultIds).toEqual(idsToUnenroll);
 
       const action = esClient.create.mock.calls[0][0] as any;
-      expect(action.body.type).toEqual('FORCE_UNENROLL');
+      expect(action.document.type).toEqual('FORCE_UNENROLL');
     });
   });
 

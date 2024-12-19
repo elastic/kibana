@@ -103,7 +103,7 @@ describe('reassignAgent', () => {
       // only 1 are regular and bulk write two line per update
       expect((calledWith as estypes.BulkRequest).operations?.length).toBe(2);
       // @ts-expect-error
-      expect(calledWith.body[0].update._id).toEqual(agentInRegularDoc._id);
+      expect(calledWith.operations[0].update._id).toEqual(agentInRegularDoc._id);
 
       // hosted policy is updated in action results with error
       const calledWithActionResults = esClient.bulk.mock.calls[1][0] as estypes.BulkRequest;

@@ -33,7 +33,7 @@ describe('requestDiagnostics', () => {
 
       expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
+          document: expect.objectContaining({
             agents: ['agent-in-regular-policy'],
             type: 'REQUEST_DIAGNOSTICS',
             expiration: expect.anything(),
@@ -53,7 +53,7 @@ describe('requestDiagnostics', () => {
 
       expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
+          document: expect.objectContaining({
             agents: ['agent-in-regular-policy-newer', 'agent-in-regular-policy-newer2'],
             type: 'REQUEST_DIAGNOSTICS',
             expiration: expect.anything(),
@@ -70,7 +70,7 @@ describe('requestDiagnostics', () => {
 
       expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
+          document: expect.objectContaining({
             agents: ['agent-in-regular-policy-newer', 'agent-in-regular-policy'],
             type: 'REQUEST_DIAGNOSTICS',
             expiration: expect.anything(),
