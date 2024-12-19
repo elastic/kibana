@@ -5,8 +5,6 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
-import { flattenObject } from '@kbn/observability-utils-common/object/flatten_object';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { EntitiesSummary } from '../../components/entities_summary';
@@ -28,19 +26,11 @@ export function InventoryPage() {
     query: { kuery },
   } = useInventoryParams('/');
   const { entityTypes } = useInventoryDecodedQueryParams();
-
-  const {
-    value = { groupBy: ENTITY_TYPE, groups: [], entitiesCount: 0 },
-    refresh,
-    loading,
-  } = useInventoryAbortableAsync(
+  const { value, refresh, loading } = useInventoryAbortableAsync(
     ({ signal }) => {
       const { entityTypesOff, entityTypesOn } = groupEntityTypesByStatus(entityTypes);
-      return inventoryAPIClient.fetch('GET /internal/inventory/entities/group_by/{field}', {
+      return inventoryAPIClient.fetch('GET /internal/inventory/entities/types', {
         params: {
-          path: {
-            field: ENTITY_TYPE,
-          },
           query: {
             includeEntityTypes: entityTypesOn.length ? JSON.stringify(entityTypesOn) : undefined,
             excludeEntityTypes: entityTypesOff.length ? JSON.stringify(entityTypesOff) : undefined,
@@ -62,21 +52,23 @@ export function InventoryPage() {
     <>
       <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EntitiesSummary totalEntities={value.entitiesCount} totalGroups={value.groups.length} />
+          <EntitiesSummary
+            totalEntities={value?.totalEntities}
+            totalGroups={value?.entityTypes.length}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <GroupBySelector />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {value.groups.map((group) => {
-        const groupValue = flattenObject(group)[value.groupBy];
+      {value?.entityTypes.map((entityType) => {
         return (
           <EntityGroupAccordion
-            key={`${value.groupBy}-${groupValue}`}
-            groupBy={value.groupBy}
-            groupValue={groupValue}
-            groupCount={group.count}
+            key={`entity.type-${entityType.id}`}
+            groupValue={entityType.id}
+            groupLabel={entityType.display_name}
+            groupCount={entityType.count}
             isLoading={loading}
           />
         );
