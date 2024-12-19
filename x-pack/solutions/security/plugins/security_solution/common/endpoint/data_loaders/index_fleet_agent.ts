@@ -6,13 +6,13 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { FleetServerAgent } from '@kbn/fleet-plugin/common';
+import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import type {
   DeleteByQueryResponse,
   IndexRequest,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { FleetServerAgent } from '@kbn/fleet-plugin/common';
-import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
-import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
+  BulkRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { DeepPartial } from 'utility-types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
@@ -165,7 +165,7 @@ export const indexFleetServerAgent = async (
   const indexRequest: IndexRequest<FleetServerAgent> = {
     index: doc._index,
     id: doc._id,
-    body: doc._source,
+    document: doc._source,
     op_type: 'create',
     refresh: 'wait_for',
   };

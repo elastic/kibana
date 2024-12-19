@@ -6,7 +6,7 @@
  */
 
 import type { TransportResult } from '@elastic/elasticsearch';
-import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   CheckMetadataTransformsTask,
   TYPE,
