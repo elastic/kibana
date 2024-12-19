@@ -477,7 +477,7 @@ return (
 
 2. Allow users to access your objects in the <<managing-saved-objects,Saved Objects Management page>> in <<management>>. You can do this by
    ensuring that your objects are marked as
-   {kib-repo}blob/{branch}/packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts[importable and exportable] in your <<saved-objects-type-registration,saved object type registration>>:
+   {kib-repo}blob/{branch}/src/core/packages/saved-objects/server/src/saved_objects_management.ts[importable and exportable] in your <<saved-objects-type-registration,saved object type registration>>:
 +
 ```ts
 name: 'my-object-type',
