@@ -193,15 +193,6 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       }
     }, []);
 
-    const onSearchKeyup = useCallback(
-      (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-          onSearchChange(search);
-        }
-      },
-      [search]
-    );
-
     return (
       <>
         <EuiFlexItem grow={false}>
@@ -215,7 +206,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
                 placeholder={i18n.SEARCH_PLACEHOLDER}
                 value={search}
                 onChange={onInputChange}
-                onKeyUp={onSearchKeyup}
+                onSearch={onSearchChange}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

@@ -31,12 +31,7 @@ export const getStatusFilter = (
     [MaintenanceWindowStatus.Archived]: '(maintenance-window.attributes.expirationDate < "now")',
   };
 
-  const fullQuery = status
-    ?.slice(1)
-    .reduce(
-      (acc, currentStatusFilter) => acc + ` or ${statusToQueryMapping[currentStatusFilter] || ''}`,
-      statusToQueryMapping[status[0]]
-    );
+  const fullQuery = status.map((status) => statusToQueryMapping[status]).filter(Boolean).join(' or ')
 
   return fullQuery ? fromKueryExpression(fullQuery) : undefined;
 };
