@@ -88,7 +88,7 @@ export async function deleteDataStreams(dataStreams: string[]) {
 }
 
 export async function updateDataRetention(
-  name: string,
+  dataStreams: string[],
   data: {
     dataRetention: string;
     timeUnit: string;
@@ -99,15 +99,15 @@ export async function updateDataRetention(
   let body;
 
   if (!data.dataRetentionEnabled) {
-    body = { enabled: false };
+    body = { enabled: false, dataStreams };
   } else {
     body = data.infiniteRetentionPeriod
-      ? {}
-      : { dataRetention: `${data.dataRetention}${data.timeUnit}` };
+      ? { dataStreams }
+      : { dataRetention: `${data.dataRetention}${data.timeUnit}`, dataStreams };
   }
 
   return sendRequest({
-    path: `${API_BASE_PATH}/data_streams/${encodeURIComponent(name)}/data_retention`,
+    path: `${API_BASE_PATH}/data_streams/data_retention`,
     method: 'put',
     body,
   });
@@ -393,6 +393,16 @@ export async function createEnrichPolicy(
 export async function getMatchingIndices(pattern: string) {
   const result = sendRequest({
     path: `${INTERNAL_API_BASE_PATH}/enrich_policies/get_matching_indices`,
+    method: 'post',
+    body: JSON.stringify({ pattern }),
+  });
+
+  return result;
+}
+
+export async function getMatchingDataStreams(pattern: string) {
+  const result = sendRequest({
+    path: `${INTERNAL_API_BASE_PATH}/enrich_policies/get_matching_data_streams`,
     method: 'post',
     body: JSON.stringify({ pattern }),
   });

@@ -9,7 +9,7 @@ import React, { useEffect, useMemo } from 'react';
 import { unmountComponentAtNode } from 'react-dom';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { apiPublishesTimeRange, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { ActionWrapper } from './action_wrapper';
 import type { CasesActionContextProps, Services } from './types';
 import type { CaseUI } from '../../../../common';
@@ -30,7 +30,9 @@ const AddExistingCaseModalWrapper: React.FC<Props> = ({ lensApi, onClose, onSucc
   });
 
   const timeRange = useStateFromPublishingSubject(lensApi.timeRange$);
-  const parentTimeRange = useStateFromPublishingSubject(lensApi.parentApi?.timeRange$);
+  const parentTimeRange = useStateFromPublishingSubject(
+    apiPublishesTimeRange(lensApi.parentApi) ? lensApi.parentApi?.timeRange$ : undefined
+  );
   const absoluteTimeRange = convertToAbsoluteTimeRange(timeRange);
   const absoluteParentTimeRange = convertToAbsoluteTimeRange(parentTimeRange);
 
@@ -86,7 +88,7 @@ export function openModal(
     >
       <AddExistingCaseModalWrapper lensApi={lensApi} onClose={onClose} onSuccess={onSuccess} />
     </ActionWrapper>,
-    { i18n: services.core.i18n, theme: services.core.theme }
+    services.core
   );
 
   mount(targetDomElement);

@@ -27,6 +27,7 @@ export function k8sPodEntity({
 }) {
   if (schema === 'ecs') {
     return new K8sEntity(schema, {
+      'entity.definition_id': 'pod',
       'entity.type': 'pod',
       'kubernetes.pod.name': name,
       'kubernetes.pod.uid': uid,
@@ -37,6 +38,7 @@ export function k8sPodEntity({
   }
 
   return new K8sEntity(schema, {
+    'entity.definition_id': 'pod',
     'entity.type': 'pod',
     'k8s.pod.name': name,
     'k8s.pod.uid': uid,

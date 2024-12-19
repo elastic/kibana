@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiSpacer, EuiComboBox, EuiFormRow, EuiCallOut, EuiText } from '@elastic/eui';
 
-import { useMappingsState } from '../../../mappings_state_context';
+import { useAppContext } from '../../../../../app_context';
 import { documentationService } from '../../../../../services/documentation';
 import { UseField, FormDataProvider, FormRow, SuperSelectField } from '../../../shared_imports';
 import { ComboBoxOption } from '../../../types';
@@ -24,7 +24,7 @@ import {
 } from './constants';
 
 export const SourceFieldSection = () => {
-  const state = useMappingsState();
+  const { canUseSyntheticSource } = useAppContext();
 
   const renderOptionDropdownDisplay = (option: SourceOptionKey) => (
     <Fragment>
@@ -44,7 +44,7 @@ export const SourceFieldSection = () => {
     },
   ];
 
-  if (state.hasEnterpriseLicense) {
+  if (canUseSyntheticSource) {
     sourceValueOptions.push({
       value: SYNTHETIC_SOURCE_OPTION,
       inputDisplay: sourceOptionLabels[SYNTHETIC_SOURCE_OPTION],

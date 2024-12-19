@@ -9,12 +9,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { ApmDataSourceWithSummary } from '../../../../common/data_source';
 import { ApmDocumentType } from '../../../../common/document_type';
-import { HOST_NAME } from '../../../../common/es_fields/apm';
+import { CONTAINER_ID, HOST_NAME } from '../../../../common/es_fields/apm';
 import { mergeKueries, toKueryFilterFormat } from '../../../../common/utils/kuery_utils';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { FlamegraphChart } from '../../shared/charts/flamegraph';
 import { ProfilingFlamegraphLink } from '../../shared/profiling/flamegraph/flamegraph_link';
-import { HostnamesFilterWarning } from './host_names_filter_warning';
+import { FilterWarning } from './filter_warning';
 
 interface Props {
   serviceName: string;
@@ -60,17 +60,20 @@ export function ProfilingHostsFlamegraph({
     [dataSource, serviceName, start, end, environment, kuery]
   );
 
-  const hostNamesKueryFormat = toKueryFilterFormat(HOST_NAME, data?.hostNames || []);
+  const profilingKueryFilter =
+    data?.containerIds && data.containerIds.length > 0
+      ? toKueryFilterFormat(CONTAINER_ID, data?.containerIds || [])
+      : toKueryFilterFormat(HOST_NAME, data?.hostNames || []);
 
   return (
     <>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <HostnamesFilterWarning hostNames={data?.hostNames} />
+          <FilterWarning containerIds={data?.containerIds} hostNames={data?.hostNames} />
         </EuiFlexItem>
         <EuiFlexItem>
           <ProfilingFlamegraphLink
-            kuery={mergeKueries([`(${hostNamesKueryFormat})`, kuery])}
+            kuery={mergeKueries([`(${profilingKueryFilter})`, kuery])}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
             justifyContent="flexEnd"

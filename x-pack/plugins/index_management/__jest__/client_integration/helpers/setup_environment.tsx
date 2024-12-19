@@ -91,6 +91,12 @@ const appDependencies = {
   overlays: {
     openConfirm: jest.fn(),
   },
+  privs: {
+    monitor: true,
+    manageEnrich: true,
+    monitorEnrich: true,
+    manageIndexTemplates: true,
+  },
 } as any;
 
 export const kibanaVersion = new SemVer(MAJOR_VERSION);

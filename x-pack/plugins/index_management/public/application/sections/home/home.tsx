@@ -41,6 +41,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
 }) => {
   const {
     plugins: { console: consolePlugin },
+    privs,
   } = useAppContext();
   const tabs = [
     {
@@ -65,7 +66,10 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         />
       ),
     },
-    {
+  ];
+
+  if (privs.manageIndexTemplates) {
+    tabs.push({
       id: Section.ComponentTemplates,
       name: (
         <FormattedMessage
@@ -73,8 +77,11 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           defaultMessage="Component Templates"
         />
       ),
-    },
-    {
+    });
+  }
+
+  if (privs.monitorEnrich) {
+    tabs.push({
       id: Section.EnrichPolicies,
       name: (
         <FormattedMessage
@@ -82,8 +89,8 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           defaultMessage="Enrich Policies"
         />
       ),
-    },
-  ];
+    });
+  }
 
   const onSectionChange = (newSection: Section) => {
     history.push(`/${newSection}`);
@@ -135,15 +142,19 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           path={[`/${Section.IndexTemplates}`, `/${Section.IndexTemplates}/:templateName?`]}
           component={TemplateList}
         />
-        <Route
-          exact
-          path={[
-            `/${Section.ComponentTemplates}`,
-            `/${Section.ComponentTemplates}/:componentTemplateName?`,
-          ]}
-          component={ComponentTemplateList}
-        />
-        <Route exact path={`/${Section.EnrichPolicies}`} component={EnrichPoliciesList} />
+        {privs.manageIndexTemplates && (
+          <Route
+            exact
+            path={[
+              `/${Section.ComponentTemplates}`,
+              `/${Section.ComponentTemplates}/:componentTemplateName?`,
+            ]}
+            component={ComponentTemplateList}
+          />
+        )}
+        {privs.monitorEnrich && (
+          <Route exact path={`/${Section.EnrichPolicies}`} component={EnrichPoliciesList} />
+        )}
       </Routes>
       {consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null}
     </>

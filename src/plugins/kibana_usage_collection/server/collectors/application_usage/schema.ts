@@ -137,6 +137,7 @@ export const applicationUsageSchema = {
   enterpriseSearch: commonSchema,
   enterpriseSearchContent: commonSchema,
   searchInferenceEndpoints: commonSchema,
+  searchPlayground: commonSchema,
   enterpriseSearchAnalytics: commonSchema,
   enterpriseSearchApplications: commonSchema,
   enterpriseSearchAISearch: commonSchema,
@@ -183,6 +184,7 @@ export const applicationUsageSchema = {
    */
   siem: commonSchema,
   space_selector: commonSchema,
+  streams: commonSchema,
   uptime: commonSchema,
   synthetics: commonSchema,
   ux: commonSchema,

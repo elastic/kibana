@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, map } from 'rxjs';
+import { map } from 'rxjs';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
@@ -120,24 +120,8 @@ export class SpacesPlugin
 
   private defaultSpaceService?: DefaultSpaceService;
 
-  private onCloud$ = new BehaviorSubject<boolean>(false);
-
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.config$ = combineLatest([
-      initializerContext.config.create<ConfigType>(),
-      this.onCloud$,
-    ]).pipe(
-      map(
-        ([config, onCloud]): ConfigType => ({
-          ...config,
-          // We only allow "solution" to be set on cloud environments, not on prem
-          // unless the forceSolutionVisibility flag is set.
-          allowSolutionVisibility:
-            (onCloud && config.allowSolutionVisibility) ||
-            Boolean(config.experimental?.forceSolutionVisibility),
-        })
-      )
-    );
+    this.config$ = initializerContext.config.create<ConfigType>();
     this.hasOnlyDefaultSpace$ = this.config$.pipe(map(({ maxSpaces }) => maxSpaces === 1));
     this.log = initializerContext.logger.get();
     this.spacesService = new SpacesService();
@@ -148,7 +132,6 @@ export class SpacesPlugin
   }
 
   public setup(core: CoreSetup<PluginsStart>, plugins: PluginsSetup): SpacesPluginSetup {
-    this.onCloud$.next(plugins.cloud !== undefined && plugins.cloud.isCloudEnabled);
     const spacesClientSetup = this.spacesClientService.setup({ config$: this.config$ });
     core.uiSettings.registerGlobal(getUiSettings());
 

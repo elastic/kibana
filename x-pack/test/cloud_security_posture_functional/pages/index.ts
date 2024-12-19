@@ -37,5 +37,6 @@ export default function ({ getPageObjects, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./vulnerabilities_grouping'));
     loadTestFile(require.resolve('./benchmark'));
     loadTestFile(require.resolve('./alerts_flyout'));
+    loadTestFile(require.resolve('./events_flyout'));
   });
 }

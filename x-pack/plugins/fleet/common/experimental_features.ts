@@ -10,7 +10,6 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
 const _allowedExperimentalValues = {
   createPackagePolicyMultiPageLayout: true,
   packageVerification: true,
-  showDevtoolsRequest: true,
   diagnosticFileUploadEnabled: true,
   displayAgentMetrics: true,
   showIntegrationsSubcategories: true,
@@ -21,14 +20,13 @@ const _allowedExperimentalValues = {
   kafkaOutput: true,
   outputSecretsStorage: true,
   remoteESOutput: true,
-  agentless: false,
   enableStrictKQLValidation: true,
-  subfeaturePrivileges: false,
+  subfeaturePrivileges: true,
   advancedPolicySettings: true,
   useSpaceAwareness: false,
   enableReusableIntegrationPolicies: true,
   asyncDeployPolicies: true,
-  enableExportCSV: false,
+  enableExportCSV: true,
 };
 
 /**

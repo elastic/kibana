@@ -74,7 +74,7 @@ export const TriggerPicker: React.FC<TriggerPickerProps> = ({
           </EuiText>
         ),
       }}
-      style={{ maxWidth: `80%` }}
+      css={{ maxWidth: `80%` }}
     >
       {items.map((trigger) => (
         <TriggerPickerItem

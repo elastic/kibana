@@ -11,7 +11,7 @@ import { ApmMetric } from '../metrics';
 import { apmAggResponseHandler, apmUuidsAgg, apmAggFilterPath } from './_apm_stats';
 import { getTimeOfLastEvent } from './_get_time_of_last_event';
 import { ElasticsearchResponse } from '../../../common/types/es';
-import { getIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 
 export function handleResponse(clusterUuid: string, response: ElasticsearchResponse) {

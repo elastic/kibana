@@ -72,19 +72,20 @@ export function registerAssistantFunctions({
       ruleDataClient,
       plugins,
       getApmIndices: async () => {
-        const apmIndices = await plugins.apmDataAccess.setup.getApmIndices();
+        const coreContext = await resources.context.core;
+        const apmIndices = await plugins.apmDataAccess.setup.getApmIndices(
+          coreContext.savedObjects.client
+        );
         return apmIndices;
       },
     };
 
-    const {
-      request,
-      plugins: { security },
-    } = apmRouteHandlerResources;
+    const { request, core } = apmRouteHandlerResources;
 
+    const coreStart = await core.start();
     const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(apmRouteHandlerResources),
-      getRandomSampler({ security, request, probability: 1 }),
+      getRandomSampler({ coreStart, request, probability: 1 }),
     ]);
 
     const hasData = await hasHistoricalAgentData(apmEventClient);

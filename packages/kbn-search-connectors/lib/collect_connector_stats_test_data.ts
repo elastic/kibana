@@ -29,7 +29,7 @@ export const spoConnector: Connector = {
   last_indexed_document_count: 1000,
   pipeline: {
     extract_binary_content: false,
-    name: 'ent-search-generic-ingestion',
+    name: 'search-default-ingestion',
     reduce_whitespace: true,
     run_ml_inference: false,
   },
@@ -99,7 +99,7 @@ export const mysqlConnector: Connector = {
   last_indexed_document_count: 2000,
   pipeline: {
     extract_binary_content: true,
-    name: 'ent-search-generic-ingestion',
+    name: 'search-default-ingestion',
     reduce_whitespace: true,
     run_ml_inference: false,
   },

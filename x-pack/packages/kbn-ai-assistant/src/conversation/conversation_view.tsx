@@ -6,7 +6,6 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
@@ -105,7 +104,7 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
   const conversationListContainerName = css`
     min-width: 250px;
     width: 250px;
-    border-right: solid 1px ${euiThemeVars.euiColorLightShade};
+    border-right: solid 1px ${euiTheme.border.color};
   `;
 
   const sidebarContainerClass = css`
@@ -117,8 +116,8 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
     height: calc(100% - 56px);
     background-color: ${euiTheme.colors.lightestShade};
     width: ${isSecondSlotVisible ? SECOND_SLOT_CONTAINER_WIDTH : 0}px;
-    border-top: solid 1px ${euiThemeVars.euiColorLightShade};
-    border-left: solid 1px ${euiThemeVars.euiColorLightShade};
+    border-top: solid 1px ${euiTheme.border.color};
+    border-left: solid 1px ${euiTheme.border.color};
 
     .euiFlyoutHeader {
       padding: ${euiTheme.size.m};

@@ -13,11 +13,9 @@ import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
-import { isLegacyTableEnabled } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
-import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 
 async function saveDataSource({
   savedSearch,
@@ -37,7 +35,7 @@ async function saveDataSource({
     if (id) {
       services.toastNotifications.addSuccess({
         title: i18n.translate('discover.notifications.savedSearchTitle', {
-          defaultMessage: `Search ''{savedSearchTitle}'' was saved`,
+          defaultMessage: `Discover session ''{savedSearchTitle}'' was saved`,
           values: {
             savedSearchTitle: savedSearch.title,
           },
@@ -58,7 +56,7 @@ async function saveDataSource({
   function onError(error: Error) {
     services.toastNotifications.addDanger({
       title: i18n.translate('discover.notifications.notSavedSearchTitle', {
-        defaultMessage: `Search ''{savedSearchTitle}'' was not saved.`,
+        defaultMessage: `Discover session ''{savedSearchTitle}'' was not saved.`,
         values: {
           savedSearchTitle: savedSearch.title,
         },
@@ -127,12 +125,7 @@ export async function onSaveSearch({
     savedSearch.title = newTitle;
     savedSearch.description = newDescription;
     savedSearch.timeRestore = newTimeRestore;
-    savedSearch.rowsPerPage = isLegacyTableEnabled({
-      uiSettings,
-      isEsqlMode: isDataSourceType(appState.dataSource, DataSourceType.Esql),
-    })
-      ? currentRowsPerPage
-      : appState.rowsPerPage;
+    savedSearch.rowsPerPage = appState.rowsPerPage;
 
     // save the custom value or reset it if it's invalid
     const appStateSampleSize = appState.sampleSize;
@@ -273,7 +266,7 @@ const SaveSearchObjectModal: React.FC<{
         label={
           <FormattedMessage
             id="discover.topNav.saveModal.storeTimeWithSearchToggleLabel"
-            defaultMessage="Store time with saved search"
+            defaultMessage="Store time with Discover session"
           />
         }
       />
@@ -296,7 +289,7 @@ const SaveSearchObjectModal: React.FC<{
       initialCopyOnSave={initialCopyOnSave}
       description={description}
       objectType={i18n.translate('discover.localMenu.saveSaveSearchObjectType', {
-        defaultMessage: 'search',
+        defaultMessage: 'Discover session',
       })}
       showDescription={true}
       options={options}
@@ -306,7 +299,7 @@ const SaveSearchObjectModal: React.FC<{
         managed
           ? i18n.translate('discover.localMenu.mustCopyOnSave', {
               defaultMessage:
-                'Elastic manages this saved search. Save any changes to a new saved search.',
+                'Elastic manages this Discover session. Save any changes to a new Discover session.',
             })
           : undefined
       }

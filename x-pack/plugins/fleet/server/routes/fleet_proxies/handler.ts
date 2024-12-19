@@ -31,6 +31,7 @@ import type {
   DownloadSource,
 } from '../../types';
 import { agentPolicyService } from '../../services';
+import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 } from '../../constants';
 
 async function bumpRelatedPolicies(
   soClient: SavedObjectsClientContract,
@@ -49,7 +50,7 @@ async function bumpRelatedPolicies(
       outputs,
       (output) => agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id),
       {
-        concurrency: 20,
+        concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
       }
     );
     await pMap(
@@ -57,7 +58,7 @@ async function bumpRelatedPolicies(
       (fleetServerHost) =>
         agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, fleetServerHost.id),
       {
-        concurrency: 20,
+        concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
       }
     );
 
@@ -66,7 +67,7 @@ async function bumpRelatedPolicies(
       (downloadSource) =>
         agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, downloadSource.id),
       {
-        concurrency: 20,
+        concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
       }
     );
   }

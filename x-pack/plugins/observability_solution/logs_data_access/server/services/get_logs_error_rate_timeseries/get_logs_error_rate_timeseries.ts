@@ -138,7 +138,7 @@ export function createGetLogErrorRateTimeseries() {
             const totalErrorsCount = logErrorCount + errorLogLevelErrorsCount;
             return {
               x: timeseriesBucket.key,
-              y: totalErrorsCount,
+              y: totalErrorsCount / (intervalString / 60),
             };
           });
 

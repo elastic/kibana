@@ -41,11 +41,12 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
 
       try {
         const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
+        const hasApmPrivileges = await apmDataAccessClient.hasPrivileges();
 
         const [infraMetricsClient, alertsClient, apmDataAccessServices] = await Promise.all([
           getInfraMetricsClient({ request, libs, context }),
           getInfraAlertsClient({ libs, request }),
-          apmDataAccessClient.getServices(),
+          hasApmPrivileges ? apmDataAccessClient.getServices() : undefined,
         ]);
 
         const hosts = await getHosts({
@@ -96,10 +97,11 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
 
       try {
         const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
+        const hasApmPrivileges = await apmDataAccessClient.hasPrivileges();
 
         const [infraMetricsClient, apmDataAccessServices] = await Promise.all([
           getInfraMetricsClient({ request, libs, context }),
-          apmDataAccessClient.getServices(),
+          hasApmPrivileges ? apmDataAccessClient.getServices() : undefined,
         ]);
 
         const count = await getHostsCount({

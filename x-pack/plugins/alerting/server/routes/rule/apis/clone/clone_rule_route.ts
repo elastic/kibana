@@ -17,6 +17,7 @@ import {
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { Rule } from '../../../../application/rule/types';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const cloneRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -25,6 +26,7 @@ export const cloneRuleRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_clone/{newId?}`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
         params: cloneRuleRequestParamsSchemaV1,
@@ -33,7 +35,8 @@ export const cloneRuleRoute = (
     handleDisabledApiKeysError(
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
-          const rulesClient = (await context.alerting).getRulesClient();
+          const alertingContext = await context.alerting;
+          const rulesClient = await alertingContext.getRulesClient();
           const params: CloneRuleRequestParamsV1 = req.params;
           try {
             // TODO (http-versioning): Remove this cast, this enables us to move forward

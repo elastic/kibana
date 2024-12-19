@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+
 import {
   ALERT_INSTANCE_ID,
   ALERT_RULE_UUID,
@@ -18,6 +19,8 @@ import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { DeepPartial } from '@kbn/utility-types';
+import { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import { CLUSTER_BLOCK_EXCEPTION, isClusterBlockError } from '../lib/error_with_type';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
   SummarizedAlerts,
@@ -65,6 +68,7 @@ import {
   filterMaintenanceWindows,
   filterMaintenanceWindowsIds,
 } from '../task_runner/maintenance_windows';
+import { ErrorWithType } from '../lib/error_with_type';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -73,12 +77,14 @@ export interface AlertsClientParams extends CreateAlertsClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   kibanaVersion: string;
   dataStreamAdapter: DataStreamAdapter;
+  isServerless: boolean;
 }
 
 interface AlertsAffectedByMaintenanceWindows {
   alertIds: string[];
   maintenanceWindowIds: string[];
 }
+
 export class AlertsClient<
   AlertData extends RuleAlertData,
   LegacyState extends AlertInstanceState,
@@ -109,6 +115,7 @@ export class AlertsClient<
   private runTimestampString: string | undefined;
   private rule: AlertRule;
   private ruleType: UntypedNormalizedRuleType;
+  private readonly isServerless: boolean;
 
   private indexTemplateAndPattern: IIndexPatternString;
 
@@ -143,6 +150,7 @@ export class AlertsClient<
     this._isUsingDataStreams = this.options.dataStreamAdapter.isUsingDataStreams();
     this.ruleInfoMessage = `for ${this.ruleType.id}:${this.options.rule.id} '${this.options.rule.name}'`;
     this.logTags = { tags: [this.ruleType.id, this.options.rule.id, 'alerts-client'] };
+    this.isServerless = options.isServerless;
   }
 
   public async initializeExecution(opts: InitializeExecutionOpts) {
@@ -555,7 +563,9 @@ export class AlertsClient<
 
       try {
         const response = await esClient.bulk({
-          refresh: true,
+          // On serverless we can force a refresh to we don't wait for the longer refresh interval
+          // When too many refresh calls are done in a short period of time, they are throttled by stateless Elasticsearch
+          refresh: this.isServerless ? true : 'wait_for',
           index: this.indexTemplateAndPattern.alias,
           require_alias: !this.isUsingDataStreams(),
           body: bulkBody,
@@ -563,6 +573,8 @@ export class AlertsClient<
 
         // If there were individual indexing errors, they will be returned in the success response
         if (response && response.errors) {
+          this.throwIfHasClusterBlockException(response);
+
           await resolveAlertConflicts({
             logger: this.options.logger,
             esClient,
@@ -579,6 +591,9 @@ export class AlertsClient<
           });
         }
       } catch (err) {
+        if (isClusterBlockError(err)) {
+          throw err;
+        }
         this.options.logger.error(
           `Error writing ${alertsToIndex.length} alerts to ${this.indexTemplateAndPattern.alias} ${this.ruleInfoMessage} - ${err.message}`,
           this.logTags
@@ -807,5 +822,18 @@ export class AlertsClient<
 
   public isUsingDataStreams(): boolean {
     return this._isUsingDataStreams;
+  }
+
+  private throwIfHasClusterBlockException(response: BulkResponse) {
+    response.items.forEach((item) => {
+      const op = item.create || item.index || item.update || item.delete;
+      if (op?.error && op.error.type === CLUSTER_BLOCK_EXCEPTION) {
+        throw new ErrorWithType({
+          message: op.error.reason || 'Unknown reason',
+          type: CLUSTER_BLOCK_EXCEPTION,
+          stack: op.error.stack_trace,
+        });
+      }
+    });
   }
 }

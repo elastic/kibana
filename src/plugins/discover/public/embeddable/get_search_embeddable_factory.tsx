@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   FetchContext,
+  getUnchangingComparator,
   initializeTimeRange,
   initializeTitles,
   useBatchedPublishingSubjects,
@@ -37,6 +38,7 @@ import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import {
+  NonPersistedDisplayOptions,
   SearchEmbeddableApi,
   SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedState,
@@ -83,6 +85,11 @@ export const getSearchEmbeddableFactory = ({
       const defaultPanelDescription$ = new BehaviorSubject<string | undefined>(
         initialState?.savedObjectDescription
       );
+
+      /** By-value SavedSearchComponent package (non-dashboard contexts) state, to adhere to the comparator contract of an embeddable. */
+      const nonPersistedDisplayOptions$ = new BehaviorSubject<
+        NonPersistedDisplayOptions | undefined
+      >(initialState?.nonPersistedDisplayOptions);
 
       /** All other state */
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -145,7 +152,7 @@ export const getSearchEmbeddableFactory = ({
           },
           getTypeDisplayName: () =>
             i18n.translate('discover.embeddable.search.displayName', {
-              defaultMessage: 'search',
+              defaultMessage: 'Discover session',
             }),
           canLinkToLibrary: async () => {
             return (
@@ -180,7 +187,7 @@ export const getSearchEmbeddableFactory = ({
             defaultPanelTitle$.next(undefined);
             defaultPanelDescription$.next(undefined);
           },
-          serializeState: async () =>
+          serializeState: () =>
             serializeState({
               uuid,
               initialState,
@@ -188,18 +195,23 @@ export const getSearchEmbeddableFactory = ({
               serializeTitles,
               serializeTimeRange: timeRange.serialize,
               savedObjectId: savedObjectId$.getValue(),
-              discoverServices,
             }),
+          getInspectorAdapters: () => searchEmbeddable.stateManager.inspectorAdapters.getValue(),
         },
         {
           ...titleComparators,
           ...timeRange.comparators,
           ...searchEmbeddable.comparators,
+          rawSavedObjectAttributes: getUnchangingComparator(),
           savedObjectId: [savedObjectId$, (value) => savedObjectId$.next(value)],
           savedObjectTitle: [defaultPanelTitle$, (value) => defaultPanelTitle$.next(value)],
           savedObjectDescription: [
             defaultPanelDescription$,
             (value) => defaultPanelDescription$.next(value),
+          ],
+          nonPersistedDisplayOptions: [
+            nonPersistedDisplayOptions$,
+            (value) => nonPersistedDisplayOptions$.next(value),
           ],
         }
       );
@@ -304,7 +316,18 @@ export const getSearchEmbeddableFactory = ({
                       <SearchEmbeddableGridComponent
                         api={{ ...api, fetchWarnings$, fetchContext$ }}
                         dataView={dataView!}
-                        onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
+                        onAddFilter={
+                          isEsqlMode(savedSearch) ||
+                          initialState.nonPersistedDisplayOptions?.enableFilters === false
+                            ? undefined
+                            : onAddFilter
+                        }
+                        enableDocumentViewer={
+                          initialState.nonPersistedDisplayOptions?.enableDocumentViewer !==
+                          undefined
+                            ? initialState.nonPersistedDisplayOptions?.enableDocumentViewer
+                            : true
+                        }
                         stateManager={searchEmbeddable.stateManager}
                       />
                     </CellActionsProvider>

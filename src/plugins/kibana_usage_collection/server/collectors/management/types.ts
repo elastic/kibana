@@ -30,9 +30,7 @@ export interface UsageStats {
   'autocomplete:valueSuggestionMethod': string;
   'search:timeout': number;
   'visualization:visualize:legacyHeatmapChartsLibrary': boolean;
-  'doc_table:legacy': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
-  'discover:searchFieldsFromSource': boolean;
   'discover:showFieldStatistics': boolean;
   'discover:showMultiFields': boolean;
   enableESQL: boolean;
@@ -53,7 +51,6 @@ export interface UsageStats {
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
   'observability:logsExplorer:allowedDataViews': string[];
   'observability:logSources': string[];
-  'observability:enableLogsStream': boolean;
   'observability:newLogsOverview': boolean;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
@@ -101,7 +98,6 @@ export interface UsageStats {
   'fileUpload:maxFileSize': string;
   'ml:anomalyDetection:results:enableTimeDefaults': boolean;
   'ml:anomalyDetection:results:timeDefaults': string;
-  'truncate:maxHeight': number;
   'timepicker:timeDefaults': string;
   'timepicker:refreshIntervalDefaults': string;
   'timepicker:quickRanges': string;

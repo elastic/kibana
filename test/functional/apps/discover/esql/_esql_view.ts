@@ -383,6 +383,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
           await testSubjects.click('querySubmitButton');
           await header.waitUntilLoadingHasFinished();
+          // for some reason the chart query is taking a very long time to return (3x the delay)
+          // so wait for the chart to be loaded
+          await discover.waitForChartLoadingComplete(1);
           await browser.execute(() => {
             window.ELASTIC_ESQL_DELAY_SECONDS = undefined;
           });

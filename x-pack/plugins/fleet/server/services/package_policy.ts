@@ -100,6 +100,11 @@ import type {
 } from '../types';
 import type { ExternalCallback } from '..';
 
+import {
+  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
+  MAX_CONCURRENT_PACKAGE_ASSETS,
+} from '../constants';
+
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 
 import type { FleetAuthzRouteConfig } from './security';
@@ -178,7 +183,7 @@ async function getPkgInfoAssetsMap({
         pkgInfo,
       });
     },
-    { concurrency: 5 }
+    { concurrency: MAX_CONCURRENT_PACKAGE_ASSETS }
   );
 
   return packageInfosandAssetsMap;
@@ -1929,6 +1934,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           output_id: newPolicy.output_id,
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,
+          supports_agentless: newPolicy.supports_agentless,
         };
       }
     }
@@ -2210,7 +2216,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           }
         },
         {
-          concurrency: 50,
+          concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
         }
       );
       await pMap(
@@ -2230,7 +2236,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           );
         },
         {
-          concurrency: 50,
+          concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
         }
       );
     }

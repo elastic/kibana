@@ -75,7 +75,7 @@ export function initializeEditApi<
   return {
     getTypeDisplayName: () =>
       i18n.translate('discover.embeddable.search.displayName', {
-        defaultMessage: 'search',
+        defaultMessage: 'Discover session',
       }),
     onEdit: async () => {
       const appTarget = await getAppTarget(partialApi, discoverServices);

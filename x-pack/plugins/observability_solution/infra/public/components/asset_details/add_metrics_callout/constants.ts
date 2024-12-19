@@ -62,7 +62,7 @@ const containerDefaultActions = (
   return {
     actions: {
       primary: {
-        href: locator?.getRedirectUrl({ category: OnboardingFlow.Infra }),
+        href: locator?.getRedirectUrl({ category: OnboardingFlow.Hosts }),
         label: defaultPrimaryActionLabel,
       },
       link: {

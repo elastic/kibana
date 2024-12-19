@@ -15,7 +15,7 @@ import {
   PersistableStateService,
   VersionedState,
 } from '@kbn/kibana-utils-plugin/common';
-import type { FormatSearchParamsOptions } from './redirect';
+import type { GetRedirectUrlOptions } from './redirect';
 
 /**
  * URL locator registry.
@@ -88,7 +88,7 @@ export interface LocatorPublic<P extends SerializableRecord> extends Persistable
    * @param params URL locator parameters.
    * @param options URL serialization options.
    */
-  getRedirectUrl(params: P, options?: FormatSearchParamsOptions): string;
+  getRedirectUrl(params: P, options?: GetRedirectUrlOptions): string;
 
   /**
    * Navigate using the `core.application.navigateToApp()` method to a Kibana

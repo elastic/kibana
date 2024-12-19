@@ -5,7 +5,7 @@ exports[`FieldFormatEditor should render normally 1`] = `
   <Suspense
     fallback={
       <div
-        style={
+        css={
           Object {
             "marginTop": 8,
             "minHeight": 430,
@@ -38,7 +38,7 @@ exports[`FieldFormatEditor should render nothing if there is no editor for the f
   <Suspense
     fallback={
       <div
-        style={
+        css={
           Object {
             "marginTop": 8,
             "minHeight": 430,

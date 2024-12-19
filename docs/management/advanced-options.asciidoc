@@ -187,7 +187,7 @@ this setting stores part of the URL in your browser session to keep the URL
 short.
 
 [[theme-darkmode]]`theme:darkMode`::
-The UI theme that the {kib} UI should use.
+deprecated:[9.0.0] The UI theme that the {kib} UI should use.
 Set to `enabled` or `disabled` to enable or disable the dark theme.
 Set to `system` to have the {kib} UI theme follow the system theme.
 You must refresh the page to apply the setting.
@@ -207,10 +207,6 @@ The default refresh interval for the time filter. Example:
 
 [[timepicker-timedefaults]]`timepicker:timeDefaults`::
 The default selection in the time filter.
-
-[[truncate-maxheight]]`truncate:maxHeight`::
-deprecated:[8.16.0]The maximum height that a cell occupies in a table. Set to 0 to disable
-truncation.
 
 [[enableESQL]]`enableESQL`::
 This setting enables ES|QL in Kibana.
@@ -313,15 +309,9 @@ Limits the number of rows per page in the document table.
 [[discover-sample-size]]`discover:sampleSize`::
 Sets the maximum number of rows for the entire document table. This is the maximum number of documents fetched from {es}.
 
-[[discover-searchFieldsFromSource]]`discover:searchFieldsFromSource`::
-deprecated:[8.15.0]
-Load fields from the original JSON {ref}/mapping-source-field.html[`_source`].
-When disabled, *Discover* loads fields using the {es} search API's
-{ref}/search-fields.html#search-fields-param[`fields`] parameter.
-
 [[discover-searchonpageload]]`discover:searchOnPageLoad`::
 Controls whether a search is executed when *Discover* first loads. This setting
-does not have an effect when loading a saved search.
+does not have an effect when loading a saved Discover session.
 
 [[discover:showFieldStatistics]]`discover:showFieldStatistics`::
 beta[] Enables the Field statistics view. Examine details such as
@@ -334,19 +324,11 @@ Controls the display of multi-fields in the expanded document view.
 The default sort direction for time-based data views.
 
 [[doctable-hidetimecolumn]]`doc_table:hideTimeColumn`::
-Hides the "Time" column in *Discover* and in all saved searches on dashboards.
+Hides the "Time" column in *Discover* and in all Discover session panels on dashboards.
 
 [[doctable-highlight]]`doc_table:highlight`::
-Highlights results in *Discover* and saved searches on dashboards. Highlighting
+Highlights search results in *Discover* and Discover session panels on dashboards. Highlighting
 slows requests when working on big documents.
-
-[[doctable-legacy]]`doc_table:legacy`::
-deprecated:[8.15.0] Controls the way the document table looks and works.
-To use the new *Document Explorer* instead of the classic view, turn off this option.
-The *Document Explorer* offers better data sorting, resizable columns, and a full screen view.
-
-[[truncate-max-height]]`truncate:maxHeight`::
-The maximum height that a cell in a table can occupy. To disable truncation, set to 0.
 
 
 [float]

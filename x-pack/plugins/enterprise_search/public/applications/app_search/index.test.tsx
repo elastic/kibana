@@ -16,7 +16,6 @@ import { Redirect } from 'react-router-dom';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { VersionMismatchPage } from '../shared/version_mismatch';
 import { rerender } from '../test_helpers';
 
 jest.mock('./app_logic', () => ({ AppLogic: jest.fn() }));
@@ -26,7 +25,6 @@ import { Credentials } from './components/credentials';
 import { EngineRouter } from './components/engine';
 import { EngineCreation } from './components/engine_creation';
 import { EnginesOverview } from './components/engines';
-import { ErrorConnecting } from './components/error_connecting';
 import { Library } from './components/library';
 import { MetaEngineCreation } from './components/meta_engine_creation';
 import { RoleMappings } from './components/role_mappings';
@@ -42,25 +40,11 @@ describe('AppSearch', () => {
     expect(wrapper.find(SetupGuide)).toHaveLength(1);
   });
 
-  it('renders VersionMismatchPage when there are mismatching versions', () => {
-    const wrapper = shallow(<AppSearch enterpriseSearchVersion="7.15.0" kibanaVersion="7.16.0" />);
-
-    expect(wrapper.find(VersionMismatchPage)).toHaveLength(1);
-  });
-
   it('renders AppSearchUnconfigured when config.host is not set', () => {
     setMockValues({ config: { host: '' } });
     const wrapper = shallow(<AppSearch />);
 
     expect(wrapper.find(AppSearchUnconfigured)).toHaveLength(1);
-  });
-
-  it('renders ErrorConnecting when Enterprise Search is unavailable', () => {
-    setMockValues({ errorConnectingMessage: '502 Bad Gateway' });
-    const wrapper = shallow(<AppSearch />);
-
-    const errorConnection = wrapper.find(ErrorConnecting);
-    expect(errorConnection).toHaveLength(1);
   });
 
   it('renders AppSearchConfigured when config.host is set & available', () => {

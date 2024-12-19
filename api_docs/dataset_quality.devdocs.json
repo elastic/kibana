@@ -311,6 +311,24 @@
           "DatasetQualityRouteHandlerResources",
           ", { isFieldLimitIssue: boolean; fieldCount: number; totalFieldLimit: number; } & { ignoreMalformed?: boolean | undefined; nestedFieldLimit?: number | undefined; fieldMapping?: { type?: string | undefined; ignore_above?: number | undefined; } | undefined; defaultPipeline?: string | undefined; }, ",
           "DatasetQualityRouteCreateOptions",
+          ">; \"GET /internal/dataset_quality/data_streams/{dataStream}/integration/check\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/dataset_quality/data_streams/{dataStream}/integration/check\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ dataStream: ",
+          "StringC",
+          "; }>; }>, ",
+          "DatasetQualityRouteHandlerResources",
+          ", { isIntegration: false; areAssetsAvailable: boolean; } | { isIntegration: true; areAssetsAvailable: true; integration: { name: string; } & { title?: string | undefined; version?: string | undefined; icons?: ({ src: string; } & { path?: string | undefined; size?: string | undefined; title?: string | undefined; type?: string | undefined; })[] | undefined; datasets?: { [x: string]: string; } | undefined; }; }, ",
+          "DatasetQualityRouteCreateOptions",
           ">; \"GET /internal/dataset_quality/data_streams/{dataStream}/settings\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -561,7 +579,7 @@
             "section": "def-common.ServerRouteCreateOptions",
             "text": "ServerRouteCreateOptions"
           },
-          "> ? TRouteParamsRT extends ",
+          " | undefined> ? TRouteParamsRT extends ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -677,6 +695,24 @@
           "; }>; }>, ",
           "DatasetQualityRouteHandlerResources",
           ", { isFieldLimitIssue: boolean; fieldCount: number; totalFieldLimit: number; } & { ignoreMalformed?: boolean | undefined; nestedFieldLimit?: number | undefined; fieldMapping?: { type?: string | undefined; ignore_above?: number | undefined; } | undefined; defaultPipeline?: string | undefined; }, ",
+          "DatasetQualityRouteCreateOptions",
+          ">; \"GET /internal/dataset_quality/data_streams/{dataStream}/integration/check\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/dataset_quality/data_streams/{dataStream}/integration/check\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ dataStream: ",
+          "StringC",
+          "; }>; }>, ",
+          "DatasetQualityRouteHandlerResources",
+          ", { isIntegration: false; areAssetsAvailable: boolean; } | { isIntegration: true; areAssetsAvailable: true; integration: { name: string; } & { title?: string | undefined; version?: string | undefined; icons?: ({ src: string; } & { path?: string | undefined; size?: string | undefined; title?: string | undefined; type?: string | undefined; })[] | undefined; datasets?: { [x: string]: string; } | undefined; }; }, ",
           "DatasetQualityRouteCreateOptions",
           ">; \"GET /internal/dataset_quality/data_streams/{dataStream}/settings\": ",
           {
@@ -912,15 +948,7 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<any, any, any, infer TReturnType extends ServerRouteHandlerReturnType, ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRouteCreateOptions",
-            "text": "ServerRouteCreateOptions"
-          },
-          "> ? TReturnType extends ",
+          "<any, any, any, infer TReturnType extends ServerRouteHandlerReturnType, any> ? TReturnType extends ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",

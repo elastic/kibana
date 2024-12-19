@@ -12,11 +12,18 @@ import React, { SyntheticEvent } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext, HasUniqueId } from '@kbn/presentation-publishing';
-import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
+import {
+  IncompatibleActionError,
+  FrequentCompatibilityChangeAction,
+  type Action,
+} from '@kbn/ui-actions-plugin/public';
+import { isClearableControl } from '../types';
 
 import { ACTION_CLEAR_CONTROL } from '.';
 
-export class ClearControlAction implements Action<EmbeddableApiContext> {
+export class ClearControlAction
+  implements Action<EmbeddableApiContext>, FrequentCompatibilityChangeAction<EmbeddableApiContext>
+{
   public readonly type = ACTION_CLEAR_CONTROL;
   public readonly id = ACTION_CLEAR_CONTROL;
   public order = 1;
@@ -48,6 +55,21 @@ export class ClearControlAction implements Action<EmbeddableApiContext> {
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
     return 'eraser';
+  }
+
+  public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
+    return isClearableControl(embeddable);
+  }
+
+  public subscribeToCompatibilityChanges(
+    { embeddable }: EmbeddableApiContext,
+    onChange: (isCompatible: boolean, action: ClearControlAction) => void
+  ) {
+    if (!isClearableControl(embeddable)) return;
+
+    return embeddable.hasSelections$.subscribe((selection) => {
+      onChange(Boolean(selection), this);
+    });
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {

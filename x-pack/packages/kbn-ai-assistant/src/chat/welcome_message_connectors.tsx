@@ -15,9 +15,10 @@ import {
   EuiSpacer,
   EuiText,
   EuiIconTip,
+  useEuiTheme,
+  euiCanAnimate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 
@@ -30,10 +31,6 @@ const fadeInAnimation = keyframes`
   }
 `;
 
-const fadeInClassName = css`
-  animation: ${fadeInAnimation} ${euiThemeVars.euiAnimSpeedNormal} ease-in-out;
-`;
-
 export function WelcomeMessageConnectors({
   connectors,
   onSetupConnectorClick,
@@ -41,6 +38,14 @@ export function WelcomeMessageConnectors({
   connectors: UseGenAIConnectorsResult;
   onSetupConnectorClick?: () => void;
 }) {
+  const { euiTheme } = useEuiTheme();
+
+  const fadeInClassName = css`
+    ${euiCanAnimate} {
+      animation: ${fadeInAnimation} ${euiTheme.animation.normal} ease-in-out;
+    }
+  `;
+
   if (connectors.error) {
     const isForbiddenError =
       isHttpFetchError(connectors.error) &&

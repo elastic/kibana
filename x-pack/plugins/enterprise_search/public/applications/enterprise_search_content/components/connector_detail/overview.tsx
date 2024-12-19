@@ -95,7 +95,7 @@ export const ConnectorDetailOverview: React.FC = () => {
         <>
           <EuiCallOut
             iconType="iInCircle"
-            color="danger"
+            color="warning"
             title={i18n.translate(
               'xpack.enterpriseSearch.content.connectors.overview.connectorNoIndexCallOut.title',
               {
@@ -115,7 +115,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             </EuiText>
             <EuiSpacer />
             <EuiButtonTo
-              color="danger"
+              color="warning"
               fill
               to={`${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
                 connectorId: connector.id,

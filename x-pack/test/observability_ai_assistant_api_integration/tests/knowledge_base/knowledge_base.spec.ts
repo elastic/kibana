@@ -15,6 +15,7 @@ import {
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
 } from './helpers';
+import { ForbiddenApiError } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
@@ -208,6 +209,62 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const entries = await getEntries({ query: 'b' });
         expect(entries.length).to.eql(1);
         expect(entries[0].title).to.eql('My title b');
+      });
+    });
+
+    describe('security roles and access privileges', () => {
+      describe('should deny access for users without the ai_assistant privilege', () => {
+        it('POST /internal/observability_ai_assistant/kb/entries/save', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
+              params: {
+                body: {
+                  id: 'my-doc-id-1',
+                  title: 'My title',
+                  text: 'My content',
+                },
+              },
+            });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
+        });
+
+        it('GET /internal/observability_ai_assistant/kb/entries', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
+              params: {
+                query: { query: '', sortBy: 'title', sortDirection: 'asc' },
+              },
+            });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
+        });
+
+        it('DELETE /internal/observability_ai_assistant/kb/entries/{entryId}', async () => {
+          try {
+            await observabilityAIAssistantAPIClient.unauthorizedUser({
+              endpoint: 'DELETE /internal/observability_ai_assistant/kb/entries/{entryId}',
+              params: {
+                path: { entryId: 'my-doc-id-1' },
+              },
+            });
+            throw new ForbiddenApiError(
+              'Expected unauthorizedUser() to throw a 403 Forbidden error'
+            );
+          } catch (e) {
+            expect(e.status).to.be(403);
+          }
+        });
       });
     });
   });

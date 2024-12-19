@@ -8,7 +8,7 @@
 import { EnterpriseSearchMetric, EnterpriseSearchMetricFields } from '../metrics';
 import { createQuery } from '../create_query';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
-import { getEntsearchDataset } from '../cluster/get_index_patterns';
+import { getEntsearchDataset } from '../../../common/get_index_patterns';
 
 /**
  * {@code createQuery} for all Enterprise Search instances.

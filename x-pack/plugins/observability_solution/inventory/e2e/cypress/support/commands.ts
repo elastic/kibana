@@ -27,23 +27,45 @@ Cypress.Commands.add('loginAsSuperUser', () => {
 Cypress.Commands.add(
   'loginAs',
   ({ username, password }: { username: string; password: string }) => {
-    const kibanaUrl = Cypress.env('KIBANA_URL');
-    cy.log(`Logging in as ${username} on ${kibanaUrl}`);
-    cy.visit('/');
-    cy.request({
-      log: true,
-      method: 'POST',
-      url: `${kibanaUrl}/internal/security/login`,
-      body: {
-        providerType: 'basic',
-        providerName: 'basic',
-        currentURL: `${kibanaUrl}/login`,
-        params: { username, password },
+    cy.session(
+      username,
+      () => {
+        const kibanaUrl = Cypress.env('KIBANA_URL');
+        cy.log(`Logging in as ${username} on ${kibanaUrl}`);
+        cy.visit('/');
+        cy.request({
+          log: true,
+          method: 'POST',
+          url: `${kibanaUrl}/internal/security/login`,
+          body: {
+            providerType: 'basic',
+            providerName: 'basic',
+            currentURL: `${kibanaUrl}/login`,
+            params: { username, password },
+          },
+          headers: {
+            'kbn-xsrf': 'e2e_test',
+          },
+        });
+        cy.visit('/');
       },
-      headers: {
-        'kbn-xsrf': 'e2e_test',
-      },
-    });
-    cy.visit('/');
+      {
+        cacheAcrossSpecs: true,
+      }
+    );
   }
 );
+
+Cypress.Commands.add('updateAdvancedSettings', (settings: Record<string, unknown>) => {
+  const kibanaUrl = Cypress.env('KIBANA_URL');
+  cy.request({
+    log: false,
+    method: 'POST',
+    url: `${kibanaUrl}/internal/kibana/settings`,
+    body: { changes: settings },
+    headers: {
+      'kbn-xsrf': 'e2e_test',
+    },
+    auth: { user: 'elastic', pass: 'changeme' },
+  });
+});

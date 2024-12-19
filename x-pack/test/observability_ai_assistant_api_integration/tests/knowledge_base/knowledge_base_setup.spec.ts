@@ -13,18 +13,21 @@ import {
   TINY_ELSER,
   deleteInferenceEndpoint,
 } from './helpers';
+import { ForbiddenApiError } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
+  const KNOWLEDGE_BASE_SETUP_API_URL = '/internal/observability_ai_assistant/kb/setup';
+
   describe('/internal/observability_ai_assistant/kb/setup', () => {
     it('returns model info when successful', async () => {
       await createKnowledgeBaseModel(ml);
       const res = await observabilityAIAssistantAPIClient
         .admin({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+          endpoint: `POST ${KNOWLEDGE_BASE_SETUP_API_URL}`,
           params: {
             query: {
               model_id: TINY_ELSER.id,
@@ -43,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it('returns error message if model is not deployed', async () => {
       const res = await observabilityAIAssistantAPIClient
         .admin({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+          endpoint: `POST ${KNOWLEDGE_BASE_SETUP_API_URL}`,
           params: {
             query: {
               model_id: TINY_ELSER.id,
@@ -59,6 +62,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       // @ts-expect-error
       expect(res.body.statusCode).to.be(500);
+    });
+
+    describe('security roles and access privileges', () => {
+      it('should deny access for users without the ai_assistant privilege', async () => {
+        try {
+          await observabilityAIAssistantAPIClient.unauthorizedUser({
+            endpoint: `POST ${KNOWLEDGE_BASE_SETUP_API_URL}`,
+            params: {
+              query: {
+                model_id: TINY_ELSER.id,
+              },
+            },
+          });
+          throw new ForbiddenApiError('Expected unauthorizedUser() to throw a 403 Forbidden error');
+        } catch (e) {
+          expect(e.status).to.be(403);
+        }
+      });
     });
   });
 }

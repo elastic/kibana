@@ -9,10 +9,18 @@
 
 import fastIsEqual from 'fast-deep-equal';
 import React, { useEffect } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, filter, map, skip } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  map,
+  skip,
+} from 'rxjs';
 
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { PublishingSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { OPTIONS_LIST_CONTROL } from '../../../../common';
 import type {
@@ -205,6 +213,22 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           if (currentSelections.length > 1) selections.setSelectedOptions([currentSelections[0]]);
         });
 
+      const hasSelections$ = new BehaviorSubject<boolean>(
+        Boolean(initialState.selectedOptions?.length || initialState.existsSelected)
+      );
+      const hasSelectionsSubscription = combineLatest([
+        selections.selectedOptions$,
+        selections.existsSelected$,
+      ])
+        .pipe(
+          map(([selectedOptions, existsSelected]) => {
+            return Boolean(selectedOptions?.length || existsSelected);
+          }),
+          distinctUntilChanged()
+        )
+        .subscribe((hasSelections) => {
+          hasSelections$.next(hasSelections);
+        });
       /** Output filters when selections change */
       const outputFilterSubscription = combineLatest([
         dataControl.api.dataViews,
@@ -269,6 +293,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
             if (selections.existsSelected$.getValue()) selections.setExistsSelected(false);
             if (invalidSelections$.getValue().size) invalidSelections$.next(new Set([]));
           },
+          hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
         },
         {
           ...dataControl.comparators,
@@ -382,6 +407,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
               outputFilterSubscription.unsubscribe();
               singleSelectSubscription.unsubscribe();
               validSearchStringSubscription.unsubscribe();
+              hasSelectionsSubscription.unsubscribe();
             };
           }, []);
 

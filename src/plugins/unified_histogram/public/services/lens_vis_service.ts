@@ -329,8 +329,13 @@ export class LensVisService {
     queryParams: QueryParams;
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
-  }): Suggestion => {
+  }): Suggestion | undefined => {
     const { dataView } = queryParams;
+
+    if (!dataView.isTimeBased() || !dataView.timeFieldName) {
+      return undefined;
+    }
+
     const showBreakdown = breakdownField && fieldSupportsBreakdown(breakdownField);
 
     let columnOrder = ['date_column', 'count_column'];
@@ -343,7 +348,7 @@ export class LensVisService {
       date_column: {
         dataType: 'date',
         isBucketed: true,
-        label: dataView.timeFieldName ?? '',
+        label: dataView.timeFieldName,
         operationType: 'date_histogram',
         scale: 'interval',
         sourceField: dataView.timeFieldName,
@@ -403,7 +408,7 @@ export class LensVisService {
 
     const datasourceState = {
       layers: {
-        [UNIFIED_HISTOGRAM_LAYER_ID]: { columnOrder, columns },
+        [UNIFIED_HISTOGRAM_LAYER_ID]: { columnOrder, columns, indexPatternId: dataView.id },
       },
     };
 

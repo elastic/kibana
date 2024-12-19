@@ -7,46 +7,14 @@
 
 import { badRequest } from '@hapi/boom';
 import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
-import {
-  findInventoryFields,
-  InventoryItemType,
-  inventoryModels,
-} from '@kbn/metrics-data-access-plugin/common';
-import { rangeQuery } from '@kbn/observability-plugin/server';
-
+import { DataStreamDetails } from '../../../../common/api_types';
 import { MAX_HOSTS_METRIC_VALUE } from '../../../../common/constants';
 import { _IGNORED } from '../../../../common/es_fields';
-import { DataStreamDetails, DataStreamSettings } from '../../../../common/api_types';
+import { datasetQualityPrivileges } from '../../../services';
 import { createDatasetQualityESClient } from '../../../utils';
-import { dataStreamService, datasetQualityPrivileges } from '../../../services';
+import { rangeQuery } from '../../../utils/queries';
 import { getDataStreams } from '../get_data_streams';
 import { getDataStreamsMeteringStats } from '../get_data_streams_metering_stats';
-
-export async function getDataStreamSettings({
-  esClient,
-  dataStream,
-}: {
-  esClient: ElasticsearchClient;
-  dataStream: string;
-}): Promise<DataStreamSettings> {
-  const [createdOn, [dataStreamInfo], datasetUserPrivileges] = await Promise.all([
-    getDataStreamCreatedOn(esClient, dataStream),
-    dataStreamService.getMatchingDataStreams(esClient, dataStream),
-    datasetQualityPrivileges.getDatasetPrivileges(esClient, dataStream),
-  ]);
-
-  const integration = dataStreamInfo?._meta?.package?.name;
-  const lastBackingIndex = dataStreamInfo?.indices?.slice(-1)[0];
-  const indexTemplate = dataStreamInfo?.template;
-
-  return {
-    createdOn,
-    integration,
-    datasetUserPrivileges,
-    lastBackingIndexName: lastBackingIndex?.index_name,
-    indexTemplate,
-  };
-}
 
 export async function getDataStreamDetails({
   esClient,
@@ -118,16 +86,6 @@ export async function getDataStreamDetails({
   }
 }
 
-async function getDataStreamCreatedOn(esClient: ElasticsearchClient, dataStream: string) {
-  const indexSettings = await dataStreamService.getDataStreamIndexSettings(esClient, dataStream);
-
-  const indexesList = Object.values(indexSettings);
-
-  return indexesList
-    .map((index) => Number(index.settings?.index?.creation_date))
-    .sort((a, b) => a - b)[0];
-}
-
 type TermAggregation = Record<string, { terms: { field: string; size: number } }>;
 
 const MAX_HOSTS = MAX_HOSTS_METRIC_VALUE + 1; // Adding 1 so that we can show e.g. '50+'
@@ -137,13 +95,21 @@ const serviceNamesAgg: TermAggregation = {
   ['service.name']: { terms: { field: 'service.name', size: MAX_HOSTS } },
 };
 
+const entityFields = [
+  'host.name',
+  'container.id',
+  'kubernetes.pod.uid',
+  'cloud.instance.id',
+  'aws.s3.bucket.name',
+  'aws.rds.db_instance.arn',
+  'aws.sqs.queue.name',
+];
+
 // Gather host terms like 'host', 'pod', 'container'
-const hostsAgg: TermAggregation = inventoryModels
-  .map((model) => findInventoryFields(model.id as InventoryItemType))
-  .reduce(
-    (acc, fields) => ({ ...acc, [fields.id]: { terms: { field: fields.id, size: MAX_HOSTS } } }),
-    {} as TermAggregation
-  );
+const hostsAgg: TermAggregation = entityFields.reduce(
+  (acc, idField) => ({ ...acc, [idField]: { terms: { field: idField, size: MAX_HOSTS } } }),
+  {} as TermAggregation
+);
 
 async function getDataStreamSummaryStats(
   esClient: ElasticsearchClient,

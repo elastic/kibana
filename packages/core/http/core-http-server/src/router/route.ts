@@ -121,7 +121,9 @@ export type Privilege = string;
  */
 export interface RouteDeprecationInfo {
   /**
-   * link to the documentation for more details on the deprecation.
+   * Link to the documentation for more details on the deprecation.
+   *
+   * @remark See template and instructions in `<REPO_ROOT>/docs/upgrade-notes.asciidoc` for instructions on adding a release note.
    */
   documentationUrl: string;
   /**
@@ -291,6 +293,8 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    *               Can be useful when we grant access to a resource but want to identify a user if possible.
    *
    * Defaults to `true` if an auth mechanism is registered.
+   *
+   * @deprecated Use `security.authc.enabled` instead
    */
   authRequired?: boolean | 'optional';
 

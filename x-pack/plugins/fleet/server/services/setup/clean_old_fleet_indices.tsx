@@ -8,6 +8,8 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import pMap from 'p-map';
 
+import { MAX_CONCURRENT_CLEAN_OLD_FILE_INDICES } from '../../constants';
+
 const INDICES_TO_CLEAN = [
   '.fleet-files-*',
   '.fleet-file-data-*',
@@ -49,7 +51,7 @@ export async function cleanUpOldFileIndices(esClient: ElasticsearchClient, logge
             });
         }
       },
-      { concurrency: 2 }
+      { concurrency: MAX_CONCURRENT_CLEAN_OLD_FILE_INDICES }
     );
     await esClient.indices
       .deleteIndexTemplate({

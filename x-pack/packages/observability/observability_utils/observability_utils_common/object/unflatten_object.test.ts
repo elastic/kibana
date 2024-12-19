@@ -37,4 +37,16 @@ describe('unflattenObject', () => {
       },
     });
   });
+
+  it('handles null values correctly', () => {
+    expect(
+      unflattenObject({
+        'agent.name': null,
+      })
+    ).toEqual({
+      agent: {
+        name: null,
+      },
+    });
+  });
 });

@@ -265,6 +265,16 @@ export const INVITATION_LINK = i18n.translate('xpack.enterpriseSearch.roleMappin
   defaultMessage: 'Enterprise Search Invitation Link',
 });
 
+export const INVITATION_LINK_COPY_ARIA_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.copyInvitationLink',
+  {
+    defaultMessage: 'Copy {invitationLink}',
+    values: {
+      invitationLink: INVITATION_LINK,
+    },
+  }
+);
+
 export const NO_USERS_TITLE = i18n.translate('xpack.enterpriseSearch.roleMapping.noUsersTitle', {
   defaultMessage: 'No user added',
 });

@@ -11,7 +11,7 @@ import { AlertCluster, AlertThreadPoolRejectionsStats } from '../../../common/ty
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
-import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
 
 const invalidNumberValue = (value: number) => {
   return isNaN(value) || value === undefined || value === null;
