@@ -12,6 +12,7 @@ import { CaseAssigneesRt, UserRt } from '../user/v1';
 import { CaseConnectorRt } from '../connector/v1';
 import { AttachmentRt } from '../attachment/v1';
 import { CaseCustomFieldsRt } from '../custom_field/v1';
+import { CaseObservableRt } from '../observable/v1';
 
 export { CaseStatuses };
 
@@ -90,6 +91,10 @@ const CaseBaseFields = {
    * The alert sync settings
    */
   settings: CaseSettingsRt,
+  /**
+   * Observables
+   */
+  observables: rt.array(CaseObservableRt),
 };
 
 export const CaseBaseOptionalFieldsRt = rt.exact(
@@ -155,6 +160,16 @@ export const RelatedCaseRt = rt.strict({
   totals: AttachmentTotalsRt,
 });
 
+export const SimilarityRt = rt.strict({
+  typeKey: rt.string,
+  value: rt.string,
+});
+
+export const SimilarCaseRt = rt.intersection([
+  CaseRt,
+  rt.strict({ similarities: rt.strict({ observables: rt.array(SimilarityRt) }) }),
+]);
+
 export type Case = rt.TypeOf<typeof CaseRt>;
 export type Cases = rt.TypeOf<typeof CasesRt>;
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
@@ -162,3 +177,5 @@ export type CaseSettings = rt.TypeOf<typeof CaseSettingsRt>;
 export type RelatedCase = rt.TypeOf<typeof RelatedCaseRt>;
 export type AttachmentTotals = rt.TypeOf<typeof AttachmentTotalsRt>;
 export type CaseBaseOptionalFields = rt.TypeOf<typeof CaseBaseOptionalFieldsRt>;
+export type SimilarCase = rt.TypeOf<typeof SimilarCaseRt>;
+export type SimilarCases = SimilarCase[];
