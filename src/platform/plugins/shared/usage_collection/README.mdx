@@ -52,7 +52,7 @@ To track a user interaction, use the API `usageCollection.reportUiCounter` as fo
 ```ts
 // public/plugin.ts
 import { METRIC_TYPE } from '@kbn/analytics';
-import { Plugin, CoreStart } from '../../../core/public';
+import { Plugin, CoreStart } from '../../../../../core/public';
 
 export class MyPlugin implements Plugin {
   public start(
@@ -133,8 +133,8 @@ To create a usage counter for your plugin, use the API `usageCollection.createUs
 
 ```ts
 // server/plugin.ts
-import type { Plugin, CoreStart } from '../../../core/server';
-import type { UsageCollectionSetup, UsageCounter } from '../../../plugins/usage_collection/server';
+import type { Plugin, CoreStart } from '../../../../../core/server';
+import type { UsageCollectionSetup, UsageCounter } from '../../../../../plugins/usage_collection/server';
 
 export class MyPlugin implements Plugin {
   private usageCounter?: UsageCounter;
@@ -408,7 +408,7 @@ for structuring your plugin code.
 ```ts
 // src/plugins/dashboard/server/plugin.ts
 
-import { PluginInitializerContext, Plugin, CoreStart, CoreSetup } from '../../src/core/server';
+import { PluginInitializerContext, Plugin, CoreStart, CoreSetup } from '../../../../src/core/server';
 
 export class DashboardPlugin implements Plugin {
   private readonly logger: Logger;
