@@ -31,7 +31,7 @@
     "xpack.customBranding": "plugins/custom_branding",
     "xpack.dashboard": "plugins/dashboard_enhanced",
     "xpack.dataQuality": "platform/plugins/shared/data_quality",
-    "xpack.datasetQuality": "plugins/observability_solution/dataset_quality",
+    "xpack.datasetQuality": "platform/plugins/shared/dataset_quality",
     "xpack.dataUsage": "platform/plugins/private/data_usage",
     "xpack.discover": "plugins/discover_enhanced",
     "xpack.crossClusterReplication": "platform/plugins/private/cross_cluster_replication",
