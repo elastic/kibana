@@ -1,6 +1,6 @@
 # Prebuilt Rule Import
 
-This is a test plan for the importing of prebuilt rules. This feature is an aspect of `Milestone 2` of the [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974) epic.
+This is a test plan for the importing of prebuilt rules. This feature is an aspect of `Milestone 3` of the [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974) epic.
 
 Status: `in progress`.
 
@@ -24,6 +24,8 @@ Status: `in progress`.
 
 #### Scenario: Importing an unmodified prebuilt rule with a matching rule_id and version
 
+**Automation**: 1 cypress test and 1 integration test.
+
 ```Gherkin
 Given the import payload contains a prebuilt rule with a matching rule_id and version, identical to the published rule
 When the user imports the rule
@@ -34,18 +36,39 @@ And isCustomized should be false
 
 #### Scenario: Importing a customized prebuilt rule with a matching rule_id and version
 
+**Automation**: 1 cypress test and 1 integration test.
+
 ```Gherkin
 Given the import payload contains a prebuilt rule with a matching rule_id and version, modified from the published version
+And the overwrite flag is set to true
 When the user imports the rule
 Then the rule should be created or updated
 And the ruleSource type should be "external"
 And isCustomized should be true
+
+CASE: Should work with older, newer, or identical version numbers
+```
+
+#### Scenario: Importing a customized rule with a matching rule_id and version
+
+**Automation**: 1 cypress test and 1 integration test.
+
+```Gherkin
+Given the import payload contains a custom rule with a matching rule_id and version
+And the overwrite flag is set to true
+When the user imports the rule
+Then the rule should be created or updated
+And the ruleSource type should be "internal"
+And isCustomized should be false
 ```
 
 #### Scenario: Importing a prebuilt rule with a matching rule_id but no matching version
 
+**Automation**: 1 integration test.
+
 ```Gherkin
 Given the import payload contains a prebuilt rule with a matching rule_id but no matching version
+And the overwrite flag is set to true
 When the user imports the rule
 Then the rule should be created or updated
 And the ruleSource type should be "external"
@@ -53,6 +76,8 @@ And isCustomized should be true
 ```
 
 #### Scenario: Importing a prebuilt rule with a non-existent rule_id
+
+**Automation**: 1 integration test.
 
 ```Gherkin
 Given the import payload contains a prebuilt rule with a non-existent rule_id
@@ -63,6 +88,8 @@ And the ruleSource type should be "internal"
 
 #### Scenario: Importing a prebuilt rule without a rule_id field
 
+**Automation**: 1 integration test.
+
 ```Gherkin
 Given the import payload contains a prebuilt rule without a rule_id field
 When the user imports the rule
@@ -71,6 +98,8 @@ Then the import should be rejected with a message "rule_id field is required"
 
 #### Scenario: Importing a prebuilt rule with a matching rule_id but missing a version field
 
+**Automation**: 1 integration test.
+
 ```Gherkin
 Given the import payload contains a prebuilt rule without a version field
 When the user imports the rule
@@ -78,6 +107,8 @@ Then the import should be rejected with a message "version field is required"
 ```
 
 #### Scenario: Importing an existing custom rule missing a version field
+
+**Automation**: 1 integration test.
 
 ```Gherkin
 Given the import payload contains an existing custom rule without a version field
@@ -89,6 +120,8 @@ And the "version" field should be set to the existing rule's "version"
 
 #### Scenario: Importing a new custom rule missing a version field
 
+**Automation**: 1 integration test.
+
 ```Gherkin
 Given the import payload contains a new custom rule without a version field
 When the user imports the rule
@@ -98,6 +131,8 @@ And the "version" field should be set to 1
 ```
 
 #### Scenario: Importing a rule with overwrite flag set to true
+
+**Automation**: 1 integration test.
 
 ```Gherkin
 Given the import payload contains a rule with an existing rule_id
@@ -109,14 +144,20 @@ And the ruleSource type should be calculated based on the rule_id and version
 
 #### Scenario: Importing a rule with overwrite flag set to false
 
+**Automation**: 1 integration test.
+
 ```Gherkin
 Given the import payload contains a rule with an existing rule_id
 And the overwrite flag is set to false
 When the user imports the rule
 Then the import should be rejected with a message "rule_id already exists"
+
+CASE: should have the same outcome for all rule types
 ```
 
 #### Scenario: Importing both custom and prebuilt rules
+
+**Automation**: 1 integration test.
 
 ```Gherkin
 Given the import payload contains modified and unmodified, custom and prebuilt rules
@@ -124,4 +165,15 @@ When the user imports the rule
 Then custom rules should be created or updated, with versions defaulted to 1
 And prebuilt rules should be created or updated,
 And prebuilt rules missing versions should be rejected
+```
+
+#### Scenario: Importing prebuilt rules when the rules package is not installed
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given the import payload contains prebuilt rules
+And no rules package has been installed locally
+When the user imports the rule
+Then all rules should be created or updated as custom rules
 ```
