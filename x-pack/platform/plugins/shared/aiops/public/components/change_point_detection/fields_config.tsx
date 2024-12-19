@@ -642,7 +642,7 @@ export const FieldsControls: FC<PropsWithChildren<FieldsControlsProps>> = ({
 }) => {
   const { splitFieldsOptions, combinedQuery } = useChangePointDetectionContext();
   const { dataView } = useDataSource();
-  const { data, uiSettings, fieldFormats, charts, fieldStats, theme } = useAiopsAppContext();
+  const { data, uiSettings, fieldFormats, charts, fieldStats } = useAiopsAppContext();
   const timefilter = useTimefilter();
   // required in order to trigger state updates
   useTimeRangeUpdates();
@@ -681,7 +681,6 @@ export const FieldsControls: FC<PropsWithChildren<FieldsControlsProps>> = ({
             }
           : undefined
       }
-      theme={theme}
     >
       <EuiFlexGroup alignItems={'center'} responsive={true} wrap={true} gutterSize={'s'}>
         <EuiFlexItem grow={false} css={{ width: '200px' }}>
