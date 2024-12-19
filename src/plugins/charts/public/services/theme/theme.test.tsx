@@ -72,7 +72,7 @@ describe('ThemeService', () => {
     });
   });
 
-  describe('useBaseChartTheme', () => {
+  describe('useChartsBaseTheme', () => {
     it('updates when the theme setting change', () => {
       setUpMockTheme.theme$ = createTheme$Mock(false);
       const themeService = new ThemeService();
