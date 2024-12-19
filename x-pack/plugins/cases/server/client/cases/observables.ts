@@ -186,7 +186,7 @@ export const updateObservable = async (
 
     return decodeOrThrow(CaseRt)(res);
   } catch (error) {
-    throw Boom.badRequest(`Failed to update observable: ${JSON.stringify(params)}: ${error}`);
+    throw Boom.badRequest(`Failed to update observable: ${error}`);
   }
 };
 
