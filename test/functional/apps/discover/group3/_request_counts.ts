@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const monacoEditor = getService('monacoEditor');
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
@@ -39,6 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         enableESQL: true,
       });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await common.navigateToApp('discover');
     });
 
     after(async () => {
@@ -48,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await common.navigateToApp('discover');
+      await discover.clickNewSearchButton();
       await header.waitUntilLoadingHasFinished();
     });
 
@@ -58,7 +60,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .getEntries()
           .filter((entry: any) => ['fetch', 'xmlhttprequest'].includes(entry.initiatorType))
       );
-      return requests.filter((entry) => entry.name.endsWith(`/internal/search/${type}`)).length;
+      const endpoint = type === 'esql' ? `${type}_async` : type;
+      const result = requests.filter((entry) =>
+        entry.name.endsWith(`/internal/search/${endpoint}`)
+      );
+      return result.length;
     };
 
     const waitForLoadingToFinish = async () => {
@@ -104,7 +110,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await waitForLoadingToFinish();
         const searchCount = await getSearchCount(type);
-        expect(searchCount).to.be(expectedRequests);
+        // one more requests for fields in ESQL mode
+        const actualExpectedRequests = type === 'esql' ? expectedRequests + 1 : expectedRequests;
+        expect(searchCount).to.be(actualExpectedRequests);
       });
 
       it(`should send no more than ${expectedRequests} requests (documents + chart) when refreshing`, async () => {
@@ -114,10 +122,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it(`should send no more than ${expectedRequests} requests (documents + chart) when changing the query`, async () => {
-        await expectSearches(type, expectedRequests, async () => {
-          await setQuery(query1);
-          await queryBar.clickQuerySubmitButton();
-        });
+        await expectSearches(
+          type,
+          type === 'esql' ? expectedRequests + 1 : expectedRequests,
+          async () => {
+            await setQuery(query1);
+            await queryBar.clickQuerySubmitButton();
+          }
+        );
       });
 
       it(`should send no more than ${expectedRequests} requests (documents + chart) when changing the time range`, async () => {
@@ -137,29 +149,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Sep 23, 2015 @ 00:00:00.000'
         );
         await waitForLoadingToFinish();
-        // TODO: Check why the request happens 4 times in case of opening a saved search
-        // https://github.com/elastic/kibana/issues/165192
-        // creating the saved search
-        await expectSearches(type, savedSearchesRequests ?? expectedRequests, async () => {
-          await discover.saveSearch(savedSearch);
-        });
+        const actualExpectedRequests = savedSearchesRequests ?? expectedRequests;
+        await expectSearches(
+          type,
+          type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
+          async () => {
+            await discover.saveSearch(savedSearch);
+          }
+        );
         // resetting the saved search
         await setQuery(query2);
         await queryBar.clickQuerySubmitButton();
         await waitForLoadingToFinish();
-        await expectSearches(type, expectedRequests, async () => {
+        await expectSearches(type, actualExpectedRequests, async () => {
           await discover.revertUnsavedChanges();
         });
         // clearing the saved search
-        await expectSearches('ese', savedSearchesRequests ?? expectedRequests, async () => {
-          await testSubjects.click('discoverNewButton');
-          await waitForLoadingToFinish();
-        });
-        // loading the saved search
-        // TODO: https://github.com/elastic/kibana/issues/165192
-        await expectSearches(type, savedSearchesRequests ?? expectedRequests, async () => {
-          await discover.loadSavedSearch(savedSearch);
-        });
+        await expectSearches(
+          type,
+          type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
+          async () => {
+            await testSubjects.click('discoverNewButton');
+            await waitForLoadingToFinish();
+          }
+        );
+        await expectSearches(
+          type,
+          type === 'esql' ? actualExpectedRequests + 1 : actualExpectedRequests,
+          async () => {
+            await discover.loadSavedSearch(savedSearch);
+          }
+        );
       });
     };
 
@@ -220,6 +240,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should send no more than 2 requests (documents + chart) when changing the data view', async () => {
         await expectSearches(type, 2, async () => {
           await discover.selectIndexPattern('long-window-logstash-*');
+        });
+      });
+    });
+
+    describe('ES|QL mode', () => {
+      const type = 'esql';
+
+      before(async () => {
+        await discover.selectTextBaseLang();
+      });
+
+      getSharedTests({
+        type,
+        savedSearch: 'esql test',
+        query1: 'from logstash-* | where bytes > 1000 ',
+        query2: 'from logstash-* | where bytes < 2000 ',
+        savedSearchesRequests: 2,
+        setQuery: (query) => monacoEditor.setCodeEditorValue(query),
+        expectedRequests: 2,
+      });
+
+      it(`should send 2 requests (documents + chart) when toggling the chart visibility`, async () => {
+        await expectSearches(type, 1, async () => {
+          await discover.toggleChartVisibility();
+        });
+        await expectSearches(type, 2, async () => {
+          await discover.toggleChartVisibility();
         });
       });
     });

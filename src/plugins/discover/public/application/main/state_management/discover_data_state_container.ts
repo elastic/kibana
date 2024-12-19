@@ -12,7 +12,7 @@ import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
+import { AggregateQuery, isOfAggregateQueryType, Query, TimeRange } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -20,13 +20,13 @@ import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
 import { getEsqlDataView } from './utils/get_esql_data_view';
-import type { DiscoverAppStateContainer } from './discover_app_state_container';
+import type { DiscoverAppState, DiscoverAppStateContainer } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
 import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
-import { sendResetMsg } from '../hooks/use_saved_search_messages';
+import { sendResetMsg, sendFetchStartMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
@@ -49,10 +49,15 @@ export interface DataMsg {
   fetchStatus: FetchStatus;
   error?: Error;
   query?: AggregateQuery | Query | undefined;
+  timeStart?: number;
+  timeEnd?: number;
 }
 
 export interface DataMainMsg extends DataMsg {
   foundDocuments?: boolean;
+  timeRange?: TimeRange;
+  timeRangeRelative?: TimeRange;
+  appState?: DiscoverAppState;
 }
 
 export interface DataDocumentsMsg extends DataMsg {
@@ -106,7 +111,7 @@ export interface DiscoverDataStateContainer {
   /**
    * resetting all data observable to initial state
    */
-  reset: () => void;
+  reset: (status?: FetchStatus) => void;
 
   /**
    * cancels the running queries
@@ -235,6 +240,13 @@ export function getDataStateContainer({
 
           abortController?.abort();
           abortControllerFetchMore?.abort();
+          sendFetchStartMsg(
+            dataSubjects.main$,
+            timefilter.getAbsoluteTime(),
+            timefilter.getTime(),
+            appStateContainer.getState().query,
+            appStateContainer.getState()
+          );
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
@@ -366,8 +378,9 @@ export function getDataStateContainer({
     return refetch$;
   };
 
-  const reset = () => {
-    sendResetMsg(dataSubjects, getInitialFetchStatus());
+  const reset = (status?: FetchStatus) => {
+    const fetchStatus = status || getInitialFetchStatus();
+    sendResetMsg(dataSubjects, fetchStatus);
   };
 
   const cancel = () => {
