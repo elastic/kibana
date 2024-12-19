@@ -52,7 +52,7 @@ export function PaletteColors({
   const selectedColorSwatchStyle = {
     outline: 'currentcolor solid 2px',
     outlineOffset: '-1px',
-    border: `2px solid ${euiTheme.colors.borderBaseFormsColorSwatch}`,
+    border: `${euiTheme.border.width.thick} solid ${euiTheme.colors.borderBaseFormsColorSwatch}`,
   };
   return (
     <>

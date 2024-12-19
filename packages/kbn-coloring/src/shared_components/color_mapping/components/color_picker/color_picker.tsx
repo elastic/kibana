@@ -79,7 +79,9 @@ export function ColorPicker({
               close();
               deleteStep();
             }}
-            css={{ paddingBottom: 8 }}
+            css={({ euiTheme }) => ({
+              paddingBottom: euiTheme.size.s,
+            })}
           >
             {i18n.translate('coloring.colorMapping.colorPicker.removeGradientColorButtonLabel', {
               defaultMessage: 'Remove color stop',
