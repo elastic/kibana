@@ -17,7 +17,7 @@ describe('useChartSeriesColor', () => {
 
     // Don't try to test a hardcoded value, just use what is provided by EUI.
     // If in the future this value changes, the tests won't break.
-    seriesDefaultColor = result.current.euiTheme.colors.backgroundLightText;
+    seriesDefaultColor = result.current.euiTheme.colors.lightestShade;
   });
 
   it('returns a default color value if given no input', () => {
