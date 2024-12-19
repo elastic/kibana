@@ -20,23 +20,23 @@ export function getCalculateAutoTimeExpression(getConfig: (key: string) => any) 
   function calculateAutoTimeExpression(
     range: TimeRange,
     interval: string,
-    expression?: true
+    asExpression?: true
   ): string | undefined;
   function calculateAutoTimeExpression(
     range: TimeRange,
     interval: string,
-    expression: false
+    asExpression: false
   ): TimeBucketsInterval | undefined;
   function calculateAutoTimeExpression(
     range: TimeRange,
     interval?: string,
-    expression?: boolean
+    asExpression?: boolean
   ): string | TimeBucketsInterval | undefined;
 
   function calculateAutoTimeExpression(
     range: TimeRange,
     interval: string = autoInterval,
-    expression: boolean = true
+    asExpression: boolean = true
   ): string | TimeBucketsInterval | undefined {
     const dates = toAbsoluteDates(range);
     if (!dates) {
@@ -57,7 +57,7 @@ export function getCalculateAutoTimeExpression(getConfig: (key: string) => any) 
     });
 
     const intervalResult = buckets.getInterval();
-    if (expression) {
+    if (asExpression) {
       return intervalResult.expression;
     }
     return intervalResult;
