@@ -11,7 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Entity Manager', function () {
     this.tags(['entityManager']);
 
-    loadTestFile(require.resolve('./builtin_definitions'));
     loadTestFile(require.resolve('./definitions'));
     loadTestFile(require.resolve('./count'));
     loadTestFile(require.resolve('./search'));
