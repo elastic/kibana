@@ -534,7 +534,7 @@ Plugin server-side only. Plugin has three main functions:
 |Adds drilldown capabilities to dashboard.  Owned by the Kibana App team.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/data_quality/README.md[dataQuality]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/data_quality/README.md[dataQuality]
 |Page where users can see the quality of their log data sets.
 
 
