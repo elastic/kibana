@@ -38,6 +38,10 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await policyDetailsLinks[indexOfRow].click();
     },
 
+    async clickIndexTemplateNameLink(name: string): Promise<void> {
+      await find.clickByLinkText(name);
+    },
+
     async clickDataStreamNameLink(name: string): Promise<void> {
       await find.clickByLinkText(name);
     },

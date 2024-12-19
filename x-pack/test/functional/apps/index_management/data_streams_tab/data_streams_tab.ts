@@ -126,6 +126,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await es.indices.deleteIndexTemplate({
           name: `logsdb_index_template`,
         });
+        await browser.refresh();
       });
     });
 
@@ -167,6 +168,131 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Expect to see a success toast
       const successToast = await toasts.getElementByIndex(1);
       expect(await successToast.getVisibleText()).to.contain('Data retention disabled');
+    });
+
+    describe('Modify Data streams index mode', () => {
+      type IndexMode = 'standard' | 'logsdb';
+
+      interface ModifyIndexModeParams {
+        origin: IndexMode;
+        destination: IndexMode;
+      }
+
+      const indexModeTypes: Record<IndexMode, { es: string; kibana: string; selector: string }> = {
+        standard: {
+          es: 'standard',
+          kibana: 'Standard',
+          selector: 'index_mode_standard',
+        },
+        logsdb: {
+          es: 'logsdb',
+          kibana: 'LogsDB',
+          selector: 'index_mode_logsdb',
+        },
+      };
+
+      const modifyDsIndexMode = async ({ origin, destination }: ModifyIndexModeParams) => {
+        const dataStreamName = `ds-${origin}-to-${destination}`;
+        const indexTemplateName = `it-${origin}-to-${destination}`;
+
+        // Create an index template with a origin index mode
+        await es.indices.putIndexTemplate({
+          name: indexTemplateName,
+          index_patterns: [dataStreamName],
+          data_stream: {},
+          template: {
+            settings: {
+              mode: indexModeTypes[origin].es,
+            },
+          },
+        });
+        // Create a data stream matching the index pattern of the index template above
+        await es.indices.createDataStream({
+          name: dataStreamName,
+        });
+        await browser.refresh();
+
+        // Open details flyout of data stream
+        await pageObjects.indexManagement.clickDataStreamNameLink(dataStreamName);
+        // Check that index mode detail exists and its label is origin
+        expect(await testSubjects.exists('indexModeDetail')).to.be(true);
+        expect(await testSubjects.getVisibleText('indexModeDetail')).to.be(
+          indexModeTypes[origin].kibana
+        );
+        // Close flyout
+        await testSubjects.click('closeDetailsButton');
+        // // Navigate to the templates tab
+        await pageObjects.indexManagement.changeTabs('templatesTab');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        // // Edit template
+        await pageObjects.indexManagement.clickIndexTemplateNameLink(indexTemplateName);
+        await testSubjects.click('manageTemplateButton');
+        await testSubjects.click('editIndexTemplateButton');
+
+        // // Verify index mode is origin
+        expect(await testSubjects.getVisibleText('indexModeField')).to.be(
+          indexModeTypes[origin].kibana
+        );
+        // // Modify index mode
+        await testSubjects.click('indexModeField');
+        await testSubjects.click(indexModeTypes[destination].selector);
+
+        // // Navigate to the last step of the wizard
+        await testSubjects.click('nextButton');
+        await testSubjects.click('nextButton');
+        await testSubjects.click('nextButton');
+        await testSubjects.click('nextButton');
+        await testSubjects.click('nextButton');
+        expect(await testSubjects.getVisibleText('indexModeValue')).to.be(
+          indexModeTypes[destination].kibana
+        );
+
+        // // Click update template
+        await pageObjects.indexManagement.clickNextButton();
+
+        // // Verify index mode and close detail tab
+        expect(await testSubjects.getVisibleText('indexModeValue')).to.be(
+          indexModeTypes[destination].kibana
+        );
+        await testSubjects.click('closeDetailsButton');
+
+        // // Navigate to the data streams tab
+        await pageObjects.indexManagement.changeTabs('data_streamsTab');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // // Open data stream
+        await pageObjects.indexManagement.clickDataStreamNameLink(dataStreamName);
+        // // Check that index mode detail exists and its label is destination index mode
+        expect(await testSubjects.exists('indexModeDetail')).to.be(true);
+        expect(await testSubjects.getVisibleText('indexModeDetail')).to.be(
+          indexModeTypes[destination].kibana
+        );
+        // Close flyout
+        await testSubjects.click('closeDetailsButton');
+
+        try {
+          await es.indices.deleteDataStream({ name: dataStreamName });
+          await es.indices.deleteIndexTemplate({
+            name: indexTemplateName,
+          });
+        } catch (e) {
+          log.debug('[Teardown error] Error deleting test data stream');
+          throw e;
+        }
+      };
+      it('allows to upgrade data stream from standard to logsdb index mode', async () => {
+        await modifyDsIndexMode({
+          origin: 'standard',
+          destination: 'logsdb',
+        });
+      });
+
+      it('allows to downgrade data stream from logsdb to standard index mode', async () => {
+        await modifyDsIndexMode({
+          origin: 'logsdb',
+          destination: 'standard',
+        });
+      });
     });
   });
 };
