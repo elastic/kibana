@@ -19,17 +19,17 @@ import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
+import { EmbeddableStateTransfer } from '.';
+import { setKibanaServices } from './kibana_services';
+import { EmbeddablePublicPlugin } from './plugin';
+import { registerReactEmbeddableFactory } from './react_embeddable_system';
+import { registerAddFromLibraryType } from './add_from_library/registry';
 import {
   EmbeddableSetup,
   EmbeddableSetupDependencies,
   EmbeddableStart,
   EmbeddableStartDependencies,
-  EmbeddableStateTransfer,
-} from '.';
-import { setKibanaServices } from './kibana_services';
-import { EmbeddablePublicPlugin } from './plugin';
-import { registerReactEmbeddableFactory } from './react_embeddable_system';
-import { registerAddFromLibraryType } from './add_from_library/registry';
+} from './types';
 
 export type Setup = jest.Mocked<EmbeddableSetup>;
 export type Start = jest.Mocked<EmbeddableStart>;
@@ -48,7 +48,6 @@ const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerAddFromLibraryType: jest.fn().mockImplementation(registerAddFromLibraryType),
     registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
-    registerEmbeddableFactory: jest.fn(),
     registerEnhancement: jest.fn(),
   };
   return setupContract;
@@ -56,8 +55,6 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    getEmbeddableFactories: jest.fn(),
-    getEmbeddableFactory: jest.fn(),
     telemetry: jest.fn(),
     extract: jest.fn(),
     inject: jest.fn(),
