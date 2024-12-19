@@ -65,9 +65,9 @@ function ThreatMatchField({
     }
   }, [isThreatIndexPatternValid, isThreatMappingInvalid, onValidityChange]);
 
-  const handleBuilderOnChange = useCallback(
-    ({ entryItems }: { entryItems: ThreatMapEntries[] }): void => {
-      field.setValue(entryItems);
+  const handleMappingsEntryChange = useCallback(
+    (newEntryItems: ThreatMapEntries[]): void => {
+      field.setValue(newEntryItems);
     },
     [field]
   );
@@ -105,12 +105,12 @@ function ThreatMatchField({
         fullWidth
       >
         <ThreatMatchComponent
-          listItems={field.value}
+          mappingEntries={field.value}
           indexPatterns={indexPatterns}
           threatIndexPatterns={threatIndexPatterns}
           data-test-subj="threatmatch-builder"
           id-aria="threatmatch-builder"
-          onChange={handleBuilderOnChange}
+          onMappingEntriesChange={handleMappingsEntryChange}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
