@@ -6,7 +6,7 @@ paths: {}
 components:
   schemas:
     ListId:
-      $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
     ListType:
       type: string
@@ -36,23 +36,23 @@ components:
         - text
 
     ListName:
-      $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
     ListDescription:
-      $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
     ListMetadata:
       type: object
       additionalProperties: true
 
     ListItemId:
-      $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
     ListItemValue:
-      $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
     ListItemDescription:
-      $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
     ListItemMetadata:
       type: object

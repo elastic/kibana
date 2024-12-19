@@ -53,7 +53,6 @@ export {
   withEmbeddableSubscription,
 } from './lib';
 export type {
-  Adapters,
   CellValueContext,
   ChartActionContext,
   EmbeddableContext,
@@ -92,10 +91,5 @@ export {
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
-
-export {
-  embeddableInputToSubject,
-  embeddableOutputToSubject,
-} from './lib/embeddables/compatibility/embeddable_compatibility_utils';
 
 export { COMMON_EMBEDDABLE_GROUPING } from './lib/embeddables/common/constants';
