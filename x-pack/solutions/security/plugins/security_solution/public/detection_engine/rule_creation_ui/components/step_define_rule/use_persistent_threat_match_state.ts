@@ -7,18 +7,21 @@
 
 import { useEffect, useRef } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
+import type { ThreatMapEntries } from '../../../../common/components/threat_match/types';
+import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import type { FormHook } from '../../../../shared_imports';
 import { useFormData } from '../../../../shared_imports';
+import type { FieldValueQueryBar } from '../query_bar_field';
 
 interface UsePersistentThreatMatchStateParams {
-  form: FormHook;
+  form: FormHook<DefineStepRule>;
 }
 
 interface LastThreatMatchState {
-  threatIndexPatterns: unknown;
-  threatQueryBar: unknown;
-  threatMapping: unknown;
+  threatIndexPatterns: string[] | undefined;
+  threatQueryBar: FieldValueQueryBar | undefined;
+  threatMapping: ThreatMapEntries[] | undefined;
 }
 
 /**
@@ -27,7 +30,10 @@ interface LastThreatMatchState {
 export function usePersistentThreatMatchState({ form }: UsePersistentThreatMatchStateParams): void {
   const lastThreatMatchState = useRef<LastThreatMatchState | undefined>();
   const [{ ruleType, threatIndex: threatIndexPatterns, threatQueryBar, threatMapping }] =
-    useFormData({ form, watch: ['ruleType', 'threatIndex', 'threatQueryBar', 'threatMapping'] });
+    useFormData<DefineStepRule>({
+      form,
+      watch: ['ruleType', 'threatIndex', 'threatQueryBar', 'threatMapping'],
+    });
   const previousRuleType = usePrevious(ruleType);
 
   useEffect(() => {
