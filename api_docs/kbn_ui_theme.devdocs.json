@@ -99,23 +99,23 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/resolver/view/use_colors.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/resolver/view/use_colors.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/resolver/view/use_colors.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/resolver/view/use_colors.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/resolver/view/use_colors.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/resolver/view/use_colors.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/resolver/view/use_colors.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/resolver/view/use_colors.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/resolver/view/use_colors.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/resolver/view/use_colors.ts"
           }
         ],
         "initialIsOpen": false

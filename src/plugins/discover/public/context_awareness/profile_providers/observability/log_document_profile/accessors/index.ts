@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getDocViewer } from './get_doc_viewer';
+export { createGetDocViewer } from './get_doc_viewer';
