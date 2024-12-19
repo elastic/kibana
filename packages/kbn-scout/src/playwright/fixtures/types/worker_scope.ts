@@ -14,7 +14,7 @@ import { LoadActionPerfOptions } from '@kbn/es-archiver';
 import { IndexStats } from '@kbn/es-archiver/src/lib/stats';
 import type { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
 
-import { ScoutServerConfig } from '../../../types';
+import { ScoutTestConfig } from '../../../types';
 import { KibanaUrl } from '../../../common/services/kibana_url';
 
 export interface EsArchiverFixture {
@@ -58,7 +58,7 @@ export interface UiSettingsFixture {
  */
 export interface ScoutWorkerFixtures {
   log: ToolingLog;
-  config: ScoutServerConfig;
+  config: ScoutTestConfig;
   kbnUrl: KibanaUrl;
   esClient: Client;
   kbnClient: KbnClient;

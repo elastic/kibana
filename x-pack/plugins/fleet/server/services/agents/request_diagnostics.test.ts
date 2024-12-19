@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
@@ -33,7 +33,7 @@ describe('requestDiagnostics', () => {
 
       expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
+          document: expect.objectContaining({
             agents: ['agent-in-regular-policy'],
             type: 'REQUEST_DIAGNOSTICS',
             expiration: expect.anything(),
@@ -53,7 +53,7 @@ describe('requestDiagnostics', () => {
 
       expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
+          document: expect.objectContaining({
             agents: ['agent-in-regular-policy-newer', 'agent-in-regular-policy-newer2'],
             type: 'REQUEST_DIAGNOSTICS',
             expiration: expect.anything(),
@@ -70,7 +70,7 @@ describe('requestDiagnostics', () => {
 
       expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
+          document: expect.objectContaining({
             agents: ['agent-in-regular-policy-newer', 'agent-in-regular-policy'],
             type: 'REQUEST_DIAGNOSTICS',
             expiration: expect.anything(),
@@ -80,14 +80,14 @@ describe('requestDiagnostics', () => {
       );
       const calledWithActionResults = esClient.bulk.mock.calls[0][0] as estypes.BulkRequest;
       // bulk write two line per create
-      expect(calledWithActionResults.body?.length).toBe(2);
+      expect(calledWithActionResults.operations?.length).toBe(2);
       const expectedObject = expect.objectContaining({
         '@timestamp': expect.anything(),
         action_id: expect.anything(),
         agent_id: 'agent-in-regular-policy',
         error: 'Agent agent-in-regular-policy does not support request diagnostics action.',
       });
-      expect(calledWithActionResults.body?.[1] as any).toEqual(expectedObject);
+      expect(calledWithActionResults.operations?.[1]).toEqual(expectedObject);
     });
   });
 });

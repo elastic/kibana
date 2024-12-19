@@ -28,7 +28,7 @@ import { asyncForEach, asyncMap } from '@kbn/std';
 import type {
   AggregationsTermsInclude,
   AggregationsTermsExclude,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { isResponseError } from '@kbn/es-errors';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';

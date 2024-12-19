@@ -158,6 +158,7 @@ packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 packages/kbn-cases-components @elastic/response-ops
 packages/kbn-cbor @elastic/kibana-operations
 packages/kbn-chart-icons @elastic/kibana-visualizations
+packages/kbn-charts-theme @elastic/kibana-visualizations
 packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
 packages/kbn-ci-stats-core @elastic/kibana-operations
@@ -865,6 +866,7 @@ x-pack/platform/plugins/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments @elastic/kibana-core
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 x-pack/platform/plugins/shared/features @elastic/kibana-core
+x-pack/platform/plugins/shared/index_management @elastic/kibana-management
 x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
 x-pack/platform/plugins/shared/integration_assistant @elastic/security-scalability
@@ -896,7 +898,6 @@ x-pack/plugins/global_search @elastic/appex-sharedux
 x-pack/plugins/global_search_bar @elastic/appex-sharedux
 x-pack/plugins/global_search_providers @elastic/appex-sharedux
 x-pack/plugins/graph @elastic/kibana-visualizations
-x-pack/plugins/index_management @elastic/kibana-management
 x-pack/plugins/lens @elastic/kibana-visualizations
 x-pack/plugins/logstash @elastic/logstash
 x-pack/plugins/maps @elastic/kibana-presentation
