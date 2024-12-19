@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           log.warning('Request count differs:', result);
         }
         expect(count).to.be(searchCount);
-      }, 5);
+      });
     };
 
     const waitForLoadingToFinish = async () => {
