@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import './overview.scss';
+
 import { snakeCase } from 'lodash';
 import React, { FC, useState, useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
