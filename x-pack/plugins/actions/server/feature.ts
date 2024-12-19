@@ -7,15 +7,16 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { KibanaFeatureConfig, KibanaFeatureScope } from '@kbn/features-plugin/common';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
 
-export const CONNECTORS_ADVANCED_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-advanced-connectors';
-export const CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-basic-connectors';
+const EDR_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-edr-connectors';
+export const EDR_EXECUTE_PRIVILEGE = `api:${EDR_EXECUTE_PRIVILEGE_API_TAG}`;
+export const EDR_SUB_ACTIONS_EXECUTE_PRIVILEGE = `api:actions:execute-edr-sub-actions`;
 
 /**
  * The order of appearance in the feature privilege page
@@ -23,7 +24,7 @@ export const CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-basic
  */
 const FEATURE_ORDER = 3000;
 
-export const ACTIONS_FEATURE = {
+export const ACTIONS_FEATURE: KibanaFeatureConfig = {
   id: 'actions',
   name: i18n.translate('xpack.actions.featureRegistry.actionsFeatureName', {
     defaultMessage: 'Actions and Connectors',
@@ -38,10 +39,7 @@ export const ACTIONS_FEATURE = {
   privileges: {
     all: {
       app: [],
-      api: [
-        CONNECTORS_ADVANCED_EXECUTE_PRIVILEGE_API_TAG,
-        CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG,
-      ],
+      api: [],
       catalogue: [],
       management: {
         insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
@@ -58,7 +56,7 @@ export const ACTIONS_FEATURE = {
     },
     read: {
       app: [],
-      api: [CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG],
+      api: [],
       catalogue: [],
       management: {
         insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
@@ -71,4 +69,34 @@ export const ACTIONS_FEATURE = {
       ui: ['show', 'execute'],
     },
   },
+  subFeatures: [
+    {
+      name: i18n.translate('xpack.actions.featureRegistry.edrSubFeatureName', {
+        defaultMessage: 'Endpoint Security',
+      }),
+      description: i18n.translate('xpack.actions.featureRegistry.edrSubFeatureDescription', {
+        defaultMessage: 'Includes: Sentinel One, Crowdstrike',
+      }),
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              api: [EDR_EXECUTE_PRIVILEGE_API_TAG],
+              id: 'edr_execute',
+              name: i18n.translate('xpack.actions.featureRegistry.edrSubFeaturePrivilege', {
+                defaultMessage: 'Execute',
+              }),
+              includeIn: 'all',
+              savedObject: {
+                all: [ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, CONNECTOR_TOKEN_SAVED_OBJECT_TYPE],
+                read: [ACTION_SAVED_OBJECT_TYPE],
+              },
+              ui: ['edrExecute'],
+            },
+          ],
+        },
+      ],
+    },
+  ],
 };

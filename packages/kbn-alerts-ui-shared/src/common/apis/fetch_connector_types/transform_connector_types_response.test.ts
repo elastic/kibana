@@ -21,6 +21,7 @@ describe('transformConnectorTypesResponse', () => {
         minimum_license_required: 'basic',
         supported_feature_ids: ['stackAlerts'],
         is_system_action_type: true,
+        sub_feature_type: 'edr',
       },
       {
         id: 'actionType2Id',
@@ -44,6 +45,7 @@ describe('transformConnectorTypesResponse', () => {
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['stackAlerts'],
         isSystemActionType: true,
+        subFeatureType: 'edr',
       },
       {
         id: 'actionType2Id',
