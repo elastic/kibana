@@ -21,8 +21,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
-  EuiTitle,
-  EuiHorizontalRule,
+  EuiPopoverFooter,
 } from '@elastic/eui';
 
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
@@ -68,7 +67,6 @@ const buildDefaultContentLinks = ({
       defaultMessage: 'Open an issue in GitHub',
     }),
     href: docLinks.links.kibana.createGithubIssue,
-    iconType: 'logoGithub',
   },
 ];
 
@@ -196,7 +194,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
           {defaultContent}
           {customContent && (
             <>
-              <EuiHorizontalRule margin="m" />
+              <EuiPopoverFooter css={{ padding: '8px' }} />
               {customContent}
             </>
           )}
@@ -210,40 +208,37 @@ export class HeaderHelpMenu extends Component<Props, State> {
 
     return (
       <Fragment>
-        {defaultContentLinks.map(
-          ({ href, title, iconType, onClick: _onClick, dataTestSubj }, i) => {
-            const isLast = i === defaultContentLinks.length - 1;
+        {defaultContentLinks.map(({ href, title, onClick: _onClick, dataTestSubj }, i) => {
+          const isLast = i === defaultContentLinks.length - 1;
 
-            if (href && _onClick) {
-              throw new Error(
-                'Only one of `href` and `onClick` should be provided for the help menu link.'
-              );
-            }
-
-            const hrefProps = href ? { href, target: '_blank' } : {};
-            const onClick = () => {
-              if (!_onClick) return;
-              _onClick();
-              this.closeMenu();
-            };
-
-            return (
-              <Fragment key={i}>
-                <EuiButtonEmpty
-                  {...hrefProps}
-                  onClick={onClick}
-                  size="s"
-                  flush="left"
-                  iconType={iconType}
-                  data-test-subj={dataTestSubj}
-                >
-                  {title}
-                </EuiButtonEmpty>
-                {!isLast && <EuiSpacer size="xs" />}
-              </Fragment>
+          if (href && _onClick) {
+            throw new Error(
+              'Only one of `href` and `onClick` should be provided for the help menu link.'
             );
           }
-        )}
+
+          const hrefProps = href ? { href, target: '_blank' } : {};
+          const onClick = () => {
+            if (!_onClick) return;
+            _onClick();
+            this.closeMenu();
+          };
+
+          return (
+            <Fragment key={i}>
+              <EuiButtonEmpty
+                {...hrefProps}
+                onClick={onClick}
+                size="s"
+                flush="left"
+                data-test-subj={dataTestSubj}
+              >
+                {title}
+              </EuiButtonEmpty>
+              {!isLast && <EuiSpacer size="xs" />}
+            </Fragment>
+          );
+        })}
       </Fragment>
     );
   }
@@ -333,10 +328,9 @@ export class HeaderHelpMenu extends Component<Props, State> {
 
     return (
       <>
-        <EuiTitle size="xxs">
+        <EuiPopoverTitle>
           <h3>{appName}</h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
+        </EuiPopoverTitle>
         {customLinks}
         {content && (
           <>

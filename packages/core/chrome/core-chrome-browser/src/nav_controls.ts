@@ -20,7 +20,6 @@ export interface ChromeNavControl {
 export interface ChromeHelpMenuLink {
   title: string;
   href?: string;
-  iconType?: string;
   onClick?: () => void;
   dataTestSubj?: string;
 }
