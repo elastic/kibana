@@ -610,6 +610,7 @@ src/platform/packages/shared/kbn-typed-react-router-config @elastic/obs-knowledg
 src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
 src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-management
 src/platform/packages/shared/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
+src/platform/plugins/private/files_management @elastic/appex-sharedux
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/platform/plugins/shared/console @elastic/kibana-management
 src/platform/plugins/shared/content_management @elastic/appex-sharedux
@@ -651,7 +652,6 @@ src/plugins/expression_shape @elastic/kibana-presentation
 src/plugins/expressions @elastic/kibana-visualizations
 src/plugins/field_formats @elastic/kibana-data-discovery
 src/plugins/files @elastic/appex-sharedux
-src/plugins/files_management @elastic/appex-sharedux
 src/plugins/ftr_apis @elastic/kibana-core
 src/plugins/guided_onboarding @elastic/appex-sharedux
 src/plugins/home @elastic/appex-sharedux
