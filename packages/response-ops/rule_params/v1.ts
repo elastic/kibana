@@ -8,10 +8,20 @@
  */
 
 import { TypeOf, schema } from '@kbn/config-schema';
+import { transactionDurationParamsSchema as transactionDurationParamsSchemaV1 } from './transaction_duration/v1';
+import { apmAnomalyParamsSchema as apmAnomalyParamsSchemaV1 } from './apm_anomaly/v1';
+import { errorCountParamsSchema as errorCountParamsSchemaV1 } from './error_count/v1';
+import { transactionErrorRateParamsSchema as transactionErrorRateParamsSchemaV1 } from './transaction_error_rate/v1';
 
-export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
-  meta: { description: 'The parameters for the rule.' },
-});
+export const ruleParamsSchema = schema.oneOf([
+  transactionDurationParamsSchemaV1,
+  apmAnomalyParamsSchemaV1,
+  errorCountParamsSchemaV1,
+  transactionErrorRateParamsSchemaV1,
+  schema.recordOf(schema.string(), schema.maybe(schema.any()), {
+    meta: { description: 'The parameters for the rule.' },
+  }),
+]);
 
 export const ruleParamsSchemaWithDefaultValue = schema.recordOf(
   schema.string(),

@@ -33,6 +33,10 @@ import {
 import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
+import {
+  TransactionErrorRateRuleTypeParams,
+  transactionErrorRateParamsSchema,
+} from '@kbn/response-ops-rule-params/transaction_error_rate';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
@@ -50,10 +54,6 @@ import {
   RULE_TYPES_CONFIG,
   THRESHOLD_MET_GROUP,
 } from '../../../../../common/rules/apm_rule_types';
-import {
-  transactionErrorRateParamsSchema,
-  ApmRuleParamsType,
-} from '../../../../../common/rules/schema';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { asDecimalOrInteger, getAlertUrlTransaction } from '../../../../../common/utils/formatters';
 import { getBackwardCompatibleDocumentTypeFilter } from '../../../../lib/helpers/transactions';
@@ -86,7 +86,6 @@ export const transactionErrorRateActionVariables = [
   apmActionVariables.viewInAppUrl,
 ];
 
-type TransactionErrorRateRuleTypeParams = ApmRuleParamsType[ApmRuleType.TransactionErrorRate];
 type TransactionErrorRateActionGroups = ActionGroupIdsOf<typeof THRESHOLD_MET_GROUP>;
 type TransactionErrorRateRuleTypeState = RuleTypeState;
 type TransactionErrorRateAlertState = AlertState;
