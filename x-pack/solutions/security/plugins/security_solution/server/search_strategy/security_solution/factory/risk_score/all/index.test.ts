@@ -11,7 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { riskScore } from '.';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { RiskSeverity, type HostRiskScore } from '../../../../../../common/search_strategy';
-import { RiskScoreEntityType } from '../../../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../../../common/entity_analytics/types';
 import * as buildQuery from './query.risk_score.dsl';
 import { get } from 'lodash/fp';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
@@ -90,7 +90,7 @@ const mockDeps = {
 
 export const mockOptions: RiskScoreRequestOptions = {
   defaultIndex: ['logs-*'],
-  riskScoreEntity: RiskScoreEntityType.host,
+  riskScoreEntity: EntityType.host,
   includeAlertsCount: true,
   factoryQueryType: EntityRiskQueries.list,
 };

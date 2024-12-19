@@ -9,7 +9,7 @@ import { render, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { EntityAnalyticsRiskScores } from '.';
-import { RiskScoreEntityType, RiskSeverity } from '../../../../common/entity_analytics/types';
+import { EntityType, RiskSeverity } from '../../../../common/entity_analytics/types';
 import type { SeverityCount } from '../severity/types';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
@@ -73,7 +73,7 @@ jest.mock('../../../common/hooks/use_navigate_to_alerts_page_with_filters', () =
 const mockOpenRightPanel = jest.fn();
 jest.mock('@kbn/expandable-flyout');
 
-describe.each([RiskScoreEntityType.host, RiskScoreEntityType.user])(
+describe.each([EntityType.host, EntityType.user])(
   'EntityAnalyticsRiskScores entityType: %s',
   (riskEntity) => {
     beforeEach(() => {
@@ -222,8 +222,8 @@ describe.each([RiskScoreEntityType.host, RiskScoreEntityType.user])(
       await waitFor(() => {
         expect(mockOpenAlertsPageWithFilters.mock.calls[0][0]).toEqual([
           {
-            title: riskEntity === RiskScoreEntityType.host ? 'Host' : 'User',
-            fieldName: riskEntity === RiskScoreEntityType.host ? 'host.name' : 'user.name',
+            title: riskEntity === EntityType.host ? 'Host' : 'User',
+            fieldName: riskEntity === EntityType.host ? 'host.name' : 'user.name',
             selectedOptions: [name],
           },
         ]);
@@ -265,7 +265,7 @@ describe.each([RiskScoreEntityType.host, RiskScoreEntityType.user])(
       });
 
       const detailsButton = getByTestId(
-        riskEntity === RiskScoreEntityType.host ? `host-details-button` : `users-link-anchor`
+        riskEntity === EntityType.host ? `host-details-button` : `users-link-anchor`
       );
 
       fireEvent.click(detailsButton);
@@ -274,7 +274,7 @@ describe.each([RiskScoreEntityType.host, RiskScoreEntityType.user])(
         expect(mockOpenRightPanel).toHaveBeenCalledWith({
           id: `${riskEntity}-panel`,
           params: {
-            [riskEntity === RiskScoreEntityType.host ? `hostName` : `userName`]: 'testName',
+            [riskEntity === EntityType.host ? `hostName` : `userName`]: 'testName',
             contextID: 'entity-risk-score-table',
             scopeId: 'entity-risk-score-table',
           },

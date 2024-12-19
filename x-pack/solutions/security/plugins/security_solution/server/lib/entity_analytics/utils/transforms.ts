@@ -19,7 +19,7 @@ import {
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,
 } from '../../../../common/entity_analytics/risk_engine';
-import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import {
   getRiskScorePivotTransformId,
   getRiskScoreLatestTransformId,
@@ -36,7 +36,7 @@ export const getLegacyTransforms = async ({
   esClient: ElasticsearchClient;
 }) => {
   const getTransformStatsRequests: Array<Promise<TransformGetTransformResponse>> = [];
-  [RiskScoreEntityType.host, RiskScoreEntityType.user].forEach((entity) => {
+  [EntityType.host, EntityType.user].forEach((entity) => {
     getTransformStatsRequests.push(
       esClient.transform.getTransform({
         transform_id: getRiskScorePivotTransformId(entity, namespace),

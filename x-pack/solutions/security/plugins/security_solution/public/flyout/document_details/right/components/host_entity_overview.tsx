@@ -30,7 +30,7 @@ import {
   FirstLastSeen,
   FirstLastSeenType,
 } from '../../../../common/components/first_last_seen/first_last_seen';
-import { RiskScoreEntityType } from '../../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
@@ -123,7 +123,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
     loading: isRiskScoreLoading,
   } = useRiskScore({
     filterQuery,
-    riskEntity: RiskScoreEntityType.host,
+    riskEntity: EntityType.host,
     skip: hostName == null,
     timerange,
   });

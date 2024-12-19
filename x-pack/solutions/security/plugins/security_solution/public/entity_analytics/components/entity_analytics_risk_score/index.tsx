@@ -8,6 +8,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { RiskSeverity } from '../../../../common/search_strategy';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import {
   EntityPanelKeyByType,
@@ -18,9 +19,8 @@ import { getRiskScoreColumns } from './columns';
 import { LastUpdatedAt } from '../../../common/components/last_updated_at';
 import { HeaderSection } from '../../../common/components/header_section';
 import {
-  type RiskSeverity,
-  type RiskScoreEntityType,
-  EntityTypeToNameField,
+  type EntityType,
+  EntityTypeToIdentifierField,
 } from '../../../../common/entity_analytics/types';
 import { generateSeverityFilter } from '../../../explore/hosts/store/helpers';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -47,10 +47,10 @@ import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 export const ENTITY_RISK_SCORE_TABLE_ID = 'entity-risk-score-table';
 
-const EntityAnalyticsRiskScoresComponent = <EntityType extends RiskScoreEntityType>({
+const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
   riskEntity,
 }: {
-  riskEntity: EntityType;
+  riskEntity: T;
 }) => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
@@ -58,7 +58,7 @@ const EntityAnalyticsRiskScoresComponent = <EntityType extends RiskScoreEntityTy
   const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
   const { telemetry } = useKibana().services;
   const { openRightPanel } = useExpandableFlyoutApi();
-  const entityNameField = EntityTypeToNameField[riskEntity];
+  const entityNameField = EntityTypeToIdentifierField[riskEntity];
 
   const openEntityOnAlertsPage = useCallback(
     (entityName: string) => {

@@ -33,7 +33,7 @@ import { HostOverview } from '../../../../overview/components/host_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { NetworkDetailsLink } from '../../../../common/components/links';
-import { RiskScoreEntityType } from '../../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -228,7 +228,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
         ? [
             {
               field: 'risk',
-              name: ENTITY_RISK_LEVEL(RiskScoreEntityType.user),
+              name: ENTITY_RISK_LEVEL(EntityType.user),
               truncateText: false,
               mobileOptions: { show: true },
               sortable: false,

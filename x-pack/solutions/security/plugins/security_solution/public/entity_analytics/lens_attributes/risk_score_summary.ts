@@ -9,14 +9,14 @@ import { v4 as uuidv4 } from 'uuid';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import capitalize from 'lodash/capitalize';
 import { SEVERITY_UI_SORT_ORDER, RISK_SEVERITY_COLOUR, RISK_SCORE_RANGES } from '../common/utils';
-import type { RiskSeverity, RiskScoreEntityType } from '../../../common/entity_analytics/types';
+import type { RiskSeverity, EntityType } from '../../../common/entity_analytics/types';
 import { EntityTypeToScoreField, RiskScoreFields } from '../../../common/search_strategy';
 
 interface GetRiskScoreSummaryAttributesProps {
   query?: string;
   spaceId?: string;
   severity?: RiskSeverity;
-  riskEntity: RiskScoreEntityType;
+  riskEntity: EntityType;
 }
 
 export const getRiskScoreSummaryAttributes: (

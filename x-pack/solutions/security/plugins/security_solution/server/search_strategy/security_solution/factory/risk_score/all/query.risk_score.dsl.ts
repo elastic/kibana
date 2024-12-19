@@ -6,7 +6,7 @@
  */
 
 import type { Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { EntityTypeToNameField } from '../../../../../../common/entity_analytics/types';
+import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import type { RiskScoreRequestOptions } from '../../../../../../common/api/search_strategy';
 import { Direction, RiskScoreFields } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
@@ -25,7 +25,7 @@ export const buildRiskScoreQuery = ({
   riskScoreEntity,
 }: Omit<RiskScoreRequestOptions, 'factoryQueryType'>) => {
   const filter = createQueryFilterClauses(filterQuery);
-  const nameField = EntityTypeToNameField[riskScoreEntity];
+  const nameField = EntityTypeToIdentifierField[riskScoreEntity];
 
   if (timerange) {
     filter.push({

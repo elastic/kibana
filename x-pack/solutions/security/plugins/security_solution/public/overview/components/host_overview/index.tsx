@@ -15,7 +15,7 @@ import { useQueryInspector } from '../../../common/components/page/manage_query'
 import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { buildHostNamesFilter, type HostItem } from '../../../../common/search_strategy';
-import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import type { DescriptionList } from '../../../../common/utility_types';
 import { useDarkMode } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
@@ -100,7 +100,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
       refetch: refetchRiskScore,
     } = useRiskScore({
       filterQuery,
-      riskEntity: RiskScoreEntityType.host,
+      riskEntity: EntityType.host,
       skip: hostName == null,
       onlyLatest: false,
       pagination: FIRST_RECORD_PAGINATION,
@@ -133,10 +133,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
       return [
         {
           title: (
-            <RiskScoreHeaderTitle
-              title={i18n.HOST_RISK_SCORE}
-              riskScoreEntity={RiskScoreEntityType.host}
-            />
+            <RiskScoreHeaderTitle title={i18n.HOST_RISK_SCORE} riskScoreEntity={EntityType.host} />
           ),
           description: (
             <>
@@ -152,7 +149,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
               <EuiFlexItem grow={false}>
                 <RiskScoreHeaderTitle
                   title={i18n.HOST_RISK_LEVEL}
-                  riskScoreEntity={RiskScoreEntityType.host}
+                  riskScoreEntity={EntityType.host}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

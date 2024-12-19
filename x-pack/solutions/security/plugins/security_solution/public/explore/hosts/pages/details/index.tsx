@@ -36,7 +36,7 @@ import { useSignalIndex } from '../../../../detections/containers/detection_engi
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { LastEventIndexKey, type HostItem } from '../../../../../common/search_strategy';
-import { RiskScoreEntityType } from '../../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import { SecurityPageName } from '../../../../app/types';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -187,11 +187,9 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   const privileges = useAssetCriticalityPrivileges(entity.name);
 
   const refetchRiskScore = useRefetchOverviewPageRiskScore(HOST_OVERVIEW_RISK_SCORE_QUERY_ID);
-  const { calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    RiskScoreEntityType.host,
-    detailName,
-    { onSuccess: refetchRiskScore }
-  );
+  const { calculateEntityRiskScore } = useCalculateEntityRiskScore(EntityType.host, detailName, {
+    onSuccess: refetchRiskScore,
+  });
 
   const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
   const criticality = useAssetCriticalityData({

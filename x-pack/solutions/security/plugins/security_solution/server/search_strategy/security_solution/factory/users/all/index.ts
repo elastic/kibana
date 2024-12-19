@@ -25,7 +25,7 @@ import type { AllUsersAggEsItem } from '../../../../../../common/search_strategy
 import { buildRiskScoreQuery } from '../../risk_score/all/query.risk_score.dsl';
 import type { RiskSeverity, UserRiskScore } from '../../../../../../common/search_strategy';
 import {
-  RiskScoreEntityType,
+  EntityType,
   buildUserNamesFilter,
   getUserRiskIndex,
 } from '../../../../../../common/search_strategy';
@@ -136,7 +136,7 @@ export async function getUserRiskData(
       buildRiskScoreQuery({
         defaultIndex: [getUserRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)],
         filterQuery: buildUserNamesFilter(userNames),
-        riskScoreEntity: RiskScoreEntityType.user,
+        riskScoreEntity: EntityType.user,
       })
     );
     return userRiskResponse;

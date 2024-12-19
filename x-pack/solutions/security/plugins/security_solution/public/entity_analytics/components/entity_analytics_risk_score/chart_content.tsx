@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { RiskScoreEntityType, RiskSeverity } from '../../../../common/entity_analytics/types';
+import type { EntityType, RiskSeverity } from '../../../../common/entity_analytics/types';
 import { EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -28,7 +28,7 @@ const ChartContentComponent = ({
 }: {
   dataExists?: boolean;
   kpiQueryId: string;
-  riskEntity: RiskScoreEntityType;
+  riskEntity: EntityType;
   severityCount: SeverityCount | undefined;
   timerange: {
     from: string;

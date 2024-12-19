@@ -22,7 +22,7 @@ import type {
 
 import type { HostRiskScore } from '../../../../../../common/search_strategy';
 import {
-  RiskScoreEntityType,
+  EntityType,
   getHostRiskIndex,
   buildHostNamesFilter,
 } from '../../../../../../common/search_strategy';
@@ -131,7 +131,7 @@ export async function getHostRiskData(
       buildRiskScoreQuery({
         defaultIndex: [getHostRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)],
         filterQuery: buildHostNamesFilter(hostNames),
-        riskScoreEntity: RiskScoreEntityType.host,
+        riskScoreEntity: EntityType.host,
       })
     );
     return hostRiskResponse;

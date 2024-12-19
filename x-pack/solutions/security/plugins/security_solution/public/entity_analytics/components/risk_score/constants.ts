@@ -6,12 +6,12 @@
  */
 
 import { capitalize } from 'lodash/fp';
-import type { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+import type { EntityType } from '../../../../common/entity_analytics/types';
 
 export const RISKY_HOSTS_DASHBOARD_TITLE = 'Current Risk Score for Hosts';
 export const RISKY_USERS_DASHBOARD_TITLE = 'Current Risk Score for Users';
 
-export const getRiskyEntityDashboardTitle = (entityType: RiskScoreEntityType) =>
+export const getRiskyEntityDashboardTitle = (entityType: EntityType) =>
   `Current Risk Score for ${capitalize(entityType)}s`;
 
 export const CELL_ACTIONS_TELEMETRY = {

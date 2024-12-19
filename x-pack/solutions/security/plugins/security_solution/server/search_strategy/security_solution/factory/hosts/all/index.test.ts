@@ -18,7 +18,7 @@ import {
 } from './__mocks__';
 import { get } from 'lodash/fp';
 import type { HostsRequestOptions } from '../../../../../../common/api/search_strategy';
-import { RiskScoreEntityType } from '../../../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../../../common/entity_analytics/types';
 
 class IndexNotFoundException extends Error {
   meta: { body: { error: { type: string } } };
@@ -129,7 +129,7 @@ describe('allHosts search strategy', () => {
       expect(buildHostsRiskQuery).toHaveBeenCalledWith({
         defaultIndex: ['ml_host_risk_score_latest_test-space'],
         filterQuery: { terms: { 'host.name': [hostName] } },
-        riskScoreEntity: RiskScoreEntityType.host,
+        riskScoreEntity: EntityType.host,
         factoryQueryType: expect.stringContaining('RiskScore'),
       });
     });

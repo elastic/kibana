@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityTypeToNameField, RiskScoreEntityType } from '../../../../entity_analytics/types';
+import { EntityTypeToIdentifierField, EntityType } from '../../../../entity_analytics/types';
 import type { ESQuery } from '../../../../typed_json';
 import { RISKY_HOSTS_INDEX_PREFIX, RISKY_USERS_INDEX_PREFIX } from '../../../../constants';
 import {
@@ -42,20 +42,17 @@ export const getUserRiskIndex = (
 };
 
 export const buildHostNamesFilter = (hostNames: string[]) => {
-  return buildEntityNameFilter(RiskScoreEntityType.host, hostNames);
+  return buildEntityNameFilter(EntityType.host, hostNames);
 };
 
 export const buildUserNamesFilter = (hostNames: string[]) => {
-  return buildEntityNameFilter(RiskScoreEntityType.user, hostNames);
+  return buildEntityNameFilter(EntityType.user, hostNames);
 };
 
-export const buildEntityNamesFilter = (entityType: RiskScoreEntityType, names: string[]) => {};
+export const buildEntityNamesFilter = (entityType: EntityType, names: string[]) => {};
 
-export const buildEntityNameFilter = (
-  riskEntity: RiskScoreEntityType,
-  entityNames: string[]
-): ESQuery => {
-  return { terms: { [EntityTypeToNameField[riskEntity]]: entityNames } };
+export const buildEntityNameFilter = (riskEntity: EntityType, entityNames: string[]): ESQuery => {
+  return { terms: { [EntityTypeToIdentifierField[riskEntity]]: entityNames } };
 };
 
-export { RiskScoreEntityType };
+export { EntityType };

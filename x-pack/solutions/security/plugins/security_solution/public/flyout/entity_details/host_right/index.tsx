@@ -36,7 +36,7 @@ import { HostDetailsPanelKey } from '../host_details_left';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { HostPreviewPanelFooter } from '../host_preview/footer';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
-import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -76,7 +76,7 @@ export const HostPanel = ({
   );
 
   const riskScoreState = useRiskScore({
-    riskEntity: RiskScoreEntityType.host,
+    riskEntity: EntityType.host,
     filterQuery: hostNameFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
@@ -93,7 +93,7 @@ export const HostPanel = ({
   }, [refetch, refetchRiskInputsTab]);
 
   const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    RiskScoreEntityType.host,
+    EntityType.host,
     hostName,
     { onSuccess: refetchRiskScore }
   );

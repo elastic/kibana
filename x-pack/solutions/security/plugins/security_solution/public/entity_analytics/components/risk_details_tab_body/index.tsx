@@ -28,7 +28,7 @@ import {
   type HostRiskScore,
   type UserRiskScore,
 } from '../../../../common/search_strategy';
-import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import type { UsersComponentsQueryProps } from '../../../explore/users/pages/navigation/types';
 import type { HostsComponentsQueryProps } from '../../../explore/hosts/pages/navigation/types';
 import { useDashboardHref } from '../../../common/hooks/use_dashboard_href';
@@ -47,7 +47,7 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 
 type ComponentsQueryProps = HostsComponentsQueryProps | UsersComponentsQueryProps;
 
-const RiskDetailsTabBodyComponent = <T extends RiskScoreEntityType>({
+const RiskDetailsTabBodyComponent = <T extends EntityType>({
   entityName,
   startDate,
   endDate,
@@ -61,7 +61,7 @@ const RiskDetailsTabBodyComponent = <T extends RiskScoreEntityType>({
   const queryId = useMemo(
     () =>
       // TODO support services
-      riskEntity === RiskScoreEntityType.host
+      riskEntity === EntityType.host
         ? HostRiskScoreQueryId.HOST_DETAILS_RISK_SCORE
         : UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE,
     [riskEntity]
@@ -69,7 +69,7 @@ const RiskDetailsTabBodyComponent = <T extends RiskScoreEntityType>({
 
   const severitySelectionRedux = useDeepEqualSelector((state: State) =>
     // TODO support services
-    riskEntity === RiskScoreEntityType.host
+    riskEntity === EntityType.host
       ? hostsSelectors.hostRiskScoreSeverityFilterSelector()(state, hostsModel.HostsType.details)
       : usersSelectors.userRiskScoreSeverityFilterSelector()(state)
   );
@@ -109,7 +109,7 @@ const RiskDetailsTabBodyComponent = <T extends RiskScoreEntityType>({
     const lastRiskItem = data && data.length > 0 ? data[data.length - 1] : null;
     if (lastRiskItem) {
       // TODO support services
-      return riskEntity === RiskScoreEntityType.host
+      return riskEntity === EntityType.host
         ? (lastRiskItem as HostRiskScore).host.risk.rule_risks
         : (lastRiskItem as UserRiskScore).user.risk.rule_risks;
     }

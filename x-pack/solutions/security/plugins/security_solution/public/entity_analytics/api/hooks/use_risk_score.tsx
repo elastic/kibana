@@ -14,7 +14,7 @@ import { createFilter } from '../../../common/containers/helpers';
 import type {
   RiskScoreSortField,
   StrategyResponseType,
-  RiskScoreEntityType,
+  EntityType,
 } from '../../../../common/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
 
@@ -25,7 +25,7 @@ import type { inputsModel } from '../../../common/store';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 import { useEntityRiskIndex } from './use_risk_score_index';
 
-export interface RiskScoreState<T extends RiskScoreEntityType> {
+export interface RiskScoreState<T extends EntityType> {
   data: undefined | StrategyResponseType<EntityRiskQueries.list>['data'];
   inspect: InspectResponse;
   isInspected: boolean;
@@ -62,7 +62,7 @@ export const initialResult: Omit<StrategyResponseType<EntityRiskQueries.list>, '
   data: undefined,
 };
 
-export const useRiskScore = <T extends RiskScoreEntityType>({
+export const useRiskScore = <T extends EntityType>({
   timerange,
   onlyLatest = true,
   filterQuery,

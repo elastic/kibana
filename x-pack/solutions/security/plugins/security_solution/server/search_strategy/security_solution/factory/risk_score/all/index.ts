@@ -10,7 +10,7 @@ import { get, getOr } from 'lodash/fp';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { AggregationsMinAggregate, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { EntityTypeToNameField } from '../../../../../../common/entity_analytics/types';
+import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import type { EntityRiskQueries } from '../../../../../../common/api/search_strategy';
 import type { SecuritySolutionFactory } from '../../types';
 import type {
@@ -47,7 +47,7 @@ export const riskScore: SecuritySolutionFactory<EntityRiskQueries.list> = {
     const totalCount = getTotalCount(response.rawResponse.hits.total);
     const hits = response?.rawResponse?.hits?.hits;
     const data = hits?.map((hit) => hit._source) ?? [];
-    const nameField = EntityTypeToNameField[options.riskScoreEntity];
+    const nameField = EntityTypeToIdentifierField[options.riskScoreEntity];
     const names = data.map((risk) => get(nameField, risk) ?? '');
 
     const enhancedData =

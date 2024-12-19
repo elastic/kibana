@@ -30,13 +30,13 @@ import type { EntityRiskScore } from '../../../../../../common/search_strategy';
 import {
   buildHostNamesFilter,
   buildUserNamesFilter,
-  RiskScoreEntityType,
+  EntityType,
 } from '../../../../../../common/search_strategy';
 import { AssetCriticalityBadge } from '../../../asset_criticality';
 import { RiskInputsUtilityBar } from '../../components/utility_bar';
 import { ActionColumn } from '../../components/action_column';
 
-export interface RiskInputsTabProps<T extends RiskScoreEntityType> {
+export interface RiskInputsTabProps<T extends EntityType> {
   entityType: T;
   entityName: string;
   scopeId: string;
@@ -50,7 +50,7 @@ const FIRST_RECORD_PAGINATION = {
 export const EXPAND_ALERT_TEST_ID = 'risk-input-alert-preview-button';
 export const RISK_INPUTS_TAB_QUERY_ID = 'RiskInputsTabQuery';
 
-export const RiskInputsTab = <T extends RiskScoreEntityType>({
+export const RiskInputsTab = <T extends EntityType>({
   entityType,
   entityName,
   scopeId,
@@ -60,9 +60,9 @@ export const RiskInputsTab = <T extends RiskScoreEntityType>({
 
   const nameFilterQuery = useMemo(() => {
     // TODO support services
-    if (entityType === RiskScoreEntityType.host) {
+    if (entityType === EntityType.host) {
       return buildHostNamesFilter([entityName]);
-    } else if (entityType === RiskScoreEntityType.user) {
+    } else if (entityType === EntityType.user) {
       return buildUserNamesFilter([entityName]);
     }
   }, [entityName, entityType]);
@@ -238,14 +238,14 @@ export const RiskInputsTab = <T extends RiskScoreEntityType>({
 
 RiskInputsTab.displayName = 'RiskInputsTab';
 
-interface ContextsSectionProps<T extends RiskScoreEntityType> {
+interface ContextsSectionProps<T extends EntityType> {
   riskScore?: EntityRiskScore<T>;
   entityType: T;
   loading: boolean;
 }
 
 // TODO how to add generix to react.fc?
-const ContextsSection = <T extends RiskScoreEntityType>({
+const ContextsSection = <T extends EntityType>({
   riskScore,
   loading,
   entityType,
@@ -346,13 +346,13 @@ const contextColumns: Array<EuiBasicTableColumn<ContextRow>> = [
   },
 ];
 
-interface ExtraAlertsMessageProps<T extends RiskScoreEntityType> {
+interface ExtraAlertsMessageProps<T extends EntityType> {
   riskScore?: EntityRiskScore<T>;
   alerts: UseRiskContributingAlertsResult;
   entityType: T;
 }
 
-const ExtraAlertsMessage = <T extends RiskScoreEntityType>({
+const ExtraAlertsMessage = <T extends EntityType>({
   riskScore,
   alerts,
   entityType,

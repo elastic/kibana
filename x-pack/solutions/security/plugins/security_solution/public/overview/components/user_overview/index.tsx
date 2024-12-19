@@ -15,7 +15,7 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import type { DescriptionList } from '../../../../common/utility_types';
 import { useDarkMode } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
@@ -102,7 +102,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
     } = useRiskScore({
       filterQuery,
       skip: userName == null,
-      riskEntity: RiskScoreEntityType.user,
+      riskEntity: EntityType.user,
       onlyLatest: false,
       pagination: FIRST_RECORD_PAGINATION,
     });
@@ -134,10 +134,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
       return [
         {
           title: (
-            <RiskScoreHeaderTitle
-              title={i18n.USER_RISK_SCORE}
-              riskScoreEntity={RiskScoreEntityType.user}
-            />
+            <RiskScoreHeaderTitle title={i18n.USER_RISK_SCORE} riskScoreEntity={EntityType.user} />
           ),
           description: (
             <>
@@ -153,7 +150,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
               <EuiFlexItem grow={false}>
                 <RiskScoreHeaderTitle
                   title={i18n.USER_RISK_LEVEL}
-                  riskScoreEntity={RiskScoreEntityType.user}
+                  riskScoreEntity={EntityType.user}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

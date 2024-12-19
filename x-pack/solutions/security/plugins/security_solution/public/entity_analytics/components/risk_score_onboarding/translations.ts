@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+import type { EntityType } from '../../../../common/entity_analytics/types';
 import { getRiskEntityTranslation } from '../risk_score/translations';
 
 export const BETA = i18n.translate('xpack.securitySolution.riskScore.technicalPreviewLabel', {
@@ -20,7 +20,7 @@ export const RESTART_TOOLTIP = i18n.translate(
   }
 );
 
-export const RISK_DATA_TITLE = (riskEntity: RiskScoreEntityType) =>
+export const RISK_DATA_TITLE = (riskEntity: EntityType) =>
   i18n.translate('xpack.securitySolution.alertDetails.overview.hostRiskDataTitle', {
     defaultMessage: '{riskEntity} Risk Data',
     values: {

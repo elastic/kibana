@@ -9,14 +9,14 @@ import { useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { useMutation } from '@tanstack/react-query';
-import type { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+import type { EntityType } from '../../../../common/entity_analytics/types';
 import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import { useEntityAnalyticsRoutes } from '../api';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useRiskEngineStatus } from './use_risk_engine_status';
 
 export const useCalculateEntityRiskScore = (
-  identifierType: RiskScoreEntityType,
+  identifierType: EntityType,
   identifier: string,
   { onSuccess }: { onSuccess: () => void }
 ) => {

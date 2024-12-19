@@ -8,14 +8,14 @@
 import { useEffect } from 'react';
 import type { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
-import type { RiskScoreEntityType } from '../../../common/entity_analytics/types';
+import type { EntityType } from '../../../common/entity_analytics/types';
 import type { RiskScoreInput } from '../../../common/api/entity_analytics/common';
 import { useQueryAlerts } from '../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../detections/containers/detection_engine/alerts/constants';
 
 import type { EntityRiskScore } from '../../../common/search_strategy/security_solution/risk_score/all';
 
-interface UseRiskContributingAlerts<T extends RiskScoreEntityType> {
+interface UseRiskContributingAlerts<T extends EntityType> {
   entityType: T;
   riskScore: EntityRiskScore<T> | undefined;
 }
@@ -46,7 +46,7 @@ export interface UseRiskContributingAlertsResult {
 /**
  * Fetches alerts related to the risk score
  */
-export const useRiskContributingAlerts = <T extends RiskScoreEntityType>({
+export const useRiskContributingAlerts = <T extends EntityType>({
   riskScore,
   entityType,
 }: UseRiskContributingAlerts<T>): UseRiskContributingAlertsResult => {
@@ -83,7 +83,7 @@ export const useRiskContributingAlerts = <T extends RiskScoreEntityType>({
   };
 };
 
-const getInputs = <T extends RiskScoreEntityType>(riskScore: EntityRiskScore<T>, entityType: T) => {
+const getInputs = <T extends EntityType>(riskScore: EntityRiskScore<T>, entityType: T) => {
   if (!riskScore) {
     return [];
   }

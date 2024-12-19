@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { RiskScoreEntityType } from '../../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import {
   getCreateLatestTransformOptions,
   getCreateMLHostPivotTransformOptions,
@@ -31,7 +31,7 @@ import { createIngestPipeline } from './ingest_pipeline';
 interface InstallRiskScoreModule {
   esClient: ElasticsearchClient;
   logger: Logger;
-  riskScoreEntity: RiskScoreEntityType;
+  riskScoreEntity: EntityType;
   spaceId: string;
 }
 
@@ -303,7 +303,7 @@ const installUserRiskScoreModule = async ({
 };
 
 export const installRiskScoreModule = async (settings: InstallRiskScoreModule) => {
-  if (settings.riskScoreEntity === RiskScoreEntityType.user) {
+  if (settings.riskScoreEntity === EntityType.user) {
     const result = await installUserRiskScoreModule(settings);
     return result;
   } else {

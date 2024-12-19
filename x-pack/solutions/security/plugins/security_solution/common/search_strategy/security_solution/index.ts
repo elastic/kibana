@@ -94,7 +94,7 @@ import type {
 } from '../../api/search_strategy';
 import type {
   KpiRiskScoreStrategyResponse,
-  RiskScoreEntityType,
+  EntityType,
   RiskScoreStrategyResponse,
 } from './risk_score';
 
@@ -156,7 +156,7 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   : T extends CtiQueries.dataSource
   ? CtiDataSourceStrategyResponse
   : T extends EntityRiskQueries.list
-  ? RiskScoreStrategyResponse<RiskScoreEntityType>
+  ? RiskScoreStrategyResponse<EntityType>
   : T extends EntityRiskQueries.kpi
   ? KpiRiskScoreStrategyResponse
   : T extends RelatedEntitiesQueries.relatedUsers

@@ -14,7 +14,7 @@ import { SEVERITY_COLOR } from '../../../overview/components/detection_response/
 import { LinkAnchor, useGetSecuritySolutionLinkProps } from '../../../common/components/links';
 import {
   Direction,
-  RiskScoreEntityType,
+  EntityType,
   RiskScoreFields,
   RiskSeverity,
 } from '../../../../common/search_strategy';
@@ -64,7 +64,7 @@ export const EntityAnalyticsHeader = () => {
     refetch: refetchHostRiskScore,
   } = useRiskScoreKpi({
     timerange,
-    riskEntity: RiskScoreEntityType.host,
+    riskEntity: EntityType.host,
     filterQuery,
   });
 
@@ -76,7 +76,7 @@ export const EntityAnalyticsHeader = () => {
   } = useRiskScoreKpi({
     filterQuery,
     timerange,
-    riskEntity: RiskScoreEntityType.user,
+    riskEntity: EntityType.user,
   });
 
   const {
@@ -87,7 +87,7 @@ export const EntityAnalyticsHeader = () => {
   } = useRiskScoreKpi({
     filterQuery,
     timerange,
-    riskEntity: RiskScoreEntityType.service,
+    riskEntity: EntityType.service,
   });
 
   const { data } = useAggregatedAnomaliesByJob({ skip: false, from, to });
@@ -200,7 +200,7 @@ export const EntityAnalyticsHeader = () => {
           <>
             <EuiFlexItem grow={false}>
               <CriticalEntitiesCount
-                entityType={RiskScoreEntityType.host}
+                entityType={EntityType.host}
                 severityCount={hostsSeverityCount}
                 onClick={goToHostRiskTabFilteredByCritical}
                 href={hostRiskTabUrl}
@@ -208,7 +208,7 @@ export const EntityAnalyticsHeader = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <CriticalEntitiesCount
-                entityType={RiskScoreEntityType.user}
+                entityType={EntityType.user}
                 severityCount={usersSeverityCount}
                 onClick={goToUserRiskTabFilteredByCritical}
                 href={userRiskTabUrl}
@@ -217,7 +217,7 @@ export const EntityAnalyticsHeader = () => {
 
             <EuiFlexItem grow={false}>
               <CriticalEntitiesCount
-                entityType={RiskScoreEntityType.service}
+                entityType={EntityType.service}
                 severityCount={servicesSeverityCount}
               />
             </EuiFlexItem>
@@ -252,7 +252,7 @@ const CriticalEntitiesCount = ({
   severityCount?: SeverityCount;
   href?: string;
   onClick?: React.MouseEventHandler;
-  entityType: RiskScoreEntityType;
+  entityType: EntityType;
 }) => {
   const CriticalEntitiesText = (
     <FormattedMessage

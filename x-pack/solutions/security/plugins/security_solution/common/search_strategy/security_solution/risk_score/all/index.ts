@@ -7,13 +7,12 @@
 
 import type { IEsSearchResponse } from '@kbn/search-types';
 
-import { EntityIdentifierFields, RiskScoreEntityType } from '../../../../entity_analytics/types';
+import { EntityIdentifierFields, EntityType } from '../../../../entity_analytics/types';
 import { EntityRiskLevels, EntityRiskLevelsEnum } from '../../../../api/entity_analytics/common';
 import type { EntityRiskScoreRecord } from '../../../../api/entity_analytics/common';
 import type { Inspect, Maybe, SortField } from '../../../common';
 
-export interface RiskScoreStrategyResponse<T extends RiskScoreEntityType>
-  extends IEsSearchResponse {
+export interface RiskScoreStrategyResponse<T extends EntityType> extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
   totalCount: number;
   data: Array<EntityRiskScore<T>> | undefined;
@@ -27,15 +26,15 @@ export interface RiskStats extends EntityRiskScoreRecord {
 export const RiskSeverity = EntityRiskLevels.enum;
 export type RiskSeverity = EntityRiskLevels;
 
-export type EntityRiskScore<Entity extends RiskScoreEntityType> = {
+export type EntityRiskScore<Entity extends EntityType> = {
   '@timestamp': string;
   alertsCount?: number;
   oldestAlertTimestamp?: string;
 } & Record<Entity, { name: string; risk: RiskStats }>;
 
-export type HostRiskScore = EntityRiskScore<RiskScoreEntityType.host>;
-export type UserRiskScore = EntityRiskScore<RiskScoreEntityType.user>;
-export type ServiceRiskScore = EntityRiskScore<RiskScoreEntityType.service>;
+export type HostRiskScore = EntityRiskScore<EntityType.host>;
+export type UserRiskScore = EntityRiskScore<EntityType.user>;
+export type ServiceRiskScore = EntityRiskScore<EntityType.service>;
 
 export interface RuleRisk {
   rule_name: string;
@@ -86,14 +85,14 @@ export const EMPTY_SEVERITY_COUNT = {
   [EntityRiskLevelsEnum.Unknown]: 0,
 };
 
-export const EntityTypeToLevelField: Record<RiskScoreEntityType, RiskScoreFields> = {
-  [RiskScoreEntityType.host]: RiskScoreFields.hostRisk,
-  [RiskScoreEntityType.user]: RiskScoreFields.userRisk,
-  [RiskScoreEntityType.service]: RiskScoreFields.serviceRisk,
+export const EntityTypeToLevelField: Record<EntityType, RiskScoreFields> = {
+  [EntityType.host]: RiskScoreFields.hostRisk,
+  [EntityType.user]: RiskScoreFields.userRisk,
+  [EntityType.service]: RiskScoreFields.serviceRisk,
 };
 
-export const EntityTypeToScoreField: Record<RiskScoreEntityType, RiskScoreFields> = {
-  [RiskScoreEntityType.host]: RiskScoreFields.hostRiskScore,
-  [RiskScoreEntityType.user]: RiskScoreFields.userRiskScore,
-  [RiskScoreEntityType.service]: RiskScoreFields.serviceRiskScore,
+export const EntityTypeToScoreField: Record<EntityType, RiskScoreFields> = {
+  [EntityType.host]: RiskScoreFields.hostRiskScore,
+  [EntityType.user]: RiskScoreFields.userRiskScore,
+  [EntityType.service]: RiskScoreFields.serviceRiskScore,
 };

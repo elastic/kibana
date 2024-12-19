@@ -33,7 +33,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import { RiskScoreEntityType } from '../../../common/entity_analytics/types';
+import { EntityType } from '../../../common/entity_analytics/types';
 import { EntityType, type StoreStatus } from '../../../common/api/entity_analytics';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../common/entity_analytics/asset_criticality';
@@ -75,11 +75,11 @@ export const EntityStoreManagementPage = () => {
   const [selectedTabId, setSelectedTabId] = useState(TabId.Import);
   const entityStoreStatus = useEntityStoreStatus({});
   const isServiceEntityStoreEnabled = useIsExperimentalFeatureEnabled('serviceEntityStoreEnabled');
-  const allEntityTypes = Object.values(EntityType.Values);
+  const allEntityTypes = Object.values(EntityType);
 
   const entityTypes = isServiceEntityStoreEnabled
     ? allEntityTypes
-    : allEntityTypes.filter((value) => value !== RiskScoreEntityType.service);
+    : allEntityTypes.filter((value) => value !== EntityType.service);
 
   const enableStoreMutation = useEnableEntityStoreMutation();
   const stopEntityEngineMutation = useStopEntityEngineMutation(entityTypes);

@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import type { BoolQuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EntityTypeToNameField, RiskScoreEntityType } from '../../../common/entity_analytics/types';
+import { EntityTypeToIdentifierField, EntityType } from '../../../common/entity_analytics/types';
 import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
 import { RISK_SCORE_INDEX_PATTERN } from '../../../common/entity_analytics/risk_engine';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
@@ -39,7 +39,7 @@ interface IRiskScorePreviewPanel {
   hideMessage: React.ReactNode;
   isLoading: boolean;
   items: EntityRiskScoreRecord[];
-  type: RiskScoreEntityType;
+  type: EntityType;
 }
 
 const getRiskiestScores = (scores: EntityRiskScoreRecord[] = [], field: string) =>
@@ -142,11 +142,11 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
   to,
 }) => {
   const isServiceEntityStoreEnabled = useIsExperimentalFeatureEnabled('serviceEntityStoreEnabled');
-  const allEntityTypes = Object.values(RiskScoreEntityType.Values);
+  const allEntityTypes = Object.values(EntityType);
 
   const entityTypes = isServiceEntityStoreEnabled
     ? allEntityTypes
-    : allEntityTypes.filter((value) => value !== RiskScoreEntityType.service);
+    : allEntityTypes.filter((value) => value !== EntityType.service);
 
   const [filters] = useState<{ bool: BoolQuery }>({
     bool: { must: [], filter: [], should: [], must_not: [] },
@@ -194,7 +194,10 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
       {entityTypes.map((entityType) => (
         <Fragment key={entityType}>
           <RiskScorePreviewPanel
-            items={getRiskiestScores(data?.scores[entityType], EntityTypeToNameField[entityType])}
+            items={getRiskiestScores(
+              data?.scores[entityType],
+              EntityTypeToIdentifierField[entityType]
+            )}
             showMessage={
               <FormattedMessage
                 id="xpack.securitySolution.riskScore.riskScorePreview.show"

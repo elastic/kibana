@@ -35,7 +35,7 @@ import type {
   RiskSeverity,
   UserRiskScore,
 } from '../../../../common/search_strategy';
-import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import { RiskInformationButtonEmpty } from '../risk_information';
 
 export const rowItems: ItemsPerRow[] = [
@@ -183,14 +183,14 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
       headerFilters={
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
-            <RiskInformationButtonEmpty riskEntity={RiskScoreEntityType.user} />
+            <RiskInformationButtonEmpty riskEntity={EntityType.user} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFilterGroup>
               <SeverityFilter
                 selectedItems={severitySelectionRedux}
                 onSelect={onSelect}
-                riskEntity={RiskScoreEntityType.user}
+                riskEntity={EntityType.user}
               />
             </EuiFilterGroup>
           </EuiFlexItem>

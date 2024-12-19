@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useDispatch } from 'react-redux';
-import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import { getTabsOnUsersUrl } from '../../../common/components/link_to/redirect_to_users';
 import { UsersTableType } from '../../../explore/users/store/model';
 
@@ -15,7 +15,7 @@ import { usersActions } from '../../../explore/users/store';
 import { hostsActions } from '../../../explore/hosts/store';
 import { SecurityPageName } from '../../../app/types';
 
-export const useEntityInfo = (riskEntity: RiskScoreEntityType) => {
+export const useEntityInfo = (riskEntity: EntityType) => {
   const dispatch = useDispatch();
 
   const tableQueryIds = {
@@ -23,7 +23,7 @@ export const useEntityInfo = (riskEntity: RiskScoreEntityType) => {
     kpiQueryId: `${riskEntity}HeaderRiskScoreKpiQuery`,
   };
 
-  if (riskEntity === RiskScoreEntityType.host) {
+  if (riskEntity === EntityType.host) {
     return {
       linkProps: {
         deepLinkId: SecurityPageName.hosts,
@@ -39,7 +39,7 @@ export const useEntityInfo = (riskEntity: RiskScoreEntityType) => {
       },
       ...tableQueryIds,
     };
-  } else if (riskEntity === RiskScoreEntityType.user) {
+  } else if (riskEntity === EntityType.user) {
     return {
       linkProps: {
         deepLinkId: SecurityPageName.users,

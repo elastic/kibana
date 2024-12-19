@@ -11,7 +11,7 @@ import type { SyntheticEvent, MouseEvent } from 'react';
 import React, { useMemo, useCallback } from 'react';
 import { isArray, isNil } from 'lodash/fp';
 import type { NavigateToAppOptions } from '@kbn/core-application-browser';
-import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
 import { encodeIpv6 } from '../../lib/helpers';
 import {
@@ -210,7 +210,7 @@ export interface EntityDetailsLinkProps {
   onClick?: (e: SyntheticEvent) => void;
   tab?: HostsTableType | UsersTableType;
   title?: string;
-  entityType: RiskScoreEntityType;
+  entityType: EntityType;
 }
 export const EntityDetailsLink = ({
   entityType,
@@ -218,9 +218,9 @@ export const EntityDetailsLink = ({
   entityName,
   ...props
 }: EntityDetailsLinkProps) => {
-  if (entityName === RiskScoreEntityType.host) {
+  if (entityName === EntityType.host) {
     return <HostDetailsLink {...props} hostTab={tab as HostsTableType} hostName={entityName} />;
-  } else if (entityName === RiskScoreEntityType.user) {
+  } else if (entityName === EntityType.user) {
     return <UserDetailsLink {...props} userTab={tab as UsersTableType} userName={entityName} />;
   }
   return entityName;

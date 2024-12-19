@@ -8,7 +8,7 @@
 import { EuiEmptyPrompt, EuiPanel, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+import type { EntityType } from '../../../../common/entity_analytics/types';
 
 import { HeaderSection } from '../../../common/components/header_section';
 import * as i18n from './translations';
@@ -21,7 +21,7 @@ const RiskScoresNoDataDetectedComponent = ({
   entityType,
   refetch,
 }: {
-  entityType: RiskScoreEntityType;
+  entityType: EntityType;
   refetch: inputsModel.Refetch;
 }) => {
   const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();

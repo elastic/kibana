@@ -9,14 +9,14 @@ import React, { useCallback } from 'react';
 import type { MultiselectFilterProps } from '../../../common/components/multiselect_filter';
 import { MultiselectFilter } from '../../../common/components/multiselect_filter';
 import { SEVERITY_UI_SORT_ORDER } from '../../common/utils';
-import type { RiskScoreEntityType, RiskSeverity } from '../../../../common/entity_analytics/types';
+import type { EntityType, RiskSeverity } from '../../../../common/entity_analytics/types';
 import { RiskScoreLevel } from './common';
 import { ENTITY_RISK_LEVEL } from '../risk_score/translations';
 import { useKibana } from '../../../common/lib/kibana';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 export interface SeverityFilterProps {
-  riskEntity?: RiskScoreEntityType;
+  riskEntity?: EntityType;
   onSelect: (newSelection: RiskSeverity[]) => void;
   selectedItems: RiskSeverity[];
 }

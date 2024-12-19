@@ -16,7 +16,7 @@ import { HeaderSection } from '../../../common/components/header_section';
 import * as i18n from './translations';
 import type { RiskInputs } from '../../../../common/entity_analytics/risk_engine';
 import {
-  RiskScoreEntityType,
+  EntityType,
   type HostRiskScore,
   type UserRiskScore,
 } from '../../../../common/search_strategy';
@@ -35,7 +35,7 @@ export interface TopRiskScoreContributorsAlertsProps {
   toggleStatus: boolean;
   toggleQuery?: (status: boolean) => void;
   riskScore: HostRiskScore | UserRiskScore;
-  riskEntity: RiskScoreEntityType;
+  riskEntity: EntityType;
   loading: boolean;
 }
 
@@ -62,7 +62,7 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
   const inputFilters = useMemo(() => {
     // TODO support services
     const riskScoreEntity =
-      riskEntity === RiskScoreEntityType.host
+      riskEntity === EntityType.host
         ? (riskScore as HostRiskScore).host
         : (riskScore as UserRiskScore).user;
 

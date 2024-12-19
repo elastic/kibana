@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import {
   getCreateLatestTransformOptions,
   getCreateMLHostPivotTransformOptions,
@@ -25,7 +25,7 @@ import {
 } from '../../../../common/utils/risk_score_modules';
 
 const getRiskyHostPrebuiltDevToolsContent = ({ spaceId = 'default' }: { spaceId?: string }) => {
-  const riskScoreEntity = RiskScoreEntityType.host;
+  const riskScoreEntity = EntityType.host;
   const stringifyScript = true;
   return {
     spaceId,
@@ -63,7 +63,7 @@ const getRiskyHostPrebuiltDevToolsContent = ({ spaceId = 'default' }: { spaceId?
 };
 
 const getRiskyUserPrebuiltDevToolsContent = ({ spaceId = 'default' }: { spaceId?: string }) => {
-  const riskScoreEntity = RiskScoreEntityType.user;
+  const riskScoreEntity = EntityType.user;
   const stringifyScript = true;
   return {
     spaceId,
@@ -104,9 +104,9 @@ export const getView = ({
   riskScoreEntity,
 }: {
   spaceId?: string;
-  riskScoreEntity: RiskScoreEntityType;
+  riskScoreEntity: EntityType;
 }) => {
-  if (riskScoreEntity === RiskScoreEntityType.user) {
+  if (riskScoreEntity === EntityType.user) {
     return getRiskyUserPrebuiltDevToolsContent({ spaceId });
   }
 

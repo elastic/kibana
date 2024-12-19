@@ -9,7 +9,7 @@ import type { CriticalityLevels } from './constants';
 import { ValidCriticalityLevels } from './constants';
 import { type AssetCriticalityUpsert, type CriticalityLevel } from './types';
 import { getAvailableEntityTypes } from '../entity_store/constants';
-import { EntityTypeToNameField, type RiskScoreEntityType } from '../types';
+import { EntityTypeToIdentifierField, type EntityType } from '../types';
 
 const MAX_COLUMN_CHARS = 1000;
 
@@ -100,7 +100,7 @@ export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
     );
   }
 
-  if (!getAvailableEntityTypes().includes(entityType as RiskScoreEntityType)) {
+  if (!getAvailableEntityTypes().includes(entityType as EntityType)) {
     return validationErrorWithMessage(
       i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.invalidEntityTypeError', {
         defaultMessage: 'Invalid entity type "{entityType}", expected to be one of: {validTypes}',
@@ -112,7 +112,7 @@ export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
     );
   }
 
-  const idField = EntityTypeToNameField[entityType as RiskScoreEntityType];
+  const idField = EntityTypeToIdentifierField[entityType as EntityType];
 
   return {
     valid: true,

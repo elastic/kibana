@@ -9,7 +9,7 @@ import React from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { RiskDetailsTabBody } from '../../../../entity_analytics/components/risk_details_tab_body';
-import { RiskScoreEntityType } from '../../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import { UsersTableType } from '../../store/model';
 import { AnomaliesUserTable } from '../../../../common/components/ml/tables/anomalies_user_table';
 import type { UsersDetailsTabsProps } from './types';
@@ -61,7 +61,7 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.risk})`}>
           <RiskDetailsTabBody
             {...tabProps}
-            riskEntity={RiskScoreEntityType.user}
+            riskEntity={EntityType.user}
             entityName={tabProps.userName}
           />
         </Route>

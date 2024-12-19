@@ -12,7 +12,7 @@ import { EuiLink } from '@elastic/eui';
 import styled from 'styled-components';
 import { get } from 'lodash/fp';
 
-import { EntityTypeToNameField } from '../../../../common/entity_analytics/types';
+import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { EntityDetailsLink } from '../../../common/components/links';
 import { RiskScoreLevel } from '../severity/common';
@@ -21,7 +21,7 @@ import type {
   EntityRiskScore,
   Maybe,
   RiskSeverity,
-  RiskScoreEntityType,
+  EntityType,
 } from '../../../../common/search_strategy';
 import {
   EntityTypeToLevelField,
@@ -46,12 +46,12 @@ const StyledCellActions = styled(SecurityCellActions)`
 type OpenEntityOnAlertsPage = (entityName: string) => void;
 type OpenEntityOnExpandableFlyout = (entityName: string) => void;
 
-export const getRiskScoreColumns = <E extends RiskScoreEntityType>(
+export const getRiskScoreColumns = <E extends EntityType>(
   entityType: E,
   openEntityOnAlertsPage: OpenEntityOnAlertsPage,
   openEntityOnExpandableFlyout: OpenEntityOnExpandableFlyout
 ): Array<EuiBasicTableColumn<EntityRiskScore<E>>> => {
-  const fieldName = EntityTypeToNameField[entityType];
+  const fieldName = EntityTypeToIdentifierField[entityType];
   const getEntityName = get(fieldName);
   const getEntityDetailsLinkComponent = (entityName: string) => {
     const onEntityDetailsLinkClick: (e: SyntheticEvent) => void = (e) => {

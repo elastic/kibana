@@ -23,8 +23,8 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash/fp';
-import type { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
-import { EntityTypeToNameField } from '../../../../common/entity_analytics/types';
+import type { EntityType } from '../../../../common/entity_analytics/types';
+import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
@@ -46,7 +46,7 @@ import {
 } from './common';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
 
-export interface RiskSummaryProps<T extends RiskScoreEntityType> {
+export interface RiskSummaryProps<T extends EntityType> {
   riskScoreData: RiskScoreState<T>;
   entityType: T;
   recalculatingScore: boolean;
@@ -55,7 +55,7 @@ export interface RiskSummaryProps<T extends RiskScoreEntityType> {
   isPreviewMode?: boolean;
 }
 
-const FlyoutRiskSummaryComponent = <T extends RiskScoreEntityType>({
+const FlyoutRiskSummaryComponent = <T extends EntityType>({
   riskScoreData,
   entityType,
   recalculatingScore,
@@ -71,7 +71,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntityType>({
 
   const lensAttributes = useMemo(() => {
     const entityName = entityData?.name ?? '';
-    const fieldName = EntityTypeToNameField[entityType];
+    const fieldName = EntityTypeToIdentifierField[entityType];
 
     return getRiskScoreSummaryAttributes({
       severity: entityData?.risk?.calculated_level,

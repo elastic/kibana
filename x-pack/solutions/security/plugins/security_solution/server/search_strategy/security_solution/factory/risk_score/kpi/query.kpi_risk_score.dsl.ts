@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityTypeToNameField } from '../../../../../../common/entity_analytics/types';
+import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { EntityTypeToLevelField } from '../../../../../../common/search_strategy';
 import type { RiskScoreKpiRequestOptions } from '../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
@@ -44,7 +44,7 @@ export const buildKpiRiskScoreQuery = ({
           aggs: {
             unique_entries: {
               cardinality: {
-                field: EntityTypeToNameField[entity],
+                field: EntityTypeToIdentifierField[entity],
               },
             },
           },

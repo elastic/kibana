@@ -10,11 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { sumBy } from 'lodash/fp';
 
-import type {
-  EntityRiskScore,
-  RiskScoreEntityType,
-  RiskStats,
-} from '../../../../common/search_strategy';
+import type { EntityRiskScore, EntityType, RiskStats } from '../../../../common/search_strategy';
 import { formatRiskScore } from '../../common';
 
 interface TableItem {
@@ -111,7 +107,7 @@ export const getItems: (entityData: EntityData | undefined) => TableItem[] = (en
   ];
 };
 
-export const getEntityData = <T extends RiskScoreEntityType>(
+export const getEntityData = <T extends EntityType>(
   entityType: T,
   riskData: EntityRiskScore<T> | undefined
 ): EntityData | undefined => {

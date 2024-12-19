@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { RiskScoreOverTime } from '.';
 import { TestProviders } from '../../../common/mock';
-import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -30,7 +30,7 @@ jest.mock('../../../common/hooks/use_space_id', () => ({
 }));
 
 const props = {
-  riskEntity: RiskScoreEntityType.host,
+  riskEntity: EntityType.host,
   riskScore: [],
   loading: false,
   from: '2020-07-07T08:20:18.966Z',

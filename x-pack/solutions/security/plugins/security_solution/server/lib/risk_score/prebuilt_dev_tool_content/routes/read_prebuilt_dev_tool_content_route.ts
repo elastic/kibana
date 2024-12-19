@@ -16,7 +16,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { consoleMappings } from '../console_mappings';
 import { readConsoleRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 
-import { RiskScoreEntityType } from '../../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import { getView } from '../utils';
 
 const getReadables = (dataPath: string) => fs.promises.readFile(dataPath, { encoding: 'utf-8' });
@@ -82,9 +82,7 @@ export const readPrebuiltDevToolContentRoute = (router: SecuritySolutionPluginRo
           const template = await getReadables(dataPath);
 
           const riskScoreEntity =
-            consoleId === 'enable_host_risk_score'
-              ? RiskScoreEntityType.host
-              : RiskScoreEntityType.user;
+            consoleId === 'enable_host_risk_score' ? EntityType.host : EntityType.user;
           const view = getView({ spaceId, riskScoreEntity });
 
           // override the mustache.js escape function to not escape special characters

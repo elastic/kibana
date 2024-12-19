@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import type { HostPanelExpandableFlyoutProps } from '../host_right';
 import type { UserPanelExpandableFlyoutProps } from '../user_right';
 
@@ -26,15 +26,15 @@ export const MANAGED_USER_QUERY_ID = 'managedUserDetailsQuery';
 export const HostPanelKey: HostPanelExpandableFlyoutProps['key'] = 'host-panel';
 export const UserPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-panel';
 
-export const EntityPanelKeyByType: Record<RiskScoreEntityType, string | undefined> = {
-  [RiskScoreEntityType.host]: HostPanelKey,
-  [RiskScoreEntityType.user]: UserPanelKey,
-  [RiskScoreEntityType.service]: undefined, // TODO create service flyout
+export const EntityPanelKeyByType: Record<EntityType, string | undefined> = {
+  [EntityType.host]: HostPanelKey,
+  [EntityType.user]: UserPanelKey,
+  [EntityType.service]: undefined, // TODO create service flyout
 };
 
 // TODO rename all params to entityName
-export const EntityPanelParamByType: Record<RiskScoreEntityType, string | undefined> = {
-  [RiskScoreEntityType.host]: 'hostName',
-  [RiskScoreEntityType.user]: 'userName',
-  [RiskScoreEntityType.service]: undefined, // TODO create service flyout
+export const EntityPanelParamByType: Record<EntityType, string | undefined> = {
+  [EntityType.host]: 'hostName',
+  [EntityType.user]: 'userName',
+  [EntityType.service]: undefined, // TODO create service flyout
 };

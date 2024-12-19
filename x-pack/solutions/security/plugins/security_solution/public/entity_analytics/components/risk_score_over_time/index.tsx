@@ -12,11 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { HeaderSection } from '../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../common/components/inspect';
 
-import type {
-  HostRiskScore,
-  RiskScoreEntityType,
-  UserRiskScore,
-} from '../../../../common/search_strategy';
+import type { HostRiskScore, EntityType, UserRiskScore } from '../../../../common/search_strategy';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getRiskScoreOverTimeAreaAttributes } from '../../lens_attributes/risk_score_over_time_area';
@@ -26,7 +22,7 @@ export interface RiskScoreOverTimeProps {
   to: string;
   loading: boolean;
   riskScore?: Array<HostRiskScore | UserRiskScore>;
-  riskEntity: RiskScoreEntityType;
+  riskEntity: EntityType;
   queryId: string;
   title: string;
   toggleStatus: boolean;

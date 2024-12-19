@@ -9,13 +9,13 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { capitalize } from 'lodash/fp';
-import type { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+import type { EntityType } from '../../../../common/entity_analytics/types';
 
 const RiskScoreHeaderTitleComponent = ({
   riskScoreEntity,
   title,
 }: {
-  riskScoreEntity: RiskScoreEntityType;
+  riskScoreEntity: EntityType;
   title?: string;
 }) => (
   <>

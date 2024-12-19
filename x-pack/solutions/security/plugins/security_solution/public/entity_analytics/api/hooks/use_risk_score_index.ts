@@ -9,15 +9,11 @@ import {
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,
 } from '../../../../common/entity_analytics/risk_engine';
-import {
-  RiskScoreEntityType,
-  getHostRiskIndex,
-  getUserRiskIndex,
-} from '../../../../common/search_strategy';
+import { EntityType, getHostRiskIndex, getUserRiskIndex } from '../../../../common/search_strategy';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useIsNewRiskScoreModuleInstalled } from './use_risk_engine_status';
 
-export const useEntityRiskIndex = (riskEntity: RiskScoreEntityType, onlyLatest: boolean = true) => {
+export const useEntityRiskIndex = (riskEntity: EntityType, onlyLatest: boolean = true) => {
   const spaceId = useSpaceId();
   const { installed: isNewRiskScoreModuleInstalled, isLoading: riskScoreStatusLoading } =
     useIsNewRiskScoreModuleInstalled();
@@ -28,7 +24,7 @@ export const useEntityRiskIndex = (riskEntity: RiskScoreEntityType, onlyLatest: 
     }
 
     // TODO Delete this when the old risk score module is removed
-    return riskEntity === RiskScoreEntityType.host
+    return riskEntity === EntityType.host
       ? getHostRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleInstalled)
       : getUserRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleInstalled);
   }

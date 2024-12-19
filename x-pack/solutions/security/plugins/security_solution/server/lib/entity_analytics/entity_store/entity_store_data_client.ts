@@ -23,7 +23,7 @@ import moment from 'moment';
 import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { estypes } from '@elastic/elasticsearch';
-import { RiskScoreEntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import type { ExperimentalFeatures } from '../../../../common';
 import type {
   GetEntityStoreStatusRequestQuery,
@@ -44,7 +44,6 @@ import type {
   ListEntityEnginesResponse,
   EngineComponentStatus,
   EngineComponentResource,
-  EntityType,
 } from '../../../../common/api/entity_analytics';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { ENGINE_STATUS, ENTITY_STORE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
@@ -211,8 +210,8 @@ export class EntityStoreDataClient {
 
     const { experimentalFeatures } = this.options;
     const enginesTypes = experimentalFeatures.serviceEntityStoreEnabled
-      ? [RiskScoreEntityType.host, RiskScoreEntityType.user, RiskScoreEntityType.service]
-      : [RiskScoreEntityType.host, RiskScoreEntityType.user];
+      ? [EntityType.host, EntityType.user, EntityType.service]
+      : [EntityType.host, EntityType.user];
 
     const promises = enginesTypes.map((entity) =>
       run(() =>
