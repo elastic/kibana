@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-export type {
-  FieldDefinition,
-  ProcessingDefinition,
-  ReadStreamDefinition,
-  StreamDefinition,
-} from './types';
+import { ProcessingDefinition } from '@kbn/streams-plugin/common';
+
+export interface ProcessorDefinition extends ProcessingDefinition {
+  id: string;
+}
+
+export type ProcessorType = ProcessingDefinition['config']['type'];
