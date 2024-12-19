@@ -22,6 +22,7 @@ import {
   EuiCopy,
   EuiButton,
   useEuiFontSize,
+  EuiText,
 } from '@elastic/eui';
 import {
   getFieldValidityAndErrorMessage,
@@ -31,12 +32,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { ConfigEntryView } from '../../../common/dynamic_config/types';
-import { ConnectorConfigurationFormItems } from '../lib/dynamic_config/connector_configuration_form_items';
-import * as i18n from './translations';
-import { DEFAULT_TASK_TYPE } from './constants';
-import { Config } from './types';
-import { TaskTypeOption } from './helpers';
+import { ConfigurationFormItems } from './configuration/configuration_form_items';
+import * as i18n from '../translations';
+import { DEFAULT_TASK_TYPE } from '../constants';
+import { Config, ConfigEntryView } from '../types/types';
+import { TaskTypeOption } from '../utils/helpers';
 
 // Custom trigger button CSS
 const buttonCss = css`
@@ -45,10 +45,8 @@ const buttonCss = css`
   }
 `;
 
-interface AdditionalOptionsConnectorFieldsProps {
+interface AdditionalOptionsFieldsProps {
   config: Config;
-  readOnly: boolean;
-  isEdit: boolean;
   optionalProviderFormFields: ConfigEntryView[];
   onSetProviderConfigEntry: (key: string, value: unknown) => Promise<void>;
   onTaskTypeOptionsSelect: (taskType: string, provider?: string) => void;
@@ -57,12 +55,11 @@ interface AdditionalOptionsConnectorFieldsProps {
   taskTypeOptions: TaskTypeOption[];
 }
 
-export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnectorFieldsProps> = ({
+export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = ({
   config,
-  readOnly,
-  isEdit,
   taskTypeOptions,
   optionalProviderFormFields,
+  taskTypeFormFields,
   selectedTaskType,
   onSetProviderConfigEntry,
   onTaskTypeOptionsSelect,
@@ -78,23 +75,22 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
           <EuiTitle size="xxs" data-test-subj="task-type-details-label">
             <h4>
               <FormattedMessage
-                id="xpack.stackConnectors.components.inference.taskTypeDetailsLabel"
+                id="xpack.inferenceEndpointUICommon.components.additionalInfo.taskTypeLabel"
                 defaultMessage="Task type"
               />
             </h4>
           </EuiTitle>
-          <EuiSpacer size="xs" />
-          <div
+          <EuiText
             css={css`
               font-size: ${xsFontSize};
               color: ${euiTheme.colors.textSubdued};
             `}
           >
             <FormattedMessage
-              id="xpack.stackConnectors.components.inference.taskTypeHelpLabel"
+              id="xpack.inferenceEndpointUICommon.components.additionalInfo.taskTypeHelpInfo"
               defaultMessage="Configure the inference task. Task types are specific to the service and model selected."
             />
-          </div>
+          </EuiText>
           <EuiSpacer size="m" />
           <UseField
             path="config.taskType"
@@ -112,18 +108,7 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
 
               return (
                 <EuiFormRow id="taskType" fullWidth isInvalid={isInvalid} error={errorMessage}>
-                  {isEdit || readOnly ? (
-                    <EuiButton
-                      css={{
-                        background: euiTheme.colors.disabled,
-                        color: euiTheme.colors.lightestShade,
-                      }}
-                      data-test-subj="taskTypeSelectDisabled"
-                      isDisabled
-                    >
-                      {config.taskType}
-                    </EuiButton>
-                  ) : taskTypeOptions.length === 1 ? (
+                  {taskTypeOptions.length === 1 ? (
                     <EuiButton
                       css={{
                         background: euiTheme.colors.darkShade,
@@ -158,8 +143,6 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
       config.taskType,
       xsFontSize,
       euiTheme.colors,
-      isEdit,
-      readOnly,
       taskTypeOptions,
       onTaskTypeOptionsSelect,
     ]
@@ -170,7 +153,7 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
   return (
     <EuiAccordion
       id="inferenceAdditionalOptions"
-      data-test-subj="inferenceAdditionalOptions"
+      data-test-subj="inference-endpoint-additional-options"
       buttonProps={{ css: buttonCss }}
       css={css`
         .euiAccordion__triggerWrapper {
@@ -187,7 +170,7 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
       buttonContent={
         <EuiTextColor color={euiTheme.colors.primary}>
           <FormattedMessage
-            id="xpack.stackConnectors.components.inference.additionalOptionsLabel"
+            id="xpack.inferenceEndpointUICommon.components.additionalInfo.additionalOptionsLabel"
             defaultMessage="Additional options"
           />
         </EuiTextColor>
@@ -201,26 +184,24 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
             <EuiTitle size="xxs" data-test-subj="provider-optional-settings-label">
               <h4>
                 <FormattedMessage
-                  id="xpack.stackConnectors.components.inference.providerOptionalSettingsLabel"
+                  id="xpack.inferenceEndpointUICommon.components.additionalInfo.providerOptionalSettingsLabel"
                   defaultMessage="Service settings"
                 />
               </h4>
             </EuiTitle>
-            <EuiSpacer size="xs" />
-            <div
+            <EuiText
               css={css`
                 font-size: ${xsFontSize};
                 color: ${euiTheme.colors.textSubdued};
               `}
             >
               <FormattedMessage
-                id="xpack.stackConnectors.components.inference.providerOptionalSettingsHelpLabel"
+                id="xpack.inferenceEndpointUICommon.components.additionalInfo.providerOptionalSettingsHelpLabel"
                 defaultMessage="Configure the inference provider. These settings are optional provider settings."
               />
-            </div>
+            </EuiText>
             <EuiSpacer size="m" />
-            <ConnectorConfigurationFormItems
-              itemsGrow={false}
+            <ConfigurationFormItems
               isLoading={false}
               direction="column"
               items={optionalProviderFormFields}
@@ -235,23 +216,22 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
         <EuiTitle size="xxs" data-test-subj="task-type-details-label">
           <h4>
             <FormattedMessage
-              id="xpack.stackConnectors.components.inference.inferenceEndpointLabel"
+              id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceEndpointLabel"
               defaultMessage="Inference Endpoint"
             />
           </h4>
         </EuiTitle>
-        <EuiSpacer size="xs" />
-        <div
+        <EuiText
           css={css`
             font-size: ${xsFontSize};
             color: ${euiTheme.colors.textSubdued};
           `}
         >
           <FormattedMessage
-            id="xpack.stackConnectors.components.inference.inferenceEndpointHelpLabel"
+            id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceEndpointHelpLabel"
             defaultMessage="Inference endpoints provide a simplified method for using this configuration, ecpecially from the API"
           />
-        </div>
+        </EuiText>
         <EuiSpacer size="s" />
 
         <UseField path="config.inferenceId">
@@ -266,14 +246,14 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
                 fullWidth
                 helpText={
                   <FormattedMessage
-                    id="xpack.stackConnectors.components.inference.inferenceIdHelpLabel"
+                    id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceIdHelpLabel"
                     defaultMessage="This ID cannot be changed once created."
                   />
                 }
               >
                 <EuiFieldText
+                  data-test-subj="inference-endpoint-input-field"
                   fullWidth
-                  disabled={isEdit || readOnly}
                   value={config.inferenceId}
                   onChange={(e) => {
                     setFieldValue('config.inferenceId', e.target.value);
@@ -294,7 +274,7 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
                           data-test-subj="copyInferenceUriToClipboard"
                         >
                           <FormattedMessage
-                            id="xpack.stackConnectors.components.inference.copyLabel"
+                            id="xpack.inferenceEndpointUICommon.components.additionalInfo.copyLabel"
                             defaultMessage="Copy"
                           />
                         </EuiButtonEmpty>
@@ -310,6 +290,3 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
     </EuiAccordion>
   );
 };
-
-// eslint-disable-next-line import/no-default-export
-export { AdditionalOptionsConnectorFields as default };

@@ -16,26 +16,25 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-import { ConfigEntryView } from '../../../../common/dynamic_config/types';
-import { ConnectorConfigurationField } from './connector_configuration_field';
+import { ConfigEntryView } from '../../types/types';
+import { ConfigurationField } from './configuration_field';
+import * as i18n from '../../translations';
 
-interface ConnectorConfigurationFormItemsProps {
+interface ConfigurationFormItemsProps {
   isLoading: boolean;
   items: ConfigEntryView[];
   setConfigEntry: (key: string, value: string | number | boolean | null) => void;
   direction?: 'column' | 'row' | 'rowReverse' | 'columnReverse' | undefined;
-  itemsGrow?: boolean;
 }
 
-export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFormItemsProps> = ({
+export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
   isLoading,
   items,
   setConfigEntry,
   direction,
 }) => {
   return (
-    <EuiFlexGroup direction={direction} data-test-subj="connector-configuration-fields">
+    <EuiFlexGroup direction={direction} data-test-subj="configuration-fields">
       {items.map((configEntry) => {
         const { key, isValid, label, sensitive, description, validationErrors, required } =
           configEntry;
@@ -54,9 +53,7 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
 
         const optionalLabel = !required ? (
           <EuiText color="subdued" size="xs">
-            {i18n.translate('xpack.stackConnectors.components.inference.config.optionalValue', {
-              defaultMessage: 'Optional',
-            })}
+            {i18n.OPTIONALTEXT}
           </EuiText>
         ) : undefined;
 
@@ -69,9 +66,9 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
               error={validationErrors}
               isInvalid={!isValid}
               labelAppend={optionalLabel}
-              data-test-subj={`connector-configuration-formrow-${key}`}
+              data-test-subj={`configuration-formrow-${key}`}
             >
-              <ConnectorConfigurationField
+              <ConfigurationField
                 configEntry={configEntry}
                 isLoading={isLoading}
                 setConfigValue={(value) => {
@@ -82,11 +79,7 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
             {sensitive ? (
               <>
                 <EuiSpacer size="s" />
-                <EuiCallOut
-                  size="s"
-                  color="warning"
-                  title={`You will need to reenter your ${label} each time you edit the connector`}
-                />
+                <EuiCallOut size="s" color="warning" title={i18n.RE_ENTER_SECRETS(label)} />
               </>
             ) : null}
           </EuiFlexItem>
