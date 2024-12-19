@@ -11,7 +11,7 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { validate } from './validate';
+import { CelValidatorWorker } from './validate';
 
 interface CelProgram {
   formattedProgram: string;
@@ -44,7 +44,9 @@ export class ValidateCelTask {
     this.logger.info(`Start time in BG task: ${Date.now()}`);
     const { params, state } = taskInstance;
     if (params.celProgram) {
-      const formattedProgram = await validate(this.logger, params.celProgram);
+      const program = params.celProgram;
+      const validator = new CelValidatorWorker(this.logger, false);
+      const formattedProgram = await validator.validate(program.trim());
       const stateUpdated = {
         ...state,
         formattedProgram,
@@ -112,7 +114,7 @@ export class ValidateCelTask {
             )
           ).body as { _id: string; _index: string; _source: CelProgram };
 
-          if (document !== undefined && document._source !== undefined) {
+          if (document?._source) {
             const formattedProgram = document._source.formattedProgram;
             if (formattedProgram) {
               clearInterval(interval);

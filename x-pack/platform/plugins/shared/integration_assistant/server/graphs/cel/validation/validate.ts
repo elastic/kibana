@@ -6,46 +6,125 @@
  */
 
 import path from 'path';
-import fs from 'fs';
-import { Logger } from '@kbn/logging';
-import './wasm/wasm_exec';
+import { Worker, MessagePort, MessageChannel } from 'worker_threads';
+import { Logger } from '@kbn/core/server';
+import { CelValidationWorkerOutOfMemoryError } from './errors';
+import {
+  ValidateCelRequest,
+  ValidateCelResponse,
+  ValidateCelResponseType,
+  WorkerData,
+} from './worker';
 
-declare global {
-  let formatCelProgram: (input: string) => { Format: string; Err?: string };
-  let stopFormatCelProgram: () => void;
-}
+export class CelValidatorWorker {
+  private worker?: Worker;
+  protected workerModulePath: string;
+  private logger: Logger;
 
-const wasmPath = path.join(__dirname, 'wasm');
-const file = fs.readFileSync(path.join(wasmPath, 'celformat.wasm'));
-let wasm: WebAssembly.Instance;
+  /**
+   * The maximum heap size for old memory region of the worker thread.
+   *
+   * @note We need to provide a sane number given that we need to load a
+   * node environment for TS compilation (dev-builds only), some library code
+   * and buffers that result from generating a PDF.
+   *
+   * Local testing indicates that to trigger an OOM event for the worker we need
+   * to exhaust not only heap but also any compression optimization and fallback
+   * swap space.
+   *
+   * With this value we are able to generate PDFs in excess of 5000x5000 pixels
+   * at which point issues other than memory start to show like glitches in the
+   * image.
+   */
+  protected workerMaxOldHeapSizeMb = 128;
 
-export async function validate(logger: Logger, input: string): Promise<string> {
-  // @ts-expect-error
-  const goWasm = new Go();
-  let value;
-  try {
-    logger.info(`Before loading WASM ${JSON.stringify(process.memoryUsage())}`);
-    const result = await WebAssembly.instantiate(file, goWasm.importObject);
-    wasm = result.instance;
-    goWasm.run(wasm);
-    logger.info(`WASM loaded ${JSON.stringify(process.memoryUsage())}`);
+  /**
+   * The maximum heap size for young memory region of the worker thread.
+   *
+   * @note we leave this 'undefined' to use the Node.js default value.
+   * @note we set this to a low value to trigger an OOM event sooner for the worker
+   * in test scenarios.
+   */
+  protected workerMaxYoungHeapSizeMb: number | undefined = undefined;
 
-    // @ts-expect-error
-    value = global.formatCelProgram(input);
-
-    logger.info(`Run function  ${JSON.stringify(process.memoryUsage())}`);
-
-    if (value === undefined) {
-      throw new Error('Failed to format CEL program');
-    }
-    if (value.Err) {
-      // Parse Error of the CEL program
-      throw new Error(value.Err);
-    }
-  } finally {
-    // @ts-expect-error
-    global.stopFormatCelProgram();
-    logger.info(`Stop Main in WASM ${JSON.stringify(process.memoryUsage())}`);
+  constructor(logger: Logger, dist: boolean) {
+    // running in dist: `worker.ts` becomes `worker.js`
+    // running in source: `worker_src_harness.ts` needs to be wrapped in JS and have a ts-node environment initialized.
+    this.workerModulePath = path.resolve(
+      __dirname,
+      dist ? './worker.js' : './worker_src_harness.js'
+    );
+    this.logger = logger;
   }
-  return value.Format;
+
+  private createWorker(port: MessagePort): Worker {
+    const workerData: WorkerData = {
+      port,
+    };
+    return new Worker(this.workerModulePath, {
+      workerData,
+      resourceLimits: {
+        maxYoungGenerationSizeMb: this.workerMaxYoungHeapSizeMb,
+        maxOldGenerationSizeMb: this.workerMaxOldHeapSizeMb,
+      },
+      transferList: [port],
+    });
+  }
+
+  private async cleanupWorker(): Promise<void> {
+    if (this.worker) {
+      await this.worker.terminate().catch(); // best effort
+      this.worker = undefined;
+      this.logger.info('Worker terminated.');
+    }
+  }
+
+  public async validate(inputProgram: string): Promise<string> {
+    if (this.worker) throw new Error('CEL validation already in progress..!');
+
+    this.logger.info(`Creating worker for validating CEL program`);
+
+    try {
+      return await new Promise<string>(async (resolve, reject) => {
+        try {
+          const { port1: myPort, port2: theirPort } = new MessageChannel();
+          this.worker = this.createWorker(theirPort);
+          this.worker.on('error', (workerError: NodeJS.ErrnoException) => {
+            this.logger.info(`Worker error: ${workerError}`);
+            if (workerError.code === 'ERR_WORKER_OUT_OF_MEMORY') {
+              reject(new CelValidationWorkerOutOfMemoryError(workerError.message).message);
+            } else {
+              reject(workerError.message);
+            }
+          });
+          this.worker.on('exit', () => {
+            this.logger.info('Worker exited');
+          });
+          myPort.on('message', ({ type, error, data, message }: ValidateCelResponse) => {
+            if (type === ValidateCelResponseType.Error) {
+              reject(new Error(`CEL validation returned the following error: ${error}`));
+              return;
+            }
+            if (type === ValidateCelResponseType.Data && !data) {
+              reject(new Error(`Failed to validate CEL program`));
+              return;
+            }
+            if (data) {
+              resolve(data.formattedProgram);
+            }
+          }); // Handle response from worker
+          const validateCelRequest: ValidateCelRequest = {
+            data: {
+              inputProgram,
+            },
+          };
+          myPort.postMessage(validateCelRequest); // Call the worker's validation function
+        } catch (error) {
+          reject(error);
+        }
+      });
+    } finally {
+      await this.cleanupWorker(); // Cleanup worker after validation and on errors
+    }
+  }
 }
