@@ -91,7 +91,7 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient, isSer
           : // When not in serverless, we have the "Space default" as an option.
             // which renders a warning callout. We don't want the modal to scale up when
             // the callout is rendered, so we set a fixed width.
-            { width: 600 }
+            { width: 580 }
       }
     >
       <EuiModalHeader>
