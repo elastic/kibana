@@ -18,6 +18,20 @@ export const conditions = {
   isNotFullyTranslated(): QueryDslQueryContainer {
     return { bool: { must_not: conditions.isFullyTranslated() } };
   },
+  isPartiallyTranslated(): QueryDslQueryContainer {
+    return { term: { translation_result: RuleTranslationResult.PARTIAL } };
+  },
+  isUntranslatable(): QueryDslQueryContainer {
+    return { term: { translation_result: RuleTranslationResult.UNTRANSLATABLE } };
+  },
+  isInstalled(): QueryDslQueryContainer {
+    return {
+      nested: {
+        path: 'elastic_rule',
+        query: { exists: { field: 'elastic_rule.id' } },
+      },
+    };
+  },
   isNotInstalled(): QueryDslQueryContainer {
     return {
       nested: {

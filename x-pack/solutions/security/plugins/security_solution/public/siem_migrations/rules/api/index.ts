@@ -215,6 +215,22 @@ export interface GetRuleMigrationParams {
   searchTerm?: string;
   /** Optional rules ids to filter documents */
   ids?: string[];
+  /** Optional attribute to retrieve prebuilt migration rules */
+  isPrebuilt?: boolean;
+  /** Optional attribute to retrieve custom migration rules */
+  isCustom?: boolean;
+  /** Optional attribute to retrieve installed migration rules */
+  isInstalled?: boolean;
+  /** Optional attribute to retrieve not installed migration rules */
+  isNotInstalled?: boolean;
+  /** Optional attribute to retrieve fully translated migration rules */
+  isFullyTranslated?: boolean;
+  /** Optional attribute to retrieve partially translated migration rules */
+  isPartiallyTranslated?: boolean;
+  /** Optional attribute to retrieve untranslated migration rules */
+  isUntranslatable?: boolean;
+  /** Optional attribute to retrieve failed migration rules */
+  isFailed?: boolean;
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
 }
@@ -227,6 +243,14 @@ export const getRuleMigrations = async ({
   sortDirection,
   searchTerm,
   ids,
+  isPrebuilt,
+  isCustom,
+  isInstalled,
+  isNotInstalled,
+  isFullyTranslated,
+  isPartiallyTranslated,
+  isUntranslatable,
+  isFailed,
   signal,
 }: GetRuleMigrationParams): Promise<GetRuleMigrationResponse> => {
   return KibanaServices.get().http.get<GetRuleMigrationResponse>(
@@ -240,6 +264,14 @@ export const getRuleMigrations = async ({
         sort_direction: sortDirection,
         search_term: searchTerm,
         ids,
+        is_prebuilt: isPrebuilt,
+        is_custom: isCustom,
+        is_installed: isInstalled,
+        is_not_installed: isNotInstalled,
+        is_fully_translated: isFullyTranslated,
+        is_partially_translated: isPartiallyTranslated,
+        is_untranslatable: isUntranslatable,
+        is_failed: isFailed,
       },
       signal,
     }
