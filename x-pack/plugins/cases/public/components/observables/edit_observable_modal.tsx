@@ -15,13 +15,13 @@ import { usePatchObservable } from '../../containers/use_patch_observables';
 import { type CaseUI } from '../../containers/types';
 
 export interface EditObservableModalProps {
-  closeModal: VoidFunction;
+  onCloseModal: VoidFunction;
   observable: Observable;
   caseData: CaseUI;
 }
 
 export const EditObservableModal: FC<EditObservableModalProps> = ({
-  closeModal,
+  onCloseModal: closeModal,
   observable,
   caseData,
 }) => {

@@ -127,7 +127,7 @@ export const ObservableActionsPopoverButton: React.FC<{
         <EditObservableModal
           caseData={caseData}
           observable={observable}
-          closeModal={() => setShowEditModal(false)}
+          onCloseModal={() => setShowEditModal(false)}
         />
       )}
     </>

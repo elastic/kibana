@@ -18,7 +18,7 @@ jest.mock('../../containers/api');
 describe('EditObservableModal', () => {
   let appMock: AppMockRenderer;
   const props: EditObservableModalProps = {
-    closeModal: jest.fn(),
+    onCloseModal: jest.fn(),
     caseData: mockCase,
     observable: {
       value: 'test',
@@ -57,6 +57,6 @@ describe('EditObservableModal', () => {
     expect(result.getByText('Cancel')).toBeInTheDocument();
     await userEvent.click(result.getByText('Cancel'));
 
-    expect(props.closeModal).toHaveBeenCalled();
+    expect(props.onCloseModal).toHaveBeenCalled();
   });
 });
