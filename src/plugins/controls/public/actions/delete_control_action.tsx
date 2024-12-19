@@ -78,6 +78,7 @@ export class DeleteControlAction implements Action<EmbeddableApiContext> {
       .then((confirmed) => {
         if (confirmed) {
           embeddable.parentApi.removePanel(embeddable.uuid);
+          embeddable?.clearVariables?.();
         }
       });
   }

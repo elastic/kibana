@@ -6,7 +6,7 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
-import type { TypedLensSerializedState } from '../../../react_embeddable/types';
+import type { TypedLensSerializedState, DashboardApi } from '../../../react_embeddable/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type {
   DatasourceMap,
@@ -86,6 +86,8 @@ export interface EditConfigPanelProps {
   // in cases where the embeddable is not filtered by time
   // (e.g. through unified search) set this property to true
   hideTimeFilterInfo?: boolean;
+  /** The dashboard api, important for creating controls from the ES|QL editor */
+  dashboardApi?: DashboardApi;
 }
 
 export interface LayerConfigurationProps {

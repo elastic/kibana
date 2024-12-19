@@ -15,6 +15,7 @@ import type {
   ESQLSource,
 } from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
   isParameterType,
   type FunctionDefinition,
@@ -48,6 +49,7 @@ import { EDITOR_MARKER } from '../shared/constants';
 import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { listCompleteItem } from './complete_items';
 import { removeMarkerArgFromArgsList } from '../shared/context';
+import { ESQLVariableType } from '../shared/types';
 
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);
@@ -367,12 +369,14 @@ export async function getFieldsOrFunctionsSuggestions(
     functions,
     fields,
     variables,
+    values = false,
     literals = false,
   }: {
     functions: boolean;
     fields: boolean;
     variables?: Map<string, ESQLVariable[]>;
     literals?: boolean;
+    values?: boolean;
   },
   {
     ignoreFn = [],
@@ -387,6 +391,7 @@ export async function getFieldsOrFunctionsSuggestions(
       ? getFieldsByType(types, ignoreColumns, {
           advanceCursor: commandName === 'sort',
           openSuggestions: commandName === 'sort',
+          variableType: values ? ESQLVariableType.VALUES : ESQLVariableType.FIELDS,
         })
       : [])) as SuggestionRawDefinition[],
     functions
@@ -617,6 +622,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
             {
               functions: true,
               fields: true,
+              values: Boolean(operator.subtype === 'binary-expression'),
             }
           ))
         );
@@ -666,3 +672,21 @@ export async function getSuggestionsToRightOfOperatorExpression({
     };
   });
 }
+
+export const getControlSuggestionLabel = (variableType: ESQLVariableType): string => {
+  switch (variableType) {
+    case ESQLVariableType.TIME_LITERAL:
+      return i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.intervalLabel', {
+        defaultMessage: 'Interval',
+      });
+    case ESQLVariableType.VALUES:
+      return i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.valueLabel', {
+        defaultMessage: 'Value',
+      });
+    case ESQLVariableType.FIELDS:
+    default:
+      return i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.fieldsLabel', {
+        defaultMessage: 'Field',
+      });
+  }
+};

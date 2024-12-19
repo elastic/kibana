@@ -510,3 +510,11 @@ export type LensByReferenceInput = Omit<LensRendererPrivateProps, 'attributes'>;
 export type TypedLensByValueInput = Omit<LensRendererProps, 'savedObjectId'>;
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
 export type LensEmbeddableOutput = LensApi;
+
+export interface ControlGroupApi {
+  addNewPanel: (panelState: Record<string, unknown>) => void;
+}
+
+export interface DashboardApi extends PresentationContainer {
+  controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
+}

@@ -15,6 +15,8 @@ import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-ty
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 
 export interface ESQLEditorProps {
   /** The aggregate type query */
@@ -69,6 +71,21 @@ export interface ESQLEditorProps {
 
   /** The component by default focuses on the editor when it is mounted, this flag disables it**/
   disableAutoFocus?: boolean;
+  /** The editor supports the creation of controls,
+   * This flag should be set to true to display the "Create control" suggestion
+   **/
+  supportsControls?: boolean;
+  /** Function to be called after the control creation **/
+  onSaveControlCb?: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
+  /** Function to be called after cancelling the control creation **/
+  onCancelControlCb?: () => void;
+}
+
+interface EsqlVariablesService {
+  enableSuggestions: () => void;
+  disableSuggestions: () => void;
+  getVariablesByType: (type: ESQLControlVariable['type']) => ESQLControlVariable[];
+  areSuggestionsEnabled: boolean;
 }
 
 export interface ESQLEditorDeps {
@@ -76,7 +93,9 @@ export interface ESQLEditorDeps {
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   storage: Storage;
+  uiActions: UiActionsStart;
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
+  esqlService: EsqlVariablesService;
 }
