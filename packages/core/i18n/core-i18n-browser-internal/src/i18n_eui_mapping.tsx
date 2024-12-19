@@ -1828,5 +1828,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Selection',
       }
     ),
+    'euiCodeBlockFullScreen.ariaLabel': i18n.translate('core.euiCodeBlockFullScreen.ariaLabel', {
+      defaultMessage: 'Expanded code block',
+    }),
+    'euiCodeBlock.label': ({ language }: EuiValues) =>
+      i18n.translate('core.euiCodeBlock.label', {
+        defaultMessage: '{language} code block:',
+        values: { language },
+      }),
   };
 };

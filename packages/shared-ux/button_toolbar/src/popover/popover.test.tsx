@@ -37,7 +37,7 @@ describe('<ToolbarPopover />', () => {
     const button = component.find('EuiButton');
     expect(button.prop('color')).toBe('text');
     expect(button.prop('css')).toMatchObject({
-      backgroundColor: '#FFF',
+      backgroundColor: '#FFFFFF',
       border: '1px solid #D3DAE6',
       color: '#343741',
     });
