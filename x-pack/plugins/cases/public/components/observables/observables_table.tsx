@@ -108,7 +108,7 @@ export const ObservablesTable = ({ caseData, isLoading }: ObservablesTableProps)
       <EuiBasicTable
         tableCaption={i18n.OBSERVABLES_TABLE}
         items={caseData.observables}
-        rowHeader="name"
+        rowHeader="id"
         columns={columns}
         data-test-subj="cases-observables-table"
         noItemsMessage={<EmptyObservablesTable caseData={caseData} />}
