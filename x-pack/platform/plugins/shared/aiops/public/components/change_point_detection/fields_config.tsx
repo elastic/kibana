@@ -216,14 +216,14 @@ const FieldPanel: FC<FieldPanelProps> = ({
     progress,
   } = useChangePointResults(fieldConfig, requestParams, combinedQuery, splitFieldCardinality);
 
-  const openCasesModalCallback = useCasesModal(
-    EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-    TITLES.CHANGE_POINT_DETECTION
-  );
-
   const selectedPartitions = useMemo(() => {
     return (selectedChangePoints[panelIndex] ?? []).map((v) => v.group?.value as string);
   }, [selectedChangePoints, panelIndex]);
+
+  const openCasesModalCallback = useCasesModal(
+    EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+    TITLES.CHANGE_POINT_DETECTION(caseAttachment.viewType, selectedPartitions.length)
+  );
 
   const caseAttachmentButtonDisabled =
     isDefined(fieldConfig.splitField) && selectedPartitions.length === 0;
