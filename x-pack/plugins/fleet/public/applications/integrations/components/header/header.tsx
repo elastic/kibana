@@ -34,7 +34,7 @@ export const IntegrationsHeader = ({
   const { euiTheme } = useEuiTheme();
   const readOnlyBtnClass = React.useMemo(() => {
     return css`
-      color: ${euiTheme.colors.text};
+      color: ${euiTheme.colors.textParagraph};
     `;
   }, [euiTheme]);
   const isReadOnly = useIsReadOnly();
