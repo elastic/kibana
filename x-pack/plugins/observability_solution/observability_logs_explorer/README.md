@@ -57,7 +57,7 @@ unset FLEET_PACKAGE_REGISTRY_PORT
 
 #### Logs Explorer
 ```
-node scripts/type_check.js --project x-pack/plugins/observability_solution/logs_explorer/tsconfig.json
+node scripts/type_check.js --project x-pack/solutions/observability/plugins/logs_explorer/tsconfig.json
 ```
 #### Observability Logs Explorer
 ```
