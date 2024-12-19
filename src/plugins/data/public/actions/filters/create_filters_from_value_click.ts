@@ -20,7 +20,7 @@ import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
 import moment from 'moment';
 import {
   buildSimpleExistFilter,
-  buildSimpleRangeFilter,
+  buildSimpleNumberRangeFilter,
 } from '@kbn/es-query/src/filters/build_filters';
 import { getIndexPatterns, getSearchService } from '../../services';
 import { AggConfigSerialized } from '../../../common/search/aggs';
@@ -166,7 +166,7 @@ export const createFilterESQL = async (
 
   if (operationType === 'date_histogram') {
     filters.push(
-      buildSimpleRangeFilter(
+      buildSimpleNumberRangeFilter(
         sourceField,
         {
           gte: moment(value).toISOString(),
@@ -179,7 +179,7 @@ export const createFilterESQL = async (
     );
   } else if (operationType === 'histogram') {
     filters.push(
-      buildSimpleRangeFilter(
+      buildSimpleNumberRangeFilter(
         sourceField,
         {
           gte: value,
