@@ -8,7 +8,6 @@
  */
 
 import expect from '@kbn/expect';
-import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
 import { VisualizeConstants } from '@kbn/visualizations-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -28,12 +27,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: true });
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: false });
     });
 
     it('ensure toolbar popover closes on add', async () => {
@@ -41,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickNewDashboard();
       await dashboard.switchToEditMode();
       await dashboardAddPanel.clickEditorMenuButton();
-      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Log stream (deprecated)');
+      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Monitors stats');
       await dashboardAddPanel.expectEditorMenuClosed();
     });
 

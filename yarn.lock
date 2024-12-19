@@ -2206,10 +2206,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@68.0.3":
-  version "68.0.3"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-68.0.3.tgz#dc4aaeb4cdc8751d5759b58dc9958efb3c2639da"
-  integrity sha512-U+NCTo2LCDDSVkV5kGinhzbiAvfEcVAZ4D2YM/0RZQFRvJfJBvelbG+jDkt6N2mEauJ4ECDDcb33995fbs71TA==
+"@elastic/charts@68.0.4":
+  version "68.0.4"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-68.0.4.tgz#b35a4734e4e36ef894432a3ff882a0e4329ffe4c"
+  integrity sha512-kn9FEm2osJBitbbqCRcuZ3ygrLHelUm9i9bCAcY/t3vXfT7tDjhvgueAjm5gQas7/NcASN8LWEykLktGo3mrxQ==
   dependencies:
     "@popperjs/core" "^2.11.8"
     bezier-easing "^2.1.0"
@@ -4105,6 +4105,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/charts-theme@link:packages/kbn-charts-theme":
+  version "0.0.0"
+  uid ""
+
 "@kbn/check-mappings-update-cli@link:packages/kbn-check-mappings-update-cli":
   version "0.0.0"
   uid ""
@@ -5929,7 +5933,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/index-management-plugin@link:x-pack/plugins/index_management":
+"@kbn/index-management-plugin@link:x-pack/platform/plugins/shared/index_management":
   version "0.0.0"
   uid ""
 
@@ -6545,7 +6549,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/openapi-common@link:packages/kbn-openapi-common":
+"@kbn/openapi-common@link:src/platform/packages/shared/kbn-openapi-common":
   version "0.0.0"
   uid ""
 
@@ -6849,7 +6853,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rule-data-utils@link:packages/kbn-rule-data-utils":
+"@kbn/rule-data-utils@link:src/platform/packages/shared/kbn-rule-data-utils":
   version "0.0.0"
   uid ""
 
@@ -7965,7 +7969,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/zod-helpers@link:packages/kbn-zod-helpers":
+"@kbn/zod-helpers@link:src/platform/packages/shared/kbn-zod-helpers":
   version "0.0.0"
   uid ""
 
