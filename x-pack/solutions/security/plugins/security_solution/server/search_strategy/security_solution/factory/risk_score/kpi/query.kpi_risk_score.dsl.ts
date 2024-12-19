@@ -6,9 +6,9 @@
  */
 
 import {
-  RiskScoreEntityLevelField,
-  RiskScoreEntityNameField,
-} from '../../../../../../common/entity_analytics/risk_engine';
+  EntityTypeToLevelField,
+  EntityTypeToNameField,
+} from '../../../../../../common/search_strategy';
 import type { RiskScoreKpiRequestOptions } from '../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
@@ -41,12 +41,12 @@ export const buildKpiRiskScoreQuery = ({
       aggs: {
         risk: {
           terms: {
-            field: RiskScoreEntityLevelField[entity],
+            field: EntityTypeToLevelField[entity],
           },
           aggs: {
             unique_entries: {
               cardinality: {
-                field: RiskScoreEntityNameField[entity],
+                field: EntityTypeToNameField[entity],
               },
             },
           },

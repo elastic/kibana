@@ -92,7 +92,7 @@ export const mockOptions: RiskScoreRequestOptions = {
   defaultIndex: ['logs-*'],
   riskScoreEntity: RiskScoreEntityType.host,
   includeAlertsCount: true,
-  factoryQueryType: EntityRiskQueries.hostsRiskScore,
+  factoryQueryType: EntityRiskQueries.list,
 };
 
 describe('buildRiskScoreQuery search strategy', () => {

@@ -11,6 +11,7 @@ import type { SyntheticEvent, MouseEvent } from 'react';
 import React, { useMemo, useCallback } from 'react';
 import { isArray, isNil } from 'lodash/fp';
 import type { NavigateToAppOptions } from '@kbn/core-application-browser';
+import { RiskScoreEntityType } from '../../../../common/search_strategy/security_solution/risk_score/common';
 import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
 import { encodeIpv6 } from '../../lib/helpers';
 import {
@@ -199,6 +200,31 @@ const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
 };
 
 export const HostDetailsLink = React.memo(HostDetailsLinkComponent);
+
+export interface EntityDetailsLinkProps {
+  children?: React.ReactNode;
+  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  entityName: string;
+  isButton?: boolean;
+  onClick?: (e: SyntheticEvent) => void;
+  tab?: HostsTableType | UsersTableType;
+  title?: string;
+  entityType: RiskScoreEntityType;
+}
+export const EntityDetailsLink = ({
+  entityType,
+  tab,
+  entityName,
+  ...props
+}: EntityDetailsLinkProps) => {
+  if (entityName === RiskScoreEntityType.host) {
+    return <HostDetailsLink {...props} hostTab={tab as HostsTableType} hostName={entityName} />;
+  } else if (entityName === RiskScoreEntityType.user) {
+    return <UserDetailsLink {...props} userTab={tab as UsersTableType} userName={entityName} />;
+  }
+  return entityName;
+};
 
 const allowedUrlSchemes = ['http://', 'https://'];
 export const ExternalLink = React.memo<{

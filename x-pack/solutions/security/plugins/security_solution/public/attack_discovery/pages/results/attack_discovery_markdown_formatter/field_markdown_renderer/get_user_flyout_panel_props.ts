@@ -8,7 +8,7 @@
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
 
-const UserPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-panel';
+export const UserPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-panel';
 
 interface UserPanelProps extends Record<string, unknown> {
   contextID: string;

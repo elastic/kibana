@@ -42,7 +42,6 @@ import type { UsersRelatedHostsStrategyResponse } from './related_entities/relat
 import type { HostsRelatedUsersStrategyResponse } from './related_entities/related_users';
 
 import type {
-  EntityKpiRiskQuery,
   EntityRiskQueries,
   EventEnrichmentRequestOptions,
   EventEnrichmentRequestOptionsInput,
@@ -112,7 +111,6 @@ export type FactoryQueryTypes =
   | UsersQueries
   | NetworkQueries
   | EntityRiskQueries
-  | typeof EntityKpiRiskQuery
   | CtiQueries
   | typeof FirstLastSeenQuery
   | RelatedEntitiesQueries;
@@ -157,13 +155,9 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? CtiEventEnrichmentStrategyResponse
   : T extends CtiQueries.dataSource
   ? CtiDataSourceStrategyResponse
-  : T extends EntityRiskQueries.hostsRiskScore
-  ? RiskScoreStrategyResponse<RiskScoreEntityType.host>
-  : T extends EntityRiskQueries.usersRiskScore
-  ? RiskScoreStrategyResponse<RiskScoreEntityType.user>
-  : T extends EntityRiskQueries.servicesRiskScore
-  ? RiskScoreStrategyResponse<RiskScoreEntityType.service>
-  : T extends typeof EntityKpiRiskQuery
+  : T extends EntityRiskQueries.list
+  ? RiskScoreStrategyResponse<RiskScoreEntityType>
+  : T extends EntityRiskQueries.kpi
   ? KpiRiskScoreStrategyResponse
   : T extends RelatedEntitiesQueries.relatedUsers
   ? HostsRelatedUsersStrategyResponse
@@ -211,9 +205,9 @@ export type StrategyRequestInputType<T extends FactoryQueryTypes> = T extends Ho
   ? EventEnrichmentRequestOptionsInput
   : T extends CtiQueries.dataSource
   ? ThreatIntelSourceRequestOptionsInput
-  : T extends EntityRiskQueries
+  : T extends EntityRiskQueries.list
   ? RiskScoreRequestOptionsInput
-  : T extends typeof EntityKpiRiskQuery
+  : T extends EntityRiskQueries.kpi
   ? RiskScoreKpiRequestOptionsInput
   : T extends RelatedEntitiesQueries.relatedHosts
   ? RelatedHostsRequestOptionsInput
@@ -261,9 +255,9 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? EventEnrichmentRequestOptions
   : T extends CtiQueries.dataSource
   ? ThreatIntelSourceRequestOptions
-  : T extends EntityRiskQueries
+  : T extends EntityRiskQueries.list
   ? RiskScoreRequestOptions
-  : T extends typeof EntityKpiRiskQuery
+  : T extends EntityRiskQueries.kpi
   ? RiskScoreKpiRequestOptions
   : T extends RelatedEntitiesQueries.relatedHosts
   ? RelatedHostsRequestOptions

@@ -79,6 +79,9 @@ const EntityStoreDashboardPanelsComponent = () => {
           <EuiFlexItem>
             <EntityAnalyticsRiskScores riskEntity={RiskScoreEntityType.host} />
           </EuiFlexItem>
+          <EuiFlexItem>
+            <EntityAnalyticsRiskScores riskEntity={RiskScoreEntityType.service} />
+          </EuiFlexItem>
         </>
       )}
       {storeStatusQuery.data?.status !== 'not_installed' &&

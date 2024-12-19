@@ -16,44 +16,48 @@ import { usersActions } from '../../../explore/users/store';
 import { hostsActions } from '../../../explore/hosts/store';
 import { SecurityPageName } from '../../../app/types';
 
-const HOST_RISK_TABLE_QUERY_ID = 'hostRiskDashboardTable';
-const HOST_RISK_KPI_QUERY_ID = 'headerHostRiskScoreKpiQuery';
-const USER_RISK_TABLE_QUERY_ID = 'userRiskDashboardTable';
-const USER_RISK_KPI_QUERY_ID = 'headerUserRiskScoreKpiQuery';
-
 export const useEntityInfo = (riskEntity: RiskScoreEntityType) => {
   const dispatch = useDispatch();
 
-  return riskEntity === RiskScoreEntityType.host
-    ? {
-        linkProps: {
-          deepLinkId: SecurityPageName.hosts,
-          path: getTabsOnHostsUrl(HostsTableType.risk),
-          onClick: () => {
-            dispatch(
-              hostsActions.updateHostRiskScoreSeverityFilter({
-                severitySelection: [],
-                hostsType: HostsType.page,
-              })
-            );
-          },
+  const tableQueryIds = {
+    tableQueryId: `${riskEntity}RiskDashboardTable`,
+    kpiQueryId: `${riskEntity}HeaderRiskScoreKpiQuery`,
+  };
+
+  if (riskEntity === RiskScoreEntityType.host) {
+    return {
+      linkProps: {
+        deepLinkId: SecurityPageName.hosts,
+        path: getTabsOnHostsUrl(HostsTableType.risk),
+        onClick: () => {
+          dispatch(
+            hostsActions.updateHostRiskScoreSeverityFilter({
+              severitySelection: [],
+              hostsType: HostsType.page,
+            })
+          );
         },
-        tableQueryId: HOST_RISK_TABLE_QUERY_ID,
-        kpiQueryId: HOST_RISK_KPI_QUERY_ID,
-      }
-    : {
-        linkProps: {
-          deepLinkId: SecurityPageName.users,
-          path: getTabsOnUsersUrl(UsersTableType.risk),
-          onClick: () => {
-            dispatch(
-              usersActions.updateUserRiskScoreSeverityFilter({
-                severitySelection: [],
-              })
-            );
-          },
+      },
+      ...tableQueryIds,
+    };
+  } else if (riskEntity === RiskScoreEntityType.user) {
+    return {
+      linkProps: {
+        deepLinkId: SecurityPageName.users,
+        path: getTabsOnUsersUrl(UsersTableType.risk),
+        onClick: () => {
+          dispatch(
+            usersActions.updateUserRiskScoreSeverityFilter({
+              severitySelection: [],
+            })
+          );
         },
-        tableQueryId: USER_RISK_TABLE_QUERY_ID,
-        kpiQueryId: USER_RISK_KPI_QUERY_ID,
-      };
+      },
+      ...tableQueryIds,
+    };
+  }
+  return {
+    linkProps: undefined,
+    ...tableQueryIds,
+  };
 };

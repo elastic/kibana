@@ -8,15 +8,18 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { HostPanelKey } from '../../../flyout/entity_details/host_right';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import {
+  EntityPanelKeyByType,
+  EntityPanelParamByType,
+} from '../../../flyout/entity_details/shared/constants';
 import { EnableRiskScore } from '../enable_risk_score';
 import { getRiskScoreColumns } from './columns';
 import { LastUpdatedAt } from '../../../common/components/last_updated_at';
 import { HeaderSection } from '../../../common/components/header_section';
-import type { RiskSeverity } from '../../../../common/search_strategy';
-import { RiskScoreEntityType } from '../../../../common/search_strategy';
+import type { RiskSeverity, RiskScoreEntityType } from '../../../../common/search_strategy';
+import { EntityTypeToNameField } from '../../../../common/search_strategy';
 import { generateSeverityFilter } from '../../../explore/hosts/store/helpers';
-import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { InspectButtonContainer } from '../../../common/components/inspect';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
@@ -35,7 +38,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_query';
 import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
-import { UserPanelKey } from '../../../flyout/entity_details/user_right';
 import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
@@ -53,6 +55,7 @@ const EntityAnalyticsRiskScoresComponent = <EntityType extends RiskScoreEntityTy
   const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
   const { telemetry } = useKibana().services;
   const { openRightPanel } = useExpandableFlyoutApi();
+  const entityNameField = EntityTypeToNameField[riskEntity];
 
   const openEntityOnAlertsPage = useCallback(
     (entityName: string) => {
@@ -61,21 +64,19 @@ const EntityAnalyticsRiskScoresComponent = <EntityType extends RiskScoreEntityTy
         {
           title: getRiskEntityTranslation(riskEntity),
           selectedOptions: [entityName],
-          // TODO support service entity
-          fieldName: riskEntity === RiskScoreEntityType.host ? 'host.name' : 'user.name',
+          fieldName: entityNameField,
         },
       ]);
     },
-    [telemetry, riskEntity, openAlertsPageWithFilters]
+    [telemetry, riskEntity, openAlertsPageWithFilters, entityNameField]
   );
 
   const openEntityOnExpandableFlyout = useCallback(
     (entityName: string) => {
       openRightPanel({
-        id: riskEntity === RiskScoreEntityType.host ? HostPanelKey : UserPanelKey,
+        id: EntityPanelKeyByType[riskEntity],
         params: {
-          // TODO support service entity
-          [riskEntity === RiskScoreEntityType.host ? 'hostName' : 'userName']: entityName,
+          [EntityPanelParamByType[riskEntity]]: entityName,
           contextID: ENTITY_RISK_SCORE_TABLE_ID,
           scopeId: ENTITY_RISK_SCORE_TABLE_ID,
         },
@@ -132,6 +133,7 @@ const EntityAnalyticsRiskScoresComponent = <EntityType extends RiskScoreEntityTy
     deleteQuery,
     inspect: inspectKpi,
   });
+
   const {
     data,
     loading: isTableLoading,
@@ -227,7 +229,7 @@ const EntityAnalyticsRiskScoresComponent = <EntityType extends RiskScoreEntityTy
             <EuiFlexItem grow={false}>
               <ChartContent
                 dataExists={data && data.length > 0}
-                kpiQueryId={entity.kpiQueryId}
+                kpiQueryId={entity.kpiQueryId ?? ''}
                 riskEntity={riskEntity}
                 severityCount={severityCount}
                 timerange={timerange}

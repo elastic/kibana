@@ -6,17 +6,39 @@
  */
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { IconType } from '@elastic/eui';
+import type { EntityType } from '../../../../common/api/entity_analytics';
+import { EntityTypeEnum } from '../../../../common/api/entity_analytics';
 import {
   ASSET_CRITICALITY_INDEX_PATTERN,
   RISK_SCORE_INDEX_PATTERN,
 } from '../../../../common/constants';
 import type {
   Entity,
+  HostEntity,
   UserEntity,
+  ServiceEntity,
 } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 
-export const isUserEntity = (record: Entity): record is UserEntity =>
-  !!(record as UserEntity)?.user;
+export const getEntityType = (record: Entity): EntityType => {
+  if ((record as UserEntity)?.user) {
+    return EntityTypeEnum.user;
+  }
+  if ((record as HostEntity)?.host) {
+    return EntityTypeEnum.host;
+  }
+
+  if ((record as ServiceEntity)?.service) {
+    return EntityTypeEnum.service;
+  }
+  throw new Error(`Unexpected entity: ${JSON.stringify(record)}`);
+};
+
+export const EntityIconByType: Record<EntityType, IconType> = {
+  [EntityTypeEnum.user]: 'user',
+  [EntityTypeEnum.host]: 'storage',
+  [EntityTypeEnum.service]: 'console',
+};
 
 export const sourceFieldToText = (source: string) => {
   if (source.match(`^${RISK_SCORE_INDEX_PATTERN}`)) {

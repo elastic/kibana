@@ -50,7 +50,6 @@ export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
   params: UserPanelProps;
 }
 
-export const UserPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-panel';
 export const UserPreviewPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-preview-panel';
 export const USER_PANEL_RISK_SCORE_QUERY_ID = 'userPanelRiskScoreQuery';
 const FIRST_RECORD_PAGINATION = {

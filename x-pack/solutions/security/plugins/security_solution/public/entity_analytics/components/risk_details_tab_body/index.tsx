@@ -10,7 +10,6 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
-import { RISKY_HOSTS_DASHBOARD_TITLE, RISKY_USERS_DASHBOARD_TITLE } from '../risk_score/constants';
 import { EnableRiskScore } from '../enable_risk_score';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import type { State } from '../../../common/store';
@@ -36,6 +35,7 @@ import { HostRiskScoreQueryId, UserRiskScoreQueryId } from '../../common/utils';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
 import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
 import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
+import { getRiskyEntityDashboardTitle } from '../risk_score/constants';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeL};
@@ -43,19 +43,20 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 
 type ComponentsQueryProps = HostsComponentsQueryProps | UsersComponentsQueryProps;
 
-const getDashboardTitle = (riskEntity: RiskScoreEntityType) =>
-  riskEntity === RiskScoreEntityType.host
-    ? RISKY_HOSTS_DASHBOARD_TITLE
-    : RISKY_USERS_DASHBOARD_TITLE;
-
-const RiskDetailsTabBodyComponent: React.FC<
-  Pick<ComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
-    entityName: string;
-    riskEntity: RiskScoreEntityType;
-  }
-> = ({ entityName, startDate, endDate, setQuery, deleteQuery, riskEntity }) => {
+const RiskDetailsTabBodyComponent = <T extends RiskScoreEntityType>({
+  entityName,
+  startDate,
+  endDate,
+  setQuery,
+  deleteQuery,
+  riskEntity,
+}: Pick<ComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
+  entityName: string;
+  riskEntity: T;
+}) => {
   const queryId = useMemo(
     () =>
+      // TODO support services
       riskEntity === RiskScoreEntityType.host
         ? HostRiskScoreQueryId.HOST_DETAILS_RISK_SCORE
         : UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE,
@@ -63,12 +64,13 @@ const RiskDetailsTabBodyComponent: React.FC<
   );
 
   const severitySelectionRedux = useDeepEqualSelector((state: State) =>
+    // TODO support services
     riskEntity === RiskScoreEntityType.host
       ? hostsSelectors.hostRiskScoreSeverityFilterSelector()(state, hostsModel.HostsType.details)
       : usersSelectors.userRiskScoreSeverityFilterSelector()(state)
   );
 
-  const buttonHref = useDashboardHref({ title: getDashboardTitle(riskEntity) });
+  const buttonHref = useDashboardHref({ title: getRiskyEntityDashboardTitle(riskEntity) });
 
   const timerange = useMemo(
     () => ({
@@ -84,11 +86,12 @@ const RiskDetailsTabBodyComponent: React.FC<
     useQueryToggle(`${queryId} contributors`);
 
   const filterQuery = useMemo(
-    () => (entityName ? buildEntityNameFilter([entityName], riskEntity) : {}),
+    () => (entityName ? buildEntityNameFilter(riskEntity, [entityName]) : {}),
     [entityName, riskEntity]
   );
 
-  const { data, loading, refetch, inspect, isDeprecated, isModuleEnabled } = useRiskScore({
+  // data: undefined | StrategyResponseType<(typeof EntityRiskQueryByEntityType)[T]>['data'];
+  const { data, loading, refetch, inspect, isDeprecated, isModuleEnabled } = useRiskScore<T>({
     filterQuery,
     onlyLatest: false,
     riskEntity,
@@ -101,6 +104,7 @@ const RiskDetailsTabBodyComponent: React.FC<
   const rules = useMemo(() => {
     const lastRiskItem = data && data.length > 0 ? data[data.length - 1] : null;
     if (lastRiskItem) {
+      // TODO support services
       return riskEntity === RiskScoreEntityType.host
         ? (lastRiskItem as HostRiskScore).host.risk.rule_risks
         : (lastRiskItem as UserRiskScore).user.risk.rule_risks;

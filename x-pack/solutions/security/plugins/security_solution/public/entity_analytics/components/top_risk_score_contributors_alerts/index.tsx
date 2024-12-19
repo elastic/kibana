@@ -57,6 +57,7 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const inputFilters = useMemo(() => {
+    // TODO support services
     const riskScoreEntity =
       riskEntity === RiskScoreEntityType.host
         ? (riskScore as HostRiskScore).host

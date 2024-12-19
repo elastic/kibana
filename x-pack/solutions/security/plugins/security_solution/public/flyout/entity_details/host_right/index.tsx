@@ -50,7 +50,6 @@ export interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
   params: HostPanelProps;
 }
 
-export const HostPanelKey: HostPanelExpandableFlyoutProps['key'] = 'host-panel';
 export const HostPreviewPanelKey: HostPanelExpandableFlyoutProps['key'] = 'host-preview-panel';
 export const HOST_PANEL_RISK_SCORE_QUERY_ID = 'HostPanelRiskScoreQuery';
 export const HOST_PANEL_OBSERVED_HOST_QUERY_ID = 'HostPanelObservedHostQuery';

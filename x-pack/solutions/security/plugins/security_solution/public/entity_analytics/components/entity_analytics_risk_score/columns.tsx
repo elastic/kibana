@@ -11,17 +11,23 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import styled from 'styled-components';
 import { get } from 'lodash/fp';
+
+import { getEmptyTagValue } from '../../../common/components/empty_value';
+import { EntityDetailsLink } from '../../../common/components/links';
+import { RiskScoreLevel } from '../severity/common';
+import { CELL_ACTIONS_TELEMETRY } from '../risk_score/constants';
+import type {
+  EntityRiskScore,
+  Maybe,
+  RiskSeverity,
+  RiskScoreEntityType,
+} from '../../../../common/search_strategy';
 import {
   EntityTypeToLevelField,
   EntityTypeToNameField,
   EntityTypeToScoreField,
-} from '../../../../common/entity_analytics/risk_engine/utils';
-import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { HostDetailsLink, UserDetailsLink } from '../../../common/components/links';
-import { RiskScoreLevel } from '../severity/common';
-import { CELL_ACTIONS_TELEMETRY } from '../risk_score/constants';
-import type { EntityRiskScore, Maybe, RiskSeverity } from '../../../../common/search_strategy';
-import { RiskScoreEntityType, RiskScoreFields } from '../../../../common/search_strategy';
+  RiskScoreFields,
+} from '../../../../common/search_strategy';
 import * as i18n from './translations';
 import { FormattedCount } from '../../../common/components/formatted_number';
 import {
@@ -48,25 +54,22 @@ export const getRiskScoreColumns = <E extends RiskScoreEntityType>(
   const fieldName = EntityTypeToNameField[entityType];
   const getEntityName = get(fieldName);
   const getEntityDetailsLinkComponent = (entityName: string) => {
-    const onEntityDetailsLinkClick = (e: SyntheticEvent) => {
+    const onEntityDetailsLinkClick: (e: SyntheticEvent) => void = (e) => {
       e.preventDefault();
       openEntityOnExpandableFlyout(entityName);
     };
 
-    if (entityType === RiskScoreEntityType.host) {
-      return <HostDetailsLink hostName={entityName} onClick={onEntityDetailsLinkClick} />;
-    }
-
-    if (entityType === RiskScoreEntityType.user) {
-      return <UserDetailsLink userName={entityName} onClick={onEntityDetailsLinkClick} />;
-    }
-
-    return entityName;
+    return (
+      <EntityDetailsLink
+        entityType={entityType}
+        entityName={entityName}
+        onClick={onEntityDetailsLinkClick}
+      />
+    );
   };
 
   return [
     {
-      // TODO ADD SERVICE ENTITY SUPPORT
       field: fieldName,
       name: i18n.ENTITY_NAME(entityType),
       truncateText: false,
@@ -74,7 +77,6 @@ export const getRiskScoreColumns = <E extends RiskScoreEntityType>(
       className: 'inline-actions-table-cell',
       render: (entityName: string) => {
         if (entityName != null && entityName.length > 0) {
-          // TODO ADD SERVICE ENTITY SUPPORT
           return (
             <>
               {getEntityDetailsLinkComponent(entityName)}

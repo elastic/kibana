@@ -6,30 +6,11 @@
  */
 
 import type { EntityRiskScoreRecord, RiskScoreInput } from '../../api/entity_analytics/common';
-import { RiskScoreFields } from '../../search_strategy';
 
 export enum RiskScoreEntityType {
   host = 'host',
   user = 'user',
   service = 'service',
-}
-
-export enum RiskScoreEntityNameField {
-  host = RiskScoreFields.hostName,
-  user = RiskScoreFields.userName,
-  service = RiskScoreFields.serviceName,
-}
-
-export enum RiskScoreEntityLevelField {
-  host = RiskScoreFields.hostRisk,
-  user = RiskScoreFields.userRisk,
-  service = RiskScoreFields.serviceRisk,
-}
-
-export enum RiskScoreEntityScoreField {
-  host = RiskScoreFields.hostRiskScore,
-  user = RiskScoreFields.userRiskScore,
-  service = RiskScoreFields.serviceRiskScore,
 }
 
 export interface InitRiskEngineResult {

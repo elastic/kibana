@@ -34,6 +34,7 @@ import { SourcererScopeName } from '../../sourcerer/store/model';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 import { userHasRiskEngineReadPermissions } from '../common';
+import { EntityIconByType } from './entity_store/helpers';
 interface IRiskScorePreviewPanel {
   showMessage: string;
   hideMessage: string;
@@ -125,7 +126,7 @@ const RiskScorePreviewPanel = ({
         buttonContent={trigger === 'closed' ? showMessage : hideMessage}
         forceState={trigger}
         onToggle={onToggle}
-        extraAction={<EuiIcon type={type === RiskScoreEntityType.host ? 'storage' : 'user'} />}
+        extraAction={<EuiIcon type={EntityIconByType[type]} />}
       >
         <>
           <EuiSpacer size={'m'} />

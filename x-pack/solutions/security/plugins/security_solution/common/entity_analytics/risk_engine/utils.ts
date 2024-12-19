@@ -6,12 +6,6 @@
  */
 
 import * as t from 'io-ts';
-import {
-  RiskScoreEntityLevelField,
-  RiskScoreEntityNameField,
-  RiskScoreEntityScoreField,
-  RiskScoreEntityType,
-} from './types';
 /*
  * This utility function can be used to turn a TypeScript enum into a io-ts codec.
  */
@@ -29,21 +23,3 @@ export function fromEnum<EnumType extends string>(
     t.identity
   );
 }
-
-export const EntityTypeToNameField: Record<RiskScoreEntityType, RiskScoreEntityNameField> = {
-  [RiskScoreEntityType.host]: RiskScoreEntityNameField.host,
-  [RiskScoreEntityType.user]: RiskScoreEntityNameField.user,
-  [RiskScoreEntityType.service]: RiskScoreEntityNameField.service,
-};
-
-export const EntityTypeToLevelField: Record<RiskScoreEntityType, RiskScoreEntityLevelField> = {
-  [RiskScoreEntityType.host]: RiskScoreEntityLevelField.host,
-  [RiskScoreEntityType.user]: RiskScoreEntityLevelField.user,
-  [RiskScoreEntityType.service]: RiskScoreEntityLevelField.service,
-};
-
-export const EntityTypeToScoreField: Record<RiskScoreEntityType, RiskScoreEntityScoreField> = {
-  [RiskScoreEntityType.host]: RiskScoreEntityScoreField.host,
-  [RiskScoreEntityType.user]: RiskScoreEntityScoreField.user,
-  [RiskScoreEntityType.service]: RiskScoreEntityScoreField.service,
-};

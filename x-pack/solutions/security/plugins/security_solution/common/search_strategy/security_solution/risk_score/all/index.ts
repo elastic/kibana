@@ -10,7 +10,7 @@ import type { IEsSearchResponse } from '@kbn/search-types';
 import { EntityRiskLevels, EntityRiskLevelsEnum } from '../../../../api/entity_analytics/common';
 import type { EntityRiskScoreRecord } from '../../../../api/entity_analytics/common';
 import type { Inspect, Maybe, SortField } from '../../../common';
-import type { RiskScoreEntityType } from '../common';
+import { RiskScoreEntityType } from '../common';
 
 export interface RiskScoreStrategyResponse<T extends RiskScoreEntityType>
   extends IEsSearchResponse {
@@ -78,14 +78,28 @@ export interface RiskScoreItem {
   [RiskScoreFields.alertsCount]: Maybe<number>;
 }
 
-export const isUserRiskScore = (
-  risk: EntityRiskScore<RiskScoreEntityType>
-): risk is EntityRiskScore<RiskScoreEntityType> => 'user' in risk;
-
 export const EMPTY_SEVERITY_COUNT = {
   [EntityRiskLevelsEnum.Critical]: 0,
   [EntityRiskLevelsEnum.High]: 0,
   [EntityRiskLevelsEnum.Low]: 0,
   [EntityRiskLevelsEnum.Moderate]: 0,
   [EntityRiskLevelsEnum.Unknown]: 0,
+};
+
+export const EntityTypeToNameField: Record<RiskScoreEntityType, RiskScoreFields> = {
+  [RiskScoreEntityType.host]: RiskScoreFields.hostName,
+  [RiskScoreEntityType.user]: RiskScoreFields.userName,
+  [RiskScoreEntityType.service]: RiskScoreFields.serviceName,
+};
+
+export const EntityTypeToLevelField: Record<RiskScoreEntityType, RiskScoreFields> = {
+  [RiskScoreEntityType.host]: RiskScoreFields.hostRisk,
+  [RiskScoreEntityType.user]: RiskScoreFields.userRisk,
+  [RiskScoreEntityType.service]: RiskScoreFields.serviceRisk,
+};
+
+export const EntityTypeToScoreField: Record<RiskScoreEntityType, RiskScoreFields> = {
+  [RiskScoreEntityType.host]: RiskScoreFields.hostRiskScore,
+  [RiskScoreEntityType.user]: RiskScoreFields.userRiskScore,
+  [RiskScoreEntityType.service]: RiskScoreFields.serviceRiskScore,
 };

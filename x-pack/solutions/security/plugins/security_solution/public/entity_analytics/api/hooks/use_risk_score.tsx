@@ -8,15 +8,13 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EntityRiskQueryByEntityType } from '../../../../common/api/search_strategy';
-import type { EntityRiskQueries } from '../../../../common/api/search_strategy';
+import { EntityRiskQueries } from '../../../../common/api/search_strategy';
 import { useRiskScoreFeatureStatus } from './use_risk_score_feature_status';
 import { createFilter } from '../../../common/containers/helpers';
-import type { RiskScoreSortField, StrategyResponseType } from '../../../../common/search_strategy';
-import {
-  getUserRiskIndex,
+import type {
+  RiskScoreSortField,
+  StrategyResponseType,
   RiskScoreEntityType,
-  getHostRiskIndex,
 } from '../../../../common/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
 
@@ -24,12 +22,11 @@ import type { InspectResponse } from '../../../types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import type { inputsModel } from '../../../common/store';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
-import { useIsNewRiskScoreModuleInstalled } from './use_risk_engine_status';
+import { useEntityRiskIndex } from './use_risk_score_index';
 
 export interface RiskScoreState<T extends RiskScoreEntityType> {
-  data: undefined | StrategyResponseType<(typeof EntityRiskQueryByEntityType)[T]>['data'];
+  data: undefined | StrategyResponseType<EntityRiskQueries.list>['data'];
   inspect: InspectResponse;
   isInspected: boolean;
   refetch: inputsModel.Refetch;
@@ -60,7 +57,7 @@ interface UseRiskScore<T> extends UseRiskScoreParams {
   riskEntity: T;
 }
 
-export const initialResult: Omit<StrategyResponseType<EntityRiskQueries>, 'rawResponse'> = {
+export const initialResult: Omit<StrategyResponseType<EntityRiskQueries.list>, 'rawResponse'> = {
   totalCount: 0,
   data: undefined,
 };
@@ -75,17 +72,9 @@ export const useRiskScore = <T extends RiskScoreEntityType>({
   riskEntity,
   includeAlertsCount = false,
 }: UseRiskScore<T>): RiskScoreState<T> => {
-  const spaceId = useSpaceId();
-  const { installed: isNewRiskScoreModuleInstalled, isLoading: riskScoreStatusLoading } =
-    useIsNewRiskScoreModuleInstalled();
-  const defaultIndex =
-    spaceId && !riskScoreStatusLoading && isNewRiskScoreModuleInstalled !== undefined
-      ? riskEntity === RiskScoreEntityType.host
-        ? getHostRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleInstalled)
-        : getUserRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleInstalled)
-      : undefined;
-  // TODO support service risk score
-  const factoryQueryType = EntityRiskQueryByEntityType[riskEntity];
+  const defaultIndex = useEntityRiskIndex(riskEntity, onlyLatest);
+
+  const factoryQueryType = EntityRiskQueries.list;
 
   const { querySize, cursorStart } = pagination || {};
 
@@ -106,7 +95,7 @@ export const useRiskScore = <T extends RiskScoreEntityType>({
     refetch,
     inspect,
     error,
-  } = useSearchStrategy<EntityRiskQueries>({
+  } = useSearchStrategy<EntityRiskQueries.list>({
     factoryQueryType,
     initialResult,
     abort: skip,

@@ -12,6 +12,7 @@ import {
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,
 } from '../../../../entity_analytics/risk_engine';
+import { EntityTypeToNameField } from '../all';
 
 /**
  * Make sure this aligns with the index in step 6, 9 in
@@ -42,20 +43,20 @@ export const getUserRiskIndex = (
 };
 
 export const buildHostNamesFilter = (hostNames: string[]) => {
-  return { terms: { 'host.name': hostNames } };
+  return buildEntityNameFilter(RiskScoreEntityType.host, hostNames);
 };
 
-export const buildUserNamesFilter = (userNames: string[]) => {
-  return { terms: { 'user.name': userNames } };
+export const buildUserNamesFilter = (hostNames: string[]) => {
+  return buildEntityNameFilter(RiskScoreEntityType.user, hostNames);
 };
+
+export const buildEntityNamesFilter = (entityType: RiskScoreEntityType, names: string[]) => {};
 
 export const buildEntityNameFilter = (
-  entityNames: string[],
-  riskEntity: RiskScoreEntityType
+  riskEntity: RiskScoreEntityType,
+  entityNames: string[]
 ): ESQuery => {
-  return riskEntity === RiskScoreEntityType.host
-    ? { terms: { 'host.name': entityNames } }
-    : { terms: { 'user.name': entityNames } };
+  return { terms: { [EntityTypeToNameField[riskEntity]]: entityNames } };
 };
 
 export { RiskScoreEntityType };

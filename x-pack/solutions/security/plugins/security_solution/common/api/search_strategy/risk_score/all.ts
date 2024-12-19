@@ -6,12 +6,13 @@
  */
 
 import { z } from '@kbn/zod';
-import { RiskScoreFields } from '../../../search_strategy';
+
+import { RiskScoreFields } from '../../../search_strategy/security_solution/risk_score/all';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { sort } from '../model/sort';
 import { timerange } from '../model/timerange';
-import { riskScoreEntity } from './model/risk_score_entity';
 import { EntityRiskQueries } from '../model/factory_query_type';
+import { riskScoreEntity } from './model/risk_score_entity';
 
 const baseRiskScoreRequestOptionsSchema = requestBasicOptionsSchema.extend({
   alertsTimerange: timerange.optional(),
@@ -33,7 +34,7 @@ const baseRiskScoreRequestOptionsSchema = requestBasicOptionsSchema.extend({
 });
 
 export const riskScoreRequestOptionsSchema = baseRiskScoreRequestOptionsSchema.extend({
-  factoryQueryType: z.nativeEnum(EntityRiskQueries),
+  factoryQueryType: z.literal(EntityRiskQueries.list),
 });
 
 export type RiskScoreRequestOptionsInput = z.input<typeof riskScoreRequestOptionsSchema>;

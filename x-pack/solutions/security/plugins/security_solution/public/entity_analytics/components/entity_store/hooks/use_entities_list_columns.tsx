@@ -10,8 +10,15 @@ import { EuiButtonIcon, EuiIcon, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UserPanelKey } from '../../../../flyout/entity_details/user_right';
-import { HostPanelKey } from '../../../../flyout/entity_details/host_right';
+import { get } from 'lodash/fp';
+import {
+  EntityTypeToLevelField,
+  EntityTypeToScoreField,
+} from '../../../../../common/search_strategy';
+import {
+  EntityPanelKeyByType,
+  EntityPanelParamByType,
+} from '../../../../flyout/entity_details/shared/constants';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { RiskScoreLevel } from '../../severity/common';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
@@ -19,7 +26,7 @@ import type { Columns } from '../../../../explore/components/paginated_table';
 import type { Entity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import { type CriticalityLevels } from '../../../../../common/constants';
 import { ENTITIES_LIST_TABLE_ID } from '../constants';
-import { isUserEntity, sourceFieldToText } from '../helpers';
+import { EntityIconByType, getEntityType, sourceFieldToText } from '../helpers';
 import { CRITICALITY_LEVEL_TITLE } from '../../asset_criticality/translations';
 import { formatRiskScore } from '../../../common';
 
@@ -47,19 +54,25 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       ),
 
       render: (record: Entity) => {
+        const entityType = getEntityType(record);
+
         const value = record.entity.name;
         const onClick = () => {
-          const id = isUserEntity(record) ? UserPanelKey : HostPanelKey;
-          const params = {
-            [isUserEntity(record) ? 'userName' : 'hostName']: value,
-            contextID: ENTITIES_LIST_TABLE_ID,
-            scopeId: ENTITIES_LIST_TABLE_ID,
-          };
+          const id = EntityPanelKeyByType[entityType];
 
-          openRightPanel({ id, params });
+          if (id) {
+            openRightPanel({
+              id,
+              params: {
+                [EntityPanelParamByType[entityType] ?? '']: value,
+                contextID: ENTITIES_LIST_TABLE_ID,
+                scopeId: ENTITIES_LIST_TABLE_ID,
+              },
+            });
+          }
         };
 
-        if (!value) {
+        if (!value || !EntityPanelKeyByType[entityType]) {
           return null;
         }
 
@@ -90,9 +103,10 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       sortable: true,
       truncateText: { lines: 2 },
       render: (_: string, record: Entity) => {
+        const entityType = getEntityType(record);
         return (
           <span>
-            {isUserEntity(record) ? <EuiIcon type="user" /> : <EuiIcon type="storage" />}
+            <EuiIcon type={EntityIconByType[entityType]} />
             <span css={{ paddingLeft: euiTheme.size.s }}>{record.entity.name}</span>
           </span>
         );
@@ -143,9 +157,8 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       ),
       width: '10%',
       render: (entity: Entity) => {
-        const riskScore = isUserEntity(entity)
-          ? entity.user?.risk?.calculated_score_norm
-          : entity.host?.risk?.calculated_score_norm;
+        const entityType = getEntityType(entity);
+        const riskScore = get(EntityTypeToScoreField[entityType], entity);
 
         if (riskScore != null) {
           return (
@@ -166,9 +179,8 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       ),
       width: '10%',
       render: (entity: Entity) => {
-        const riskLevel = isUserEntity(entity)
-          ? entity.user?.risk?.calculated_level
-          : entity.host?.risk?.calculated_level;
+        const entityType = getEntityType(entity);
+        const riskLevel = get(EntityTypeToLevelField[entityType], entity);
 
         if (riskLevel != null) {
           return <RiskScoreLevel severity={riskLevel} />;

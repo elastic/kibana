@@ -76,6 +76,10 @@ const EntityAnalyticsComponent = () => {
                     <EuiFlexItem>
                       <EntityAnalyticsRiskScores riskEntity={RiskScoreEntityType.user} />
                     </EuiFlexItem>
+
+                    <EuiFlexItem>
+                      <EntityAnalyticsRiskScores riskEntity={RiskScoreEntityType.service} />
+                    </EuiFlexItem>
                   </>
                 )}
 

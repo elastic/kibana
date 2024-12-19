@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RiskScoreEntityType, RiskScoreFields } from '../../../../common/search_strategy';
-import type { RiskSeverity } from '../../../../common/search_strategy';
+import { EntityTypeToLevelField } from '../../../../common/search_strategy';
+import type { RiskSeverity, RiskScoreEntityType } from '../../../../common/search_strategy';
 import { DEFAULT_TABLE_ACTIVE_PAGE } from '../../../common/store/constants';
 
 import type { HostsModel, Queries } from './model';
@@ -72,9 +72,7 @@ export const generateSeverityFilter = (
             bool: {
               should: severitySelection.map((query) => ({
                 match_phrase: {
-                  [entity === RiskScoreEntityType.user
-                    ? RiskScoreFields.userRisk
-                    : RiskScoreFields.hostRisk]: {
+                  [EntityTypeToLevelField[entity]]: {
                     query,
                   },
                 },

@@ -13,7 +13,7 @@ import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics/ri
 import { useEntityAnalyticsRoutes } from '../api';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useRiskEngineStatus } from './use_risk_engine_status';
-import { RiskScoreEntityType } from '../../../../common/entity_analytics/risk_engine';
+import type { RiskScoreEntityType } from '../../../../common/entity_analytics/risk_engine';
 
 export const useCalculateEntityRiskScore = (
   identifierType: RiskScoreEntityType,
@@ -29,7 +29,7 @@ export const useCalculateEntityRiskScore = (
       addError(error, {
         title: i18n.translate('xpack.securitySolution.entityDetails.userPanel.error', {
           defaultMessage: 'There was a problem calculating the {entity} risk score',
-          values: { entity: identifierType === RiskScoreEntityType.host ? "host's" : "user's" },
+          values: { entity: `${identifierType}'s` },
         }),
       });
     },

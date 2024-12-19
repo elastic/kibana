@@ -15,8 +15,6 @@ import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks
 import { useEventDetails } from '../../document_details/shared/hooks/use_event_details';
 import { getField, getAlertTitle, getEventTitle } from '../../document_details/shared/utils';
 import { RulePanelKey } from '../../rule_details/right';
-import { UserPanelKey } from '../../entity_details/user_right';
-import { HostPanelKey } from '../../entity_details/host_right';
 import { NetworkPanelKey } from '../../network_details';
 import { useRuleDetails } from '../../rule_details/hooks/use_rule_details';
 import {
@@ -27,6 +25,7 @@ import {
   USER_HISTORY_ROW_TEST_ID,
   NETWORK_HISTORY_ROW_TEST_ID,
 } from './test_ids';
+import { HostPanelKey, UserPanelKey } from '../../entity_details/shared/constants';
 
 export interface FlyoutHistoryRowProps {
   /**

@@ -12,34 +12,6 @@ export const BETA = i18n.translate('xpack.securitySolution.riskScore.technicalPr
   defaultMessage: 'Beta',
 });
 
-export const HOST_WARNING_TITLE = i18n.translate(
-  'xpack.securitySolution.riskScore.hostsDashboardWarningPanelTitle',
-  {
-    defaultMessage: 'No host risk score data available to display',
-  }
-);
-
-export const USER_WARNING_TITLE = i18n.translate(
-  'xpack.securitySolution.riskScore.usersDashboardWarningPanelTitle',
-  {
-    defaultMessage: 'No user risk score data available to display',
-  }
-);
-
-export const HOST_WARNING_BODY = i18n.translate(
-  'xpack.securitySolution.riskScore.hostsDashboardWarningPanelBody',
-  {
-    defaultMessage: `We haven’t found any host risk score data. Check if you have any global filters in the global KQL search bar. If you have just enabled the host risk module, the risk engine might need an hour to generate host risk score data and display in this panel.`,
-  }
-);
-
-export const USER_WARNING_BODY = i18n.translate(
-  'xpack.securitySolution.riskScore.usersDashboardWarningPanelBody',
-  {
-    defaultMessage: `We haven’t found any user risk score data. Check if you have any global filters in the global KQL search bar. If you have just enabled the user risk module, the risk engine might need an hour to generate user risk score data and display in this panel.`,
-  }
-);
-
 export const RESTART_TOOLTIP = i18n.translate(
   'xpack.securitySolution.riskScore.usersDashboardRestartTooltip',
   {

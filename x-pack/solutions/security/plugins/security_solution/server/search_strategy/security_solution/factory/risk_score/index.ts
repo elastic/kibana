@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityKpiRiskQuery, EntityRiskQueries } from '../../../../../common/api/search_strategy';
+import { EntityRiskQueries } from '../../../../../common/api/search_strategy';
 import type { FactoryQueryTypes } from '../../../../../common/search_strategy';
 
 import type { SecuritySolutionFactory } from '../types';
@@ -13,11 +13,9 @@ import { riskScore } from './all';
 import { kpiRiskScore } from './kpi';
 
 export const riskScoreFactory: Record<
-  EntityRiskQueries | typeof EntityKpiRiskQuery,
+  EntityRiskQueries,
   SecuritySolutionFactory<FactoryQueryTypes>
 > = {
-  [EntityRiskQueries.hostsRiskScore]: riskScore,
-  [EntityRiskQueries.usersRiskScore]: riskScore,
-  [EntityRiskQueries.servicesRiskScore]: riskScore,
-  [EntityKpiRiskQuery]: kpiRiskScore,
+  [EntityRiskQueries.list]: riskScore,
+  [EntityRiskQueries.kpi]: kpiRiskScore,
 };

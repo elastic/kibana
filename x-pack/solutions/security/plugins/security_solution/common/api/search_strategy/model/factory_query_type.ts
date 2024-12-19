@@ -32,18 +32,9 @@ export enum NetworkQueries {
 }
 
 export enum EntityRiskQueries {
-  hostsRiskScore = 'hostsRiskScore',
-  usersRiskScore = 'usersRiskScore',
-  servicesRiskScore = 'servicesRiskScore',
+  list = 'listEntitiesRiskScore',
+  kpi = 'kpiRiskScore',
 }
-
-export const EntityRiskQueryByEntityType = {
-  host: EntityRiskQueries.hostsRiskScore,
-  user: EntityRiskQueries.usersRiskScore,
-  service: EntityRiskQueries.servicesRiskScore,
-};
-
-export const EntityKpiRiskQuery = 'kpiRiskScore';
 
 export enum CtiQueries {
   eventEnrichment = 'eventEnrichment',
@@ -62,7 +53,6 @@ export type FactoryQueryTypes =
   | UsersQueries
   | NetworkQueries
   | EntityRiskQueries
-  | typeof EntityKpiRiskQuery
   | CtiQueries
   | typeof FirstLastSeenQuery
   | RelatedEntitiesQueries;

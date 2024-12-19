@@ -8,7 +8,8 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { RiskScoreEntityType } from '../../../../common/search_strategy';
+import { capitalize } from 'lodash/fp';
+import type { RiskScoreEntityType } from '../../../../common/search_strategy';
 
 const RiskScoreHeaderTitleComponent = ({
   riskScoreEntity,
@@ -18,18 +19,15 @@ const RiskScoreHeaderTitleComponent = ({
   title?: string;
 }) => (
   <>
-    {title ??
-      (riskScoreEntity === RiskScoreEntityType.user ? (
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.usersRiskDashboard.title"
-          defaultMessage="User Risk Scores"
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.hostsRiskDashboard.title"
-          defaultMessage="Host Risk Scores"
-        />
-      ))}
+    {title ?? (
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.usersRiskDashboard.title"
+        defaultMessage="{entityType} Risk Scores"
+        values={{
+          entityType: capitalize(riskScoreEntity),
+        }}
+      />
+    )}
   </>
 );
 
