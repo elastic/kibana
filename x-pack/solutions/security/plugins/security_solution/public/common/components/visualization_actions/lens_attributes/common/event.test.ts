@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useRouteSpy } from '../../../../utils/route/use_route_spy';
 import { wrapper } from '../../mocks';
 
