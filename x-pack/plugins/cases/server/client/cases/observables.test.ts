@@ -85,7 +85,7 @@ describe('addObservable', () => {
       )
     ).rejects.toThrow(
       Boom.badRequest(
-        'Failed to add observable: {"observable":{"typeKey":"invalid type","value":"127.0.0.1","description":""}}: Error: Invalid observable type, key does not exist: invalid type'
+        'Failed to add observable: Error: Invalid observable type, key does not exist: invalid type'
       )
     );
   });
@@ -103,9 +103,7 @@ describe('addObservable', () => {
         mockCasesClient
       )
     ).rejects.toThrow(
-      Boom.badRequest(
-        'Failed to add observable: {"observable":{"typeKey":"observable-type-ipv4","value":"127.0.0.1","description":""}}: Error: Invalid duplicated observables in request.'
-      )
+      Boom.badRequest('Failed to add observable: Error: Invalid duplicated observables in request.')
     );
   });
 

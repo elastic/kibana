@@ -230,8 +230,6 @@ export const deleteObservable = async (
       updatedAttributes: { observables: updatedObservables },
     });
   } catch (error) {
-    throw Boom.badRequest(
-      `Failed to delete observable id: ${observableId}: ${error}`
-    );
+    throw Boom.badRequest(`Failed to delete observable id: ${observableId}: ${error}`);
   }
 };
