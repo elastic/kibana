@@ -230,7 +230,6 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     },
   ];
   const [selectedVersion, setSelectedVersion] = useState(preselected);
-  const [selectedVersionStr, setSelectedVersionStr] = useState('');
 
   // latest agent version might be earlier than kibana version
   const latestAgentVersion = useAgentVersion();
@@ -571,7 +570,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
             data-test-subj="agentUpgradeModal.VersionInput"
             onChange={(e) => {
               const newValue = e.target.value;
-              setSelectedVersionStr(newValue);
+
               setSelectedVersion([{ label: newValue, value: newValue }]);
             }}
             isInvalid={!!semverErrors}
