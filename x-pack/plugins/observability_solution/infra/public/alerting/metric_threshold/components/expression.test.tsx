@@ -13,43 +13,43 @@ import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
 import { Expressions } from './expression';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { TIMESTAMP_FIELD } from '../../../../common/constants';
-import { ResolvedDataView } from '../../../utils/data_view';
-
-const mockDataView = {
-  id: 'mock-id',
-  title: 'mock-title',
-  timeFieldName: TIMESTAMP_FIELD,
-  isPersisted: () => false,
-  getName: () => 'mock-data-view',
-  toSpec: () => ({}),
-} as jest.Mocked<DataView>;
-
-jest.mock('../../../containers/metrics_source', () => ({
-  withSourceProvider: () => jest.fn,
-  useSourceContext: () => ({
-    source: { id: 'default' },
-  }),
-  useMetricsDataViewContext: () => ({
-    metricsView: {
-      indices: 'metricbeat-*',
-      timeFieldName: mockDataView.timeFieldName,
-      fields: mockDataView.fields,
-      dataViewReference: mockDataView,
-    } as ResolvedDataView,
-    loading: false,
-    error: undefined,
-  }),
-}));
+import { dataViewPluginMocks as mockDataViewPlugin } from '@kbn/data-views-plugin/public/mocks';
+import { indexPatternEditorPluginMock as mockDataViewEditorPlugin } from '@kbn/data-view-editor-plugin/public/mocks';
+import { dataPluginMock as mockDataPlugin } from '@kbn/data-plugin/public/mocks';
+import { useKibana } from '@kbn/observability-plugin/public/utils/kibana_react';
+import { kibanaStartMock } from '@kbn/observability-plugin/public/utils/kibana_react.mock';
 
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibanaContextForPlugin: () => ({
-    services: mockCoreMock.createStart(),
+    services: {
+      ...mockCoreMock.createStart(),
+      data: mockDataPlugin.createStartContract(),
+      dataViews: {
+        ...mockDataViewPlugin.createStartContract(),
+        getIds: jest.fn().mockImplementation(() => ['test-data-view-id']),
+        get: jest.fn().mockReturnValue(Promise.resolve({ isPersisted: jest.fn() })),
+      },
+      dataViewEditor: mockDataViewEditorPlugin.createStartContract(),
+    },
   }),
 }));
 
+jest.mock('@kbn/observability-plugin/public/utils/kibana_react');
+
+const useKibanaMock = useKibana as jest.Mock;
+
+const mockKibana = () => {
+  useKibanaMock.mockReturnValue({
+    ...kibanaStartMock.startContract(),
+  });
+};
+
 describe('Expression', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockKibana();
+  });
+
   async function setup(currentOptions: {
     metrics?: MetricsExplorerMetric[];
     filterQuery?: string;
@@ -59,7 +59,14 @@ describe('Expression', () => {
       criteria: [],
       groupBy: undefined,
       filterQueryText: '',
-      sourceId: 'default',
+      sourceId: '',
+      searchConfiguration: {
+        index: 'mockedIndex',
+        query: {
+          query: '',
+          language: 'kuery',
+        },
+      },
     };
     const wrapper = mountWithIntl(
       <Expressions
@@ -72,7 +79,9 @@ describe('Expression', () => {
         setRuleProperty={() => {}}
         metadata={{
           currentOptions,
+          adHocDataViewList: [],
         }}
+        onChangeMetaData={() => {}}
       />
     );
 

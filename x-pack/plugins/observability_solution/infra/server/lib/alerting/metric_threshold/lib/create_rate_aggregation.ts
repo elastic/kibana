@@ -7,7 +7,6 @@
 
 import moment from 'moment';
 import { calculateRateTimeranges } from '../../inventory_metric_threshold/lib/calculate_rate_timeranges';
-import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 
 export const createRateAggsBucketScript = (
   timeframe: { start: number; end: number },
@@ -33,6 +32,7 @@ export const createRateAggsBucketScript = (
 export const createRateAggsBuckets = (
   timeframe: { start: number; end: number },
   id: string,
+  timeFieldName: string,
   field: string
 ) => {
   const { firstBucketRange, secondBucketRange } = calculateRateTimeranges({
@@ -44,7 +44,7 @@ export const createRateAggsBuckets = (
     [`${id}_first_bucket`]: {
       filter: {
         range: {
-          [TIMESTAMP_FIELD]: {
+          [timeFieldName]: {
             gte: moment(firstBucketRange.from).toISOString(),
             lt: moment(firstBucketRange.to).toISOString(),
           },
@@ -55,7 +55,7 @@ export const createRateAggsBuckets = (
     [`${id}_second_bucket`]: {
       filter: {
         range: {
-          [TIMESTAMP_FIELD]: {
+          [timeFieldName]: {
             gte: moment(secondBucketRange.from).toISOString(),
             lt: moment(secondBucketRange.to).toISOString(),
           },

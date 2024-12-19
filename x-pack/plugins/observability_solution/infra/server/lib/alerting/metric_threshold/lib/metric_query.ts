@@ -45,12 +45,13 @@ export const calculateCurrentTimeframe = (
 export const createBaseFilters = (
   metricParams: MetricExpressionParams,
   timeframe: { start: number; end: number },
+  timeFieldName: string,
   filterQuery?: string
 ) => {
   const rangeFilters = [
     {
       range: {
-        '@timestamp': {
+        [timeFieldName]: {
           gte: moment(timeframe.start).toISOString(),
           lte: moment(timeframe.end).toISOString(),
         },
@@ -77,6 +78,7 @@ export const createBaseFilters = (
 export const getElasticsearchMetricQuery = (
   metricParams: MetricExpressionParams,
   timeframe: { start: number; end: number },
+  timeFieldName: string,
   compositeSize: number,
   alertOnGroupDisappear: boolean,
   lastPeriodEnd?: number,
@@ -94,13 +96,21 @@ export const getElasticsearchMetricQuery = (
 
   // We need to make a timeframe that represents the current timeframe as oppose
   // to the total timeframe (which includes the last period).
-  const currentTimeframe = calculateCurrentTimeframe(metricParams, timeframe);
+  const currentTimeframe = {
+    ...calculateCurrentTimeframe(metricParams, timeframe),
+    timeFieldName,
+  };
 
   const metricAggregations =
     aggType === Aggregators.COUNT
       ? {}
       : aggType === Aggregators.RATE
-      ? createRateAggsBuckets(currentTimeframe, 'aggregatedValue', metricParams.metric)
+      ? createRateAggsBuckets(
+          currentTimeframe,
+          'aggregatedValue',
+          timeFieldName,
+          metricParams.metric
+        )
       : aggType === Aggregators.P95 || aggType === Aggregators.P99
       ? createPercentileAggregation(aggType, metricParams.metric)
       : isCustom(metricParams)
@@ -224,7 +234,7 @@ export const getElasticsearchMetricQuery = (
     aggs.groupings.composite.after = afterKey;
   }
 
-  const baseFilters = createBaseFilters(metricParams, timeframe, filterQuery);
+  const baseFilters = createBaseFilters(metricParams, timeframe, timeFieldName, filterQuery);
 
   return {
     track_total_hits: true,
