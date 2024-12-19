@@ -77,13 +77,22 @@ export const DurationInput = memo(function DurationInputComponent({
     )} !important; // Override focus states etc.
     color: ${euiTheme.colors.primary};
   `;
+  const durationInputStyle = css`
+    box-shadow: none !important; // Override disabled state
+  `;
 
   // EUI missing some props
   const rest = { disabled: isDisabled, ...props };
 
   return (
-    <EuiFormRow className={durationFormRowStyle} error={errorMessage} isInvalid={isInvalid}>
+    <EuiFormRow
+      className={durationFormRowStyle}
+      error={errorMessage}
+      isInvalid={isInvalid}
+      isDisabled={isDisabled}
+    >
       <EuiFieldNumber
+        className={durationInputStyle}
         append={
           <EuiSelect
             className={durationUnitSelectStyle}
