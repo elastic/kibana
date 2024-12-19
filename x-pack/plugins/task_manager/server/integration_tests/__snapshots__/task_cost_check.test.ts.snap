@@ -4,7 +4,35 @@ exports[`Task cost checks detects tasks with cost definitions 1`] = `
 Array [
   Object {
     "cost": 1,
+    "taskType": "actions:.bedrock",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.cases",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.cases-webhook",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.crowdstrike",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.d3security",
+  },
+  Object {
+    "cost": 1,
     "taskType": "actions:.email",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.gemini",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.gen-ai",
   },
   Object {
     "cost": 1,
@@ -12,15 +40,43 @@ Array [
   },
   Object {
     "cost": 1,
+    "taskType": "actions:.jira",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.observability-ai-assistant",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.opsgenie",
+  },
+  Object {
+    "cost": 1,
     "taskType": "actions:.pagerduty",
   },
   Object {
     "cost": 1,
-    "taskType": "actions:.swimlane",
+    "taskType": "actions:.resilient",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.sentinelone",
   },
   Object {
     "cost": 1,
     "taskType": "actions:.server-log",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.servicenow",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.servicenow-itom",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.servicenow-sir",
   },
   Object {
     "cost": 1,
@@ -32,31 +88,7 @@ Array [
   },
   Object {
     "cost": 1,
-    "taskType": "actions:.webhook",
-  },
-  Object {
-    "cost": 1,
-    "taskType": "actions:.cases-webhook",
-  },
-  Object {
-    "cost": 1,
-    "taskType": "actions:.xmatters",
-  },
-  Object {
-    "cost": 1,
-    "taskType": "actions:.servicenow",
-  },
-  Object {
-    "cost": 1,
-    "taskType": "actions:.servicenow-sir",
-  },
-  Object {
-    "cost": 1,
-    "taskType": "actions:.servicenow-itom",
-  },
-  Object {
-    "cost": 1,
-    "taskType": "actions:.jira",
+    "taskType": "actions:.swimlane",
   },
   Object {
     "cost": 1,
@@ -64,11 +96,7 @@ Array [
   },
   Object {
     "cost": 1,
-    "taskType": "actions:.torq",
-  },
-  Object {
-    "cost": 1,
-    "taskType": "actions:.opsgenie",
+    "taskType": "actions:.thehive",
   },
   Object {
     "cost": 1,
@@ -76,43 +104,15 @@ Array [
   },
   Object {
     "cost": 1,
-    "taskType": "actions:.gen-ai",
+    "taskType": "actions:.torq",
   },
   Object {
     "cost": 1,
-    "taskType": "actions:.bedrock",
+    "taskType": "actions:.webhook",
   },
   Object {
     "cost": 1,
-    "taskType": "actions:.gemini",
-  },
-  Object {
-    "cost": 1,
-    "taskType": "actions:.d3security",
-  },
-  Object {
-    "cost": 1,
-    "taskType": "actions:.resilient",
-  },
-  Object {
-    "cost": 1,
-    "taskType": "actions:.thehive",
-  },
-  Object {
-    "cost": 1,
-    "taskType": "actions:.sentinelone",
-  },
-  Object {
-    "cost": 1,
-    "taskType": "actions:.crowdstrike",
-  },
-  Object {
-    "cost": 1,
-    "taskType": "actions:.cases",
-  },
-  Object {
-    "cost": 1,
-    "taskType": "actions:.observability-ai-assistant",
+    "taskType": "actions:.xmatters",
   },
   Object {
     "cost": 10,

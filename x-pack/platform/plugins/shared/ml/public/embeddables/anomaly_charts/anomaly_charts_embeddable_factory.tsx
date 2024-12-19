@@ -32,7 +32,7 @@ import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_exe
 import { initializeAnomalyChartsControls } from './initialize_anomaly_charts_controls';
 import { LazyAnomalyChartsContainer } from './lazy_anomaly_charts_container';
 import { getAnomalyChartsServiceDependencies } from './get_anomaly_charts_services_dependencies';
-import { buildDataViewPublishingApi } from '../common/anomaly_detection_embeddable';
+import { buildDataViewPublishingApi } from '../common/build_data_view_publishing_api';
 
 export const getAnomalyChartsReactEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
