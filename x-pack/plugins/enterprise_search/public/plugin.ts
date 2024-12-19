@@ -264,6 +264,19 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
+      id: 'overviewRedirect',
+      title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAV_TITLE,
+      appRoute: '/app/enterprise_search/overview',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({}: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.application.navigateToApp(ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID);
+        return () => {};
+      },
+    });
+
+    core.application.register({
       appRoute: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       deepLinks: contentLinks,
@@ -286,6 +299,45 @@ export class EnterpriseSearchPlugin implements Plugin {
       },
       order: 1,
       title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
+    });
+
+    core.application.register({
+      id: 'contentIndicesRedirect',
+      title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
+      appRoute: '/app/enterprise_search/content/search_indices',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({}: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.application.navigateToApp('/elasticsearch/content/search_indices');
+        return () => {};
+      },
+    });
+
+    core.application.register({
+      id: 'contentConnectorsRedirect',
+      title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
+      appRoute: '/app/enterprise_search/content/connectors',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({}: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.application.navigateToApp('/elasticsearch/content/connectors');
+        return () => {};
+      },
+    });
+
+    core.application.register({
+      id: 'contentCrawlersRedirect',
+      title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
+      appRoute: '/app/enterprise_search/content/crawlers',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({}: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.application.navigateToApp('/elasticsearch/content/crawlers');
+        return () => {};
+      },
     });
 
     core.application.register({
@@ -397,6 +449,19 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
+      id: 'searchApplicationRedirect',
+      title: APPLICATIONS_PLUGIN.NAV_TITLE,
+      appRoute: '/app/enterprise_search/applications/search_applications',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({}: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.application.navigateToApp('/elasticsearch/applications/search_applications');
+        return () => {};
+      },
+    });
+
+    core.application.register({
       appRoute: ANALYTICS_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
@@ -415,6 +480,19 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(Analytics, kibanaDeps, pluginData);
       },
       title: ANALYTICS_PLUGIN.NAME,
+    });
+
+    core.application.register({
+      id: 'searchAnalyticsRedirect',
+      title: ANALYTICS_PLUGIN.NAME,
+      appRoute: '/app/enterprise_search/analytics',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({}: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.application.navigateToApp('/elasticsearch/analytics');
+        return () => {};
+      },
     });
 
     core.application.register({
