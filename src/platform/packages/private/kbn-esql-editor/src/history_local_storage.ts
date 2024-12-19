@@ -66,11 +66,11 @@ export const addQueriesToCache = (
   // the cachedQueries Map might not contain all
   // the localStorage queries
   const queries = getHistoryItems('desc');
-cachedQueries.clear();
-queries.forEach((queryItem) => {
-  const trimmedQueryString = getTrimmedQuery(queryItem.queryString);
-  cachedQueries.set(trimmedQueryString, queryItem);
-});
+  cachedQueries.clear();
+  queries.forEach((queryItem) => {
+    const trimmedQueryString = getTrimmedQuery(queryItem.queryString);
+    cachedQueries.set(trimmedQueryString, queryItem);
+  });
   const trimmedQueryString = getTrimmedQuery(item.queryString);
 
   if (item.queryString) {
