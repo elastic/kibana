@@ -35,25 +35,23 @@ export function hasRumDataQuery({
   end?: number;
 }) {
   return {
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
-            { term: { [PROCESSOR_EVENT]: 'transaction' } },
-          ],
-        },
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
+          { term: { [PROCESSOR_EVENT]: 'transaction' } },
+        ],
       },
-      aggs: {
-        services: {
-          filter: rangeQuery(start, end)[0],
-          aggs: {
-            mostTraffic: {
-              terms: {
-                field: SERVICE_NAME,
-                size: 1,
-              },
+    },
+    aggs: {
+      services: {
+        filter: rangeQuery(start, end)[0],
+        aggs: {
+          mostTraffic: {
+            terms: {
+              field: SERVICE_NAME,
+              size: 1,
             },
           },
         },

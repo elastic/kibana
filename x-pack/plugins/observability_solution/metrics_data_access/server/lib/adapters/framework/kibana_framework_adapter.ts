@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { TransportRequestParams } from '@elastic/elasticsearch';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import {

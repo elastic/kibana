@@ -126,7 +126,7 @@ export function getTopNAggregationRequest({
 
 export function createTopNSamples(
   response: Required<
-    InferSearchResponseOf<unknown, { body: { aggs: ReturnType<typeof getTopNAggregationRequest> } }>
+    InferSearchResponseOf<unknown, { aggs: ReturnType<typeof getTopNAggregationRequest> }>
   >['aggregations'],
   startMilliseconds: number,
   endMilliseconds: number,

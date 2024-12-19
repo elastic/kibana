@@ -51,50 +51,46 @@ async function getLatencyChartsForDependencyForTimeRange({
     apm: {
       events: [getProcessorEventForServiceDestinationStatistics(searchServiceDestinationMetrics)],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...termQuery(SPAN_NAME, spanName || null),
-            ...getDocumentTypeFilterForServiceDestinationStatistics(
-              searchServiceDestinationMetrics
-            ),
-            { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName } },
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...rangeQuery(startWithOffset, endWithOffset),
+          ...termQuery(SPAN_NAME, spanName || null),
+          ...getDocumentTypeFilterForServiceDestinationStatistics(searchServiceDestinationMetrics),
+          { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName } },
+        ],
       },
-      aggs: {
-        timeseries: {
-          date_histogram: getMetricsDateHistogramParams({
-            start: startWithOffset,
-            end: endWithOffset,
-            metricsInterval: 60,
-          }),
-          aggs: {
-            latency_sum: {
-              sum: {
-                field: getLatencyFieldForServiceDestinationStatistics(
-                  searchServiceDestinationMetrics
-                ),
-              },
+    },
+    aggs: {
+      timeseries: {
+        date_histogram: getMetricsDateHistogramParams({
+          start: startWithOffset,
+          end: endWithOffset,
+          metricsInterval: 60,
+        }),
+        aggs: {
+          latency_sum: {
+            sum: {
+              field: getLatencyFieldForServiceDestinationStatistics(
+                searchServiceDestinationMetrics
+              ),
             },
-            ...(searchServiceDestinationMetrics
-              ? {
-                  latency_count: {
-                    sum: {
-                      field: getDocCountFieldForServiceDestinationStatistics(
-                        searchServiceDestinationMetrics
-                      ),
-                    },
-                  },
-                }
-              : {}),
           },
+          ...(searchServiceDestinationMetrics
+            ? {
+                latency_count: {
+                  sum: {
+                    field: getDocCountFieldForServiceDestinationStatistics(
+                      searchServiceDestinationMetrics
+                    ),
+                  },
+                },
+              }
+            : {}),
         },
       },
     },

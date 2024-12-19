@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { TransportRequestParams } from '@elastic/elasticsearch';
 import { ElasticsearchClient, RouteConfig, SavedObjectsClientContract } from '@kbn/core/server';
 import { CoreSetup, IRouter, KibanaRequest, RequestHandler, RouteMethod } from '@kbn/core/server';

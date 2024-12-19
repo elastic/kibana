@@ -33,20 +33,18 @@ export async function getHostsCount({
 
   const response = await infraMetricsClient.search({
     allow_no_indices: true,
-    body: {
-      size: 0,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [query, ...rangeQuery(from, to)],
-          should: [...documentsFilter],
-        },
+    size: 0,
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter: [query, ...rangeQuery(from, to)],
+        should: [...documentsFilter],
       },
-      aggs: {
-        totalCount: {
-          cardinality: {
-            field: HOST_NAME_FIELD,
-          },
+    },
+    aggs: {
+      totalCount: {
+        cardinality: {
+          field: HOST_NAME_FIELD,
         },
       },
     },

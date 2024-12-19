@@ -9,6 +9,7 @@ import { isEmpty } from 'lodash';
 import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { InventoryRouteHandlerResources } from '../../routes/types';
 
 export type AlertsClient = Awaited<ReturnType<typeof createAlertsClient>>;
@@ -27,12 +28,14 @@ export async function createAlertsClient({
   type RequiredParams = ESSearchRequest & {
     size: number;
     track_total_hits: boolean | number;
+    sort?: estypes.SortOptions[];
   };
 
   return {
     search<TParams extends RequiredParams>(
       searchParams: TParams
     ): Promise<InferSearchResponseOf<ParsedTechnicalFields, TParams>> {
+      // @ts-expect-error mismatching types for _source and sort
       return alertsClient.find({
         ...searchParams,
         index: alertsIndices.join(','),

@@ -37,17 +37,13 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
     includeLegacyData?: boolean;
   } & ({ events: ProcessorEvent[] } | { sources: ApmDataSource[] });
-  body: {
-    size: number;
-    track_total_hits: boolean | number;
-  };
+  size: number;
+  track_total_hits: boolean | number;
 };
 
 export type APMLogEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
-  body: {
-    size: number;
-    track_total_hits: boolean | number;
-  };
+  size: number;
+  track_total_hits: boolean | number;
 };
 
 type APMEventWrapper<T> = Omit<T, 'index'> & {
@@ -172,15 +168,12 @@ export class APMEventClient {
     }
 
     const searchParams = {
-      ...omit(params, 'apm', 'body'),
+      ...omit(params, 'apm'),
       index,
-      body: {
-        ...params.body,
-        query: {
-          bool: {
-            filter: filters,
-            must: compact([params.body.query]),
-          },
+      query: {
+        bool: {
+          filter: filters,
+          must: compact([params.query]),
         },
       },
       ...(this.includeFrozen ? { ignore_throttled: false } : {}),
@@ -211,15 +204,12 @@ export class APMEventClient {
       this.excludedDataTiers.length > 0 ? excludeTiersQuery(this.excludedDataTiers) : undefined;
 
     const searchParams = {
-      ...omit(params, 'body'),
+      ...omit(params),
       index,
-      body: {
-        ...params.body,
-        query: {
-          bool: {
-            filter,
-            must: compact([params.body.query]),
-          },
+      query: {
+        bool: {
+          filter,
+          must: compact([params.query]),
         },
       },
       ...(this.includeFrozen ? { ignore_throttled: false } : {}),
@@ -263,11 +253,10 @@ export class APMEventClient {
             expand_wildcards: ['open' as const, 'hidden' as const],
           },
           {
-            ...omit(params, 'apm', 'body'),
-            ...params.body,
+            ...omit(params, 'apm'),
             query: {
               bool: {
-                filter: compact([params.body.query, ...filters]),
+                filter: compact([params.query, ...filters]),
               },
             },
           },

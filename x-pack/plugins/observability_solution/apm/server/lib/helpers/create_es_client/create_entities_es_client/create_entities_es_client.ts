@@ -111,7 +111,7 @@ export async function createEntitiesESClient({
               ignore_unavailable: true,
             },
             {
-              ...params.body,
+              ...params,
             },
           ];
 

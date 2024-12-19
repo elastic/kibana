@@ -53,19 +53,17 @@ async function getServerlessTransactionThroughput({
         },
       ],
     },
-    body: {
-      track_total_hits: true,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...termQuery(FAAS_ID, serverlessId),
-          ],
-        },
+    track_total_hits: true,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(SERVICE_NAME, serviceName),
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...termQuery(FAAS_ID, serverlessId),
+        ],
       },
     },
   };
@@ -108,34 +106,32 @@ export async function getServerlessSummary({
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(METRICSET_NAME, 'app'),
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...termQuery(FAAS_ID, serverlessId),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(METRICSET_NAME, 'app'),
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...termQuery(FAAS_ID, serverlessId),
+        ],
       },
-      aggs: {
-        totalFunctions: { cardinality: { field: FAAS_ID } },
-        faasDurationAvg: { avg: { field: FAAS_DURATION } },
-        faasBilledDurationAvg: { avg: { field: FAAS_BILLED_DURATION } },
-        avgTotalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-        avgFreeMemory: { avg: { field: METRIC_SYSTEM_FREE_MEMORY } },
-        countInvocations: { value_count: { field: FAAS_BILLED_DURATION } },
-        avgComputeUsageBytesMs: computeUsageAvgScript,
-        sample: {
-          top_metrics: {
-            metrics: [{ field: HOST_ARCHITECTURE }],
-            sort: [{ '@timestamp': { order: 'desc' as const } }],
-          },
+    },
+    aggs: {
+      totalFunctions: { cardinality: { field: FAAS_ID } },
+      faasDurationAvg: { avg: { field: FAAS_DURATION } },
+      faasBilledDurationAvg: { avg: { field: FAAS_BILLED_DURATION } },
+      avgTotalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+      avgFreeMemory: { avg: { field: METRIC_SYSTEM_FREE_MEMORY } },
+      countInvocations: { value_count: { field: FAAS_BILLED_DURATION } },
+      avgComputeUsageBytesMs: computeUsageAvgScript,
+      sample: {
+        top_metrics: {
+          metrics: [{ field: HOST_ARCHITECTURE }],
+          sort: [{ '@timestamp': { order: 'desc' as const } }],
         },
       },
     },
