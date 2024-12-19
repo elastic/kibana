@@ -23,8 +23,7 @@ const createAgent = (legacyConfig: ESConfigForProxy) => {
   const verificationMode = legacyConfig.ssl && legacyConfig.ssl.verificationMode;
   switch (verificationMode) {
     case 'none':
-      agentOptions.rejectUnauthorized = false;
-      break;
+      throw new Error(`Unsupported ssl verificationMode: ${verificationMode}`);
     case 'certificate':
       agentOptions.rejectUnauthorized = true;
 
