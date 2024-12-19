@@ -12,7 +12,9 @@ export const graphRequestSchema = schema.object({
   nodesLimit: schema.maybe(schema.number()),
   showUnknownTarget: schema.maybe(schema.boolean()),
   query: schema.object({
-    eventIds: schema.arrayOf(schema.string()),
+    originEventIds: schema.arrayOf(
+      schema.object({ id: schema.string(), isAlert: schema.boolean() })
+    ),
     // TODO: use zod for range validation instead of config schema
     start: schema.oneOf([schema.number(), schema.string()]),
     end: schema.oneOf([schema.number(), schema.string()]),
