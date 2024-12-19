@@ -125,9 +125,10 @@ export const useUpdateUserProfile = ({
     <D extends Partial<UserProfileData>>(updatedData: D) => {
       userProfileSnapshot.current = merge({}, userProfileData);
       setIsLoading(true);
-      return userProfileApiClient
-        .partialUpdate(updatedData)
-        .then(() => onUserProfileUpdate(updatedData));
+      return userProfileApiClient.partialUpdate(updatedData).then(() => {
+        onUserProfileUpdate(updatedData);
+        return updatedData;
+      });
     },
     [userProfileApiClient, onUserProfileUpdate, userProfileData]
   );
