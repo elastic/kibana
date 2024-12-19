@@ -8,7 +8,7 @@
 import moment from 'moment-timezone';
 import { isDefined } from '@kbn/ml-is-defined';
 
-// Partial list of packages/core/ui-settings/core-ui-settings-common/src/timezones.ts
+// Partial list of src/core/packages/ui-settings/common/src/timezones.ts
 export const ACCEPTED_TIMEZONES = new Set([
   ...moment.tz
     .names()
