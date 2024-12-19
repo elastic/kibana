@@ -25,8 +25,8 @@ export interface BlockListFlyoutProps {
 /**
  * Component calling the block list flyout (retrieved from the SecuritySolution plugin via context).
  * This reuses a lot of components passed down via context from the Security Solution plugin:
- * - the flyout component: https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/public/management/components/artifact_list_page/components/artifact_flyout.tsx
- * - the form component: https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/public/management/pages/blocklist/view/components/blocklist_form.tsx
+ * - the flyout component: x-pack/solutions/security/plugins/security_solution/public/management/components/artifact_list_page/components/artifact_flyout.tsx
+ * - the form component: x-pack/solutions/security/plugins/security_solution/public/management/pages/blocklist/view/components/blocklist_form.tsx
  */
 export const BlockListFlyout: VFC<BlockListFlyoutProps> = ({ indicatorFileHash }) => {
   const { setBlockListIndicatorValue } = useBlockListContext();
