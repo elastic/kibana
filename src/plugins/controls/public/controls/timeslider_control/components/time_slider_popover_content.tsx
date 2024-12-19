@@ -49,7 +49,7 @@ export function TimeSliderPopoverContent({
       }, 750),
     [onChange]
   );
-  
+
   /**
    * The following `useEffect` ensures that the changes to the value that come from the embeddable (for example,
    * from the `clear` button on the dashboard) are reflected in the displayed value

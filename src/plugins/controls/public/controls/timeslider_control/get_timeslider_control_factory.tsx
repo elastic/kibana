@@ -286,7 +286,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
           const value: Timeslice = useMemo(() => {
             return [from, to];
           }, [from, to]);
-          
+
           return (
             <EuiInputPopover
               {...controlPanelClassNames}
