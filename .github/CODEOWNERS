@@ -300,7 +300,6 @@ packages/kbn-search-index-documents @elastic/search-kibana
 packages/kbn-search-response-warnings @elastic/kibana-data-discovery
 packages/kbn-search-types @elastic/kibana-data-discovery
 packages/kbn-security-hardening @elastic/kibana-security
-packages/kbn-server-http-tools @elastic/kibana-core
 packages/kbn-set-map @elastic/kibana-operations
 packages/kbn-shared-svg @elastic/obs-ux-infra_services-team
 packages/kbn-shared-ux-utility @elastic/appex-sharedux
@@ -600,6 +599,7 @@ src/platform/packages/shared/kbn-securitysolution-es-utils @elastic/security-det
 src/platform/packages/shared/kbn-securitysolution-io-ts-types @elastic/security-detection-engine
 src/platform/packages/shared/kbn-securitysolution-io-ts-utils @elastic/security-detection-engine
 src/platform/packages/shared/kbn-securitysolution-rules @elastic/security-detection-engine
+src/platform/packages/shared/kbn-server-http-tools @elastic/kibana-core
 src/platform/packages/shared/kbn-server-route-repository @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-server-route-repository-client @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-server-route-repository-utils @elastic/obs-knowledge-team
