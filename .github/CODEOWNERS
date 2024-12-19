@@ -619,6 +619,7 @@ src/platform/plugins/shared/es_ui_shared @elastic/kibana-management
 src/platform/plugins/shared/esql @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
 src/platform/plugins/shared/management @elastic/kibana-management
+src/platform/plugins/shared/newsfeed @elastic/kibana-core
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/bfetch @elastic/appex-sharedux
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
@@ -666,7 +667,6 @@ src/plugins/kibana_utils @elastic/appex-sharedux
 src/plugins/links @elastic/kibana-presentation
 src/plugins/maps_ems @elastic/kibana-presentation
 src/plugins/navigation @elastic/appex-sharedux
-src/plugins/newsfeed @elastic/kibana-core
 src/plugins/no_data_page @elastic/appex-sharedux
 src/plugins/presentation_panel @elastic/kibana-presentation
 src/plugins/presentation_util @elastic/kibana-presentation
@@ -1790,7 +1790,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /test/functional/apps/bundles @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/64367
 /test/examples/hello_world @elastic/kibana-core
 /test/examples/routing/index.ts @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/69581
-/test/common/plugins/newsfeed @elastic/kibana-core
+/test/common/platform/plugins/shared/newsfeed @elastic/kibana-core
 /test/common/configure_http2.ts @elastic/kibana-core
 /test/api_integration/apis/ui_counters @elastic/kibana-core
 /test/api_integration/apis/telemetry @elastic/kibana-core
@@ -1828,7 +1828,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 #CC# /x-pack/platform/plugins/shared/cloud/ @elastic/kibana-core
 #CC# /x-pack/platform/plugins/shared/features/ @elastic/kibana-core
 #CC# /x-pack/plugins/global_search/ @elastic/kibana-core
-#CC# /src/plugins/newsfeed @elastic/kibana-core
+#CC# /src/platform/plugins/shared/newsfeed @elastic/kibana-core
 #CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
 
 # AppEx AI Infra
