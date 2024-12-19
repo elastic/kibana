@@ -34,7 +34,7 @@ export const useCardStyles = () => {
       ? `
           background-color: ${euiTheme.colors.backgroundBaseSubdued};
           box-shadow: none;
-          border: 1px solid ${euiTheme.colors.borderBaseFormsControl};
+          border: ${euiTheme.border.thin}px solid ${euiTheme.colors.borderBaseFormsControl};
         `
       : ''}
   `;
