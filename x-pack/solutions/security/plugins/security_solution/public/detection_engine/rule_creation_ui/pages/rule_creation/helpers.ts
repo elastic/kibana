@@ -70,6 +70,7 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
+import { convertDurationToDateMath } from '../../../../common/utils/date_math';
 
 export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
   const timeObj: { unit: Unit; value: number } = {
@@ -530,7 +531,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         query: ruleFields.queryBar?.query?.query as string,
         required_fields: requiredFields,
         new_terms_fields: ruleFields.newTermsFields,
-        history_window_start: `now-${ruleFields.historyWindowSize}`,
+        history_window_start: convertDurationToDateMath(ruleFields.historyWindowSize),
         ...alertSuppressionFields,
       }
     : isEsqlFields(ruleFields) && !('index' in ruleFields)

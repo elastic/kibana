@@ -63,12 +63,13 @@ export function registerGetApmServicesListFunction({
       } as const,
     },
     async ({ arguments: args }, signal) => {
-      const { logger } = resources;
+      const { logger, core } = resources;
+      const coreStart = await core.start();
       const [apmAlertsClient, mlClient, randomSampler] = await Promise.all([
         getApmAlertsClient(resources),
         getMlClient(resources),
         getRandomSampler({
-          security: resources.plugins.security,
+          coreStart,
           probability: 1,
           request: resources.request,
         }),
