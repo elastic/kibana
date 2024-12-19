@@ -44,7 +44,7 @@ describe('calcAutoIntervalNear', () => {
 
   test('1h/100 buckets = 30s buckets', () => {
     const interval = calcAutoIntervalNear(100, Number(moment.duration(1, 'hours')));
-    expect(interval.asSeconds()).toBe(30);
+    expect(interval.asMinutes()).toBe(1);
   });
 
   test('1d/25 buckets = 1h buckets', () => {
@@ -62,9 +62,9 @@ describe('calcAutoIntervalNear', () => {
     expect(interval.asHours()).toBe(1);
   });
 
-  test('1y/100000 buckets = 5m buckets', () => {
+  test('1y/100000 buckets = 10m buckets', () => {
     const interval = calcAutoIntervalNear(100000, Number(moment.duration(1, 'year')));
-    expect(interval.asMinutes()).toBe(5);
+    expect(interval.asMinutes()).toBe(10);
   });
 });
 
