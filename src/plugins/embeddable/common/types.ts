@@ -97,7 +97,7 @@ export interface EmbeddableRegistryDefinition<
 export type EmbeddablePersistableStateService = PersistableStateService<EmbeddableStateWithType>;
 
 export interface CommonEmbeddableStartContract {
-  getEmbeddableFactory: (
+  getEmbeddableFactory?: (
     embeddableFactoryId: string
   ) => PersistableState & { isContainerType: boolean };
   getEnhancement: (enhancementId: string) => PersistableState;

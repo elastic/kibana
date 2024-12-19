@@ -12,4 +12,3 @@ export * from './embeddables';
 export * from './types';
 export * from './triggers';
 export * from './state_transfer';
-export * from './factory_migrations/run_factory_migrations';

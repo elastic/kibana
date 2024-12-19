@@ -13,7 +13,7 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public/plugin';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
