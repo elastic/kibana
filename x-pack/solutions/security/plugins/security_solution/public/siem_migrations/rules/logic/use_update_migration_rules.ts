@@ -20,9 +20,8 @@ export const UPDATE_MIGRATION_RULES_MUTATION_KEY = ['PUT', SIEM_RULE_MIGRATIONS_
 export const useUpdateMigrationRules = (migrationId: string) => {
   const { addError } = useAppToasts();
 
-  const invalidateGetRuleMigrations = useInvalidateGetMigrationRules(migrationId);
-  const invalidateGetMigrationTranslationStats =
-    useInvalidateGetMigrationTranslationStats(migrationId);
+  const invalidateGetRuleMigrations = useInvalidateGetMigrationRules();
+  const invalidateGetMigrationTranslationStats = useInvalidateGetMigrationTranslationStats();
 
   return useMutation<UpdateRuleMigrationResponse, Error, UpdateRuleMigrationData[]>(
     (rulesToUpdate) => updateMigrationRules({ rulesToUpdate }),
@@ -32,8 +31,8 @@ export const useUpdateMigrationRules = (migrationId: string) => {
         addError(error, { title: i18n.UPDATE_MIGRATION_RULES_FAILURE });
       },
       onSettled: () => {
-        invalidateGetRuleMigrations();
-        invalidateGetMigrationTranslationStats();
+        invalidateGetRuleMigrations(migrationId);
+        invalidateGetMigrationTranslationStats(migrationId);
       },
     }
   );

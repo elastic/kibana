@@ -214,6 +214,35 @@ export const InstallTranslatedMigrationRulesResponse = z.object({
   installed: z.boolean(),
 });
 
+export type RetryRuleMigrationRequestParams = z.infer<typeof RetryRuleMigrationRequestParams>;
+export const RetryRuleMigrationRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type RetryRuleMigrationRequestParamsInput = z.input<typeof RetryRuleMigrationRequestParams>;
+
+export type RetryRuleMigrationRequestBody = z.infer<typeof RetryRuleMigrationRequestBody>;
+export const RetryRuleMigrationRequestBody = z.object({
+  connector_id: ConnectorId,
+  langsmith_options: LangSmithOptions.optional(),
+  /**
+   * The indicator to retry only failed rules
+   */
+  failed: z.boolean().optional(),
+  /**
+   * The indicator to retry only not fully translated rules
+   */
+  not_fully_translated: z.boolean().optional(),
+});
+export type RetryRuleMigrationRequestBodyInput = z.input<typeof RetryRuleMigrationRequestBody>;
+
+export type RetryRuleMigrationResponse = z.infer<typeof RetryRuleMigrationResponse>;
+export const RetryRuleMigrationResponse = z.object({
+  /**
+   * Indicates the migration retry has been started. `false` means the migration does not need to be retried.
+   */
+  started: z.boolean(),
+});
+
 export type StartRuleMigrationRequestParams = z.infer<typeof StartRuleMigrationRequestParams>;
 export const StartRuleMigrationRequestParams = z.object({
   migration_id: NonEmptyString,
