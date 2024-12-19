@@ -47,7 +47,7 @@ console.log(discoverUrl); // http://localhost:5601/bpr/s/space/app/discover
 const discoverUrlWithSomeState = core.http.basePath.prepend(`/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'2020-09-10T11:39:50.203Z',to:'2020-09-10T11:40:20.249Z'))&_a=(columns:!(_source),filters:!(),index:'90943e30-9a47-11e8-b64d-95841ca0b247',interval:auto,query:(language:kuery,query:''),sort:!())`);
 ----
 
-Instead, each app should expose {kib-repo}tree/{branch}/src/plugins/share/common/url_service/locators/README.md[a locator].
+Instead, each app should expose {kib-repo}tree/{branch}/src/platform/plugins/shared/share/common/url_service/locators/README.md[a locator].
 Other apps should use those locators for navigation or URL creation. 
 
 [source,typescript jsx]
@@ -222,7 +222,7 @@ There are utils to help you to implement such kind of state syncing.
 
 * Adding a query param flag or simple key/value to the URL. 
 
-Follow {kib-repo}tree/{branch}/src/plugins/kibana_utils/docs/state_sync#state-syncing-utilities[these] docs to learn more.
+Follow {kib-repo}tree/{branch}/src/platform/plugins/shared/kibana_utils/docs/state_sync#state-syncing-utilities[these] docs to learn more.
 
 
 [[preserve-state]]
@@ -246,7 +246,7 @@ you'd notice that state is stored inside that link, and it also gets updated whe
 image:images/state_inside_the_link.png[State is stored inside the navigation link]
 
 This is where <<query-params, separation>> into `_a` and `_g` query params comes into play. What is considered a *global* state gets constantly updated in those navigation links. In the example above it was a time filter.
-This is backed by {kib-repo}tree/{branch}/src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts#L57[KbnUrlTracker] util. You can use it to achieve similar behavior.
+This is backed by {kib-repo}tree/{branch}/src/platform/plugins/shared/kibana_utils/public/state_management/url/kbn_url_tracker.ts#L57[KbnUrlTracker] util. You can use it to achieve similar behavior.
 
 NOTE: After migrating to KP navigation works without page reloads and all plugins are loaded simultaneously.
 Hence, likely there are simpler ways to preserve state of your application, unless you want to do it through URL.

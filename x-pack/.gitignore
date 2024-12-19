@@ -9,8 +9,8 @@
 # TODO remove once all of the modules have been relocated
 # we keep them around to avoid conflicts derived of merge commits,
 # suddenly adding a huge amount of files due to these rules being outdated
-/plugins/reporting/.chromium/
-/plugins/reporting/.phantom/
+/platform/plugins/private/reporting/.chromium/
+/platform/plugins/private/reporting/.phantom/
 /plugins/screenshotting/.chromium/
 /plugins/screenshotting/chromium/
 
