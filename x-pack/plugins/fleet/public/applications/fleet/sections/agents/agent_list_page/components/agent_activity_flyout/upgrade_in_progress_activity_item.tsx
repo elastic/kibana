@@ -15,6 +15,7 @@ import {
   EuiPanel,
   EuiButton,
   EuiLink,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,12 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ActionStatus } from '../../../../../types';
 import { useStartServices } from '../../../../../hooks';
 
-import {
-  formattedTime,
-  inProgressDescription,
-  inProgressTitle,
-  inProgressTitleColor,
-} from './helpers';
+import { formattedTime, inProgressDescription, inProgressTitle } from './helpers';
 import { ViewAgentsButton } from './view_agents_button';
 
 export const UpgradeInProgressActivityItem: React.FunctionComponent<{
@@ -36,6 +32,8 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
   onClickViewAgents: (action: ActionStatus) => void;
 }> = ({ action, abortUpgrade, onClickViewAgents }) => {
   const { docLinks } = useStartServices();
+  const theme = useEuiTheme();
+
   const [isAborting, setIsAborting] = useState(false);
   const onClickAbortUpgrade = useCallback(async () => {
     try {
@@ -69,7 +67,10 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
               {isScheduled ? <EuiIcon type="clock" /> : <EuiLoadingSpinner size="m" />}
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText color={inProgressTitleColor} data-test-subj="upgradeInProgressTitle">
+              <EuiText
+                color={theme.euiTheme.colors.textPrimary}
+                data-test-subj="upgradeInProgressTitle"
+              >
                 {isScheduled && action.startTime ? (
                   <FormattedMessage
                     id="xpack.fleet.agentActivityFlyout.scheduleTitle"

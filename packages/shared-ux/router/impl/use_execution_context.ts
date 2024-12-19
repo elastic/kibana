@@ -8,7 +8,7 @@
  */
 
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
-import { SharedUXExecutionContextSetup } from './services';
+import type { SharedUXExecutionContextSetup } from './services';
 import { SharedUXExecutionContext } from './types';
 
 /**
