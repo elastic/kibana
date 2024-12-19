@@ -5,12 +5,23 @@
  * 2.0.
  */
 
+import type { EuiThemeComputed } from '@elastic/eui';
+
+// @deprecated, use getSeverityColor instead
 export const SEVERITY_COLOR = {
   critical: '#E7664C',
   high: '#DA8B45',
   medium: '#D6BF57',
   low: '#54B399',
 } as const;
+
+export const getSeverityColor = (euiTheme: EuiThemeComputed) =>
+  ({
+    critical: euiTheme.colors.vis.euiColorVis9,
+    high: euiTheme.colors.vis.euiColorVis7,
+    medium: euiTheme.colors.vis.euiColorVis5,
+    low: euiTheme.colors.vis.euiColorVis0,
+  } as const);
 
 export const ITEMS_PER_PAGE = 4;
 const MAX_ALLOWED_RESULTS = 100;

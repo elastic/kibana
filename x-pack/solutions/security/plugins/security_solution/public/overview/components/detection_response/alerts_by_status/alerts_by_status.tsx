@@ -12,6 +12,7 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
   useIsWithinMaxBreakpoint,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
@@ -49,11 +50,11 @@ import {
 } from '../translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { VIEW_ALERTS } from '../../../pages/translations';
-import { SEVERITY_COLOR } from '../utils';
+import { getSeverityColor } from '../utils';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { ChartLabel } from './chart_label';
 import { Legend } from '../../../../common/components/charts/legend';
-import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
+import { getEmptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
@@ -84,12 +85,37 @@ interface AlertsByStatusProps {
   signalIndexName: string | null;
 }
 
-const chartConfigs: Array<{ key: Severity; label: string; color: string }> = [
-  { key: 'critical', label: STATUS_CRITICAL_LABEL, color: SEVERITY_COLOR.critical },
-  { key: 'high', label: STATUS_HIGH_LABEL, color: SEVERITY_COLOR.high },
-  { key: 'medium', label: STATUS_MEDIUM_LABEL, color: SEVERITY_COLOR.medium },
-  { key: 'low', label: STATUS_LOW_LABEL, color: SEVERITY_COLOR.low },
-];
+const useGetChartConfigs: () => { legendItems: LegendItem[]; fillColor: FillColor } = () => {
+  const { euiTheme } = useEuiTheme();
+  const severityColor = useMemo(() => getSeverityColor(euiTheme), [euiTheme]);
+  const configs = useMemo(
+    () => [
+      { key: 'critical' as Severity, label: STATUS_CRITICAL_LABEL, color: severityColor.critical },
+      { key: 'high' as Severity, label: STATUS_HIGH_LABEL, color: severityColor.high },
+      { key: 'medium' as Severity, label: STATUS_MEDIUM_LABEL, color: severityColor.medium },
+      { key: 'low' as Severity, label: STATUS_LOW_LABEL, color: severityColor.low },
+    ],
+    [severityColor]
+  );
+
+  const legendItems: LegendItem[] = useMemo(
+    () =>
+      configs.map((d) => ({
+        color: d.color,
+        field: ALERT_SEVERITY,
+        value: d.label,
+      })),
+    [configs]
+  );
+
+  const fillColor: FillColor = useCallback(
+    (dataName: string) => {
+      return configs.find((cfg) => cfg.label === dataName)?.color ?? getEmptyDonutColor(euiTheme);
+    },
+    [configs, euiTheme]
+  );
+  return { fillColor, legendItems };
+};
 
 const eventKindSignalFilter: EntityFilter = {
   field: 'event.kind',
@@ -149,15 +175,7 @@ export const AlertsByStatus = ({
     to,
     from,
   });
-  const legendItems: LegendItem[] = useMemo(
-    () =>
-      chartConfigs.map((d) => ({
-        color: d.color,
-        field: ALERT_SEVERITY,
-        value: d.label,
-      })),
-    []
-  );
+  const { legendItems, fillColor } = useGetChartConfigs();
 
   const navigateToAlertsWithStatus = useCallback(
     (status: Status, level?: string) =>
@@ -213,10 +231,6 @@ export const AlertsByStatus = ({
   const { total: visualizationTotalAlerts } = useAlertsByStatusVisualizationData();
 
   const totalAlertsCount = isDonutChartEmbeddablesEnabled ? visualizationTotalAlerts : totalAlerts;
-
-  const fillColor: FillColor = useCallback((dataName: string) => {
-    return chartConfigs.find((cfg) => cfg.label === dataName)?.color ?? emptyDonutColor;
-  }, []);
 
   return (
     <>
