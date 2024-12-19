@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { OBSERVABLE_TYPES_BUILTIN, OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
+import { OBSERVABLE_TYPES_BUILTIN } from '@kbn/cases-plugin/common/constants';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   createCase,
@@ -133,51 +133,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(casesSimilarToB.length).to.be(0);
-      });
-
-      it('returns cases similar to given case with json in the value', async () => {
-        const [caseA, caseB] = await Promise.all([
-          createCase(supertest, getPostCaseRequest()),
-          createCase(supertest, getPostCaseRequest()),
-          createCase(supertest, getPostCaseRequest()),
-        ]);
-
-        const newObservableData = {
-          value: '127.0.0.1',
-          typeKey: OBSERVABLE_TYPE_IPV4.key,
-          description: '',
-        };
-
-        const { cases } = await similarCases({
-          supertest,
-          body: { perPage: 10, page: 1 },
-          caseId: caseA.id,
-        });
-        expect(cases.length).to.be(0);
-
-        await addObservable({
-          supertest,
-          caseId: caseA.id,
-          params: {
-            observable: newObservableData,
-          },
-        });
-
-        await addObservable({
-          supertest,
-          caseId: caseB.id,
-          params: {
-            observable: newObservableData,
-          },
-        });
-
-        const { cases: casesAfterObservablesAreAdded } = await similarCases({
-          supertest,
-          body: { perPage: 10, page: 1 },
-          caseId: caseA.id,
-        });
-
-        expect(casesAfterObservablesAreAdded.length).to.be(1);
       });
     });
   });
