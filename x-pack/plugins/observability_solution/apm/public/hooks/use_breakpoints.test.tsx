@@ -7,11 +7,12 @@
 
 import React, { FC, PropsWithChildren } from 'react';
 import { renderHook } from '@testing-library/react';
-import { EuiProvider } from '@elastic/eui';
+import { EuiProvider, EuiThemeAmsterdam } from '@elastic/eui';
 import { useBreakpoints } from './use_breakpoints';
 
 const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <EuiProvider
+    theme={EuiThemeAmsterdam}
     modify={{
       // set in apm/public/application/index.tsx
       breakpoint: {
