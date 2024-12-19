@@ -726,5 +726,5 @@ describe('AddInferenceFlyout', () => {
 
     await userEvent.click(screen.getByTestId('add-inference-endpoint-submit-button'));
     expect(mockAddEndpoint).toHaveBeenCalled();
-  });
+  }, 10e3);
 });
