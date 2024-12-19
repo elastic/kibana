@@ -38,6 +38,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     clickEditDataRetentionButton: () => void;
     clickDetailPanelIndexTemplateLink: () => void;
     clickManageDataStreamsButton: () => void;
+    clickBulkDeleteDataStreamsButton: () => void;
     clickBulkEditDataRetentionButton: () => void;
   };
   findDeleteActionAt: (index: number) => ReactWrapper;
@@ -216,7 +217,13 @@ export const setup = async (
     testBed.find('dataStreamActionsPopoverButton').simulate('click');
   };
 
+  const clickBulkDeleteDataStreamsButton = () => {
+    testBed.find('dataStreamActionsPopoverButton').simulate('click');
+    testBed.find('deleteDataStreamsButton').simulate('click');
+  };
+
   const clickBulkEditDataRetentionButton = () => {
+    testBed.find('dataStreamActionsPopoverButton').simulate('click');
     testBed.find('bulkEditDataRetentionButton').simulate('click');
   };
 
@@ -269,6 +276,7 @@ export const setup = async (
       clickEditDataRetentionButton,
       clickDetailPanelIndexTemplateLink,
       clickManageDataStreamsButton,
+      clickBulkDeleteDataStreamsButton,
       clickBulkEditDataRetentionButton,
     },
     findDeleteActionAt,
