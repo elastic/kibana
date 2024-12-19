@@ -60,8 +60,7 @@ const getColumnConfigs = ({
   application,
   http,
   share,
-  chrome,
-  cloud
+  chrome
 }) => {
 
   const columns = [
@@ -80,11 +79,11 @@ const getColumnConfigs = ({
                 navigateToIndexDetailsPage(
                   index.name,
                   location.search || '',
+                  extensionsService,
                   application,
                   http,
                   share,
                   chrome,
-                  cloud
                 );
               }}
             >
@@ -588,8 +587,7 @@ export class IndexTable extends Component {
             application,
             http,
             share,
-            chrome,
-            cloud
+            chrome
           });
           const columnsCount = columnConfigs.length + 1;
           return (

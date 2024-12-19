@@ -50,8 +50,7 @@ export class IndexActionsContextMenu extends Component {
   panels() {
     const {
       services: { extensionsService },
-      core: { getUrlForApp, application, http, chrome },
-      plugins : { share, cloud },
+      core: { getUrlForApp, application, http },
       history,
       config: { enableIndexActions },
     } = this.context;
@@ -77,6 +76,7 @@ export class IndexActionsContextMenu extends Component {
     const allFrozen = every(indices, (index) => index.isFrozen);
     const selectedIndexCount = indexNames.length;
     const items = [];
+    const activeSolutionId = this.context.activeSolutionId;
     if (isOnListView && selectedIndexCount === 1) {
       items.push({
         'data-test-subj': 'showOverviewIndexMenuButton',
@@ -87,11 +87,9 @@ export class IndexActionsContextMenu extends Component {
           navigateToIndexDetailsPage(
             indexNames[0],
             indicesListURLParams,
+            extensionsService,
             application,
             http,
-            share,
-            chrome,
-            cloud,
             IndexDetailsSection.Overview
           );
         },
@@ -105,11 +103,9 @@ export class IndexActionsContextMenu extends Component {
           navigateToIndexDetailsPage(
             indexNames[0],
             indicesListURLParams,
+            extensionsService,
             application,
             http,
-            share,
-            chrome,
-            cloud,
             IndexDetailsSection.Settings
           );
         },
@@ -123,11 +119,9 @@ export class IndexActionsContextMenu extends Component {
           navigateToIndexDetailsPage(
             indexNames[0],
             indicesListURLParams,
+            extensionsService,
             application,
             http,
-            share,
-            chrome,
-            cloud,
             IndexDetailsSection.Mappings
           );
         },

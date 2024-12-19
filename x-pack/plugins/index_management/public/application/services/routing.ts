@@ -13,6 +13,7 @@ import { IndexDetailsSection } from '../../../common/constants';
 import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { firstValueFrom } from 'rxjs';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { ExtensionsService } from '../../services';
 
 export const getTemplateListLink = () => `/templates`;
 
@@ -92,21 +93,13 @@ export const getComponentTemplateDetailLink = (name: string) => {
 export const navigateToIndexDetailsPage = async (
   indexName: string,
   indicesListURLParams: string,
+  extensionsService: ExtensionsService,
   application: ApplicationStart,
   http: HttpSetup,
-  share: SharePublicStart,
-  chrome: ChromeStart,
-  cloud: CloudSetup,
   tabId?: IndexDetailsSection
 ) => {
-  const isServerlessEnabled = cloud.isServerlessEnabled;
-  const serverlessActiveSolutionId = await firstValueFrom(
-    chrome.getActiveSolutionNavId$()
-  );
-  const searchIndicesLocator = share.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID');
-  if(searchIndicesLocator && (!isServerlessEnabled  || serverlessActiveSolutionId === 'es')) {
-    searchIndicesLocator.navigate({indexName, 'detailsTabId': tabId})
-  }else{
+  console.log("extensionsService.indexDetailsPageRoute", extensionsService.indexDetailsPageRoute)
+  if (!extensionsService.indexDetailsPageRoute) {
     application.navigateToUrl(
       http.basePath.prepend(
         `/app/management/data/index_management${getIndexDetailsLink(
@@ -116,5 +109,8 @@ export const navigateToIndexDetailsPage = async (
         )}`
       )
     );
+  }else{
+    const route = extensionsService.indexDetailsPageRoute.renderRoute(indexName, tabId);
+    application.navigateToUrl(http.basePath.prepend(route));
   }
 };

@@ -22,14 +22,17 @@ import { INDICES_APP_ID, START_APP_ID } from '../common';
 import {
   CREATE_INDEX_PATH,
   INDICES_APP_BASE,
+  SearchIndexDetailsTabValues,
   START_APP_BASE,
 } from './routes';
 import { registerLocators } from './locators';
+import { Subscription } from 'rxjs';
 
 export class SearchIndicesPlugin
   implements Plugin<SearchIndicesPluginSetup, SearchIndicesPluginStart>
 {
   private pluginEnabled: boolean = false;
+  private activeSolutionIdSubscription: Subscription | undefined;
 
   public setup(
     core: CoreSetup<SearchIndicesAppPluginStartDependencies, SearchIndicesPluginStart>,
@@ -79,6 +82,7 @@ export class SearchIndicesPlugin
           ...depsStart,
           history,
         };
+
         return renderApp(SearchIndicesRouter, coreStart, startDeps, element, queryClient);
       },
     });
@@ -93,12 +97,28 @@ export class SearchIndicesPlugin
   }
 
   public start(
-    core: CoreStart
+    core: CoreStart,
+    deps: SearchIndicesAppPluginStartDependencies
   ): SearchIndicesPluginStart {
-    docLinks.setDocLinks(core.docLinks.links);
-    // if (this.pluginEnabled) {
+    const { indexManagement } = deps;
 
-    // }
+    docLinks.setDocLinks(core.docLinks.links);
+    if (this.pluginEnabled) {
+      this.activeSolutionIdSubscription = core.chrome.getActiveSolutionNavId$().subscribe((activeSolutionId)=> {
+        console.log("activeSolutionId",activeSolutionId)
+        if(activeSolutionId === 'es') {
+          indexManagement?.extensionsService.setIndexDetailsPageRoute({
+            renderRoute: (indexName, detailsTabId) => {
+              const route = `/app/elasticsearch/indices/index_details/${indexName}`;
+              if (detailsTabId && SearchIndexDetailsTabValues.includes(detailsTabId)) {
+                return `${route}/${detailsTabId}`;
+              }
+              return route;
+            },
+          })
+        }
+      });
+    }
     return {
       enabled: this.pluginEnabled,
       startAppId: START_APP_ID,
@@ -106,5 +126,10 @@ export class SearchIndicesPlugin
     };
   }
 
-  public stop() {}
+  public stop() {
+    if (this.activeSolutionIdSubscription) {
+      this.activeSolutionIdSubscription.unsubscribe();
+      this.activeSolutionIdSubscription = undefined;
+    }
+  }
 }
