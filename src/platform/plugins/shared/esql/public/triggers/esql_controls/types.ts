@@ -6,9 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { EsqlControlType } from '@kbn/esql-validation-autocomplete';
+import type { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 
-export enum EsqlControlFlyoutType {
+export enum EsqlControlType {
   STATIC_VALUES = 'STATIC_VALUES',
   VALUES_FROM_QUERY = 'VALUES_FROM_QUERY',
 }
@@ -20,6 +20,7 @@ export interface ESQLControlState {
   availableOptions: string[];
   selectedOptions: string[];
   variableName: string;
-  variableType: EsqlControlType;
+  variableType: ESQLVariableType;
   esqlQuery: string;
+  controlType: EsqlControlType;
 }

@@ -16,6 +16,7 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
   const variableName$ = new BehaviorSubject<string>(initialState.variableName ?? '');
   const variableType$ = new BehaviorSubject<string>(initialState.variableType ?? '');
+  const controlType$ = new BehaviorSubject<string>(initialState.controlType ?? '');
   const esqlQuery$ = new BehaviorSubject<string>(initialState.esqlQuery ?? '');
   const title$ = new BehaviorSubject<string | undefined>(initialState.title);
 
@@ -34,6 +35,7 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
       availableOptions: [availableOptions$, (next) => availableOptions$.next(next)],
       variableName: [variableName$, (next) => variableName$.next(next)],
       variableType: [variableType$, (next) => variableType$.next(next)],
+      controlType: [controlType$, (next) => controlType$.next(next)],
       esqlQuery: [esqlQuery$, (next) => esqlQuery$.next(next)],
       title: [title$, (next) => title$.next(next)],
     } as StateComparators<
@@ -43,6 +45,7 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
         | 'availableOptions'
         | 'variableName'
         | 'variableType'
+        | 'controlType'
         | 'esqlQuery'
         | 'title'
       >
@@ -52,6 +55,7 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
     availableOptions$: availableOptions$ as PublishingSubject<string[]>,
     variableName$: variableName$ as PublishingSubject<string>,
     variableType$: variableType$ as PublishingSubject<string>,
+    controlType$: controlType$ as PublishingSubject<string>,
     esqlQuery$: esqlQuery$ as PublishingSubject<string>,
     title$: title$ as PublishingSubject<string | undefined>,
     setSelectedOptions,

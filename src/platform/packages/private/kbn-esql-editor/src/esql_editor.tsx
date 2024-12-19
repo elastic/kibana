@@ -39,7 +39,7 @@ import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
-import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -69,7 +69,7 @@ const BREAKPOINT_WIDTH = 540;
 
 const triggerControl = async (
   queryString: string,
-  controlType: EsqlControlType,
+  variableType: ESQLVariableType,
   position: monaco.Position | null | undefined,
   uiActions: ESQLEditorDeps['uiActions'],
   onSaveControlCb?: ESQLEditorProps['onSaveControlCb'],
@@ -77,7 +77,7 @@ const triggerControl = async (
 ) => {
   await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
     queryString,
-    controlType,
+    variableType,
     cursorPosition: position,
     onSaveControlCb,
     onCancelControlCb,
@@ -283,7 +283,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     const position = editor1.current?.getPosition();
     await triggerControl(
       query.esql,
-      EsqlControlType.TIME_LITERAL,
+      ESQLVariableType.TIME_LITERAL,
       position,
       uiActions,
       onSaveControlCb,
@@ -295,7 +295,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     const position = editor1.current?.getPosition();
     await triggerControl(
       query.esql,
-      EsqlControlType.FIELDS,
+      ESQLVariableType.FIELDS,
       position,
       uiActions,
       onSaveControlCb,
@@ -307,7 +307,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     const position = editor1.current?.getPosition();
     await triggerControl(
       query.esql,
-      EsqlControlType.VALUES,
+      ESQLVariableType.VALUES,
       position,
       uiActions,
       onSaveControlCb,
@@ -458,7 +458,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       },
       // @ts-expect-error To prevent circular type import, type defined here is partial of full client
       getFieldsMetadata: fieldsMetadata?.getClient(),
-      getVariablesByType: (type: EsqlControlType) => {
+      getVariablesByType: (type: ESQLVariableType) => {
         return esqlService.getVariablesByType(type);
       },
       canSuggestVariables: () => {

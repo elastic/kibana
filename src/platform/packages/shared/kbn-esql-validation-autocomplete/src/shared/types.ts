@@ -40,10 +40,10 @@ export interface ESQLSourceResult {
 export interface ESQLControlVariable {
   key: string;
   value: string | number;
-  type: EsqlControlType;
+  type: ESQLVariableType;
 }
 
-export enum EsqlControlType {
+export enum ESQLVariableType {
   TIME_LITERAL = 'time_literal',
   FIELDS = 'fields',
   VALUES = 'values',
@@ -58,7 +58,7 @@ export interface ESQLCallbacks {
   >;
   getPreferences?: () => Promise<{ histogramBarTarget: number }>;
   getFieldsMetadata?: Promise<PartialFieldsMetadataClient>;
-  getVariablesByType?: (type: EsqlControlType) => ESQLControlVariable[];
+  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[];
   canSuggestVariables?: () => boolean;
 }
 

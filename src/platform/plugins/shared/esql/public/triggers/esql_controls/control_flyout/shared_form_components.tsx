@@ -30,7 +30,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { esqlVariablesService } from '@kbn/esql-variables/common';
-import { EsqlControlFlyoutType } from '../types';
+import { EsqlControlType } from '../types';
 
 const controlTypeOptions = [
   {
@@ -38,14 +38,14 @@ const controlTypeOptions = [
       defaultMessage: 'Static Values',
     }),
     'data-test-subj': 'staticValues',
-    key: EsqlControlFlyoutType.STATIC_VALUES,
+    key: EsqlControlType.STATIC_VALUES,
   },
   {
     label: i18n.translate('esql.flyout.controlTypeOptions.valuesFromQueryLabel', {
       defaultMessage: 'Values from a query',
     }),
     'data-test-subj': 'valuesFromQuery',
-    key: EsqlControlFlyoutType.VALUES_FROM_QUERY,
+    key: EsqlControlType.VALUES_FROM_QUERY,
   },
 ];
 
@@ -76,8 +76,8 @@ export function ControlType({
   setControlFlyoutType,
 }: {
   isDisabled: boolean;
-  initialControlFlyoutType: EsqlControlFlyoutType;
-  setControlFlyoutType?: (flyoutType: EsqlControlFlyoutType) => void;
+  initialControlFlyoutType: EsqlControlType;
+  setControlFlyoutType?: (flyoutType: EsqlControlType) => void;
 }) {
   const controlFlyoutType = controlTypeOptions.find(
     (option) => option.key === initialControlFlyoutType
@@ -95,16 +95,16 @@ export function ControlType({
 
   return (
     <EuiFormRow
-      label={i18n.translate('esql.flyout.controlTypeOptions.label', {
+      label={i18n.translate('esql.flyout.controlTypeOptionsOptions.label', {
         defaultMessage: 'Type',
       })}
       fullWidth
     >
       <EuiComboBox
-        aria-label={i18n.translate('esql.flyout.controlTypeOptions.placeholder', {
+        aria-label={i18n.translate('esql.flyout.controlTypeOptionsOptions.placeholder', {
           defaultMessage: 'Select a control type',
         })}
-        placeholder={i18n.translate('esql.flyout.controlTypeOptions.placeholder', {
+        placeholder={i18n.translate('esql.flyout.controlTypeOptionsOptions.placeholder', {
           defaultMessage: 'Select a control type',
         })}
         singleSelection={{ asPlainText: true }}

@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { monaco } from '@kbn/monaco';
 import { esqlVariablesService } from '@kbn/esql-variables/common';
@@ -19,7 +19,7 @@ import { updateQueryStringWithVariable } from './helpers';
 
 interface ESQLControlsFlyoutProps {
   search: ISearchGeneric;
-  controlType: EsqlControlType;
+  variableType: ESQLVariableType;
   queryString: string;
   onSaveControlCb?: (controlState: ESQLControlState, updatedQuery: string) => Promise<void>;
   onCancelControlCb?: () => void;
@@ -30,7 +30,7 @@ interface ESQLControlsFlyoutProps {
 
 export function ESQLControlsFlyout({
   search,
-  controlType,
+  variableType,
   queryString,
   onSaveControlCb,
   onCancelControlCb,
@@ -39,14 +39,14 @@ export function ESQLControlsFlyout({
   closeFlyout,
 }: ESQLControlsFlyoutProps) {
   const addToESQLVariablesService = useCallback(
-    (varName: string, variableValue: string, variableType: EsqlControlType) => {
+    (varName: string, variableValue: string, type: ESQLVariableType) => {
       if (esqlVariablesService.variableExists(varName)) {
         esqlVariablesService.removeVariable(varName);
       }
       esqlVariablesService.addVariable({
         key: varName,
         value: variableValue,
-        type: variableType,
+        type,
       });
     },
     []
@@ -56,27 +56,27 @@ export function ESQLControlsFlyout({
     async (state: ESQLControlState, variableName: string, variableValue: string) => {
       if (cursorPosition) {
         const query = updateQueryStringWithVariable(queryString, variableName, cursorPosition);
-        addToESQLVariablesService(variableName, variableValue, controlType);
+        addToESQLVariablesService(variableName, variableValue, variableType);
 
         await onSaveControlCb?.(state, query);
       }
     },
-    [addToESQLVariablesService, controlType, cursorPosition, onSaveControlCb, queryString]
+    [addToESQLVariablesService, variableType, cursorPosition, onSaveControlCb, queryString]
   );
 
   const onEditControl = useCallback(
     async (state: ESQLControlState, variableName: string, variableValue: string) => {
       await onSaveControlCb?.(state, '');
-      addToESQLVariablesService(variableName, variableValue, controlType);
+      addToESQLVariablesService(variableName, variableValue, variableType);
     },
-    [addToESQLVariablesService, controlType, onSaveControlCb]
+    [addToESQLVariablesService, variableType, onSaveControlCb]
   );
 
-  if (controlType === EsqlControlType.VALUES || controlType === EsqlControlType.TIME_LITERAL) {
+  if (variableType === ESQLVariableType.VALUES || variableType === ESQLVariableType.TIME_LITERAL) {
     return (
       <ValueControlForm
         queryString={queryString}
-        controlType={controlType}
+        variableType={variableType}
         closeFlyout={closeFlyout}
         onCancelControlCb={onCancelControlCb}
         initialState={initialState}
@@ -85,10 +85,10 @@ export function ESQLControlsFlyout({
         search={search}
       />
     );
-  } else if (controlType === EsqlControlType.FIELDS) {
+  } else if (variableType === ESQLVariableType.FIELDS) {
     return (
       <FieldControlForm
-        controlType={controlType}
+        variableType={variableType}
         queryString={queryString}
         onCancelControlCb={onCancelControlCb}
         onCreateControl={onCreateControl}

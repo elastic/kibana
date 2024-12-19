@@ -73,7 +73,8 @@ export const getRecurrentVariableName = (name: string, existingNames: string[]) 
 };
 
 export const getValuesFromQueryField = (queryString: string) => {
-  const { root } = parse(queryString);
+  const validQuery = `${queryString} ""`;
+  const { root } = parse(validQuery);
   const lastCommand = root.commands[root.commands.length - 1];
   const columns: ESQLColumn[] = [];
 

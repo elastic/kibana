@@ -13,7 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { EsqlControlType } from '@kbn/esql-validation-autocomplete';
+import type { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { monaco } from '@kbn/monaco';
 import { ESQLControlsFlyout } from './control_flyout';
@@ -26,7 +26,7 @@ interface Context {
   queryString: string;
   core: CoreStart;
   search: ISearchGeneric;
-  controlType: EsqlControlType;
+  variableType: ESQLVariableType;
   onSaveControlCb?: (controlState: ESQLControlState, updatedQuery: string) => Promise<void>;
   onCancelControlCb?: () => void;
   cursorPosition?: monaco.Position;
@@ -42,7 +42,7 @@ export async function executeAction({
   queryString,
   core,
   search,
-  controlType,
+  variableType,
   onSaveControlCb,
   onCancelControlCb,
   cursorPosition,
@@ -66,7 +66,7 @@ export async function executeAction({
             <ESQLControlsFlyout
               queryString={queryString}
               search={search}
-              controlType={controlType}
+              variableType={variableType}
               closeFlyout={() => {
                 handle.close();
               }}

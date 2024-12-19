@@ -93,7 +93,7 @@ import type {
   ESQLCallbacks,
   ESQLSourceResult,
   ESQLControlVariable,
-  EsqlControlType,
+  ESQLVariableType,
 } from '../shared/types';
 import {
   getFunctionsToIgnoreForStats,
@@ -1050,7 +1050,7 @@ async function getFunctionArgsSuggestions(
   getFieldsMap: GetFieldsMapFn,
   fullText: string,
   offset: number,
-  getVariablesByType?: (type: EsqlControlType) => ESQLControlVariable[],
+  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[],
   supportsControls?: boolean
 ): Promise<SuggestionRawDefinition[]> {
   const fnDefinition = getFunctionDefinition(node.name);

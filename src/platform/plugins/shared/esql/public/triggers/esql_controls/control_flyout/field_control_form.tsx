@@ -19,7 +19,7 @@ import {
 import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import { esqlVariablesService } from '@kbn/esql-variables/common';
 import type { ESQLControlState } from '../types';
@@ -32,11 +32,11 @@ import {
   ControlLabel,
 } from './shared_form_components';
 import { getRecurrentVariableName, getFlyoutStyling, getQueryForFields } from './helpers';
-import { EsqlControlFlyoutType } from '../types';
+import { EsqlControlType } from '../types';
 
 interface FieldControlFormProps {
   search: ISearchGeneric;
-  controlType: EsqlControlType;
+  variableType: ESQLVariableType;
   queryString: string;
   closeFlyout: () => void;
   onCreateControl: (state: ESQLControlState, variableName: string, variableValue: string) => void;
@@ -47,7 +47,7 @@ interface FieldControlFormProps {
 }
 
 export function FieldControlForm({
-  controlType,
+  variableType,
   initialState,
   queryString,
   cursorPosition,
@@ -58,7 +58,7 @@ export function FieldControlForm({
   closeFlyout,
 }: FieldControlFormProps) {
   const suggestedVariableName = useMemo(() => {
-    const existingVariables = esqlVariablesService.getVariablesByType(controlType);
+    const existingVariables = esqlVariablesService.getVariablesByType(variableType);
 
     return initialState
       ? `${initialState.variableName}`
@@ -66,7 +66,7 @@ export function FieldControlForm({
           'field',
           existingVariables.map((variable) => variable.key)
         );
-  }, [controlType, initialState]);
+  }, [variableType, initialState]);
 
   const [availableFieldsOptions, setAvailableFieldsOptions] = useState<EuiComboBoxOptionOption[]>(
     []
@@ -109,7 +109,7 @@ export function FieldControlForm({
         );
       });
     }
-  }, [availableFieldsOptions.length, controlType, cursorPosition, queryString, search]);
+  }, [availableFieldsOptions.length, variableType, cursorPosition, queryString, search]);
 
   useEffect(() => {
     const variableExists =
@@ -174,7 +174,8 @@ export function FieldControlForm({
       width: minimumWidth,
       title: label || variableName,
       variableName,
-      variableType: controlType,
+      variableType,
+      controlType: EsqlControlType.STATIC_VALUES,
       esqlQuery: queryString,
       grow,
     };
@@ -192,7 +193,7 @@ export function FieldControlForm({
     minimumWidth,
     label,
     variableName,
-    controlType,
+    variableType,
     queryString,
     grow,
     isControlInEditMode,
@@ -211,7 +212,7 @@ export function FieldControlForm({
           ${styling}
         `}
       >
-        <ControlType isDisabled initialControlFlyoutType={EsqlControlFlyoutType.STATIC_VALUES} />
+        <ControlType isDisabled initialControlFlyoutType={EsqlControlType.STATIC_VALUES} />
 
         <VariableName
           variableName={variableName}

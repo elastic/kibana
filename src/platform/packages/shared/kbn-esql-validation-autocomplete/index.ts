@@ -8,7 +8,7 @@
  */
 
 export type { SuggestionRawDefinition, ItemKind } from './src/autocomplete/types';
-export { EsqlControlType, type ESQLControlVariable } from './src/shared/types';
+export { ESQLVariableType, type ESQLControlVariable } from './src/shared/types';
 export { inKnownTimeInterval } from './src/shared/helpers';
 export type { CodeAction } from './src/code_actions/types';
 export type {

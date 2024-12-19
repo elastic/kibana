@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { EuiComboBox } from '@elastic/eui';
 import { useBatchedPublishingSubjects, PublishingSubject } from '@kbn/presentation-publishing';
-import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import { esqlVariablesService } from '@kbn/esql-variables/common';
 import { ESQL_CONTROL } from '../../../common';
 import type { ESQLControlState, ESQLControlApi } from './types';
@@ -34,8 +34,8 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
     buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
       const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
       const variableName$ = new BehaviorSubject<string>(initialState.variableName ?? '');
-      const variableType$ = new BehaviorSubject<EsqlControlType>(
-        initialState.variableType ?? EsqlControlType.VALUES
+      const variableType$ = new BehaviorSubject<ESQLVariableType>(
+        initialState.variableType ?? ESQLVariableType.VALUES
       );
       // initialize the variable
       esqlVariablesService.addVariable({
@@ -70,7 +70,8 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
             };
             await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
               queryString: initialState.esqlQuery,
-              controlType: initialState.variableType,
+              variableType: initialState.variableType,
+              controlType: initialState.controlType,
               onSaveControlCb,
               initialState: state,
             });
@@ -85,6 +86,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
                 availableOptions: selections.availableOptions$.getValue(),
                 variableName: selections.variableName$.getValue(),
                 variableType: selections.variableType$.getValue(),
+                controlType: selections.controlType$.getValue(),
                 esqlQuery: selections.esqlQuery$.getValue(),
                 title: selections.title$.getValue(),
               },

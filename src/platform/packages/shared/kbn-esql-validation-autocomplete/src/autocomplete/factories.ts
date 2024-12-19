@@ -30,7 +30,7 @@ import { isNumericType } from '../shared/esql_types';
 import type { ESQLControlVariable } from '../shared/types';
 import { getTestFunctions } from '../shared/test_functions';
 import { builtinFunctions } from '../definitions/builtin';
-import { EsqlControlType } from '../shared/types';
+import { ESQLVariableType } from '../shared/types';
 import { getControlSuggestionLabel } from './helper';
 
 const techPreviewLabel = i18n.translate(
@@ -223,10 +223,10 @@ export const buildFieldsDefinitionsWithMetadata = (
     advanceCursor?: boolean;
     openSuggestions?: boolean;
     addComma?: boolean;
-    controlType?: EsqlControlType;
+    variableType?: ESQLVariableType;
     supportsControls?: boolean;
   },
-  getVariablesByType?: (type: EsqlControlType) => ESQLControlVariable[]
+  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[]
 ): SuggestionRawDefinition[] => {
   const fieldsSuggestions = fields.map((field) => {
     const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
@@ -246,12 +246,12 @@ export const buildFieldsDefinitionsWithMetadata = (
 
   const suggestions = [...fieldsSuggestions];
   if (options?.supportsControls) {
-    const controlType = options?.controlType ?? EsqlControlType.FIELDS;
-    const variables = getVariablesByType?.(controlType) ?? [];
+    const variableType = options?.variableType ?? ESQLVariableType.FIELDS;
+    const variables = getVariablesByType?.(variableType) ?? [];
 
     const controlSuggestions = fields.length
       ? getControlSuggestion(
-          controlType,
+          variableType,
           variables?.map((v) => `?${v.key}`)
         )
       : [];
@@ -489,7 +489,7 @@ export function getCompatibleLiterals(
     addComma?: boolean;
     supportsControls?: boolean;
   },
-  getVariablesByType?: (type: EsqlControlType) => ESQLControlVariable[]
+  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[]
 ) {
   const suggestions: SuggestionRawDefinition[] = [];
   if (types.some(isNumericType)) {
@@ -507,10 +507,10 @@ export function getCompatibleLiterals(
       ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options),
     ];
     if (options?.supportsControls) {
-      const variables = getVariablesByType?.(EsqlControlType.TIME_LITERAL) ?? [];
+      const variables = getVariablesByType?.(ESQLVariableType.TIME_LITERAL) ?? [];
       timeLiteralSuggestions.push(
         ...getControlSuggestion(
-          EsqlControlType.TIME_LITERAL,
+          ESQLVariableType.TIME_LITERAL,
           variables.map((v) => `?${v.key}`)
         )
       );
@@ -608,7 +608,7 @@ export function getDateLiterals(options?: {
 }
 
 export function getControlSuggestion(
-  type: EsqlControlType,
+  type: ESQLVariableType,
   variables?: string[]
 ): SuggestionRawDefinition[] {
   const typeLabel = getControlSuggestionLabel(type);
