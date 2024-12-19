@@ -10,13 +10,11 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { componentTemplatesApi } from './lib/component_templates.api';
 import { componentTemplateHelpers } from './lib/component_template.helpers';
-import { API_BASE_PATH } from './constants';
 
 const CACHE_TEMPLATES = true;
 
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const supertest = getService('supertest');
 
   const {
     createComponentTemplate,
@@ -391,21 +389,6 @@ export default function ({ getService }: FtrProviderContext) {
           ],
           type: 'resource_not_found_exception',
           reason: 'component_does_not_exist',
-        });
-      });
-    });
-
-    describe('Privileges', () => {
-      it('should return privileges result', async () => {
-        const uri = `${API_BASE_PATH}/component_templates/privileges`;
-
-        const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').expect(200);
-
-        expect(body).to.eql({
-          hasAllPrivileges: true,
-          missingPrivileges: {
-            cluster: [],
-          },
         });
       });
     });

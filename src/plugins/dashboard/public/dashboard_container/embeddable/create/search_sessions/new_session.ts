@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, TimeRange, onlyDisabledFiltersChanged } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, Filter, TimeRange, onlyDisabledFiltersChanged } from '@kbn/es-query';
 import { combineLatest, distinctUntilChanged, Observable, skip } from 'rxjs';
-import { shouldRefreshFilterCompareOptions } from '@kbn/embeddable-plugin/public';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiPublishesReload, apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { areTimesEqual } from '../../../../dashboard_api/unified_search_manager';
+
+const shouldRefreshFilterCompareOptions = {
+  ...COMPARE_ALL_OPTIONS,
+  // do not compare $state to avoid refreshing when filter is pinned/unpinned (which does not impact results)
+  state: false,
+};
 
 export function newSession$(api: unknown) {
   const observables: Array<Observable<unknown>> = [];

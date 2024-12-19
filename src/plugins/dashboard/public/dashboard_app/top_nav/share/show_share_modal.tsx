@@ -15,7 +15,6 @@ import { EuiCallOut, EuiCheckboxGroup } from '@elastic/eui';
 import type { Capabilities } from '@kbn/core/public';
 import { QueryState } from '@kbn/data-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 
@@ -177,7 +176,7 @@ export function ShowShareModal({
     dashboardId: savedObjectId,
     preserveSavedFilters: true,
     refreshInterval: undefined, // We don't share refresh interval externally
-    viewMode: ViewMode.VIEW, // For share locators we always load the dashboard in view mode
+    viewMode: 'view', // For share locators we always load the dashboard in view mode
     useHash: false,
     timeRange: dataService.query.timefilter.timefilter.getTime(),
     ...unsavedStateForLocator,
