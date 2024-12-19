@@ -12,7 +12,7 @@ import { type RuleMigration } from '../../../../../common/siem_migrations/model/
 import * as i18n from './translations';
 import { COLUMN_EMPTY_VALUE, type TableColumn } from './constants';
 
-const Author = ({ isPrebuiltRule }: { isPrebuiltRule: boolean }) => {
+export const Author = ({ isPrebuiltRule }: { isPrebuiltRule: boolean }) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       {isPrebuiltRule && (

@@ -15,7 +15,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
 
 import {
   UpdateRuleMigrationData,
@@ -62,6 +62,14 @@ export const GetRuleMigrationRequestQuery = z.object({
   sort_direction: z.enum(['asc', 'desc']).optional(),
   search_term: z.string().optional(),
   ids: ArrayFromString(NonEmptyString).optional(),
+  is_prebuilt: BooleanFromString.optional(),
+  is_custom: BooleanFromString.optional(),
+  is_installed: BooleanFromString.optional(),
+  is_not_installed: BooleanFromString.optional(),
+  is_fully_translated: BooleanFromString.optional(),
+  is_partially_translated: BooleanFromString.optional(),
+  is_untranslatable: BooleanFromString.optional(),
+  is_failed: BooleanFromString.optional(),
 });
 export type GetRuleMigrationRequestQueryInput = z.input<typeof GetRuleMigrationRequestQuery>;
 

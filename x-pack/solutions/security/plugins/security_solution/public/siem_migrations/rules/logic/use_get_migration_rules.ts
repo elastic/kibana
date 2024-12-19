@@ -22,6 +22,14 @@ export const useGetMigrationRules = (params: {
   sortDirection?: 'asc' | 'desc';
   searchTerm?: string;
   ids?: string[];
+  isPrebuilt?: boolean;
+  isCustom?: boolean;
+  isInstalled?: boolean;
+  isNotInstalled?: boolean;
+  isFullyTranslated?: boolean;
+  isPartiallyTranslated?: boolean;
+  isUntranslatable?: boolean;
+  isFailed?: boolean;
 }) => {
   const { addError } = useAppToasts();
 

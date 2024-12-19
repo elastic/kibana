@@ -41,11 +41,16 @@ export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
 export interface RuleMigrationFilters {
   status?: SiemMigrationStatus | SiemMigrationStatus[];
   ids?: string[];
+  installed?: boolean;
+  notInstalled?: boolean;
   installable?: boolean;
   prebuilt?: boolean;
   custom?: boolean;
   failed?: boolean;
+  fullyTranslated?: boolean;
   notFullyTranslated?: boolean;
+  partiallyTranslated?: boolean;
+  untranslatable?: boolean;
   searchTerm?: string;
 }
 export interface RuleMigrationGetOptions {
@@ -403,12 +408,17 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     {
       status,
       ids,
+      installed,
+      notInstalled,
       installable,
       prebuilt,
       custom,
       searchTerm,
       failed,
+      fullyTranslated,
       notFullyTranslated,
+      partiallyTranslated,
+      untranslatable,
     }: RuleMigrationFilters = {}
   ): QueryDslQueryContainer {
     const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
@@ -421,6 +431,12 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     }
     if (ids) {
       filter.push({ terms: { _id: ids } });
+    }
+    if (installed) {
+      filter.push(searchConditions.isInstalled());
+    }
+    if (notInstalled) {
+      filter.push(searchConditions.isNotInstalled());
     }
     if (installable) {
       filter.push(...searchConditions.isInstallable());
@@ -437,8 +453,17 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     if (failed) {
       filter.push(searchConditions.isFailed());
     }
+    if (fullyTranslated) {
+      filter.push(searchConditions.isFullyTranslated());
+    }
     if (notFullyTranslated) {
       filter.push(searchConditions.isNotFullyTranslated());
+    }
+    if (partiallyTranslated) {
+      filter.push(searchConditions.isPartiallyTranslated());
+    }
+    if (untranslatable) {
+      filter.push(searchConditions.isUntranslatable());
     }
     return { bool: { filter } };
   }

@@ -64,3 +64,16 @@ export const DEFAULT_TRANSLATION_FIELDS = {
 } as const;
 
 export const EMPTY_RESOURCE_PLACEHOLDER = '<empty>';
+
+export enum AuthorFilter {
+  ELASTIC = 'elastic',
+  CUSTOM = 'custom',
+}
+
+export enum StatusFilter {
+  INSTALLED = 'installed',
+  TRANSLATED = 'translated',
+  PARTIALLY_TRANSLATED = 'partially_translated',
+  UNTRANSLATABLE = 'untranslatable',
+  FAILED = 'failed',
+}
