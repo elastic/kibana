@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   EuiFormRow,
   EuiSpacer,
@@ -31,12 +31,12 @@ import {
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { ConfigEntryView } from '../../../common/dynamic_config/types';
+import { InferenceTaskType } from '../../../common/inference/types';
 import { ServiceProviderKeys } from '../../../common/inference/constants';
 import { ConnectorConfigurationFormItems } from '../lib/dynamic_config/connector_configuration_form_items';
-import { getTaskTypes } from './get_task_types';
 import * as i18n from './translations';
 import { DEFAULT_TASK_TYPE } from './constants';
-import { ConfigEntryView } from '../lib/dynamic_config/types';
 import { SelectableProvider } from './providers/selectable';
 import { Config, Secrets } from './types';
 import { generateInferenceEndpointId, getTaskTypeOptions, TaskTypeOption } from './helpers';
@@ -116,13 +116,13 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
   }, [isSubmitting, config, validateFields]);
 
   const onTaskTypeOptionsSelect = useCallback(
-    async (taskType: string, provider?: string) => {
+    (taskType: string, provider?: string) => {
       // Get task type settings
-      const currentTaskTypes = await getTaskTypes(http, provider ?? config?.provider);
+      const currentProvider = providers?.find((p) => p.provider === (provider ?? config?.provider));
+      const currentTaskTypes = currentProvider?.task_types;
       const newTaskType = currentTaskTypes?.find((p) => p.task_type === taskType);
 
       setSelectedTaskType(taskType);
-      generateInferenceEndpointId(config, setFieldValue);
 
       // transform the schema
       const newTaskTypeSchema = Object.keys(newTaskType?.configuration ?? {}).map((k) => ({
@@ -150,19 +150,23 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
           taskTypeConfig: configDefaults,
         },
       });
+      generateInferenceEndpointId(
+        { ...config, taskType, taskTypeConfig: configDefaults },
+        setFieldValue
+      );
     },
-    [config, http, setFieldValue, updateFieldValues]
+    [config, providers, setFieldValue, updateFieldValues]
   );
 
   const onProviderChange = useCallback(
-    async (provider?: string) => {
+    (provider?: string) => {
       const newProvider = providers?.find((p) => p.provider === provider);
 
       // Update task types list available for the selected provider
-      const providerTaskTypes = newProvider?.taskTypes ?? [];
+      const providerTaskTypes = (newProvider?.task_types ?? []).map((t) => t.task_type);
       setTaskTypeOptions(getTaskTypeOptions(providerTaskTypes));
       if (providerTaskTypes.length > 0) {
-        await onTaskTypeOptionsSelect(providerTaskTypes[0], provider);
+        onTaskTypeOptionsSelect(providerTaskTypes[0], provider);
       }
 
       // Update connector providerSchema
@@ -203,9 +207,8 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
   );
 
   useEffect(() => {
-    const getTaskTypeSchema = async () => {
-      const currentTaskTypes = await getTaskTypes(http, config?.provider ?? '');
-      const newTaskType = currentTaskTypes?.find((p) => p.task_type === config?.taskType);
+    const getTaskTypeSchema = (taskTypes: InferenceTaskType[]) => {
+      const newTaskType = taskTypes.find((p) => p.task_type === config?.taskType);
 
       // transform the schema
       const newTaskTypeSchema = Object.keys(newTaskType?.configuration ?? {}).map((k) => ({
@@ -228,7 +231,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
 
       setProviderSchema(newProviderSchema);
 
-      getTaskTypeSchema();
+      getTaskTypeSchema(newProvider?.task_types ?? []);
     }
   }, [config?.provider, config?.taskType, http, isEdit, providers]);
 
@@ -309,6 +312,22 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     setFieldValue('config.provider', '');
   }, [onProviderChange, setFieldValue]);
 
+  const providerIcon = useMemo(
+    () =>
+      Object.keys(SERVICE_PROVIDERS).includes(config?.provider)
+        ? SERVICE_PROVIDERS[config?.provider as ServiceProviderKeys].icon
+        : undefined,
+    [config?.provider]
+  );
+
+  const providerName = useMemo(
+    () =>
+      Object.keys(SERVICE_PROVIDERS).includes(config?.provider)
+        ? SERVICE_PROVIDERS[config?.provider as ServiceProviderKeys].name
+        : config?.provider,
+    [config?.provider]
+  );
+
   const providerSuperSelect = useCallback(
     (isInvalid: boolean) => (
       <EuiFormControlLayout
@@ -317,11 +336,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
         isDisabled={isEdit || readOnly}
         isInvalid={isInvalid}
         fullWidth
-        icon={
-          !config?.provider
-            ? { type: 'sparkles', side: 'left' }
-            : SERVICE_PROVIDERS[config?.provider as ServiceProviderKeys].icon
-        }
+        icon={!config?.provider ? { type: 'sparkles', side: 'left' } : providerIcon}
       >
         <EuiFieldText
           onClick={handleProviderPopover}
@@ -329,9 +344,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
           isInvalid={isInvalid}
           disabled={isEdit || readOnly}
           onKeyDown={handleProviderKeyboardOpen}
-          value={
-            config?.provider ? SERVICE_PROVIDERS[config?.provider as ServiceProviderKeys].name : ''
-          }
+          value={config?.provider ? providerName : ''}
           fullWidth
           placeholder={i18n.SELECT_PROVIDER}
           icon={{ type: 'arrowDown', side: 'right' }}
@@ -345,8 +358,10 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       readOnly,
       onClearProvider,
       config?.provider,
+      providerIcon,
       handleProviderPopover,
       handleProviderKeyboardOpen,
+      providerName,
       isProviderPopoverOpen,
     ]
   );
