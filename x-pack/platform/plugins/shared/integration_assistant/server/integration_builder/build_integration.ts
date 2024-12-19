@@ -36,7 +36,7 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
 
   if (!isValidName(integration.name)) {
     throw new Error(
-      `Invalid integration name: ${integration.name}, Should only contain letters and underscores`
+      `Invalid integration name: ${integration.name}, Should only contain letters, numbers and underscores`
     );
   }
 
@@ -49,7 +49,7 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
     const dataStreamName = dataStream.name;
     if (!isValidName(dataStreamName)) {
       throw new Error(
-        `Invalid datastream name: ${dataStreamName}, Should only contain letters and underscores`
+        `Invalid datastream name: ${dataStreamName}, Should only contain letters, numbers and underscores`
       );
     }
     const specificDataStreamDir = joinPath(dataStreamsDir, dataStreamName);
@@ -77,7 +77,7 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
   return zipBuffer;
 }
 export function isValidName(input: string): boolean {
-  const regex = /^[a-zA-Z_]+$/;
+  const regex = /^[a-zA-Z0-9_]+$/;
   return input.length > 0 && regex.test(input);
 }
 function createDirectories(
