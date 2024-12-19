@@ -231,7 +231,7 @@ export const deleteObservable = async (
     });
   } catch (error) {
     throw Boom.badRequest(
-      `Failed to delete observable id: ${JSON.stringify(observableId)}: ${error}`
+      `Failed to delete observable id: ${observableId}: ${error}`
     );
   }
 };
