@@ -21,7 +21,7 @@ import { FormattedCount } from '../../../../../common/components/formatted_numbe
 import { getIsChartCollapseData } from './helpers';
 import * as i18n from './translations';
 
-import { SEVERITY_COLOR } from '../../../../../overview/components/detection_response/utils';
+import { getSeverityColor as getAlertsSeverityColor } from '../../../../../overview/components/detection_response/utils';
 
 const DETECTIONS_ALERTS_COLLAPSED_CHART_ID = 'detectioin-alerts-collapsed-chart';
 
@@ -97,7 +97,8 @@ export const ChartCollapse: React.FC<Props> = ({
   const topGroup = useMemo(() => data.at(0)?.group ?? i18n.NO_RESULT_MESSAGE, [data]);
   const severities = useMemo(() => {
     const severityData = data.at(0)?.severities ?? [];
-    return Object.keys(SEVERITY_COLOR).map((severity) => {
+    const severityColors = getAlertsSeverityColor(euiTheme);
+    return Object.keys(severityColors).map((severity) => {
       const obj = severityData.find((s) => s.key === severity);
       if (obj) {
         return { key: obj.key, label: obj.label, value: obj.value };
@@ -105,7 +106,7 @@ export const ChartCollapse: React.FC<Props> = ({
         return { key: severity, label: capitalize(severity), value: 0 };
       }
     });
-  }, [data]);
+  }, [data, euiTheme]);
   const groupBy = useMemo(() => getGroupByLabel(groupBySelection), [groupBySelection]);
 
   return (
