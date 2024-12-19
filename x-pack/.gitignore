@@ -6,6 +6,7 @@
 /test/functional/apps/**/reports/session
 /test/reporting/configs/failure_debug/
 /plugins/reporting/.chromium/
+/platform/plugins/shared/screenshotting/chromium/
 /plugins/screenshotting/chromium/
 /plugins/reporting/.phantom/
 /.aws-config.json

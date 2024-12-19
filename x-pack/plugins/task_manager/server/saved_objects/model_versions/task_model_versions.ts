@@ -8,6 +8,10 @@
 import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import { taskSchemaV1, taskSchemaV2 } from '../schemas/task';
 
+// IMPORTANT!!!
+// When adding new model versions, make sure to manually test
+// downgrading to the previous version. This is a gap in our
+// automated test coverage so manual testing is needed.
 export const taskModelVersions: SavedObjectsModelVersionMap = {
   '1': {
     changes: [
