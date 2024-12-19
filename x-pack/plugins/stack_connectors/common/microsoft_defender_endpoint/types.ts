@@ -106,11 +106,11 @@ export interface MicrosoftDefenderEndpointMachineAction {
     | 'RestrictCodeExecution'
     | 'UnrestrictCodeExecution';
   /** Scope of the action. Full or Selective for Isolation, Quick or Full for antivirus scan. */
-  scope: string;
+  scope?: string;
   /** Identity of the person that executed the action. */
   requestor: string;
   /** Id the customer can submit in the request for custom correlation. */
-  externalID: string;
+  externalID?: string;
   /** The name of the user/application that submitted the action. */
   requestSource: string;
   /** Commands to run. Allowed values are PutFile, RunScript, GetFile. */
@@ -137,6 +137,8 @@ export interface MicrosoftDefenderEndpointMachineAction {
   title: string;
   /** Contains two Properties. string fileIdentifier, Enum fileIdentifierType with the possible values: Sha1, Sha256, and Md5. */
   relatedFileInfo?: { fileIdentifier: string; fileIdentifierType: 'Sha1' | 'Sha256' | 'Md5' };
+  errorResult?: number;
+  troubleshootInfo?: string;
 }
 
 export type MicrosoftDefenderEndpointTestConnectorParams = TypeOf<typeof TestConnectorParamsSchema>;
