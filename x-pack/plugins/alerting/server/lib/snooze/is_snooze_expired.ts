@@ -7,10 +7,10 @@
 
 import { RRule, Weekday } from '@kbn/rrule';
 import { RuleSnoozeSchedule } from '../../types';
-import { isSnoozeActive } from './is_snooze_active';
+import { getActiveSnoozeIfExist } from './get_active_snooze_if_exist';
 
 export function isSnoozeExpired(snooze: RuleSnoozeSchedule) {
-  if (isSnoozeActive(snooze)) {
+  if (getActiveSnoozeIfExist(snooze)) {
     return false;
   }
   const now = Date.now();
