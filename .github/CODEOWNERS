@@ -628,6 +628,7 @@ src/platform/plugins/shared/kibana_react @elastic/appex-sharedux
 src/platform/plugins/shared/kibana_utils @elastic/appex-sharedux
 src/platform/plugins/shared/management @elastic/kibana-management
 src/platform/plugins/shared/navigation @elastic/appex-sharedux
+src/platform/plugins/shared/saved_objects @elastic/appex-sharedux
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/bfetch @elastic/appex-sharedux
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
@@ -670,7 +671,6 @@ src/plugins/maps_ems @elastic/kibana-presentation
 src/plugins/newsfeed @elastic/kibana-core
 src/plugins/presentation_panel @elastic/kibana-presentation
 src/plugins/presentation_util @elastic/kibana-presentation
-src/plugins/saved_objects @elastic/appex-sharedux
 src/plugins/saved_objects_finder @elastic/kibana-data-discovery
 src/plugins/saved_objects_management @elastic/kibana-core
 src/plugins/saved_objects_tagging_oss @elastic/appex-sharedux
@@ -1824,7 +1824,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/functional/es_archives/cases/migrations/8.8.0 @elastic/response-ops
 
 #CC# /src/core/server/csp/ @elastic/kibana-core
-#CC# /src/plugins/saved_objects/ @elastic/kibana-core
+#CC# /src/platform/plugins/shared/saved_objects/ @elastic/kibana-core
 #CC# /x-pack/plugins/cloud/ @elastic/kibana-core
 #CC# /x-pack/plugins/features/ @elastic/kibana-core
 #CC# /x-pack/platform/plugins/shared/global_search/ @elastic/kibana-core
