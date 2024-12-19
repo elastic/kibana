@@ -44,7 +44,7 @@ export interface PrebuiltRulesResults {
  * @param rulesIds The list of IDs to filter requested prebuilt rules. If not specified, all available prebuilt rules will be returned.
  * @returns
  */
-export const getPrebuiltRulesByIds = async (
+export const getPrebuiltRules = async (
   rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
   rulesIds?: string[]
@@ -113,11 +113,7 @@ export const getPrebuiltRulesForMigration = async (
   }
   const prebuiltRulesIds = Array.from(rulesIds);
 
-  const prebuiltRules = await getPrebuiltRulesByIds(
-    rulesClient,
-    savedObjectsClient,
-    prebuiltRulesIds
-  );
+  const prebuiltRules = await getPrebuiltRules(rulesClient, savedObjectsClient, prebuiltRulesIds);
 
   return prebuiltRules;
 };

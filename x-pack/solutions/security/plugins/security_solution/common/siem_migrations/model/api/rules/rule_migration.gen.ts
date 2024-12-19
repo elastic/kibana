@@ -28,9 +28,9 @@ import {
   RuleMigrationResourceType,
   RuleMigrationResource,
 } from '../../rule_migration.gen';
+import { RelatedIntegration } from '../../../../api/detection_engine/model/rule_schema/common_attributes.gen';
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import { ConnectorId, LangSmithOptions } from '../../common.gen';
-import { RelatedIntegration } from '../../../../api/detection_engine/model/rule_schema/common_attributes.gen';
 
 export type CreateRuleMigrationRequestParams = z.infer<typeof CreateRuleMigrationRequestParams>;
 export const CreateRuleMigrationRequestParams = z.object({
