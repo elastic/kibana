@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { Plugin as PluginClass } from '@kbn/core/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { EntityClient } from './lib/entity_client';
 
 export interface EntityManagerPublicPluginSetup {
@@ -14,7 +15,17 @@ export interface EntityManagerPublicPluginStart {
   entityClient: EntityClient;
 }
 
+export interface EntityManagerPublicPluginSetupDependencies {
+  uiActions: UiActionsSetup;
+}
+
+export interface EntityManagerPublicPluginStartDependencies {
+  uiActions: UiActionsStart;
+}
+
 export type EntityManagerPluginClass = PluginClass<
   EntityManagerPublicPluginSetup,
-  EntityManagerPublicPluginStart
+  EntityManagerPublicPluginStart,
+  EntityManagerPublicPluginSetupDependencies,
+  EntityManagerPublicPluginStartDependencies
 >;

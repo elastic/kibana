@@ -7,10 +7,12 @@
 
 import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { Logger } from '@kbn/logging';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 
-import { EntityManagerPluginClass } from './types';
+import { EntityManagerPluginClass, EntityManagerPublicPluginStartDependencies } from './types';
 import type { EntityManagerPublicConfig } from '../common/config';
 import { EntityClient } from './lib/entity_client';
+import { createEntityNavigationAction } from './lib/entity_navigation_action';
 
 export class Plugin implements EntityManagerPluginClass {
   public config: EntityManagerPublicConfig;
@@ -27,9 +29,15 @@ export class Plugin implements EntityManagerPluginClass {
     };
   }
 
-  start(core: CoreStart) {
+  start(core: CoreStart, plugins: EntityManagerPublicPluginStartDependencies) {
+    const entityClient = new EntityClient(core);
+    plugins.uiActions.addTriggerAction(
+      APPLY_FILTER_TRIGGER,
+      createEntityNavigationAction(core, entityClient)
+    );
+
     return {
-      entityClient: new EntityClient(core),
+      entityClient,
     };
   }
 
