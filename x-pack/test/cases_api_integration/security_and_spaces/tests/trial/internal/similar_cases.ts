@@ -135,5 +135,18 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(casesSimilarToB.length).to.be(0);
       });
     });
+
+    describe('rbac', () => {
+      const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+      it('should not getting similar cases without permissions', async () => {
+        await similarCases({
+          supertest: supertestWithoutAuth,
+          body: { perPage: 10, page: 1 },
+          caseId: 'mock-case-id',
+          expectedHttpCode: 403,
+        });
+      });
+    });
   });
 };

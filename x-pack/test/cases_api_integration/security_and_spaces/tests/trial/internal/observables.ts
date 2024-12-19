@@ -161,6 +161,63 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 403,
         });
       });
+
+      it('should not allow deleting an observable without permissions', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+
+        const newObservableData = {
+          value: '127.0.0.1',
+          typeKey: OBSERVABLE_TYPE_IPV4.key,
+          description: '',
+        };
+
+        const {
+          observables: [observable],
+        } = await addObservable({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            observable: newObservableData,
+          },
+        });
+
+        await deleteObservable({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          observableId: observable.id as string,
+          auth: { user: secOnly, space: null },
+          expectedHttpCode: 403,
+        });
+      });
+
+      it('should not allow updating an observable without premissions', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+
+        const newObservableData = {
+          value: '127.0.0.1',
+          typeKey: OBSERVABLE_TYPE_IPV4.key,
+          description: '',
+        };
+
+        const {
+          observables: [observable],
+        } = await addObservable({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            observable: newObservableData,
+          },
+        });
+
+        await updateObservable({
+          supertest: supertestWithoutAuth,
+          params: { observable: { description: '', value: '192.168.68.1' } },
+          caseId: postedCase.id,
+          observableId: observable.id as string,
+          auth: { user: secOnly, space: null },
+          expectedHttpCode: 403,
+        });
+      });
     });
   });
 };
