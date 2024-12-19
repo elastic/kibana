@@ -8,13 +8,9 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { LeftPanelInsightsTab } from '../../left';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
-import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
 import {
   INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID,
   INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
@@ -29,10 +25,13 @@ import {
   EXPANDABLE_PANEL_LOADING_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
-jest.mock('@kbn/expandable-flyout');
 jest.mock('../../shared/context');
 jest.mock('../hooks/use_fetch_threat_intelligence');
+
+const mockNavigateToLeftPanel = jest.fn();
+jest.mock('../../shared/hooks/use_navigate_to_left_panel');
 
 const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(
   INSIGHTS_THREAT_INTELLIGENCE_TEST_ID
@@ -60,10 +59,6 @@ const ENRICHED_WITH_THREAT_INTELLIGENCE_BUTTON_TEST_ID = SUMMARY_ROW_BUTTON_TEST
   INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID
 );
 
-const mockOpenLeftPanel = jest.fn();
-const eventId = 'eventId';
-const indexName = 'indexName';
-const scopeId = 'scopeId';
 const dataFormattedForFieldBrowser = ['scopeId'];
 
 const renderThreatIntelligenceOverview = () =>
@@ -76,22 +71,20 @@ const renderThreatIntelligenceOverview = () =>
 describe('<ThreatIntelligenceOverview />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
     (useDocumentDetailsContext as jest.Mock).mockReturnValue({
-      eventId,
-      indexName,
-      scopeId,
       dataFormattedForFieldBrowser,
       isPreviewMode: false,
     });
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
-  });
-
-  it('should render wrapper component', () => {
     (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
       loading: false,
     });
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
+      navigateToLeftPanel: mockNavigateToLeftPanel,
+      isEnabled: true,
+    });
+  });
 
+  it('should render wrapper component', () => {
     const { getByTestId, queryByTestId } = renderThreatIntelligenceOverview();
 
     expect(queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
@@ -100,22 +93,28 @@ describe('<ThreatIntelligenceOverview />', () => {
     expect(queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('should not render link if isPreviewMode is true', () => {
+  it('should render link without icon if in preview mode', () => {
     (useDocumentDetailsContext as jest.Mock).mockReturnValue({
-      eventId,
-      indexName,
-      scopeId,
       dataFormattedForFieldBrowser,
       isPreviewMode: true,
     });
-    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
-      loading: false,
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
+      navigateToLeftPanel: mockNavigateToLeftPanel,
+      isEnabled: true,
+    });
+    const { getByTestId, queryByTestId } = renderThreatIntelligenceOverview();
+    expect(queryByTestId(TITLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should not render link if navigation is not enabled', () => {
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
+      navigateToLeftPanel: mockNavigateToLeftPanel,
+      isEnabled: false,
     });
 
     const { getByTestId, queryByTestId } = renderThreatIntelligenceOverview();
 
-    expect(queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(TITLE_ICON_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(TITLE_TEXT_TEST_ID)).toBeInTheDocument();
   });
@@ -175,18 +174,7 @@ describe('<ThreatIntelligenceOverview />', () => {
     const { getByTestId } = renderThreatIntelligenceOverview();
 
     getByTestId(TITLE_LINK_TEST_ID).click();
-    expect(mockOpenLeftPanel).toHaveBeenCalledWith({
-      id: DocumentDetailsLeftPanelKey,
-      path: {
-        tab: LeftPanelInsightsTab,
-        subTab: THREAT_INTELLIGENCE_TAB_ID,
-      },
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
+    expect(mockNavigateToLeftPanel).toHaveBeenCalled();
   });
 
   it('should open the expanded section to the correct tab when the number is clicked', () => {
@@ -199,32 +187,10 @@ describe('<ThreatIntelligenceOverview />', () => {
     const { getByTestId } = renderThreatIntelligenceOverview();
     getByTestId(THREAT_MATCHES_BUTTON_TEST_ID).click();
 
-    expect(mockOpenLeftPanel).toHaveBeenCalledWith({
-      id: DocumentDetailsLeftPanelKey,
-      path: {
-        tab: LeftPanelInsightsTab,
-        subTab: THREAT_INTELLIGENCE_TAB_ID,
-      },
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
+    expect(mockNavigateToLeftPanel).toHaveBeenCalled();
 
     getByTestId(ENRICHED_WITH_THREAT_INTELLIGENCE_BUTTON_TEST_ID).click();
 
-    expect(mockOpenLeftPanel).toHaveBeenCalledWith({
-      id: DocumentDetailsLeftPanelKey,
-      path: {
-        tab: LeftPanelInsightsTab,
-        subTab: THREAT_INTELLIGENCE_TAB_ID,
-      },
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
+    expect(mockNavigateToLeftPanel).toHaveBeenCalled();
   });
 });

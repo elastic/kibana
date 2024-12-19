@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -18,9 +18,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { useDocumentDetailsContext } from '../../shared/context';
 import {
@@ -29,6 +28,7 @@ import {
   NOTES_COUNT_TEST_ID,
   NOTES_LOADING_TEST_ID,
   NOTES_TITLE_TEST_ID,
+  NOTES_VIEW_NOTES_BUTTON_TEST_ID,
 } from './test_ids';
 import type { State } from '../../../../common/store';
 import type { Note } from '../../../../../common/api/timeline';
@@ -42,6 +42,7 @@ import {
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { AlertHeaderBlock } from './alert_header_block';
 import { LeftPanelNotesTab } from '../../left';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
 export const FETCH_NOTES_ERROR = i18n.translate(
   'xpack.securitySolution.flyout.right.notes.fetchNotesErrorLabel',
@@ -55,6 +56,12 @@ export const ADD_NOTE_BUTTON = i18n.translate(
     defaultMessage: 'Add note',
   }
 );
+export const VIEW_NOTES_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.right.notes.viewNoteButtonAriaLabel',
+  {
+    defaultMessage: 'View notes',
+  }
+);
 
 /**
  * Renders a block with the number of notes for the event
@@ -62,30 +69,23 @@ export const ADD_NOTE_BUTTON = i18n.translate(
 export const Notes = memo(() => {
   const { euiTheme } = useEuiTheme();
   const dispatch = useDispatch();
-  const { eventId, indexName, scopeId, isPreview, isPreviewMode } = useDocumentDetailsContext();
+  const { eventId, isPreview } = useDocumentDetailsContext();
   const { addError: addErrorToast } = useAppToasts();
+  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
 
-  const { openLeftPanel } = useExpandableFlyoutApi();
-  const openExpandedFlyoutNotesTab = useCallback(
-    () =>
-      openLeftPanel({
-        id: DocumentDetailsLeftPanelKey,
-        path: { tab: LeftPanelNotesTab },
-        params: {
-          id: eventId,
-          indexName,
-          scopeId,
-        },
-      }),
-    [eventId, indexName, openLeftPanel, scopeId]
-  );
+  const { navigateToLeftPanel: openExpandedFlyoutNotesTab, isEnabled: isLinkEnabled } =
+    useNavigateToLeftPanel({
+      tab: LeftPanelNotesTab,
+    });
+
+  const isNotesDisabled = !isLinkEnabled || isPreview;
 
   useEffect(() => {
     // only fetch notes if we are not in a preview panel, or not in a rule preview workflow
-    if (!isPreviewMode && !isPreview) {
+    if (!isNotesDisabled) {
       dispatch(fetchNotesByDocumentIds({ documentIds: [eventId] }));
     }
-  }, [dispatch, eventId, isPreview, isPreviewMode]);
+  }, [dispatch, eventId, isNotesDisabled]);
 
   const fetchStatus = useSelector((state: State) => selectFetchNotesByDocumentIdsStatus(state));
   const fetchError = useSelector((state: State) => selectFetchNotesByDocumentIdsError(state));
@@ -100,6 +100,60 @@ export const Notes = memo(() => {
       });
     }
   }, [addErrorToast, fetchError, fetchStatus]);
+
+  const viewNotesButton = useMemo(
+    () => (
+      <EuiButtonEmpty
+        onClick={openExpandedFlyoutNotesTab}
+        size="s"
+        disabled={isNotesDisabled}
+        aria-label={VIEW_NOTES_BUTTON_ARIA_LABEL}
+        data-test-subj={NOTES_VIEW_NOTES_BUTTON_TEST_ID}
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.notes.viewNoteButtonLabel"
+          defaultMessage="View {count, plural, one {note} other {notes}}"
+          values={{ count: notes.length }}
+        />
+      </EuiButtonEmpty>
+    ),
+    [isNotesDisabled, notes.length, openExpandedFlyoutNotesTab]
+  );
+  const addNoteButton = useMemo(
+    () => (
+      <EuiButtonEmpty
+        iconType="plusInCircle"
+        onClick={openExpandedFlyoutNotesTab}
+        size="s"
+        disabled={isNotesDisabled}
+        aria-label={ADD_NOTE_BUTTON}
+        data-test-subj={NOTES_ADD_NOTE_BUTTON_TEST_ID}
+      >
+        {ADD_NOTE_BUTTON}
+      </EuiButtonEmpty>
+    ),
+    [isNotesDisabled, openExpandedFlyoutNotesTab]
+  );
+  const addNoteButtonIcon = useMemo(
+    () => (
+      <EuiButtonIcon
+        onClick={openExpandedFlyoutNotesTab}
+        iconType="plusInCircle"
+        disabled={isNotesDisabled || !kibanaSecuritySolutionsPrivileges.crud}
+        css={css`
+          margin-left: ${euiTheme.size.xs};
+        `}
+        aria-label={ADD_NOTE_BUTTON}
+        data-test-subj={NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID}
+      />
+    ),
+    [
+      euiTheme.size.xs,
+      isNotesDisabled,
+      kibanaSecuritySolutionsPrivileges.crud,
+      openExpandedFlyoutNotesTab,
+    ]
+  );
 
   return (
     <AlertHeaderBlock
@@ -120,32 +174,14 @@ export const Notes = memo(() => {
           ) : (
             <>
               {notes.length === 0 ? (
-                <EuiButtonEmpty
-                  iconType="plusInCircle"
-                  onClick={openExpandedFlyoutNotesTab}
-                  size="s"
-                  disabled={isPreviewMode || isPreview}
-                  aria-label={ADD_NOTE_BUTTON}
-                  data-test-subj={NOTES_ADD_NOTE_BUTTON_TEST_ID}
-                >
-                  {ADD_NOTE_BUTTON}
-                </EuiButtonEmpty>
+                <>{kibanaSecuritySolutionsPrivileges.crud ? addNoteButton : getEmptyTagValue()}</>
               ) : (
                 <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
                   <EuiFlexItem data-test-subj={NOTES_COUNT_TEST_ID}>
                     <FormattedCount count={notes.length} />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiButtonIcon
-                      onClick={openExpandedFlyoutNotesTab}
-                      iconType="plusInCircle"
-                      disabled={isPreviewMode || isPreview}
-                      css={css`
-                        margin-left: ${euiTheme.size.xs};
-                      `}
-                      aria-label={ADD_NOTE_BUTTON}
-                      data-test-subj={NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID}
-                    />
+                    {kibanaSecuritySolutionsPrivileges.crud ? addNoteButtonIcon : viewNotesButton}
                   </EuiFlexItem>
                 </EuiFlexGroup>
               )}

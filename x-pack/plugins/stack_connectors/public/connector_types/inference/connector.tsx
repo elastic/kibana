@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   EuiFormRow,
   EuiSpacer,
@@ -31,23 +31,18 @@ import {
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { ConfigEntryView } from '../../../common/dynamic_config/types';
 import { ServiceProviderKeys } from '../../../common/inference/constants';
 import { ConnectorConfigurationFormItems } from '../lib/dynamic_config/connector_configuration_form_items';
-import { getTaskTypes } from './get_task_types';
 import * as i18n from './translations';
 import { DEFAULT_TASK_TYPE } from './constants';
-import { ConfigEntryView } from '../lib/dynamic_config/types';
 import { SelectableProvider } from './providers/selectable';
 import { Config, Secrets } from './types';
 import { generateInferenceEndpointId, getTaskTypeOptions, TaskTypeOption } from './helpers';
 import { useProviders } from './providers/get_providers';
 import { SERVICE_PROVIDERS } from './providers/render_service_provider/service_provider';
 import { AdditionalOptionsConnectorFields } from './additional_options_fields';
-import {
-  getProviderConfigHiddenField,
-  getProviderSecretsHiddenField,
-  getTaskTypeConfigHiddenField,
-} from './hidden_fields';
+import { getProviderConfigHiddenField, getProviderSecretsHiddenField } from './hidden_fields';
 
 const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
@@ -63,7 +58,6 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     watch: [
       'secrets.providerSecrets',
       'config.taskType',
-      'config.taskTypeConfig',
       'config.inferenceId',
       'config.provider',
       'config.providerConfig',
@@ -82,10 +76,9 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     []
   );
 
-  const [taskTypeSchema, setTaskTypeSchema] = useState<ConfigEntryView[]>([]);
   const [taskTypeOptions, setTaskTypeOptions] = useState<TaskTypeOption[]>([]);
   const [selectedTaskType, setSelectedTaskType] = useState<string>(DEFAULT_TASK_TYPE);
-  const [taskTypeFormFields, setTaskTypeFormFields] = useState<ConfigEntryView[]>([]);
+  const [taskTypeFormFields] = useState<ConfigEntryView[]>([]);
 
   const handleProviderClosePopover = useCallback(() => {
     setProviderPopoverOpen(false);
@@ -111,65 +104,39 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     if (isSubmitting) {
       validateFields(['config.providerConfig']);
       validateFields(['secrets.providerSecrets']);
-      validateFields(['config.taskTypeConfig']);
     }
   }, [isSubmitting, config, validateFields]);
 
   const onTaskTypeOptionsSelect = useCallback(
-    async (taskType: string, provider?: string) => {
+    (taskType: string) => {
       // Get task type settings
-      const currentTaskTypes = await getTaskTypes(http, provider ?? config?.provider);
-      const newTaskType = currentTaskTypes?.find((p) => p.task_type === taskType);
-
       setSelectedTaskType(taskType);
-      generateInferenceEndpointId(config, setFieldValue);
-
-      // transform the schema
-      const newTaskTypeSchema = Object.keys(newTaskType?.configuration ?? {}).map((k) => ({
-        key: k,
-        isValid: true,
-        ...newTaskType?.configuration[k],
-      })) as ConfigEntryView[];
-      setTaskTypeSchema(newTaskTypeSchema);
-
-      const configDefaults = Object.keys(newTaskType?.configuration ?? {}).reduce(
-        (res: Record<string, unknown>, k) => {
-          if (newTaskType?.configuration[k] && !!newTaskType?.configuration[k].default_value) {
-            res[k] = newTaskType.configuration[k].default_value;
-          } else {
-            res[k] = null;
-          }
-          return res;
-        },
-        {}
-      );
 
       updateFieldValues({
         config: {
           taskType,
-          taskTypeConfig: configDefaults,
         },
       });
+      generateInferenceEndpointId({ ...config, taskType }, setFieldValue);
     },
-    [config, http, setFieldValue, updateFieldValues]
+    [config, setFieldValue, updateFieldValues]
   );
 
   const onProviderChange = useCallback(
-    async (provider?: string) => {
-      const newProvider = providers?.find((p) => p.provider === provider);
+    (provider?: string) => {
+      const newProvider = providers?.find((p) => p.service === provider);
 
       // Update task types list available for the selected provider
-      const providerTaskTypes = newProvider?.taskTypes ?? [];
-      setTaskTypeOptions(getTaskTypeOptions(providerTaskTypes));
-      if (providerTaskTypes.length > 0) {
-        await onTaskTypeOptionsSelect(providerTaskTypes[0], provider);
+      setTaskTypeOptions(getTaskTypeOptions(newProvider?.task_types ?? []));
+      if (newProvider?.task_types && newProvider?.task_types.length > 0) {
+        onTaskTypeOptionsSelect(newProvider?.task_types[0]);
       }
 
       // Update connector providerSchema
-      const newProviderSchema = Object.keys(newProvider?.configuration ?? {}).map((k) => ({
+      const newProviderSchema = Object.keys(newProvider?.configurations ?? {}).map((k) => ({
         key: k,
         isValid: true,
-        ...newProvider?.configuration[k],
+        ...newProvider?.configurations[k],
       })) as ConfigEntryView[];
 
       setProviderSchema(newProviderSchema);
@@ -177,10 +144,10 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       const defaultProviderConfig: Record<string, unknown> = {};
       const defaultProviderSecrets: Record<string, unknown> = {};
 
-      Object.keys(newProvider?.configuration ?? {}).forEach((k) => {
-        if (!newProvider?.configuration[k].sensitive) {
-          if (newProvider?.configuration[k] && !!newProvider?.configuration[k].default_value) {
-            defaultProviderConfig[k] = newProvider.configuration[k].default_value;
+      Object.keys(newProvider?.configurations ?? {}).forEach((k) => {
+        if (!newProvider?.configurations[k].sensitive) {
+          if (newProvider?.configurations[k] && !!newProvider?.configurations[k].default_value) {
+            defaultProviderConfig[k] = newProvider.configurations[k].default_value;
           } else {
             defaultProviderConfig[k] = null;
           }
@@ -191,7 +158,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
 
       updateFieldValues({
         config: {
-          provider: newProvider?.provider,
+          provider: newProvider?.service,
           providerConfig: defaultProviderConfig,
         },
         secrets: {
@@ -203,32 +170,16 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
   );
 
   useEffect(() => {
-    const getTaskTypeSchema = async () => {
-      const currentTaskTypes = await getTaskTypes(http, config?.provider ?? '');
-      const newTaskType = currentTaskTypes?.find((p) => p.task_type === config?.taskType);
-
-      // transform the schema
-      const newTaskTypeSchema = Object.keys(newTaskType?.configuration ?? {}).map((k) => ({
-        key: k,
-        isValid: true,
-        ...newTaskType?.configuration[k],
-      })) as ConfigEntryView[];
-
-      setTaskTypeSchema(newTaskTypeSchema);
-    };
-
     if (config?.provider && isEdit) {
-      const newProvider = providers?.find((p) => p.provider === config.provider);
+      const newProvider = providers?.find((p) => p.service === config.provider);
       // Update connector providerSchema
-      const newProviderSchema = Object.keys(newProvider?.configuration ?? {}).map((k) => ({
+      const newProviderSchema = Object.keys(newProvider?.configurations ?? {}).map((k) => ({
         key: k,
         isValid: true,
-        ...newProvider?.configuration[k],
+        ...newProvider?.configurations[k],
       })) as ConfigEntryView[];
 
       setProviderSchema(newProviderSchema);
-
-      getTaskTypeSchema();
     }
   }, [config?.provider, config?.taskType, http, isEdit, providers]);
 
@@ -247,31 +198,14 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
         })
       : [];
 
-    existingConfiguration.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     setOptionalProviderFormFields(existingConfiguration.filter((p) => !p.required && !p.sensitive));
     setRequiredProviderFormFields(existingConfiguration.filter((p) => p.required || p.sensitive));
   }, [config?.providerConfig, providerSchema, secrets]);
 
-  useEffect(() => {
-    // Set values from the task type config to the schema
-    const existingTaskTypeConfiguration = taskTypeSchema
-      ? taskTypeSchema.map((item: ConfigEntryView) => {
-          const itemValue = item;
-          itemValue.isValid = true;
-          if (config?.taskTypeConfig) {
-            itemValue.value = config?.taskTypeConfig[item.key] as any;
-          }
-          return itemValue;
-        })
-      : [];
-    existingTaskTypeConfiguration.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-    setTaskTypeFormFields(existingTaskTypeConfiguration);
-  }, [config, taskTypeSchema]);
-
   const getProviderOptions = useCallback(() => {
     return providers?.map((p) => ({
-      label: p.provider,
-      key: p.provider,
+      label: p.service,
+      key: p.service,
     })) as EuiSelectableOption[];
   }, [providers]);
 
@@ -309,6 +243,22 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     setFieldValue('config.provider', '');
   }, [onProviderChange, setFieldValue]);
 
+  const providerIcon = useMemo(
+    () =>
+      Object.keys(SERVICE_PROVIDERS).includes(config?.provider)
+        ? SERVICE_PROVIDERS[config?.provider as ServiceProviderKeys].icon
+        : undefined,
+    [config?.provider]
+  );
+
+  const providerName = useMemo(
+    () =>
+      Object.keys(SERVICE_PROVIDERS).includes(config?.provider)
+        ? SERVICE_PROVIDERS[config?.provider as ServiceProviderKeys].name
+        : config?.provider,
+    [config?.provider]
+  );
+
   const providerSuperSelect = useCallback(
     (isInvalid: boolean) => (
       <EuiFormControlLayout
@@ -317,11 +267,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
         isDisabled={isEdit || readOnly}
         isInvalid={isInvalid}
         fullWidth
-        icon={
-          !config?.provider
-            ? { type: 'sparkles', side: 'left' }
-            : SERVICE_PROVIDERS[config?.provider as ServiceProviderKeys].icon
-        }
+        icon={!config?.provider ? { type: 'sparkles', side: 'left' } : providerIcon}
       >
         <EuiFieldText
           onClick={handleProviderPopover}
@@ -329,9 +275,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
           isInvalid={isInvalid}
           disabled={isEdit || readOnly}
           onKeyDown={handleProviderKeyboardOpen}
-          value={
-            config?.provider ? SERVICE_PROVIDERS[config?.provider as ServiceProviderKeys].name : ''
-          }
+          value={config?.provider ? providerName : ''}
           fullWidth
           placeholder={i18n.SELECT_PROVIDER}
           icon={{ type: 'arrowDown', side: 'right' }}
@@ -345,8 +289,10 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       readOnly,
       onClearProvider,
       config?.provider,
+      providerIcon,
       handleProviderPopover,
       handleProviderKeyboardOpen,
+      providerName,
       isProviderPopoverOpen,
     ]
   );
@@ -418,7 +364,6 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
             onSetProviderConfigEntry={onSetProviderConfigEntry}
             onTaskTypeOptionsSelect={onTaskTypeOptionsSelect}
             taskTypeFormFields={taskTypeFormFields}
-            taskTypeSchema={taskTypeSchema}
             taskTypeOptions={taskTypeOptions}
             selectedTaskType={selectedTaskType}
           />
@@ -434,7 +379,6 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
             setRequiredProviderFormFields,
             isSubmitting
           )}
-          {getTaskTypeConfigHiddenField(taskTypeSchema, setTaskTypeFormFields, isSubmitting)}
         </>
       ) : null}
     </>
