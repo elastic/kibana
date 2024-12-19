@@ -19,21 +19,16 @@ import type { ExecutionContextStart } from '@kbn/core-execution-context-browser'
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { I18nStart } from '@kbn/core-i18n-browser';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { KibanaRootContextProvider } from './root_provider';
-import { I18nStart } from '@kbn/core-i18n-browser';
 
 describe('KibanaRootContextProvider', () => {
   let euiTheme: UseEuiTheme | undefined;
   let i18nMock: I18nStart;
-  let userProfile: UserProfileService;
   let executionContext: ExecutionContextStart;
 
   beforeEach(() => {
     euiTheme = undefined;
     i18nMock = i18nServiceMock.createStartContract();
-    userProfile = userProfileServiceMock.createStart();
     executionContext = executionContextServiceMock.createStartContract();
   });
 
@@ -68,7 +63,6 @@ describe('KibanaRootContextProvider', () => {
     const wrapper = mountWithIntl(
       <KibanaRootContextProvider
         i18n={i18nMock}
-        userProfile={userProfile}
         executionContext={executionContext}
         theme={{ theme$: of(coreTheme) }}
       >
@@ -87,7 +81,6 @@ describe('KibanaRootContextProvider', () => {
     const wrapper = mountWithIntl(
       <KibanaRootContextProvider
         i18n={i18nMock}
-        userProfile={userProfile}
         executionContext={executionContext}
         theme={{ theme$: coreTheme$ }}
       >
