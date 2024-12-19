@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiHealth, EuiNotificationBadge, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiHealth,
+  EuiNotificationBadge,
+  EuiFlexItem,
+  useEuiTheme,
+} from '@elastic/eui';
 import React, { memo } from 'react';
 
 import {
@@ -31,9 +37,10 @@ export const AgentStatusBadges: React.FC<{
 
 const AgentStatusBadge: React.FC<{ status: SimplifiedAgentStatus; count: number }> = memo(
   ({ status, count }) => {
+    const { euiTheme } = useEuiTheme();
     return (
       <>
-        <EuiHealth color={getColorForAgentStatus(status)}>
+        <EuiHealth color={getColorForAgentStatus(status, euiTheme)}>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>{getLabelForAgentStatus(status)}</EuiFlexItem>
             <EuiFlexItem grow={false}>

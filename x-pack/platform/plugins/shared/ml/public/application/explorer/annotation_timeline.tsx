@@ -8,8 +8,11 @@
 import React, { type FC, type PropsWithChildren, useEffect } from 'react';
 import d3 from 'd3';
 import { scaleTime } from 'd3-scale';
+
+import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
+
 import { type ChartTooltipService, type TooltipData } from '../components/chart_tooltip';
-import { useCurrentThemeVars } from '../contexts/kibana';
+
 import { Y_AXIS_LABEL_PADDING, Y_AXIS_LABEL_WIDTH } from './constants';
 
 export interface AnnotationTimelineProps<T extends { timestamp: number; end_timestamp?: number }> {
@@ -39,7 +42,8 @@ export const AnnotationTimeline = <T extends { timestamp: number; end_timestamp?
   getTooltipContent,
 }: PropsWithChildren<AnnotationTimelineProps<T>>): ReturnType<FC> => {
   const canvasRef = React.useRef<HTMLDivElement | null>(null);
-  const { euiTheme } = useCurrentThemeVars();
+  const { euiTheme } = useEuiTheme();
+  const euiFontSizeXS = useEuiFontSize('xs', { unit: 'px' }).fontSize as string;
 
   useEffect(
     function renderChart() {
@@ -69,8 +73,8 @@ export const AnnotationTimeline = <T extends { timestamp: number; end_timestamp?
         .attr('x', Y_AXIS_LABEL_WIDTH - Y_AXIS_LABEL_PADDING)
         .attr('y', ANNOTATION_CONTAINER_HEIGHT / 2)
         .attr('dominant-baseline', 'middle')
-        .style('fill', euiTheme.euiTextSubduedColor)
-        .style('font-size', euiTheme.euiFontSizeXS);
+        .style('fill', euiTheme.colors.textSubdued)
+        .style('font-size', euiFontSizeXS);
 
       // Add border
       svg
@@ -79,7 +83,7 @@ export const AnnotationTimeline = <T extends { timestamp: number; end_timestamp?
         .attr('y', 0)
         .attr('height', ANNOTATION_CONTAINER_HEIGHT)
         .attr('width', endingXPos - startingXPos)
-        .style('stroke', euiTheme.euiBorderColor)
+        .style('stroke', euiTheme.border.color)
         .style('fill', 'none')
         .style('stroke-width', 1);
 
@@ -166,17 +170,7 @@ export const AnnotationTimeline = <T extends { timestamp: number; end_timestamp?
           .on('mouseout', () => tooltipService.hide());
       });
     },
-    [
-      chartWidth,
-      domain,
-      data,
-      tooltipService,
-      label,
-      euiTheme.euiTextSubduedColor,
-      euiTheme.euiFontSizeXS,
-      euiTheme.euiBorderColor,
-      getTooltipContent,
-    ]
+    [chartWidth, domain, data, tooltipService, label, euiTheme, euiFontSizeXS, getTooltipContent]
   );
 
   return <div ref={canvasRef} />;

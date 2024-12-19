@@ -18,7 +18,7 @@ import { getLatestEntity } from './get_latest_entity';
 interface Params {
   entityId: string;
   entityType: 'host' | 'container';
-  entityCentriExperienceEnabled: boolean;
+  entityCentricExperienceEnabled: boolean;
   infraMetricsClient: InfraMetricsClient;
   obsEsClient: ObservabilityElasticsearchClient;
   entityManagerClient: EntityClient;
@@ -26,7 +26,7 @@ interface Params {
 }
 
 export async function getDataStreamTypes({
-  entityCentriExperienceEnabled,
+  entityCentricExperienceEnabled,
   entityId,
   entityManagerClient,
   entityType,
@@ -42,7 +42,7 @@ export async function getDataStreamTypes({
 
   const sourceDataStreams = new Set(hasMetricsData ? [EntityDataStreamType.METRICS] : []);
 
-  if (!entityCentriExperienceEnabled) {
+  if (!entityCentricExperienceEnabled) {
     return Array.from(sourceDataStreams);
   }
 

@@ -7,7 +7,7 @@
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { getServiceNodeName, SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
 import { asDynamicBytes, asInteger, asPercent } from '../../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -21,7 +21,7 @@ import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 const INITIAL_SORT_FIELD = 'cpu';
 const INITIAL_SORT_DIRECTION = 'desc';
 
-const ServiceNodeName = euiStyled.div`
+const ServiceNodeName = styled.div`
   ${truncate(8 * unit)}
 `;
 

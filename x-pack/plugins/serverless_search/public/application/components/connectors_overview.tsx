@@ -20,16 +20,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
 
 import { GithubLink } from '@kbn/search-api-panels';
+import { SelfManagedConnectorsEmptyPrompt } from './connectors/self_managed_connectors_empty_prompt';
 import { docLinks } from '../../../common/doc_links';
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
 import { useConnectors } from '../hooks/api/use_connectors';
 import { useCreateConnector } from '../hooks/api/use_create_connector';
 import { useKibanaServices } from '../hooks/use_kibana';
-import { EmptyConnectorsPrompt } from './connectors/empty_connectors_prompt';
 import { ConnectorsTable } from './connectors/connectors_table';
 import { ConnectorPrivilegesCallout } from './connectors/connector_config/connector_privileges_callout';
 import { useAssetBasePath } from '../hooks/use_asset_base_path';
-
 import { BASE_CONNECTORS_PATH, ELASTIC_MANAGED_CONNECTOR_PATH } from '../constants';
 
 const CALLOUT_KEY = 'search.connectors.ElasticManaged.ComingSoon.feedbackCallout';
@@ -42,15 +41,11 @@ export const ConnectorsOverview = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
-
   const canManageConnectors = !data || data.canManageConnectors;
-
   const {
     application: { navigateToUrl },
   } = useKibanaServices();
-
   const [showCallOut, setShowCallOut] = useState(sessionStorage.getItem(CALLOUT_KEY) !== 'hidden');
-
   const onDismiss = () => {
     setShowCallOut(false);
     sessionStorage.setItem(CALLOUT_KEY, 'hidden');
@@ -155,7 +150,7 @@ export const ConnectorsOverview = () => {
             <ConnectorsTable />
           </>
         ) : (
-          <EmptyConnectorsPrompt />
+          <SelfManagedConnectorsEmptyPrompt />
         )}
       </EuiPageTemplate.Section>
       {embeddableConsole}
