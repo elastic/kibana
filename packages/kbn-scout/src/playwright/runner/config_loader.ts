@@ -7,20 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ServerlessProjectType } from '@kbn/es';
-
-export interface ScoutServerConfig {
-  serverless: boolean;
-  projectType?: ServerlessProjectType;
-  isCloud: boolean;
-  cloudUsersFilePath: string;
-  hosts: {
-    kibana: string;
-    elasticsearch: string;
-  };
-  auth: {
-    username: string;
-    password: string;
-  };
-  metadata?: any;
+/**
+ * Loads the config module dynamically
+ * @param configPath config absolute path
+ * @returns
+ */
+export async function loadConfigModule(configPath: string) {
+  return import(configPath);
 }

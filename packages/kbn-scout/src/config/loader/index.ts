@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ScoutServerConfig } from '../../types';
-import { defaultConfig } from './base.config';
-
-export const servers: ScoutServerConfig = defaultConfig;
+export { readConfigFile } from './read_config_file';
