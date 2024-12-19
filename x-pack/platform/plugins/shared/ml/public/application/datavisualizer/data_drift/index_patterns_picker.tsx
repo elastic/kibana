@@ -48,7 +48,7 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
         <MlPageHeader>
           <FormattedMessage
             id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
-            defaultMessage="Select data view or saved search"
+            defaultMessage="Select data view or saved Discover session"
           />
         </MlPageHeader>
         <EuiPanel hasShadow={false} hasBorder>
@@ -58,16 +58,16 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
             onChoose={onObjectSelection}
             showFilter
             noItemsMessage={i18n.translate('xpack.ml.newJob.wizard.searchSelection.notFoundLabel', {
-              defaultMessage: 'No matching data views or saved searches found.',
+              defaultMessage: 'No matching data views or saved Discover sessions found.',
             })}
             savedObjectMetaData={[
               {
                 type: 'search',
-                getIconForSavedObject: () => 'search',
+                getIconForSavedObject: () => 'discoverApp',
                 name: i18n.translate(
-                  'xpack.ml.newJob.wizard.searchSelection.savedObjectType.search',
+                  'xpack.ml.newJob.wizard.searchSelection.savedObjectType.discoverSession',
                   {
-                    defaultMessage: 'Saved search',
+                    defaultMessage: 'Discover session',
                   }
                 ),
                 showSavedObject: (savedObject: SavedObject) =>
