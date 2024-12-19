@@ -211,8 +211,10 @@ async function rewritePromptForConnector({
     message: {
       role: MessageRole.User,
       content: dedent(
-        `Given the following user prompt, screen description and the preceeding message history, please rewrite the user prompt. 
-        
+        `Given the following user prompt, screen description, and the available field information, rewrite the user prompt and infer query filters based on the user's intent. Ensure that:
+        - The rewritten prompt is concise and represents the core of the user's query.
+        - The filters include relevant fields (e.g., keyword fields or date ranges) to narrow down the dataset.
+
         User prompt: 
         ${userPrompt}
 
