@@ -173,7 +173,7 @@ export const JourneyScreenshotDialog = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false} css={{ flexBasis: 'fit-content' }}>
-              <EuiText color={euiTheme.colors.text}>
+              <EuiText color={euiTheme.colors.textParagraph}>
                 {i18n.translate('xpack.synthetics.monitor.stepOfSteps', {
                   defaultMessage: 'Step: {stepNumber} of {totalSteps}',
                   values: {
@@ -201,7 +201,7 @@ export const JourneyScreenshotDialog = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiText
-            color={euiTheme.colors.text}
+            color={euiTheme.colors.textParagraph}
             css={{
               outline: 0,
               padding: euiTheme.size.m,

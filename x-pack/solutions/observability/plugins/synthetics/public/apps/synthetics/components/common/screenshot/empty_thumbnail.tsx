@@ -103,11 +103,11 @@ export const EmptyThumbnail = ({
           <EuiIcon
             data-test-subj="stepScreenshotNotAvailable"
             type="eyeClosed"
-            color={euiTheme.colors.disabledText}
+            color={euiTheme.colors.textDisabled}
           />
 
           {unavailableMessage ? (
-            <EuiText color={euiTheme.colors.disabledText}>{unavailableMessage}</EuiText>
+            <EuiText color={euiTheme.colors.textDisabled}>{unavailableMessage}</EuiText>
           ) : null}
         </div>
       )}
