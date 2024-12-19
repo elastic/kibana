@@ -26,11 +26,13 @@ export const useRequestParams = ({
   query: originalQuery,
   filters: originalFilters,
   timeRange: originalTimeRange,
+  relativeTimeRange: originalRelativeTimeRange,
 }: {
   services: UnifiedHistogramServices;
   query?: Query | AggregateQuery;
   filters?: Filter[];
   timeRange?: TimeRange;
+  relativeTimeRange?: TimeRange;
 }): UseRequestParamsResult => {
   const { data } = services;
 
@@ -42,14 +44,15 @@ export const useRequestParams = ({
   );
 
   const relativeTimeRange = useMemo(
-    () => originalTimeRange ?? data.query.timefilter.timefilter.getTimeDefaults(),
-    [data.query.timefilter.timefilter, originalTimeRange]
+    () => originalRelativeTimeRange ?? data.query.timefilter.timefilter.getTimeDefaults(),
+    [data.query.timefilter.timefilter, originalRelativeTimeRange]
   );
 
-  const timeRange = useRef(getAbsoluteTimeRange(relativeTimeRange));
+  const timeRange = useRef(originalTimeRange ?? getAbsoluteTimeRange(relativeTimeRange));
+
   const getTimeRange = useCallback(() => timeRange.current, []);
   const updateTimeRange = useStableCallback(() => {
-    timeRange.current = getAbsoluteTimeRange(relativeTimeRange);
+    timeRange.current = originalTimeRange ?? getAbsoluteTimeRange(relativeTimeRange);
   });
 
   return { filters, query, getTimeRange, updateTimeRange, relativeTimeRange };
