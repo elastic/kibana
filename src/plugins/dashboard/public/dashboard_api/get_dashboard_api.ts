@@ -41,7 +41,7 @@ import { initializeSearchSessionManager } from './search_session_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import { UnsavedPanelState } from '../dashboard_container/types';
 import { initializeTrackContentfulRender } from './track_contentful_render';
-import { getDashboardState } from './get_dashboard_state';
+import { getSerializedState } from './get_serialized_state';
 
 export function getDashboardApi({
   creationOptions,
@@ -175,7 +175,7 @@ export function getDashboardApi({
       unifiedSearchManager.internalApi.controlGroupReload$,
       unifiedSearchManager.internalApi.panelsReload$
     ).pipe(debounceTime(0)),
-    getSerializedState: () => getDashboardState(getState()),
+    getSerializedState: () => getSerializedState(getState()),
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
       const saveResult = await openSaveModal({

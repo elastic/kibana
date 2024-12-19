@@ -19,7 +19,7 @@ import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboa
 import { getDashboardBackupService } from '../../dashboard_backup_service';
 import { contentManagementService, coreServices } from '../../kibana_services';
 import { SaveDashboardProps, SaveDashboardReturn } from '../types';
-import { getDashboardState } from '../../../dashboard_api/get_dashboard_state';
+import { getSerializedState } from '../../../dashboard_api/get_serialized_state';
 
 export const saveDashboardState = async ({
   controlGroupReferences,
@@ -31,7 +31,7 @@ export const saveDashboardState = async ({
 }: SaveDashboardProps): Promise<SaveDashboardReturn> => {
   const dashboardContentManagementCache = getDashboardContentManagementCache();
 
-  const { attributes, references } = getDashboardState({
+  const { attributes, references } = getSerializedState({
     controlGroupReferences,
     generateNewIds: saveOptions.saveAsCopy,
     dashboardState,

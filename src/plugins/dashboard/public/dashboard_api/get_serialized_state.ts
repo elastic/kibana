@@ -11,17 +11,18 @@ import { pick } from 'lodash';
 import moment, { Moment } from 'moment';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 
+import type { Reference } from '@kbn/content-management-utils';
 import { convertPanelMapToPanelsArray, extractReferences, generateNewPanelIds } from '../../common';
 import type { DashboardAttributes } from '../../server';
 
 import { convertDashboardVersionToNumber } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
-import { GetDashboardStateProps } from '../services/dashboard_content_management_service/types';
 import {
   dataService,
   embeddableService,
   savedObjectsTaggingService,
 } from '../services/kibana_services';
 import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../dashboard_container';
+import { DashboardState } from './types';
 
 export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
   if (moment(time).isValid()) {
@@ -33,13 +34,19 @@ export const convertTimeToUTCString = (time?: string | Moment): undefined | stri
   }
 };
 
-export const getDashboardState = ({
+export const getSerializedState = ({
   controlGroupReferences,
   generateNewIds,
   dashboardState,
   panelReferences,
   searchSourceReferences,
-}: GetDashboardStateProps) => {
+}: {
+  controlGroupReferences?: Reference[];
+  generateNewIds?: boolean;
+  dashboardState: DashboardState;
+  panelReferences?: Reference[];
+  searchSourceReferences: Reference[];
+}) => {
   const {
     query: {
       timefilter: { timefilter },

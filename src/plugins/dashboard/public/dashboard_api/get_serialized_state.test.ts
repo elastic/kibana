@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DashboardPanelState } from '../../common';
+
 import {
   dataService,
   embeddableService,
   savedObjectsTaggingService,
 } from '../services/kibana_services';
 import { getSampleDashboardState } from '../mocks';
-import { DashboardState } from './types';
-import { getDashboardState } from './get_dashboard_state';
+import { getSerializedState } from './get_serialized_state';
 
 dataService.search.searchSource.create = jest.fn().mockResolvedValue({
   setField: jest.fn(),
@@ -41,30 +42,63 @@ if (savedObjectsTaggingService) {
   });
 }
 
-describe('getDashboardState', () => {
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('54321'),
+}));
+
+describe('getSerializedState', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should return the current state attributes and references', async () => {
     const dashboardState = getSampleDashboardState();
-    const result = await getDashboardState({
+    const result = await getSerializedState({
       controlGroupReferences: [],
       generateNewIds: false,
       dashboardState,
       panelReferences: [],
+      searchSourceReferences: [],
     });
 
-    expect(result.attributes.panels).toEqual([]);
+    expect(result.attributes).toMatchInlineSnapshot(`
+      Object {
+        "controlGroupInput": undefined,
+        "description": "",
+        "kibanaSavedObjectMeta": Object {
+          "searchSource": Object {
+            "filter": Array [],
+            "query": Object {
+              "language": "kuery",
+              "query": "hi",
+            },
+          },
+        },
+        "options": Object {
+          "hidePanelTitles": false,
+          "syncColors": false,
+          "syncCursor": true,
+          "syncTooltips": false,
+          "useMargins": true,
+        },
+        "panels": Array [],
+        "refreshInterval": undefined,
+        "timeFrom": undefined,
+        "timeRestore": false,
+        "timeTo": undefined,
+        "title": "My Dashboard",
+        "version": 3,
+      }
+    `);
     expect(result.references).toEqual([]);
   });
 
   it('should generate new IDs for panels and references when generateNewIds is true', async () => {
     const dashboardState = {
       ...getSampleDashboardState(),
-      panels: { oldPanelId: { type: 'visualization' } },
-    } as unknown as DashboardState;
-    const result = await getDashboardState({
+      panels: { oldPanelId: { type: 'visualization' } as unknown as DashboardPanelState },
+    };
+    const result = await getSerializedState({
       controlGroupReferences: [],
       generateNewIds: true,
       dashboardState,
@@ -75,25 +109,31 @@ describe('getDashboardState', () => {
           id: 'bizzbuzz',
         },
       ],
+      searchSourceReferences: [],
     });
 
-    expect(result.attributes.panels).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          panelIndex: expect.not.stringMatching('oldPanelId'),
-          type: 'visualization',
-        }),
-      ])
-    );
-    expect(result.references).toEqual(
-      expect.arrayContaining([
-        {
-          name: expect.not.stringMatching(/^oldPanelId:/),
-          id: 'bizzbuzz',
-          type: 'index-pattern',
+    expect(result.attributes.panels).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "gridData": Object {
+            "i": "54321",
+          },
+          "panelConfig": Object {},
+          "panelIndex": "54321",
+          "type": "visualization",
+          "version": undefined,
         },
-      ])
-    );
+      ]
+    `);
+    expect(result.references).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": "bizzbuzz",
+          "name": "54321:indexpattern_foobar",
+          "type": "index-pattern",
+        },
+      ]
+    `);
   });
 
   it('should include control group references', async () => {
@@ -101,11 +141,12 @@ describe('getDashboardState', () => {
     const controlGroupReferences = [
       { name: 'control1:indexpattern', type: 'index-pattern', id: 'foobar' },
     ];
-    const result = await getDashboardState({
+    const result = await getSerializedState({
       controlGroupReferences,
       generateNewIds: false,
       dashboardState,
       panelReferences: [],
+      searchSourceReferences: [],
     });
 
     expect(result.references).toEqual(controlGroupReferences);
@@ -116,11 +157,12 @@ describe('getDashboardState', () => {
     const panelReferences = [
       { name: 'panel1:boogiewoogie', type: 'index-pattern', id: 'fizzbuzz' },
     ];
-    const result = await getDashboardState({
+    const result = await getSerializedState({
       controlGroupReferences: [],
       generateNewIds: false,
       dashboardState,
       panelReferences,
+      searchSourceReferences: [],
     });
 
     expect(result.references).toEqual(panelReferences);

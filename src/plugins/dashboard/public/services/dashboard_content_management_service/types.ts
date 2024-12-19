@@ -80,19 +80,12 @@ export interface LoadDashboardReturn {
  */
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolean };
 
-export interface GetDashboardStateProps {
-  controlGroupReferences?: Reference[];
-  generateNewIds?: boolean;
-  dashboardState: DashboardState;
-  panelReferences?: Reference[];
-  searchSourceReferences?: Reference[];
-}
 export interface SaveDashboardProps {
   controlGroupReferences?: Reference[];
   dashboardState: DashboardState;
   saveOptions: SavedDashboardSaveOpts;
   panelReferences?: Reference[];
-  searchSourceReferences?: Reference[];
+  searchSourceReferences: Reference[];
   lastSavedId?: string;
 }
 
