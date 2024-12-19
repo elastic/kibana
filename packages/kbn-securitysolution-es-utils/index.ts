@@ -30,6 +30,7 @@ export * from './src/read_index';
 export * from './src/read_privileges';
 export * from './src/put_mappings';
 export * from './src/remove_policy_from_index';
+export * from './src/remove_aliases';
 export * from './src/set_index_template';
 export * from './src/set_policy';
 export * from './src/set_template';
