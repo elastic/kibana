@@ -6,14 +6,16 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiContextMenuPanelDescriptor, EuiContextMenu } from '@elastic/eui';
-import { SnapshotMetricTypeRT, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenu } from '@elastic/eui';
+import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import { SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label';
-import {
+import type {
   SnapshotMetricInput,
   SnapshotCustomMetricInput,
-  SnapshotCustomMetricInputRT,
 } from '../../../../../../../common/http_api/snapshot_api';
+import { SnapshotCustomMetricInputRT } from '../../../../../../../common/http_api/snapshot_api';
 
 interface Props {
   options: Array<{ text: string; value: string }>;

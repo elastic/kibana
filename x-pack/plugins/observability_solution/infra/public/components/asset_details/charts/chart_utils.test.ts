@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common/expression_types';
+import type {
+  DatatableColumn,
+  DatatableRow,
+} from '@kbn/expressions-plugin/common/expression_types';
 import {
   calculateChartRowsTimeInterval,
   extractRangeFromChartFilterEvent,

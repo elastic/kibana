@@ -16,7 +16,7 @@ import type {
 import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
 export type ApmPluginRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: Pick<LicensingApiRequestHandlerContext, 'license' | 'featureUsage'>;

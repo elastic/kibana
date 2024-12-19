@@ -9,7 +9,8 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import { Metric, LIGHT_THEME } from '@elastic/charts';
 import { render } from '@testing-library/react';
 import React from 'react';
-import { Props, Threshold } from './threshold';
+import type { Props } from './threshold';
+import { Threshold } from './threshold';
 
 jest.mock('@elastic/charts', () => {
   const actual = jest.requireActual('@elastic/charts');

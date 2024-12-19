@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import axios, { AxiosRequestConfig, AxiosError } from 'axios';
+import type { AxiosRequestConfig, AxiosError } from 'axios';
+import axios from 'axios';
 import { once } from 'lodash';
-import { Elasticsearch, Kibana } from '../create_apm_users';
+import type { Elasticsearch, Kibana } from '../create_apm_users';
 
 const DEFAULT_HEADERS = {
   'kbn-xsrf': 'true',

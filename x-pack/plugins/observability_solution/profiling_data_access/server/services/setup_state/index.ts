@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { CloudSetupStateType } from '../../../common/cloud_setup';
-import { SetupStateType } from '../../../common/setup';
-import { RegisterServicesParams } from '../register_services';
+import type { CloudSetupStateType } from '../../../common/cloud_setup';
+import type { SetupStateType } from '../../../common/setup';
+import type { RegisterServicesParams } from '../register_services';
 import { cloudSetupState } from './cloud_setup_state';
 import { selfManagedSetupState } from './self_managed_setup_state';
 

@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiBadge, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
-import { EventOutcome } from '../../../../../../../typings/es_schemas/raw/fields/event_outcome';
+import type { EventOutcome } from '../../../../../../../typings/es_schemas/raw/fields/event_outcome';
 
 const ResetLineHeight = styled.span`
   line-height: initial;

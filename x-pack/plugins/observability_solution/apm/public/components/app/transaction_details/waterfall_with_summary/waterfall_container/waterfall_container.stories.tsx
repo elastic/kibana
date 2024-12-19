@@ -7,18 +7,19 @@
 import { EuiFilePicker, EuiForm } from '@elastic/eui';
 import { apm, dedot } from '@kbn/apm-synthtrace-client';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Meta, Story } from '@storybook/react';
+import type { Meta, Story } from '@storybook/react';
 import { noop } from 'lodash';
-import React, { ComponentProps, useState } from 'react';
+import type { ComponentProps } from 'react';
+import React, { useState } from 'react';
 import { WaterfallContainer } from '.';
-import {
+import type {
   WaterfallError,
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../../../../../common/waterfall/typings';
-import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
+import type { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
 import { MockApmPluginStorybook } from '../../../../../context/apm_plugin/mock_apm_plugin_storybook';
-import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { getWaterfall } from './waterfall/waterfall_helpers/waterfall_helpers';
 
 type Args = ComponentProps<typeof WaterfallContainer>;

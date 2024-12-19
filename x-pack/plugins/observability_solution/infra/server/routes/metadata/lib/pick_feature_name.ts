@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InfraMetadataAggregationBucket } from '../../../lib/adapters/framework';
+import type { InfraMetadataAggregationBucket } from '../../../lib/adapters/framework';
 
 export const pickFeatureName = (buckets: InfraMetadataAggregationBucket[]): string[] => {
   if (buckets) {

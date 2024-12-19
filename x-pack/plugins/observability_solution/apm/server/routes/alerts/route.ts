@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { jsonRt } from '@kbn/io-ts-utils';
-import { Coordinate } from '../../../typings/timeseries';
+import type { Coordinate } from '../../../typings/timeseries';
 import { getTransactionDurationChartPreview } from './rule_types/transaction_duration/get_transaction_duration_chart_preview';
 import { getTransactionErrorCountChartPreview } from './rule_types/error_count/get_error_count_chart_preview';
 import { getTransactionErrorRateChartPreview } from './rule_types/transaction_error_rate/get_transaction_error_rate_chart_preview';

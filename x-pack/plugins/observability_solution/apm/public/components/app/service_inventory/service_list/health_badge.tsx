@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { EuiBadge, useEuiTheme } from '@elastic/eui';
+import type { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
   getServiceHealthStatusBadgeColor,
   getServiceHealthStatusLabel,
-  ServiceHealthStatus,
 } from '../../../../../common/service_health_status';
 
 export function HealthBadge({ healthStatus }: { healthStatus: ServiceHealthStatus }) {

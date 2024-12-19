@@ -11,7 +11,7 @@ import {
   type MetricsAPISeries,
   findInventoryFields,
 } from '@kbn/metrics-data-access-plugin/common';
-import { SnapshotRequest, SnapshotNodePath, SnapshotNode } from '../../../../common/http_api';
+import type { SnapshotRequest, SnapshotNodePath, SnapshotNode } from '../../../../common/http_api';
 import { META_KEY } from './constants';
 
 export const isIPv4 = (subject: string) => /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(subject);

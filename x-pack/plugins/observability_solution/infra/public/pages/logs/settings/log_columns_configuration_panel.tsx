@@ -23,19 +23,21 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
 import type { DropResult, DragHandleProps } from '../../../types';
-import {
+import type {
   FieldLogColumnConfiguration,
-  getLogColumnConfigurationId,
-  isMessageLogColumnConfiguration,
-  isTimestampLogColumnConfiguration,
   LogColumnConfiguration,
   MessageLogColumnConfiguration,
   TimestampLogColumnConfiguration,
 } from '../../../utils/source_configuration';
+import {
+  getLogColumnConfigurationId,
+  isMessageLogColumnConfiguration,
+  isTimestampLogColumnConfiguration,
+} from '../../../utils/source_configuration';
 import { AddLogColumnButtonAndPopover } from './add_log_column_popover';
-import { FormElement } from './form_elements';
+import type { FormElement } from './form_elements';
 import { LogSourceConfigurationFormError } from './source_configuration_form_errors';
-import { FormValidationError } from './validation_errors';
+import type { FormValidationError } from './validation_errors';
 
 export const LogColumnsConfigurationPanel = React.memo<{
   availableFields: string[];

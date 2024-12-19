@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiToolTip, useEuiFontSize } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
-import { UserAgent } from '../../../../typings/es_schemas/raw/fields/user_agent';
+import type { UserAgent } from '../../../../typings/es_schemas/raw/fields/user_agent';
 
 type UserAgentSummaryItemProps = UserAgent;
 

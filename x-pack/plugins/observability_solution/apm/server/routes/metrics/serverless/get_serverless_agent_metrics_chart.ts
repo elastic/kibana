@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { APMConfig } from '../../..';
-import { ApmTransactionDocumentType } from '../../../../common/document_type';
-import { RollupInterval } from '../../../../common/rollup';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMConfig } from '../../..';
+import type { ApmTransactionDocumentType } from '../../../../common/document_type';
+import type { RollupInterval } from '../../../../common/rollup';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getMemoryChartData } from '../by_agent/shared/memory';
 import { getColdStartCountChart } from './get_cold_start_count_chart';

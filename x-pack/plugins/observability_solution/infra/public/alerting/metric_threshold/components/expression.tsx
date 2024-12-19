@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiButtonEmpty,
@@ -19,15 +20,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
-import {
-  ForLastExpression,
+import type {
   IErrorObject,
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
+import type { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { GenericAggType, RuleConditionChart } from '@kbn/observability-plugin/public';
+import type { GenericAggType } from '@kbn/observability-plugin/public';
+import { RuleConditionChart } from '@kbn/observability-plugin/public';
 import { Aggregators, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import {
   useMetricsDataViewContext,
@@ -36,9 +38,9 @@ import {
 } from '../../../containers/metrics_source';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
-import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import type { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
-import { AlertContextMeta, AlertParams, MetricExpression } from '../types';
+import type { AlertContextMeta, AlertParams, MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 

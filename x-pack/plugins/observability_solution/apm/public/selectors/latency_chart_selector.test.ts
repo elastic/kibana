@@ -6,7 +6,8 @@
  */
 
 import { LatencyAggregationType } from '../../common/latency_aggregation_types';
-import { getLatencyChartSelector, LatencyChartsResponse } from './latency_chart_selectors';
+import type { LatencyChartsResponse } from './latency_chart_selectors';
+import { getLatencyChartSelector } from './latency_chart_selectors';
 import * as timeSeriesColor from '../components/shared/charts/helper/get_timeseries_color';
 
 const latencyChartData = {

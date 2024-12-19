@@ -6,15 +6,25 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TransportRequestParams } from '@elastic/elasticsearch';
-import { ElasticsearchClient, RouteConfig, SavedObjectsClientContract } from '@kbn/core/server';
-import { CoreSetup, IRouter, KibanaRequest, RequestHandler, RouteMethod } from '@kbn/core/server';
+import type { TransportRequestParams } from '@elastic/elasticsearch';
+import type {
+  ElasticsearchClient,
+  RouteConfig,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import type {
+  CoreSetup,
+  IRouter,
+  KibanaRequest,
+  RequestHandler,
+  RouteMethod,
+} from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
-import { TimeseriesVisData } from '@kbn/vis-type-timeseries-plugin/server';
+import type { TimeseriesVisData } from '@kbn/vis-type-timeseries-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { TSVBMetricModel } from '@kbn/metrics-data-access-plugin/common';
+import type { TSVBMetricModel } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraConfig, InfraPluginRequestHandlerContext } from '../../../types';
-import {
+import type {
   CallWithRequestParams,
   InfraDatabaseGetIndicesAliasResponse,
   InfraDatabaseGetIndicesResponse,

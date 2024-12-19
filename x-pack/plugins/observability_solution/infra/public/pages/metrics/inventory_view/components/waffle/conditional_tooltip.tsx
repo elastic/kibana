@@ -9,15 +9,12 @@ import React, { useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { first } from 'lodash';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import {
-  InventoryItemType,
-  SnapshotMetricType,
-  SnapshotMetricTypeRT,
-} from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import { SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { getCustomMetricLabel } from '../../../../../../common/formatters/get_custom_metric_label';
-import { SnapshotCustomMetricInput } from '../../../../../../common/http_api';
+import type { SnapshotCustomMetricInput } from '../../../../../../common/http_api';
 import { useSourceContext } from '../../../../../containers/metrics_source';
-import { InfraWaffleMapNode } from '../../../../../common/inventory/types';
+import type { InfraWaffleMapNode } from '../../../../../common/inventory/types';
 import { useSnapshot } from '../../hooks/use_snaphot';
 import { createInventoryMetricFormatter } from '../../lib/create_inventory_metric_formatter';
 import { getSnapshotMetricTranslations } from '../../../../../../common/inventory_models/intl_strings';

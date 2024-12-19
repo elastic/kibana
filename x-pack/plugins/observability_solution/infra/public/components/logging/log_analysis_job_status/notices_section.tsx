@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { QualityWarning } from '../../../../common/log_analysis';
+import type { QualityWarning } from '../../../../common/log_analysis';
 import { LogAnalysisJobProblemIndicator } from './log_analysis_job_problem_indicator';
 import { CategoryQualityWarnings } from './quality_warning_notices';
 

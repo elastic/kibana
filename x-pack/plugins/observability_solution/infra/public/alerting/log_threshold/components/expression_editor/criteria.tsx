@@ -14,17 +14,19 @@ import type {
   ResolvedLogViewField,
 } from '@kbn/logs-shared-plugin/common';
 import { Criterion } from './criterion';
-import {
+import type {
   PartialRuleParams,
   PartialCountCriteria as PartialCountCriteriaType,
   PartialCriteria as PartialCriteriaType,
   PartialCriterion as PartialCriterionType,
   PartialRatioCriteria as PartialRatioCriteriaType,
+} from '../../../../../common/alerting/logs/log_threshold/types';
+import {
   isRatioRule,
   getNumerator,
   getDenominator,
 } from '../../../../../common/alerting/logs/log_threshold/types';
-import { Errors, CriterionErrors } from '../../validation';
+import type { Errors, CriterionErrors } from '../../validation';
 import { ExpressionLike } from './editor';
 import { CriterionPreview } from './criterion_preview_chart';
 

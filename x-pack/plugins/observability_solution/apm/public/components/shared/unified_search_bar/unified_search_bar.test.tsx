@@ -6,13 +6,14 @@
  */
 
 import { mount } from 'enzyme';
-import { createMemoryHistory, MemoryHistory } from 'history';
+import type { MemoryHistory } from 'history';
+import { createMemoryHistory } from 'history';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { UnifiedSearchBar } from '.';
-import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
+import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import { UrlParams } from '../../../context/url_params_context/types';
+import type { UrlParams } from '../../../context/url_params_context/types';
 import * as useApmDataViewHook from '../../../hooks/use_adhoc_apm_data_view';
 import * as useApmParamsHook from '../../../hooks/use_apm_params';
 import * as useFetcherHook from '../../../hooks/use_fetcher';

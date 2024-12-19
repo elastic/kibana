@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { XYBrushEvent } from '@elastic/charts';
+import type { XYBrushEvent } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -22,9 +22,9 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { DurationDistributionChartWithScrubber } from '../../../shared/charts/duration_distribution_chart_with_scrubber';
 import { ResettingHeightRetainer } from '../../../shared/height_retainer/resetting_height_container';
 import { fromQuery, push, toQuery } from '../../../shared/links/url_helpers';
-import { TransactionTab } from '../waterfall_with_summary/transaction_tabs';
+import type { TransactionTab } from '../waterfall_with_summary/transaction_tabs';
 import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
-import { TraceSamplesFetchResult } from '../../../../hooks/use_transaction_trace_samples_fetcher';
+import type { TraceSamplesFetchResult } from '../../../../hooks/use_transaction_trace_samples_fetcher';
 
 interface TransactionDistributionProps {
   onChartSelection: (event: XYBrushEvent) => void;

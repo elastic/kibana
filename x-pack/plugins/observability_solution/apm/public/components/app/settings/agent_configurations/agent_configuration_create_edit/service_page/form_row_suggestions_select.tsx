@@ -6,7 +6,8 @@
  */
 import moment from 'moment';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { SuggestionsSelect } from '../../../../../shared/suggestions_select';
 import {

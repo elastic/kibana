@@ -8,15 +8,8 @@
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
 import { isEqual } from 'lodash';
-import React, {
-  createContext,
-  CSSProperties,
-  memo,
-  ReactNode,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import type { CSSProperties, ReactNode } from 'react';
+import React, { createContext, memo, useEffect, useRef, useState } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { useTraceExplorerEnabledSetting } from '../../../hooks/use_trace_explorer_enabled_setting';
 import { getCytoscapeOptions } from './cytoscape_options';

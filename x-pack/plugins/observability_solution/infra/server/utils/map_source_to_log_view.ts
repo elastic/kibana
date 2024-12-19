@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { LogIndexReference, LogView, LogViewAttributes } from '@kbn/logs-shared-plugin/common';
-import { LogIndexReference as SourceConfigurationLogIndexReference } from '../../common/source_configuration/source_configuration';
-import { InfraSource } from '../lib/sources';
+import type { LogIndexReference, LogView, LogViewAttributes } from '@kbn/logs-shared-plugin/common';
+import type { LogIndexReference as SourceConfigurationLogIndexReference } from '../../common/source_configuration/source_configuration';
+import type { InfraSource } from '../lib/sources';
 
 export const mapSourceToLogView = (sourceConfiguration: InfraSource): LogView => {
   return {
