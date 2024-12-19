@@ -612,6 +612,7 @@ src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-ma
 src/platform/packages/shared/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
 src/platform/plugins/private/files_management @elastic/appex-sharedux
 src/platform/plugins/private/image_embeddable @elastic/appex-sharedux
+src/platform/plugins/private/kibana_overview @elastic/appex-sharedux
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/platform/plugins/shared/console @elastic/kibana-management
 src/platform/plugins/shared/content_management @elastic/appex-sharedux
@@ -659,7 +660,6 @@ src/plugins/ftr_apis @elastic/kibana-core
 src/plugins/input_control_vis @elastic/kibana-presentation
 src/plugins/inspector @elastic/kibana-presentation
 src/plugins/interactive_setup @elastic/kibana-security
-src/plugins/kibana_overview @elastic/appex-sharedux
 src/plugins/kibana_react @elastic/appex-sharedux
 src/plugins/kibana_usage_collection @elastic/kibana-core
 src/plugins/kibana_utils @elastic/appex-sharedux
