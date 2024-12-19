@@ -979,12 +979,7 @@ finalize it.
      */
     getRuleMigrationIntegrations(kibanaSpace: string = 'default') {
       return supertest
-        .get(
-          routeWithNamespace(
-            '/internal/siem_migrations/rules/{migration_id}/integrations',
-            kibanaSpace
-          )
-        )
+        .get(routeWithNamespace('/internal/siem_migrations/rules/integrations', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');

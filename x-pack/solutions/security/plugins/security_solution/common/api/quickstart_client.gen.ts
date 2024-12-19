@@ -1463,7 +1463,7 @@ finalize it.
     this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationIntegrations`);
     return this.kbnClient
       .request<GetRuleMigrationIntegrationsResponse>({
-        path: '/internal/siem_migrations/rules/{migration_id}/integrations',
+        path: '/internal/siem_migrations/rules/integrations',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
