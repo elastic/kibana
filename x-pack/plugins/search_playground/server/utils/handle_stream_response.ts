@@ -25,7 +25,6 @@ export const handleStreamResponse = async ({
 }) => {
   const { end, push, responseWithHeaders } = streamFactory(logger, isCloud);
   const reader = stream.getReader();
-  const textDecoder = new TextDecoder();
 
   const abortController = new AbortController();
 
@@ -38,21 +37,13 @@ export const handleStreamResponse = async ({
 
   async function pushStreamUpdate() {
     try {
-      const { done, value }: { done: boolean; value?: Uint8Array } = await reader.read();
+      const { done, value }: { done: boolean; value?: string } = await reader.read();
       if (done || abortController.signal.aborted) {
         end();
         return;
       }
 
-      let decodedValue;
-      try {
-        decodedValue = textDecoder.decode(value);
-      } catch (e) {
-        decodedValue = '';
-        logger.error(`Could not decode the data: ${e.toString()}`);
-      }
-
-      push(decodedValue);
+      if (value) push(value);
 
       void pushStreamUpdate();
     } catch (error) {
