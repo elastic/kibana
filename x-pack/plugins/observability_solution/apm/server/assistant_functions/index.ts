@@ -80,14 +80,12 @@ export function registerAssistantFunctions({
       },
     };
 
-    const {
-      request,
-      plugins: { security },
-    } = apmRouteHandlerResources;
+    const { request, core } = apmRouteHandlerResources;
 
+    const coreStart = await core.start();
     const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(apmRouteHandlerResources),
-      getRandomSampler({ security, request, probability: 1 }),
+      getRandomSampler({ coreStart, request, probability: 1 }),
     ]);
 
     const hasData = await hasHistoricalAgentData(apmEventClient);

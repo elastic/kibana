@@ -121,7 +121,7 @@ export const ProductSelector: React.FC = () => {
             <EuiFlexItem>
               <SearchLabsBanner />
             </EuiFlexItem>
-            {!config.host && config.canDeployEntSearch && (
+            {!config.host && (
               <EuiFlexItem>
                 <SetupGuideCta />
               </EuiFlexItem>

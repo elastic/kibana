@@ -51,7 +51,6 @@ describe('checkAccess', () => {
     request: { auth: { isAuthenticated: true } },
     config: {
       appsDisabled: false,
-      canDeployEntSearch: true,
       host: 'http://localhost:3002',
     },
     globalConfigService: new GlobalConfigService(),
