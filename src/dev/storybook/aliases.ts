@@ -19,7 +19,7 @@ export const storybookAliases = {
   cell_actions: 'src/platform/packages/shared/kbn-cell-actions/.storybook',
   cloud_security_posture_packages:
     'x-pack/solutions/security/packages/kbn-cloud-security-posture/.storybook',
-  cloud: 'packages/cloud/.storybook',
+  cloud: 'src/platform/packages/shared/cloud/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',
   language_documentation_popover:
     'src/platform/packages/private/kbn-language-documentation/.storybook',
