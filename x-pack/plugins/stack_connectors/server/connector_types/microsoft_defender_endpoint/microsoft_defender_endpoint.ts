@@ -156,7 +156,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
         results.push('API call to Machine Isolate was successful');
       });
 
-    await this.isolateHost(
+    await this.releaseHost(
       { id: 'elastic-connector-test', comment: 'connector test' },
       connectorUsageCollector
     )

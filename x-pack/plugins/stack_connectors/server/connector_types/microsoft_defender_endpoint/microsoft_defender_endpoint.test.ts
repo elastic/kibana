@@ -55,6 +55,25 @@ describe('Microsoft Defender for Endpoint Connector', () => {
           'API call to Machine Release was successful',
         ],
       });
+
+      expect(connectorMock.instanceMock.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: expect.stringMatching(/machines\/elastic-connector-test$/),
+        }),
+        connectorMock.usageCollector
+      );
+      expect(connectorMock.instanceMock.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: expect.stringMatching(/machines\/elastic-connector-test\/isolate$/),
+        }),
+        connectorMock.usageCollector
+      );
+      expect(connectorMock.instanceMock.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: expect.stringMatching(/machines\/elastic-connector-test\/unisolate$/),
+        }),
+        connectorMock.usageCollector
+      );
     });
   });
 
