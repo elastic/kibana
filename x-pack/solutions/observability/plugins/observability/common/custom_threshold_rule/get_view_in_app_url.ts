@@ -57,7 +57,7 @@ export const getViewInAppUrl = ({
     query.query = searchConfigurationQuery;
   }
 
-  return logsLocator?.getRedirectUrl(
+  return logsLocator.getRedirectUrl(
     {
       dataViewId,
       dataViewSpec: searchConfiguration?.index,

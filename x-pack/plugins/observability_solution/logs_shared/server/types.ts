@@ -13,8 +13,10 @@ import {
 import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/server';
 import { LogsSharedDomainLibs } from './lib/logs_shared_types';
 import { LogViewsServiceSetup, LogViewsServiceStart } from './services/log_views/types';
+import type { LogsSharedLocators } from '../common/locators';
 
 export type LogsSharedPluginCoreSetup = CoreSetup<
   LogsSharedServerPluginStartDeps,
@@ -25,6 +27,7 @@ export type LogsSharedPluginStartServicesAccessor = LogsSharedPluginCoreSetup['g
 export interface LogsSharedPluginSetup extends LogsSharedDomainLibs {
   logViews: LogViewsServiceSetup;
   registerUsageCollectorActions: (usageCollector: UsageCollector) => void;
+  locators: LogsSharedLocators;
 }
 
 export interface LogsSharedPluginStart {
@@ -32,10 +35,12 @@ export interface LogsSharedPluginStart {
 }
 
 export interface LogsSharedServerPluginSetupDeps {
+  share: SharePluginSetup;
   data: DataPluginSetup;
 }
 
 export interface LogsSharedServerPluginStartDeps {
+  share: SharePluginStart;
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
   logsDataAccess: LogsDataAccessPluginStart;
