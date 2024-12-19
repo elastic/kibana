@@ -9138,6 +9138,7 @@ paths:
         - Security Detections API
   /api/detection_engine/rules/{id}/exceptions:
     post:
+      description: Create exception items that apply to a single detection rule.
       operationId: CreateRuleExceptionListItems
       parameters:
         - description: Detection rule's identifier
@@ -9195,7 +9196,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Creates rule exception list items
+      summary: Create rule exception list items
       tags:
         - Security Exceptions API
   /api/detection_engine/rules/prepackaged:
@@ -11226,6 +11227,7 @@ paths:
         - Security Entity Analytics API
   /api/exception_lists:
     delete:
+      description: Delete an exception list using the `id` or `list_id` field.
       operationId: DeleteExceptionList
       parameters:
         - description: Either `id` or `list_id` must be specified
@@ -11285,10 +11287,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Deletes an exception list
+      summary: Delete an exception list
       tags:
         - Security Exceptions API
     get:
+      description: Get the details of an exception list using the `id` or `list_id` field.
       operationId: ReadExceptionList
       parameters:
         - description: Either `id` or `list_id` must be specified
@@ -11348,10 +11351,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Retrieves an exception list using its `id` or `list_id` field
+      summary: Get exception list details
       tags:
         - Security Exceptions API
     post:
+      description: |
+        An exception list groups exception items and can be associated with detection rules. You can assign detection rules with multiple exception lists.
+        > info
+        > All exception items added to the same list are evaluated using `OR` logic. That is, if any of the items in a list evaluate to `true`, the exception prevents the rule from generating an alert. Likewise, `OR` logic is used for evaluating exceptions when more than one exception list is assigned to a rule. To use the `AND` operator, you can define multiple clauses (`entries`) in a single exception item.
       operationId: CreateExceptionList
       requestBody:
         content:
@@ -11425,10 +11432,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Creates an exception list
+      summary: Create an exception list
       tags:
         - Security Exceptions API
     put:
+      description: Update an exception list using the `id` or `list_id` field.
       operationId: UpdateExceptionList
       requestBody:
         content:
@@ -11505,11 +11513,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Updates an exception list
+      summary: Update an exception list
       tags:
         - Security Exceptions API
   /api/exception_lists/_duplicate:
     post:
+      description: Duplicate an existing exception list.
       operationId: DuplicateExceptionList
       parameters:
         - description: Exception list's human identifier
@@ -11572,12 +11581,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Duplicates an exception list
+      summary: Duplicate an exception list
       tags:
         - Security Exceptions API
   /api/exception_lists/_export:
     post:
-      description: Exports an exception list and its associated items to an .ndjson file
+      description: Export an exception list and its associated items to an NDJSON file.
       operationId: ExportExceptionList
       parameters:
         - description: Exception list's identifier
@@ -11648,11 +11657,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Exports an exception list
+      summary: Export an exception list
       tags:
         - Security Exceptions API
   /api/exception_lists/_find:
     get:
+      description: Get a list of all exception lists.
       operationId: FindExceptionLists
       parameters:
         - description: |
@@ -11760,12 +11770,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Finds exception lists
+      summary: Get exception lists
       tags:
         - Security Exceptions API
   /api/exception_lists/_import:
     post:
-      description: Imports an exception list and associated items
+      description: Import an exception list and its associated items from an NDJSON file.
       operationId: ImportExceptionList
       parameters:
         - description: |
@@ -11869,11 +11879,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Imports an exception list
+      summary: Import an exception list
       tags:
         - Security Exceptions API
   /api/exception_lists/items:
     delete:
+      description: Delete an exception list item using the `id` or `item_id` field.
       operationId: DeleteExceptionListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -11933,10 +11944,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Deletes an exception list item
+      summary: Delete an exception list item
       tags:
         - Security Exceptions API
     get:
+      description: Get the details of an exception list item using the `id` or `item_id` field.
       operationId: ReadExceptionListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -11996,10 +12008,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Gets an exception list item
+      summary: Get an exception list item
       tags:
         - Security Exceptions API
     post:
+      description: |
+        Create an exception item and associate it with the specified exception list.
+        > info
+        > Before creating exception items, you must create an exception list.
       operationId: CreateExceptionListItem
       requestBody:
         content:
@@ -12083,10 +12099,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Creates an exception list item
+      summary: Create an exception list item
       tags:
         - Security Exceptions API
     put:
+      description: Update an exception list item using the `id` or `item_id` field.
       operationId: UpdateExceptionListItem
       requestBody:
         content:
@@ -12174,11 +12191,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Updates an exception list item
+      summary: Update an exception list item
       tags:
         - Security Exceptions API
   /api/exception_lists/items/_find:
     get:
+      description: Get a list of all exception list items in the specified list.
       operationId: FindExceptionListItems
       parameters:
         - description: List's id
@@ -12306,11 +12324,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Finds exception list items
+      summary: Get exception list items
       tags:
         - Security Exceptions API
   /api/exception_lists/summary:
     get:
+      description: Get a summary of the specified exception list.
       operationId: ReadExceptionListSummary
       parameters:
         - description: Exception list's identifier generated upon creation
@@ -12389,11 +12408,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Retrieves an exception list summary
+      summary: Get an exception list summary
       tags:
         - Security Exceptions API
   /api/exceptions/shared:
     post:
+      description: |
+        An exception list groups exception items and can be associated with detection rules. A shared exception list can apply to multiple detection rules.
+        > info
+        > All exception items added to the same list are evaluated using `OR` logic. That is, if any of the items in a list evaluate to `true`, the exception prevents the rule from generating an alert. Likewise, `OR` logic is used for evaluating exceptions when more than one exception list is assigned to a rule. To use the `AND` operator, you can define multiple clauses (`entries`) in a single exception item.
       operationId: CreateSharedExceptionList
       requestBody:
         content:
@@ -12448,7 +12471,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_SiemErrorResponse'
           description: Internal server error response
-      summary: Creates a shared exception list
+      summary: Create a shared exception list
       tags:
         - Security Exceptions API
   /api/fleet/agent_download_sources:
