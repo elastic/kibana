@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/test-helpers/core-test-helpers-so-type-serializer'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/test-helpers/so-type-serializer'],
 };
