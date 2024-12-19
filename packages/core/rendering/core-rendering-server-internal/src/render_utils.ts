@@ -17,6 +17,7 @@ import {
   type LoggingConfigWithBrowserType,
 } from '@kbn/core-logging-server-internal';
 import type { DarkModeValue } from '@kbn/core-ui-settings-common';
+import { ConsoleMessagesSetting } from '@kbn/core-console-messages-common';
 
 export const getSettingValue = <T>(
   settingName: string,
@@ -75,4 +76,13 @@ export const getBrowserLoggingConfig = async (
     configService.atPath<LoggingConfigWithBrowserType>(loggingConfigDef.path)
   );
   return loggingConfig.browser;
+};
+
+export const getSurfaceConsoleMessagesConfig = async (
+  configService: IConfigService
+): Promise<ConsoleMessagesSetting> => {
+  const config = await firstValueFrom(
+    configService.atPath<ConsoleMessagesSetting>('dev.consoleMessages')
+  );
+  return config;
 };
