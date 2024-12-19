@@ -121,7 +121,9 @@ export type Privilege = string;
  */
 export interface RouteDeprecationInfo {
   /**
-   * link to the documentation for more details on the deprecation.
+   * Link to the documentation for more details on the deprecation.
+   *
+   * @remark See template and instructions in `<REPO_ROOT>/docs/upgrade-notes.asciidoc` for instructions on adding a release note.
    */
   documentationUrl: string;
   /**
