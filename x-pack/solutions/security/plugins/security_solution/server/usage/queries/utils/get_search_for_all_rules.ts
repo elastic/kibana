@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  AggregationsAggregationContainer,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import { RULE_EXECUTION_LOG_PROVIDER } from '../../../lib/detection_engine/rule_monitoring';
 
 /**
