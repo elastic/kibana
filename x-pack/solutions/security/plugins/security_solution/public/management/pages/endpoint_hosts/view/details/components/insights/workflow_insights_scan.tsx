@@ -81,6 +81,7 @@ export const WorkflowInsightsScanSection = ({
     return (
       <EuiFlexItem grow={false}>
         <EuiButton
+          data-test-subj="workflowInsightsScanButton"
           size="s"
           isLoading={isScanButtonDisabled}
           onClick={() => {
