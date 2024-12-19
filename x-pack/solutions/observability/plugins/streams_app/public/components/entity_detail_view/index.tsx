@@ -8,9 +8,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiPanel, EuiBadge } from 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/css';
-import { StreamDefinition } from '@kbn/streams-plugin/common';
-import { StreamLifecycle } from '@kbn/streams-plugin/common/types';
-import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-plugin/public';
+import { ReadStreamDefinition, StreamLifecycle } from '@kbn/streams-plugin/common/types';
+import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { EntityOverviewTabList } from '../entity_overview_tab_list';
@@ -38,7 +37,7 @@ export function EntityDetailViewWithoutParams({
     displayName?: string;
     id: string;
   };
-  definition?: StreamDefinition;
+  definition?: ReadStreamDefinition;
 }) {
   const router = useStreamsAppRouter();
   useStreamsAppBreadcrumbs(() => {
@@ -144,7 +143,7 @@ function LifecycleBadge({ lifecycle }: { lifecycle: StreamLifecycle }) {
       start: { share },
     },
   } = useKibana();
-  const ilmLocator = share.url.locators.get<IlmLocatorParams>('ILM_LOCATOR_ID');
+  const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
   if (lifecycle.type === 'ilm') {
     return (
       <>
