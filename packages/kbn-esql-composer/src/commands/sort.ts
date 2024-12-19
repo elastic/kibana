@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { QueryOperator } from '../types';
+import { NamedParameterWithIdentifier, QueryOperator } from '../types';
 import { append } from './append';
 
 export enum SortOrder {
@@ -16,7 +17,14 @@ export enum SortOrder {
 
 type Sort = Record<string, SortOrder>;
 
-export function sort(...sorts: Array<string | Sort | Array<string | Sort>>): QueryOperator {
+type SortArgs = Sort | string | Array<Sort | string>;
+
+// TODO: a better name?
+export function sortRaw(body: string, bindings?: NamedParameterWithIdentifier): QueryOperator {
+  return append({ command: `SORT ${body}`, bindings });
+}
+
+export function sort(...sorts: SortArgs[]): QueryOperator {
   const allSorts = sorts
     .flatMap((sortInstruction) => sortInstruction)
     .map((sortInstruction): { column: string; order: 'ASC' | 'DESC' } => {
@@ -31,9 +39,9 @@ export function sort(...sorts: Array<string | Sort | Array<string | Sort>>): Que
       };
     });
 
-  return append(
-    `SORT ${allSorts
-      .map((sortInstruction) => `${sortInstruction.column} ${sortInstruction.order}`)
-      .join(', ')}`
-  );
+  const command = `SORT ${allSorts
+    .map((sortInstruction) => `${sortInstruction.column} ${sortInstruction.order}`)
+    .join(', ')}`;
+
+  return append({ command });
 }
