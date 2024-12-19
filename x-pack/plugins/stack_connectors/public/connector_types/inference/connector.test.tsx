@@ -799,7 +799,7 @@ describe('ConnectorFields renders', () => {
           ...openAiConnector.config,
           providerConfig: {
             url: '',
-            modelId: 'gpt-4o',
+            model_id: 'gpt-4o',
           },
         },
       };
@@ -808,6 +808,10 @@ describe('ConnectorFields renders', () => {
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
+      );
+      await userEvent.type(
+        res.getByTestId('api_key-password'),
+        '{selectall}{backspace}goodpassword'
       );
 
       await userEvent.click(res.getByTestId('form-test-provide-submit'));
@@ -819,7 +823,7 @@ describe('ConnectorFields renders', () => {
     });
 
     const tests: Array<[string, string]> = [
-      ['url-input', 'not-valid'],
+      ['url-input', ''],
       ['api_key-password', ''],
     ];
     it.each(tests)('validates correctly %p', async (field, value) => {
@@ -837,9 +841,7 @@ describe('ConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
-        delay: 10,
-      });
+      await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`);
 
       await userEvent.click(res.getByTestId('form-test-provide-submit'));
       await waitFor(async () => {

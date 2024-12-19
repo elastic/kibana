@@ -302,7 +302,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^packages\/kbn-grouping/,
         /^packages\/kbn-resizable-layout/,
         /^packages\/kbn-rison/,
-        /^packages\/kbn-rule-data-utils/,
+        /^src\/platform\/packages\/shared\/kbn-rule-data-utils/,
         /^packages\/kbn-safer-lodash-set/,
         /^packages\/kbn-search-types/,
         /^packages\/kbn-securitysolution-.*/,
@@ -384,6 +384,16 @@ const getPipeline = (filename: string, removeSteps = true) => {
           '.buildkite/pipelines/pull_request/security_solution/cloud_security_posture.yml'
         )
       );
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^x-pack\/plugins\/discover_enhanced\/ui_tests/,
+        /^packages\/kbn-scout/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:scout-ui-tests')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_ui_tests.yml'));
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
