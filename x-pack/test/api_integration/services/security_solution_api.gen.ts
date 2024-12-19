@@ -257,8 +257,11 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .send(props.body as object);
     },
     /**
-     * Bulk upsert up to 1000 asset criticality records, creating or updating them as needed.
-     */
+      * Bulk upsert up to 1000 asset criticality records.
+
+If asset criticality records already exist for the specified entities, those records are overwritten with the specified values. If asset criticality records don't exist for the specified entities, new records are created.
+
+      */
     bulkUpsertAssetCriticalityRecords(
       props: BulkUpsertAssetCriticalityRecordsProps,
       kibanaSpace: string = 'default'
@@ -327,8 +330,11 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-     * Create or update a criticality record for a specific asset.
-     */
+      * Create or update an asset criticality record for a specific entity.
+
+If a record already exists for the specified entity, that record is overwritten with the specified value. If a record doesn't exist for the specified entity, a new record is created.
+
+      */
     createAssetCriticalityRecord(
       props: CreateAssetCriticalityRecordProps,
       kibanaSpace: string = 'default'
@@ -400,7 +406,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Delete the asset criticality record for a specific asset if it exists.
+     * Delete the asset criticality record for a specific entity.
      */
     deleteAssetCriticalityRecord(
       props: DeleteAssetCriticalityRecordProps,
@@ -803,7 +809,7 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Get the criticality record for a specific asset.
+     * Get the asset criticality record for a specific entity.
      */
     getAssetCriticalityRecord(
       props: GetAssetCriticalityRecordProps,
@@ -1301,6 +1307,9 @@ detection engine rules.
         .send(props.body as object)
         .query(props.query);
     },
+    /**
+     * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
+     */
     scheduleRiskEngineNow(kibanaSpace: string = 'default') {
       return supertest
         .post(routeWithNamespace('/api/risk_score/engine/schedule_now', kibanaSpace))
