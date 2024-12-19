@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { EndpointMetrics, UniqueEndpointCountResponse } from './types';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
 import { tlog } from '../../lib/telemetry/helpers';
@@ -34,21 +34,19 @@ export const getUniqueEndpointCount = async (
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: ENDPOINT_METRICS_INDEX,
       ignore_unavailable: false,
-      body: {
-        size: 0, // no query results required - only aggregation quantity
-        query: {
-          range: {
-            '@timestamp': {
-              gte: 'now-24h',
-              lt: 'now',
-            },
+      size: 0, // no query results required - only aggregation quantity
+      query: {
+        range: {
+          '@timestamp': {
+            gte: 'now-24h',
+            lt: 'now',
           },
         },
-        aggs: {
-          endpoint_count: {
-            cardinality: {
-              field: 'agent.id',
-            },
+      },
+      aggs: {
+        endpoint_count: {
+          cardinality: {
+            field: 'agent.id',
           },
         },
       },
