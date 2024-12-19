@@ -47,13 +47,13 @@ function buildUserMessagesApi(metaInfo?: SharingSavedObjectProps) {
   const internalApi = getLensInternalApiMock();
   const services = makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
     visOverrides: { id: 'lnsXY' },
-    dataOverrides: { id: 'form_based' },
+    dataOverrides: { id: 'formBased' },
   });
   // fill the context with some data
   internalApi.updateVisualizationContext({
     activeAttributes: getLensAttributesMock({
       state: {
-        datasourceStates: { form_based: { something: {} } },
+        datasourceStates: { formBased: { something: {} } },
         visualization: { activeId: 'lnsXY', state: {} },
         query: { query: '', language: 'kuery' },
         filters: [],

@@ -93,13 +93,7 @@ export function loadEmbeddableData(
     updateWarnings,
     resetMessages,
     updateMessages,
-  } = buildUserMessagesHelpers(
-    api,
-    internalApi,
-    services,
-    onBeforeBadgesRender,
-    metaInfo
-  );
+  } = buildUserMessagesHelpers(api, internalApi, services, onBeforeBadgesRender, metaInfo);
 
   const dispatchBlockingErrorIfAny = () => {
     const blockingErrors = getUserMessages(blockingMessageDisplayLocations, {

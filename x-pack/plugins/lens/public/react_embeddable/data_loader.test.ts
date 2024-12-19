@@ -21,7 +21,9 @@ import {
   LensApi,
   LensEmbeddableStartServices,
   LensInternalApi,
+  LensOverrides,
   LensPublicCallbacks,
+  LensRuntimeState,
 } from './types';
 import {
   HasParentApi,
@@ -84,12 +86,14 @@ type ChangeFnType = ({
 
 async function callDataLoader(
   changeFn: ChangeFnType,
-  attributes: LensDocument = getLensAttributesMock(),
-  parentApiOverrides?: Partial<{
-    filters$: BehaviorSubject<Filter[] | undefined>;
-    query$: BehaviorSubject<Query | AggregateQuery | undefined>;
-    timeRange$: BehaviorSubject<TimeRange | undefined>;
-  }>
+  runtimeState: LensRuntimeState = { attributes: getLensAttributesMock() },
+  parentApiOverrides?: Partial<
+    {
+      filters$: BehaviorSubject<Filter[] | undefined>;
+      query$: BehaviorSubject<Query | AggregateQuery | undefined>;
+      timeRange$: BehaviorSubject<TimeRange | undefined>;
+    } & LensOverrides
+  >
 ): Promise<void> {
   const parentApi = {
     ...createUnifiedSearchApi(),
@@ -111,9 +115,7 @@ async function callDataLoader(
     ...getLensApiMock(),
     parentApi,
   };
-  const getState = jest.fn(() => ({
-    attributes,
-  }));
+  const getState = jest.fn(() => runtimeState);
   const internalApi = getLensInternalApiMock();
   const services = makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
     visOverrides: { id: 'lnsXY' },
@@ -126,7 +128,7 @@ async function callDataLoader(
     api,
     parentApi,
     internalApi,
-    services,
+    services
   );
   // there's a debounce, so skip to the next tick
   jest.advanceTimersByTime(100);
@@ -302,7 +304,7 @@ describe('Data Loader', () => {
 
         return false;
       },
-      attributes,
+      { attributes },
       createUnifiedSearchApi(parentApiQuery, parentApiFilters, parentApiTimeRange)
     );
   });
@@ -342,13 +344,71 @@ describe('Data Loader', () => {
 
         return false;
       },
-      getLensAttributesMock({
-        references: [
-          { type: 'index-pattern', id: '123', name: 'abc' },
-          { type: 'index-pattern', id: '123', name: 'def' },
-          { type: 'index-pattern', id: '456', name: 'ghi' },
-        ],
-      })
+      {
+        attributes: getLensAttributesMock({
+          references: [
+            { type: 'index-pattern', id: '123', name: 'abc' },
+            { type: 'index-pattern', id: '123', name: 'def' },
+            { type: 'index-pattern', id: '456', name: 'ghi' },
+          ],
+        }),
+      }
+    );
+  });
+
+  it('should override noPadding in the display options if noPadding is set in the embeddable input', async () => {
+    await callDataLoader(async ({ internalApi }) => {
+      await waitForValue(
+        internalApi.expressionParams$,
+        (v: unknown) => isObject(v) && 'expression' in v && typeof v.expression != null
+      );
+
+      const params = internalApi.expressionParams$.getValue()!;
+      expect(params.noPadding).toBeUndefined();
+      return false;
+    });
+  });
+
+  it('should reload only once when the attributes or savedObjectId and the search context change at the same time', async () => {
+    await callDataLoader(async ({ internalApi, api }) => {
+      // trigger a change by changing the title in the attributes
+      (internalApi.attributes$ as BehaviorSubject<LensDocument | undefined>).next({
+        ...internalApi.attributes$.getValue(),
+        title: faker.lorem.word(),
+      });
+      (api.savedObjectId as BehaviorSubject<string | undefined>).next('newSavedObjectId');
+    });
+  });
+
+  it('should pass over the overrides as variables', async () => {
+    await callDataLoader(
+      async ({ internalApi }) => {
+        await waitForValue(
+          internalApi.expressionParams$,
+          (v: unknown) => isObject(v) && 'variables' in v && typeof v.variables != null
+        );
+
+        const params = internalApi.expressionParams$.getValue()!;
+        expect(params.variables).toEqual(
+          expect.objectContaining({
+            overrides: {
+              settings: {
+                onBrushEnd: 'ignore',
+              },
+            },
+          })
+        );
+        return false;
+      },
+      // send a runtime state with the overrides
+      {
+        attributes: getLensAttributesMock(),
+        overrides: {
+          settings: {
+            onBrushEnd: 'ignore',
+          },
+        },
+      }
     );
   });
 });
