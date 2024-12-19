@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { SecurityQueryRoleQueryRole } from '@elastic/elasticsearch/lib/api/types';
+
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '../..';
@@ -38,11 +40,31 @@ export function defineGetAllRolesBySpaceRoutes({
         const hideReservedRoles = buildFlavor === 'serverless';
         const esClient = (await context.core).elasticsearch.client;
 
-        const [features, elasticsearchRoles] = await Promise.all([
+        const [features, queryRolesResponse] = await Promise.all([
           getFeatures(),
-          await esClient.asCurrentUser.security.getRole(),
+          // await esClient.asCurrentUser.security.getRole(),
+          await esClient.asCurrentUser.security.queryRole({
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'applications.resources': `space:${request.params.spaceId}`,
+                    },
+                  },
+                ],
+              },
+            },
+          }),
         ]);
-
+        const elasticsearchRoles = queryRolesResponse.roles?.reduce<
+          Record<string, SecurityQueryRoleQueryRole>
+        >((acc, role) => {
+          return {
+            ...acc,
+            [role.name]: role,
+          };
+        }, {});
         // Transform elasticsearch roles into Kibana roles and return in a list sorted by the role name.
         return response.ok({
           body: Object.entries(elasticsearchRoles)
@@ -53,8 +75,7 @@ export function defineGetAllRolesBySpaceRoutes({
 
               const role = transformElasticsearchRoleToRole({
                 features,
-                // @ts-expect-error @elastic/elasticsearch SecurityIndicesPrivileges.names expected to be string[]
-                elasticsearchRole,
+                elasticsearchRole, // TODO: address why the `remote_cluster` field is throwing type errors
                 name: roleName,
                 application: authz.applicationName,
                 logger,
