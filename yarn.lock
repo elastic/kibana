@@ -5729,7 +5729,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/fields-metadata-plugin@link:x-pack/plugins/fields_metadata":
+"@kbn/fields-metadata-plugin@link:x-pack/platform/plugins/shared/fields_metadata":
   version "0.0.0"
   uid ""
 
