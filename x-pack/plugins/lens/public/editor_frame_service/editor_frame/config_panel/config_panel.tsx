@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, memo, useCallback } from 'react';
+import React, { useMemo, memo, useCallback, useState } from 'react';
 import { EuiForm } from '@elastic/eui';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -152,6 +152,8 @@ export function LayerPanels(
       },
     [dispatchLens, visualization.state, datasourceStates, activeVisualization.id]
   );
+
+  const [expandedLayerId, setExpandedLayerId] = useState<number>(0);
 
   const toggleFullscreen = useCallback(() => {
     dispatchLens(setToggleFullscreen());
@@ -327,6 +329,10 @@ export function LayerPanels(
               }}
               toggleFullscreen={toggleFullscreen}
               indexPatternService={indexPatternService}
+              setExpandedLayerId={(id) => {
+                setExpandedLayerId(id);
+              }}
+              expandedLayerId={expandedLayerId}
             />
           )
         );
