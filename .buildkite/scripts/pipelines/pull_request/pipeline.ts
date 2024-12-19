@@ -116,7 +116,10 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     if (
-      (await doAnyChangesMatch([/^x-pack\/platform\/plugins\/shared\/fleet/, /^x-pack\/test\/fleet_cypress/])) ||
+      (await doAnyChangesMatch([
+        /^x-pack\/platform\/plugins\/shared\/fleet/,
+        /^x-pack\/test\/fleet_cypress/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
