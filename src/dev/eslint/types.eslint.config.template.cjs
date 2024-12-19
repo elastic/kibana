@@ -18,12 +18,14 @@ module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
   parserOptions: {
+    projectService: true,
     tsconfigRootDir: config.rootDir,
     project: ['./tsconfig.json'],
   },
   plugins: ['@typescript-eslint'],
   rules: {
     '@typescript-eslint/consistent-type-exports': 'error',
+    '@typescript-eslint/no-deprecated': 'warn',
   },
   overrides: [
     {

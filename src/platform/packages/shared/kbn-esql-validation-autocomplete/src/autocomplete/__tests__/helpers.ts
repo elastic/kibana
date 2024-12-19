@@ -139,7 +139,7 @@ export function getFunctionSignaturesByReturnType(
     builtin?: boolean;
     skipAssign?: boolean;
   } = {},
-  paramsTypes?: Readonly<FunctionParameterType[]>,
+  paramsTypes?: readonly FunctionParameterType[],
   ignored?: string[],
   option?: string
 ): PartialSuggestionWithText[] {

@@ -42,7 +42,7 @@ const getNavLink = (partial: Partial<ChromeNavLink> = {}): ChromeNavLink => ({
   ...partial,
 });
 
-const getNavLinksService = (ids: Readonly<string[]> = []) => {
+const getNavLinksService = (ids: readonly string[] = []) => {
   const navLinks = ids.map((id) => getNavLink({ id, title: id.toUpperCase() }));
 
   const navLinksMock: jest.Mocked<ChromeNavLinks> = {
@@ -64,7 +64,7 @@ const setup = ({
   isServerless = true,
 }: {
   locationPathName?: string;
-  navLinkIds?: Readonly<string[]>;
+  navLinkIds?: readonly string[];
   isServerless?: boolean;
 } = {}) => {
   const history = createMemoryHistory({
