@@ -63,10 +63,22 @@
     },
     {
       "groupName": "@elastic/elasticsearch",
-      "matchDepNames": ["@elastic/elasticsearch"],
-      "reviewers": ["team:kibana-operations", "team:kibana-core"],
-      "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "Team:Operations", "Team:Core"],
+      "matchDepNames": [
+        "@elastic/elasticsearch"
+      ],
+      "reviewers": [
+        "team:kibana-operations",
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:prev-minor",
+        "Team:Operations",
+        "Team:Core"
+      ],
       "enabled": true
     },
     {
@@ -103,43 +115,117 @@
     },
     {
       "groupName": "APM",
-      "matchDepNames": ["elastic-apm-node", "@elastic/apm-rum", "@elastic/apm-rum-react"],
-      "reviewers": ["team:kibana-core"],
-      "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
+      "matchDepNames": [
+        "elastic-apm-node",
+        "@elastic/apm-rum",
+        "@elastic/apm-rum-react",
+        "@elastic/apm-rum-core"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Core",
+        "backport:prev-minor"
+      ],
       "enabled": true
     },
     {
       "groupName": "RxJS",
-      "matchDepNames": ["rxjs"],
-      "reviewers": ["team:kibana-core"],
-      "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
+      "matchDepNames": [
+        "rxjs"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Core",
+        "backport:prev-minor"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "stack traces",
+      "matchDepNames": [
+        "trace",
+        "clarify"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Core",
+        "backport:skip"
+      ],
       "enabled": true
     },
     {
       "groupName": "@elastic/ebt",
-      "matchDepNames": ["@elastic/ebt"],
-      "reviewers": ["team:kibana-core"],
-      "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
+      "matchDepNames": [
+        "@elastic/ebt"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Core",
+        "backport:prev-minor"
+      ],
       "enabled": true
     },
     {
-      "groupName": "ansi-regex",
-      "matchDepNames": ["ansi-regex"],
-      "reviewers": ["team:kibana-core"],
-      "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
-      "minimumReleaseAge": "7 days",
+      "groupName": "lodash",
+      "matchDepNames": [
+        "lodash",
+        "@types/lodash"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Core",
+        "backport:prev-minor"
+      ],
       "enabled": true
     },
     {
       "groupName": "OpenAPI Spec",
-      "matchDepNames": ["@redocly/cli"],
-      "reviewers": ["team:kibana-core"],
-      "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
+      "matchDepNames": [
+        "@apidevtools/swagger-parser",
+        "@redocly/cli",
+        "openapi-types"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Core",
+        "backport:prev-minor"
+      ],
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
