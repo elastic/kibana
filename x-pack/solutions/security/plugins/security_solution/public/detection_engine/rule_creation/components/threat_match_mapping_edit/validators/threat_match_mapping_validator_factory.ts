@@ -69,7 +69,7 @@ export function threatMatchMappingValidatorFactory({
           'xpack.securitySolution.detectionEngine.ruleManagement.threatMappingField.unknownFields',
           {
             defaultMessage:
-              'Indicator mapping has unknown fields. {unknownSourceIndicesFields} field(s) not found in the source events indices and {unknownThreatMatchIndicesFields} field(s) not found in the indicator indices.',
+              'Indicator mapping has unknown fields. {unknownSourceIndicesFields} fields not found in the source events indices and {unknownThreatMatchIndicesFields} fields not found in the indicator indices.',
             values: {
               unknownSourceIndicesFields: `"${unknownSourceIndicesFields.join('", "')}"`,
               unknownThreatMatchIndicesFields: `"${unknownThreatMatchIndicesFields.join('", "')}"`,
@@ -87,7 +87,7 @@ export function threatMatchMappingValidatorFactory({
           'xpack.securitySolution.detectionEngine.ruleManagement.threatMappingField.unknownSourceIndicesFields',
           {
             defaultMessage:
-              'Indicator mapping has unknown fields. {unknownSourceIndicesFields} field(s) not found in the source events indices.',
+              'Indicator mapping has unknown fields. {unknownSourceIndicesFields} fields not found in the source events indices.',
             values: {
               unknownSourceIndicesFields: `"${unknownSourceIndicesFields.join('", "')}"`,
             },
@@ -104,7 +104,7 @@ export function threatMatchMappingValidatorFactory({
           'xpack.securitySolution.detectionEngine.ruleManagement.threatMappingField.unknownIndicatorIndicesFields',
           {
             defaultMessage:
-              'Indicator mapping has unknown fields. {unknownThreatMatchIndicesFields} field(s) not found in the indicator indices.',
+              'Indicator mapping has unknown fields. {unknownThreatMatchIndicesFields} fields not found in the indicator indices.',
             values: {
               unknownThreatMatchIndicesFields: `"${unknownThreatMatchIndicesFields.join('", "')}"`,
             },
