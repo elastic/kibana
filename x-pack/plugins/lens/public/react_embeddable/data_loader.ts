@@ -106,7 +106,6 @@ export function loadEmbeddableData(
     getVisualizationContext,
     services,
     onBeforeBadgesRender,
-    services.spaces,
     metaInfo
   );
 
@@ -144,9 +143,7 @@ export function loadEmbeddableData(
     internalApi.updateDataLoading(true);
 
     // the component is ready to load
-    if (apiHasLensComponentCallbacks(parentApi)) {
-      parentApi.onLoad?.(true);
-    }
+    onLoad?.(true);
 
     const currentState = getState();
 
@@ -177,6 +174,7 @@ export function loadEmbeddableData(
       updateVisualizationContext({
         activeData: adapters?.tables?.tables,
       });
+
       // data has loaded
       internalApi.updateDataLoading(false);
       // The third argument here is an observable to let the
