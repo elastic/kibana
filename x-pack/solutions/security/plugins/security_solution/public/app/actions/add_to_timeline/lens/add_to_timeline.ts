@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { CellValueContext, IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-import { apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { apiPublishesUnifiedSearch, hasBlockingError } from '@kbn/presentation-publishing';
 import { isLensApi } from '@kbn/lens-plugin/public';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import type { SecurityAppStore } from '../../../../common/store/types';
@@ -84,7 +83,7 @@ export const createAddToTimelineLensAction = ({
     getIconType: () => ADD_TO_TIMELINE_ICON,
     getDisplayName: () => ADD_TO_TIMELINE,
     isCompatible: async ({ embeddable, data }) =>
-      !isErrorEmbeddable(embeddable as IEmbeddable) &&
+      !hasBlockingError(embeddable) &&
       isLensApi(embeddable) &&
       apiPublishesUnifiedSearch(embeddable) &&
       isDataColumnsFilterable(data) &&
