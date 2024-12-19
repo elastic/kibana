@@ -5,21 +5,18 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSpacer } from '@elastic/eui';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
-
 import { ThresholdIndicator } from '../../common/components/thershold_indicator';
-import { useNetworkTimingsPrevious24Hours } from '../hooks/use_network_timings_prev';
 import { formatMillisecond } from '../common/network_data/data_formatting';
 import { useNetworkTimings } from '../hooks/use_network_timings';
+import { useNetworkTimingsPrevious24Hours } from '../hooks/use_network_timings_prev';
 
 export const BreakdownLegend = () => {
   const networkTimings = useNetworkTimings();
 
   const { timingsWithLabels: prevTimingsWithLabels, loading } = useNetworkTimingsPrevious24Hours();
-
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   return (
     <>
@@ -28,17 +25,13 @@ export const BreakdownLegend = () => {
         {networkTimings.timingsWithLabels.map(({ label, value }, index) => {
           const prevValueItem = prevTimingsWithLabels?.find((prev) => prev.label === label);
           const prevValue = prevValueItem?.value;
+          // @ts-ignore
+          const color = euiTheme.colors.vis[`euiColorVis${index + 1}`];
 
           return (
             <EuiFlexGroup key={index} gutterSize="s" alignItems="center">
               <EuiFlexItem grow={true}>
-                <EuiHealth
-                  color={
-                    (theme.eui as unknown as Record<string, string>)[`euiColorVis${index + 1}`]
-                  }
-                >
-                  {label}
-                </EuiHealth>
+                <EuiHealth color={color}>{label}</EuiHealth>
               </EuiFlexItem>
               <EuiFlexItem grow={false} style={{ minWidth: 50 }}>
                 <ThresholdIndicator
