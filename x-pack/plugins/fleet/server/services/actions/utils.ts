@@ -29,7 +29,7 @@ export const isFieldDefined = (
 
 export const hasFieldKeyError = (
   key: string | null | undefined,
-  fieldTypes: Readonly<string[]>,
+  fieldTypes: readonly string[],
   indexMapping: FleetActionsIndexMapping | FleetActionsResultsIndexMapping,
   indexType: IndexType
 ): string | null => {
@@ -54,8 +54,8 @@ export const hasFieldKeyError = (
   return null;
 };
 
-export const ALLOWED_FLEET_ACTIONS_RESULTS_FIELD_TYPES: Readonly<string[]> = ['keyword'];
-export const ALLOWED_FLEET_ACTIONS_FIELD_TYPES: Readonly<string[]> = ['keyword', 'date'];
+export const ALLOWED_FLEET_ACTIONS_RESULTS_FIELD_TYPES: readonly string[] = ['keyword'];
+export const ALLOWED_FLEET_ACTIONS_FIELD_TYPES: readonly string[] = ['keyword', 'date'];
 
 export interface FleetActionsIndexMapping {
   properties: {
@@ -137,7 +137,7 @@ export type IndexType = 'actions' | 'results';
 
 interface ValidateFilterKueryNodeParams {
   astFilter: KueryNode;
-  types: Readonly<string[]>;
+  types: readonly string[];
   indexMapping: FleetActionsIndexMapping;
   indexType?: IndexType;
   path?: string;
