@@ -910,8 +910,6 @@ x-pack/plugins/observability_solution/apm/ftr_e2e @elastic/obs-ux-infra_services
 x-pack/plugins/observability_solution/inventory @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/inventory/e2e @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/metrics_data_access @elastic/obs-ux-infra_services-team
-x-pack/plugins/observability_solution/observability_onboarding @elastic/obs-ux-logs-team
-x-pack/plugins/observability_solution/observability_onboarding/e2e @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/observability_shared @elastic/observability-ui
 x-pack/plugins/observability_solution/profiling @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/profiling_data_access @elastic/obs-ux-infra_services-team
@@ -953,6 +951,8 @@ x-pack/solutions/observability/plugins/observability @elastic/obs-ux-management-
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/obs-ai-assistant
 x-pack/solutions/observability/plugins/observability_ai_assistant_management @elastic/obs-ai-assistant
 x-pack/solutions/observability/plugins/observability_logs_explorer @elastic/obs-ux-logs-team
+x-pack/solutions/observability/plugins/observability_onboarding @elastic/obs-ux-logs-team
+x-pack/solutions/observability/plugins/observability_onboarding/e2e @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability_solution/entities_data_access @elastic/obs-entities
 x-pack/solutions/observability/plugins/observability_solution/entity_manager_app @elastic/obs-entities
 x-pack/solutions/observability/plugins/serverless_observability @elastic/obs-ux-management-team
