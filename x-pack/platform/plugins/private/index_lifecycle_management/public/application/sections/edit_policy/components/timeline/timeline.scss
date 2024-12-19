@@ -62,7 +62,13 @@ $ilmTimelineBarHeight: $euiSizeS;
     width: var(--ilm-timeline-hot-phase-width);
 
     &__colorBar {
-      background-color: $euiColorVis9;
+      &__borealis {
+        background-color: $euiColorVis6;
+      }
+
+      &__amsterdam {
+        background-color: $euiColorVis9;
+      }
     }
   }
 
@@ -70,7 +76,13 @@ $ilmTimelineBarHeight: $euiSizeS;
     width: var(--ilm-timeline-warm-phase-width);
 
     &__colorBar {
-      background-color: $euiColorVis5;
+      &__borealis {
+        background-color: $euiColorVis9;
+      }
+
+      &__amsterdam {
+        background-color: $euiColorVis5;
+      }
     }
   }
 
@@ -78,7 +90,13 @@ $ilmTimelineBarHeight: $euiSizeS;
     width: var(--ilm-timeline-cold-phase-width);
 
     &__colorBar {
-      background-color: $euiColorVis1;
+      &__borealis {
+        background-color: $euiColorVis2;
+      }
+
+      &__amsterdam {
+        background-color: $euiColorVis1;
+      }
     }
   }
 
