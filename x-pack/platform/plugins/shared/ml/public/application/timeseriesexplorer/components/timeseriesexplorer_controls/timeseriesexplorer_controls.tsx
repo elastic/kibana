@@ -216,7 +216,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
         gutterSize="s"
       >
         {showModelBoundsCheckbox && showControls && (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} css={{ minWidth: '170px' }}>
             <EuiFormRow hasEmptyLabelSpace>
               <EuiCheckbox
                 id="toggleModelBoundsCheckbox"
@@ -246,7 +246,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
         )}
 
         {showForecastCheckbox && showControls && (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} css={{ minWidth: '120px' }}>
             <EuiFormRow hasEmptyLabelSpace>
               <EuiCheckbox
                 id="toggleShowForecastCheckbox"
