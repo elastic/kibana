@@ -82,6 +82,11 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       noParse: [/[\/\\]node_modules[\/\\]vega[\/\\]build-es5[\/\\]vega\.js$/],
       rules: [
         {
+          test: /\.mjs$/,
+          include: /node_modules/,
+          type: 'javascript/auto',
+        },
+        {
           test: /\.(html|md|txt|tmpl)$/,
           use: {
             loader: 'raw-loader',
@@ -159,7 +164,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
     },
     plugins: [new IgnoreNotFoundExportPlugin()],
     resolve: {
-      extensions: ['.js', '.ts', '.tsx', '.json', '.mdx'],
+      extensions: ['.js', '.mjs', '.ts', '.tsx', '.json', '.mdx'],
       mainFields: ['browser', 'main'],
       alias: {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/styles/core_app/images'),
