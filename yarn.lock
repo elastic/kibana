@@ -6821,7 +6821,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rison@link:packages/kbn-rison":
+"@kbn/rison@link:src/platform/packages/shared/kbn-rison":
   version "0.0.0"
   uid ""
 
