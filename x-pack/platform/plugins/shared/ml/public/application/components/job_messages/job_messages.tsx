@@ -83,7 +83,6 @@ export const JobMessages: FC<JobMessagesProps> = ({
         name: i18n.translate('xpack.ml.jobMessages.messageLabel', {
           defaultMessage: 'Message',
         }),
-        width: '40%',
       },
     ];
 
@@ -102,7 +101,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
         name: i18n.translate('xpack.ml.jobMessages.actionsLabel', {
           defaultMessage: 'Actions',
         }),
-        width: '20%',
+        width: '15%',
         actions: [
           {
             render: (message: JobMessage) => {
