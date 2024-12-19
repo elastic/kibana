@@ -11,7 +11,7 @@ import { getAnomalies } from '.';
 
 const getFiltersFromMock = (mock: jest.Mock) => {
   const [[searchParams]] = mock.mock.calls;
-  return searchParams.body.query.bool.filter;
+  return searchParams.query.bool.filter;
 };
 
 const getBoolCriteriaFromFilters = (filters: ESFilter[]) =>
