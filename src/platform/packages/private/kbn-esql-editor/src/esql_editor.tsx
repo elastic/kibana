@@ -92,7 +92,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     fieldsMetadata,
     uiSettings,
   } = kibana.services;
-  const darkMode = core.theme?.getTheme().darkMode;
 
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(query.esql ?? '');
