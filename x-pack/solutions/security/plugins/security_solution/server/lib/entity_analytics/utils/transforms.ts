@@ -130,7 +130,7 @@ export const stopTransform = async ({
     { logger }
   );
 
-export const deleteTransform = async ({
+export const deleteTransform = ({
   esClient,
   logger,
   transformId,
