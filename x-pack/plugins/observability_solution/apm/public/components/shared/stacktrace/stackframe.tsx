@@ -19,7 +19,7 @@ import { Variables } from './variables';
 const ContextContainer = styled.div<{ isLibraryFrame: boolean }>`
   position: relative;
   font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
-  font-size: ${({ theme }) => useEuiFontSize('s').fontSize};
+  font-size: ${() => useEuiFontSize('s').fontSize};
   border: ${({ theme }) => theme.euiTheme.border.thin};
   border-radius: ${({ theme }) => theme.euiTheme.border.radius.small};
   background: ${({ isLibraryFrame, theme }) =>

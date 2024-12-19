@@ -24,7 +24,7 @@ const CausedByContainer = styled('h5')`
 const CausedByHeading = styled('span')`
   color: ${({ theme }) => theme.euiTheme.colors.textSubdued};
   display: block;
-  font-size: ${({ theme }) => useEuiFontSize('xs').fontSize};
+  font-size: ${() => useEuiFontSize('xs').fontSize};
   font-weight: ${({ theme }) => theme.euiTheme.font.weight.bold};
   text-transform: uppercase;
 `;

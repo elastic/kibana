@@ -96,6 +96,6 @@ const Count = styled.div`
   flex: 0 0 auto;
   border-left: ${(props) => props.theme.euiTheme.border.thin};
   padding: 6px 10px;
-  font-size: ${(props) => useEuiFontSize('xs').fontSize};
+  font-size: ${() => useEuiFontSize('xs').fontSize};
   font-weight: normal;
 `;

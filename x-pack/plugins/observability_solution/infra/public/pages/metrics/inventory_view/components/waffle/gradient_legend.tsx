@@ -84,7 +84,7 @@ const GradientLegendTickLine = styled.div`
 
 const GradientLegendTickLabel = styled.div`
   position: absolute;
-  font-size: ${(props) => useEuiFontSize('xxs').fontSize};
+  font-size: ${() => useEuiFontSize('xxs').fontSize};
   text-align: center;
   top: 0;
   left: 0;
