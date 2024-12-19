@@ -84,6 +84,13 @@ export const createLensEmbeddableFactory = (
 
       const inspectorConfig = initializeInspector(services);
 
+      const searchContextConfig = initializeSearchContext(
+        initialState,
+        internalApi,
+        parentApi,
+        services
+      );
+
       const editConfig = initializeEditApi(
         uuid,
         initialState,
@@ -91,12 +98,12 @@ export const createLensEmbeddableFactory = (
         internalApi,
         stateConfig.api,
         inspectorConfig.api,
+        searchContextConfig.api,
         isTextBasedLanguage,
         services,
         parentApi
       );
 
-      const searchContextConfig = initializeSearchContext(initialState, internalApi, parentApi);
       const integrationsConfig = initializeIntegrations(getState, services);
       const actionsConfig = initializeActionApi(
         uuid,
