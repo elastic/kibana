@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
 import { SERVERLESS_ES_WEB_CRAWLERS_ID } from '@kbn/deeplinks-search/constants';
-import { BACK_LABEL } from '../../../../common/i18n_string';
+import { BACK_LABEL, COMING_SOON_LABEL } from '../../../../common/i18n_string';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibanaServices } from '../../hooks/use_kibana';
 
@@ -31,6 +31,7 @@ export const ElasticManagedWebCrawlersEmptyPrompt = () => {
         defaultMessage: 'Elastic managed web crawlers',
       })}
       isComingSoon
+      comingSoonLabel={COMING_SOON_LABEL}
       description={i18n.translate(
         'xpack.serverlessSearch.elasticManagedWebCrawlerEmpty.description',
         {

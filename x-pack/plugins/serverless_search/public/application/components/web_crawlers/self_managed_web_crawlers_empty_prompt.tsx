@@ -19,10 +19,11 @@ import { i18n } from '@kbn/i18n';
 import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ELASTIC_MANAGED_WEB_CRAWLERS_PATH, BASE_WEB_CRAWLERS_PATH } from '../../constants';
+import { COMING_SOON_LABEL } from '../../../../common/i18n_string';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
-export const SelftManagedWebCrawlersEmptyPrompt = () => {
+export const SelfManagedWebCrawlersEmptyPrompt = () => {
   const {
     application: { navigateToUrl },
   } = useKibanaServices();
@@ -217,7 +218,7 @@ export const SelftManagedWebCrawlersEmptyPrompt = () => {
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="accent">Coming soon</EuiBadge>
+                <EuiBadge color="accent">{COMING_SOON_LABEL}</EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

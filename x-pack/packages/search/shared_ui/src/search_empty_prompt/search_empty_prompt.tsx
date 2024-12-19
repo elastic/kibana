@@ -28,6 +28,10 @@ interface SearchEmptyPromptProps {
   description?: string;
   icon?: string | React.JSXElementConstructor<any>;
   isComingSoon?: boolean;
+<<<<<<< HEAD
+=======
+  comingSoonLabel?: string;
+>>>>>>> 4f4772f63e6 ([Search] Moving search-empty-prompt to a shared package (#204545))
   title: string;
 }
 
@@ -38,6 +42,7 @@ export const SearchEmptyPrompt: React.FC<SearchEmptyPromptProps> = ({
   description,
   icon,
   isComingSoon,
+  comingSoonLabel,
   title,
 }) => {
   return (
@@ -66,7 +71,7 @@ export const SearchEmptyPrompt: React.FC<SearchEmptyPromptProps> = ({
         </EuiFlexItem>
         {isComingSoon && (
           <EuiFlexItem>
-            <EuiBadge color="accent">Coming soon</EuiBadge>
+            <EuiBadge color="accent">{comingSoonLabel}</EuiBadge>
           </EuiFlexItem>
         )}
         {description && (
