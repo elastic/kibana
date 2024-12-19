@@ -124,3 +124,32 @@ export const updateCaseStatus = async ({
     .send(updateRequest);
   return updatedCase;
 };
+
+export const updateCaseAssignee = async ({
+  supertest,
+  caseId,
+  version = '2',
+  assigneeId,
+  expectedHttpCode = 204,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  version?: string;
+  assigneeId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}) => {
+  const updateRequest: CasePatchRequest = {
+    version,
+    assignees: [{ uid: assigneeId }],
+    id: caseId,
+  };
+
+  const { body: updatedCase } = await supertest
+    .patch(`/api/cases/${caseId}`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'xxx')
+    .send(updateRequest);
+  return updatedCase;
+};
