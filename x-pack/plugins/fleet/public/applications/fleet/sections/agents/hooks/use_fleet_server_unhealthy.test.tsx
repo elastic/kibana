@@ -19,7 +19,8 @@ jest.mock('../../../../../hooks/use_authz', () => ({
   }),
 }));
 
-describe('useFleetServerUnhealthy', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/202359
+describe.skip('useFleetServerUnhealthy', () => {
   const testRenderer = createFleetTestRendererMock();
 
   it('should return isUnHealthy:false with an online fleet server', async () => {

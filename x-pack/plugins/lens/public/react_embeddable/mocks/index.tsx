@@ -30,12 +30,10 @@ import {
   LensRendererProps,
   LensRuntimeState,
   LensSerializedState,
-  VisualizationContext,
 } from '../types';
 import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
 import { Datasource, DatasourceMap, Visualization, VisualizationMap } from '../../types';
 import { initializeInternalApi } from '../initializers/initialize_internal_api';
-import { initializeVisualizationContext } from '../initializers/initialize_visualization_context';
 
 const LensApiMock: LensApi = {
   // Static props
@@ -293,22 +291,6 @@ export function getLensInternalApiMock(overrides: Partial<LensInternalApi> = {})
     ...getInternalApiWithFunctionWrappers(),
     ...overrides,
   };
-}
-
-export function getVisualizationContextHelperMock(
-  attributesOverrides?: Partial<LensRuntimeState['attributes']>,
-  contextOverrides?: Omit<Partial<VisualizationContext>, 'doc'>
-) {
-  const attributes = getLensAttributesMock(attributesOverrides);
-  const helper = initializeVisualizationContext(
-    getLensInternalApiMock({
-      attributes$: new BehaviorSubject(attributes),
-    })
-  );
-  if (contextOverrides) {
-    helper.updateVisualizationContext({ doc: attributes, ...contextOverrides });
-  }
-  return helper;
 }
 
 export function createUnifiedSearchApi(

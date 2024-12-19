@@ -8,6 +8,7 @@
 import { darken } from 'polished';
 import React from 'react';
 import styled from '@emotion/styled';
+import { useEuiFontSize } from '@elastic/eui';
 import {
   InfraFormatter,
   InfraWaffleMapRuleOperator,
@@ -78,5 +79,5 @@ const StepSquareInner = styled.div`
 `;
 
 const StepLabel = styled.div`
-  font-size: 12px;
+  font-size: ${() => useEuiFontSize('xs').fontSize};
 `;
