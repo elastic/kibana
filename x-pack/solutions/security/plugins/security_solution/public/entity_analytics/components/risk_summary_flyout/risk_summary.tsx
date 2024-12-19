@@ -247,7 +247,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
                   css={css`
                     position: absolute;
                     right: 0;
-                    top: -${euiTheme.size};
+                    top: -${euiTheme.size.base};
                   `}
                 >
                   <InspectButton

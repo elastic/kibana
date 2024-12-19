@@ -27,7 +27,7 @@ const RiskBadge = styled.div<{
     ${($severity === 'Critical' || $severity === 'High') &&
     !$hideBackgroundColor &&
     css`
-      background-color: ${theme.eui.euiColorDanger};
+      background-color: ${euiTheme.colors.backgroundLightDanger};
       border-radius: 999px; // pill shaped
     `};
   `}

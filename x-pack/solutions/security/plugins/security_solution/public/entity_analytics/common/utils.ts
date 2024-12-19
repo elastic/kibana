@@ -43,7 +43,7 @@ export const useRiskSeverityColors = (): { [k in RiskSeverity]: string } => {
       ? '#DA8B45'
       : euiTheme.colors.vis.euiColorVisWarm1,
     [RiskSeverity.Critical]: euiTheme.flags.hasVisColorAdjustment
-      ? '#F66D64'
+      ? '#E7664C'
       : euiTheme.colors.vis.euiColorVis6,
   };
 };
