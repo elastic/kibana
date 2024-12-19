@@ -159,8 +159,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await testSubjects.exists('xyVisChart')).to.be(true);
 
       await discover.chooseLensSuggestion('pie');
-      await header.waitUntilLoadingHasFinished();
-      expect(await testSubjects.exists('partitionVisChart')).to.be(true);
+      retry.waitFor('partition chart suggestion to appear', async () => {
+        await header.waitUntilLoadingHasFinished();
+        return testSubjects.exists('partitionVisChart');
+      });
     });
 
     it('should allow changing dimensions', async () => {
