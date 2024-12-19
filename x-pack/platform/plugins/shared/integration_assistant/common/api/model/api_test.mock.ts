@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AnalyzeApiRequestBody } from '../analyze_api/analyze_api_route.gen';
 import type { AnalyzeLogsRequestBody } from '../analyze_logs/analyze_logs_route.gen';
 import type { BuildIntegrationRequestBody } from '../build_integration/build_integration.gen';
 import type { CategorizationRequestBody } from '../categorization/categorization_route.gen';
@@ -67,9 +68,17 @@ export const getCategorizationRequestMock = (): CategorizationRequestBody => ({
 });
 
 export const getCelRequestMock = (): CelInputRequestBody => ({
-  dataStreamName: 'test-data-stream-name',
-  apiDefinition: 'test-api-definition',
+  dataStreamTitle: 'test-data-stream-title',
   connectorId: 'test-connector-id',
+  celDetails: {
+    path: 'test-cel-path',
+    auth: 'basic',
+    openApiDetails: {
+      operation: 'test-open-api-operation',
+      schemas: 'test-open-api-schemas',
+      auth: 'test-open-api-auth',
+    },
+  },
 });
 
 export const getBuildIntegrationRequestMock = (): BuildIntegrationRequestBody => ({
@@ -100,4 +109,10 @@ export const getAnalyzeLogsRequestBody = (): AnalyzeLogsRequestBody => ({
   dataStreamTitle: 'Test data stream title',
   connectorId: 'test-connector-id',
   logSamples: rawSamples,
+});
+
+export const getAnalyzeApiRequestBody = (): AnalyzeApiRequestBody => ({
+  connectorId: 'test-connector-id',
+  dataStreamTitle: 'test-data-stream-name',
+  pathOptions: { '/v1/events': 'the path for events', '/v1/logs': 'the path for logs' },
 });

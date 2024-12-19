@@ -62,6 +62,7 @@ describe('DataStreamStep', () => {
           integrationSettings={undefined}
           connector={mockState.connector}
           isGenerating={false}
+          celInputResult={undefined}
         />,
         { wrapper }
       );
@@ -224,6 +225,45 @@ describe('DataStreamStep', () => {
         });
       });
     });
+
+    describe('when dataCollectionMethod is cel', () => {
+      const dataCollectionMethod = 'cel';
+      beforeEach(() => {
+        act(() => {
+          fireEvent.change(result.getByTestId('dataCollectionMethodInput'), {
+            target: { value: dataCollectionMethod },
+          });
+        });
+      });
+
+      it('should show add OpenApi spec button', () => {
+        expect(result.queryByTestId('addOpenApiSpecButton')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('when dataCollectionMethod=cel and has celInputResult', () => {
+    let result: RenderResult;
+    beforeEach(() => {
+      result = render(
+        <DataStreamStep
+          integrationSettings={mockState.integrationSettings}
+          connector={mockState.connector}
+          isGenerating={false}
+          celInputResult={mockState.celInputResult}
+        />,
+        { wrapper }
+      );
+      act(() => {
+        fireEvent.change(result.getByTestId('dataCollectionMethodInput'), {
+          target: { value: 'cel' },
+        });
+      });
+    });
+
+    it('should render successfully configured cel input', () => {
+      expect(result.queryByTestId('openApiConfigured')).toBeInTheDocument();
+    });
   });
 
   describe('when is generating', () => {
@@ -234,6 +274,7 @@ describe('DataStreamStep', () => {
           integrationSettings={mockState.integrationSettings}
           connector={mockState.connector}
           isGenerating={true}
+          celInputResult={undefined}
         />,
         { wrapper }
       );
