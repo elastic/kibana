@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ecsTestState } from '@kbn/integration-assistant-plugin/__jest__/fixtures/ecs_mapping';
+import { ecsTestState } from '../../../__jest__/fixtures/ecs_mapping';
 import { ECS_RESERVED } from './constants';
 
 import { EcsMappingState } from '../../types';
