@@ -118,7 +118,7 @@ The value of the parameter `indexID` needs to be passed to the API service when 
 
 ## Guides config
 
-To use the API service, you need to know a guide ID (currently one of `appSearch`, `websiteSearch`, `databaseSearch`, `kubernetes`, `siem`) and a step ID (for example, `add_data`, `search_experience`, `rules` etc). The consumers of guided onboarding register their guide configs themselves and have therefore full control over the guide ID and step IDs used for their guide. For more details on registering a guide config, see below.
+To use the API service, you need to know a guide ID (currently one of `websiteSearch`, `databaseSearch`, `kubernetes`, `siem`) and a step ID (for example, `add_data`, `search_experience`, `rules` etc). The consumers of guided onboarding register their guide configs themselves and have therefore full control over the guide ID and step IDs used for their guide. For more details on registering a guide config, see below.
 
 ## Server side: register a guide config
 

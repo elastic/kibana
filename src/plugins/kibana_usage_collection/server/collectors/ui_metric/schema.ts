@@ -36,8 +36,6 @@ const uiMetricFromDataPluginSchema: MakeSchemaFrom<UIMetricUsage> = {
   csm: commonSchema,
   canvas: commonSchema,
   enterpriseSearch: commonSchema,
-  appSearch: commonSchema,
-  workplaceSearch: commonSchema,
   graph: commonSchema,
   logs: commonSchema,
   metrics: commonSchema,

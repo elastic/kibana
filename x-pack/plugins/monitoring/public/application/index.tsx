@@ -17,7 +17,6 @@ import {
   CODE_PATH_APM,
   CODE_PATH_BEATS,
   CODE_PATH_ELASTICSEARCH,
-  CODE_PATH_ENTERPRISE_SEARCH,
   CODE_PATH_KIBANA,
   CODE_PATH_LOGSTASH,
 } from '../../common/constants';
@@ -43,7 +42,6 @@ import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
 import { ElasticsearchNodeAdvancedPage } from './pages/elasticsearch/node_advanced_page';
 import { ElasticsearchNodePage } from './pages/elasticsearch/node_page';
 import { ElasticsearchOverviewPage } from './pages/elasticsearch/overview';
-import { EntSearchOverviewPage } from './pages/enterprise_search/overview';
 import { ClusterListing } from './pages/home/cluster_listing';
 import { KibanaInstancePage } from './pages/kibana/instance';
 import { KibanaInstancesPage } from './pages/kibana/instances';
@@ -322,13 +320,6 @@ const MonitoringApp: React.FC<{
                         path="/apm"
                         component={ApmOverviewPage}
                         codePaths={[CODE_PATH_APM]}
-                        fetchAllClusters={false}
-                      />
-
-                      <RouteInit
-                        path="/enterprise_search"
-                        component={EntSearchOverviewPage}
-                        codePaths={[CODE_PATH_ENTERPRISE_SEARCH]}
                         fetchAllClusters={false}
                       />
 
