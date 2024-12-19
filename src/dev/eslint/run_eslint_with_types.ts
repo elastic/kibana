@@ -85,6 +85,7 @@ export function runEslintWithTypes() {
                 ),
                 ...(project.config.exclude ?? []).flatMap((p) => ['--ignore-pattern', p]),
                 ...['--ignore-pattern', '**/*.json'],
+                ...['--ignore-pattern', '**/*.d.ts'],
                 ...['--ext', '.ts,.tsx'],
                 '--no-error-on-unmatched-pattern',
                 '--no-inline-config',
@@ -93,6 +94,9 @@ export function runEslintWithTypes() {
                 ...['--ignore-path', Path.relative(project.directory, ignoreFilePath)],
                 ...(flags.verbose ? ['--debug'] : []),
                 ...(flags.fix ? ['--fix'] : []),
+                ...(flags['max-warnings'] && typeof flags['max-warnings'] === 'string'
+                  ? ['--max-warnings', flags['max-warnings']]
+                  : []),
               ],
               {
                 cwd: project.directory,
@@ -157,11 +161,12 @@ export function runEslintWithTypes() {
       description:
         'Run ESLint in each TS project, feeding it the TS config so it can validate our code using the type information',
       flags: {
-        string: ['project'],
+        string: ['project', 'max-warnings'],
         boolean: ['fix'],
         help: `
           --project          Only run eslint on a specific ts project
           --fix              Run eslint in --fix mode
+          --max-warnings     Number of warnings to trigger nonzero exit code
         `,
       },
     }
