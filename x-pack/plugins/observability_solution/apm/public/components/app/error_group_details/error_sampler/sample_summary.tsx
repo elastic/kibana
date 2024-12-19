@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiText, EuiSpacer, EuiCodeBlock } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiCodeBlock, useEuiFontSize } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 
-const Label = euiStyled.div`
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
-  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
-  color: ${({ theme }) => theme.eui.euiColorDarkestShade};
+const Label = styled.div`
+  margin-bottom: ${({ theme }) => theme.euiTheme.size.xs};
+  font-size: ${() => useEuiFontSize('s').fontSize};
+  color: ${({ theme }) => theme.euiTheme.colors.darkestShade};
 `;
 
 interface Props {

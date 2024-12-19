@@ -52,7 +52,7 @@ describe('addConnector lib function', () => {
         _meta: {
           pipeline: {
             default_extract_binary_content: true,
-            default_name: 'ent-search-generic-ingestion',
+            default_name: 'search-default-ingestion',
             default_reduce_whitespace: true,
             default_run_ml_inference: true,
           },
@@ -89,7 +89,7 @@ describe('addConnector lib function', () => {
       name: 'index_name',
       pipeline: {
         extract_binary_content: true,
-        name: 'ent-search-generic-ingestion',
+        name: 'search-default-ingestion',
         reduce_whitespace: true,
         run_ml_inference: true,
       },
@@ -134,7 +134,7 @@ describe('addConnector lib function', () => {
       name: 'index_name',
       pipeline: {
         extract_binary_content: true,
-        name: 'ent-search-generic-ingestion',
+        name: 'search-default-ingestion',
         reduce_whitespace: true,
         run_ml_inference: true,
       },
@@ -264,7 +264,7 @@ describe('addConnector lib function', () => {
       name: '',
       pipeline: {
         extract_binary_content: true,
-        name: 'ent-search-generic-ingestion',
+        name: 'search-default-ingestion',
         reduce_whitespace: true,
         run_ml_inference: true,
       },

@@ -17,7 +17,7 @@ import {
   getWindowParametersForTrigger,
   getSnappedTimestamps,
   getSnappedWindowParameters,
-  LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR,
+  useLogRateAnalysisBarColors,
   LOG_RATE_ANALYSIS_TYPE,
   type WindowParameters,
 } from '@kbn/aiops-log-rate-analysis';
@@ -130,7 +130,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   const barStyle = {
     rect: {
       opacity: 1,
-      fill: LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR,
+      fill: useLogRateAnalysisBarColors().barHighlightColor,
     },
   };
 
