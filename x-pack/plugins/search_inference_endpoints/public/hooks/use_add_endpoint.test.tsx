@@ -41,24 +41,32 @@ const mockUseKibana = useKibana as jest.Mock;
 const mockAdd = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
+const mockOnSuccess = jest.fn();
+const mockOnError = jest.fn();
 
 describe('useAddEndpoint', () => {
-  mockUseKibana.mockReturnValue({
-    services: {
-      http: {
-        put: mockAdd,
-      },
-      notifications: {
-        toasts: {
-          addSuccess: mockAddSuccess,
-          addError: mockAddError,
+  beforeEach(() => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        http: {
+          put: mockAdd,
+        },
+        notifications: {
+          toasts: {
+            addSuccess: mockAddSuccess,
+            addError: mockAddError,
+          },
         },
       },
-    },
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('show call add inference endpoint and show success toast', async () => {
-    const { result } = renderHook(() => useAddEndpoint(), { wrapper });
+    const { result } = renderHook(() => useAddEndpoint(mockOnSuccess, mockOnError), { wrapper });
 
     result.current.mutate({ inferenceEndpoint: mockInferenceEndpoint });
 
@@ -73,15 +81,21 @@ describe('useAddEndpoint', () => {
     expect(mockAddSuccess).toHaveBeenCalledWith({
       title: i18n.ENDPOINT_ADDED_SUCCESS,
     });
+    expect(mockOnSuccess).toHaveBeenCalled();
+    expect(mockOnError).not.toHaveBeenCalled();
   });
 
   it('should show error toast on failure', async () => {
     const error = { body: { message: 'error' } };
     mockAdd.mockRejectedValue(error);
-    const { result } = renderHook(() => useAddEndpoint(), { wrapper });
+    const { result } = renderHook(() => useAddEndpoint(mockOnSuccess, mockOnError), { wrapper });
 
     result.current.mutate({ inferenceEndpoint: mockInferenceEndpoint });
 
-    await waitFor(() => expect(mockAddError).toHaveBeenCalled());
+    await waitFor(() => {
+      expect(mockAddError).toHaveBeenCalled();
+      expect(mockOnSuccess).not.toHaveBeenCalled();
+      expect(mockOnError).toHaveBeenCalled();
+    });
   });
 });

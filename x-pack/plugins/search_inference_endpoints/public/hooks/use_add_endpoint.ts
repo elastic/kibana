@@ -17,7 +17,7 @@ interface MutationArgs {
   inferenceEndpoint: InferenceEndpoint;
 }
 
-export const useAddEndpoint = (onSuccess?: () => void) => {
+export const useAddEndpoint = (onSuccess?: () => void, onError?: () => void) => {
   const queryClient = useQueryClient();
   const { services } = useKibana();
   const toasts = services.notifications?.toasts;
@@ -46,6 +46,9 @@ export const useAddEndpoint = (onSuccess?: () => void) => {
           title: i18n.ENDPOINT_CREATION_FAILED,
           toastMessage: error.body.message,
         });
+        if (onError) {
+          onError();
+        }
       },
     }
   );

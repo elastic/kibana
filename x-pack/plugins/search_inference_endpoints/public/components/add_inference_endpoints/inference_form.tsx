@@ -6,7 +6,7 @@
  */
 
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { InferenceServices } from '@kbn/inference-endpoint-ui-common';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useProviders } from '../../hooks/use_providers';
@@ -18,17 +18,30 @@ interface InferenceFormProps {
   onSubmitSuccess: (state: boolean) => void;
 }
 export const InferenceForm: React.FC<InferenceFormProps> = ({ onSubmitSuccess }) => {
-  const { mutate: addEndpoint } = useAddEndpoint(() => onSubmitSuccess(false));
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const onSuccess = useCallback(() => {
+    setIsLoading(false);
+    onSubmitSuccess(false);
+  }, [onSubmitSuccess]);
+  const onError = useCallback(() => {
+    setIsLoading(false);
+  }, []);
+  const { mutate: addEndpoint } = useAddEndpoint(
+    () => onSuccess(),
+    () => onError()
+  );
   const { data: providers } = useProviders();
   const { form } = useForm();
   const handleSubmit = useCallback(async () => {
+    setIsLoading(true);
     const { isValid, data } = await form.submit();
 
     if (isValid) {
       addEndpoint({
         inferenceEndpoint: data as InferenceEndpoint,
       });
-      return;
+    } else {
+      setIsLoading(false);
     }
   }, [addEndpoint, form]);
 
@@ -42,8 +55,8 @@ export const InferenceForm: React.FC<InferenceFormProps> = ({ onSubmitSuccess })
             fill
             color="success"
             size="m"
-            isLoading={form.isSubmitting}
-            disabled={!form.isValid && form.isSubmitted}
+            isLoading={form.isSubmitting || isLoading}
+            disabled={(!form.isValid && form.isSubmitted) || isLoading}
             data-test-subj="add-inference-endpoint-submit-button"
             onClick={handleSubmit}
           >
