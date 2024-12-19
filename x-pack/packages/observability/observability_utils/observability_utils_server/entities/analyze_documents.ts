@@ -66,7 +66,7 @@ export async function analyzeDocuments({
       })
       .then((response) => ({
         hits: response.hits.hits.map((hit) =>
-          mapValues(hit.fields!, (value) => (value.length === 1 ? value[0] : value))
+          mapValues(hit.fields!, (value) => (value?.length === 1 ? value[0] : value))
         ),
         total: response.hits.total,
       })),
