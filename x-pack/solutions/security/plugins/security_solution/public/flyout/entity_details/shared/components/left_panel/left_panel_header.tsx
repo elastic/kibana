@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTab, EuiTabs,  useEuiTheme } from '@elastic/eui';
+import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import type { ReactElement, VFC } from 'react';
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
