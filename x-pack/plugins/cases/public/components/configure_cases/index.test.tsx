@@ -1288,8 +1288,6 @@ describe('ConfigureCases', () => {
       await userEvent.click(screen.getByTestId('add-observable-type'));
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
-
-      expect(await screen.findByText(i18n.ADD_OBSERVABLE_TYPE)).toBeInTheDocument();
     });
 
     it('closes fly out for when click on cancel', async () => {

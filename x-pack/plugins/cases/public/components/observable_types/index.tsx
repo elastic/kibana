@@ -52,6 +52,10 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
     [handleEditObservableType]
   );
 
+  if (!permissions.settings) {
+    return null;
+  }
+
   return (
     <EuiDescribedFormGroup
       fullWidth
