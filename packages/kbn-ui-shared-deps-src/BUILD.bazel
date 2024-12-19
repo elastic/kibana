@@ -29,7 +29,7 @@ webpack_cli(
     "//packages/kbn-monaco",
     "//packages/kbn-datemath",
     "//src/platform/packages/shared/kbn-analytics",
-    "//packages/kbn-crypto-browser",
+    "//src/platform/packages/shared/kbn-crypto-browser",
     "//packages/kbn-es-query",
     "//packages/kbn-search-errors",
     "//packages/kbn-std",
