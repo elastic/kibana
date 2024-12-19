@@ -114,7 +114,12 @@ tags:
   - description: Manage and interact with Security Assistant resources.
     name: Security AI Assistant API
     x-displayName: Security AI assistant
-  - description: You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.
+  - description: |
+      Use the detections APIs to create and manage detection rules. Detection rules search events and external alerts sent to Elastic Security and generate detection alerts from any hits. Alerts are displayed on the **Alerts** page and can be assigned and triaged, using the alert status to mark them as open, closed, or acknowledged.
+      > warn
+      > If the API key used for authorization has different privileges than the key that created or most recently updated a rule, the rule behavior might change.
+
+      > If the API key that created a rule is deleted, or the user that created the rule becomes inactive, the rule will stop running.
     name: Security Detections API
     x-displayName: Security detections
   - description: Endpoint Exceptions API allows you to manage detection rule endpoint exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.
@@ -126,10 +131,67 @@ tags:
   - description: ''
     name: Security Entity Analytics API
     x-displayName: Security entity analytics
-  - description: Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.
+  - description: |
+      Exceptions are associated with detection and endpoint rules, and are used to prevent a rule from generating an alert from incoming events, even when the rule's other criteria are met. They can help reduce the number of false positives and prevent trusted processes and network activity from generating unnecessary alerts.
+
+      Exceptions are made up of:
+
+      * **Exception containers**: A container for related exceptions. Generally, a single exception container contains all the exception items relevant for a subset of rules. For example, a container can be used to group together network-related exceptions that are relevant for a large number of network rules. The container can then be associated with all the relevant rules.
+      * **Exception items**: The query (fields, values, and logic) used to prevent rules from generating alerts. When an exception item's query evaluates to `true`, the rule does not generate an alert.
+
+      For detection rules, you can also use lists to define rule exceptions. A list holds multiple values of the same Elasticsearch data type, such as IP addresses. These values are used to determine when an exception prevents an alert from being generated.
+      > info
+      > You cannot use lists with endpoint rule exceptions.
+
+      > info
+      > Only exception containers can be associated with rules. You cannot directly associate an exception item or a list container with a rule. To use list exceptions, create an exception item that references the relevant list container.
+
+      ## Exceptions requirements
+
+      Before you can start working with exceptions that use value lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the [Create list data streams](../operation/operation-createlistindex) endpoint. Once these data streams are created, your role needs privileges to manage rules. For a complete list of requirements, refer to [Enable and access detections](https://www.elastic.co/guide/en/serverless/current/security-detections-requirements.html#enable-detections-ui).
     name: Security Exceptions API
     x-displayName: Security exceptions
-  - description: Lists API allows you to manage lists of keywords, IPs or IP ranges items.
+  - description: |
+      Lists can be used with detection rule exceptions to define values that prevent a rule from generating alerts.
+
+      Lists are made up of:
+
+      * **List containers**: A container for values of the same Elasticsearch data type. The following data types can be used:
+          * `boolean`
+          * `byte`
+          * `date`
+          * `date_nanos`
+          * `date_range`
+          * `double`
+          * `double_range`
+          * `float`
+          * `float_range`
+          * `half_float`
+          * `integer`
+          * `integer_range`
+          * `ip`
+          * `ip_range`
+          * `keyword`
+          * `long`
+          * `long_range`
+          * `short`
+          * `text`
+      * **List items**: The values used to determine whether the exception prevents an alert from being generated.
+
+      All list items in the same list container must be of the same data type, and each item defines a single value. For example, an IP list container named `internal-ip-addresses-southport` contains five items, where each item defines one internal IP address:
+      1. `192.168.1.1`
+      2. `192.168.1.3`
+      3. `192.168.1.18`
+      4. `192.168.1.12`
+      5. `192.168.1.7`
+
+      To use these IP addresses as values for defining rule exceptions, use the Security exceptions API to [create an exception list item](../operation/operation-createexceptionlistitem) that references the `internal-ip-addresses-southport` list.
+      > info
+      > Lists cannot be added directly to rules, nor do they define the operators used to determine when exceptions are applied (`is in list`, `is not in list`). Use an exception item to define the operator and associate it with an [exception container](../operation/operation-createexceptionlist). You can then add the exception container to a rule's `exceptions_list` object.
+
+      ## Lists requirements
+
+      Before you can start using lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the [Create list data streams](../operation/operation-createlistindex) endpoint. Once these data streams are created, your role needs privileges to manage rules. Refer to [Enable and access detections](https://www.elastic.co/guide/en/serverless/current/security-detections-requirements.html#enable-detections-ui) for a complete list of requirements.
     name: Security Lists API
     x-displayName: Security lists
   - description: Run live queries, manage packs and saved queries.
@@ -154,14 +216,6 @@ paths:
       description: You do not need any Kibana feature privileges to run this API.
       operationId: get-actions-connector-types
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A filter to limit the retrieved connector types to those that support a specific feature (such as alerting or cases).
           in: query
           name: feature_id
@@ -185,14 +239,6 @@ paths:
       description: 'WARNING: When you delete a connector, it cannot be recovered.'
       operationId: delete-actions-connector-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -216,14 +262,6 @@ paths:
     get:
       operationId: get-actions-connector-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: An identifier for the connector.
           in: path
           name: id
@@ -280,14 +318,6 @@ paths:
     post:
       operationId: post-actions-connector-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -435,14 +465,6 @@ paths:
     put:
       operationId: put-actions-connector-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -573,14 +595,6 @@ paths:
       description: You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.
       operationId: post-actions-connector-id-execute
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -697,15 +711,7 @@ paths:
   /api/actions/connectors:
     get:
       operationId: get-actions-connectors
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           description: Indicates a successful call.
@@ -722,14 +728,6 @@ paths:
     delete:
       operationId: delete-alerting-rule-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -759,14 +757,6 @@ paths:
     get:
       operationId: get-alerting-rule-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: The identifier for the rule.
           in: path
           name: id
@@ -1420,14 +1410,6 @@ paths:
     post:
       operationId: post-alerting-rule-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -2344,14 +2326,6 @@ paths:
     put:
       operationId: put-alerting-rule-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -3227,14 +3201,6 @@ paths:
     post:
       operationId: post-alerting-rule-id-disable
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -3277,14 +3243,6 @@ paths:
     post:
       operationId: post-alerting-rule-id-enable
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -3315,14 +3273,6 @@ paths:
     post:
       operationId: post-alerting-rule-id-mute-all
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -3353,14 +3303,6 @@ paths:
     post:
       operationId: post-alerting-rule-id-unmute-all
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -3391,14 +3333,6 @@ paths:
     post:
       operationId: post-alerting-rule-id-update-api-key
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -3431,14 +3365,6 @@ paths:
     post:
       operationId: post-alerting-rule-rule-id-alert-alert-id-mute
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -3475,14 +3401,6 @@ paths:
     post:
       operationId: post-alerting-rule-rule-id-alert-alert-id-unmute
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -3519,14 +3437,6 @@ paths:
     get:
       operationId: get-alerting-rules-find
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: The number of rules to return per page.
           in: query
           name: per_page
@@ -5201,14 +5111,6 @@ paths:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: get-dashboards-dashboard
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: The page number to return. Default is "1".
           in: query
           name: page
@@ -5332,14 +5234,6 @@ paths:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: delete-dashboards-dashboard-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -5363,14 +5257,6 @@ paths:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: get-dashboards-dashboard-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A unique identifier for the dashboard.
           in: path
           name: id
@@ -5835,14 +5721,6 @@ paths:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: post-dashboards-dashboard-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -6677,14 +6555,6 @@ paths:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: put-dashboards-dashboard-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -11330,15 +11200,7 @@ paths:
   /api/fleet/agent_download_sources:
     get:
       operationId: get-fleet-agent-download-sources
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -11405,14 +11267,6 @@ paths:
     post:
       operationId: post-fleet-agent-download-sources
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -11501,14 +11355,6 @@ paths:
       description: Delete an agent binary download source by ID.
       operationId: delete-fleet-agent-download-sources-sourceid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -11557,14 +11403,6 @@ paths:
       description: Get an agent binary download source by ID.
       operationId: get-fleet-agent-download-sources-sourceid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: sourceId
           required: true
@@ -11626,14 +11464,6 @@ paths:
       description: Update an agent binary download source by ID.
       operationId: put-fleet-agent-download-sources-sourceid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -11726,14 +11556,6 @@ paths:
     get:
       operationId: get-fleet-agent-policies
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: page
           required: false
@@ -12313,14 +12135,6 @@ paths:
     post:
       operationId: post-fleet-agent-policies
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -13014,14 +12828,6 @@ paths:
     post:
       operationId: post-fleet-agent-policies-bulk-get
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -13568,14 +13374,6 @@ paths:
       description: Get an agent policy by ID.
       operationId: get-fleet-agent-policies-agentpolicyid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: agentPolicyId
           required: true
@@ -14098,14 +13896,6 @@ paths:
       description: Update an agent policy by ID.
       operationId: put-fleet-agent-policies-agentpolicyid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -14808,14 +14598,6 @@ paths:
       description: Copy an agent policy by ID.
       operationId: post-fleet-agent-policies-agentpolicyid-copy
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -15360,14 +15142,6 @@ paths:
       description: Download an agent policy by ID.
       operationId: get-fleet-agent-policies-agentpolicyid-download
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: agentPolicyId
           required: true
@@ -15435,14 +15209,6 @@ paths:
       description: Get a full agent policy by ID.
       operationId: get-fleet-agent-policies-agentpolicyid-full
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: agentPolicyId
           required: true
@@ -15792,14 +15558,6 @@ paths:
       description: Get a list of outputs associated with agent policy by policy id.
       operationId: get-fleet-agent-policies-agentpolicyid-outputs
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: agentPolicyId
           required: true
@@ -15897,14 +15655,6 @@ paths:
       description: Delete an agent policy by ID.
       operationId: post-fleet-agent-policies-delete
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -15966,14 +15716,6 @@ paths:
       description: Get a list of outputs associated with agent policies.
       operationId: post-fleet-agent-policies-outputs
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -16088,14 +15830,6 @@ paths:
     get:
       operationId: get-fleet-agent-status
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: policyId
           required: false
@@ -16184,14 +15918,6 @@ paths:
     get:
       operationId: get-fleet-agent-status-data
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: agentsIds
           required: true
@@ -16267,14 +15993,6 @@ paths:
     get:
       operationId: get-fleet-agents
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: page
           required: false
@@ -16654,14 +16372,6 @@ paths:
     post:
       operationId: post-fleet-agents
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -16721,14 +16431,6 @@ paths:
       description: Delete an agent by ID.
       operationId: delete-fleet-agents-agentid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -16779,14 +16481,6 @@ paths:
       description: Get an agent by ID.
       operationId: get-fleet-agents-agentid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: agentId
           required: true
@@ -17109,14 +16803,6 @@ paths:
       description: Update an agent by ID.
       operationId: put-fleet-agents-agentid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -17454,14 +17140,6 @@ paths:
     post:
       operationId: post-fleet-agents-agentid-actions
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -17599,14 +17277,6 @@ paths:
     post:
       operationId: post-fleet-agents-agentid-reassign
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -17662,14 +17332,6 @@ paths:
     post:
       operationId: post-fleet-agents-agentid-request-diagnostics
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -17732,14 +17394,6 @@ paths:
     post:
       operationId: post-fleet-agents-agentid-unenroll
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -17773,14 +17427,6 @@ paths:
     post:
       operationId: post-fleet-agents-agentid-upgrade
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -17842,14 +17488,6 @@ paths:
     get:
       operationId: get-fleet-agents-agentid-uploads
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: agentId
           required: true
@@ -17923,14 +17561,6 @@ paths:
     get:
       operationId: get-fleet-agents-action-status
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: page
           required: false
@@ -18089,14 +17719,6 @@ paths:
     post:
       operationId: post-fleet-agents-actions-actionid-cancel
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -18183,15 +17805,7 @@ paths:
   /api/fleet/agents/available_versions:
     get:
       operationId: get-fleet-agents-available-versions
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -18230,14 +17844,6 @@ paths:
     post:
       operationId: post-fleet-agents-bulk-reassign
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -18304,14 +17910,6 @@ paths:
     post:
       operationId: post-fleet-agents-bulk-request-diagnostics
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -18378,14 +17976,6 @@ paths:
     post:
       operationId: post-fleet-agents-bulk-unenroll
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -18457,14 +18047,6 @@ paths:
     post:
       operationId: post-fleet-agents-bulk-update-agent-tags
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -18536,14 +18118,6 @@ paths:
     post:
       operationId: post-fleet-agents-bulk-upgrade
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -18622,14 +18196,6 @@ paths:
       description: Delete a file uploaded by an agent.
       operationId: delete-fleet-agents-files-fileid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -18682,14 +18248,6 @@ paths:
       description: Get a file uploaded by an agent.
       operationId: get-fleet-agents-files-fileid-filename
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: fileId
           required: true
@@ -18729,15 +18287,7 @@ paths:
   /api/fleet/agents/setup:
     get:
       operationId: get-fleet-agents-setup
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -18798,14 +18348,6 @@ paths:
     post:
       operationId: post-fleet-agents-setup
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -18864,14 +18406,6 @@ paths:
     get:
       operationId: get-fleet-agents-tags
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: kuery
           required: false
@@ -18921,14 +18455,6 @@ paths:
     get:
       operationId: get-fleet-check-permissions
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: fleetServerSetup
           required: false
@@ -18975,15 +18501,7 @@ paths:
   /api/fleet/data_streams:
     get:
       operationId: get-fleet-data-streams
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -19081,14 +18599,6 @@ paths:
     get:
       operationId: get-fleet-enrollment-api-keys
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: page
           required: false
@@ -19212,14 +18722,6 @@ paths:
     post:
       operationId: post-fleet-enrollment-api-keys
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -19311,14 +18813,6 @@ paths:
       description: Revoke an enrollment API key by ID by marking it as inactive.
       operationId: delete-fleet-enrollment-api-keys-keyid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -19369,14 +18863,6 @@ paths:
       description: Get an enrollment API key by ID.
       operationId: get-fleet-enrollment-api-keys-keyid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: keyId
           required: true
@@ -19445,14 +18931,6 @@ paths:
     post:
       operationId: post-fleet-epm-bulk-assets
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -19544,14 +19022,6 @@ paths:
     get:
       operationId: get-fleet-epm-categories
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: prerelease
           required: false
@@ -19616,14 +19086,6 @@ paths:
     post:
       operationId: post-fleet-epm-custom-integrations
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -19759,14 +19221,6 @@ paths:
     get:
       operationId: get-fleet-epm-data-streams
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: type
           required: false
@@ -19842,14 +19296,6 @@ paths:
     get:
       operationId: get-fleet-epm-packages
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: category
           required: false
@@ -20242,14 +19688,6 @@ paths:
     post:
       operationId: post-fleet-epm-packages
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -20370,14 +19808,6 @@ paths:
     post:
       operationId: post-fleet-epm-packages-bulk
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -20553,14 +19983,6 @@ paths:
     delete:
       operationId: delete-fleet-epm-packages-pkgname-pkgversion
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -20668,14 +20090,6 @@ paths:
     get:
       operationId: get-fleet-epm-packages-pkgname-pkgversion
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: pkgName
           required: true
@@ -21148,14 +20562,6 @@ paths:
     post:
       operationId: post-fleet-epm-packages-pkgname-pkgversion
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -21298,14 +20704,6 @@ paths:
     put:
       operationId: put-fleet-epm-packages-pkgname-pkgversion
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -21768,14 +21166,6 @@ paths:
     get:
       operationId: get-fleet-epm-packages-pkgname-pkgversion-filepath
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: pkgName
           required: true
@@ -21820,14 +21210,6 @@ paths:
     post:
       operationId: post-fleet-epm-packages-pkgname-pkgversion-transforms-authorize
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -21913,14 +21295,6 @@ paths:
     get:
       operationId: get-fleet-epm-packages-pkgname-stats
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: pkgName
           required: true
@@ -21968,14 +21342,6 @@ paths:
     get:
       operationId: get-fleet-epm-packages-installed
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: dataStreamType
           required: false
@@ -22121,15 +21487,7 @@ paths:
   /api/fleet/epm/packages/limited:
     get:
       operationId: get-fleet-epm-packages-limited
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -22168,14 +21526,6 @@ paths:
     get:
       operationId: get-fleet-epm-templates-pkgname-pkgversion-inputs
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: pkgName
           required: true
@@ -22275,15 +21625,7 @@ paths:
   /api/fleet/epm/verification_key_id:
     get:
       operationId: get-fleet-epm-verification-key-id
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -22320,15 +21662,7 @@ paths:
   /api/fleet/fleet_server_hosts:
     get:
       operationId: get-fleet-fleet-server-hosts
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -22401,14 +21735,6 @@ paths:
     post:
       operationId: post-fleet-fleet-server-hosts
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -22509,14 +21835,6 @@ paths:
       description: Delete a Fleet Server host by ID.
       operationId: delete-fleet-fleet-server-hosts-itemid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -22565,14 +21883,6 @@ paths:
       description: Get a Fleet Server host by ID.
       operationId: get-fleet-fleet-server-hosts-itemid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: itemId
           required: true
@@ -22640,14 +21950,6 @@ paths:
       description: Update a Fleet Server host by ID.
       operationId: put-fleet-fleet-server-hosts-itemid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -22745,14 +22047,6 @@ paths:
     post:
       operationId: post-fleet-health-check
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -22827,14 +22121,6 @@ paths:
     get:
       operationId: get-fleet-kubernetes
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: download
           required: false
@@ -22886,14 +22172,6 @@ paths:
     get:
       operationId: get-fleet-kubernetes-download
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: download
           required: false
@@ -22955,14 +22233,6 @@ paths:
     post:
       operationId: post-fleet-logstash-api-keys
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -23006,14 +22276,6 @@ paths:
     post:
       operationId: post-fleet-message-signing-service-rotate-key-pair
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -23078,15 +22340,7 @@ paths:
   /api/fleet/outputs:
     get:
       operationId: get-fleet-outputs
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -23812,14 +23066,6 @@ paths:
     post:
       operationId: post-fleet-outputs
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -25227,14 +24473,6 @@ paths:
       description: Delete output by ID.
       operationId: delete-fleet-outputs-outputid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -25299,14 +24537,6 @@ paths:
       description: Get output by ID.
       operationId: get-fleet-outputs-outputid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: outputId
           required: true
@@ -26027,14 +25257,6 @@ paths:
       description: Update output by ID.
       operationId: put-fleet-outputs-outputid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -27425,14 +26647,6 @@ paths:
     get:
       operationId: get-fleet-outputs-outputid-health
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: outputId
           required: true
@@ -27483,14 +26697,6 @@ paths:
     get:
       operationId: get-fleet-package-policies
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: page
           required: false
@@ -27956,14 +27162,6 @@ paths:
     post:
       operationId: post-fleet-package-policies
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -28807,14 +28005,6 @@ paths:
     post:
       operationId: post-fleet-package-policies-bulk-get
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -29269,14 +28459,6 @@ paths:
       description: Delete a package policy by ID.
       operationId: delete-fleet-package-policies-packagepolicyid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -29330,14 +28512,6 @@ paths:
       description: Get a package policy by ID.
       operationId: get-fleet-package-policies-packagepolicyid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: packagePolicyId
           required: true
@@ -29771,14 +28945,6 @@ paths:
       description: Update a package policy by ID.
       operationId: put-fleet-package-policies-packagepolicyid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -30620,14 +29786,6 @@ paths:
     post:
       operationId: post-fleet-package-policies-delete
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -30758,14 +29916,6 @@ paths:
       description: Upgrade a package policy to a newer package version.
       operationId: post-fleet-package-policies-upgrade
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -30839,14 +29989,6 @@ paths:
     post:
       operationId: post-fleet-package-policies-upgrade-dryrun
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -31639,15 +30781,7 @@ paths:
   /api/fleet/proxies:
     get:
       operationId: get-fleet-proxies
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -31726,14 +30860,6 @@ paths:
     post:
       operationId: post-fleet-proxies
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -31846,14 +30972,6 @@ paths:
       description: Delete a proxy by ID
       operationId: delete-fleet-proxies-itemid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -31902,14 +31020,6 @@ paths:
       description: Get a proxy by ID.
       operationId: get-fleet-proxies-itemid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: itemId
           required: true
@@ -31983,14 +31093,6 @@ paths:
       description: Update a proxy by ID.
       operationId: put-fleet-proxies-itemid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -32104,14 +31206,6 @@ paths:
     post:
       operationId: post-fleet-service-tokens
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -32168,15 +31262,7 @@ paths:
   /api/fleet/settings:
     get:
       operationId: get-fleet-settings
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -32265,14 +31351,6 @@ paths:
     put:
       operationId: put-fleet-settings
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -32400,14 +31478,6 @@ paths:
     post:
       operationId: post-fleet-setup
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -32479,14 +31549,6 @@ paths:
       description: List the metadata for the latest uninstall tokens per agent policy.
       operationId: get-fleet-uninstall-tokens
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: Partial match filtering for policy IDs
           in: query
           name: policyId
@@ -32580,14 +31642,6 @@ paths:
       description: Get one decrypted uninstall token by its ID.
       operationId: get-fleet-uninstall-tokens-uninstalltokenid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: uninstallTokenId
           required: true
@@ -34491,6 +33545,58 @@ paths:
       tags:
         - Security Entity Analytics API
       x-beta: true
+  /api/risk_score/engine/saved_object/configure:
+    patch:
+      description: Configuring the Risk Engine Saved Object
+      operationId: ConfigureRiskEngineSavedObject
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                exclude_alert_statuses:
+                  items:
+                    type: string
+                  type: array
+                exclude_alert_tags:
+                  items:
+                    type: string
+                  type: array
+                range:
+                  type: object
+                  properties:
+                    end:
+                      type: string
+                    start:
+                      type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  risk_engine_saved_object_configured:
+                    type: boolean
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_TaskManagerUnavailableResponse'
+          description: Task manager is unavailable
+        default:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_ConfigureRiskEngineSavedObjectErrorResponse'
+          description: Unexpected error
+      summary: Configure the Risk Engine Saved Object
+      tags:
+        - Security Entity Analytics API
+      x-beta: true
   /api/risk_score/engine/schedule_now:
     post:
       description: Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
@@ -35225,14 +34331,6 @@ paths:
     get:
       operationId: get-security-role
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: If `true` and the response contains any privileges that are associated with deprecated features, they are omitted in favor of details about the appropriate replacement feature privileges.
           in: query
           name: replaceDeprecatedPrivileges
@@ -35250,14 +34348,6 @@ paths:
     delete:
       operationId: delete-security-role-name
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -35281,14 +34371,6 @@ paths:
     get:
       operationId: get-security-role-name
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: The role name.
           in: path
           name: name
@@ -35313,14 +34395,6 @@ paths:
       description: Create a new Kibana role or update the attributes of an existing role. Kibana roles are stored in the Elasticsearch native realm.
       operationId: put-security-role-name
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -35528,14 +34602,6 @@ paths:
     post:
       operationId: post-security-roles
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -35736,14 +34802,6 @@ paths:
     get:
       operationId: get-spaces-space
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: Specifies which authorization checks are applied to the API call. The default value is `any`.
           in: query
           name: purpose
@@ -35791,14 +34849,6 @@ paths:
     post:
       operationId: post-spaces-space
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -35859,14 +34909,6 @@ paths:
       description: When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.
       operationId: delete-spaces-space-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -35892,14 +34934,6 @@ paths:
     get:
       operationId: get-spaces-space-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: The space identifier.
           in: path
           name: id
@@ -35921,14 +34955,6 @@ paths:
     put:
       operationId: put-spaces-space-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -35994,14 +35020,6 @@ paths:
     get:
       operationId: get-status
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: Set to "true" to get the response in v7 format.
           in: query
           name: v7format
@@ -41427,9 +40445,9 @@ components:
         - assistant
       type: string
     Security_AI_Assistant_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_AI_Assistant_API_NormalizedAnonymizationFieldError:
       type: object
@@ -44193,9 +43211,9 @@ components:
             - severity
         - $ref: '#/components/schemas/Security_Detections_API_NewTermsRuleCreateFields'
     Security_Detections_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Detections_API_NormalizedRuleAction:
       additionalProperties: false
@@ -47397,9 +46415,9 @@ components:
         - text
       type: string
     Security_Endpoint_Exceptions_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Endpoint_Exceptions_API_PlatformErrorResponse:
       type: object
@@ -47700,9 +46718,9 @@ components:
       required:
         - hostStatuses
     Security_Endpoint_Management_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Endpoint_Management_API_NoParametersRequestSchema:
       type: object
@@ -48021,6 +47039,27 @@ components:
       required:
         - cleanup_successful
         - errors
+    Security_Entity_Analytics_API_ConfigureRiskEngineSavedObjectErrorResponse:
+      type: object
+      properties:
+        errors:
+          items:
+            type: object
+            properties:
+              error:
+                type: string
+              seq:
+                type: integer
+            required:
+              - seq
+              - error
+          type: array
+        risk_engine_saved_object_configured:
+          example: false
+          type: boolean
+      required:
+        - risk_engine_saved_object_configured
+        - errors
     Security_Entity_Analytics_API_CreateAssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityRecordIdParts'
@@ -48198,6 +47237,7 @@ components:
       enum:
         - user
         - host
+        - service
       type: string
     Security_Entity_Analytics_API_HostEntity:
       type: object
@@ -48883,9 +47923,9 @@ components:
         - text
       type: string
     Security_Exceptions_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Exceptions_API_PlatformErrorResponse:
       type: object
@@ -49129,9 +48169,9 @@ components:
         - text
       type: string
     Security_Lists_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Lists_API_PlatformErrorResponse:
       type: object

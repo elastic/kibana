@@ -273,7 +273,15 @@
             "section": "def-common.ThemeServiceStart",
             "text": "ThemeServiceStart"
           },
-          "; }"
+          "; userProfile?: Pick<",
+          {
+            "pluginId": "@kbn/core-user-profile-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+            "section": "def-public.UserProfileService",
+            "text": "UserProfileService"
+          },
+          ", \"getUserProfile$\"> | undefined; }"
         ],
         "path": "packages/react/kibana_mount/to_mount_point.tsx",
         "deprecated": false,

@@ -20,10 +20,10 @@
     "classes": [
       {
         "parentPluginId": "@kbn/ml-url-state",
-        "id": "def-common.PageUrlStateService",
+        "id": "def-common.UrlStateService",
         "type": "Class",
         "tags": [],
-        "label": "PageUrlStateService",
+        "label": "UrlStateService",
         "description": [
           "\nService for managing URL state of particular page."
         ],
@@ -32,21 +32,21 @@
             "pluginId": "@kbn/ml-url-state",
             "scope": "common",
             "docId": "kibKbnMlUrlStatePluginApi",
-            "section": "def-common.PageUrlStateService",
-            "text": "PageUrlStateService"
+            "section": "def-common.UrlStateService",
+            "text": "UrlStateService"
           },
           "<T>"
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-url-state",
-            "id": "def-common.PageUrlStateService.getPageUrlState$",
+            "id": "def-common.UrlStateService.getUrlState$",
             "type": "Function",
             "tags": [],
-            "label": "getPageUrlState$",
+            "label": "getUrlState$",
             "description": [
               "\nProvides updates for the page URL state."
             ],
@@ -55,7 +55,7 @@
               "Observable",
               "<T>"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -63,15 +63,15 @@
           },
           {
             "parentPluginId": "@kbn/ml-url-state",
-            "id": "def-common.PageUrlStateService.getPageUrlState",
+            "id": "def-common.UrlStateService.getUrlState",
             "type": "Function",
             "tags": [],
-            "label": "getPageUrlState",
+            "label": "getUrlState",
             "description": [],
             "signature": [
               "() => T | null"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -79,7 +79,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-url-state",
-            "id": "def-common.PageUrlStateService.updateUrlState",
+            "id": "def-common.UrlStateService.updateUrlState",
             "type": "Function",
             "tags": [],
             "label": "updateUrlState",
@@ -87,13 +87,13 @@
             "signature": [
               "(update: Partial<T>, replaceState?: boolean | undefined) => void"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ml-url-state",
-                "id": "def-common.PageUrlStateService.updateUrlState.$1",
+                "id": "def-common.UrlStateService.updateUrlState.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "update",
@@ -101,14 +101,14 @@
                 "signature": [
                   "Partial<T>"
                 ],
-                "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+                "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/ml-url-state",
-                "id": "def-common.PageUrlStateService.updateUrlState.$2",
+                "id": "def-common.UrlStateService.updateUrlState.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "replaceState",
@@ -116,7 +116,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+                "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -126,7 +126,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-url-state",
-            "id": "def-common.PageUrlStateService.setCurrentState",
+            "id": "def-common.UrlStateService.setCurrentState",
             "type": "Function",
             "tags": [],
             "label": "setCurrentState",
@@ -136,13 +136,13 @@
             "signature": [
               "(currentState: T) => void"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ml-url-state",
-                "id": "def-common.PageUrlStateService.setCurrentState.$1",
+                "id": "def-common.UrlStateService.setCurrentState.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "currentState",
@@ -150,7 +150,7 @@
                 "signature": [
                   "T"
                 ],
-                "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+                "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -160,7 +160,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-url-state",
-            "id": "def-common.PageUrlStateService.setUpdateCallback",
+            "id": "def-common.UrlStateService.setUpdateCallback",
             "type": "Function",
             "tags": [],
             "label": "setUpdateCallback",
@@ -170,13 +170,13 @@
             "signature": [
               "(callback: (update: Partial<T>, replaceState?: boolean | undefined) => void) => void"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ml-url-state",
-                "id": "def-common.PageUrlStateService.setUpdateCallback.$1",
+                "id": "def-common.UrlStateService.setUpdateCallback.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "callback",
@@ -184,7 +184,7 @@
                 "signature": [
                   "(update: Partial<T>, replaceState?: boolean | undefined) => void"
                 ],
-                "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+                "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -209,7 +209,7 @@
         "signature": [
           "(queryParam: string) => boolean"
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -223,7 +223,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -250,7 +250,7 @@
           },
           "<any>"
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -264,7 +264,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -285,7 +285,7 @@
           "UrlState",
           ">>"
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -317,7 +317,7 @@
         "signature": [
           "({ children }: { children?: React.ReactNode; }) => React.JSX.Element"
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -331,7 +331,7 @@
             "signature": [
               "{ children?: React.ReactNode; }"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -363,12 +363,12 @@
             "pluginId": "@kbn/ml-url-state",
             "scope": "common",
             "docId": "kibKbnMlUrlStatePluginApi",
-            "section": "def-common.PageUrlStateService",
-            "text": "PageUrlStateService"
+            "section": "def-common.UrlStateService",
+            "text": "UrlStateService"
           },
           "<T[\"pageUrlState\"]>]"
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -382,7 +382,7 @@
             "signature": [
               "T[\"pageKey\"]"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -397,7 +397,7 @@
             "signature": [
               "T[\"pageUrlState\"] | undefined"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -432,7 +432,7 @@
           },
           "<unknown>, value?: unknown, replaceState?: boolean | undefined) => void]"
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -452,7 +452,7 @@
                 "text": "Accessor"
               }
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -480,7 +480,7 @@
           },
           "<TValue>"
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -494,7 +494,7 @@
             "signature": [
               "[id: string]:  TValue"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -508,7 +508,7 @@
         "tags": [],
         "label": "ListingPageUrlState",
         "description": [],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -519,7 +519,7 @@
             "tags": [],
             "label": "pageSize",
             "description": [],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -530,7 +530,7 @@
             "tags": [],
             "label": "pageIndex",
             "description": [],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -541,7 +541,7 @@
             "tags": [],
             "label": "sortField",
             "description": [],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -552,7 +552,7 @@
             "tags": [],
             "label": "sortDirection",
             "description": [],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -566,7 +566,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -580,7 +580,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -594,7 +594,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -608,7 +608,7 @@
         "tags": [],
         "label": "PageUrlState",
         "description": [],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -619,7 +619,7 @@
             "tags": [],
             "label": "pageKey",
             "description": [],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -633,7 +633,7 @@
             "signature": [
               "object"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -653,7 +653,7 @@
         "signature": [
           "\"_a\" | \"_g\""
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -684,7 +684,7 @@
           },
           "<any>, value?: any, replaceState?: boolean | undefined) => void"
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -699,7 +699,7 @@
             "signature": [
               "\"_a\" | \"_g\""
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -721,7 +721,7 @@
               },
               "<any>"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -735,7 +735,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -749,7 +749,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

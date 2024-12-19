@@ -107,6 +107,38 @@ describe('Overview - Migrate system indices', () => {
       expect(exists('viewSystemIndicesStateButton')).toBe(true);
     });
 
+    test('handles confirmModal submission', async () => {
+      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+        migration_status: 'MIGRATION_NEEDED',
+      });
+
+      testBed = await setupOverviewPage(httpSetup);
+
+      const { exists, component, find } = testBed;
+
+      component.update();
+
+      expect(exists('startSystemIndicesMigrationButton')).toBe(true);
+      await act(async () => {
+        find('startSystemIndicesMigrationButton').simulate('click');
+      });
+      component.update();
+
+      expect(exists('migrationConfirmModal')).toBe(true);
+
+      const modal = document.body.querySelector('[data-test-subj="migrationConfirmModal"]');
+      const confirmButton: HTMLButtonElement | null = modal!.querySelector(
+        '[data-test-subj="confirmModalConfirmButton"]'
+      );
+
+      await act(async () => {
+        confirmButton!.click();
+      });
+      component.update();
+
+      expect(exists('migrationConfirmModal')).toBe(false);
+    });
+
     test('Handles errors when migrating', async () => {
       httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
         migration_status: 'MIGRATION_NEEDED',
@@ -124,6 +156,16 @@ describe('Overview - Migrate system indices', () => {
         find('startSystemIndicesMigrationButton').simulate('click');
       });
 
+      component.update();
+
+      const modal = document.body.querySelector('[data-test-subj="migrationConfirmModal"]');
+      const confirmButton: HTMLButtonElement | null = modal!.querySelector(
+        '[data-test-subj="confirmModalConfirmButton"]'
+      );
+
+      await act(async () => {
+        confirmButton!.click();
+      });
       component.update();
 
       // Error is displayed
