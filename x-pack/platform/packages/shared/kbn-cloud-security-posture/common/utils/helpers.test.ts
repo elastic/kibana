@@ -318,8 +318,18 @@ describe('test helper methods', () => {
   });
 
   describe('buildEntityAlertsQuery', () => {
-    const getExpectedAlertsQuery = (size?: number, severity?: string) => {
+    const field = 'host.name';
+    const query = 'exampleHost';
+    const to = 'Tomorrow';
+    const from = 'Today';
+    const getExpectedAlertsQuery = (
+      size?: number,
+      severity?: string,
+      sortField?: string,
+      sortDirection?: 'asc' | 'desc'
+    ) => {
       return {
+        sort: sortField ? [{ [sortField]: sortDirection }] : [],
         size: size || 0,
         _source: false,
         fields: [
@@ -379,10 +389,6 @@ describe('test helper methods', () => {
     };
 
     it('should return the correct query when given all params', () => {
-      const field = 'host.name';
-      const query = 'exampleHost';
-      const to = 'Tomorrow';
-      const from = 'Today';
       const size = 100;
 
       expect(buildEntityAlertsQuery(field, to, from, query, size)).toEqual(
@@ -391,26 +397,29 @@ describe('test helper methods', () => {
     });
 
     it('should return the correct query when not given size', () => {
-      const field = 'host.name';
-      const query = 'exampleHost';
-      const to = 'Tomorrow';
-      const from = 'Today';
       const size = undefined;
 
       expect(buildEntityAlertsQuery(field, to, from, query)).toEqual(getExpectedAlertsQuery(size));
     });
 
     it('should return the correct query when given severity query', () => {
-      const field = 'host.name';
-      const query = 'exampleHost';
-      const to = 'Tomorrow';
-      const from = 'Today';
       const size = undefined;
       const severity = 'low';
 
       expect(buildEntityAlertsQuery(field, to, from, query, size, severity)).toEqual(
         getExpectedAlertsQuery(size, 'low')
       );
+    });
+
+    it('should return the correct query when given sort parameter', () => {
+      const size = undefined;
+      const severity = 'low';
+      const sortField = 'sort.field';
+      const sortDirection = 'asc';
+
+      expect(
+        buildEntityAlertsQuery(field, to, from, query, size, severity, sortField, sortDirection)
+      ).toEqual(getExpectedAlertsQuery(size, 'low', sortField, sortDirection));
     });
   });
 });
