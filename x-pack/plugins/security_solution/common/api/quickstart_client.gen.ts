@@ -537,7 +537,9 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Retrieves a clean draft timeline. If a draft timeline does not exist, it is created and returned.
+    * Create a clean draft Timeline or Timeline template for the current user.
+> info
+> If the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
 
     */
   async cleanDraftTimelines(props: CleanDraftTimelinesProps) {
@@ -647,6 +649,9 @@ Migrations are initiated per index. While the process is neither destructive nor
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Create a new Timeline or Timeline template.
+   */
   async createTimelines(props: CreateTimelinesProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateTimelines`);
     return this.kbnClient
@@ -719,6 +724,9 @@ Migrations are initiated per index. While the process is neither destructive nor
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Delete a note from a Timeline using the note ID.
+   */
   async deleteNote(props: DeleteNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteNote`);
     return this.kbnClient
@@ -749,6 +757,9 @@ Migrations are initiated per index. While the process is neither destructive nor
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Delete one or more Timelines or Timeline templates.
+   */
   async deleteTimelines(props: DeleteTimelinesProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteTimelines`);
     return this.kbnClient
@@ -1103,6 +1114,9 @@ Migrations are initiated per index. While the process is neither destructive nor
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Export Timelines as an NDJSON file.
+   */
   async exportTimelines(props: ExportTimelinesProps) {
     this.log.info(`${new Date().toISOString()} Calling API ExportTimelines`);
     return this.kbnClient
@@ -1213,6 +1227,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the details of the draft Timeline  or Timeline template for the current user. If the user doesn't have a draft Timeline, an empty Timeline is returned.
+   */
   async getDraftTimelines(props: GetDraftTimelinesProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetDraftTimelines`);
     return this.kbnClient
@@ -1279,7 +1296,7 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Gets notes
+   * Get all notes for a given document.
    */
   async getNotes(props: GetNotesProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetNotes`);
@@ -1373,6 +1390,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the details of an existing saved Timeline or Timeline template.
+   */
   async getTimeline(props: GetTimelineProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetTimeline`);
     return this.kbnClient
@@ -1387,6 +1407,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get a list of all saved Timelines or Timeline templates.
+   */
   async getTimelines(props: GetTimelinesProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetTimelines`);
     return this.kbnClient
@@ -1421,6 +1444,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Import Timelines.
+   */
   async importTimelines(props: ImportTimelinesProps) {
     this.log.info(`${new Date().toISOString()} Calling API ImportTimelines`);
     return this.kbnClient
@@ -1477,6 +1503,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Install or update prepackaged Timelines.
+   */
   async installPrepackedTimelines(props: InstallPrepackedTimelinesProps) {
     this.log.info(`${new Date().toISOString()} Calling API InstallPrepackedTimelines`);
     return this.kbnClient
@@ -1549,7 +1578,7 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Updates an existing timeline. This API is used to update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing timeline.
+   * Update an existing Timeline. You can update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing Timeline.
    */
   async patchTimeline(props: PatchTimelineProps) {
     this.log.info(`${new Date().toISOString()} Calling API PatchTimeline`);
@@ -1581,6 +1610,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Favorite a Timeline or Timeline template for the current user.
+   */
   async persistFavoriteRoute(props: PersistFavoriteRouteProps) {
     this.log.info(`${new Date().toISOString()} Calling API PersistFavoriteRoute`);
     return this.kbnClient
@@ -1594,6 +1626,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Add a note to a Timeline or update an existing note.
+   */
   async persistNoteRoute(props: PersistNoteRouteProps) {
     this.log.info(`${new Date().toISOString()} Calling API PersistNoteRoute`);
     return this.kbnClient
@@ -1607,6 +1642,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Pin an event to an existing Timeline.
+   */
   async persistPinnedEventRoute(props: PersistPinnedEventRouteProps) {
     this.log.info(`${new Date().toISOString()} Calling API PersistPinnedEventRoute`);
     return this.kbnClient
