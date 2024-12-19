@@ -59,8 +59,8 @@ export interface NotesListProps {
  * When a note is being created, the component renders a loading spinner when the new note is about to be added.
  */
 export const NotesList = memo(({ notes, options }: NotesListProps) => {
-  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
-  const canDeleteNotes = kibanaSecuritySolutionsPrivileges.crud;
+  const { notesPrivileges } = useUserPrivileges();
+  const canDeleteNotes = notesPrivileges.crud;
 
   const createStatus = useSelector((state: State) => selectCreateNoteStatus(state));
 

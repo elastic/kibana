@@ -13,6 +13,7 @@ import { useTimelineClick } from '../../../../utils/timeline/use_timeline_click'
 import type { TimelineProps } from './types';
 import * as i18n from './translations';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
+import { useUserPrivileges } from '../../../user_privileges';
 
 export const TimelineMarkDownRendererComponent: React.FC<TimelineProps> = ({
   id,
@@ -22,6 +23,10 @@ export const TimelineMarkDownRendererComponent: React.FC<TimelineProps> = ({
   const { addError } = useAppToasts();
 
   const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
+  const {
+    timelinePrivileges: { read: canReadTimelines },
+  } = useUserPrivileges();
+  const isDisabled = !!interactionsUpsellingMessage || !canReadTimelines;
 
   const handleTimelineClick = useTimelineClick();
 
@@ -43,7 +48,7 @@ export const TimelineMarkDownRendererComponent: React.FC<TimelineProps> = ({
     <EuiToolTip content={interactionsUpsellingMessage ?? i18n.TIMELINE_ID(id ?? '')}>
       <EuiLink
         onClick={onClickTimeline}
-        disabled={!!interactionsUpsellingMessage}
+        disabled={isDisabled}
         data-test-subj={`markdown-timeline-link-${id}`}
       >
         {title}
