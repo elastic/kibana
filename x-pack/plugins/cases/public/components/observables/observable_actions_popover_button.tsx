@@ -47,7 +47,7 @@ export const ObservableActionsPopoverButton: React.FC<{
     },
   });
 
-  const tooglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
+  const tooglePopover = useCallback(() => setIsPopoverOpen((prevValue) => !prevValue), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
   const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
