@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import type { DataViewBase } from '@kbn/es-query';
 import { createOrNewEntryItem } from '../../../../common/components/threat_match/helpers';
@@ -18,17 +18,33 @@ export const DEFAULT_THREAT_MAPPING_VALUE = [createOrNewEntryItem()];
 
 interface ThreatMatchMappingFieldProps {
   field: FieldHook<ThreatMapEntries[]>;
-  threatIndexPatterns: DataViewBase;
   indexPatterns: DataViewBase;
+  threatIndexPatterns: DataViewBase;
 }
 
 export function ThreatMatchMappingField({
   field,
-  threatIndexPatterns,
   indexPatterns,
+  threatIndexPatterns,
 }: ThreatMatchMappingFieldProps): JSX.Element {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-  const { setValue } = field;
+  const { setValue, validate } = field;
+
+  // We have to make sure validation runs against the latest source events index patterns
+  // and threat match index patterns.
+  // Form lib's `fieldsToValidateOnChange` on the corresponding index patterns edit fields
+  // doesn't help here. It leads to running threat match mapping validation before render
+  // of this component happens. In the end validation runs against previous index patterns
+  // producing invalid validation results.
+  //
+  // Validating the field imperatively here fixes this issue.
+  //
+  // Additional pitfall here is `validate` function changing its reference every render. Including it
+  // in useEffect's deps leads to infinite re-render.
+  useEffect(() => {
+    validate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indexPatterns, threatIndexPatterns]);
 
   const handleMappingChange = useCallback(
     (entryItems: ThreatMapEntries[]): void => {
