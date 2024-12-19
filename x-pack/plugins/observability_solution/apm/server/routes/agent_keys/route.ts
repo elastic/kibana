@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { AgentKeysResponse, getAgentKeys } from './get_agent_keys';
@@ -33,19 +31,12 @@ const agentKeysPrivilegesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/agent_keys/privileges',
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<AgentKeysPrivilegesResponse> => {
-    const {
-      plugins: { security },
-      context,
-    } = resources;
+    const { context, core } = resources;
 
-    if (!security) {
-      throw Boom.internal(SECURITY_REQUIRED_MESSAGE);
-    }
-
-    const securityPluginStart = await security.start();
+    const coreStart = await core.start();
     const agentKeysPrivileges = await getAgentKeysPrivileges({
       context,
-      securityPluginStart,
+      coreStart,
     });
 
     return agentKeysPrivileges;
@@ -63,23 +54,15 @@ const invalidateAgentKeyRoute = createApmServerRoute({
     body: t.type({ id: t.string }),
   }),
   handler: async (resources): Promise<InvalidateAgentKeyResponse> => {
-    const {
-      context,
-      params,
-      plugins: { security },
-    } = resources;
+    const { context, params, core } = resources;
     const {
       body: { id },
     } = params;
 
-    if (!security) {
-      throw Boom.internal(SECURITY_REQUIRED_MESSAGE);
-    }
-
-    const securityPluginStart = await security.start();
+    const coreStart = await core.start();
     const { isAdmin } = await getAgentKeysPrivileges({
       context,
-      securityPluginStart,
+      coreStart,
     });
 
     const invalidatedKeys = await invalidateAgentKey({
@@ -126,7 +109,3 @@ export const agentKeysRouteRepository = {
   ...invalidateAgentKeyRoute,
   ...createAgentKeyRoute,
 };
-
-const SECURITY_REQUIRED_MESSAGE = i18n.translate('xpack.apm.api.apiKeys.securityRequired', {
-  defaultMessage: 'Security plugin is required',
-});
