@@ -13,17 +13,18 @@ const mockStatsFindings = [
   {
     key: 'passed',
     count: 90,
-    color: euiThemeVars.euiColorVis0,
+    color: euiThemeVars.euiColorSuccess,
     label: 'Passed',
   },
   {
     key: 'failed',
     count: 10,
-    color: euiThemeVars.euiColorVis9,
+    color: euiThemeVars.euiColorDanger,
     label: <>{'Failed'}</>,
   },
 ];
 
+// TODO: replace with severity palette colors
 const mockStatsAlerts = [
   {
     key: 'low',

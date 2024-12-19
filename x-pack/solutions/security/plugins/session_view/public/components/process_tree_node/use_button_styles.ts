@@ -10,6 +10,7 @@ import { transparentize } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../hooks';
 
+// TODO: check euiColorVis in Borialis
 export const useButtonStyles = () => {
   const { euiTheme, euiVars } = useEuiTheme();
 

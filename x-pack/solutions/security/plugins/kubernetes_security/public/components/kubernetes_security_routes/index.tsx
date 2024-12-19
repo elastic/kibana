@@ -191,7 +191,7 @@ const KubernetesSecurityRoutesComponent = ({
                             }
                           ),
                           fieldName: ENTRY_LEADER_INTERACTIVE,
-                          color: euiThemeVars.euiColorVis0,
+                          color: euiThemeVars.euiColorVis0, // TODO: is it ok in Borealis theme,
                         },
                         false: {
                           name: i18n.translate(
@@ -201,7 +201,7 @@ const KubernetesSecurityRoutesComponent = ({
                             }
                           ),
                           fieldName: ENTRY_LEADER_INTERACTIVE,
-                          color: euiThemeVars.euiColorVis1,
+                          color: euiThemeVars.euiColorVis1, // TODO: is it ok in Borealis theme
                           shouldHideFilter: true,
                         },
                       }}
@@ -241,14 +241,14 @@ const KubernetesSecurityRoutesComponent = ({
                             defaultMessage: 'Root',
                           }),
                           fieldName: ENTRY_LEADER_USER_ID,
-                          color: euiThemeVars.euiColorVis2,
+                          color: euiThemeVars.euiColorVis2, // TODO: is it ok in Borealis theme
                         },
                         nonRoot: {
                           name: i18n.translate('xpack.kubernetesSecurity.entryUserChart.nonRoot', {
                             defaultMessage: 'Non-root',
                           }),
                           fieldName: ENTRY_LEADER_USER_ID,
-                          color: euiThemeVars.euiColorVis3,
+                          color: euiThemeVars.euiColorVis3, // TODO: is it ok in Borealis theme
                           shouldHideFilter: true,
                         },
                       }}
