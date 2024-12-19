@@ -6,36 +6,43 @@
  */
 
 import type { FC } from 'react';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import d3 from 'd3';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-
-import { euiThemeVars } from '@kbn/ui-theme';
+import { useEuiFontSize, useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 const COLOR_RANGE_RESOLUTION = 10;
 
 // Overrides for d3/svg default styles
-const cssOverride = css({
-  // Override default font size and color for axis
-  text: {
-    fontSize: `calc(${euiThemeVars.euiFontSizeXS} - 2px)`,
-    fill: euiThemeVars.euiColorDarkShade,
-  },
-  // Override default styles for axis lines
-  '.axis': {
-    path: {
-      fill: 'none',
-      stroke: 'none',
-    },
-    line: {
-      fill: 'none',
-      stroke: euiThemeVars.euiColorMediumShade,
-      shapeRendering: 'crispEdges',
-    },
-  },
-});
+const useCssOverride = () => {
+  const { euiTheme } = useEuiTheme();
+  const euiFontSizeXS = useEuiFontSize('xs', { unit: 'px' }).fontSize as string;
+
+  return useMemo(
+    () =>
+      css({
+        // Override default font size and color for axis
+        text: {
+          fontSize: `calc(${euiFontSizeXS} - 2px)`,
+          fill: euiTheme.colors.darkShade,
+        },
+        // Override default styles for axis lines
+        '.axis': {
+          path: {
+            fill: 'none',
+            stroke: 'none',
+          },
+          line: {
+            fill: 'none',
+            stroke: euiTheme.colors.mediumShade,
+            shapeRendering: 'crispEdges',
+          },
+        },
+      }),
+    [euiFontSizeXS, euiTheme]
+  );
+};
 
 interface ColorRangeLegendProps {
   colorRange: (d: number) => string;
@@ -60,6 +67,7 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
   title,
   width = 250,
 }) => {
+  const cssOverride = useCssOverride();
   const d3Container = useRef<null | SVGSVGElement>(null);
 
   const scale = d3.range(COLOR_RANGE_RESOLUTION + 1).map((d) => ({

@@ -18,6 +18,7 @@ export type TestFailure = FailedTestCase['$'] & {
   githubIssue?: string;
   failureCount?: number;
   commandLine?: string;
+  owners?: any;
 };
 
 const getText = (node?: Array<string | { _: string }>) => {
@@ -78,6 +79,7 @@ export function getFailures(report: TestReport) {
   for (const testCase of makeFailedTestCaseIter(report)) {
     const failure = getText(testCase.failure);
     const likelyIrrelevant = isLikelyIrrelevant(testCase.$.name, failure);
+    const owners = testCase.$.owners;
 
     const failureObj = {
       // unwrap xml weirdness
@@ -87,6 +89,7 @@ export function getFailures(report: TestReport) {
       likelyIrrelevant,
       'system-out': getText(testCase['system-out']),
       commandLine,
+      owners,
     };
 
     // cleaning up duplicates

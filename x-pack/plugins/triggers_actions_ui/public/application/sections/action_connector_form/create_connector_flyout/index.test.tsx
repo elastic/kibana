@@ -9,7 +9,7 @@ import React, { lazy } from 'react';
 
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
-import { waitFor, act } from '@testing-library/react';
+import { waitFor, act, screen } from '@testing-library/react';
 import CreateConnectorFlyout from '.';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { TECH_PREVIEW_LABEL } from '../../translations';
@@ -426,7 +426,7 @@ describe('CreateConnectorFlyout', () => {
 
   describe('Submitting', () => {
     it('creates a connector correctly', async () => {
-      const { getByTestId } = appMockRenderer.render(
+      const { getByTestId, queryByTestId } = appMockRenderer.render(
         <CreateConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
           onClose={onClose}
@@ -469,6 +469,70 @@ describe('CreateConnectorFlyout', () => {
         name: 'My test',
         secrets: {},
       });
+      expect(queryByTestId('connector-form-header-error-label')).not.toBeInTheDocument();
+    });
+
+    it('show error message in the form header', async () => {
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId(`${actionTypeModel.id}-card`));
+      expect(await screen.findByTestId('test-connector-text-field')).toBeInTheDocument();
+
+      await userEvent.type(
+        await screen.findByTestId('test-connector-text-field'),
+        'My text field',
+        {
+          delay: 100,
+        }
+      );
+
+      await userEvent.click(await screen.findByTestId('create-connector-flyout-save-btn'));
+      expect(onClose).not.toHaveBeenCalled();
+      expect(onConnectorCreated).not.toHaveBeenCalled();
+      expect(await screen.findByTestId('connector-form-header-error-label')).toBeInTheDocument();
+    });
+
+    it('removes error message from the form header', async () => {
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId(`${actionTypeModel.id}-card`));
+      expect(await screen.findByTestId('test-connector-text-field')).toBeInTheDocument();
+
+      await userEvent.type(
+        await screen.findByTestId('test-connector-text-field'),
+        'My text field',
+        {
+          delay: 100,
+        }
+      );
+
+      await userEvent.click(await screen.findByTestId('create-connector-flyout-save-btn'));
+      expect(onClose).not.toHaveBeenCalled();
+      expect(onConnectorCreated).not.toHaveBeenCalled();
+      expect(await screen.findByTestId('connector-form-header-error-label')).toBeInTheDocument();
+
+      await userEvent.type(await screen.findByTestId('nameInput'), 'My test', {
+        delay: 100,
+      });
+
+      await userEvent.click(await screen.findByTestId('create-connector-flyout-save-btn'));
+      expect(onClose).toHaveBeenCalled();
+      expect(onConnectorCreated).toHaveBeenCalled();
+      expect(screen.queryByTestId('connector-form-header-error-label')).not.toBeInTheDocument();
     });
 
     it('runs pre submit validator correctly', async () => {

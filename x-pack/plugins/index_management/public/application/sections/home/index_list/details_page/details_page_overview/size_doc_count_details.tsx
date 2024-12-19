@@ -13,7 +13,7 @@ import {
   EuiIcon,
   EuiText,
   EuiTextColor,
-  useEuiTheme,
+  useEuiFontSize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Index } from '../../../../../../../common';
@@ -24,7 +24,7 @@ export const SizeDocCountDetails: FunctionComponent<{
   size: Index['size'];
   documents: Index['documents'];
 }> = ({ size, documents }) => {
-  const { euiTheme } = useEuiTheme();
+  const largeFontSize = useEuiFontSize('l').fontSize;
   const { config } = useAppContext();
   if (!config.enableSizeAndDocCount) {
     return null;
@@ -41,7 +41,7 @@ export const SizeDocCountDetails: FunctionComponent<{
             <EuiFlexItem grow={false}>
               <EuiText
                 css={css`
-                  font-size: ${euiTheme.font.scale.l};
+                  font-size: ${largeFontSize};
                 `}
               >
                 {size}

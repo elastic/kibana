@@ -7,13 +7,14 @@
 
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import {
+  TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR,
   uptimeOverviewLocatorID,
+  type TransactionDetailsByTraceIdLocatorParams,
   type UptimeOverviewLocatorInfraParams,
 } from '@kbn/deeplinks-observability';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LinkDescriptor, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { ILocatorClient } from '@kbn/share-plugin/common/url_service';
+import { BrowserUrlService } from '@kbn/share-plugin/public';
 import React, { useMemo } from 'react';
 import { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -33,14 +34,11 @@ export const LogEntryActionsMenu = ({ logEntry }: LogEntryActionsMenuProps) => {
   } = useKibanaContextForPlugin();
   const { hide, isVisible, toggle } = useVisibilityState(false);
 
-  const apmLinkDescriptor = useMemo(() => getAPMLink(logEntry), [logEntry]);
-
-  const uptimeLinkProps = getUptimeLink({ locators })(logEntry);
-
-  const apmLinkProps = useLinkProps({
-    app: 'apm',
-    ...(apmLinkDescriptor ? apmLinkDescriptor : {}),
-  });
+  const apmLinkProps = useMemo(() => getAPMLink({ locators })(logEntry), [locators, logEntry]);
+  const uptimeLinkProps = useMemo(
+    () => getUptimeLink({ locators })(logEntry),
+    [locators, logEntry]
+  );
 
   const menuItems = useMemo(
     () => [
@@ -58,7 +56,7 @@ export const LogEntryActionsMenu = ({ logEntry }: LogEntryActionsMenuProps) => {
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         data-test-subj="logEntryActionsMenuItem apmLogEntryActionsMenuItem"
-        disabled={!apmLinkDescriptor}
+        disabled={!apmLinkProps}
         icon="apmApp"
         key="apmLink"
         {...apmLinkProps}
@@ -69,7 +67,7 @@ export const LogEntryActionsMenu = ({ logEntry }: LogEntryActionsMenuProps) => {
         />
       </EuiContextMenuItem>,
     ],
-    [apmLinkDescriptor, apmLinkProps, uptimeLinkProps]
+    [apmLinkProps, uptimeLinkProps]
   );
 
   const hasMenuItems = useMemo(() => menuItems.length > 0, [menuItems]);
@@ -101,8 +99,8 @@ export const LogEntryActionsMenu = ({ logEntry }: LogEntryActionsMenuProps) => {
 };
 
 const getUptimeLink =
-  ({ locators }: { locators: ILocatorClient }) =>
-  (logEntry: LogEntry): ContextRouterLinkProps | undefined => {
+  ({ locators }: { locators: BrowserUrlService['locators'] }) =>
+  (logEntry: LogEntry) => {
     const uptimeLocator = locators.get<UptimeOverviewLocatorInfraParams>(uptimeOverviewLocatorID);
 
     if (!uptimeLocator) {
@@ -135,47 +133,49 @@ const getUptimeLink =
     }) as ContextRouterLinkProps;
   };
 
-const getAPMLink = (logEntry: LogEntry): LinkDescriptor | undefined => {
-  const traceId = logEntry.fields.find(
-    ({ field, value }) => typeof value[0] === 'string' && field === 'trace.id'
-  )?.value?.[0];
+const getAPMLink =
+  ({ locators }: { locators: BrowserUrlService['locators'] }) =>
+  (logEntry: LogEntry) => {
+    const traceId = logEntry.fields.find(
+      ({ field, value }) => typeof value[0] === 'string' && field === 'trace.id'
+    )?.value?.[0];
 
-  if (typeof traceId !== 'string') {
-    return undefined;
-  }
+    if (typeof traceId !== 'string') {
+      return undefined;
+    }
 
-  const timestampField = logEntry.fields.find(({ field }) => field === '@timestamp');
-  const timestamp = timestampField ? timestampField.value[0] : null;
-  const { rangeFrom, rangeTo } =
-    typeof timestamp === 'number'
-      ? (() => {
-          const from = new Date(timestamp);
-          const to = new Date(timestamp);
+    const apmLocator = locators.get<TransactionDetailsByTraceIdLocatorParams>(
+      TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR
+    );
 
-          from.setMinutes(from.getMinutes() - 10);
-          to.setMinutes(to.getMinutes() + 10);
+    if (!apmLocator) {
+      return undefined;
+    }
 
-          return { rangeFrom: from.toISOString(), rangeTo: to.toISOString() };
-        })()
-      : { rangeFrom: 'now-1y', rangeTo: 'now' };
+    const timestampField = logEntry.fields.find(({ field }) => field === '@timestamp');
+    const timestamp = timestampField ? timestampField.value[0] : null;
+    const { rangeFrom, rangeTo } =
+      typeof timestamp === 'number' || typeof timestamp === 'string'
+        ? (() => {
+            const from = new Date(timestamp);
+            const to = new Date(timestamp);
 
-  return {
-    app: 'apm',
-    pathname: getApmTraceUrl({ traceId, rangeFrom, rangeTo }),
+            from.setMinutes(from.getMinutes() - 10);
+            to.setMinutes(to.getMinutes() + 10);
+
+            return { rangeFrom: from.toISOString(), rangeTo: to.toISOString() };
+          })()
+        : { rangeFrom: 'now-1y', rangeTo: 'now' };
+
+    const apmLocatorParams = { traceId, rangeFrom, rangeTo };
+
+    // Coercing the return value to ContextRouterLinkProps because
+    // EuiContextMenuItem defines a too broad type for onClick
+    return getRouterLinkProps({
+      href: apmLocator.getRedirectUrl(apmLocatorParams),
+      onClick: () => apmLocator.navigate(apmLocatorParams),
+    }) as ContextRouterLinkProps;
   };
-};
-
-function getApmTraceUrl({
-  traceId,
-  rangeFrom,
-  rangeTo,
-}: {
-  traceId: string;
-  rangeFrom: string;
-  rangeTo: string;
-}) {
-  return `/link-to/trace/${traceId}?` + new URLSearchParams({ rangeFrom, rangeTo }).toString();
-}
 
 export interface ContextRouterLinkProps {
   href: string | undefined;

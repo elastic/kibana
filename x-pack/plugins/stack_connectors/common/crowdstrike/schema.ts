@@ -318,16 +318,16 @@ export const CrowdstrikeExecuteRTRResponseSchema = schema.object(
           schema.string(),
           schema.object(
             {
-              session_id: schema.maybe(schema.string()),
-              task_id: schema.maybe(schema.string()),
-              complete: schema.maybe(schema.boolean()),
-              stdout: schema.maybe(schema.string()),
-              stderr: schema.maybe(schema.string()),
-              base_command: schema.maybe(schema.string()),
-              aid: schema.maybe(schema.string()),
-              errors: schema.maybe(schema.arrayOf(schema.any())),
-              query_time: schema.maybe(schema.number()),
-              offline_queued: schema.maybe(schema.boolean()),
+              session_id: schema.string(),
+              task_id: schema.string(),
+              complete: schema.boolean(),
+              stdout: schema.string(),
+              stderr: schema.string(),
+              base_command: schema.string(),
+              aid: schema.string(),
+              errors: schema.arrayOf(schema.any()),
+              query_time: schema.number(),
+              offline_queued: schema.boolean(),
             },
             { unknowns: 'allow' }
           )
@@ -337,9 +337,9 @@ export const CrowdstrikeExecuteRTRResponseSchema = schema.object(
     ),
     meta: schema.object(
       {
-        query_time: schema.maybe(schema.number()),
-        powered_by: schema.maybe(schema.string()),
-        trace_id: schema.maybe(schema.string()),
+        query_time: schema.number(),
+        powered_by: schema.string(),
+        trace_id: schema.string(),
       },
       { unknowns: 'allow' }
     ),
@@ -347,8 +347,6 @@ export const CrowdstrikeExecuteRTRResponseSchema = schema.object(
   },
   { unknowns: 'allow' }
 );
-
-export type CrowdStrikeExecuteRTRResponse = typeof CrowdstrikeExecuteRTRResponseSchema;
 
 // TODO: will be part of a next PR
 export const CrowdstrikeGetScriptsParamsSchema = schema.any({});

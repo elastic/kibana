@@ -41,7 +41,7 @@ import {
 import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
-import { buildDataViewPublishingApi } from '../common/anomaly_detection_embeddable';
+import { buildDataViewPublishingApi } from '../common/build_data_view_publishing_api';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { initializeSwimLaneControls } from './initialize_swim_lane_controls';
 import { initializeSwimLaneDataFetcher } from './initialize_swim_lane_data_fetcher';

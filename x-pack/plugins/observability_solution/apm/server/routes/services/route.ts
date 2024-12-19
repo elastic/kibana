@@ -80,7 +80,6 @@ import {
 import { getThroughput, ServiceThroughputResponse } from './get_throughput';
 import { getServiceEntitySummary } from '../entities/services/get_service_entity_summary';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { createEntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -297,16 +296,11 @@ const serviceAgentRoute = createApmServerRoute({
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceAgentResponse> => {
-    const { context, request } = resources;
-    const coreContext = await context.core;
+    const { request, plugins } = resources;
+    const entityManagerStart = await plugins.entityManager.start();
 
-    const [apmEventClient, entitiesESClient] = await Promise.all([
-      getApmEventClient(resources),
-      createEntitiesESClient({
-        request,
-        esClient: coreContext.elasticsearch.client.asCurrentUser,
-      }),
-    ]);
+    const apmEventClient = await getApmEventClient(resources);
+    const entityManagerClient = await entityManagerStart.getScopedClient({ request });
     const { params } = resources;
     const { serviceName } = params.path;
     const { start, end } = params.query;
@@ -320,7 +314,7 @@ const serviceAgentRoute = createApmServerRoute({
       }),
       getServiceEntitySummary({
         serviceName,
-        entitiesESClient,
+        entityManagerClient,
         environment: ENVIRONMENT_ALL.value,
       }),
     ]);

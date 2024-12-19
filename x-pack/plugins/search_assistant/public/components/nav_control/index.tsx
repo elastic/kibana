@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useRef, useState } from 'react';
-import { AssistantAvatar, useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
+import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import { EuiButton, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { v4 } from 'uuid';
@@ -19,6 +19,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 
 interface NavControlWithProviderDeps {
   coreStart: CoreStart;
@@ -123,7 +124,7 @@ export function NavControl() {
           fullWidth={false}
           minWidth={0}
         >
-          {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantAvatar size="xs" />}
+          {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantIcon size="m" />}
         </EuiButton>
       </EuiToolTip>
       {chatService.value &&

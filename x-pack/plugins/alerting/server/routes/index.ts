@@ -11,7 +11,6 @@ import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-p
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import { Observable } from 'rxjs';
 import { GetAlertIndicesAlias, ILicenseState } from '../lib';
-import { defineLegacyRoutes } from './legacy';
 import { AlertingRequestHandlerContext } from '../types';
 import { createRuleRoute } from './rule/apis/create';
 import { getRuleRoute, getInternalRuleRoute } from './rule/apis/get/get_rule_route';
@@ -94,10 +93,6 @@ export function defineRoutes(opts: RouteOptions) {
     getAlertIndicesAlias,
   } = opts;
 
-  // Legacy APIs
-  defineLegacyRoutes(opts);
-
-  // Rule APIs
   createRuleRoute(opts);
   getRuleRoute(router, licenseState);
   getInternalRuleRoute(router, licenseState);

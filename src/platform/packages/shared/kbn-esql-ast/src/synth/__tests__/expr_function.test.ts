@@ -57,7 +57,7 @@ test('can generate a function call expression', () => {
       {
         type: 'literal',
         literalType: 'keyword',
-        value: '"test"',
+        valueUnquoted: 'test',
       },
     ],
   });

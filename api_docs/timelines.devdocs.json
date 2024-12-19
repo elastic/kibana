@@ -1232,27 +1232,27 @@
           "references": [
             {
               "plugin": "kubernetesSecurity",
-              "path": "x-pack/plugins/kubernetes_security/public/hooks/use_filter.ts"
-            },
-            {
-              "plugin": "threatIntelligence",
-              "path": "x-pack/solutions/security/plugins/threat_intelligence/public/modules/timeline/components/add_to_timeline.tsx"
-            },
-            {
-              "plugin": "threatIntelligence",
-              "path": "x-pack/solutions/security/plugins/threat_intelligence/public/modules/timeline/components/add_to_timeline.tsx"
-            },
-            {
-              "plugin": "threatIntelligence",
-              "path": "x-pack/solutions/security/plugins/threat_intelligence/public/modules/timeline/components/add_to_timeline.tsx"
-            },
-            {
-              "plugin": "threatIntelligence",
-              "path": "x-pack/solutions/security/plugins/threat_intelligence/public/modules/timeline/components/add_to_timeline.tsx"
+              "path": "x-pack/solutions/security/plugins/kubernetes_security/public/hooks/use_filter.ts"
             },
             {
               "plugin": "osquery",
               "path": "x-pack/platform/plugins/shared/osquery/public/timelines/add_to_timeline_button.tsx"
+            },
+            {
+              "plugin": "threatIntelligence",
+              "path": "x-pack/solutions/security/plugins/threat_intelligence/public/modules/timeline/components/add_to_timeline.tsx"
+            },
+            {
+              "plugin": "threatIntelligence",
+              "path": "x-pack/solutions/security/plugins/threat_intelligence/public/modules/timeline/components/add_to_timeline.tsx"
+            },
+            {
+              "plugin": "threatIntelligence",
+              "path": "x-pack/solutions/security/plugins/threat_intelligence/public/modules/timeline/components/add_to_timeline.tsx"
+            },
+            {
+              "plugin": "threatIntelligence",
+              "path": "x-pack/solutions/security/plugins/threat_intelligence/public/modules/timeline/components/add_to_timeline.tsx"
             }
           ],
           "children": [],
@@ -1834,7 +1834,7 @@
         ],
         "label": "DeprecatedRowRenderer",
         "description": [
-          "\nThis interface should not be used anymore.\nUse the one from `plugins/security_solution/common/types/timeline`."
+          "\nThis interface should not be used anymore.\nUse the one from `solutions/security/plugins/security_solution/common/types/timeline`."
         ],
         "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
         "deprecated": true,
@@ -1850,11 +1850,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/events_viewer/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/events_viewer/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/events_viewer/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/events_viewer/index.tsx"
           }
         ],
         "children": [
@@ -2394,27 +2394,27 @@
         "references": [
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/common/search_strategy/index_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
           }
         ],
         "children": [
@@ -3699,19 +3699,19 @@
         "references": [
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/common/search_strategy/index_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
           }
         ],
         "initialIsOpen": false
@@ -3772,323 +3772,315 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/common/search_strategy/index_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/types/timeline/cells/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/common/types/timeline/cells/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/types/timeline/cells/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/common/types/timeline/cells/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/types/header_actions/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/common/types/header_actions/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/types/header_actions/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/common/types/header_actions/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/control_columns/transform_control_columns.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/control_columns/transform_control_columns.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/control_columns/transform_control_columns.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/control_columns/transform_control_columns.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.test.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.test.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.test.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.test.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.test.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.test.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/mock.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/source/mock.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/mock.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/source/mock.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/sourcerer/store/model.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/store/model.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/sourcerer/store/model.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/store/model.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/sourcerer/store/model.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/store/model.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/source/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/source/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/source/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/source/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/source/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/edit_data_provider/helpers.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/edit_data_provider/helpers.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/edit_data_provider/helpers.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/edit_data_provider/helpers.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/edit_data_provider/helpers.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/edit_data_provider/helpers.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/edit_data_provider/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/edit_data_provider/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/edit_data_provider/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/edit_data_provider/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_actions.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_actions.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_actions.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_actions.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_actions.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_actions.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_badge.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_badge.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_badge.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_badge.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/drag_drop_context_wrapper.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/add_data_provider_popover.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/drag_drop_context_wrapper.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/add_data_provider_popover.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/drag_drop_context_wrapper.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/empty.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/top_n/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/empty.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/top_n/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/providers.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/add_data_provider_popover.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/providers.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/add_data_provider_popover.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop/drag_drop_context_wrapper.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/empty.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop/drag_drop_context_wrapper.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/empty.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop/drag_drop_context_wrapper.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/providers.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/top_n/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/providers.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/top_n/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/hooks/use_event_details.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/shared/hooks/use_event_details.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/hooks/use_event_details.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/shared/hooks/use_event_details.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/context.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/shared/context.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/context.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/shared/context.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/utils/enriched_field_info.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/tabs/shared/utils.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/utils/enriched_field_info.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/tabs/shared/utils.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/tabs/shared/utils.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/right/utils/enriched_field_info.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/tabs/shared/utils.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/mocks/mock_browser_fields.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/mocks/mock_browser_fields.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/right/utils/enriched_field_info.ts"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
@@ -4097,6 +4089,14 @@
           {
             "plugin": "@kbn/securitysolution-data-table",
             "path": "x-pack/solutions/security/packages/data_table/mock/mock_source.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/shared/mocks/mock_browser_fields.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/shared/mocks/mock_browser_fields.ts"
           }
         ],
         "initialIsOpen": false
@@ -4195,7 +4195,7 @@
         ],
         "label": "DeprecatedCellValueElementProps",
         "description": [
-          "\nThe following props are provided to the function called by `renderCellValue`.\nWarning: This type might be outdated. Therefore, migrate to the new one from\n`plugins/security_solution/common/types/timeline/cells/index.ts`."
+          "\nThe following props are provided to the function called by `renderCellValue`.\nWarning: This type might be outdated. Therefore, migrate to the new one from\n`solutions/security/plugins/security_solution/common/types/timeline/cells/index.ts`."
         ],
         "signature": [
           "EuiDataGridCellValueElementProps",
@@ -4263,11 +4263,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/events_viewer/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/events_viewer/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/events_viewer/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/events_viewer/index.tsx"
           }
         ],
         "initialIsOpen": false
@@ -4347,27 +4347,27 @@
         "references": [
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/common/search_strategy/index_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
           }
         ],
         "initialIsOpen": false

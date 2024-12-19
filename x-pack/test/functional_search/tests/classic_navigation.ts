@@ -26,7 +26,10 @@ export default function searchSolutionNavigation({
       });
 
       // Create a space with the search solution and navigate to its home page
-      ({ cleanUp, space: spaceCreated } = await spaces.create({ solution: 'classic' }));
+      ({ cleanUp, space: spaceCreated } = await spaces.create({
+        name: 'search-classic-ftr',
+        solution: 'classic',
+      }));
       await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
       await common.navigateToApp('enterpriseSearch');
     });

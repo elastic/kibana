@@ -13,7 +13,7 @@ export function useEntityCentricExperienceSetting() {
 
   const isEntityCentricExperienceEnabled = core.uiSettings.get<boolean>(
     entityCentricExperience,
-    true
+    false
   );
 
   return { isEntityCentricExperienceEnabled };

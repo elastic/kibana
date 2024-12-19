@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import qs from 'query-string';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import type { SerializableRecord } from '@kbn/utility-types';
+import {
+  TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR,
+  type TransactionDetailsByTraceIdLocatorParams,
+} from '@kbn/deeplinks-observability';
 
-export const TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR = 'TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR';
-
-export interface TransactionDetailsByTraceIdLocatorParams extends SerializableRecord {
-  traceId: string;
-}
+export { TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR, type TransactionDetailsByTraceIdLocatorParams };
 
 export type TransactionDetailsByTraceIdLocator =
   LocatorPublic<TransactionDetailsByTraceIdLocatorParams>;
@@ -21,10 +21,15 @@ export class TransactionDetailsByTraceIdLocatorDefinition
 {
   public readonly id = TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR;
 
-  public readonly getLocation = async ({ traceId }: TransactionDetailsByTraceIdLocatorParams) => {
+  public readonly getLocation = async ({
+    rangeFrom,
+    rangeTo,
+    traceId,
+  }: TransactionDetailsByTraceIdLocatorParams) => {
+    const params = { rangeFrom, rangeTo };
     return {
       app: 'apm',
-      path: `/link-to/trace/${encodeURIComponent(traceId)}`,
+      path: `/link-to/trace/${encodeURIComponent(traceId)}?${qs.stringify(params)}`,
       state: {},
     };
   };

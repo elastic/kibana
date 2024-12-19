@@ -14,7 +14,7 @@ steps:
       - check_oas_snapshot
     timeout_in_minutes: 30
     artifact_paths:
-      - 'x-pack/plugins/observability_solution/slo/e2e/.journeys/**/*'
+      - 'x-pack/solutions/observability/plugins/slo/e2e/.journeys/**/*'
     retry:
       automatic:
         - exit_status: '-1'

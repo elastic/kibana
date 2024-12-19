@@ -816,6 +816,84 @@ describe('EPM template', () => {
     expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
   });
 
+  it('tests processing object field with more specific properties without wildcard', () => {
+    const objectFieldWithPropertyReversedLiteralYml = `
+- name: labels
+  type: object
+  object_type: keyword
+  object_type_mapping_type: '*'
+- name: labels.count
+  type: long
+`;
+    const objectFieldWithPropertyReversedMapping = {
+      dynamic_templates: [
+        {
+          labels: {
+            path_match: 'labels.*',
+            match_mapping_type: '*',
+            mapping: {
+              type: 'keyword',
+            },
+          },
+        },
+      ],
+      properties: {
+        labels: {
+          dynamic: true,
+          type: 'object',
+          properties: {
+            count: {
+              type: 'long',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = load(objectFieldWithPropertyReversedLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
+  });
+
+  it('tests processing object field with more specific properties with wildcard', () => {
+    const objectFieldWithPropertyReversedLiteralYml = `
+- name: labels.*
+  type: object
+  object_type: keyword
+  object_type_mapping_type: '*'
+- name: labels.count
+  type: long
+`;
+    const objectFieldWithPropertyReversedMapping = {
+      dynamic_templates: [
+        {
+          'labels.*': {
+            path_match: 'labels.*',
+            match_mapping_type: '*',
+            mapping: {
+              type: 'keyword',
+            },
+          },
+        },
+      ],
+      properties: {
+        labels: {
+          dynamic: true,
+          type: 'object',
+          properties: {
+            count: {
+              type: 'long',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = load(objectFieldWithPropertyReversedLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
+  });
+
   it('tests processing object field with subobjects set to false (case B)', () => {
     const objectFieldWithPropertyReversedLiteralYml = `
 - name: b.labels.*

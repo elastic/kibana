@@ -111,7 +111,7 @@ actions:
                     # Infra metric threshold rule (metrics.alert.threshold)
                     - $ref: '../../x-pack/plugins/observability_solution/infra/server/lib/alerting/docs/params_property_infra_metric_threshold.yaml'
                     # SLO burn rate (slo.rules.burnRate)
-                    - $ref:  '../../x-pack/plugins/observability_solution/slo/server/lib/rules/slo_burn_rate/docs/params_property_slo_burn_rate.yaml'
+                    - $ref:  '../../x-pack/solutions/observability/plugins/slo/server/lib/rules/slo_burn_rate/docs/params_property_slo_burn_rate.yaml'
                     # Synthetics uptime TLS rule (xpack.uptime.alerts.tls)
                     - $ref: '../../x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/lib/alerts/docs/params_property_synthetics_uptime_tls.yaml'
                     # Uptime monitor status rule (xpack.uptime.alerts.monitorStatus)

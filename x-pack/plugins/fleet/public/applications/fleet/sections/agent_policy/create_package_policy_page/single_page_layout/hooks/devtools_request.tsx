@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
-import { ExperimentalFeaturesService } from '../../../../../services';
 import {
   generateCreatePackagePolicyDevToolsRequest,
   generateCreateAgentPolicyDevToolsRequest,
@@ -39,12 +38,7 @@ export function useDevToolsRequest({
   packageInfo?: PackageInfo;
   packagePolicyId?: string;
 }) {
-  const { showDevtoolsRequest: isShowDevtoolRequestExperimentEnabled } =
-    ExperimentalFeaturesService.get();
-
-  const showDevtoolsRequest =
-    !HIDDEN_API_REFERENCE_PACKAGES.includes(packageInfo?.name ?? '') &&
-    isShowDevtoolRequestExperimentEnabled;
+  const showDevtoolsRequest = !HIDDEN_API_REFERENCE_PACKAGES.includes(packageInfo?.name ?? '');
 
   const [devtoolRequest, devtoolRequestDescription] = useMemo(() => {
     if (selectedPolicyTab === SelectedPolicyTab.NEW) {

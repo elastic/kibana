@@ -32,10 +32,10 @@ import {
   ESQLParamLiteral,
   ESQLFunction,
   ESQLAstItem,
+  ESQLStringLiteral,
   ESQLBinaryExpression,
   ESQLUnaryExpression,
   ESQLTimeInterval,
-  ESQLStringLiteral,
   ESQLBooleanLiteral,
   ESQLNullLiteral,
 } from '../types';
@@ -368,26 +368,6 @@ export namespace Builder {
         ) as ESQLDecimalLiteral;
       };
 
-      export const string = (
-        value: string,
-        template?: Omit<AstNodeTemplate<ESQLStringLiteral>, 'name' | 'literalType'>,
-        fromParser?: Partial<AstNodeParserFields>
-      ): ESQLStringLiteral => {
-        // TODO: Once (https://github.com/elastic/kibana/issues/203445) do not use
-        //    triple quotes and escape the string.
-        const quotedValue = '"""' + value + '"""';
-        const node: ESQLStringLiteral = {
-          ...template,
-          ...Builder.parserFields(fromParser),
-          type: 'literal',
-          literalType: 'keyword',
-          name: quotedValue,
-          value: quotedValue,
-        };
-
-        return node;
-      };
-
       /**
        * Constructs "time interval" literal node.
        *
@@ -405,6 +385,38 @@ export namespace Builder {
           quantity,
           name: `${quantity} ${unit}`,
         };
+      };
+
+      export const string = (
+        valueUnquoted: string,
+        template?: Omit<
+          AstNodeTemplate<ESQLStringLiteral>,
+          'name' | 'literalType' | 'value' | 'valueUnquoted'
+        > &
+          Partial<Pick<ESQLStringLiteral, 'name'>>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLStringLiteral => {
+        const value =
+          '"' +
+          valueUnquoted
+            .replace(/\\/g, '\\\\')
+            .replace(/"/g, '\\"')
+            .replace(/\n/g, '\\n')
+            .replace(/\r/g, '\\r')
+            .replace(/\t/g, '\\t') +
+          '"';
+        const name = template?.name ?? value;
+        const node: ESQLStringLiteral = {
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'literal',
+          literalType: 'keyword',
+          name,
+          value,
+          valueUnquoted,
+        };
+
+        return node;
       };
 
       export const list = (

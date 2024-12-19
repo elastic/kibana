@@ -9,7 +9,6 @@
     "public/**/*",
     "server/**/*",
     "types/**/*",
-    "./emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/core",

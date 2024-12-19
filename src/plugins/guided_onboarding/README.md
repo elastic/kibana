@@ -126,7 +126,7 @@ The guided onboarding exposes a function `registerGuideConfig(guideId: GuideId, 
 
 - enterprise search: `x-pack/plugins/enterprise_search/server/plugin.ts`
 - observability: `x-pack/solutions/observability/plugins/observability/server/plugin.ts`
-- security solution: `x-pack/plugins/security_solution/server/plugin.ts`
+- security solution: `x-pack/solutions/security/plugins/security_solution/server/plugin.ts`
 
 ## Adding a new guide
 
