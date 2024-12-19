@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { Query } from '@elastic/eui';
-import { fireEvent } from '@testing-library/react';
 import React from 'react';
-
+import { fireEvent, screen } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { StatusFilter } from './status_filter';
+import { MaintenanceWindowStatus } from '../../../../common';
 
 describe('StatusFilter', () => {
   let appMockRenderer: AppMockRenderer;
   const onChange = jest.fn();
-  const query = Query.parse('');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -23,18 +22,39 @@ describe('StatusFilter', () => {
   });
 
   test('it renders', () => {
-    const result = appMockRenderer.render(<StatusFilter query={query} onChange={onChange} />);
+    const result = appMockRenderer.render(<StatusFilter selectedStatus={[]} onChange={onChange} />);
 
     expect(result.getByTestId('status-filter-button')).toBeInTheDocument();
   });
 
-  test('it shows the popover', () => {
-    const result = appMockRenderer.render(<StatusFilter query={query} onChange={onChange} />);
+  test('it shows the popover', async () => {
+    const result = appMockRenderer.render(<StatusFilter selectedStatus={[]} onChange={onChange} />);
 
     fireEvent.click(result.getByTestId('status-filter-button'));
+
+    await waitForEuiPopoverOpen();
     expect(result.getByTestId('status-filter-running')).toBeInTheDocument();
     expect(result.getByTestId('status-filter-upcoming')).toBeInTheDocument();
     expect(result.getByTestId('status-filter-finished')).toBeInTheDocument();
     expect(result.getByTestId('status-filter-archived')).toBeInTheDocument();
+  });
+
+  test('should have 2 active filters', async () => {
+    const result = appMockRenderer.render(
+      <StatusFilter
+        selectedStatus={[MaintenanceWindowStatus.Running, MaintenanceWindowStatus.Upcoming]}
+        onChange={onChange}
+      />
+    );
+
+    fireEvent.click(result.getByTestId('status-filter-button'));
+    await waitForEuiPopoverOpen();
+
+    // Find the span containing the notification badge (with the active filter count)
+    const notificationBadge = screen.getByRole('marquee', {
+      name: /2 active filters/i,
+    });
+
+    expect(notificationBadge).toHaveTextContent('2');
   });
 });
