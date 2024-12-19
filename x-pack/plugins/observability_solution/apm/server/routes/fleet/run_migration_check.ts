@@ -34,12 +34,9 @@ export async function runMigrationCheck({
   const cloudApmMigrationEnabled = config.agent.migrations.enabled;
 
   const savedObjectsClient = (await context.core).savedObjects.client;
-  const [fleetPluginStart, securityPluginStart] = await Promise.all([
-    plugins.fleet.start(),
-    plugins.security.start(),
-  ]);
+  const [fleetPluginStart, coreStart] = await Promise.all([plugins.fleet.start(), core.start()]);
 
-  const hasRequiredRole = isSuperuser({ securityPluginStart, request });
+  const hasRequiredRole = isSuperuser({ coreStart, request });
   if (!hasRequiredRole) {
     return {
       has_cloud_agent_policy: false,
@@ -58,7 +55,6 @@ export async function runMigrationCheck({
       })
     : undefined;
   const apmPackagePolicy = getApmPackagePolicy(cloudAgentPolicy);
-  const coreStart = await core.start();
   const latestApmPackage = await getLatestApmPackage({
     fleetPluginStart,
     request,

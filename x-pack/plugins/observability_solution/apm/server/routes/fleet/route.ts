@@ -149,19 +149,17 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       throw Boom.internal(FLEET_SECURITY_REQUIRED_MESSAGE);
     }
 
-    const [savedObjectsClient, coreStart, fleetPluginStart, securityPluginStart, apmIndices] =
-      await Promise.all([
-        (await context.core).savedObjects.client,
-        resources.core.start(),
-        plugins.fleet.start(),
-        plugins.security.start(),
-        resources.getApmIndices(),
-      ]);
+    const [savedObjectsClient, coreStart, fleetPluginStart, apmIndices] = await Promise.all([
+      (await context.core).savedObjects.client,
+      resources.core.start(),
+      plugins.fleet.start(),
+      resources.getApmIndices(),
+    ]);
 
     const esClient = coreStart.elasticsearch.client.asScoped(resources.request).asCurrentUser;
     const cloudPluginSetup = plugins.cloud?.setup;
 
-    const hasRequiredRole = isSuperuser({ securityPluginStart, request });
+    const hasRequiredRole = isSuperuser({ coreStart, request });
     if (!hasRequiredRole || !cloudApmMigrationEnabled) {
       throw Boom.forbidden(CLOUD_SUPERUSER_REQUIRED_MESSAGE);
     }
