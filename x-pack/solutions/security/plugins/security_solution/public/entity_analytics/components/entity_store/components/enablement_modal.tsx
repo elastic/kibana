@@ -73,7 +73,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
     useEntityEnginePrivileges();
   const riskEnginePrivileges = useMissingRiskEnginePrivileges();
   const enablementOptions = enablements.riskScore || enablements.entityStore;
-  const { EnablementModalCallout } = useContractComponents();
+  const { AdditionalChargesMessage } = useContractComponents();
 
   if (!visible) {
     return null;
@@ -102,7 +102,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
 
       <EuiModalBody>
         <EuiFlexGroup direction="column">
-          <EuiFlexItem>{EnablementModalCallout && <EnablementModalCallout />}</EuiFlexItem>
+          <EuiFlexItem>{AdditionalChargesMessage && <AdditionalChargesMessage />}</EuiFlexItem>
           <EuiFlexItem>
             <EuiSwitch
               label={

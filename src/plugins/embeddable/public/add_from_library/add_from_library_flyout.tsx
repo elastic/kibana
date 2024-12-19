@@ -27,7 +27,6 @@ import {
   contentManagement,
   usageCollection,
 } from '../kibana_services';
-import { EmbeddableFactoryNotFoundError } from '../lib';
 import { getAddFromLibraryType, useAddFromLibraryTypes } from './registry';
 
 const runAddTelemetry = (
@@ -61,7 +60,12 @@ export const AddFromLibraryFlyout = ({
     ) => {
       const libraryType = getAddFromLibraryType(type);
       if (!libraryType) {
-        core.notifications.toasts.addWarning(new EmbeddableFactoryNotFoundError(type).message);
+        core.notifications.toasts.addWarning(
+          i18n.translate('embeddableApi.addPanel.typeNotFound', {
+            defaultMessage: 'Unable to load type: {type}',
+            values: { type },
+          })
+        );
         return;
       }
 
