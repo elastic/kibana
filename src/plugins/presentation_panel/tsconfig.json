@@ -18,7 +18,6 @@
     "@kbn/unified-search-plugin",
     "@kbn/inspector-plugin",
     "@kbn/std",
-    "@kbn/ui-theme",
     "@kbn/expressions-plugin",
     "@kbn/utility-types",
     "@kbn/content-management-plugin",

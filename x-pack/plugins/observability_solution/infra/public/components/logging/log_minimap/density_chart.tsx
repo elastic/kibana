@@ -11,6 +11,7 @@ import { max } from 'lodash';
 import * as React from 'react';
 import styled from '@emotion/styled';
 import { LogEntriesSummaryBucket } from '@kbn/logs-shared-plugin/common';
+import { COLOR_MODES_STANDARD } from '@elastic/eui';
 
 interface DensityChartProps {
   buckets: LogEntriesSummaryBucket[];
@@ -66,14 +67,14 @@ export const DensityChart: React.FC<DensityChartProps> = ({
 
 const DensityChartPositiveBackground = styled.rect`
   fill: ${(props) =>
-    props.theme.colorMode === 'DARK'
+    props.theme.colorMode === COLOR_MODES_STANDARD.dark
       ? props.theme.euiTheme.colors.lightShade
       : props.theme.euiTheme.colors.lightestShade};
 `;
 
 const PositiveAreaPath = styled.path`
   fill: ${(props) =>
-    props.theme.colorMode === 'DARK'
+    props.theme.colorMode === COLOR_MODES_STANDARD.dark
       ? props.theme.euiTheme.colors.mediumShade
       : props.theme.euiTheme.colors.lightShade};
 `;

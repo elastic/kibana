@@ -6,25 +6,17 @@
  */
 
 import type { EuiStepProps } from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiStepNumber,
-  EuiSteps,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStepNumber, EuiTitle } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import { SubStepsWrapper } from '../common/sub_step_wrapper';
-import type { OnMigrationCreated, OnMissingResourcesFetched, DataInputStep } from '../../types';
+import type { OnMigrationCreated, OnMissingResourcesFetched } from '../../types';
+import * as i18n from './translations';
+import { DataInputStep } from '../constants';
+import { getStatus } from '../common/get_status';
+import { SubSteps } from '../common/sub_step';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useRulesFileUploadStep } from './sub_steps/rules_file_upload';
-import * as i18n from './translations';
 import { useCheckResourcesStep } from './sub_steps/check_resources';
-import { getStatus } from '../common/get_status';
-
-const DataInputStepNumber: DataInputStep = 1;
 
 interface RulesDataInputSubStepsProps {
   migrationStats?: RuleMigrationTaskStats;
@@ -37,7 +29,7 @@ interface RulesDataInputProps extends RulesDataInputSubStepsProps {
 export const RulesDataInput = React.memo<RulesDataInputProps>(
   ({ dataInputStep, migrationStats, onMigrationCreated, onMissingResourcesFetched }) => {
     const dataInputStatus = useMemo(
-      () => getStatus(DataInputStepNumber, dataInputStep),
+      () => getStatus(DataInputStep.Rules, dataInputStep),
       [dataInputStep]
     );
 
@@ -49,7 +41,7 @@ export const RulesDataInput = React.memo<RulesDataInputProps>(
               <EuiFlexItem grow={false}>
                 <EuiStepNumber
                   titleSize="xs"
-                  number={DataInputStepNumber}
+                  number={DataInputStep.Rules}
                   status={dataInputStatus}
                 />
               </EuiFlexItem>
@@ -121,11 +113,7 @@ export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
       [copyStep, uploadStep, resourcesStep]
     );
 
-    return (
-      <SubStepsWrapper>
-        <EuiSteps titleSize="xxs" steps={steps} />
-      </SubStepsWrapper>
-    );
+    return <SubSteps steps={steps} />;
   }
 );
 RulesDataInputSubSteps.displayName = 'RulesDataInputActive';

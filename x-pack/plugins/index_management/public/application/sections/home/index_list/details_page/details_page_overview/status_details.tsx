@@ -15,9 +15,9 @@ import {
   EuiText,
   EuiTextColor,
   EuiBadgeProps,
+  useEuiFontSize,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import { useAppContext } from '../../../../../app_context';
 import { Index } from '../../../../../../../common';
@@ -54,6 +54,7 @@ export const StatusDetails: FunctionComponent<{
   status: Index['status'];
   health: Index['health'];
 }> = ({ documents, documentsDeleted, status, health }) => {
+  const largeFontSize = useEuiFontSize('l').fontSize;
   const { config } = useAppContext();
   if (!config.enableIndexStats || !health) {
     return null;
@@ -72,7 +73,7 @@ export const StatusDetails: FunctionComponent<{
           <EuiText
             color={status === 'close' ? 'danger' : 'success'}
             css={css`
-              font-size: ${euiThemeVars.euiFontSizeL};
+              font-size: ${largeFontSize};
             `}
           >
             {status === 'close'

@@ -27,9 +27,9 @@ const { REPO_ROOT } = require('@kbn/repo-info');
 
       // Security solution
       `${REPO_ROOT}/x-pack/solutions/security/plugins/security_solution/docs/openapi/ess/*.schema.yaml`,
-      `${REPO_ROOT}/packages/kbn-securitysolution-lists-common/docs/openapi/ess/*.schema.yaml`,
-      `${REPO_ROOT}/packages/kbn-securitysolution-exceptions-common/docs/openapi/ess/*.schema.yaml`,
-      `${REPO_ROOT}/packages/kbn-securitysolution-endpoint-exceptions-common/docs/openapi/ess/*.schema.yaml`,
+      `${REPO_ROOT}/x-pack/solutions/security/packages/kbn-securitysolution-lists-common/docs/openapi/ess/*.schema.yaml`,
+      `${REPO_ROOT}/x-pack/solutions/security/packages/kbn-securitysolution-exceptions-common/docs/openapi/ess/*.schema.yaml`,
+      `${REPO_ROOT}/x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common/docs/openapi/ess/*.schema.yaml`,
       `${REPO_ROOT}/x-pack/platform/packages/shared/kbn-elastic-assistant-common/docs/openapi/ess/*.schema.yaml`,
       `${REPO_ROOT}/x-pack/platform/plugins/shared/osquery/docs/openapi/ess/*.schema.yaml`,
     ],

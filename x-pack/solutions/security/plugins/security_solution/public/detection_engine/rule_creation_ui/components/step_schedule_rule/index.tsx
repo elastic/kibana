@@ -13,11 +13,11 @@ import type {
   ScheduleStepRule,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
-import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
 import { Form, UseField } from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
 import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
 import { schema } from './schema';
+import { ScheduleItemField } from '../../../rule_creation/components/schedule_item_field';
 
 const StyledForm = styled(Form)`
   max-width: 235px !important;
@@ -43,7 +43,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
         <StyledForm form={form} data-test-subj="stepScheduleRule">
           <UseField
             path="interval"
-            component={ScheduleItem}
+            component={ScheduleItemField}
             componentProps={{
               idAria: 'detectionEngineStepScheduleRuleInterval',
               isDisabled: isLoading,
@@ -53,7 +53,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
           />
           <UseField
             path="from"
-            component={ScheduleItem}
+            component={ScheduleItemField}
             componentProps={{
               idAria: 'detectionEngineStepScheduleRuleFrom',
               isDisabled: isLoading,

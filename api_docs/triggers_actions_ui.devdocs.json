@@ -6493,7 +6493,7 @@
         "signature": [
           "\"observability\" | \"stackAlerts\" | \"alerts\" | \"logs\" | \"infrastructure\""
         ],
-        "path": "packages/kbn-rule-data-utils/src/rule_types/index.ts",
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

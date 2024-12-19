@@ -13,6 +13,7 @@ import {
   EuiTitle,
   EuiToolTip,
   EuiIcon,
+  useEuiTheme,
 } from '@elastic/eui';
 import cytoscape from 'cytoscape';
 import React, {
@@ -27,7 +28,6 @@ import React, {
 import { i18n } from '@kbn/i18n';
 import { SERVICE_NAME, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 import { Environment } from '../../../../../common/environment_rt';
-import { useTheme } from '../../../../hooks/use_theme';
 import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
 import { CytoscapeContext } from '../cytoscape';
 import { getAnimationOptions, popoverWidth } from '../cytoscape_options';
@@ -83,7 +83,7 @@ interface PopoverProps {
 }
 
 export function Popover({ focusedServiceName, environment, kuery, start, end }: PopoverProps) {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const cy = useContext(CytoscapeContext);
   const [selectedElement, setSelectedElement] = useState<
     cytoscape.NodeSingular | cytoscape.EdgeSingular | undefined
@@ -164,12 +164,12 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
       event.preventDefault();
       if (cy) {
         cy.animate({
-          ...getAnimationOptions(theme),
+          ...getAnimationOptions(euiTheme),
           center: { eles: cy.getElementById(selectedElementId) },
         });
       }
     },
-    [cy, selectedElementId, theme]
+    [cy, selectedElementId, euiTheme]
   );
 
   const isAlreadyFocused = focusedServiceName === selectedElementId;

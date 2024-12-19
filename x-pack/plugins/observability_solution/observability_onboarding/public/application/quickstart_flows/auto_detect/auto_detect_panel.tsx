@@ -95,7 +95,11 @@ export const AutoDetectPanel: FunctionComponent = () => {
                 <SupportedIntegrationsList />
                 <EuiSpacer />
                 {/* Bash syntax highlighting only highlights a few random numbers (badly) so it looks less messy to go with plain text */}
-                <EuiCodeBlock paddingSize="m" language="text">
+                <EuiCodeBlock
+                  paddingSize="m"
+                  language="text"
+                  data-test-subj="observabilityOnboardingAutoDetectPanelCodeSnippet"
+                >
                   {command}
                 </EuiCodeBlock>
                 <EuiSpacer />

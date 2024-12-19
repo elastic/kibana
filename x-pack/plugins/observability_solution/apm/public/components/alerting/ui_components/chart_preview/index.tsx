@@ -10,6 +10,8 @@ import {
   Axis,
   BarSeries,
   Chart,
+  LIGHT_THEME,
+  DARK_THEME,
   LineAnnotation,
   Position,
   RectAnnotation,
@@ -20,7 +22,7 @@ import {
   Tooltip,
   niceTimeFormatter,
 } from '@elastic/charts';
-import { EuiSpacer } from '@elastic/eui';
+import { COLOR_MODES_STANDARD, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common';
@@ -28,7 +30,6 @@ import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { Coordinate } from '../../../../../typings/timeseries';
-import { useTheme } from '../../../../hooks/use_theme';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
 import { TimeLabelForData, TIME_LABELS, getDomain } from './chart_preview_helper';
 import { ALERT_PREVIEW_BUCKET_SIZE } from '../../utils/helper';
@@ -52,15 +53,15 @@ export function ChartPreview({
   timeUnit = 'm',
   totalGroups,
 }: ChartPreviewProps) {
-  const theme = useTheme();
+  const theme = useEuiTheme();
   const thresholdOpacity = 0.3;
   const DEFAULT_DATE_FORMAT = 'Y-MM-DD HH:mm:ss';
 
   const style = {
-    fill: theme.eui.euiColorVis2,
+    fill: theme.euiTheme.colors.vis.euiColorVis2,
     line: {
       strokeWidth: 2,
-      stroke: theme.eui.euiColorVis2,
+      stroke: theme.euiTheme.colors.vis.euiColorVis2,
       opacity: 1,
     },
     opacity: thresholdOpacity,
@@ -121,6 +122,7 @@ export function ChartPreview({
           legendPosition={'bottom'}
           legendSize={legendSize}
           locale={i18n.getLocale()}
+          theme={theme.colorMode === COLOR_MODES_STANDARD.dark ? DARK_THEME : LIGHT_THEME}
         />
         <LineAnnotation
           dataValues={[{ dataValue: threshold }]}

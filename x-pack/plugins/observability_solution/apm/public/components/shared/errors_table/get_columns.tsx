@@ -9,7 +9,7 @@ import { EuiBasicTableColumn, RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { asInteger } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
@@ -22,7 +22,7 @@ import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
 import { ApmRoutes } from '../../routing/apm_route_config';
 
-const ErrorLink = euiStyled(ErrorOverviewLink)`
+const ErrorLink = styled(ErrorOverviewLink)`
   ${truncate('100%')};
 `;
 

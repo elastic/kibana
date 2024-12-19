@@ -6,20 +6,21 @@
  */
 
 import React, { memo } from 'react';
-import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import {
   NodeShapeContainer,
-  NodeLabel,
   NodeShapeOnHoverSvg,
   NodeShapeSvg,
   NodeIcon,
   NodeButton,
   HandleStyleOverride,
+  useNodeFillColor,
 } from './styles';
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import { RectangleHoverShape, RectangleShape } from './shapes/rectangle_shape';
 import { NodeExpandButton } from './node_expand_button';
+import { Label } from './label';
 
 const NODE_WIDTH = 81;
 const NODE_HEIGHT = 80;
@@ -51,7 +52,7 @@ export const RectangleNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           xmlns="http://www.w3.org/2000/svg"
         >
           <RectangleShape
-            fill={useEuiBackgroundColor(color ?? 'primary')}
+            fill={useNodeFillColor(color)}
             stroke={euiTheme.colors[color ?? 'primary']}
           />
           {icon && <NodeIcon x="8" y="7" icon={icon} color={color} />}
@@ -60,6 +61,7 @@ export const RectangleNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           <>
             <NodeButton onClick={(e) => nodeClick?.(e, props)} />
             <NodeExpandButton
+              color={color}
               onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
               x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize / 4}px`}
               y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize / 2) / 2}px`}
@@ -81,7 +83,7 @@ export const RectangleNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           style={HandleStyleOverride}
         />
       </NodeShapeContainer>
-      <NodeLabel>{label ? label : id}</NodeLabel>
+      <Label text={label ? label : id} />
     </>
   );
 });

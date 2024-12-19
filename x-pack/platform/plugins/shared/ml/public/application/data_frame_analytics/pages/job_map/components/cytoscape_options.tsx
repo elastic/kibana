@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import type cytoscape from 'cytoscape';
+
+import { useEuiFontSize, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
+
 import { ANALYSIS_CONFIG_TYPE, JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
-import type { EuiThemeType } from '../../../../components/color_range_legend';
+
 import classificationJobIcon from './icons/ml_classification_job.svg';
 import outlierDetectionJobIcon from './icons/ml_outlier_detection_job.svg';
 import regressionJobIcon from './icons/ml_regression_job.svg';
@@ -57,85 +61,106 @@ function iconForNode(el: cytoscape.NodeSingular) {
   }
 }
 
-function borderColorForNode(el: cytoscape.NodeSingular, theme: EuiThemeType) {
+function borderColorForNode(el: cytoscape.NodeSingular, euiTheme: EuiThemeComputed) {
   if (el.selected()) {
-    return theme.euiColorPrimary;
+    return euiTheme.colors.primary;
   }
 
   const type = el.data('type');
 
   switch (type) {
     case JOB_MAP_NODE_TYPES.ANALYTICS_JOB_MISSING:
-      return theme.euiColorFullShade;
+      return euiTheme.colors.fullShade;
     case JOB_MAP_NODE_TYPES.ANALYTICS:
-      return theme.euiColorVis0;
+      // Amsterdam + Borealis
+      return euiTheme.colors.vis.euiColorVis0;
     case JOB_MAP_NODE_TYPES.TRANSFORM:
-      return theme.euiColorVis1;
+      // Amsterdam: euiTheme.colors.vis.euiColorVis1
+      // Borealis:  euiTheme.colors.vis.euiColorVis2
+      return euiTheme.flags.hasVisColorAdjustment
+        ? euiTheme.colors.vis.euiColorVis1
+        : euiTheme.colors.vis.euiColorVis2;
     case JOB_MAP_NODE_TYPES.INDEX:
-      return theme.euiColorVis2;
+      // Amsterdam: euiTheme.colors.vis.euiColorVis2
+      // Borealis:  euiTheme.colors.vis.euiColorVis4
+      return euiTheme.flags.hasVisColorAdjustment
+        ? euiTheme.colors.vis.euiColorVis2
+        : euiTheme.colors.vis.euiColorVis4;
     case JOB_MAP_NODE_TYPES.TRAINED_MODEL:
-      return theme.euiColorVis3;
+      // Amsterdam: euiTheme.colors.vis.euiColorVis3
+      // Borealis:  euiTheme.colors.vis.euiColorVis5
+      return euiTheme.flags.hasVisColorAdjustment
+        ? euiTheme.colors.vis.euiColorVis3
+        : euiTheme.colors.vis.euiColorVis5;
     case JOB_MAP_NODE_TYPES.INGEST_PIPELINE:
-      return theme.euiColorVis7;
+      // Amsterdam: euiTheme.colors.vis.euiColorVis7
+      // Borealis:  euiTheme.colors.vis.euiColorVis8
+      return euiTheme.flags.hasVisColorAdjustment
+        ? euiTheme.colors.vis.euiColorVis7
+        : euiTheme.colors.vis.euiColorVis8;
 
     default:
-      return theme.euiColorMediumShade;
+      return euiTheme.colors.mediumShade;
   }
 }
 
-export const getCytoscapeOptions = (theme: EuiThemeType): cytoscape.CytoscapeOptions => {
-  const lineColor = theme.euiColorLightShade;
+export const useCytoscapeOptions = (): cytoscape.CytoscapeOptions => {
+  const { euiTheme } = useEuiTheme();
+  const euiFontSizeXS = useEuiFontSize('xs', { unit: 'px' }).fontSize as string;
 
-  return {
-    autoungrabify: true,
-    boxSelectionEnabled: false,
-    maxZoom: 3,
-    minZoom: 0.2,
-    style: [
-      {
-        selector: 'node',
-        style: {
-          'background-color': (el: cytoscape.NodeSingular) =>
-            el.data('isRoot') ? theme.euiColorWarning : theme.euiColorGhost,
-          'background-height': '60%',
-          'background-width': '60%',
-          'border-color': (el: cytoscape.NodeSingular) => borderColorForNode(el, theme),
-          'border-style': 'solid',
-          // @ts-ignore
-          'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
-          'border-width': (el: cytoscape.NodeSingular) => (el.selected() ? 4 : 3),
-          color: theme.euiTextColor,
-          'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
-          'font-size': theme.euiFontSizeXS,
-          'min-zoomed-font-size': parseInt(theme.euiSizeL, 10),
-          label: 'data(label)',
-          shape: (el: cytoscape.NodeSingular) => shapeForNode(el),
-          'text-background-color': theme.euiColorLightestShade,
-          'text-background-opacity': 0,
-          'text-background-padding': theme.euiSizeXS,
-          'text-background-shape': 'roundrectangle',
-          'text-margin-y': parseInt(theme.euiSizeS, 10),
-          'text-max-width': '200px',
-          'text-valign': 'bottom',
-          'text-wrap': 'wrap',
+  return useMemo(
+    () => ({
+      autoungrabify: true,
+      boxSelectionEnabled: false,
+      maxZoom: 3,
+      minZoom: 0.2,
+      style: [
+        {
+          selector: 'node',
+          style: {
+            'background-color': (el: cytoscape.NodeSingular) =>
+              el.data('isRoot') ? euiTheme.colors.warning : euiTheme.colors.ghost,
+            'background-height': '60%',
+            'background-width': '60%',
+            'border-color': (el: cytoscape.NodeSingular) => borderColorForNode(el, euiTheme),
+            'border-style': 'solid',
+            // @ts-ignore
+            'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
+            'border-width': (el: cytoscape.NodeSingular) => (el.selected() ? 4 : 3),
+            color: euiTheme.colors.textParagraph,
+            'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
+            'font-size': euiFontSizeXS,
+            'min-zoomed-font-size': parseInt(euiTheme.size.l, 10),
+            label: 'data(label)',
+            shape: (el: cytoscape.NodeSingular) => shapeForNode(el),
+            'text-background-color': euiTheme.colors.lightestShade,
+            'text-background-opacity': 0,
+            'text-background-padding': euiTheme.size.xs,
+            'text-background-shape': 'roundrectangle',
+            'text-margin-y': parseInt(euiTheme.size.s, 10),
+            'text-max-width': '200px',
+            'text-valign': 'bottom',
+            'text-wrap': 'wrap',
+          },
         },
-      },
-      {
-        selector: 'edge',
-        style: {
-          'curve-style': 'taxi',
-          // @ts-ignore
-          'taxi-direction': 'rightward',
-          'line-color': lineColor,
-          'overlay-opacity': 0,
-          'target-arrow-color': lineColor,
-          'target-arrow-shape': 'triangle',
-          // @ts-ignore
-          'target-distance-from-node': theme.euiSizeXS,
-          width: 1,
-          'source-arrow-shape': 'none',
+        {
+          selector: 'edge',
+          style: {
+            'curve-style': 'taxi',
+            // @ts-ignore
+            'taxi-direction': 'rightward',
+            'line-color': euiTheme.colors.lightShade,
+            'overlay-opacity': 0,
+            'target-arrow-color': euiTheme.colors.lightShade,
+            'target-arrow-shape': 'triangle',
+            // @ts-ignore
+            'target-distance-from-node': euiTheme.size.xs,
+            width: 1,
+            'source-arrow-shape': 'none',
+          },
         },
-      },
-    ],
-  };
+      ],
+    }),
+    [euiFontSizeXS, euiTheme]
+  );
 };

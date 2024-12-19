@@ -31,10 +31,7 @@ export const initSideNavigation = async (services: Services) => {
         ) as GroupDefinition;
         if (footerGroup) {
           footerGroup.title = PROJECT_SETTINGS_TITLE;
-          footerGroup.children.push(
-            { cloudLink: 'userAndRoles', openInNewTab: true },
-            { cloudLink: 'billingAndSub', openInNewTab: true }
-          );
+          footerGroup.children.push({ cloudLink: 'billingAndSub', openInNewTab: true });
         }
       })
     )

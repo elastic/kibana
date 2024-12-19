@@ -31,7 +31,7 @@ interface ShareableConfiguration
 export const DEFAULT_LENS_LAYOUT_DIMENSIONS = {
   width: 1793,
   // this is a magic number from the reporting tool implementation
-  // see: x-pack/plugins/screenshotting/server/browsers/chromium/driver_factory/index.ts#L146
+  // see: x-pack/platform/plugins/shared/screenshotting/server/browsers/chromium/driver_factory/index.ts#L146
   height: 1086,
 };
 

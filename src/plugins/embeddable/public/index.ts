@@ -22,20 +22,13 @@ export {
   EmbeddableFactoryNotFoundError,
   EmbeddableStateTransfer,
   ErrorEmbeddable,
-  genericEmbeddableInputIsEqual,
   isContextMenuTriggerContext,
-  isEmbeddable,
-  isErrorEmbeddable,
   isExplicitInputWithAttributes,
-  isFilterableEmbeddable,
   isMultiValueClickTriggerContext,
   isRangeSelectTriggerContext,
-  isReferenceOrValueEmbeddable,
   isRowClickTriggerContext,
-  isSavedObjectEmbeddableInput,
   isValueClickTriggerContext,
   MULTI_VALUE_CLICK_TRIGGER,
-  omitGenericEmbeddableInput,
   panelBadgeTrigger,
   panelHoverTrigger,
   PanelNotFoundError,
@@ -46,14 +39,10 @@ export {
   PANEL_NOTIFICATION_TRIGGER,
   runEmbeddableFactoryMigrations,
   SELECT_RANGE_TRIGGER,
-  shouldFetch$,
-  shouldRefreshFilterCompareOptions,
   VALUE_CLICK_TRIGGER,
   ViewMode,
-  withEmbeddableSubscription,
 } from './lib';
 export type {
-  Adapters,
   CellValueContext,
   ChartActionContext,
   EmbeddableContext,
@@ -64,15 +53,11 @@ export type {
   EmbeddableInstanceConfiguration,
   EmbeddableOutput,
   EmbeddablePackageState,
-  FilterableEmbeddable,
   IEmbeddable,
   MultiValueClickContext,
   OutputSpec,
   PropertySpec,
   RangeSelectContext,
-  ReferenceOrValueEmbeddable,
-  SavedObjectEmbeddableInput,
-  SelfStyledEmbeddable,
   ValueClickContext,
 } from './lib';
 export type {
@@ -92,10 +77,5 @@ export {
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
-
-export {
-  embeddableInputToSubject,
-  embeddableOutputToSubject,
-} from './lib/embeddables/compatibility/embeddable_compatibility_utils';
 
 export { COMMON_EMBEDDABLE_GROUPING } from './lib/embeddables/common/constants';

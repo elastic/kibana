@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiFontSize } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { truncate } from '../../../utils/style';
 
 export interface IStickyProperty {
@@ -19,14 +19,14 @@ export interface IStickyProperty {
   truncated?: boolean;
 }
 
-const TooltipFieldName = euiStyled.span`
-  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
+const TooltipFieldName = styled.span`
+  font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
 `;
 
-const PropertyLabel = euiStyled.div`
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
-  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  color: ${({ theme }) => theme.eui.euiColorMediumShade};
+const PropertyLabel = styled.div`
+  margin-bottom: ${({ theme }) => theme.euiTheme.size.s};
+  font-size: ${() => useEuiFontSize('xs').fontSize};
+  color: ${({ theme }) => theme.euiTheme.colors.mediumShade};
 
   span {
     cursor: help;
@@ -35,13 +35,13 @@ const PropertyLabel = euiStyled.div`
 PropertyLabel.displayName = 'PropertyLabel';
 
 const propertyValueLineHeight = 1.2;
-const PropertyValue = euiStyled.div`
+const PropertyValue = styled.div`
   display: inline-block;
   line-height: ${propertyValueLineHeight};
 `;
 PropertyValue.displayName = 'PropertyValue';
 
-const PropertyValueTruncated = euiStyled.span`
+const PropertyValueTruncated = styled.span`
   display: inline-block;
   line-height: ${propertyValueLineHeight};
   ${truncate('100%')};

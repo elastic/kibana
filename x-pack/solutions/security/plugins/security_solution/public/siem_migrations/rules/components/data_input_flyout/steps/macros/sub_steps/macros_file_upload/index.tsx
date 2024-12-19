@@ -81,7 +81,7 @@ export const useMacrosFileUploadStep = ({
   }, [isLoading, error, status]);
 
   return {
-    title: i18n.RULES_DATA_INPUT_FILE_UPLOAD_TITLE,
+    title: i18n.MACROS_DATA_INPUT_FILE_UPLOAD_TITLE,
     status: uploadStepStatus,
     children: (
       <MacrosFileUpload

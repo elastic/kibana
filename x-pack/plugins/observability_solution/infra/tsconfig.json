@@ -9,7 +9,6 @@
     "public/**/*",
     "server/**/*",
     "types/**/*",
-    "./emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -102,7 +101,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-context-theme",
     "@kbn/presentation-publishing",
-    "@kbn/presentation-containers",
     "@kbn/deeplinks-observability",
     "@kbn/event-annotation-common",
     "@kbn/logs-data-access-plugin",
@@ -111,8 +109,6 @@
     "@kbn/core-application-browser",
     "@kbn/shared-ux-page-no-data-types",
     "@kbn/xstate-utils",
-    "@kbn/management-settings-ids",
-    "@kbn/core-ui-settings-common",
     "@kbn/entityManager-plugin",
     "@kbn/entities-schema",
     "@kbn/zod",

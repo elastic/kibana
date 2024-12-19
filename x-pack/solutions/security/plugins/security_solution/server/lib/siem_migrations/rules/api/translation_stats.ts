@@ -45,6 +45,9 @@ export const registerSiemRuleMigrationsTranslationStatsRoute = (
 
             const stats = await ruleMigrationsClient.data.rules.getTranslationStats(migrationId);
 
+            if (stats.rules.total === 0) {
+              return res.noContent();
+            }
             return res.ok({ body: stats });
           } catch (err) {
             logger.error(err);

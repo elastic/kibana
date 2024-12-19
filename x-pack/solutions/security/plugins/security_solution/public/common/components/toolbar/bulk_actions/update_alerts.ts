@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Status } from '../../../../../common/api/detection_engine';
 import {
   updateAlertStatusByIds,

@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { CodeEditor } from '@kbn/code-editor';
 import { FormRowOnChange } from '.';
 import { SettingsRow } from '../typings';
