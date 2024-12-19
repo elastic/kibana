@@ -53,6 +53,7 @@ import { cssMlExplorerChart } from './explorer_chart_styles';
 
 const popoverMenuOffset = 0;
 const CONTENT_WRAPPER_HEIGHT = 215;
+// Not used for CSS, but with d3 to select elements.
 const CONTENT_WRAPPER_CLASS = 'ml-explorer-chart-content-wrapper';
 const mlExplorerChartContentWrapper = css({
   height: `${CONTENT_WRAPPER_HEIGHT}px`,
