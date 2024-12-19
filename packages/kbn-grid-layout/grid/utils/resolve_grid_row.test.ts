@@ -21,24 +21,21 @@ describe('resolve grid row', () => {
         panel4: { id: 'panel4', row: 0, column: 6, height: 3, width: 1 },
       },
     };
-    const result = resolveGridRow(gridRow, 8);
+    const result = resolveGridRow(gridRow);
     expect(result).toEqual(gridRow);
   });
 
   test('resolves grid row if it has collisions without drag event', () => {
-    const result = resolveGridRow(
-      {
-        title: 'Test',
-        isCollapsed: false,
-        panels: {
-          panel1: { id: 'panel1', row: 0, column: 0, height: 3, width: 4 },
-          panel2: { id: 'panel2', row: 3, column: 0, height: 2, width: 2 },
-          panel3: { id: 'panel3', row: 3, column: 2, height: 2, width: 2 },
-          panel4: { id: 'panel4', row: 0, column: 3, height: 5, width: 4 },
-        },
+    const result = resolveGridRow({
+      title: 'Test',
+      isCollapsed: false,
+      panels: {
+        panel1: { id: 'panel1', row: 0, column: 0, height: 3, width: 4 },
+        panel2: { id: 'panel2', row: 3, column: 0, height: 2, width: 2 },
+        panel3: { id: 'panel3', row: 3, column: 2, height: 2, width: 2 },
+        panel4: { id: 'panel4', row: 0, column: 3, height: 5, width: 4 },
       },
-      8
-    );
+    });
     expect(result).toEqual({
       title: 'Test',
       isCollapsed: false,
@@ -62,7 +59,6 @@ describe('resolve grid row', () => {
           panel3: { id: 'panel3', row: 2, column: 0, height: 1, width: 7 },
         },
       },
-      8,
       { id: 'panel4', row: 0, column: 7, height: 3, width: 1 }
     );
 
@@ -90,7 +86,6 @@ describe('resolve grid row', () => {
           panel4: { id: 'panel4', row: 3, column: 4, height: 3, width: 4 },
         },
       },
-      8,
       { id: 'panel5', row: 2, column: 0, height: 3, width: 3 }
     );
 
@@ -118,7 +113,6 @@ describe('resolve grid row', () => {
           panel3: { id: 'panel3', row: 3, column: 2, height: 2, width: 2 },
         },
       },
-      8,
       { id: 'panel4', row: 0, column: 3, height: 5, width: 4 }
     );
     expect(result).toEqual({
@@ -144,7 +138,6 @@ describe('resolve grid row', () => {
           panel3: { id: 'panel3', row: 2, column: 0, height: 1, width: 7 },
         },
       },
-      8,
       { id: 'panel4', row: 0, column: 6, height: 3, width: 1 }
     );
 

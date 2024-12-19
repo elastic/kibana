@@ -206,17 +206,13 @@ export const useGridLayoutEvents = ({
 
         // resolve destination grid
         const destinationGrid = nextLayout[targetRowIndex];
-        const resolvedDestinationGrid = resolveGridRow(
-          destinationGrid,
-          columnCount,
-          requestedGridData
-        );
+        const resolvedDestinationGrid = resolveGridRow(destinationGrid, requestedGridData);
         nextLayout[targetRowIndex] = resolvedDestinationGrid;
 
         // resolve origin grid
         if (hasChangedGridRow) {
           const originGrid = nextLayout[lastRowIndex];
-          const resolvedOriginGrid = resolveGridRow(originGrid, columnCount);
+          const resolvedOriginGrid = resolveGridRow(originGrid);
           nextLayout[lastRowIndex] = resolvedOriginGrid;
         }
         if (!deepEqual(currentLayout, nextLayout)) {
