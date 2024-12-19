@@ -413,7 +413,6 @@ packages/kbn-react-mute-legacy-root-warning @elastic/appex-sharedux
 packages/kbn-recently-accessed @elastic/appex-sharedux
 packages/kbn-relocate @elastic/kibana-core
 packages/kbn-repo-file-maps @elastic/kibana-operations
-packages/kbn-repo-info @elastic/kibana-operations
 packages/kbn-repo-linter @elastic/kibana-operations
 packages/kbn-repo-packages @elastic/kibana-operations
 packages/kbn-repo-path @elastic/kibana-operations
@@ -594,6 +593,7 @@ src/platform/packages/shared/kbn-management/settings/types @elastic/kibana-manag
 src/platform/packages/shared/kbn-management/settings/utilities @elastic/kibana-management
 src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
+src/platform/packages/shared/kbn-repo-info @elastic/kibana-operations
 src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detections-response @elastic/response-ops @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
 src/platform/packages/shared/kbn-securitysolution-es-utils @elastic/security-detection-engine
