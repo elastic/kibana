@@ -755,6 +755,7 @@ export class HttpServer {
       access: route.options.access ?? 'internal',
       deprecated,
       security: route.security,
+      excludeFromRateLimiter: route.options.excludeFromRateLimiter ?? false,
     };
     // Log HTTP API target consumer.
     optionsLogger.debug(
