@@ -127,7 +127,7 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI']
 
     // proceed with exporting only custom rules
     cy.get(MODAL_CONFIRMATION_BTN)
-      .should('have.text', `Export ${expectedNumberCustomRulesToBeExported} custom rule`)
+      .should('have.text', `Export ${expectedNumberCustomRulesToBeExported} rule`)
       .click();
 
     getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
@@ -175,7 +175,7 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI']
 
       // should display correct number of custom rules when one of them has exceptions
       cy.get(MODAL_CONFIRMATION_BTN)
-        .should('have.text', `Export ${expectedNumberCustomRulesToBeExported} custom rules`)
+        .should('have.text', `Export ${expectedNumberCustomRulesToBeExported} rules`)
         .click();
 
       cy.get(TOASTER_BODY).should(
