@@ -13,11 +13,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  useEuiTheme,
   EuiButton,
   EuiSearchBarProps,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { SortDirection } from '../types';
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
@@ -100,8 +98,6 @@ const rowProps = (item: MaintenanceWindow) => ({
 
 export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
   ({ isLoading, items, readOnly, refreshData }) => {
-    const { euiTheme } = useEuiTheme();
-
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
     const onEdit = useCallback<TableActionsPopoverProps['onEdit']>(
       (id) => navigateToEditMaintenanceWindows(id),
@@ -135,16 +131,6 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     const isMutatingOrLoading = useMemo(() => {
       return isLoadingFinish || isLoadingArchive || isLoadingFinishAndArchive || isLoading;
     }, [isLoadingFinish, isLoadingArchive, isLoadingFinishAndArchive, isLoading]);
-
-    const tableCss = useMemo(() => {
-      return css`
-        .euiTableRow {
-          &.running {
-            background-color: ${euiTheme.colors.highlight};
-          }
-        }
-      `;
-    }, [euiTheme.colors.highlight]);
 
     const actions: Array<EuiBasicTableColumn<MaintenanceWindow>> = useMemo(
       () => [
@@ -199,7 +185,6 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     return (
       <EuiInMemoryTable
         data-test-subj="maintenance-windows-table"
-        css={tableCss}
         itemId="id"
         loading={isMutatingOrLoading}
         tableCaption="Maintenance Windows List"

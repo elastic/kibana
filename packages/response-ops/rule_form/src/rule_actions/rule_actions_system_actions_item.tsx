@@ -126,8 +126,8 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
   >({});
   const [warning, setWarning] = useState<string | null>(null);
 
-  const subdued = useEuiBackgroundColor('subdued');
   const { euiTheme } = useEuiTheme();
+  const subdued = euiTheme.colors.lightestShade;
 
   const dispatch = useRuleFormDispatch();
   const actionTypeModel = actionTypeRegistry.get(action.actionTypeId);
@@ -267,7 +267,7 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
       buttonContent={
         <EuiPanel
           data-test-subj="ruleActionsSystemActionsItemAccordionButton"
-          color="subdued"
+          color="transparent"
           paddingSize="m"
         >
           <EuiFlexGroup alignItems="center">

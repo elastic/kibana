@@ -75,7 +75,7 @@ export const RuleAddFooter = ({
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                color="success"
+                color="primary"
                 data-test-subj="saveRuleButton"
                 type="submit"
                 iconType="check"
