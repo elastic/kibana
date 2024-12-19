@@ -6,10 +6,10 @@
  */
 
 import type {
+  ClusterPutComponentTemplateRequest,
   MappingDynamicMapping,
   Metadata,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+} from '@elastic/elasticsearch/lib/api/types';
 import {
   createOrUpdateComponentTemplate,
   createOrUpdateIndexTemplate,
@@ -149,22 +149,20 @@ export class RiskScoreDataClient {
         esClient,
         template: {
           name: indexPatterns.template,
-          body: {
-            data_stream: { hidden: true },
-            index_patterns: [indexPatterns.alias],
-            composed_of: [nameSpaceAwareMappingsComponentName(namespace)],
-            template: {
-              lifecycle: {},
-              settings: {
-                'index.mapping.total_fields.limit': totalFieldsLimit,
-              },
-              mappings: {
-                dynamic: false,
-                _meta: indexMetadata,
-              },
+          data_stream: { hidden: true },
+          index_patterns: [indexPatterns.alias],
+          composed_of: [nameSpaceAwareMappingsComponentName(namespace)],
+          template: {
+            lifecycle: {},
+            settings: {
+              'index.mapping.total_fields.limit': totalFieldsLimit,
             },
-            _meta: indexMetadata,
+            mappings: {
+              dynamic: false,
+              _meta: indexMetadata,
+            },
           },
+          _meta: indexMetadata,
         },
       });
 
