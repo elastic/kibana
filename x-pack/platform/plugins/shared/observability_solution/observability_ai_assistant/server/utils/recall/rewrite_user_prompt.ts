@@ -86,15 +86,52 @@ async function rewritePromptForConnector({
     indexPattern,
     logger,
   });
-  const keywordFieldSchema = lowCardinalityKeywordFields.map(({ field, values }) => ({
-    properties: {
-      field: { const: field },
-      value: { enum: values },
-    },
-    required: ['field', 'value'],
-  }));
 
   const REWRITE_USER_PROMPT_FUNCTION_NAME = `rewrite_user_prompt-${indexPattern}`;
+
+  const keywordExample = lowCardinalityKeywordFields[0];
+  const dateFieldExample = timestampFields[0];
+
+  const queryFilterItems = compact([
+    ...lowCardinalityKeywordFields.map(
+      ({ field, values }) =>
+        ({
+          type: 'object' as const,
+          properties: {
+            field: { const: field },
+            value: { enum: values },
+          },
+          required: ['field', 'value'],
+          additionalProperties: false,
+        } as const)
+    ),
+    ...(timestampFields.length === 0
+      ? []
+      : [
+          {
+            type: 'object',
+            description: 'A range filter to specify a date range.',
+            properties: {
+              field: {
+                type: 'string',
+                description: 'The name of the date field',
+                enum: timestampFields,
+              },
+              gte: {
+                type: 'string',
+                description:
+                  "The greater-than-or-equal value (e.g., a date string like 'now-7d/d').",
+              },
+              lte: {
+                type: 'string',
+                description: "The less-than-or-equal value (e.g., a date string like 'now/d').",
+              },
+            },
+            required: ['field', 'gte', 'lte'],
+            additionalProperties: false,
+          } as const,
+        ]),
+  ]);
 
   const rewriteUserPromptFunction = {
     strict: true,
@@ -105,74 +142,47 @@ async function rewritePromptForConnector({
           User prompt: "List all the bug reports that were opened for the front page this week?" 
           Screen description: "User is looking at the front page of the website"
 
+          Return value:
           """
           {
             "rewrittenUserPrompt": "front page bugs",
-            "keywordFilters": [
-              { "field": "type", "value": "issue" }
+            "queryFilters": [
+              { "field": "${keywordExample.field}", "value": "${keywordExample.values[0]}" },
+              { "field": "${dateFieldExample}", "gte": "now-7d/d", "lte": "now/d" }
             ],
-            "timestampFilter": {
-              { "field": "@timestamp", "gte": "now-7d/d", "lte": "now/d" }
-            }
           }
           """
+
+          Example if no filters match:
+          """
+          {
+            "rewrittenUserPrompt": "front page bugs",
+            "queryFilters": [],
+          }
+          """          
+
         `,
     parameters: {
       type: 'object',
+      additionalProperties: false,
+      required: ['rewrittenUserPrompt', 'queryFilters'],
       properties: {
         rewrittenUserPrompt: {
           type: 'string',
           description:
             "A single sentence that captures the core of the user's intent. The rewritten user prompt will be used as a semantic search query.",
         },
-        ...(keywordFieldSchema.length > 0
-          ? {
-              keywordFilters: {
-                type: 'array',
-                description:
-                  'A list of Elasticsearch filters for exactly matching keyword fields. The filters are used to narrow down the search results based on user intent.',
-                items: {
-                  type: 'object',
-                  description:
-                    'A filter object for a named keyword field, filtered by a specific value.',
-                  oneOf: keywordFieldSchema,
-                },
-              } as const,
-            }
-          : {}),
-        ...(timestampFields.length > 0
-          ? {
-              timestampFilter: {
-                type: 'object',
-                description: 'A range filter to specify a date range.',
-                properties: {
-                  field: {
-                    type: 'string',
-                    description: 'The name of the date field',
-                    enum: timestampFields,
-                  },
-                  gte: {
-                    type: 'string',
-                    description:
-                      "The greater-than-or-equal value (e.g., a date string like 'now-7d/d').",
-                  },
-                  lte: {
-                    type: 'string',
-                    description: "The less-than-or-equal value (e.g., a date string like 'now/d').",
-                  },
-                },
-                required: ['field', 'gte', 'lte'],
-                additionalProperties: false,
-              } as const,
-            }
-          : {}),
+        queryFilters: {
+          type: 'array',
+          description:
+            'A list of Elasticsearch filters for exactly matching keyword fields. The filters are used to narrow down the search results based on user intent.',
+          items: {
+            type: 'object',
+            description: 'A filter object for a named keyword field, filtered by a specific value.',
+            oneOf: queryFilterItems,
+          },
+        },
       },
-      additionalProperties: false,
-      required: [
-        'rewrittenUserPrompt',
-        ...(timestampFields.length > 0 ? ['timestampFilter'] : []),
-        ...(keywordFieldSchema.length > 0 ? ['keywordFilters'] : []),
-      ],
     } as const,
   };
 
@@ -216,27 +226,24 @@ async function rewritePromptForConnector({
 
   const parsedArgs = JSON.parse(response.message.function_call.arguments) as {
     rewrittenUserPrompt: string;
-    keywordFilters?: Array<{ field: string; value: string }>;
-    timestampFilter?: { field: string; gte: string; lte: string };
+    queryFilters: Array<
+      { field: string; value: string } | { field: string; gte: string; lte: string }
+    >;
   };
 
   return {
     userPrompt: parsedArgs.rewrittenUserPrompt,
     indexPattern,
     filters: compact([
-      ...(parsedArgs.keywordFilters ?? []).map(({ field, value }) => ({
-        term: { [field]: value },
-      })),
-      parsedArgs.timestampFilter
-        ? {
-            range: {
-              [parsedArgs.timestampFilter.field]: {
-                gte: parsedArgs.timestampFilter.gte,
-                lte: parsedArgs.timestampFilter.lte,
-              },
-            },
-          }
-        : undefined,
+      ...(parsedArgs.queryFilters ?? []).map((filter) => {
+        if ('value' in filter) {
+          return { term: { [filter.field]: filter.value } };
+        }
+
+        if ('gte' in filter) {
+          return { range: { [filter.field]: { gte: filter.gte, lte: filter.lte } } };
+        }
+      }),
     ]),
   };
 }
