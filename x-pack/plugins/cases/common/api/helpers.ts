@@ -105,8 +105,12 @@ export const getCaseUpdateObservableUrl = (id: string, observableId: string): st
   );
 };
 
-export const getCaseDeleteObservableUrl = (id: string, observableId: string): string =>
-  getCaseUpdateObservableUrl(id, observableId);
+export const getCaseDeleteObservableUrl = (id: string, observableId: string): string => {
+return INTERNAL_CASE_OBSERVABLES_DELETE_URL.replace('{case_id}', id).replace(
+    '{observable_id}',
+    observableId
+  );
+}
 
 export const getCaseSimilarCasesUrl = (caseId: string) => {
   return INTERNAL_CASE_SIMILAR_CASES_URL.replace('{case_id}', caseId);
