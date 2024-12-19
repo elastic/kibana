@@ -141,3 +141,6 @@ xpack.index_management.enableProjectLevelRetentionChecks: true
 
 # This feature is disabled in Serverless until fully performance tested within a Serverless environment
 xpack.securitySolution.enableExperimental: ['entityStoreDisabled']
+
+discover.experimental.enabledProfiles:
+  - security-root-profile
