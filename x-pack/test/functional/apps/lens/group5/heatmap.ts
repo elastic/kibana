@@ -138,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
       // assert the cell has the correct coloring despite the legend rounding
       expect(debugState?.heatmap!.cells[debugState.heatmap!.cells.length - 1].fill).to.be(
-        'rgba(96, 146, 192, 1)' // rgba version of #599dff
+        'rgba(89, 157, 255, 1)' // rgba version of #599dff
       );
     });
 
