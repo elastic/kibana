@@ -15,7 +15,6 @@ import {
   createOrUpdateIndexTemplate,
   DEFAULT_ALERTS_ILM_POLICY,
   DEFAULT_ALERTS_ILM_POLICY_NAME,
-  ECS_COMPONENT_TEMPLATE_NAME,
   getIndexTemplate,
   installWithTimeout,
   TOTAL_FIELDS_LIMIT,
@@ -25,7 +24,6 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../common/assets';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
-import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
 import type { IndexInfo } from './index_info';
 
 interface ConstructorOptions {
@@ -88,15 +86,6 @@ export class ResourceInstaller {
                     name: DEFAULT_ALERTS_ILM_POLICY_NAME,
                     policy: DEFAULT_ALERTS_ILM_POLICY,
                     dataStreamAdapter: this.options.dataStreamAdapter,
-                  }),
-                  createOrUpdateComponentTemplate({
-                    logger,
-                    esClient: clusterClient,
-                    template: {
-                      name: ECS_COMPONENT_TEMPLATE_NAME,
-                      body: ecsComponentTemplate,
-                    },
-                    totalFieldsLimit: TOTAL_FIELDS_LIMIT,
                   }),
                 ]),
             createOrUpdateComponentTemplate({
