@@ -19,7 +19,7 @@ export function getEsPreference(
   sessionId = defaultSessionId
 ): SearchRequest['preference'] {
   const setPreference = getConfigFn<string>(UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE);
-  if (setPreference === 'sessionId') return `${sessionId}`;
+  if (setPreference === 'sessionId') return sessionId;
   const customPreference = getConfigFn<string>(UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE);
   return setPreference === 'custom' ? customPreference : undefined;
 }
