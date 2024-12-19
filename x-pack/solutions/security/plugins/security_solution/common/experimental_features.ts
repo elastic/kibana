@@ -244,6 +244,12 @@ export const allowedExperimentalValues = Object.freeze({
   serviceEntityStoreEnabled: false,
 
   /**
+   * Enables the Asset Inventory related features.
+   * Allows initializing the Universal Entity Store via the API.
+   */
+  assetInventoryStoreEnabled: false,
+
+  /**
    * Enables the siem migrations feature
    */
   siemMigrationsEnabled: false,
