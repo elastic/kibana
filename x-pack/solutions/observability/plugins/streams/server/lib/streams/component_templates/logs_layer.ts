@@ -9,8 +9,9 @@ import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 
 export const logsSettings: IndicesIndexSettings = {
   index: {
+    mode: 'logsdb',
     lifecycle: {
-      name: 'logs',
+      name: 'logs@lifecycle',
     },
     codec: 'best_compression',
     mapping: {
