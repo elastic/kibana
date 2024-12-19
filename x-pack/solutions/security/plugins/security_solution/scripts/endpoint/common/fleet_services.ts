@@ -898,6 +898,7 @@ export const getOrCreateDefaultAgentPolicy = async ({
 }: GetOrCreateDefaultAgentPolicyOptions): Promise<AgentPolicy> => {
   const existingPolicy = await fetchAgentPolicyList(kbnClient, {
     kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.name: "${policyName}"`,
+    withAgentCount: true,
   });
 
   if (existingPolicy.items[0]) {
