@@ -23,13 +23,19 @@ export const sanitizeRequest = (body: string): string => {
  * The stream parameter is accepted in the ChatCompletion
  * API and the Completion API only
  */
-export const getRequestWithStreamOption = (body: string, stream: boolean): string => {
+export const getRequestWithStreamOption = (
+  body: string,
+  stream: boolean,
+  defaultModel?: string
+): string => {
   try {
     const jsonBody = JSON.parse(body);
     if (jsonBody) {
       jsonBody.stream = stream;
     }
-
+    if (defaultModel && !jsonBody.model) {
+      jsonBody.model = defaultModel;
+    }
     return JSON.stringify(jsonBody);
   } catch (err) {
     // swallow the error
