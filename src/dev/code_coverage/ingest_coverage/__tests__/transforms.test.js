@@ -83,7 +83,8 @@ describe(`Transform fns`, () => {
   describe(`teamAssignment`, () => {
     const teamAssignmentsPathMOCK =
       'src/dev/code_coverage/ingest_coverage/__tests__/mocks/team_assign_mock.txt';
-    const coveredFilePath = 'x-pack/platform/plugins/private/reporting/server/browsers/extract/unzip.ts';
+    const coveredFilePath =
+      'x-pack/platform/plugins/private/reporting/server/browsers/extract/unzip.ts';
     const obj = { coveredFilePath };
     const log = new ToolingLog({
       level: 'info',

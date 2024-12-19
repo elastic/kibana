@@ -9,7 +9,10 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/private/global_search_bar'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/private/global_search_bar',
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/private/global_search_bar',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/platform/plugins/private/global_search_bar/public/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/platform/plugins/private/global_search_bar/public/**/*.{ts,tsx}',
+  ],
 };

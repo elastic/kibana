@@ -20,7 +20,8 @@ const logsDescription = i18n.translate('home.sampleData.logsTsdbSpecDescription'
   defaultMessage: 'Sample data, visualizations, and dashboards for monitoring web logs.',
 });
 
-export const GLOBE_ICON_PATH = '/platform/plugins/shared/home/assets/sample_data_resources/logs/icon.svg';
+export const GLOBE_ICON_PATH =
+  '/platform/plugins/shared/home/assets/sample_data_resources/logs/icon.svg';
 export const logsTSDBSpecProvider: SampleDatasetProvider = ({ staticAssets }) => {
   const startDate = new Date();
   const endDate = new Date();
