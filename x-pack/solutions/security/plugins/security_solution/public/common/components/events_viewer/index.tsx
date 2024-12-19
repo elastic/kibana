@@ -94,7 +94,7 @@ export interface EventsViewerProps {
   leadingControlColumns: ControlColumnProps[];
   sourcererScope: SourcererScopeName;
   start: string;
-  showTotalCount?: boolean; // eslint-disable-line react/no-unused-prop-types
+  showTotalCount?: boolean;
   pageFilters?: Filter[];
   currentFilter?: AlertWorkflowStatus;
   onRuleChange?: () => void;

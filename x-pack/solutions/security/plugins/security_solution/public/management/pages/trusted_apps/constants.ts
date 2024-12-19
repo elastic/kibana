@@ -13,7 +13,7 @@ import {
   ENDPOINT_TRUSTED_APPS_LIST_NAME,
 } from '@kbn/securitysolution-list-constants';
 
-export const SEARCHABLE_FIELDS: Readonly<string[]> = [
+export const SEARCHABLE_FIELDS: readonly string[] = [
   `name`,
   `description`,
   'item_id',
