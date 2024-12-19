@@ -25,7 +25,7 @@ import {
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { LOGS_EXPLORER_LOCATOR_ID, LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
+import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -252,8 +252,7 @@ export class Plugin
       new RuleDetailsLocatorDefinition()
     );
 
-    const logsExplorerLocator =
-      pluginsSetup.share.url.locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID);
+    const logsLocator = pluginsSetup.share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
@@ -314,7 +313,7 @@ export class Plugin
     registerObservabilityRuleTypes(
       this.observabilityRuleTypeRegistry,
       coreSetup.uiSettings,
-      logsExplorerLocator
+      logsLocator
     );
 
     if (pluginsSetup.home) {

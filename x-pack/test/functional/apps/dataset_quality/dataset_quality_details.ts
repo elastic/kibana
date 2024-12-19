@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import originalExpect from 'expect';
 import { DatasetQualityFtrProviderContext } from './config';
 import {
   createDegradedFieldsRecord,
@@ -25,6 +26,7 @@ const integrationActions = {
 export default function ({ getService, getPageObjects }: DatasetQualityFtrProviderContext) {
   const PageObjects = getPageObjects([
     'common',
+    'discover',
     'navigationalSearch',
     'observabilityLogsExplorer',
     'datasetQuality',
@@ -327,9 +329,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await logExplorerButton.click();
 
         // Confirm dataset selector text in observability logs explorer
-        const datasetSelectorText =
-          await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-        expect(datasetSelectorText).to.eql(regularDatasetName);
+        const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+        originalExpect(datasetSelectorText).toMatch(regularDatasetName);
       });
 
       it('should go log explorer for degraded docs when the button next to breakdown selector is clicked', async () => {
@@ -342,9 +343,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         );
 
         // Confirm dataset selector text in observability logs explorer
-        const datasetSelectorText =
-          await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-        expect(datasetSelectorText).to.contain(apacheAccessDatasetName);
+        const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+        originalExpect(datasetSelectorText).toMatch(apacheAccessDatasetName);
       });
     });
 

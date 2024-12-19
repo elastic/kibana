@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import originalExpect from 'expect';
 import { defaultNamespace } from '@kbn/test-suites-xpack/functional/apps/dataset_quality/data';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -25,6 +26,7 @@ const integrationActions = {
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'common',
+    'discover',
     'navigationalSearch',
     'observabilityLogsExplorer',
     'datasetQuality',
@@ -333,9 +335,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await logExplorerButton.click();
 
         // Confirm dataset selector text in observability logs explorer
-        const datasetSelectorText =
-          await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-        expect(datasetSelectorText).to.eql(regularDatasetName);
+        const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+        originalExpect(datasetSelectorText).toMatch(regularDatasetName);
       });
 
       it('should go log explorer for degraded docs when the button next to breakdown selector is clicked', async () => {
@@ -348,9 +349,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         // Confirm dataset selector text in observability logs explorer
-        const datasetSelectorText =
-          await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-        expect(datasetSelectorText).to.contain(apacheAccessDatasetName);
+        const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+        originalExpect(datasetSelectorText).toMatch(apacheAccessDatasetName);
       });
     });
 

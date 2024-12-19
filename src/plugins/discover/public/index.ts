@@ -40,5 +40,4 @@ export {
   type NonPersistedDisplayOptions,
 } from './embeddable';
 export { loadSharingDataHelpers } from './utils';
-export { LogsExplorerTabs, type LogsExplorerTabsProps } from './components/logs_explorer_tabs';
 export type { DiscoverServices } from './build_services';

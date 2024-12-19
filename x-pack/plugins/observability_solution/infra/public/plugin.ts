@@ -390,7 +390,6 @@ export class Plugin implements InfraClientPluginClass {
 }
 
 const getLogsNavigationEntries = ({
-  isLogsExplorerAccessible,
   config,
   routes,
 }: {
@@ -401,15 +400,6 @@ const getLogsNavigationEntries = ({
   const entries: NavigationEntry[] = [];
 
   if (!config.featureFlags.logsUIEnabled) return entries;
-
-  if (isLogsExplorerAccessible) {
-    entries.push({
-      label: 'Explorer',
-      app: 'observability-logs-explorer',
-      path: '/',
-      isBetaFeature: true,
-    });
-  }
 
   // Display Stream nav entry when Logs Stream is enabled
   if (routes.stream) entries.push(createNavEntryFromRoute(routes.stream));

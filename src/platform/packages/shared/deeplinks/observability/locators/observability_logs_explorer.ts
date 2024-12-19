@@ -8,46 +8,12 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import { LogsExplorerNavigationParams } from './logs_explorer';
 
 // Will become a union once we have more origins
 export interface ObservabilityLogsExplorerLocationState extends SerializableRecord {
   origin?: {
     id: 'application-log-onboarding';
   };
-}
-
-export type DatasetLocatorParams = LogsExplorerNavigationParams &
-  ObservabilityLogsExplorerLocationState;
-
-// All datasets locator
-export const ALL_DATASETS_LOCATOR_ID = 'ALL_DATASETS_LOCATOR';
-
-export type AllDatasetsLocatorParams = DatasetLocatorParams;
-
-// Single dataset locator
-export const SINGLE_DATASET_LOCATOR_ID = 'SINGLE_DATASET_LOCATOR';
-
-export interface SingleDatasetLocatorParams extends DatasetLocatorParams {
-  /**
-   * Integration name to be selected.
-   */
-  integration?: string;
-  /**
-   * Dataset name to be selected.
-   * ex: system.syslog
-   */
-  dataset: string;
-}
-
-// Data view locator
-export const OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR_ID = 'OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR';
-
-export interface ObsLogsExplorerDataViewLocatorParams extends DatasetLocatorParams {
-  /**
-   * Data view id to select
-   */
-  id: string;
 }
 
 // To store the last used logs viewer (either of discover or observability-logs-explorer)

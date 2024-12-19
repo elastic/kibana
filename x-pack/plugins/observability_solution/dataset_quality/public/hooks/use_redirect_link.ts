@@ -5,20 +5,11 @@
  * 2.0.
  */
 
-import { map } from 'rxjs';
 import { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { AppStatus } from '@kbn/core-application-browser';
-import {
-  OBSERVABILITY_LOGS_EXPLORER_APP_ID,
-  SINGLE_DATASET_LOCATOR_ID,
-  SingleDatasetLocatorParams,
-} from '@kbn/deeplinks-observability';
 import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { Query, AggregateQuery, buildPhraseFilter } from '@kbn/es-query';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import { LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
 import { useKibanaContextForPlugin } from '../utils';
 import { BasicDataStream, TimeRangeConfig } from '../../common/types';
@@ -38,53 +29,24 @@ export const useRedirectLink = <T extends BasicDataStream>({
   sendTelemetry: SendTelemetryFn;
 }) => {
   const {
-    services: { share, application },
+    services: { share },
   } = useKibanaContextForPlugin();
 
   const { from, to } = timeRangeConfig;
-
-  const logsExplorerLocator =
-    share.url.locators.get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID);
-
-  const isLogsExplorerAppAccessible = useObservable(
-    useMemo(
-      () =>
-        application.applications$.pipe(
-          map(
-            (apps) =>
-              (apps.get(OBSERVABILITY_LOGS_EXPLORER_APP_ID)?.status ?? AppStatus.inaccessible) ===
-              AppStatus.accessible
-          )
-        ),
-      [application.applications$]
-    ),
-    false
-  );
 
   return useMemo<{
     linkProps: RouterLinkProps;
     navigate: () => void;
     isLogsExplorerAvailable: boolean;
   }>(() => {
-    const isLogsExplorerAvailable =
-      isLogsExplorerAppAccessible && !!logsExplorerLocator && dataStreamStat.type === 'logs';
-    const config = isLogsExplorerAvailable
-      ? buildLogsExplorerConfig({
-          locator: logsExplorerLocator,
-          dataStreamStat,
-          query,
-          from,
-          to,
-          breakdownField,
-        })
-      : buildDiscoverConfig({
-          locatorClient: share.url.locators,
-          dataStreamStat,
-          query,
-          from,
-          to,
-          breakdownField,
-        });
+    const config = buildDiscoverConfig({
+      locatorClient: share.url.locators,
+      dataStreamStat,
+      query,
+      from,
+      to,
+      breakdownField,
+    });
 
     const onClickWithTelemetry = (event: Parameters<RouterLinkProps['onClick']>[0]) => {
       sendTelemetry();
@@ -104,68 +66,9 @@ export const useRedirectLink = <T extends BasicDataStream>({
         onClick: onClickWithTelemetry,
       },
       navigate: navigateWithTelemetry,
-      isLogsExplorerAvailable,
+      isLogsExplorerAvailable: false,
     };
-  }, [
-    breakdownField,
-    dataStreamStat,
-    from,
-    to,
-    logsExplorerLocator,
-    query,
-    sendTelemetry,
-    share.url.locators,
-    isLogsExplorerAppAccessible,
-  ]);
-};
-
-const buildLogsExplorerConfig = <T extends BasicDataStream>({
-  locator,
-  dataStreamStat,
-  query,
-  from,
-  to,
-  breakdownField,
-}: {
-  locator: LocatorPublic<SingleDatasetLocatorParams>;
-  dataStreamStat: T;
-  query?: Query | AggregateQuery;
-  from: string;
-  to: string;
-  breakdownField?: string;
-}): {
-  navigate: () => void;
-  routerLinkProps: RouterLinkProps;
-} => {
-  const params: SingleDatasetLocatorParams = {
-    dataset: dataStreamStat.name,
-    timeRange: {
-      from,
-      to,
-    },
-    integration: dataStreamStat.integration?.name,
-    query,
-    filterControls: {
-      namespace: {
-        mode: 'include',
-        values: [dataStreamStat.namespace],
-      },
-    },
-    breakdownField,
-  };
-
-  const urlToLogsExplorer = locator.getRedirectUrl(params);
-
-  const navigateToLogsExplorer = () => {
-    locator.navigate(params) as Promise<void>;
-  };
-
-  const logsExplorerLinkProps = getRouterLinkProps({
-    href: urlToLogsExplorer,
-    onClick: navigateToLogsExplorer,
-  });
-
-  return { routerLinkProps: logsExplorerLinkProps, navigate: navigateToLogsExplorer };
+  }, [breakdownField, dataStreamStat, from, to, query, sendTelemetry, share.url.locators]);
 };
 
 const buildDiscoverConfig = <T extends BasicDataStream>({

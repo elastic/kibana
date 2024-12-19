@@ -110,37 +110,4 @@ describe('DiscoverTopNavInline', () => {
       });
     });
   });
-
-  describe('LogsExplorerTabs', () => {
-    it('should render when showLogsExplorerTabs is true', async () => {
-      const props = getProps();
-      props.stateContainer.customizationContext.inlineTopNav.showLogsExplorerTabs = true;
-      render(
-        <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNavInline {...props} />
-        </DiscoverMainProvider>
-      );
-      const topNav = screen.queryByTestId('discoverTopNavInline');
-      expect(topNav).not.toBeNull();
-      await waitFor(() => {
-        const logsExplorerTabs = screen.queryByTestId('logsExplorerTabs');
-        expect(logsExplorerTabs).not.toBeNull();
-      });
-    });
-
-    it('should not render when showLogsExplorerTabs is false', async () => {
-      const props = getProps();
-      render(
-        <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNavInline {...props} />
-        </DiscoverMainProvider>
-      );
-      const topNav = screen.queryByTestId('discoverTopNavInline');
-      expect(topNav).not.toBeNull();
-      await waitFor(() => {
-        const logsExplorerTabs = screen.queryByTestId('logsExplorerTabs');
-        expect(logsExplorerTabs).toBeNull();
-      });
-    });
-  });
 });

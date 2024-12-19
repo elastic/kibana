@@ -276,7 +276,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(viewInAppUrlPathName).contain(`/s/${SPACE_ID}/app/r`);
 
-        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOGS_EXPLORER_LOCATOR');
+        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOGS_LOCATOR');
         expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
           dataset: DATA_VIEW_ID,
           timeRange: { to: 'now' },

@@ -17,6 +17,5 @@
   ],
   "kbn_references": [
     "@kbn/utility-types",
-    "@kbn/es-query",
   ]
 }

@@ -29,20 +29,7 @@ export const createNavigationTree = ({
             title: i18n.translate('xpack.serverlessObservability.nav.discover', {
               defaultMessage: 'Discover',
             }),
-            link: 'last-used-logs-viewer',
-            // avoid duplicate "Discover" breadcrumbs
-            breadcrumbStatus: 'hidden',
-            renderAs: 'item',
-            children: [
-              {
-                link: 'discover',
-                children: [
-                  {
-                    link: 'observability-logs-explorer',
-                  },
-                ],
-              },
-            ],
+            link: 'discover',
           },
           {
             title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
