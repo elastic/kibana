@@ -9,6 +9,7 @@
 
 import path from 'path';
 import { Config } from '../config';
+import { ScoutServerConfig } from '../../types';
 
 /**
  * Dynamically loads server configuration file in the "kbn-scout" framework. It reads
@@ -17,13 +18,13 @@ import { Config } from '../config';
  * @param configPath Path to the configuration file to be loaded.
  * @returns Config instance that is used to start local servers
  */
-export const loadConfig = async (configPath: string): Promise<Config> => {
+export const readConfigFile = async (configPath: string): Promise<Config> => {
   try {
     const absolutePath = path.resolve(configPath);
     const configModule = await import(absolutePath);
 
     if (configModule.servers) {
-      return new Config(configModule.servers);
+      return new Config(configModule.servers as ScoutServerConfig);
     } else {
       throw new Error(`No 'servers' found in the config file at path: ${absolutePath}`);
     }

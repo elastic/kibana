@@ -7,20 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ServerlessProjectType } from '@kbn/es';
-
-export interface ScoutServerConfig {
-  serverless: boolean;
-  projectType?: ServerlessProjectType;
-  isCloud: boolean;
-  cloudUsersFilePath: string;
-  hosts: {
-    kibana: string;
-    elasticsearch: string;
-  };
-  auth: {
-    username: string;
-    password: string;
-  };
-  metadata?: any;
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-charts-theme'],
+};
