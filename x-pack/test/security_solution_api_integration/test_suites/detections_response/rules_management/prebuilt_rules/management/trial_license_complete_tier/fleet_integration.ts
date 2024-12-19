@@ -24,7 +24,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('@ess @serverless @skipInServerlessMKI install_prebuilt_rules_from_real_package', () => {
     beforeEach(async () => {
-      await deletePrebuiltRulesFleetPackage(supertest);
+      await deletePrebuiltRulesFleetPackage(supertest, log);
       await deleteAllRules(supertest, log);
       await deleteAllTimelines(es, log);
       await deleteAllPrebuiltRuleAssets(es, log);

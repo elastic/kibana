@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
-      await deletePrebuiltRulesFleetPackage(supertest);
+      await deletePrebuiltRulesFleetPackage(supertest, log);
     });
 
     it('should install latest stable version and ignore prerelease packages', async () => {
