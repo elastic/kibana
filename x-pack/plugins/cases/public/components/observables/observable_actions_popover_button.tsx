@@ -31,7 +31,7 @@ export const ObservableActionsPopoverButton: React.FC<{
 
   const { isLoading: isDeleteLoading, mutateAsync: deleteObservable } = useDeleteObservable(
     caseData.id,
-    observable.id as string
+    observable.id
   );
 
   const isLoading = isDeleteLoading;
