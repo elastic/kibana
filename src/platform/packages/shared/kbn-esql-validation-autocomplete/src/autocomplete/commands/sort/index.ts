@@ -129,6 +129,7 @@ export async function suggest(
       return [
         ...pushItUpInTheList(
           fieldSuggestions.map((suggestion) => {
+            // if there is already a command, we don't want to override it
             if (suggestion.command) return suggestion;
             return {
               ...suggestion,

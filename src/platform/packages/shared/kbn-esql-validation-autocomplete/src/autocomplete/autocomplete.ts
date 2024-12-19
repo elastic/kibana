@@ -627,6 +627,7 @@ async function getExpressionSuggestionsByType(
           (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
             // COMMAND fie<suggest>
             return fieldSuggestions.map((suggestion) => {
+              // if there is already a command, we don't want to override it
               if (suggestion.command) return suggestion;
               return {
                 ...suggestion,
@@ -639,12 +640,16 @@ async function getExpressionSuggestionsByType(
           (fragment: string, rangeToReplace: { start: number; end: number }) => {
             // COMMAND field<suggest>
             if (['grok', 'dissect'].includes(command.name)) {
-              return fieldSuggestions.map((suggestion) => ({
-                ...suggestion,
-                text: suggestion.text + ' ',
-                command: TRIGGER_SUGGESTION_COMMAND,
-                rangeToReplace,
-              }));
+              return fieldSuggestions.map((suggestion) => {
+                // if there is already a command, we don't want to override it
+                if (suggestion.command) return suggestion;
+                return {
+                  ...suggestion,
+                  text: suggestion.text + ' ',
+                  command: TRIGGER_SUGGESTION_COMMAND,
+                  rangeToReplace,
+                };
+              });
             }
 
             const finalSuggestions = [{ ...pipeCompleteItem, text: ' | ' }];
