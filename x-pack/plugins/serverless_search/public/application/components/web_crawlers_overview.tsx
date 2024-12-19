@@ -5,15 +5,13 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import { EuiLink, EuiPageTemplate, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
-
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
-
 import { useKibanaServices } from '../hooks/use_kibana';
-import { EmptyWebCrawlersPrompt } from './web_crawlers/empty_web_crawlers_prompt';
+import { SelfManagedWebCrawlersEmptyPrompt } from './web_crawlers/self_managed_web_crawlers_empty_prompt';
 
 export const WebCrawlersOverview = () => {
   const { console: consolePlugin } = useKibanaServices();
@@ -54,7 +52,7 @@ export const WebCrawlersOverview = () => {
         </EuiText>
       </EuiPageTemplate.Header>
       <EuiPageTemplate.Section restrictWidth color="subdued">
-        <EmptyWebCrawlersPrompt />
+        <SelfManagedWebCrawlersEmptyPrompt />
       </EuiPageTemplate.Section>
       {embeddableConsole}
     </EuiPageTemplate>
