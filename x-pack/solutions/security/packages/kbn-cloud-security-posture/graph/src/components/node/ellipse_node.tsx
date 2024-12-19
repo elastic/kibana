@@ -10,19 +10,18 @@ import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import {
   NodeShapeContainer,
-  NodeLabel,
   NodeShapeOnHoverSvg,
   NodeShapeSvg,
   NodeIcon,
   NodeButton,
   HandleStyleOverride,
+  NODE_WIDTH,
+  NODE_HEIGHT,
 } from './styles';
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import { EllipseHoverShape, EllipseShape } from './shapes/ellipse_shape';
 import { NodeExpandButton } from './node_expand_button';
-
-const NODE_WIDTH = 90;
-const NODE_HEIGHT = 90;
+import { Label } from './label';
 
 // eslint-disable-next-line react/display-name
 export const EllipseNode: React.FC<NodeProps> = memo((props: NodeProps) => {
@@ -81,7 +80,7 @@ export const EllipseNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           style={HandleStyleOverride}
         />
       </NodeShapeContainer>
-      <NodeLabel>{label ? label : id}</NodeLabel>
+      <Label text={label ? label : id} />
     </>
   );
 });
