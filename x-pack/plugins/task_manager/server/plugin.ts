@@ -140,6 +140,14 @@ export class TaskManagerPlugin
     setupSavedObjects(core.savedObjects, this.config);
     this.taskManagerId = this.initContext.env.instanceUuid;
 
+    const processEnv = process.env;
+    Object.keys(processEnv).forEach((key) => {
+      if (key.startsWith('npm')) {
+        delete processEnv[key];
+      }
+    });
+    this.logger.info(`process env ${JSON.stringify(process.env)}`);
+
     if (!this.taskManagerId) {
       this.logger.error(
         `TaskManager is unable to start as there the Kibana UUID is invalid (value of the "server.uuid" configuration is ${this.taskManagerId})`
