@@ -31,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return 404 when cluster is not found', () =>
       supertest
         .get(
-          `/internal/index-pattern-management/resolve_index/cluscluster1:filebeat-*,cluster2:filebeat-*`
+          `/internal/index-pattern-management/resolve_index/cluster1:filebeat-*,cluster2:filebeat-*`
         )
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(404));
