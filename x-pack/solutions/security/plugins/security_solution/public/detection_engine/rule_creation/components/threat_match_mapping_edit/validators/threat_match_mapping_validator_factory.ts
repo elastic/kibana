@@ -96,7 +96,7 @@ export function threatMatchMappingValidatorFactory({
       };
     }
 
-    if (unknownSourceIndicesFields.length > 0) {
+    if (unknownThreatMatchIndicesFields.length > 0) {
       return {
         code: THREAT_MATCH_MAPPING_ERROR_CODES.ERR_FIELDS_UNKNOWN,
         path,

@@ -30,7 +30,10 @@ export const ThreatMatchMappingEdit = memo(function ThreatMatchMappingEdit({
       label: i18n.THREAT_MATCH_MAPPING_FIELD_LABEL,
       validations: [
         {
-          validator: threatMatchMappingValidatorFactory({ indexPatterns, threatIndexPatterns }),
+          validator: threatMatchMappingValidatorFactory({
+            indexPatterns,
+            threatIndexPatterns,
+          }),
         },
       ],
     }),
