@@ -10,3 +10,4 @@
 export { ThemeService } from './src/theme_service';
 export { CoreThemeProvider } from './src/core_theme_provider';
 export type { ThemeServiceSetupDeps } from './src/theme_service';
+export { browsersSupportsSystemTheme } from './src/system_theme';
