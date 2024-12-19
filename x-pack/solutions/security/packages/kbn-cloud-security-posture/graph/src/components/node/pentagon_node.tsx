@@ -11,7 +11,6 @@ import styled from '@emotion/styled';
 import { Handle, Position } from '@xyflow/react';
 import {
   NodeShapeContainer,
-  NodeLabel,
   NodeShapeOnHoverSvg,
   NodeShapeSvg,
   NodeIcon,
@@ -21,6 +20,7 @@ import {
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import { PentagonHoverShape, PentagonShape } from './shapes/pentagon_shape';
 import { NodeExpandButton } from './node_expand_button';
+import { Label } from './label';
 
 const PentagonShapeOnHover = styled(NodeShapeOnHoverSvg)`
   transform: translate(-50%, -51.5%);
@@ -86,7 +86,7 @@ export const PentagonNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           style={HandleStyleOverride}
         />
       </NodeShapeContainer>
-      <NodeLabel>{label ? label : id}</NodeLabel>
+      <Label text={label ? label : id} />
     </>
   );
 });

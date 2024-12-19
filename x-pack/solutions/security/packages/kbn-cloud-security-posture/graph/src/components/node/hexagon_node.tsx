@@ -10,7 +10,6 @@ import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import {
   NodeShapeContainer,
-  NodeLabel,
   NodeShapeOnHoverSvg,
   NodeShapeSvg,
   NodeIcon,
@@ -20,6 +19,7 @@ import {
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import { HexagonHoverShape, HexagonShape } from './shapes/hexagon_shape';
 import { NodeExpandButton } from './node_expand_button';
+import { Label } from './label';
 
 const NODE_WIDTH = 87;
 const NODE_HEIGHT = 96;
@@ -81,7 +81,7 @@ export const HexagonNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           style={HandleStyleOverride}
         />
       </NodeShapeContainer>
-      <NodeLabel>{label ? label : id}</NodeLabel>
+      <Label text={label ? label : id} />
     </>
   );
 });
