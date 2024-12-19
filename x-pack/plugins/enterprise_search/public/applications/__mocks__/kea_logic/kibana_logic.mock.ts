@@ -58,7 +58,6 @@ export const mockKibanaValues = {
     hasDocumentLevelSecurityEnabled: true,
     hasIncrementalSyncEnabled: true,
     hasNativeConnectors: true,
-    hasWebCrawler: true,
   },
   renderHeaderActions: jest.fn(),
   security: securityMock.createStart(),

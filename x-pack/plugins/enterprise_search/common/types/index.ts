@@ -16,7 +16,6 @@ export interface ProductFeatures {
   hasDocumentLevelSecurityEnabled: boolean;
   hasIncrementalSyncEnabled: boolean;
   hasNativeConnectors: boolean;
-  hasWebCrawler: boolean;
 }
 
 export interface SearchOAuth {

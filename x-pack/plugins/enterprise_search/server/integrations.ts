@@ -7,34 +7,9 @@
 import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { i18n } from '@kbn/i18n';
 
-import { ConfigType } from '.';
-
 export const registerEnterpriseSearchIntegrations = (
-  config: ConfigType,
   customIntegrations: CustomIntegrationsPluginSetup
 ) => {
-  if (config.hasWebCrawler) {
-    customIntegrations.registerCustomIntegration({
-      id: 'web_crawler',
-      title: i18n.translate('xpack.enterpriseSearch.integrations.webCrawlerName', {
-        defaultMessage: 'Web crawler',
-      }),
-      description: i18n.translate('xpack.enterpriseSearch.integrations.webCrawlerDescription', {
-        defaultMessage: 'Add search to your website with the web crawler.',
-      }),
-      categories: ['search', 'web', 'elastic_stack', 'crawler'],
-      uiInternalPath: '/app/elasticsearch/content/crawlers/new_crawler',
-      icons: [
-        {
-          type: 'eui',
-          src: 'logoEnterpriseSearch',
-        },
-      ],
-      shipper: 'search',
-      isBeta: false,
-    });
-  }
-
   customIntegrations.registerCustomIntegration({
     id: 'api',
     title: i18n.translate('xpack.enterpriseSearch.integrations.apiName', {

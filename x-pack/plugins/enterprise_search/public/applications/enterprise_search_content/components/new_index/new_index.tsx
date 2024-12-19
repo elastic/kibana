@@ -27,7 +27,6 @@ import { NewIndexCard } from './new_index_card';
 const getAvailableMethodOptions = (productFeatures: ProductFeatures): INGESTION_METHOD_IDS[] => {
   return [
     INGESTION_METHOD_IDS.API,
-    ...(productFeatures.hasWebCrawler ? [INGESTION_METHOD_IDS.CRAWLER] : []),
     ...(productFeatures.hasConnectors ? [INGESTION_METHOD_IDS.CONNECTOR] : []),
   ];
 };

@@ -12,7 +12,6 @@ export const DEFAULT_INITIAL_APP_DATA = {
     hasDocumentLevelSecurityEnabled: true,
     hasIncrementalSyncEnabled: true,
     hasNativeConnectors: true,
-    hasWebCrawler: true,
   },
   kibanaVersion: '9.0.0',
 };

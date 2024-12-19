@@ -48,11 +48,7 @@ import {
 } from '../common/constants';
 
 import {
-  appSearchGuideId,
-  websiteSearchGuideId,
   databaseSearchGuideId,
-  appSearchGuideConfig,
-  websiteSearchGuideConfig,
   databaseSearchGuideConfig,
 } from '../common/guided_onboarding/search_guide_config';
 
@@ -64,18 +60,11 @@ import {
 
 import { registerEnterpriseSearchIntegrations } from './integrations';
 
-import { entSearchHttpAgent } from './lib/enterprise_search_http_agent';
-import {
-  EnterpriseSearchRequestHandler,
-  IEnterpriseSearchRequestHandler,
-} from './lib/enterprise_search_request_handler';
-
 import { registerEnterpriseSearchRoutes } from './routes/enterprise_search';
 import { registerAnalyticsRoutes } from './routes/enterprise_search/analytics';
 import { registerApiKeysRoutes } from './routes/enterprise_search/api_keys';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
 import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
-import { registerCrawlerRoutes } from './routes/enterprise_search/crawler/crawler';
 import { registerStatsRoutes } from './routes/enterprise_search/stats';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 
@@ -111,7 +100,6 @@ export interface PluginsStart {
 
 export interface RouteDependencies {
   config: ConfigType;
-  enterpriseSearchRequestHandler: IEnterpriseSearchRequestHandler;
   getSavedObjectsService?(): SavedObjectsServiceStart;
   globalConfigService: GlobalConfigService;
   log: Logger;
@@ -164,13 +152,8 @@ export class EnterpriseSearchPlugin implements Plugin {
     const isCloud = !!cloud?.cloudId;
 
     if (customIntegrations) {
-      registerEnterpriseSearchIntegrations(config, customIntegrations);
+      registerEnterpriseSearchIntegrations(customIntegrations);
     }
-
-    /*
-     * Initialize config.ssl.certificateAuthorities file(s) - required for all API calls (+ access checks)
-     */
-    entSearchHttpAgent.initializeHttpAgent(config);
 
     /**
      * Register space/feature control
@@ -274,13 +257,11 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register routes
      */
     const router = http.createRouter();
-    const enterpriseSearchRequestHandler = new EnterpriseSearchRequestHandler({ config, log });
     const dependencies = {
       router,
       config,
       globalConfigService: this.globalConfigService,
       log,
-      enterpriseSearchRequestHandler,
       ml,
       licensing,
     };
@@ -289,7 +270,6 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerEnterpriseSearchRoutes(dependencies);
     // Enterprise Search Routes
     if (config.hasConnectors) registerConnectorRoutes(dependencies);
-    if (config.hasWebCrawler) registerCrawlerRoutes(dependencies);
     registerStatsRoutes(dependencies);
 
     // Analytics Routes (stand-alone product)
@@ -346,10 +326,6 @@ export class EnterpriseSearchPlugin implements Plugin {
     /**
      * Register a config for the search guide
      */
-    guidedOnboarding?.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
-    if (config.hasWebCrawler) {
-      guidedOnboarding?.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
-    }
     if (config.hasConnectors) {
       guidedOnboarding?.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
     }
@@ -360,12 +336,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     if (globalSearch) {
       globalSearch.registerResultProvider(
-        getSearchResultProvider(
-          config,
-          searchConnectors?.getConnectorTypes() || [],
-          isCloud,
-          http.staticAssets.getPluginAssetHref('images/crawler.svg')
-        )
+        getSearchResultProvider(config, searchConnectors?.getConnectorTypes() || [], isCloud)
       );
       globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.staticAssets));
       globalSearch.registerResultProvider(getConnectorsSearchResultProvider(http.staticAssets));

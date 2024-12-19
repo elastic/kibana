@@ -67,18 +67,6 @@ const connectors = [
 ];
 
 describe('Search search provider', () => {
-  const crawlerResult = {
-    icon: 'crawlerIcon.svg',
-    id: 'elastic-crawler',
-    score: 75,
-    title: 'Elastic Web Crawler',
-    type: 'Elasticsearch',
-    url: {
-      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/crawlers/new_crawler`,
-      prependBasePath: true,
-    },
-  };
-
   const mongoResult = {
     icon: 'mongodb.svg',
     id: 'mongodb',
@@ -118,11 +106,9 @@ describe('Search search provider', () => {
   const searchResultProvider = getSearchResultProvider(
     {
       hasConnectors: true,
-      hasWebCrawler: true,
     } as any,
     connectors,
-    false,
-    'crawlerIcon.svg'
+    false
   );
 
   beforeEach(() => {});
@@ -136,12 +122,12 @@ describe('Search search provider', () => {
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
           searchResultProvider.find(
-            { term: 'crawler' },
+            { term: 'mongo' },
             { aborted$: NEVER, maxResults: 100, preference: '' },
             mockSearchProviderContext
           )
         ).toBe('(a|)', {
-          a: [crawlerResult],
+          a: [{ ...mongoResult, score: 90 }],
         });
       });
     });
@@ -155,10 +141,7 @@ describe('Search search provider', () => {
             mockSearchProviderContext
           )
         ).toBe('(a|)', {
-          a: expect.arrayContaining([
-            { ...crawlerResult, score: 80 },
-            { ...mongoResult, score: 80 },
-          ]),
+          a: expect.arrayContaining([{ ...mongoResult, score: 80 }]),
         });
       });
     });
@@ -172,30 +155,7 @@ describe('Search search provider', () => {
             mockSearchProviderContext
           )
         ).toBe('(a|)', {
-          a: [{ ...crawlerResult, score: 80 }],
-        });
-      });
-    });
-
-    it('omits crawler if config has crawler disabled', () => {
-      const searchProvider = getSearchResultProvider(
-        {
-          hasConnectors: true,
-          hasWebCrawler: false,
-        } as any,
-        connectors,
-        false,
-        'crawlerIcon.svg'
-      );
-      getTestScheduler().run(({ expectObservable }) => {
-        expectObservable(
-          searchProvider.find(
-            { term: '' },
-            { aborted$: NEVER, maxResults: 100, preference: '' },
-            mockSearchProviderContext
-          )
-        ).toBe('(a|)', {
-          a: expect.not.arrayContaining([{ ...crawlerResult, score: 80 }]),
+          a: [{ ...mongoResult, score: 80 }],
         });
       });
     });
@@ -204,11 +164,9 @@ describe('Search search provider', () => {
       const searchProvider = getSearchResultProvider(
         {
           hasConnectors: false,
-          hasWebCrawler: true,
         } as any,
         connectors,
-        false,
-        'crawlerIcon.svg'
+        false
       );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
@@ -267,25 +225,12 @@ describe('Search search provider', () => {
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
           searchResultProvider.find(
-            { term: 'crawler', types: ['integration'] },
+            { term: 'mongo', types: ['integration'] },
             { aborted$: NEVER, maxResults: 1, preference: '' },
             mockSearchProviderContext
           )
         ).toBe('(a|)', {
-          a: [crawlerResult],
-        });
-      });
-    });
-    it('returns results for enterprise search tag', () => {
-      getTestScheduler().run(({ expectObservable }) => {
-        expectObservable(
-          searchResultProvider.find(
-            { term: 'crawler', types: ['enterprise search'] },
-            { aborted$: NEVER, maxResults: 1, preference: '' },
-            mockSearchProviderContext
-          )
-        ).toBe('(a|)', {
-          a: [crawlerResult],
+          a: [{ ...mongoResult, score: 90 }],
         });
       });
     });
@@ -293,11 +238,9 @@ describe('Search search provider', () => {
       const searchProvider = getSearchResultProvider(
         {
           hasConnectors: false,
-          hasWebCrawler: false,
         } as any,
         connectors,
-        false,
-        'crawlerIcon.svg'
+        false
       );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
@@ -315,11 +258,9 @@ describe('Search search provider', () => {
       const searchProvider = getSearchResultProvider(
         {
           hasConnectors: false,
-          hasWebCrawler: false,
         } as any,
         connectors,
-        false,
-        'crawlerIcon.svg'
+        false
       );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
@@ -338,11 +279,9 @@ describe('Search search provider', () => {
       const searchProvider = getSearchResultProvider(
         {
           hasConnectors: true,
-          hasWebCrawler: true,
         } as any,
         connectors,
-        true,
-        'crawlerIcon.svg'
+        true
       );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
@@ -353,7 +292,6 @@ describe('Search search provider', () => {
           )
         ).toBe('(a|)', {
           a: expect.arrayContaining([
-            { ...crawlerResult, score: 80 },
             { ...nativeMongoResult, score: 80 },
             { ...customizedConnectorResult, score: 80 },
           ]),

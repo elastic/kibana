@@ -29,7 +29,6 @@ export function registerConfigDataRoute({
           hasDocumentLevelSecurityEnabled: config.hasDocumentLevelSecurityEnabled,
           hasIncrementalSyncEnabled: config.hasIncrementalSyncEnabled,
           hasNativeConnectors: config.hasNativeConnectors,
-          hasWebCrawler: config.hasWebCrawler,
         },
         kibanaVersion: kibanaPackageJson.version,
       };

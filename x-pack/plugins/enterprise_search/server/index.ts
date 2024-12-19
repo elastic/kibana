@@ -14,8 +14,18 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
 };
 
 export const configSchema = schema.object({
-  accessCheckTimeout: schema.number({ defaultValue: 5000 }),
-  accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
+  // accessCheckTimeout: schema.number({ defaultValue: 5000 }),
+  // accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
+  // host: schema.maybe(schema.string()),
+  // ssl: schema.object({
+  //   certificateAuthorities: schema.maybe(
+  //     schema.oneOf([schema.arrayOf(schema.string(), { minSize: 1 }), schema.string()])
+  //   ),
+  //   verificationMode: schema.oneOf(
+  //     [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+  //     { defaultValue: 'full' }
+  //   ),
+  // }),
   customHeaders: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   enabled: schema.boolean({ defaultValue: true }),
   hasConnectors: schema.boolean({ defaultValue: true }),
@@ -23,18 +33,7 @@ export const configSchema = schema.object({
   hasDocumentLevelSecurityEnabled: schema.boolean({ defaultValue: true }),
   hasIncrementalSyncEnabled: schema.boolean({ defaultValue: true }),
   hasNativeConnectors: schema.boolean({ defaultValue: true }),
-  hasWebCrawler: schema.boolean({ defaultValue: true }),
-  host: schema.maybe(schema.string()),
   isCloud: schema.boolean({ defaultValue: false }),
-  ssl: schema.object({
-    certificateAuthorities: schema.maybe(
-      schema.oneOf([schema.arrayOf(schema.string(), { minSize: 1 }), schema.string()])
-    ),
-    verificationMode: schema.oneOf(
-      [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
-      { defaultValue: 'full' }
-    ),
-  }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
@@ -45,7 +44,6 @@ export type ConfigType = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<ConfigType> = {
   deprecations: ({ unused }) => [unused('canDeployEntSearch', { level: 'warning' })],
   exposeToBrowser: {
-    host: true,
     ui: true,
   },
   schema: configSchema,
