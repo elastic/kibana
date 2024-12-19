@@ -277,7 +277,7 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .send(props.body as object);
     },
     /**
-     * Bulk upsert up to 1000 asset criticality records.
+      * Bulk upsert up to 1000 asset criticality records.
 
 If asset criticality records already exist for the specified entities, those records are overwritten with the specified values. If asset criticality records don't exist for the specified entities, new records are created.
 
@@ -348,7 +348,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-     * Create or update an asset criticality record for a specific entity.
+      * Create or update an asset criticality record for a specific entity.
 
 If a record already exists for the specified entity, that record is overwritten with the specified value. If a record doesn't exist for the specified entity, a new record is created.
 
