@@ -5369,7 +5369,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/discover-contextual-components@link:packages/kbn-discover-contextual-components":
+"@kbn/discover-contextual-components@link:src/platform/packages/shared/kbn-discover-contextual-components":
   version "0.0.0"
   uid ""
 
