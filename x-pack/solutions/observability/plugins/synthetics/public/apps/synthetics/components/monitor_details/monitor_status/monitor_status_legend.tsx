@@ -52,7 +52,7 @@ export const MonitorStatusLegend = ({ brushable }: { brushable: boolean }) => {
         <>
           <EuiFlexItem aria-hidden={true} grow={true} />
           <EuiFlexItem grow={false}>
-            <EuiText size="xs" color={euiTheme.colors.subduedText}>
+            <EuiText size="xs" color={euiTheme.colors.textSubdued}>
               {labels.BRUSH_AREA_MESSAGE}
             </EuiText>
           </EuiFlexItem>
