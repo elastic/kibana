@@ -10,7 +10,6 @@
 import type { Observable } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
 import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
@@ -157,23 +156,16 @@ export const enhancedEsSearchStrategyProvider = (
   ): Promise<IEsSearchResponse> {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const legacyConfig = await firstValueFrom(legacyConfig$);
-    const { body, index, ...params } = request.params!;
-    const method = 'POST';
-    const path = encodeURI(`/${index}/_rollup_search`);
-    const querystring = {
-      ...getShardTimeout(legacyConfig),
-      ...(await getIgnoreThrottled(uiSettingsClient)),
-      ...(await getDefaultSearchParams(uiSettingsClient)),
-      ...params,
-    };
+    const { index, ...params } = request.params!;
 
     try {
-      const esResponse = await client.transport.request(
+      const esResponse = await client.rollup.rollupSearch(
         {
-          method,
-          path,
-          body,
-          querystring,
+          ...getShardTimeout(legacyConfig),
+          ...(await getIgnoreThrottled(uiSettingsClient)),
+          ...(await getDefaultSearchParams(uiSettingsClient)),
+          ...params,
+          index: index!,
         },
         {
           signal: options?.abortSignal,
@@ -181,7 +173,7 @@ export const enhancedEsSearchStrategyProvider = (
         }
       );
 
-      const response = esResponse.body as estypes.SearchResponse<any>;
+      const response = esResponse.body;
       return {
         rawResponse: shimHitsTotal(response, options),
         ...(esResponse.meta?.request?.params
