@@ -60,5 +60,3 @@ export const DEFAULT_TRANSLATION_FIELDS = {
   to: 'now',
   interval: '5m',
 } as const;
-
-export const EMPTY_RESOURCE_PLACEHOLDER = '<empty>';

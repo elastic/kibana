@@ -47,10 +47,24 @@ describe('splResourceIdentifier', () => {
 
     const result = splResourceIdentifier(query);
     expect(result).toEqual([
-      { type: 'list', name: 'my_lookup_table' },
-      { type: 'list', name: 'other_lookup_list' },
-      { type: 'list', name: 'third_lookup' },
+      { type: 'lookup', name: 'my_lookup_table' },
+      { type: 'lookup', name: 'other_lookup_list' },
+      { type: 'lookup', name: 'third' },
     ]);
+  });
+
+  it('should extract lookup from inputlookup tables correctly', () => {
+    const query = 'inputlookup my_lookup_table WHERE field="value"';
+
+    const result = splResourceIdentifier(query);
+    expect(result).toEqual([{ type: 'lookup', name: 'my_lookup_table' }]);
+  });
+
+  it('should extract lookup from inputlookup with modifiers correctly', () => {
+    const query = 'inputlookup append=T start=10 my_lookup_table WHERE field="value"';
+
+    const result = splResourceIdentifier(query);
+    expect(result).toEqual([{ type: 'lookup', name: 'my_lookup_table' }]);
   });
 
   it('should extract both macros and lookup tables correctly', () => {
@@ -60,9 +74,9 @@ describe('splResourceIdentifier', () => {
     const result = splResourceIdentifier(query);
     expect(result).toEqual([
       { type: 'macro', name: 'macro_one' },
-      { type: 'list', name: 'my_lookup_table' },
-      { type: 'list', name: 'other_lookup_list' },
-      { type: 'list', name: 'third_lookup' },
+      { type: 'lookup', name: 'my_lookup_table' },
+      { type: 'lookup', name: 'other_lookup_list' },
+      { type: 'lookup', name: 'third' },
     ]);
   });
 
@@ -72,11 +86,11 @@ describe('splResourceIdentifier', () => {
 
     const result = splResourceIdentifier(query);
     expect(result).toEqual([
-      { type: 'list', name: 'my_lookup_1' },
-      { type: 'list', name: 'my_lookup_2' },
-      { type: 'list', name: 'my_lookup_3' },
-      { type: 'list', name: 'my_lookup_4' },
-      { type: 'list', name: 'my_lookup_5' },
+      { type: 'lookup', name: 'my_lookup_1' },
+      { type: 'lookup', name: 'my_lookup_2' },
+      { type: 'lookup', name: 'my_lookup_3' },
+      { type: 'lookup', name: 'my_lookup_4' },
+      { type: 'lookup', name: 'my_lookup_5' },
     ]);
   });
 
@@ -96,7 +110,7 @@ describe('splResourceIdentifier', () => {
       { type: 'macro', name: 'macro_one' },
       { type: 'macro', name: 'my_lookup_table' },
       { type: 'macro', name: 'third_macro' },
-      { type: 'list', name: 'real_lookup_list' },
+      { type: 'lookup', name: 'real_lookup_list' },
     ]);
   });
 
@@ -107,7 +121,7 @@ describe('splResourceIdentifier', () => {
     const result = splResourceIdentifier(query);
     expect(result).toEqual([
       { type: 'macro', name: 'macro_one' },
-      { type: 'list', name: 'my_lookup_table' },
+      { type: 'lookup', name: 'my_lookup_table' },
     ]);
   });
 
@@ -118,7 +132,7 @@ describe('splResourceIdentifier', () => {
     const result = splResourceIdentifier(query);
     expect(result).toEqual([
       { type: 'macro', name: 'macro_one' },
-      { type: 'list', name: 'my_lookup_table' },
+      { type: 'lookup', name: 'my_lookup_table' },
     ]);
   });
 
@@ -129,7 +143,7 @@ describe('splResourceIdentifier', () => {
     const result = splResourceIdentifier(query);
     expect(result).toEqual([
       { type: 'macro', name: 'macro_one' },
-      { type: 'list', name: 'my_lookup_table' },
+      { type: 'lookup', name: 'my_lookup_table' },
     ]);
   });
 });

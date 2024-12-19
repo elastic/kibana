@@ -25,13 +25,14 @@ export const getValidationNode = ({ logger }: GetValidationNodeParams): GraphNod
     // We want to prevent infinite loops, so we increment the iterations counter for each validation run.
     const currentIteration = ++state.validation_errors.iterations;
     let esqlErrors: string = '';
-    if (!isEmpty(query)) {
-      const { errors, isEsqlQueryAggregating, hasMetadataOperator } = parseEsqlQuery(query);
+    const sanitizedQuery = query ? removePlaceHolders(query) : '';
+    if (!isEmpty(sanitizedQuery)) {
+      const { errors, isEsqlQueryAggregating, hasMetadataOperator } =
+        parseEsqlQuery(sanitizedQuery);
       if (!isEmpty(errors)) {
         esqlErrors = JSON.stringify(errors);
       } else if (!isEsqlQueryAggregating && !hasMetadataOperator) {
-        esqlErrors =
-          'Queries that don’t use the STATS...BY function (non-aggregating queries) must include the "metadata _id, _version, _index" operator after the source command. For example: FROM logs* metadata _id, _version, _index.';
+        esqlErrors = `Queries that do't use the STATS...BY function (non-aggregating queries) must include the "metadata _id, _version, _index" operator after the source command. For example: FROM logs* metadata _id, _version, _index.`;
       }
     }
     if (esqlErrors) {
@@ -41,3 +42,10 @@ export const getValidationNode = ({ logger }: GetValidationNodeParams): GraphNod
     return { validation_errors: { iterations: currentIteration, esql_errors: esqlErrors } };
   };
 };
+
+function removePlaceHolders(query: string): string {
+  return query
+    .replace(/\[indexPattern\]/g, 'logs-*') // Replace the indexPattern placeholder with logs-*
+    .replaceAll(/\[(macro|lookup):.*?\]/g, '') // Removes any macro or lookup placeholders
+    .replaceAll(/\n(\s*?\|\s*?\n)*/g, '\n'); // Removes any empty lines with | (pipe) alone after removing the placeholders
+}
