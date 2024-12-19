@@ -74,6 +74,16 @@ function wrapSearchBarInContext(testProps: any) {
   (dataViewEditorMock.userPermissions.editDataView as jest.Mock).mockReturnValue(true);
 
   const services = {
+    application: {
+      ...startMock.application,
+      capabilities: {
+        ...startMock.application.capabilities,
+        savedQueryManagement: {
+          showQueries: true,
+          saveQuery: true,
+        },
+      },
+    },
     uiSettings: startMock.uiSettings,
     settings: startMock.settings,
     savedObjects: startMock.savedObjects,

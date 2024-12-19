@@ -98,7 +98,7 @@ export const ResultsLinks: FC<Props> = ({
     let unmounted = false;
 
     const getDiscoverUrl = async (): Promise<void> => {
-      const isDiscoverAvailable = capabilities.discover?.show ?? false;
+      const isDiscoverAvailable = capabilities.discover_v2?.show ?? false;
       if (!isDiscoverAvailable) return;
       const discoverLocator = url.locators.get('DISCOVER_APP_LOCATOR');
 

@@ -41,7 +41,7 @@ export function getSavedSearchObjectType(
       getInAppUrl(obj) {
         return {
           path: `/app/discover#/view/${encodeURIComponent(obj.id)}`,
-          uiCapabilitiesPath: 'discover.show',
+          uiCapabilitiesPath: 'discover_v2.show',
         };
       },
     },
