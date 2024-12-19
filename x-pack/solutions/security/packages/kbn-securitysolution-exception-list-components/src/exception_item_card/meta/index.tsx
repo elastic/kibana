@@ -28,7 +28,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
   ({ item, rules, dataTestSubj, securityLinkAnchorComponent, formattedDateComponent }) => {
     const { euiTheme } = useEuiTheme();
     const itemCss = css`
-      border-right: 1px solid ${euiTheme.border.color};
+      border-right: ${euiTheme.border.thin};
       padding: ${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.s} 0;
     `;
 

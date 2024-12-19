@@ -20,7 +20,6 @@ import {
   EuiTextColor,
   EuiIconTip,
   EuiSpacer,
-  useEuiTheme,
 } from '@elastic/eui';
 
 import type { OperatingSystem } from '@kbn/securitysolution-utils';
@@ -74,7 +73,6 @@ export const SettingCard: FC<SettingCardProps> = memo(
     mode = 'edit',
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const { euiTheme } = useEuiTheme();
 
     return (
       <EuiPanel data-test-subj={getTestId()} hasBorder={true} hasShadow={false} paddingSize="none">
@@ -82,7 +80,9 @@ export const SettingCard: FC<SettingCardProps> = memo(
           direction="row"
           gutterSize="none"
           alignItems="center"
-          style={{ padding: `${euiTheme.size.base} ${euiTheme.size.base} 0 ${euiTheme.size.base}` }}
+          css={({ euiTheme }) => ({
+            padding: `${euiTheme.size.base} ${euiTheme.size.base} 0 ${euiTheme.size.base}`,
+          })}
         >
           <EuiFlexItem grow={1}>
             <SettingCardHeader>{TITLES.type}</SettingCardHeader>
@@ -147,9 +147,9 @@ export const SettingCard: FC<SettingCardProps> = memo(
           <>
             <EuiHorizontalRule margin="m" />
             <div
-              style={{
-                padding: `0 ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base}`,
-              }}
+              css={({ euiTheme }) => ({
+                padding: `${euiTheme.size.base} ${euiTheme.size.base} 0 ${euiTheme.size.base}`,
+              })}
             >
               {children}
             </div>

@@ -63,7 +63,7 @@ const StyledButtonGroup = styled(EuiButtonGroup)`
 const EffectivePolicyFormContainer = styled.div`
   .policy-name .euiSelectableListItem__text {
     text-decoration: none !important;
-    color: ${(props) => props.theme.eui.euiTextColor} !important;
+    color: ${(props) => props.theme.euiTheme.colors.textParagraph} !important;
   }
 `;
 
