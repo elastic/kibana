@@ -61,7 +61,7 @@ node scripts/type_check.js --project x-pack/solutions/observability/plugins/logs
 ```
 #### Observability Logs Explorer
 ```
-node scripts/type_check.js --project x-pack/plugins/observability_solution/observability_logs_explorer/tsconfig.json
+node scripts/type_check.js --project x-pack/solutions/observability/plugins/observability_logs_explorer/tsconfig.json
 ```
 
 ### Generating Data using Synthtrace

@@ -6497,7 +6497,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-logs-explorer-plugin@link:x-pack/plugins/observability_solution/observability_logs_explorer":
+"@kbn/observability-logs-explorer-plugin@link:x-pack/solutions/observability/plugins/observability_logs_explorer":
   version "0.0.0"
   uid ""
 
