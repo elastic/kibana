@@ -1,0 +1,261 @@
+{
+  "properties": {
+    "cloud": {
+      "properties": {
+        "isCloudEnabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Is the deployment running in Elastic Cloud (ESS or Serverless)?"
+          }
+        },
+        "trialEndDate": {
+          "type": "date",
+          "_meta": {
+            "description": "End of the trial period"
+          }
+        },
+        "inTrial": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Is the organization during the trial period?"
+          }
+        },
+        "isElasticStaffOwned": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Is the deploymend owned by an Elastician"
+          }
+        },
+        "organizationId": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The Elastic Cloud Organization ID that owns the deployment/project"
+          }
+        },
+        "deploymentId": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The ESS Deployment ID"
+          }
+        },
+        "projectId": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The Serverless Project ID"
+          }
+        },
+        "projectType": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The Serverless Project type"
+          }
+        },
+        "orchestratorTarget": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The Orchestrator Target where it is deployed (canary/non-canary)"
+          }
+        }
+      }
+    },
+    "cloudExperiments": {
+      "properties": {
+        "initialized": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Whether the A/B testing client is correctly initialized (identify has been called)"
+          }
+        },
+        "flags": {
+          "type": "pass_through",
+          "_meta": {
+            "description": "Flags received by the client"
+          }
+        },
+        "flagNames": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "Names of the flags received by the client"
+            }
+          }
+        }
+      }
+    },
+    "ml": {
+      "properties": {
+        "alertRules": {
+          "properties": {
+            "xpack.ml.anomaly_detection_alert": {
+              "properties": {
+                "count_by_result_type": {
+                  "properties": {
+                    "record": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules using record result type"
+                      }
+                    },
+                    "influencer": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules using influencer result type"
+                      }
+                    },
+                    "bucket": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules using bucket result type"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "xpack.ml.anomaly_detection_jobs_health": {
+              "properties": {
+                "count_by_check_type": {
+                  "properties": {
+                    "datafeed": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the not started datafeed health check"
+                      }
+                    },
+                    "mml": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the model memory limit health check"
+                      }
+                    },
+                    "delayedData": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the delayed data health check"
+                      }
+                    },
+                    "errorMessages": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the error messages health check"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "rollups": {
+      "properties": {
+        "index_patterns": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup index patterns"
+              }
+            }
+          }
+        },
+        "saved_searches": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup saved searches"
+              }
+            }
+          }
+        },
+        "visualizations": {
+          "properties": {
+            "saved_searches": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the visualizations that are based on rollup saved searches"
+                  }
+                },
+                "lens_total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the lens visualizations that are based on rollup saved searches"
+                  }
+                }
+              }
+            },
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the visualizations that are based on rollup index patterns"
+              }
+            },
+            "lens_total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the lens visualizations that are based on rollup index patterns"
+              }
+            }
+          }
+        }
+      }
+    },
+    "transform": {
+      "properties": {
+        "alertRules": {
+          "properties": {
+            "transform_health": {
+              "properties": {
+                "count_by_check_type": {
+                  "properties": {
+                    "notStarted": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the not started health check"
+                      }
+                    },
+                    "errorMessages": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the error message health check"
+                      }
+                    },
+                    "healthCheck": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the health check with the stats API"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "upgrade-assistant-telemetry": {
+      "properties": {
+        "features": {
+          "properties": {
+            "deprecation_logging": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "_meta": {
+                    "description": "Whether user has enabled Elasticsearch deprecation logging"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

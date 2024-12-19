@@ -1,0 +1,27 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/safer-lodash-set",
+    "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+    "@kbn/std",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/doc-links",
+    "@kbn/repo-packages"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

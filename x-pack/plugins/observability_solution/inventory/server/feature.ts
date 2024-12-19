@@ -22,7 +22,7 @@ export const INVENTORY_SERVER_FEATURE = {
   app: [INVENTORY_SERVER_FEATURE_ID],
   catalogue: [INVENTORY_SERVER_FEATURE_ID],
   alerting: [],
-  // see x-pack/plugins/features/common/feature_kibana_privileges.ts
+  // see x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
       app: [INVENTORY_SERVER_FEATURE_ID],
