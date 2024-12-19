@@ -269,14 +269,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/siem_migrations/ai_connector/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/siem_migrations/start_migration/panels/migration_result_panel.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/siem_migrations/start_migration/panels/migration_result_panel.tsx"
           }
         ],
         "children": [
