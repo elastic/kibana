@@ -43,7 +43,7 @@ export const LogsDeprecationCallout = ({ page }: LogsDeprecationCalloutProps) =>
     services: {
       share,
       application: {
-        capabilities: { discover, fleet },
+        capabilities: { discover_v2: discover, fleet },
       },
     },
   } = useKibanaContextForPlugin();

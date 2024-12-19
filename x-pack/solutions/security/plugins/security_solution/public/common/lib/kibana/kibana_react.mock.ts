@@ -205,6 +205,10 @@ export const createStartServicesMock = (
           crud: true,
           read: true,
         },
+        savedQueryManagement: {
+          showQueries: true,
+          saveQuery: true,
+        },
       },
     },
     security,
