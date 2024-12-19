@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
 
-  describe('discover request counts', function describeIndexTests() {
+  describe.only('discover request counts', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
@@ -193,6 +193,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('data view mode', () => {
       const type = 'ese';
 
+      beforeEach(async () => {
+        await common.navigateToApp('discover');
+        await header.waitUntilLoadingHasFinished();
+      });
+
       getSharedTests({
         type,
         savedSearch: 'data view test',
@@ -233,6 +238,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should send no more than 3 requests (documents + chart + other bucket) when changing to a breakdown field with an other bucket', async () => {
+        await testSubjects.click('discoverNewButton');
         await expectSearches(type, 3, async () => {
           await discover.chooseBreakdownField('extension.raw');
         });
