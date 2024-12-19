@@ -1550,7 +1550,7 @@
             "section": "def-common.ControlWidth",
             "text": "ControlWidth"
           },
-          "; }>[]; }> | undefined; } & { options: Readonly<{} & { hidePanelTitles: boolean; syncTooltips: boolean; useMargins: boolean; syncColors: boolean; syncCursor: boolean; }>; title: string; description: string; kibanaSavedObjectMeta: Readonly<{ searchSource?: Readonly<{ type?: string | undefined; sort?: Record<string, ",
+          "; }>[]; }> | undefined; } & { options: Readonly<{} & { hidePanelTitles: boolean; syncColors: boolean; syncCursor: boolean; syncTooltips: boolean; useMargins: boolean; }>; title: string; description: string; kibanaSavedObjectMeta: Readonly<{ searchSource?: Readonly<{ type?: string | undefined; sort?: Record<string, ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -2207,14 +2207,15 @@
             "section": "def-common.DashboardContainerInput",
             "text": "DashboardContainerInput"
           },
-          " extends ",
+          " extends Omit<",
           {
             "pluginId": "embeddable",
             "scope": "common",
             "docId": "kibEmbeddablePluginApi",
             "section": "def-common.EmbeddableInput",
             "text": "EmbeddableInput"
-          }
+          },
+          ", \"viewMode\">"
         ],
         "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
         "deprecated": false,
@@ -2350,18 +2351,12 @@
           {
             "parentPluginId": "dashboard",
             "id": "def-common.DashboardContainerInput.viewMode",
-            "type": "Enum",
+            "type": "CompoundType",
             "tags": [],
             "label": "viewMode",
             "description": [],
             "signature": [
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.ViewMode",
-                "text": "ViewMode"
-              }
+              "\"edit\" | \"view\" | \"print\" | \"preview\""
             ],
             "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
@@ -2703,10 +2698,10 @@
         "signature": [
           "{ id?: string | undefined; version?: string | undefined; tags?: string[] | undefined; title?: string | undefined; description?: string | undefined; viewMode?: ",
           {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.ViewMode",
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
           " | undefined; timeRestore?: boolean | undefined; timeRange?: ",
@@ -2749,7 +2744,7 @@
             "section": "def-common.KibanaExecutionContext",
             "text": "KibanaExecutionContext"
           },
-          " | undefined; timeslice?: [number, number] | undefined; hidePanelTitles?: boolean | undefined; syncTooltips?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; lastReloadRequestTime?: number | undefined; enhancements?: ",
+          " | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -2757,7 +2752,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; panels?: ",
+          " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; useMargins?: boolean | undefined; panels?: ",
           "DashboardPanel",
           "[] | undefined; }"
         ],

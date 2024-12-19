@@ -265,13 +265,13 @@ export const BULK_EDIT_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
     }
   );
 
-export const BULK_ACTION_CONFIRMATION_PARTLY_TITLE = (customRulesCount: number) =>
+export const BULK_ACTION_CONFIRMATION_PARTLY_TITLE = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkActionConfirmationPartlyTitle',
     {
-      values: { customRulesCount },
+      values: { rulesCount },
       defaultMessage:
-        'This action can only be applied to {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
+        'This action can only be applied to {rulesCount, plural, =1 {# rule} other {# rules}}',
     }
   );
 
@@ -289,32 +289,30 @@ export const BULK_ACTION_CONFIRMATION_CLOSE = i18n.translate(
   }
 );
 
-export const BULK_EDIT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
+export const BULK_EDIT_CONFIRMATION_CONFIRM = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmation.confirmButtonLabel',
     {
-      values: { customRulesCount },
-      defaultMessage: 'Edit {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
+      values: { rulesCount },
+      defaultMessage: 'Edit {rulesCount, plural, =1 {# rule} other {# rules}}',
     }
   );
 
-export const BULK_EXPORT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
+export const BULK_EXPORT_CONFIRMATION_CONFIRM = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkExportConfirmation.confirmButtonLabel',
     {
-      values: { customRulesCount },
-      defaultMessage:
-        'Export {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
+      values: { rulesCount },
+      defaultMessage: 'Export {rulesCount, plural, =1 {# rule} other {# rules}}',
     }
   );
 
-export const BULK_MANUAL_RULE_RUN_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
+export const BULK_MANUAL_RULE_RUN_CONFIRMATION_CONFIRM = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkManualRuleRunConfirmation.confirmButtonLabel',
     {
-      values: { customRulesCount },
-      defaultMessage:
-        'Schedule {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
+      values: { rulesCount },
+      defaultMessage: 'Schedule {rulesCount, plural, =1 {# rule} other {# rules}}',
     }
   );
 
