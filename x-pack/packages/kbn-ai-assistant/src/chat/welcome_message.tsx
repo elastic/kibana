@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useCurrentEuiBreakpoint } from '@
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { isSupportedConnectorType } from '@kbn/observability-ai-assistant-plugin/public';
+import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { Disclaimer } from './disclaimer';
@@ -78,9 +79,11 @@ export function WelcomeMessage({
         gutterSize="none"
         className={fullHeightClassName}
       >
+        <EuiFlexItem grow={false}>
+          <AssistantBeacon backgroundColor="ghost" size="xl" />
+        </EuiFlexItem>
         <EuiFlexItem grow className={centerMaxWidthClassName}>
           <EuiSpacer size={['xl', 'l'].includes(breakpoint!) ? 'l' : 's'} />
-
           <WelcomeMessageConnectors
             connectors={connectors}
             onSetupConnectorClick={handleConnectorClick}
@@ -89,10 +92,8 @@ export function WelcomeMessage({
             <WelcomeMessageKnowledgeBase connectors={connectors} knowledgeBase={knowledgeBase} />
           ) : null}
         </EuiFlexItem>
-
         <EuiFlexItem grow={false}>
           <StarterPrompts onSelectPrompt={onSelectPrompt} />
-
           <EuiSpacer size="l" />
           <Disclaimer />
         </EuiFlexItem>

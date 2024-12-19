@@ -8,6 +8,14 @@ Centralized asset inventory experience within the Elastic Security solution. A c
 
 See the [kibana contributing guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) for instructions setting up your development environment.
 
+### Feature flag
+
+First, enable the `assetInventoryStoreEnabled` experimental feature flag by adding the following to your `kibana.dev.yml`:
+
+```yml
+xpack.securitySolution.enableExperimental: ['assetInventoryStoreEnabled']
+```
+
 ## Testing
 
 For general guidelines, read [Kibana Testing Guide](https://www.elastic.co/guide/en/kibana/current/development-tests.html) for more details
