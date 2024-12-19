@@ -44,8 +44,8 @@ export const useCertSearch = ({
   });
 
   const esParams = createEsParams({
+    ...searchBody,
     index: settings.settings?.heartbeatIndices,
-    body: searchBody,
   });
 
   const { data: result, loading } = useEsSearch<Ping, typeof esParams>(

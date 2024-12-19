@@ -34,6 +34,7 @@ export async function getAlertsClient({
     search<TParams extends RequiredParams>(
       searchParams: TParams
     ): Promise<InferSearchResponseOf<ParsedTechnicalFields, TParams>> {
+      // @ts-expect-error incompatible sort
       return alertsClient.find({
         ...searchParams,
         index: alertsIndices.join(','),

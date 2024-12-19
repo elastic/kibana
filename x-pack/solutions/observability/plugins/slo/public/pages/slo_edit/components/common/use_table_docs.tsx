@@ -10,6 +10,7 @@ import { FieldPath, useFormContext } from 'react-hook-form';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import { QuerySchema } from '@kbn/slo-schema';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getElasticsearchQueryOrThrow } from '../../../../../common/parse_kuery';
 import { CreateSLOForm } from '../../types';
 
@@ -28,7 +29,7 @@ export const useTableDocs = ({
   const errorMessages = getFieldState(name).error?.message;
   const filter = watch(name) as QuerySchema;
 
-  const esFilter = getElasticsearchQueryOrThrow(filter);
+  const esFilter = getElasticsearchQueryOrThrow(filter) as QueryDslQueryContainer;
 
   const { data, loading, error } = useEsSearch(
     {

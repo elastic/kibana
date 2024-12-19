@@ -28,13 +28,9 @@ const getCertsResults = async (
 ) => {
   const { syntheticsEsClient } = requestParams;
 
-  const searchBody = getCertsRequestBody(requestParams);
+  const request = getCertsRequestBody(requestParams);
 
-  const request = { body: searchBody };
-
-  const { body: result } = await syntheticsEsClient.search<Ping, typeof request>({
-    body: searchBody,
-  });
+  const { body: result } = await syntheticsEsClient.search<Ping, typeof request>(request);
 
   return result;
 };

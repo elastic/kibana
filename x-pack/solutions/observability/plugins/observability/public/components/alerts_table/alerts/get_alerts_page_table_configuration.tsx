@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_START } from '@kbn/rule-data-utils';
 import {
   AlertsTableConfigurationRegistry,

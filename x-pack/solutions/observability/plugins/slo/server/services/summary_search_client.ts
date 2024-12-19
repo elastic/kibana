@@ -10,7 +10,7 @@ import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/co
 import { ALL_VALUE, Paginated, Pagination } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { Groupings, SLODefinition, SLOId, StoredSLOSettings, Summary } from '../domain/models';
 import { toHighPrecision } from '../utils/number';

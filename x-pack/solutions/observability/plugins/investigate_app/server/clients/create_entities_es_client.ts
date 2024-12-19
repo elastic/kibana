@@ -96,14 +96,14 @@ export function createEntitiesESClient({
       allSearches: Array<TSearchRequest & { index: LatestAlias }>
     ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {
       const searches = allSearches
-        .map((params) => {
+        .map(({ index, ...body }) => {
           const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] = [
             {
-              index: [params.index],
+              index: [index],
               ignore_unavailable: true,
             },
             {
-              ...params.body,
+              ...body,
             },
           ];
 

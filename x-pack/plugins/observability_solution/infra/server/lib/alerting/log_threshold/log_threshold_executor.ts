@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import {
@@ -746,7 +746,10 @@ export const getGroupedESQuery = (
       },
     };
 
-    const body: estypes.SearchRequest['body'] = {
+    return {
+      index,
+      allow_no_indices: true,
+      ignore_unavailable: true,
       query: {
         bool: {
           filter: [rangeFilter, ...mustFilters],
@@ -756,13 +759,6 @@ export const getGroupedESQuery = (
       aggregations,
       runtime_mappings: runtimeMappings,
       size: 0,
-    };
-
-    return {
-      index,
-      allow_no_indices: true,
-      ignore_unavailable: true,
-      body,
     };
   } else {
     const aggregations = {
@@ -792,7 +788,10 @@ export const getGroupedESQuery = (
       },
     };
 
-    const body: estypes.SearchRequest['body'] = {
+    return {
+      index,
+      allow_no_indices: true,
+      ignore_unavailable: true,
       query: {
         bool: {
           filter: [groupedRangeFilter],
@@ -801,13 +800,6 @@ export const getGroupedESQuery = (
       aggregations,
       runtime_mappings: runtimeMappings,
       size: 0,
-    };
-
-    return {
-      index,
-      allow_no_indices: true,
-      ignore_unavailable: true,
-      body,
     };
   }
 };
@@ -825,7 +817,7 @@ export const getUngroupedESQuery = (
     executionTimeRange
   );
 
-  const body: estypes.SearchRequest['body'] = {
+  const body: estypes.SearchRequest = {
     // Ensure we accurately track the hit count for the ungrouped case, otherwise we can only ensure accuracy up to 10,000.
     track_total_hits: true,
     query: {

@@ -6,7 +6,7 @@
  */
 import Boom from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
@@ -145,7 +145,7 @@ interface SearchAlertsParams {
   query?: string | object;
   aggs?: Record<string, any>;
   index?: string;
-  _source?: string[] | false;
+  _source?: string | string[] | false;
   track_total_hits?: boolean | number;
   size?: number;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
@@ -307,7 +307,7 @@ export class AlertsClient {
 
       const config = getEsQueryConfig();
 
-      let queryBody: estypes.SearchRequest['body'] = {
+      let queryBody: estypes.SearchRequest = {
         fields: [ALERT_RULE_TYPE_ID, ALERT_RULE_CONSUMER, ALERT_WORKFLOW_STATUS, SPACE_IDS],
         query: await this.buildEsQueryWithAuthz(
           query,

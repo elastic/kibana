@@ -37,7 +37,7 @@ export const getJourneyScreenshotBlocks: UMElasticsearchQueryFn<
     size: 1000,
   };
 
-  const fetchScreenshotBlocksResult = await uptimeEsClient.search({ body });
+  const fetchScreenshotBlocksResult = await uptimeEsClient.search(body);
 
   return (fetchScreenshotBlocksResult.body.hits.hits as ScreenshotBlockResultType[]).map(
     ({ _id, _source }) => ({
