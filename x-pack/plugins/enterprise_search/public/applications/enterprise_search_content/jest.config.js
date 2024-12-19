@@ -21,21 +21,8 @@ module.exports = {
   ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/enterprise_search/public/applications/enterprise_search_content',
-  coveragePathIgnorePatterns: [
-    '<rootDir>/x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/search_index',
-    '<rootDir>/x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/search_indices',
-    '<rootDir>/x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/new_index',
-  ],
-  testPathIgnorePatterns: [
-    '<rootDir>/x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/search_index',
-    '<rootDir>/x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/search_indices',
-    '<rootDir>/x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/new_index',
-  ],
   modulePathIgnorePatterns: [
     '<rootDir>/x-pack/plugins/enterprise_search/public/applications/app_search/cypress',
     '<rootDir>/x-pack/plugins/enterprise_search/public/applications/workplace_search/cypress',
-    '<rootDir>/x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/search_index',
-    '<rootDir>/x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/search_indices',
-    '<rootDir>/x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/new_index',
   ],
 };
