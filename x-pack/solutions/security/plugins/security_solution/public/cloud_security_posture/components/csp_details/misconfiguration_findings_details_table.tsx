@@ -68,7 +68,7 @@ const getFindingsStats = (
         }
       ),
       count: failedFindingsStats,
-      color: euiThemeVars.euiColorVis9,
+      color: euiThemeVars.euiColorDanger,
       filter: () => {
         filterFunction(MISCONFIGURATION_STATUS.FAILED);
       },

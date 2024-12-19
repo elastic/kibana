@@ -8,8 +8,8 @@ import { euiThemeVars } from '@kbn/ui-theme';
 
 export const statusColors = {
   passed: euiThemeVars.euiColorSuccess,
-  failed: euiThemeVars.euiColorVis9,
-  unknown: euiThemeVars.euiColorLightShade,
+  failed: euiThemeVars.euiColorDanger,
+  unknown: euiThemeVars.euiColorLightShade, // TODO: switch to semantic color, eg. euiColorSeverity0
 };
 
 export const HOST_NAME = 'host.name';

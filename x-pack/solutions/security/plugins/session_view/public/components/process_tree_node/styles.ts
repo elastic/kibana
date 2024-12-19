@@ -166,7 +166,7 @@ export const useStyles = ({
     };
 
     const workingDir: CSSObject = {
-      color: colors.successText,
+      color: colors.textSuccess,
       fontFamily: font.familyCode,
       fontWeight: font.weight.regular,
     };
