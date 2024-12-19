@@ -7,11 +7,10 @@
 
 import React, { useMemo } from 'react';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
-import { FieldDefinitionConfigWithName } from '@kbn/streams-schema';
+import { FieldDefinitionConfigWithName, ReadStreamDefinition } from '@kbn/streams-schema';
 import { getFormattedError } from '../../../util/errors';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { PreviewTable } from '../../preview_table';
@@ -46,7 +45,7 @@ const SamplePreviewTableContent = ({
         signal,
         params: {
           path: {
-            id: definition.id,
+            id: definition.name,
           },
           body: {
             field_definitions: [nextFieldDefinition],
@@ -54,7 +53,7 @@ const SamplePreviewTableContent = ({
         },
       });
     },
-    [definition.id, nextFieldDefinition, streamsRepositoryClient],
+    [definition.name, nextFieldDefinition, streamsRepositoryClient],
     {
       disableToastOnError: true,
     }
