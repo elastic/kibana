@@ -19,7 +19,6 @@ import {
   HttpSetup,
   IUiSettingsClient,
   OverlayStart,
-  ChromeStart,
 } from '@kbn/core/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -32,7 +31,6 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ExtensionsService } from '../services';
 import { HttpService, NotificationService, UiMetricService } from './services';
 import { IndexManagementBreadcrumb } from './services/breadcrumbs';
-import useObservable from 'react-use/lib/useObservable';
 
 export const AppContext = createContext<AppDependencies | undefined>(undefined);
 
@@ -54,7 +52,6 @@ export interface AppDependencies {
     console?: ConsolePluginStart;
     licensing?: LicensingPluginStart;
     ml?: MlPluginStart;
-    chrome: ChromeStart;
   };
   services: {
     uiMetricService: UiMetricService;
@@ -97,7 +94,6 @@ export const AppContextProvider = ({
   value: AppDependencies;
   children: React.ReactNode;
 }) => {
-  const { chrome } = value.plugins;
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 

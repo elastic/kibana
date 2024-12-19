@@ -27,7 +27,6 @@ import { EnterpriseSearchApplicationIndex } from '../../../../../common/types/se
 
 import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';
 import { indexHealthToHealthColor } from '../../../shared/constants/health_colors';
-import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { TelemetryLogic } from '../../../shared/telemetry/telemetry_logic';
 
@@ -53,7 +52,7 @@ export const SearchApplicationIndices: React.FC = () => {
       if (searchIndicesLocator) {
         return {
           ...viewIndicesDefaultProps,
-          href: generateEncodedPath(searchIndicesLocator.getRedirectUrl({}), { indexName }),
+          href: searchIndicesLocator.getRedirectUrl({}),
           onClick: async (event: React.MouseEvent<HTMLAnchorElement>) => {
             event.preventDefault();
             const url = await searchIndicesLocator.getUrl({ indexName });

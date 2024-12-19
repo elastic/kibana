@@ -21,7 +21,7 @@ export class SearchIndicesLocatorDefinition
 {
   public readonly getLocation = async (params: SearchIndicesLocatorParams) => {
     const path = `/index_details/${params.indexName}`;
-    console.log('params.indexName', params.detailsTabId);
+
     return {
       app: INDICES_APP_ID,
       path: SearchIndexDetailsTabValues.includes(params.detailsTabId)

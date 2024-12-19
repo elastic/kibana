@@ -59,10 +59,7 @@ const getColumnConfigs = ({
   location,
   application,
   http,
-  share,
-  chrome
 }) => {
-
   const columns = [
     {
       fieldName: 'name',
@@ -81,9 +78,7 @@ const getColumnConfigs = ({
                   location.search || '',
                   extensionsService,
                   application,
-                  http,
-                  share,
-                  chrome,
+                  http
                 );
               }}
             >
@@ -575,8 +570,8 @@ export class IndexTable extends Component {
       <AppContextConsumer>
         {({ services, config, core, plugins }) => {
           const { extensionsService } = services;
-          const { application, http, chrome } = core;
-          const { share, cloud } = plugins;
+          const { application, http } = core;
+          const { share } = plugins;
           const columnConfigs = getColumnConfigs({
             showIndexStats: config.enableIndexStats,
             showSizeAndDocCount: config.enableSizeAndDocCount,
@@ -586,8 +581,6 @@ export class IndexTable extends Component {
             location,
             application,
             http,
-            share,
-            chrome
           });
           const columnsCount = columnConfigs.length + 1;
           return (

@@ -76,7 +76,6 @@ export class IndexActionsContextMenu extends Component {
     const allFrozen = every(indices, (index) => index.isFrozen);
     const selectedIndexCount = indexNames.length;
     const items = [];
-    const activeSolutionId = this.context.activeSolutionId;
     if (isOnListView && selectedIndexCount === 1) {
       items.push({
         'data-test-subj': 'showOverviewIndexMenuButton',

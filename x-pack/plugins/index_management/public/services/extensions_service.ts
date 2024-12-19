@@ -13,7 +13,7 @@ import {
   EmptyListContent,
   IndexContent,
   ExtensionsSetup,
-  IndexDetailsPageRoute
+  IndexDetailsPageRoute,
 } from '@kbn/index-management-shared-types';
 import { IndexDetailsTab } from '../../common/constants';
 
@@ -122,12 +122,13 @@ export class ExtensionsService {
     }
   }
   private setIndexDetailsPageRoute(route: IndexDetailsPageRoute) {
-       if (this._indexDetailsPageRoute) {
-         throw new Error(`The route for index details has already been set.`);
-       } else {
-        this._indexDetailsPageRoute = route;
-        }
-      }
+    if (this._indexDetailsPageRoute) {
+      throw new Error(`The route for index details has already been set.`);
+    } else {
+      this._indexDetailsPageRoute = route;
+    }
+  }
+
   public get actions() {
     return this._actions;
   }
@@ -167,7 +168,7 @@ export class ExtensionsService {
   public get indexMappingsContent() {
     return this._indexMappingsContent;
   }
-   public get indexDetailsPageRoute() {
-       return this._indexDetailsPageRoute;
-    }
+  public get indexDetailsPageRoute() {
+    return this._indexDetailsPageRoute;
+  }
 }

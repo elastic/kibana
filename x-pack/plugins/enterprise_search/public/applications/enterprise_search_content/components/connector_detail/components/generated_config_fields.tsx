@@ -7,6 +7,8 @@
 
 import React, { useMemo, useState } from 'react';
 
+import { useValues } from 'kea';
+
 import {
   EuiButtonIcon,
   EuiCallOut,
@@ -28,12 +30,12 @@ import { Connector } from '@kbn/search-connectors';
 
 import { MANAGE_API_KEYS_URL } from '../../../../../../common/constants';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
+import { KibanaLogic } from '../../../../shared/kibana';
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 
 import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
 import { CONNECTOR_DETAIL_PATH } from '../../../routes';
-import { useValues } from 'kea';
-import { KibanaLogic } from '../../../../shared/kibana';
+
 export interface GeneratedConfigFieldsProps {
   apiKey?: ApiKey;
   connector: Connector;
@@ -125,7 +127,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
       };
     }
   }, [navigateToUrl, searchIndexDetailsUrl]);
-  console.log('searchIndexDetailsUrl', searchIndexDetailsUrl);
+
   return (
     <>
       {isModalVisible && <ConfirmModal onCancel={onCancel} onConfirm={onConfirm} />}
@@ -212,19 +214,6 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
             {connector.index_name && (
               <EuiLink {...SearchIndicesLinkProps}>{connector.index_name}</EuiLink>
             )}
-            {/* {connector.index_name ?
-              { searchIndexDetailsUrl ?
-                <EuiLinkTo
-                external
-                target="_blank"
-                to={generateEncodedPath(searchIndexDetailsUrl, {
-                  indexName: connector.index_name,
-                })}
-              >
-                {connector.index_name}
-              </EuiLinkTo> : {connector.index_name}}
-
-            )} */}
           </EuiFlexItem>
           <EuiFlexItem />
           <EuiFlexItem>

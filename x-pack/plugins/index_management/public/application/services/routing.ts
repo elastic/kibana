@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { ApplicationStart, ChromeStart } from '@kbn/core/public';
+import { ApplicationStart } from '@kbn/core/public';
 import { HttpSetup } from '@kbn/core/public';
 import { Section } from '../../../common/constants';
 import type { IndexDetailsTabId } from '../../../common/constants';
+import { ExtensionsService } from '../../services/extensions_service';
 import { IndexDetailsSection } from '../../../common/constants';
-import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
-import { firstValueFrom } from 'rxjs';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { ExtensionsService } from '../../services';
 
 export const getTemplateListLink = () => `/templates`;
 
@@ -90,7 +87,7 @@ export const getComponentTemplateDetailLink = (name: string) => {
   return `/component_templates/${encodeURIComponent(name)}`;
 };
 
-export const navigateToIndexDetailsPage = async (
+export const navigateToIndexDetailsPage = (
   indexName: string,
   indicesListURLParams: string,
   extensionsService: ExtensionsService,
@@ -98,7 +95,6 @@ export const navigateToIndexDetailsPage = async (
   http: HttpSetup,
   tabId?: IndexDetailsSection
 ) => {
-  console.log("extensionsService.indexDetailsPageRoute", extensionsService.indexDetailsPageRoute)
   if (!extensionsService.indexDetailsPageRoute) {
     application.navigateToUrl(
       http.basePath.prepend(
@@ -109,7 +105,7 @@ export const navigateToIndexDetailsPage = async (
         )}`
       )
     );
-  }else{
+  } else {
     const route = extensionsService.indexDetailsPageRoute.renderRoute(indexName, tabId);
     application.navigateToUrl(http.basePath.prepend(route));
   }

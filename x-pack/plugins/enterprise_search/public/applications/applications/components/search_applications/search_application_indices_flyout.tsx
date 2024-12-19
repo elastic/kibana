@@ -26,17 +26,13 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
-
 import { EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
 
-import { SEARCH_INDEX_PATH } from '../../../enterprise_search_content/routes';
 import { healthColorsMap } from '../../../shared/constants/health_colors';
-import { generateEncodedPath } from '../../../shared/encode_path_params';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
+
+import { KibanaLogic } from '../../../shared/kibana';
 
 import { SearchApplicationIndicesFlyoutLogic } from './search_application_indices_flyout_logic';
-import { KibanaLogic } from '../../../shared/kibana';
 
 export const SearchApplicationIndicesFlyout: React.FC = () => {
   const {
@@ -90,14 +86,6 @@ export const SearchApplicationIndicesFlyout: React.FC = () => {
       ),
       render: (indexName: string) => (
         <EuiLink {...SearchIndicesLinkProps(indexName)}>{indexName}</EuiLink>
-        // <EuiLinkTo
-        //   to={`${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}${generateEncodedPath(SEARCH_INDEX_PATH, {
-        //     indexName,
-        //   })}`}
-        //   shouldNotCreateHref
-        // >
-        //   {indexName}
-        // </EuiLinkTo>
       ),
       sortable: true,
       truncateText: true,
