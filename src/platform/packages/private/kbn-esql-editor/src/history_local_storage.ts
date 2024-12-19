@@ -66,10 +66,15 @@ export const addQueriesToCache = (
   // the cachedQueries Map might not contain all
   // the localStorage queries
   const queries = getHistoryItems('desc');
-  queries.forEach((queryItem) => {
-    const trimmedQueryString = getTrimmedQuery(queryItem.queryString);
-    cachedQueries.set(trimmedQueryString, queryItem);
-  });
+  if (queries.length > 0) {
+    queries.forEach((queryItem) => {
+      const trimmedQueryString = getTrimmedQuery(queryItem.queryString);
+      cachedQueries.set(trimmedQueryString, queryItem);
+    });
+  } else {
+    // if there are no queries in the localStorage, clear the cache
+    cachedQueries.clear();
+  }
   const trimmedQueryString = getTrimmedQuery(item.queryString);
 
   if (item.queryString) {
@@ -87,11 +92,12 @@ export const addQueriesToCache = (
 
     // queries to store in the localstorage
     allQueries = sortedByDate.slice(0, maxQueriesAllowed);
+
+    // clear and reset the queries in the cache
+    cachedQueries.clear();
     allQueries.forEach((queryItem) => {
       cachedQueries.set(queryItem.queryString, queryItem);
     });
   }
-  // clear and reset the queries in the cache
-  cachedQueries.clear();
   localStorage.setItem(QUERY_HISTORY_ITEM_KEY, JSON.stringify(allQueries));
 };
