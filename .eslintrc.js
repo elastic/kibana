@@ -1917,7 +1917,7 @@ module.exports = {
         // core-team owned code
         'src/core/**',
         'x-pack/platform/plugins/shared/features/**',
-        'x-pack/plugins/licensing/**',
+        'x-pack/platform/plugins/shared/licensing/**',
         'x-pack/plugins/global_search/**',
         'x-pack/platform/plugins/shared/cloud/**',
         'src/platform/packages/shared/kbn-config-schema',
