@@ -204,7 +204,7 @@ async function rewritePromptForConnector({
         ${screenDescription}
 
         Keyword fields that can be used to filter the dataset:
-        ${lowCardinalityKeywordFields}
+        ${JSON.stringify(lowCardinalityKeywordFields)}
 
         Available date fields that can be used to filter the dataset:
         ${timestampFields}
