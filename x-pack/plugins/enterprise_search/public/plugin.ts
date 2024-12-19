@@ -489,6 +489,27 @@ export class EnterpriseSearchPlugin implements Plugin {
       visibleIn: [],
     });
 
+    core.application.register({
+      appRoute: '/app',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      id: 'enterpriseSearchRedirect',
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME);
+
+        await this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { Applications } = await import('./applications/enterprise_search_redirect');
+
+        return renderApp(Applications, kibanaDeps, pluginData);
+      },
+      title: 'EnterpriseSearchRedirect',
+      visibleIn: [],
+    });
+
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
         description: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.DESCRIPTION,
