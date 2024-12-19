@@ -41,9 +41,9 @@ const baseNavItems = [
     items: [
       {
         'data-test-subj': 'searchSideNav-Indices',
-        href: '/app/elasticsearch/content/search_indices',
+        href: '/app/management/data/index_management/',
         id: 'search_indices',
-        items: [],
+        items: undefined,
         name: 'Indices',
       },
       {
@@ -148,9 +148,9 @@ const mockNavLinks = [
     url: '/app/elasticsearch/overview',
   },
   {
-    id: 'enterpriseSearchContent:searchIndices',
+    id: 'management:index_management',
     title: 'Indices',
-    url: '/app/elasticsearch/content/search_indices',
+    url: '/app/management/data/index_management/',
   },
   {
     id: 'enterpriseSearchContent:connectors',
