@@ -9,7 +9,7 @@ import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
 import { ASSET_CRITICALITY_MAPPINGS_VERSIONS } from './constants';
 
-interface AssetCriticalityEcsMigrationClientOpts {
+interface AssetCriticalityMigrationClientOpts {
   logger: Logger;
   auditLogger: AuditLogger | undefined;
   esClient: ElasticsearchClient;
@@ -41,16 +41,16 @@ if (ctx._source.id_field == 'user.name') {
   ctx._source.host = host;
 }`;
 
-export class AssetCriticalityEcsMigrationClient {
+export class AssetCriticalityMigrationClient {
   private readonly assetCriticalityDataClient: AssetCriticalityDataClient;
-  constructor(private readonly options: AssetCriticalityEcsMigrationClientOpts) {
+  constructor(private readonly options: AssetCriticalityMigrationClientOpts) {
     this.assetCriticalityDataClient = new AssetCriticalityDataClient({
       ...options,
       namespace: '*', // The migration is applied to all spaces
     });
   }
 
-  public isEcsMappingsMigrationRequired = async () => {
+  public isMappingsMigrationRequired = async () => {
     const indicesMappings = await this.assetCriticalityDataClient.getIndexMappings();
 
     return Object.values(indicesMappings).some(
@@ -67,7 +67,7 @@ export class AssetCriticalityEcsMigrationClient {
     return resp.hits.hits.length > 0;
   };
 
-  public migrateEcsMappings = () => {
+  public migrateMappings = () => {
     return this.assetCriticalityDataClient.createOrUpdateIndex();
   };
 

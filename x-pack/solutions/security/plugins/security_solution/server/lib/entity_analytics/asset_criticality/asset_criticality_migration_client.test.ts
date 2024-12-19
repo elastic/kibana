@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AssetCriticalityEcsMigrationClient } from './asset_criticality_migration_client';
+import { AssetCriticalityMigrationClient } from './asset_criticality_migration_client';
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
@@ -25,7 +25,7 @@ describe('AssetCriticalityEcsMigrationClient', () => {
   let auditLogger: AuditLogger | undefined;
   let esClient: ElasticsearchClient;
   let assetCriticalityDataClient: jest.Mocked<AssetCriticalityDataClient>;
-  let migrationClient: AssetCriticalityEcsMigrationClient;
+  let migrationClient: AssetCriticalityMigrationClient;
 
   beforeEach(() => {
     logger = { info: jest.fn(), error: jest.fn() } as unknown as Logger;
@@ -40,7 +40,7 @@ describe('AssetCriticalityEcsMigrationClient', () => {
 
     (AssetCriticalityDataClient as jest.Mock).mockImplementation(() => assetCriticalityDataClient);
 
-    migrationClient = new AssetCriticalityEcsMigrationClient({ logger, auditLogger, esClient });
+    migrationClient = new AssetCriticalityMigrationClient({ logger, auditLogger, esClient });
   });
 
   describe('isEcsMappingsMigrationRequired', () => {
@@ -50,7 +50,7 @@ describe('AssetCriticalityEcsMigrationClient', () => {
         index2: { mappings: { properties: {}, _meta: { version: '9999' } } },
       });
 
-      const result = await migrationClient.isEcsMappingsMigrationRequired();
+      const result = await migrationClient.isMappingsMigrationRequired();
       expect(result).toBe(true);
     });
 
@@ -61,7 +61,7 @@ describe('AssetCriticalityEcsMigrationClient', () => {
         },
       });
 
-      const result = await migrationClient.isEcsMappingsMigrationRequired();
+      const result = await migrationClient.isMappingsMigrationRequired();
       expect(result).toBe(false);
     });
   });
@@ -87,7 +87,7 @@ describe('AssetCriticalityEcsMigrationClient', () => {
 
   describe('migrateEcsMappings', () => {
     it('should call createOrUpdateIndex on assetCriticalityDataClient', async () => {
-      await migrationClient.migrateEcsMappings();
+      await migrationClient.migrateMappings();
       expect(assetCriticalityDataClient.createOrUpdateIndex).toHaveBeenCalled();
     });
   });

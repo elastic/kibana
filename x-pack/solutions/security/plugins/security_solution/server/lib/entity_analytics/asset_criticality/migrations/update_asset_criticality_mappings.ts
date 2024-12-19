@@ -7,7 +7,7 @@
 
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 
-import { AssetCriticalityEcsMigrationClient } from '../asset_criticality_migration_client';
+import { AssetCriticalityMigrationClient } from '../asset_criticality_migration_client';
 
 export const updateAssetCriticalityMappings = async ({
   auditLogger,
@@ -17,15 +17,15 @@ export const updateAssetCriticalityMappings = async ({
   const [coreStart] = await getStartServices();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-  const migrationClient = new AssetCriticalityEcsMigrationClient({
+  const migrationClient = new AssetCriticalityMigrationClient({
     esClient,
     logger,
     auditLogger,
   });
 
-  const shouldMigrateMappings = await migrationClient.isEcsMappingsMigrationRequired();
+  const shouldMigrateMappings = await migrationClient.isMappingsMigrationRequired();
   if (shouldMigrateMappings) {
     logger.info('Migrating Asset Criticality mappings');
-    await migrationClient.migrateEcsMappings();
+    await migrationClient.migrateMappings();
   }
 };

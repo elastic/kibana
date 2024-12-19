@@ -100,10 +100,10 @@ export const getImplicitEntityFields = (record: AssetCriticalityUpsertWithDelete
  * @example
  *  const field = `user.asset.criticality`
  *  const mapping = {user: {properties: {asset: {properties: {criticality: {type: 'keyword'}}}}}};
- *  getMappingForFlattenField(field, mapping) // returns {type: 'keyword'}
+ *  getMappingForFlattenedField(field, mapping) // returns {type: 'keyword'}
  *
  */
-export const getMappingForFlattenField = (
+export const getMappingForFlattenedField = (
   field: string,
   mapping: Record<string, MappingProperty>
 ) => get(field.replaceAll('.', '.properties.'), mapping);

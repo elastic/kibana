@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { applyCriticalityToScore, getMappingForFlattenField } from './helpers';
+import { applyCriticalityToScore, getMappingForFlattenedField } from './helpers';
 
 describe('applyCriticalityToScore', () => {
   describe('integer scores', () => {
@@ -61,7 +61,7 @@ describe('applyCriticalityToScore', () => {
     });
   });
 
-  describe('getMappingForFlattenField', () => {
+  describe('getMappingForFlattenedField', () => {
     const mappingProperty: MappingProperty = { type: 'keyword' };
     const mapping: Record<string, MappingProperty> = {
       user: {
@@ -79,21 +79,21 @@ describe('applyCriticalityToScore', () => {
     it('returns the correct mapping for a simple field', () => {
       const field = 'name';
 
-      const result = getMappingForFlattenField(field, mapping);
+      const result = getMappingForFlattenedField(field, mapping);
       expect(result).toEqual(mappingProperty);
     });
 
     it('returns the correct mapping for a nested field', () => {
       const field = 'user.asset.criticality';
 
-      const result = getMappingForFlattenField(field, mapping);
+      const result = getMappingForFlattenedField(field, mapping);
       expect(result).toEqual(mappingProperty);
     });
 
     it('returns undefined for a non-existent field', () => {
       const field = 'user.asset.nonExistentField';
 
-      const result = getMappingForFlattenField(field, mapping);
+      const result = getMappingForFlattenedField(field, mapping);
       expect(result).toBeUndefined();
     });
   });
