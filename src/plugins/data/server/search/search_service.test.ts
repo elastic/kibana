@@ -16,7 +16,6 @@ import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mo
 import { createIndexPatternsStartMock } from '../data_views/mocks';
 
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
-import { bfetchPluginMock } from '@kbn/bfetch-plugin/server/mocks';
 import { lastValueFrom, of } from 'rxjs';
 
 import type {
@@ -68,10 +67,8 @@ describe('Search service', () => {
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
-      const bfetch = bfetchPluginMock.createSetupContract();
       const setup = plugin.setup(mockCoreSetup, {
         packageInfo: { version: '8' },
-        bfetch,
         expressions: {
           registerFunction: jest.fn(),
           registerType: jest.fn(),
@@ -115,7 +112,6 @@ describe('Search service', () => {
       mockSessionClient = createSearchSessionsClientMock();
 
       const pluginSetup = plugin.setup(mockCoreSetup, {
-        bfetch: bfetchPluginMock.createSetupContract(),
         expressions: expressionsPluginMock.createSetupContract(),
       });
       pluginSetup.registerSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY, mockStrategy);
