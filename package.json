@@ -964,7 +964,7 @@
     "@kbn/threat-intelligence-plugin": "link:x-pack/solutions/security/plugins/threat_intelligence",
     "@kbn/timelines-plugin": "link:x-pack/solutions/security/plugins/timelines",
     "@kbn/timelion-grammar": "link:packages/kbn-timelion-grammar",
-    "@kbn/timerange": "link:packages/kbn-timerange",
+    "@kbn/timerange": "link:src/platform/packages/shared/kbn-timerange",
     "@kbn/tinymath": "link:packages/kbn-tinymath",
     "@kbn/transform-plugin": "link:x-pack/platform/plugins/private/transform",
     "@kbn/translations-plugin": "link:x-pack/platform/plugins/private/translations",
