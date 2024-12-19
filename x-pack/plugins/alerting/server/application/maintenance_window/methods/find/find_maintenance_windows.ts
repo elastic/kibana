@@ -31,7 +31,10 @@ export const getStatusFilter = (
     [MaintenanceWindowStatus.Archived]: '(maintenance-window.attributes.expirationDate < "now")',
   };
 
-  const fullQuery = status.map((status) => statusToQueryMapping[status]).filter(Boolean).join(' or ')
+  const fullQuery = status
+    .map((status) => statusToQueryMapping[status])
+    .filter(Boolean)
+    .join(' or ');
 
   return fullQuery ? fromKueryExpression(fullQuery) : undefined;
 };
