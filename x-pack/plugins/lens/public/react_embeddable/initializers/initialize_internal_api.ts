@@ -52,6 +52,8 @@ export function initializeInternalApi(
   // the isNewPanel won't be serialized so it will be always false after the edit panel closes applying the changes
   const isNewlyCreated$ = new BehaviorSubject<boolean>(initialState.isNewPanel || false);
 
+  const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
+
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
   return {
@@ -65,6 +67,7 @@ export function initializeInternalApi(
     renderCount$,
     isNewlyCreated$,
     dataViews: dataViews$,
+    blockingError$,
     dispatchError: () => {
       hasRenderCompleted$.next(true);
       renderCount$.next(renderCount$.getValue() + 1);
@@ -90,6 +93,7 @@ export function initializeInternalApi(
       messages$.next([]);
       validationMessages$.next([]);
     },
+    updateBlockingError: (blockingError: Error | undefined) => blockingError$.next(blockingError),
     setAsCreated: () => isNewlyCreated$.next(false),
     getDisplayOptions: () => {
       const latestAttributes = attributes$.getValue();
