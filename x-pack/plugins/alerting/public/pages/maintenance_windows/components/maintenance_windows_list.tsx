@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   formatDate,
   EuiBasicTableColumn,
@@ -43,11 +43,9 @@ interface MaintenanceWindowsListProps {
   perPage: number;
   total: number;
   onPageChange: ({ page: { index, size } }: { page: { index: number; size: number } }) => void;
-  inputText: string;
-  onSearchKeyup: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onStatusChange: (status: MaintenanceWindowStatus[]) => void;
   selectedStatus: MaintenanceWindowStatus[];
-  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSearchChange: (value: string) => void;
 }
 
 const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindow>> = [
@@ -110,13 +108,12 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     perPage,
     total,
     onPageChange,
-    inputText,
     selectedStatus,
     onStatusChange,
-    onSearchKeyup,
     onSearchChange,
   }) => {
     const { euiTheme } = useEuiTheme();
+    const [search, setSearch] = useState<string>('');
 
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
     const onEdit = useCallback<TableActionsPopoverProps['onEdit']>(
@@ -189,6 +186,22 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       [actions, readOnly]
     );
 
+    const onInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearch(e.target.value);
+      if (e.target.value === '') {
+        onSearchChange(e.target.value);
+      }
+    }, []);
+
+    const onSearchKeyup = useCallback(
+      (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+          onSearchChange(search);
+        }
+      },
+      [search]
+    );
+
     return (
       <>
         <EuiFlexItem grow={false}>
@@ -200,8 +213,8 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
                 isClearable
                 incremental={false}
                 placeholder={i18n.SEARCH_PLACEHOLDER}
-                value={inputText}
-                onChange={onSearchChange}
+                value={search}
+                onChange={onInputChange}
                 onKeyUp={onSearchKeyup}
               />
             </EuiFlexItem>

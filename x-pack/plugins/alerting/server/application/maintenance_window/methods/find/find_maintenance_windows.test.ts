@@ -224,29 +224,29 @@ describe('getStatusFilter', () => {
                 "function": "range",
                 "type": "function",
               },
+            ],
+            "function": "not",
+            "type": "function",
+          },
+          Object {
+            "arguments": Array [
               Object {
-                "arguments": Array [
-                  Object {
-                    "isQuoted": false,
-                    "type": "literal",
-                    "value": "maintenance-window.attributes.expirationDate",
-                  },
-                  "lt",
-                  Object {
-                    "isQuoted": true,
-                    "type": "literal",
-                    "value": "now",
-                  },
-                ],
-                "function": "range",
-                "type": "function",
+                "isQuoted": false,
+                "type": "literal",
+                "value": "maintenance-window.attributes.expirationDate",
+              },
+              "gt",
+              Object {
+                "isQuoted": true,
+                "type": "literal",
+                "value": "now",
               },
             ],
-            "function": "or",
+            "function": "range",
             "type": "function",
           },
         ],
-        "function": "not",
+        "function": "and",
         "type": "function",
       }
     `);

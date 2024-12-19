@@ -27,7 +27,7 @@ export const getStatusFilter = (
     [MaintenanceWindowStatus.Upcoming]:
       '(not maintenance-window.attributes.events: "now" and maintenance-window.attributes.events > "now")',
     [MaintenanceWindowStatus.Finished]:
-      '(not (maintenance-window.attributes.events >= "now" or maintenance-window.attributes.expirationDate < "now"))',
+      '(not maintenance-window.attributes.events >= "now" and maintenance-window.attributes.expirationDate >"now")',
     [MaintenanceWindowStatus.Archived]: '(maintenance-window.attributes.expirationDate < "now")',
   };
 
@@ -35,7 +35,7 @@ export const getStatusFilter = (
     ?.slice(1)
     .reduce(
       (acc, currentStatusFilter) => acc + ` or ${statusToQueryMapping[currentStatusFilter] || ''}`,
-      statusToQueryMapping[status[0]] || ''
+      statusToQueryMapping[status[0]]
     );
 
   return fullQuery ? fromKueryExpression(fullQuery) : undefined;

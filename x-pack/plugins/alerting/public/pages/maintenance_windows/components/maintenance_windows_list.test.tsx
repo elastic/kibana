@@ -99,8 +99,6 @@ describe('MaintenanceWindowsList', () => {
         perPage={10}
         total={22}
         onPageChange={() => {}}
-        inputText={''}
-        onSearchKeyup={() => {}}
         onStatusChange={() => {}}
         selectedStatus={[]}
         onSearchChange={() => {}}
@@ -141,8 +139,6 @@ describe('MaintenanceWindowsList', () => {
         perPage={10}
         total={22}
         onPageChange={() => {}}
-        inputText={''}
-        onSearchKeyup={() => {}}
         onStatusChange={() => {}}
         selectedStatus={[]}
         onSearchChange={() => {}}
@@ -167,8 +163,6 @@ describe('MaintenanceWindowsList', () => {
         perPage={10}
         total={22}
         onPageChange={() => {}}
-        inputText={''}
-        onSearchKeyup={() => {}}
         onStatusChange={() => {}}
         selectedStatus={[]}
         onSearchChange={() => {}}

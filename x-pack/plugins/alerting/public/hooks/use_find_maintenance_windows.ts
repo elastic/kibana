@@ -57,10 +57,12 @@ export const useFindMaintenanceWindows = (params: UseFindMaintenanceWindowsProps
     retry: false,
     cacheTime: 0,
     enabled,
+    placeholderData: { maintenanceWindows: [], total: 0 },
+    keepPreviousData: true,
   });
 
   return {
-    data: data || { maintenanceWindows: [], total: 0 },
+    data,
     isLoading: enabled && (isLoading || isFetching),
     isInitialLoading,
     refetch,

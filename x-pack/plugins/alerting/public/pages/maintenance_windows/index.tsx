@@ -46,7 +46,6 @@ export const MaintenanceWindowsPage = React.memo(() => {
   const [page, setPage] = useState<number>(MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE);
   const [perPage, setPerPage] = useState<number>(MAINTENANCE_WINDOW_DEFAULT_PER_PAGE);
 
-  const [inputText, setInputText] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<MaintenanceWindowStatus[]>([]);
   const [search, setSearch] = useState<string>('');
 
@@ -60,7 +59,7 @@ export const MaintenanceWindowsPage = React.memo(() => {
     selectedStatus,
   });
 
-  const { maintenanceWindows, total } = data;
+  const { maintenanceWindows, total } = data || { maintenanceWindows: [], total: 0 };
 
   useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows);
 
@@ -114,21 +113,9 @@ export const MaintenanceWindowsPage = React.memo(() => {
     setSelectedStatus(status);
   }, []);
 
-  const onSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputText(e.target.value);
-    if (e.target.value === '') {
-      setSearch(e.target.value);
-    }
+  const onSearchChange = useCallback((value: string) => {
+    setSearch(value);
   }, []);
-
-  const onSearchKeyup = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        setSearch(inputText);
-      }
-    },
-    [inputText]
-  );
 
   return (
     <>
@@ -173,15 +160,13 @@ export const MaintenanceWindowsPage = React.memo(() => {
             readOnly={readOnly}
             refreshData={refreshData}
             isLoading={isLoading || isInitialLoading}
-            items={data.maintenanceWindows}
+            items={maintenanceWindows}
             page={page}
             perPage={perPage}
             total={total}
             onPageChange={onPageChange}
-            inputText={inputText}
             selectedStatus={selectedStatus}
             onStatusChange={onSelectedStatusChange}
-            onSearchKeyup={onSearchKeyup}
             onSearchChange={onSearchChange}
           />
         </>
