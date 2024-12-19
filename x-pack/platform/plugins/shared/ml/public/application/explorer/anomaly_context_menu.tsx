@@ -102,7 +102,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
   const openCasesModal = useCasesModal(
     ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-    TITLES.ANOMALY_CHARTS
+    TITLES.ANOMALY_CHARTS(maxSeriesToPlot)
   );
 
   const canEditDashboards = capabilities.dashboard?.createNew ?? false;

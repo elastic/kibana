@@ -61,7 +61,7 @@ export const useCasesModal = <EmbeddableType extends MlEmbeddableTypes>(
         ],
       });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [embeddableType]
+
+    [embeddableType, selectCaseModal]
   );
 };
