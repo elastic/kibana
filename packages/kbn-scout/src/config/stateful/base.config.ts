@@ -25,7 +25,7 @@ import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { dockerImage } from '@kbn/test-suites-xpack/fleet_api_integration/config.base';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
-import type { ScoutLoaderConfig } from '../../types';
+import type { ScoutServerConfig } from '../../types';
 import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../constants';
 
 const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
@@ -61,7 +61,7 @@ const servers = {
 
 const kbnUrl = `${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`;
 
-export const defaultConfig: ScoutLoaderConfig = {
+export const defaultConfig: ScoutServerConfig = {
   servers,
   dockerServers: defineDockerServersConfig({
     registry: {

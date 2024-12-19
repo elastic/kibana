@@ -8,19 +8,22 @@
  */
 
 import path from 'path';
-import { CliSupportedServerModes } from '../types';
+import { CliSupportedServerModes } from '../../types';
 
 export const getConfigFilePath = (config: CliSupportedServerModes): string => {
+  const baseDir = path.join(__dirname, '..'); // config base directory
+
   if (config === 'stateful') {
-    return path.join(__dirname, 'stateful', 'stateful.config.ts');
+    return path.join(baseDir, 'stateful', 'stateful.config.ts');
   }
 
   const [mode, type] = config.split('=');
+
   if (mode !== 'serverless' || !type) {
     throw new Error(
-      `Invalid config format: ${config}. Expected "stateful" or "serverless=<type>".`
+      `Invalid config format: "${config}". Expected "stateful" or "serverless=<type>".`
     );
   }
 
-  return path.join(__dirname, 'serverless', `${type}.serverless.config.ts`);
+  return path.join(baseDir, 'serverless', `${type}.serverless.config.ts`);
 };

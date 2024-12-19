@@ -9,7 +9,7 @@
 
 import { UrlParts } from '@kbn/test';
 
-export interface ScoutLoaderConfig {
+export interface ScoutServerConfig {
   serverless?: boolean;
   servers: {
     kibana: UrlParts;
