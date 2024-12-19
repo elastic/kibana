@@ -309,6 +309,7 @@ oss plugins.
 
 |{kib-repo}blob/{branch}/src/plugins/saved_search/README.md[savedSearch]
 |Contains the saved search saved object definition and helpers.
+This object is created when a user saves their current session in the Discover app.
 
 
 |{kib-repo}blob/{branch}/src/plugins/screenshot_mode/README.md[screenshotMode]
@@ -639,7 +640,7 @@ which are particularly useful for ingesting logs.
 Index Management by running this series of requests in Console:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/index_management/README.md[indexManagement]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/index_management/README.md[indexManagement]
 |This service is exposed from the Index Management setup contract and can be used to add content to the indices list and the index details page.
 
 
@@ -693,7 +694,7 @@ the infrastructure monitoring use-case within Kibana.
 |The licensing plugin retrieves license data from Elasticsearch at regular configurable intervals.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/lists/README.md[lists]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/lists/README.md[lists]
 |README.md for developers working on the backend lists on how to get started
 using the CURL scripts in the scripts folder.
 
@@ -815,7 +816,7 @@ Elastic.
 |Add tagging capability to saved objects
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/screenshotting/README.md[screenshotting]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/screenshotting/README.md[screenshotting]
 |This plugin provides functionality to take screenshots of the Kibana pages.
 It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 
@@ -864,16 +865,16 @@ to understand why a search request might be slow.
 Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/security_solution/README.md[securitySolution]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/security_solution/README.md[securitySolution]
 |Welcome to the Kibana Security Solution plugin! This README will go over getting started with development and testing.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/security_solution_ess/README.md[securitySolutionEss]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/security_solution_ess/README.md[securitySolutionEss]
 |The security_solution_ess plugin is an internal plugin for Kibana's Security Solution, designed to encapsulate ESS-specific logic.
 This plugin is only enabled when the application is built for stateful deployments (ESS or on-prem), keeping the main security_solution plugin clean and agnostic of the offering model.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/security_solution_serverless/README.md[securitySolutionServerless]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/security_solution_serverless/README.md[securitySolutionServerless]
 |The security_solution_serverless plugin is an internal plugin for Kibana's Security Solution, designed to encapsulate serverless-specific logic.
 This plugin is only enabled when the application is built for serverless project, keeping the main security_solution plugin clean and agnostic of the offering model.
 

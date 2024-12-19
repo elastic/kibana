@@ -10,10 +10,11 @@ import { Router } from '@kbn/shared-ux-router';
 import { MemoryHistory } from 'history/createMemoryHistory';
 import { createMemoryHistory, History } from 'history';
 import { mountWithIntl, renderWithI18nProvider, shallowWithIntl } from '@kbn/test-jest-helpers';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MountWithReduxProvider } from './helper_with_redux';
 import { AppState } from '../../state';
 import { mockState } from '../__mocks__/uptime_store.mock';
-import { KibanaProviderOptions, MockRouter } from './rtl_helpers';
+import { KibanaProviderOptions, mockCore, MockRouter } from './rtl_helpers';
 
 interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore> {
   history?: History;
@@ -31,7 +32,11 @@ const helperWithRouter: <R>(
 
   history.location.key = 'TestKeyForTesting';
 
-  const routerWrapper = <Router history={history}>{component}</Router>;
+  const routerWrapper = (
+    <KibanaContextProvider services={{ ...mockCore() }}>
+      <Router history={history}>{component}</Router>
+    </KibanaContextProvider>
+  );
 
   if (wrapReduxStore) {
     return helper(
