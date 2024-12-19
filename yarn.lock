@@ -6729,7 +6729,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/repo-packages@link:packages/kbn-repo-packages":
+"@kbn/repo-packages@link:src/platform/packages/private/kbn-repo-packages":
   version "0.0.0"
   uid ""
 

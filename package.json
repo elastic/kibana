@@ -746,7 +746,7 @@
     "@kbn/remote-clusters-plugin": "link:x-pack/platform/plugins/private/remote_clusters",
     "@kbn/rendering-plugin": "link:test/plugin_functional/plugins/rendering_plugin",
     "@kbn/repo-info": "link:src/platform/packages/shared/kbn-repo-info",
-    "@kbn/repo-packages": "link:packages/kbn-repo-packages",
+    "@kbn/repo-packages": "link:src/platform/packages/private/kbn-repo-packages",
     "@kbn/reporting-common": "link:packages/kbn-reporting/common",
     "@kbn/reporting-csv-share-panel": "link:packages/kbn-reporting/get_csv_panel_actions",
     "@kbn/reporting-export-types-csv": "link:packages/kbn-reporting/export_types/csv",
