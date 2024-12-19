@@ -21,6 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { ApiKeyForm } from '@kbn/search-api-keys-components';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useNavigateToDiscover } from '../../hooks/use_navigate_to_discover';
 import { useIndex } from '../../hooks/api/use_index';
 import { useKibana } from '../../hooks/use_kibana';
@@ -45,7 +46,14 @@ export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
   const tabId = decodeURIComponent(useParams<{ tabId: string }>().tabId);
 
-  const { console: consolePlugin, docLinks, application, history, share } = useKibana().services;
+  const {
+    console: consolePlugin,
+    docLinks,
+    application,
+    history,
+    share,
+    searchNavigation,
+  } = useKibana().services;
   const {
     data: index,
     refetch,
@@ -189,13 +197,14 @@ export const SearchIndexDetailsPage = () => {
   }
 
   return (
-    <EuiPageTemplate
+    <KibanaPageTemplate
       offset={0}
       restrictWidth={false}
       data-test-subj="searchIndicesDetailsPage"
       grow={false}
       panelled
       bottomBorder
+      solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
       {isIndexError || isMappingsError || !index || !mappings || !indexDocuments ? (
         <IndexloadingError
@@ -311,6 +320,6 @@ export const SearchIndexDetailsPage = () => {
         />
       )}
       {embeddableConsole}
-    </EuiPageTemplate>
+    </KibanaPageTemplate>
   );
 };
