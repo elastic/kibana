@@ -9,7 +9,7 @@
 
 import { defaults, keyBy, sortBy } from 'lodash';
 
-import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import { callFieldCapsApi } from '../es_api';
 import { readFieldCapsResponse } from './field_caps_response';
