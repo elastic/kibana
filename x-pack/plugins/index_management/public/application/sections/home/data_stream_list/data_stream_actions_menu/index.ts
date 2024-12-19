@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const commonEcsIndexPatterns = ['metrics-kubernetes*', 'logs-*'];
+export { DataStreamActionsMenu } from './data_stream_actions_menu';

@@ -1,0 +1,417 @@
+{
+    "took": 7,
+    "timed_out": false,
+    "_shards": {
+        "total": 66,
+        "successful": 66,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": {
+            "value": 1,
+            "relation": "eq"
+        },
+        "max_score": 0,
+        "hits": [
+            {
+                "_index": ".internal.alerts-security.alerts-infosec-detections-000035",
+                "_id": "25c70415e594522b5b04febad0e21b6793a595cc",
+                "_score": 0,
+                "_source": {
+                    "kibana.alert.severity": "medium",
+                    "kibana.alert.rule.references": [
+                        "https://github.com/elastic/infosec/issues/15898"
+                    ],
+                    "kibana.alert.rule.updated_by": "aaron.jewitt@elastic.co",
+                    "kibana.alert.case_ids": [
+                        "8d7d5182-ee6d-4189-aa24-bd78aebd48c2"
+                    ],
+                    "kibana.alert.rule.threat": [
+                        {
+                            "framework": "MITRE ATT&CK",
+                            "technique": [
+                                {
+                                    "reference": "https://attack.mitre.org/techniques/T1651",
+                                    "name": "Cloud Administration Command",
+                                    "subtechnique": [],
+                                    "id": "T1651"
+                                }
+                            ],
+                            "tactic": {
+                                "reference": "https://attack.mitre.org/tactics/TA0002",
+                                "name": "Execution",
+                                "id": "TA0002"
+                            }
+                        }
+                    ],
+                    "kibana.alert.url": "https://kibana-app.whitesector.inf.elasticnet.co/s/infosec-detections/app/security/alerts/redirect/25c70415e594522b5b04febad0e21b6793a595cc?index=.alerts-security.alerts-infosec-detections&timestamp=2024-12-17T23:26:12.177Z",
+                    "kibana.alert.rule.description": "This detection rule is a threshold rule looking for multiple different UEBA alerts for a single AWS Access Key from an unmanaged IP address. This alert is triaged in Tines to close any alerts coming from managed IP space such as a users workstation or Elastic managed infrastructure. This alert is only for events within the elastic-eng AWS org.",
+                    "kibana.alert.rule.tags": [
+                        "AWS",
+                        "Triage: All",
+                        "Triage: Custom"
+                    ],
+                    "kibana.alert.rule.producer": "siem",
+                    "kibana.alert.rule.to": "now",
+                    "kibana.alert.rule.created_by": "aaron.jewitt@elastic.co",
+                    "kibana.alert.instance.id": "298d23113b9c6a28dcc953dccfe8bab6e7910adb",
+                    "kibana.alert.suppression.terms": [
+                        {
+                            "field": "source.ip",
+                            "value": "18.217.88.142"
+                        },
+                        {
+                            "field": "user.id",
+                            "value": "AIDASHTA5RHLTJBUU3FO2"
+                        }
+                    ],
+                    "kibana.alert.risk_score": 47,
+                    "kibana.alert.rule.name": "AWS Key UEBA - Multiple different AWS Key alerts for a user - Elastic Eng",
+                    "source.ip": "18.217.88.142",
+                    "event.kind": "signal",
+                    "user.id": "AIDASHTA5RHLTJBUU3FO2",
+                    "kibana.alert.workflow_status": "closed",
+                    "kibana.alert.rule.uuid": "1fca40c0-a0d9-11ee-897e-3d224e95dd3a",
+                    "kibana.alert.rule.risk_score_mapping": [],
+                    "kibana.alert.rule.interval": "5m",
+                    "kibana.alert.reason": "event with source 18.217.88.142 created medium alert AWS Key UEBA - Multiple different AWS Key alerts for a user - Elastic Eng.",
+                    "kibana.alert.rule.type": "threshold",
+                    "kibana.alert.start": "2024-12-17T23:26:12.289Z",
+                    "kibana.alert.rule.immutable": false,
+                    "kibana.alert.depth": 1,
+                    "kibana.alert.rule.enabled": true,
+                    "kibana.alert.rule.version": 3,
+                    "kibana.alert.rule.from": "now-43500s",
+                    "kibana.alert.rule.parameters": {
+                        "note": "Review all activity by the `aws.cloudtrail.user_identity.access_key_id` and the source.ip causing the alerts. Reach out to the team that owns the AWS cloud account to determine the purpose of the key and possibly whether the source.ip is managed or not.",
+                        "severity_mapping": [],
+                        "references": [
+                            "https://github.com/elastic/infosec/issues/15898"
+                        ],
+                        "description": "This detection rule is a threshold rule looking for multiple different UEBA alerts for a single AWS Access Key from an unmanaged IP address. This alert is triaged in Tines to close any alerts coming from managed IP space such as a users workstation or Elastic managed infrastructure. This alert is only for events within the elastic-eng AWS org.",
+                        "language": "kuery",
+                        "threshold": {
+                            "field": [
+                                "source.ip",
+                                "user.id"
+                            ],
+                            "value": 1,
+                            "cardinality": [
+                                {
+                                    "field": "signal.rule.name",
+                                    "value": 3
+                                }
+                            ]
+                        },
+                        "type": "threshold",
+                        "exceptions_list": [
+                            {
+                                "list_id": "d8b24c93-96b3-4ff8-b332-b9be00de9f89",
+                                "namespace_type": "single",
+                                "id": "dcb6b1cf-3ba4-4b94-b233-65ea6529847a",
+                                "type": "rule_default"
+                            }
+                        ],
+                        "from": "now-43500s",
+                        "severity": "medium",
+                        "max_signals": 100,
+                        "rule_source": {
+                            "type": "internal"
+                        },
+                        "alert_suppression": {
+                            "duration": {
+                                "unit": "h",
+                                "value": 24
+                            }
+                        },
+                        "risk_score": 47,
+                        "risk_score_mapping": [],
+                        "author": [
+                            "Aaron Jewitt"
+                        ],
+                        "query": "kibana.alert.rule.tags : \"AWS KEY UEBA\"",
+                        "index": [
+                            ".siem-signals-infosec-detections"
+                        ],
+                        "filters": [
+                            {
+                                "$state": {
+                                    "store": "appState"
+                                },
+                                "meta": {
+                                    "negate": false,
+                                    "alias": null,
+                                    "index": ".siem-signals-infosec-detections*",
+                                    "disabled": false,
+                                    "params": [
+                                        {
+                                            "meta": {
+                                                "field": "source.ip",
+                                                "negate": true,
+                                                "alias": null,
+                                                "index": "ddfa7425-c4a7-4b5a-a069-368b52bd3f2f",
+                                                "disabled": false,
+                                                "params": {
+                                                    "lt": "192.168.255.255",
+                                                    "gte": "192.168.0.0"
+                                                },
+                                                "type": "range",
+                                                "value": {
+                                                    "lt": "192.168.255.255",
+                                                    "gte": "192.168.0.0"
+                                                },
+                                                "key": "source.ip"
+                                            },
+                                            "query": {
+                                                "range": {
+                                                    "source.ip": {
+                                                        "lt": "192.168.255.255",
+                                                        "gte": "192.168.0.0"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "$state": {
+                                                "store": "appState"
+                                            },
+                                            "meta": {
+                                                "field": "source.ip",
+                                                "negate": true,
+                                                "alias": null,
+                                                "index": "ddfa7425-c4a7-4b5a-a069-368b52bd3f2f",
+                                                "disabled": false,
+                                                "params": {
+                                                    "lt": "10.255.255.255",
+                                                    "gte": "10.0.0.0"
+                                                },
+                                                "type": "range",
+                                                "value": {
+                                                    "lt": "10.255.255.255",
+                                                    "gte": "10.0.0.0"
+                                                },
+                                                "key": "source.ip"
+                                            },
+                                            "query": {
+                                                "range": {
+                                                    "source.ip": {
+                                                        "lt": "10.255.255.255",
+                                                        "gte": "10.0.0.0"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "meta": {
+                                                "field": "source.ip",
+                                                "negate": true,
+                                                "alias": null,
+                                                "index": "ddfa7425-c4a7-4b5a-a069-368b52bd3f2f",
+                                                "disabled": false,
+                                                "params": {
+                                                    "lt": "172.31.255.255",
+                                                    "gte": "172.16.0.0"
+                                                },
+                                                "type": "range",
+                                                "value": {
+                                                    "lt": "172.31.255.255",
+                                                    "gte": "172.16.0.0"
+                                                },
+                                                "key": "source.ip"
+                                            },
+                                            "query": {
+                                                "range": {
+                                                    "source.ip": {
+                                                        "lt": "172.31.255.255",
+                                                        "gte": "172.16.0.0"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "type": "combined",
+                                    "relation": "AND"
+                                },
+                                "query": {}
+                            },
+                            {
+                                "$state": {
+                                    "store": "appState"
+                                },
+                                "meta": {
+                                    "field": "tags",
+                                    "negate": false,
+                                    "alias": null,
+                                    "index": ".siem-signals-infosec-detections*",
+                                    "disabled": false,
+                                    "params": {
+                                        "query": "org:elastic-eng"
+                                    },
+                                    "type": "phrase",
+                                    "key": "tags"
+                                },
+                                "query": {
+                                    "match_phrase": {
+                                        "tags": "org:elastic-eng"
+                                    }
+                                }
+                            },
+                            {
+                                "$state": {
+                                    "store": "appState"
+                                },
+                                "meta": {
+                                    "field": "user.name",
+                                    "negate": true,
+                                    "alias": null,
+                                    "index": ".siem-signals-infosec-detections*",
+                                    "disabled": false,
+                                    "params": {
+                                        "query": "pwncloud-backdoor-user"
+                                    },
+                                    "type": "phrase",
+                                    "key": "user.name"
+                                },
+                                "query": {
+                                    "match_phrase": {
+                                        "user.name": "pwncloud-backdoor-user"
+                                    }
+                                }
+                            }
+                        ],
+                        "version": 3,
+                        "rule_id": "d654481d-5176-463f-8f3c-caa64b43339a",
+                        "license": "",
+                        "required_fields": [],
+                        "immutable": false,
+                        "related_integrations": [],
+                        "meta": {
+                            "from": "12h",
+                            "kibana_siem_app_url": "https://kibana-app.whitesector.inf.elasticnet.co/s/infosec-detections/app/security"
+                        },
+                        "setup": "",
+                        "false_positives": [
+                            " A brand new key being created and used from a third party service may cause false positives."
+                        ],
+                        "threat": [
+                            {
+                                "framework": "MITRE ATT&CK",
+                                "technique": [
+                                    {
+                                        "reference": "https://attack.mitre.org/techniques/T1651",
+                                        "name": "Cloud Administration Command",
+                                        "subtechnique": [],
+                                        "id": "T1651"
+                                    }
+                                ],
+                                "tactic": {
+                                    "reference": "https://attack.mitre.org/tactics/TA0002",
+                                    "name": "Execution",
+                                    "id": "TA0002"
+                                }
+                            }
+                        ],
+                        "to": "now"
+                    },
+                    "kibana.alert.rule.revision": 26,
+                    "kibana.alert.threshold_result": {
+                        "terms": [
+                            {
+                                "field": "source.ip",
+                                "value": "18.217.88.142"
+                            },
+                            {
+                                "field": "user.id",
+                                "value": "AIDASHTA5RHLTJBUU3FO2"
+                            }
+                        ],
+                        "count": 3,
+                        "from": "2024-12-17T23:18:09.778Z",
+                        "cardinality": [
+                            {
+                                "field": "signal.rule.name",
+                                "value": 3
+                            }
+                        ]
+                    },
+                    "kibana.alert.status": "active",
+                    "kibana.alert.last_detected": "2024-12-17T23:36:12.368Z",
+                    "kibana.alert.ancestors": [
+                        {
+                            "depth": 0,
+                            "index": ".siem-signals-infosec-detections",
+                            "id": "1478482a-be79-513b-b254-4a52df8a7a78",
+                            "type": "event"
+                        }
+                    ],
+                    "kibana.alert.rule.exceptions_list": [
+                        {
+                            "list_id": "d8b24c93-96b3-4ff8-b332-b9be00de9f89",
+                            "namespace_type": "single",
+                            "id": "dcb6b1cf-3ba4-4b94-b233-65ea6529847a",
+                            "type": "rule_default"
+                        }
+                    ],
+                    "kibana.alert.rule.actions": [
+                        {
+                            "action_type_id": ".webhook",
+                            "id": "9b66485e-b6fa-5625-a98f-896a2a929b8f",
+                            "params": {
+                                "body": "{{#context.alerts}}\r\n{{{.}}}\r\n{{/context.alerts}}"
+                            },
+                            "uuid": "b4929f70-f8b1-49e3-8fe2-da7746fc868a",
+                            "frequency": {
+                                "summary": false,
+                                "throttle": null,
+                                "notifyWhen": "onActiveAlert"
+                            },
+                            "group": "default"
+                        }
+                    ],
+                    "kibana.alert.suppression.end": "2024-12-17T23:32:10.615Z",
+                    "kibana.alert.rule.rule_type_id": "siem.thresholdRule",
+                    "kibana.alert.rule.license": "",
+                    "kibana.alert.suppression.docs_count": 1,
+                    "kibana.alert.workflow_tags": [
+                        "Sent to Prod"
+                    ],
+                    "kibana.alert.workflow_assignee_ids": [],
+                    "kibana.alert.rule.note": "Review all activity by the `aws.cloudtrail.user_identity.access_key_id` and the source.ip causing the alerts. Reach out to the team that owns the AWS cloud account to determine the purpose of the key and possibly whether the source.ip is managed or not.",
+                    "kibana.alert.rule.severity_mapping": [],
+                    "kibana.alert.rule.max_signals": 100,
+                    "kibana.alert.rule.updated_at": "2024-12-10T13:28:56.772Z",
+                    "kibana.alert.rule.risk_score": 47,
+                    "kibana.alert.rule.author": [
+                        "Aaron Jewitt"
+                    ],
+                    "kibana.alert.rule.false_positives": [
+                        " A brand new key being created and used from a third party service may cause false positives."
+                    ],
+                    "kibana.alert.rule.consumer": "siem",
+                    "kibana.alert.rule.indices": [
+                        ".siem-signals-infosec-detections"
+                    ],
+                    "kibana.alert.rule.category": "Threshold Rule",
+                    "@timestamp": "2024-12-17T23:26:12.177Z",
+                    "kibana.alert.rule.created_at": "2023-12-22T14:48:10.413Z",
+                    "kibana.alert.rule.severity": "medium",
+                    "kibana.alert.intended_timestamp": "2024-12-17T23:26:12.177Z",
+                    "kibana.alert.suppression.start": "2024-12-17T23:18:09.778Z",
+                    "kibana.alert.rule.execution.timestamp": "2024-12-17T23:26:12.289Z",
+                    "kibana.alert.rule.execution.uuid": "01945171-2c3a-4d95-a9ff-47e4a292b0be",
+                    "kibana.space_ids": [
+                        "infosec-detections"
+                    ],
+                    "kibana.alert.uuid": "25c70415e594522b5b04febad0e21b6793a595cc",
+                    "kibana.alert.rule.meta.kibana_siem_app_url": "https://kibana-app.whitesector.inf.elasticnet.co/s/infosec-detections/app/security",
+                    "kibana.version": "8.17.0",
+                    "kibana.alert.rule.execution.type": "scheduled",
+                    "kibana.alert.rule.meta.from": "12h",
+                    "kibana.alert.original_time": "2024-12-17T23:25:15.834Z",
+                    "kibana.alert.rule.rule_id": "d654481d-5176-463f-8f3c-caa64b43339a"
+                }
+            }
+        ]
+    }
+}
