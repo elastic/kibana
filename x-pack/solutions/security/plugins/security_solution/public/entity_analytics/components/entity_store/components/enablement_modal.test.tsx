@@ -172,5 +172,16 @@ describe('EntityStoreEnablementModal', () => {
       renderComponent();
       expect(screen.getByTestId('callout-missing-risk-engine-privileges')).toBeInTheDocument();
     });
+
+    it('should render additional charges message when available', async () => {
+      const AdditionalChargesMessageMock = () => <span data-test-subj="enablement-modal-test" />;
+      mockUseContractComponents.mockReturnValue({
+        AdditionalChargesMessage: AdditionalChargesMessageMock,
+      });
+
+      await renderComponent();
+
+      expect(screen.queryByTestId('enablement-modal-test')).toBeInTheDocument();
+    });
   });
 });
