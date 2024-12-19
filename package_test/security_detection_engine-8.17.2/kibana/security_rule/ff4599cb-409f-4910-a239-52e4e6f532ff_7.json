@@ -1,0 +1,108 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies access attempts to the LSASS handle, which may indicate an attempt to dump credentials from LSASS memory.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.api-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "LSASS Process Access via Windows API",
+    "note": "## Triage and analysis\n\n### Investigating LSASS Process Access via Windows API\n\nThe Local Security Authority Subsystem Service (LSASS) is a critical Windows component responsible for managing user authentication and security policies. Adversaries may attempt to access the LSASS handle to dump credentials from its memory, which can be used for lateral movement and privilege escalation.\n\nThis rule identifies attempts to access LSASS by monitoring for specific API calls (OpenProcess, OpenThread) targeting the \"lsass.exe\" process.\n\n> **Note**:\n> This investigation guide uses the [Osquery Markdown Plugin](https://www.elastic.co/guide/en/security/master/invest-guide-run-osquery.html) introduced in Elastic Stack version 8.5.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n\n### Possible investigation steps\n\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Investigate the process execution chain (parent process tree) of the process that accessed the LSASS handle.\n  - Examine their executable files for prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n  - Determine the first time the process executable was seen in the environment and if this behavior happened in the past.\n  - Validate the activity is not related to planned patches, updates, network administrator activity, or legitimate software installations.\n  - Investigate any abnormal behavior by the subject process, such as network connections, DLLs loaded, registry or file modifications, and any spawned child processes.\n- Assess the access rights (`process.Ext.api.parameters.desired_access`field) requested by the process. This [Microsoft documentation](https://learn.microsoft.com/en-us/windows/win32/procthread/process-security-and-access-rights) may be useful to help the interpretation.\n- If there are traces of LSASS memory being successfully dumped, investigate potentially compromised accounts. Analysts can do this by searching for login events (e.g., 4624) to the target host.\n- Examine the host for derived artifacts that indicate suspicious activities:\n  - Analyze the executables of the processes using a private sandboxed analysis system.\n  - Observe and collect information about the following activities in both the sandbox and the alert subject host:\n    - Attempts to contact external domains and addresses.\n      - Use the Elastic Defend network events to determine domains and addresses contacted by the subject process by filtering by the process's `process.entity_id`.\n      - Examine the DNS cache for suspicious or anomalous entries.\n        - !{osquery{\"label\":\"Osquery - Retrieve DNS Cache\",\"query\":\"SELECT * FROM dns_cache\"}}\n    - Use the Elastic Defend registry events to examine registry keys accessed, modified, or created by the related processes in the process tree.\n    - Examine the host services for suspicious or anomalous entries.\n      - !{osquery{\"label\":\"Osquery - Retrieve All Services\",\"query\":\"SELECT description, display_name, name, path, pid, service_type, start_type, status, user_account FROM services\"}}\n      - !{osquery{\"label\":\"Osquery - Retrieve Services Running on User Accounts\",\"query\":\"SELECT description, display_name, name, path, pid, service_type, start_type, status, user_account FROM services WHERE\\nNOT (user_account LIKE '%LocalSystem' OR user_account LIKE '%LocalService' OR user_account LIKE '%NetworkService' OR\\nuser_account == null)\\n\"}}\n      - !{osquery{\"label\":\"Osquery - Retrieve Service Unsigned Executables with Virustotal Link\",\"query\":\"SELECT concat('https://www.virustotal.com/gui/file/', sha1) AS VtLink, name, description, start_type, status, pid,\\nservices.path FROM services JOIN authenticode ON services.path = authenticode.path OR services.module_path =\\nauthenticode.path JOIN hash ON services.path = hash.path WHERE authenticode.result != 'trusted'\\n\"}}\n  - Retrieve the files' SHA-256 hash values using the PowerShell `Get-FileHash` cmdlet and search for the existence and reputation of the hashes in resources like VirusTotal, Hybrid-Analysis, CISCO Talos, Any.run, etc.\n\n\n### False positive analysis\n\n- If this rule is noisy in your environment due to expected activity, consider adding exceptions — preferably with a combination of `process.executable`, `process.code_signature.subject_name` and `process.Ext.api.parameters.desired_access_numeric` conditions.\n\n### Related Rules\n\n- Suspicious Lsass Process Access - 128468bf-cab1-4637-99ea-fdf3780a4609\n- Potential Credential Access via DuplicateHandle in LSASS - 02a4576a-7480-4284-9327-548a806b5e48\n- LSASS Memory Dump Handle Access - 208dbe77-01ed-4954-8d44-1e5751cb20de\n\n### Response and Remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n  - If malicious activity is confirmed, perform a broader investigation to identify the scope of the compromise and determine the appropriate remediation steps.\n- Isolate the involved host to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors like reverse shells, reverse proxies, or droppers that attackers could use to reinfect the system.\n- Remove and block malicious artifacts identified during triage.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Reimage the host operating system or restore the compromised files to clean versions.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+    "query": "api where host.os.type == \"windows\" and \n  process.Ext.api.name in (\"OpenProcess\", \"OpenThread\") and Target.process.name : \"lsass.exe\" and \n  not \n  (\n    process.executable : (\n        \"?:\\\\ProgramData\\\\GetSupportService*\\\\Updates\\\\Update_*.exe\",\n        \"?:\\\\ProgramData\\\\Microsoft\\\\Windows Defender\\\\Platform\\\\*\\\\MsMpEng.exe\",\n        \"?:\\\\Program Files (x86)\\\\Asiainfo Security\\\\OfficeScan Client\\\\NTRTScan.exe\",\n        \"?:\\\\Program Files (x86)\\\\Blackpoint\\\\SnapAgent\\\\SnapAgent.exe\",\n        \"?:\\\\Program Files (x86)\\\\eScan\\\\reload.exe\",\n        \"?:\\\\Program Files (x86)\\\\Google\\\\Update\\\\GoogleUpdate.exe\",\n        \"?:\\\\Program Files (x86)\\\\Kaspersky Lab\\\\*\\\\avp.exe\",\n        \"?:\\\\Program Files (x86)\\\\N-able Technologies\\\\Reactive\\\\bin\\\\NableReactiveManagement.exe\",\n        \"?:\\\\Program Files (x86)\\\\N-able Technologies\\\\Windows Agent\\\\bin\\\\agent.exe\",\n        \"?:\\\\Program Files (x86)\\\\Trend Micro\\\\*\\\\CCSF\\\\TmCCSF.exe\",\n        \"?:\\\\Program Files*\\\\Windows Defender\\\\MsMpEng.exe\",\n        \"?:\\\\Program Files\\\\Bitdefender\\\\Endpoint Security\\\\EPSecurityService.exe\",\n        \"?:\\\\Program Files\\\\Cisco\\\\AMP\\\\*\\\\sfc.exe\",\n        \"?:\\\\Program Files\\\\Common Files\\\\McAfee\\\\AVSolution\\\\mcshield.exe\",\n        \"?:\\\\Program Files\\\\EA\\\\AC\\\\EAAntiCheat.GameService.exe\",\n        \"?:\\\\Program Files\\\\Elastic\\\\Agent\\\\data\\\\elastic-agent-*\\\\components\\\\metricbeat.exe\",\n        \"?:\\\\Program Files\\\\Elastic\\\\Agent\\\\data\\\\elastic-agent-*\\\\components\\\\osqueryd.exe\",\n        \"?:\\\\Program Files\\\\Elastic\\\\Agent\\\\data\\\\elastic-agent-*\\\\components\\\\packetbeat.exe\",\n        \"?:\\\\Program Files\\\\ESET\\\\ESET Security\\\\ekrn.exe\",\n        \"?:\\\\Program Files\\\\Fortinet\\\\FortiClient\\\\FortiProxy.exe\",\n        \"?:\\\\Program Files\\\\Huntress\\\\HuntressAgent.exe\",\n        \"?:\\\\Program Files\\\\LogicMonitor\\\\Agent\\\\bin\\\\sbshutdown.exe\",\n        \"?:\\\\Program Files\\\\Microsoft Security Client\\\\MsMpEng.exe\",\n        \"?:\\\\Program Files\\\\Qualys\\\\QualysAgent\\\\QualysAgent.exe\",\n        \"?:\\\\Program Files\\\\TDAgent\\\\ossec-agent\\\\ossec-agent.exe\",\n        \"?:\\\\Program Files\\\\Topaz OFD\\\\Warsaw\\\\core.exe\",\n        \"?:\\\\Program Files\\\\VMware\\\\VMware Tools\\\\vmtoolsd.exe\",\n        \"?:\\\\Windows\\\\AdminArsenal\\\\PDQDeployRunner\\\\*\\\\exec\\\\Sysmon64.exe\",\n        \"?:\\\\Windows\\\\Sysmon.exe\",\n        \"?:\\\\Windows\\\\Sysmon64.exe\",\n        \"?:\\\\Windows\\\\System32\\\\csrss.exe\",\n        \"?:\\\\Windows\\\\System32\\\\MRT.exe\",\n        \"?:\\\\Windows\\\\System32\\\\msiexec.exe\",\n        \"?:\\\\Windows\\\\System32\\\\RtkAudUService64.exe\",\n        \"?:\\\\Windows\\\\System32\\\\wbem\\\\WmiPrvSE.exe\",\n        \"?:\\\\Windows\\\\SysWOW64\\\\wbem\\\\WmiPrvSE.exe\"\n    ) and process.code_signature.trusted == true\n  )\n",
+    "references": [
+      "https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1003.001/T1003.001.md"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "Target.process.name",
+        "type": "unknown"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "process.Ext.api.name",
+        "type": "unknown"
+      },
+      {
+        "ecs": true,
+        "name": "process.code_signature.trusted",
+        "type": "boolean"
+      },
+      {
+        "ecs": true,
+        "name": "process.executable",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "ff4599cb-409f-4910-a239-52e4e6f532ff",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Credential Access",
+      "Tactic: Execution",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1003",
+            "name": "OS Credential Dumping",
+            "reference": "https://attack.mitre.org/techniques/T1003/",
+            "subtechnique": [
+              {
+                "id": "T1003.001",
+                "name": "LSASS Memory",
+                "reference": "https://attack.mitre.org/techniques/T1003/001/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1106",
+            "name": "Native API",
+            "reference": "https://attack.mitre.org/techniques/T1106/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 7
+  },
+  "id": "ff4599cb-409f-4910-a239-52e4e6f532ff_7",
+  "type": "security-rule"
+}

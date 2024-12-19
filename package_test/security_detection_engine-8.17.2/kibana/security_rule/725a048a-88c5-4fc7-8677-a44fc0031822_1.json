@@ -1,0 +1,42 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies multiple validation exeception errors within AWS Bedrock. Validation errors occur when you run the InvokeModel or InvokeModelWithResponseStream APIs on a foundation model that uses an incorrect inference parameter or corresponding value. These errors also occur when you use an inference parameter for one model with a model that doesn't have the same API parameter. This could indicate attempts to bypass limitations of other approved models, or to force an impact on the environment by incurring exhorbitant costs.",
+    "false_positives": [
+      "Legitimate misunderstanding by users or overly strict policies"
+    ],
+    "from": "now-60m",
+    "interval": "10m",
+    "language": "esql",
+    "license": "Elastic License v2",
+    "name": "AWS Bedrock Detected Multiple Validation Exception Errors by a Single User",
+    "query": "from logs-aws_bedrock.invocation-*\n// truncate the timestamp to a 1-minute window\n| eval target_time_window = DATE_TRUNC(1 minutes, @timestamp)\n| where gen_ai.response.error_code == \"ValidationException\"\n// count the number of users causing validation errors within a 1 minute window\n| stats total_denials = count(*) by target_time_window, user.id, cloud.account.id\n| where total_denials > 3\n",
+    "references": [
+      "https://atlas.mitre.org/techniques/AML.T0015",
+      "https://atlas.mitre.org/techniques/AML.T0034",
+      "https://atlas.mitre.org/techniques/AML.T0046",
+      "https://www.elastic.co/security-labs/elastic-advances-llm-security"
+    ],
+    "risk_score": 73,
+    "rule_id": "725a048a-88c5-4fc7-8677-a44fc0031822",
+    "setup": "## Setup\n\nThis rule requires that AWS Bedrock Integration be configured. For more information, see the AWS Bedrock integration documentation:\n\nhttps://www.elastic.co/docs/current/integrations/aws_bedrock\n",
+    "severity": "high",
+    "tags": [
+      "Domain: LLM",
+      "Data Source: AWS",
+      "Data Source: AWS Bedrock",
+      "Data Source: AWS S3",
+      "Use Case: Policy Violation",
+      "Mitre Atlas: T0015",
+      "Mitre Atlas: T0034",
+      "Mitre Atlas: T0046"
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "esql",
+    "version": 1
+  },
+  "id": "725a048a-88c5-4fc7-8677-a44fc0031822_1",
+  "type": "security-rule"
+}

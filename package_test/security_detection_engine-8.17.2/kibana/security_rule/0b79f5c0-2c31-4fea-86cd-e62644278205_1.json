@@ -1,0 +1,88 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "This rule looks for use of the IAM `AttachUserPolicy` API operation to attach the `CompromisedKeyQuarantine` or `CompromisedKeyQuarantineV2` AWS managed policies to an existing IAM user. This policy denies access to certain actions and is applied by the AWS team in the event that an IAM user's credentials have been compromised or exposed publicly.",
+    "false_positives": [
+      "This is an intentional action taken by AWS in the event of compromised credentials. Follow the instructions specified in the support case created for you regarding this event."
+    ],
+    "from": "now-6m",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "AWS IAM CompromisedKeyQuarantine Policy Attached to User",
+    "note": "## Triage and Analysis\n\n### Investigating AWS IAM CompromisedKeyQuarantine Policy Attached to User\n\nThe AWS IAM `CompromisedKeyQuarantine` and `CompromisedKeyQuarantineV2` managed policies deny certain action and is applied by the AWS team to a user with exposed credentials. \nThis action is accompanied by a support case which specifies instructions to follow before detaching the policy. \n\n#### Possible Investigation Steps\n\n- **Identify Potentially Compromised Identity**: Review the `userName` parameter of the `aws.cloudtrail.request_parameters` to determine the quarantined IAM entity.\n- **Contextualize with AWS Support Case**: Review any information from AWS comtaining additional information about the quarantined account and the reasoning for quarantine.\n- **Follow Support Case Instructions**: Do not revert the quarantine policy attachment or delete the compromised keys. Instead folow the instructions given in your support case.\n- **Correlate with Other Activities**: Search for related CloudTrail events before and after this change to see if the same actor or IP address engaged in potentially suspicious activities.\n- **Interview Relevant Personnel**: If the compromised key belongs to a user, verify the intent and authorization for these correlated actions with the person or team responsible for managing the compromised key.\n\n### False Positive Analysis\n\n- There shouldn't be many false positives related to this action as it is inititated by AWS in response to compromised or publicly exposed credentials.\n\n### Response and Remediation\n\n- **Immediate Review and Reversal**: Update the user IAM permissions to remove the quarantine policy and disable the compromised credentials.\n- **Policy Update**: Review and possibly update your organization’s policies on credential storage to tighten control and prevent public exposure.\n- **Incident Response**: If malicious intent is confirmed, consider it a data breach incident and initiate the incident response protocol. This includes further investigation, containment, and recovery.\n\n### Additional Information:\n\nFor further guidance on managing and securing credentials in AWS environments, refer to the [AWS IAM User Guide](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html) regarding security best practices and guidance on [Remediating Potentially Compromised AWS Credentials](https://docs.aws.amazon.com/guardduty/latest/ug/compromised-creds.html).\n",
+    "query": "any where event.dataset == \"aws.cloudtrail\" \n   and event.action == \"AttachUserPolicy\"\n   and event.outcome == \"success\" \n   and stringContains(aws.cloudtrail.request_parameters, \"AWSCompromisedKeyQuarantine\")\n",
+    "references": [
+      "https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AWSCompromisedKeyQuarantine.html/",
+      "https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AWSCompromisedKeyQuarantineV2.html/"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.request_parameters",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "0b79f5c0-2c31-4fea-86cd-e62644278205",
+    "severity": "high",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS IAM",
+      "Resources: Investigation Guide",
+      "Use Case: Identity and Access Audit",
+      "Tactic: Credential Access"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1552",
+            "name": "Unsecured Credentials",
+            "reference": "https://attack.mitre.org/techniques/T1552/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "0b79f5c0-2c31-4fea-86cd-e62644278205_1",
+  "type": "security-rule"
+}

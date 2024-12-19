@@ -1,0 +1,131 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "This rule monitors for the potential edit of a suspicious file. In Linux, when editing a file through an editor, a temporary .swp file is created. By monitoring for the creation of this .swp file, we can detect potential file edits of suspicious files. The execution of this rule is not a clear sign of the file being edited, as just opening the file through an editor will trigger this event. Attackers may alter any of the files added in this rule to establish persistence, escalate privileges or perform reconnaisance on the system.",
+        "from": "now-119m",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "max_signals": 1,
+        "name": "Potential Suspicious File Edit",
+        "query": "file where event.action in (\"creation\", \"file_create_event\") and file.extension == \"swp\" and \nfile.path : (\n  /* common interesting files and locations */\n  \"/etc/.shadow.swp\", \"/etc/.shadow-.swp\", \"/etc/.shadow~.swp\", \"/etc/.gshadow.swp\", \"/etc/.gshadow-.swp\",\n  \"/etc/.passwd.swp\", \"/etc/.pwd.db.swp\", \"/etc/.master.passwd.swp\", \"/etc/.spwd.db.swp\", \"/etc/security/.opasswd.swp\",\n  \"/etc/.environment.swp\", \"/etc/.profile.swp\", \"/etc/sudoers.d/.*.swp\", \"/etc/ld.so.conf.d/.*.swp\",\n  \"/etc/init.d/.*.swp\", \"/etc/.rc.local.swp\", \"/etc/rc*.d/.*.swp\", \"/dev/shm/.*.swp\", \"/etc/update-motd.d/.*.swp\",\n  \"/usr/lib/update-notifier/.*.swp\",\n\n  /* service, timer, want, socket and lock files */\n  \"/etc/systemd/system/.*.swp\", \"/usr/local/lib/systemd/system/.*.swp\", \"/lib/systemd/system/.*.swp\",\n  \"/usr/lib/systemd/system/.*.swp\",\"/home/*/.config/systemd/user/.*.swp\", \"/run/.*.swp\", \"/var/run/.*.swp/\",\n\n  /* profile and shell configuration files */  \n  \"/home/*.profile.swp\", \"/home/*.bash_profile.swp\", \"/home/*.bash_login.swp\", \"/home/*.bashrc.swp\", \"/home/*.bash_logout.swp\",\n  \"/home/*.zshrc.swp\", \"/home/*.zlogin.swp\", \"/home/*.tcshrc.swp\", \"/home/*.kshrc.swp\", \"/home/*.config.fish.swp\",\n  \"/root/*.profile.swp\", \"/root/*.bash_profile.swp\", \"/root/*.bash_login.swp\", \"/root/*.bashrc.swp\", \"/root/*.bash_logout.swp\",\n  \"/root/*.zshrc.swp\", \"/root/*.zlogin.swp\", \"/root/*.tcshrc.swp\", \"/root/*.kshrc.swp\", \"/root/*.config.fish.swp\"\n)\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.extension",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "3728c08d-9b70-456b-b6b8-007c7d246128",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Tactic: Privilege Escalation",
+            "Data Source: Elastic Endgame",
+            "Rule Type: BBR",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1037",
+                        "name": "Boot or Logon Initialization Scripts",
+                        "reference": "https://attack.mitre.org/techniques/T1037/",
+                        "subtechnique": [
+                            {
+                                "id": "T1037.004",
+                                "name": "RC Scripts",
+                                "reference": "https://attack.mitre.org/techniques/T1037/004/"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "T1574",
+                        "name": "Hijack Execution Flow",
+                        "reference": "https://attack.mitre.org/techniques/T1574/",
+                        "subtechnique": [
+                            {
+                                "id": "T1574.006",
+                                "name": "Dynamic Linker Hijacking",
+                                "reference": "https://attack.mitre.org/techniques/T1574/006/"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "T1543",
+                        "name": "Create or Modify System Process",
+                        "reference": "https://attack.mitre.org/techniques/T1543/",
+                        "subtechnique": [
+                            {
+                                "id": "T1543.002",
+                                "name": "Systemd Service",
+                                "reference": "https://attack.mitre.org/techniques/T1543/002/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0004",
+                    "name": "Privilege Escalation",
+                    "reference": "https://attack.mitre.org/tactics/TA0004/"
+                },
+                "technique": [
+                    {
+                        "id": "T1548",
+                        "name": "Abuse Elevation Control Mechanism",
+                        "reference": "https://attack.mitre.org/techniques/T1548/",
+                        "subtechnique": [
+                            {
+                                "id": "T1548.003",
+                                "name": "Sudo and Sudo Caching",
+                                "reference": "https://attack.mitre.org/techniques/T1548/003/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 3
+    },
+    "id": "3728c08d-9b70-456b-b6b8-007c7d246128_3",
+    "type": "security-rule"
+}

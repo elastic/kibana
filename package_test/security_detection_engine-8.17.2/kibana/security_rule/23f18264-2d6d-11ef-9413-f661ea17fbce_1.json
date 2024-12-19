@@ -1,0 +1,75 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects when an Okta client address has a certain threshold of Okta user authentication events with multiple device token hashes generated for single user authentication. Adversaries may attempt to launch a credential stuffing or password spraying attack from the same device by using a list of known usernames and passwords to gain unauthorized access to user accounts.",
+    "false_positives": [
+      "Users may share an endpoint related to work or personal use in which separate Okta accounts are used.",
+      "Shared systems such as Kiosks and conference room computers may be used by multiple users."
+    ],
+    "from": "now-9m",
+    "language": "esql",
+    "license": "Elastic License v2",
+    "name": "High Number of Okta Device Token Cookies Generated for Authentication",
+    "note": "## Triage and analysis\n\n### Investigating High Number of Okta Device Token Cookies Generated for Authentication\n\nThis rule detects when a certain threshold of Okta user authentication events are reported for multiple users from the same client address. Adversaries may attempt to launch a credential stuffing attack from the same device by using a list of known usernames and passwords to gain unauthorized access to user accounts. Note that Okta does not log unrecognized usernames supplied during authentication attempts, so this rule may not detect all credential stuffing attempts or may indicate a targeted attack.\n\n#### Possible investigation steps:\n- Since this is an ES|QL rule, the `okta.actor.alternate_id` and `okta.client.ip` values can be used to pivot into the raw authentication events related to this activity.\n- Identify the users involved in this action by examining the `okta.actor.id`, `okta.actor.type`, `okta.actor.alternate_id`, and `okta.actor.display_name` fields.\n- Determine the device client used for these actions by analyzing `okta.client.ip`, `okta.client.user_agent.raw_user_agent`, `okta.client.zone`, `okta.client.device`, and `okta.client.id` fields.\n- Review the `okta.security_context.is_proxy` field to determine if the device is a proxy.\n    - If the device is a proxy, this may indicate that a user is using a proxy to access multiple accounts for password spraying.\n- With the list of `okta.actor.alternate_id` values, review `event.outcome` results to determine if the authentication was successful.\n    - If the authentication was successful for any user, pivoting to `event.action` values for those users may provide additional context.\n- With Okta end users identified, review the `okta.debug_context.debug_data.dt_hash` field.\n    - Historical analysis should indicate if this device token hash is commonly associated with the user.\n- Review the `okta.event_type` field to determine the type of authentication event that occurred.\n    - If the event type is `user.authentication.sso`, the user may have legitimately started a session via a proxy for security or privacy reasons.\n    - If the event type is `user.authentication.password`, the user may be using a proxy to access multiple accounts for password spraying.\n    - If the event type is `user.session.start`, the source may have attempted to establish a session via the Okta authentication API.\n- Examine the `okta.outcome.result` field to determine if the authentication was successful.\n- Review the past activities of the actor(s) involved in this action by checking their previous actions.\n- Evaluate the actions that happened just before and after this event in the `okta.event_type` field to help understand the full context of the activity.\n    - This may help determine the authentication and authorization actions that occurred between the user, Okta and application.\n\n### False positive analysis:\n- A user may have legitimately started a session via a proxy for security or privacy reasons.\n- Users may share an endpoint related to work or personal use in which separate Okta accounts are used.\n    - Architecturally, this shared endpoint may leverage a proxy for security or privacy reasons.\n    - Shared systems such as Kiosks and conference room computers may be used by multiple users.\n    - Shared working spaces may have a single endpoint that is used by multiple users.\n\n### Response and remediation:\n- Review the profile of the users involved in this action to determine if proxy usage may be expected.\n- If the user is legitimate and the authentication behavior is not suspicious based on device analysis, no action is required.\n- If the user is legitimate but the authentication behavior is suspicious, consider resetting passwords for the users involves and enabling multi-factor authentication (MFA).\n    - If MFA is already enabled, consider resetting MFA for the users.\n- If any of the users are not legitimate, consider deactivating the user's account.\n- Conduct a review of Okta policies and ensure they are in accordance with security best practices.\n- Check with internal IT teams to determine if the accounts involved recently had MFA reset at the request of the user.\n    - If so, confirm with the user this was a legitimate request.\n    - If so and this was not a legitimate request, consider deactivating the user's account temporarily.\n        - Reset passwords and reset MFA for the user.\n- If this is a false positive, consider adding the `okta.debug_context.debug_data.dt_hash` field to the `exceptions` list in the rule.\n    - This will prevent future occurrences of this event for this device from triggering the rule.\n    - Alternatively adding `okta.client.ip` or a CIDR range to the `exceptions` list can prevent future occurrences of this event from triggering the rule.\n        - This should be done with caution as it may prevent legitimate alerts from being generated.\n",
+    "query": "FROM logs-okta*\n| WHERE\n    event.dataset == \"okta.system\"\n    AND (event.action RLIKE \"user\\\\.authentication(.*)\" OR event.action == \"user.session.start\")\n    AND okta.debug_context.debug_data.request_uri == \"/api/v1/authn\"\n    AND okta.outcome.reason == \"INVALID_CREDENTIALS\"\n| STATS\n    source_auth_count = COUNT_DISTINCT(okta.debug_context.debug_data.dt_hash)\n    BY okta.client.ip, okta.actor.alternate_id\n| WHERE\n    source_auth_count >= 30\n| SORT\n    source_auth_count DESC\n",
+    "references": [
+      "https://support.okta.com/help/s/article/How-does-the-Device-Token-work?language=en_US",
+      "https://developer.okta.com/docs/reference/api/event-types/",
+      "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy",
+      "https://sec.okta.com/articles/2023/08/cross-tenant-impersonation-prevention-and-detection",
+      "https://www.okta.com/resources/whitepaper-how-adaptive-mfa-can-help-in-mitigating-brute-force-attacks/"
+    ],
+    "risk_score": 21,
+    "rule_id": "23f18264-2d6d-11ef-9413-f661ea17fbce",
+    "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+    "severity": "low",
+    "tags": [
+      "Use Case: Identity and Access Audit",
+      "Data Source: Okta",
+      "Tactic: Credential Access"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1110",
+            "name": "Brute Force",
+            "reference": "https://attack.mitre.org/techniques/T1110/",
+            "subtechnique": [
+              {
+                "id": "T1110.003",
+                "name": "Password Spraying",
+                "reference": "https://attack.mitre.org/techniques/T1110/003/"
+              }
+            ]
+          },
+          {
+            "id": "T1110",
+            "name": "Brute Force",
+            "reference": "https://attack.mitre.org/techniques/T1110/",
+            "subtechnique": [
+              {
+                "id": "T1110.004",
+                "name": "Credential Stuffing",
+                "reference": "https://attack.mitre.org/techniques/T1110/004/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "esql",
+    "version": 1
+  },
+  "id": "23f18264-2d6d-11ef-9413-f661ea17fbce_1",
+  "type": "security-rule"
+}
