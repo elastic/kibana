@@ -77,50 +77,48 @@ export async function getServicesWithoutTransactions({
         : {
             events: [ProcessorEvent.metric, ProcessorEvent.error],
           },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...rangeQuery(start, end),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-              ...serviceGroupWithOverflowQuery(serviceGroup),
-              ...wildcardQuery(SERVICE_NAME, searchQuery),
-            ],
-          },
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...serviceGroupWithOverflowQuery(serviceGroup),
+            ...wildcardQuery(SERVICE_NAME, searchQuery),
+          ],
         },
-        aggs: {
-          sample: {
-            random_sampler: randomSampler,
-            aggs: {
-              services: {
-                terms: {
-                  field: SERVICE_NAME,
-                  size: maxNumServices,
+      },
+      aggs: {
+        sample: {
+          random_sampler: randomSampler,
+          aggs: {
+            services: {
+              terms: {
+                field: SERVICE_NAME,
+                size: maxNumServices,
+              },
+              aggs: {
+                environments: {
+                  terms: {
+                    field: SERVICE_ENVIRONMENT,
+                  },
                 },
-                aggs: {
-                  environments: {
-                    terms: {
-                      field: SERVICE_ENVIRONMENT,
-                    },
+                telemetryAgentName: {
+                  terms: {
+                    field: TELEMETRY_SDK_LANGUAGE,
                   },
-                  telemetryAgentName: {
-                    terms: {
-                      field: TELEMETRY_SDK_LANGUAGE,
-                    },
+                },
+                telemetrySdkName: {
+                  terms: {
+                    field: TELEMETRY_SDK_NAME,
                   },
-                  telemetrySdkName: {
-                    terms: {
-                      field: TELEMETRY_SDK_NAME,
-                    },
-                  },
-                  latest: {
-                    top_metrics: {
-                      metrics: [{ field: AGENT_NAME } as const],
-                      sort: { '@timestamp': 'desc' },
-                    },
+                },
+                latest: {
+                  top_metrics: {
+                    metrics: [{ field: AGENT_NAME } as const],
+                    sort: { '@timestamp': 'desc' },
                   },
                 },
               },

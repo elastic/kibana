@@ -39,6 +39,7 @@ export async function getInfraAlertsClient({
     search<TParams extends RequiredParams>(
       searchParams: TParams
     ): Promise<InferSearchResponseOf<ParsedTechnicalFields, TParams>> {
+      // @ts-expect-error mismatching types for _source and sort
       return alertsClient.find({
         ...searchParams,
         index: infraAlertsIndices.join(','),

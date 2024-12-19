@@ -7,7 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { last, omit } from 'lodash';
@@ -118,18 +118,16 @@ export async function getTraceItems({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 1000,
-      query: {
-        bool: {
-          filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
-          must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
-        },
+    track_total_hits: false,
+    size: 1000,
+    query: {
+      bool: {
+        filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
+        must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
       },
-      fields: [...requiredFields, ...optionalFields],
-      _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
     },
+    fields: [...requiredFields, ...optionalFields],
+    _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
   });
 
   const traceResponsePromise = getTraceDocsPaginated({
@@ -303,7 +301,10 @@ async function getTraceDocsPerPage({
     CHILD_ID,
   ] as const);
 
-  const body = {
+  const res = await apmEventClient.search('get_trace_docs', {
+    apm: {
+      events: [ProcessorEvent.span, ProcessorEvent.transaction],
+    },
     track_total_hits: true,
     size,
     search_after: searchAfter,
@@ -335,13 +336,6 @@ async function getTraceDocsPerPage({
       { '@timestamp': 'asc' },
       { _doc: 'asc' },
     ] as Sort,
-  };
-
-  const res = await apmEventClient.search('get_trace_docs', {
-    apm: {
-      events: [ProcessorEvent.span, ProcessorEvent.transaction],
-    },
-    body,
   });
 
   return {

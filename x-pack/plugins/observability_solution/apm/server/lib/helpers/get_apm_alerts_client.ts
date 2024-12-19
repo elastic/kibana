@@ -48,6 +48,7 @@ export async function getApmAlertsClient({
     search<TParams extends ApmAlertsRequiredParams>(
       searchParams: TParams
     ): Promise<InferSearchResponseOf<ParsedTechnicalFields, TParams>> {
+      // @ts-expect-error types of property sort are incompatible.
       return alertsClient.find({
         ...searchParams,
         query: getDataTierFilterCombined({

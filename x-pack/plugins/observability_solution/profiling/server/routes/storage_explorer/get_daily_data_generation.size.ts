@@ -48,31 +48,29 @@ export async function getDailyDataGenerationSize({
       'profiling-hosts',
       'profiling-metrics',
     ].join(),
-    body: {
-      query: {
-        bool: {
-          filter: {
-            ...kqlQuery(kuery),
-            range: {
-              '@timestamp': {
-                gte: String(timeFrom),
-                lt: String(timeTo),
-                format: 'epoch_second',
-              },
+    query: {
+      bool: {
+        filter: {
+          ...kqlQuery(kuery),
+          range: {
+            '@timestamp': {
+              gte: String(timeFrom),
+              lt: String(timeTo),
+              format: 'epoch_second',
             },
           },
         },
       },
-      aggs: {
-        indices: {
-          terms: {
-            field: '_index',
-          },
-          aggs: {
-            number_of_documents: {
-              value_count: {
-                field: '_index',
-              },
+    },
+    aggs: {
+      indices: {
+        terms: {
+          field: '_index',
+        },
+        aggs: {
+          number_of_documents: {
+            value_count: {
+              field: '_index',
             },
           },
         },
