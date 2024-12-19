@@ -112,20 +112,15 @@ export const getCase = async (
 
 export const resolveCase = async ({
   caseId,
-  includeComments = true,
   signal,
 }: {
   caseId: string;
-  includeComments?: boolean;
   signal?: AbortSignal;
 }): Promise<ResolvedCase> => {
   const response = await KibanaServices.get().http.fetch<CaseResolveResponse>(
     `${getCaseDetailsUrl(caseId)}/resolve`,
     {
       method: 'GET',
-      query: {
-        includeComments,
-      },
       signal,
     }
   );
