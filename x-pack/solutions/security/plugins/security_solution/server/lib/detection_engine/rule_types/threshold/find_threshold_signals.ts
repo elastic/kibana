@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { isEmpty } from 'lodash';
 
 import type {
@@ -118,7 +118,7 @@ export const findThresholdSignals = async ({
         sortKeys = thresholdTerms?.after_key;
 
         buckets.push(
-          ...((searchResult.aggregations?.thresholdTerms.buckets as ThresholdBucket[]) ?? [])
+          ...((searchResult.aggregations?.thresholdTerms?.buckets as ThresholdBucket[]) ?? [])
         );
       } else {
         throw new Error('Aggregations were missing on threshold rule search result');

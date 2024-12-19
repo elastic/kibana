@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { Filter } from '@kbn/es-query';
 import { isEmpty } from 'lodash/fp';
 import type {
@@ -79,23 +79,21 @@ export const buildEqlSearchRequest = ({
   return {
     index,
     allow_no_indices: true,
-    body: {
-      size,
-      query,
-      filter: {
-        bool: {
-          filter: requestFilter,
-        },
+    size,
+    query,
+    filter: {
+      bool: {
+        filter: requestFilter,
       },
-      runtime_mappings: runtimeMappings,
-      timestamp_field: timestampField,
-      event_category_field: eventCategoryOverride,
-      ...(!isEmpty(tiebreakerField)
-        ? {
-            tiebreaker_field: tiebreakerField,
-          }
-        : {}),
-      fields,
     },
+    runtime_mappings: runtimeMappings,
+    timestamp_field: timestampField,
+    event_category_field: eventCategoryOverride,
+    ...(!isEmpty(tiebreakerField)
+      ? {
+          tiebreaker_field: tiebreakerField,
+        }
+      : {}),
+    fields,
   };
 };
