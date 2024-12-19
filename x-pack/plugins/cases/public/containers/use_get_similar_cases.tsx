@@ -29,7 +29,7 @@ export const useGetSimilarCases = (params: {
   const toasts = useToasts();
 
   return useQuery(
-    casesQueriesKeys.cases(params),
+    casesQueriesKeys.similarCases(params.caseId, params),
     ({ signal }) => {
       return getSimilarCases({
         caseId: params.caseId,
