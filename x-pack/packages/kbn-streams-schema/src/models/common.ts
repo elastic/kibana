@@ -89,6 +89,12 @@ export const fieldDefinitionSchema = z.record(z.string(), fieldDefinitionConfigS
 
 export type FieldDefinition = z.infer<typeof fieldDefinitionSchema>;
 
+export const fieldDefinitionConfigWithNameSchema = fieldDefinitionConfigSchema.extend({
+  name: z.string(),
+});
+
+export type FieldDefinitionConfigWithName = z.infer<typeof fieldDefinitionConfigWithNameSchema>;
+
 export const streamChildSchema = z.object({
   name: z.string(),
   condition: z.optional(conditionSchema),
