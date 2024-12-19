@@ -20,6 +20,7 @@ import type { ObservableTypesConfiguration } from '../../../../common/types/doma
 import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmation_modal';
 
 export interface ObservableTypesListProps {
+  disabled: boolean;
   observableTypes: ObservableTypesConfiguration;
   onDeleteObservableType: (key: string) => void;
   onEditObservableType: (key: string) => void;
@@ -75,6 +76,7 @@ const ObservableTypesListComponent: React.FC<ObservableTypesListProps> = (props)
                           aria-label={`${observableType.key}-observable-type-edit`}
                           iconType="pencil"
                           color="primary"
+                          disabled={props.disabled}
                           onClick={() => onEditObservableType(observableType.key)}
                         />
                       </EuiFlexItem>
@@ -84,6 +86,7 @@ const ObservableTypesListComponent: React.FC<ObservableTypesListProps> = (props)
                           aria-label={`${observableType.key}-observable-type-delete`}
                           iconType="minusInCircle"
                           color="danger"
+                          disabled={props.disabled}
                           onClick={() => setSelectedItem(observableType)}
                         />
                       </EuiFlexItem>

@@ -22,6 +22,7 @@ describe('ObservableTypesList', () => {
   let appMockRender: AppMockRenderer;
 
   const props: ObservableTypesListProps = {
+    disabled: false,
     observableTypes,
     onDeleteObservableType: jest.fn(),
     onEditObservableType: jest.fn(),

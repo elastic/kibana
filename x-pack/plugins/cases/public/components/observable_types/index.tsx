@@ -39,7 +39,7 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
   observableTypes,
 }) => {
   const { permissions } = useCasesContext();
-  const canAddObservableTypes = !disabled && permissions.settings;
+  const canModifyObservableTypes = !disabled && permissions.settings;
 
   const onAddObservableType = useCallback(() => {
     handleAddObservableType();
@@ -52,7 +52,7 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
     [handleEditObservableType]
   );
 
-  return canAddObservableTypes ? (
+  return (
     <EuiDescribedFormGroup
       fullWidth
       title={
@@ -67,6 +67,7 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
         {observableTypes.length ? (
           <>
             <ObservableTypesList
+              disabled={!canModifyObservableTypes}
               observableTypes={observableTypes}
               onDeleteObservableType={handleDeleteObservableType}
               onEditObservableType={onEditObservableType}
@@ -87,7 +88,7 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
             {observableTypes.length < MAX_CUSTOM_OBSERVABLE_TYPES ? (
               <EuiButtonEmpty
                 isLoading={isLoading}
-                isDisabled={disabled}
+                isDisabled={!canModifyObservableTypes}
                 size="s"
                 onClick={onAddObservableType}
                 iconType="plusInCircle"
@@ -106,7 +107,7 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
         </EuiFlexGroup>
       </EuiPanel>
     </EuiDescribedFormGroup>
-  ) : null;
+  );
 };
 ObservableTypesComponent.displayName = 'CustomFields';
 
