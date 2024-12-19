@@ -99,7 +99,6 @@ export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }
       {data.pipelines && (
         <div data-test-subj="logstashPipelinesListing">
           <PipelineListing
-            className="monitoringLogstashPipelinesTable"
             onBrush={onBrush}
             zoomInfo={zoomInfo}
             stats={data.nodeSummary}

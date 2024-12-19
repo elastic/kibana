@@ -3,7 +3,7 @@
 exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  className="monPipelineViewer__pluginStatement"
+  css={[Function]}
   gutterSize="none"
   justifyContent="spaceBetween"
 >
@@ -20,8 +20,8 @@ exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
       >
         <EuiButtonEmpty
           aria-label="mutate"
-          className="monPipelineViewer__plugin"
           color="primary"
+          css={[Function]}
           flush="left"
           iconType="dot"
           onClick={[Function]}
@@ -51,20 +51,20 @@ exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
       gutterSize="s"
     >
       <Metric
-        className="monPipelineViewer__metric--cpuTime"
         key="cpuMetric"
+        type="cpuTime"
         value="25%"
         warning={true}
       />
       <Metric
-        className="monPipelineViewer__metric--eventMillis"
         key="eventMillis"
+        type="eventMillis"
         value="100 ms/e"
         warning={false}
       />
       <Metric
-        className="monPipelineViewer__metric--events"
         key="eventsReceived"
+        type="events"
         value="120 e/s received"
       />
     </EuiFlexGroup>
@@ -75,7 +75,7 @@ exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
 exports[`PluginStatement component adds warning highlight for event millis 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  className="monPipelineViewer__pluginStatement"
+  css={[Function]}
   gutterSize="none"
   justifyContent="spaceBetween"
 >
@@ -92,8 +92,8 @@ exports[`PluginStatement component adds warning highlight for event millis 1`] =
       >
         <EuiButtonEmpty
           aria-label="mutate"
-          className="monPipelineViewer__plugin"
           color="primary"
+          css={[Function]}
           flush="left"
           iconType="dot"
           onClick={[Function]}
@@ -123,20 +123,20 @@ exports[`PluginStatement component adds warning highlight for event millis 1`] =
       gutterSize="s"
     >
       <Metric
-        className="monPipelineViewer__metric--cpuTime"
         key="cpuMetric"
+        type="cpuTime"
         value="25%"
         warning={false}
       />
       <Metric
-        className="monPipelineViewer__metric--eventMillis"
         key="eventMillis"
+        type="eventMillis"
         value="100 ms/e"
         warning={true}
       />
       <Metric
-        className="monPipelineViewer__metric--events"
         key="eventsReceived"
+        type="events"
         value="120 e/s received"
       />
     </EuiFlexGroup>
@@ -147,7 +147,7 @@ exports[`PluginStatement component adds warning highlight for event millis 1`] =
 exports[`PluginStatement component does not render explicit id field if no id is specified 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  className="monPipelineViewer__pluginStatement"
+  css={[Function]}
   gutterSize="none"
   justifyContent="spaceBetween"
 >
@@ -164,8 +164,8 @@ exports[`PluginStatement component does not render explicit id field if no id is
       >
         <EuiButtonEmpty
           aria-label="stdin"
-          className="monPipelineViewer__plugin"
           color="primary"
+          css={[Function]}
           flush="left"
           iconType="dot"
           onClick={[Function]}
@@ -185,8 +185,8 @@ exports[`PluginStatement component does not render explicit id field if no id is
       gutterSize="s"
     >
       <Metric
-        className="monPipelineViewer__metric--eventsEmitted"
         key="eventsEmitted"
+        type="eventsEmitted"
         value="125 e/s emitted"
       />
     </EuiFlexGroup>
@@ -197,7 +197,7 @@ exports[`PluginStatement component does not render explicit id field if no id is
 exports[`PluginStatement component renders input metrics and explicit id fields 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  className="monPipelineViewer__pluginStatement"
+  css={[Function]}
   gutterSize="none"
   justifyContent="spaceBetween"
 >
@@ -214,8 +214,8 @@ exports[`PluginStatement component renders input metrics and explicit id fields 
       >
         <EuiButtonEmpty
           aria-label="stdin"
-          className="monPipelineViewer__plugin"
           color="primary"
+          css={[Function]}
           flush="left"
           iconType="dot"
           onClick={[Function]}
@@ -245,8 +245,8 @@ exports[`PluginStatement component renders input metrics and explicit id fields 
       gutterSize="s"
     >
       <Metric
-        className="monPipelineViewer__metric--eventsEmitted"
         key="eventsEmitted"
+        type="eventsEmitted"
         value="125 e/s emitted"
       />
     </EuiFlexGroup>
@@ -257,7 +257,7 @@ exports[`PluginStatement component renders input metrics and explicit id fields 
 exports[`PluginStatement component renders processor statement metrics 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  className="monPipelineViewer__pluginStatement"
+  css={[Function]}
   gutterSize="none"
   justifyContent="spaceBetween"
 >
@@ -274,8 +274,8 @@ exports[`PluginStatement component renders processor statement metrics 1`] = `
       >
         <EuiButtonEmpty
           aria-label="mutate"
-          className="monPipelineViewer__plugin"
           color="primary"
+          css={[Function]}
           flush="left"
           iconType="dot"
           onClick={[Function]}
@@ -305,20 +305,20 @@ exports[`PluginStatement component renders processor statement metrics 1`] = `
       gutterSize="s"
     >
       <Metric
-        className="monPipelineViewer__metric--cpuTime"
         key="cpuMetric"
+        type="cpuTime"
         value="25%"
         warning={false}
       />
       <Metric
-        className="monPipelineViewer__metric--eventMillis"
         key="eventMillis"
+        type="eventMillis"
         value="100 ms/e"
         warning={false}
       />
       <Metric
-        className="monPipelineViewer__metric--events"
         key="eventsReceived"
+        type="events"
         value="120 e/s received"
       />
     </EuiFlexGroup>
