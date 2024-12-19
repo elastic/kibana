@@ -48,71 +48,50 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
 );
 
 export const grokProcessingDefinitionSchema = z.object({
-  type: z.literal('grok'),
-  field: z.string(),
-  patterns: z.array(z.string()),
-  pattern_definitions: z.optional(z.record(z.string())),
+  grok: z.object({
+    field: z.string(),
+    patterns: z.array(z.string()),
+    pattern_definitions: z.optional(z.record(z.string())),
+  }),
 });
 
+export type GrokProcessingDefinition = z.infer<typeof grokProcessingDefinitionSchema>;
+
 export const dissectProcessingDefinitionSchema = z.object({
-  type: z.literal('dissect'),
-  field: z.string(),
-  pattern: z.string(),
+  dissect: z.object({
+    field: z.string(),
+    pattern: z.string(),
+  }),
 });
+
+export type DissectProcssingDefinition = z.infer<typeof dissectProcessingDefinitionSchema>;
+
+export const processingConfigSchema = z.union([
+  grokProcessingDefinitionSchema,
+  dissectProcessingDefinitionSchema,
+]);
 
 export const processingDefinitionSchema = z.object({
   condition: z.optional(conditionSchema),
-  config: z.discriminatedUnion('type', [
-    grokProcessingDefinitionSchema,
-    dissectProcessingDefinitionSchema,
-  ]),
+  config: processingConfigSchema,
 });
 
 export type ProcessingDefinition = z.infer<typeof processingDefinitionSchema>;
 
-export const fieldDefinitionSchema = z.object({
-  name: z.string(),
+export const fieldDefinitionConfigSchema = z.object({
   type: z.enum(['keyword', 'match_only_text', 'long', 'double', 'date', 'boolean', 'ip']),
   format: z.optional(z.string()),
 });
 
+export type FieldDefinitionConfig = z.infer<typeof fieldDefinitionConfigSchema>;
+
+export const fieldDefinitionSchema = z.record(z.string(), fieldDefinitionConfigSchema);
+
 export type FieldDefinition = z.infer<typeof fieldDefinitionSchema>;
 
 export const streamChildSchema = z.object({
-  id: z.string(),
+  name: z.string(),
   condition: z.optional(conditionSchema),
 });
 
 export type StreamChild = z.infer<typeof streamChildSchema>;
-
-export const streamWithoutIdDefinitonSchema = z.object({
-  processing: z.array(processingDefinitionSchema).default([]),
-  fields: z.array(fieldDefinitionSchema).default([]),
-  managed: z.boolean().default(true),
-  children: z.array(streamChildSchema).default([]),
-});
-
-export type StreamWithoutIdDefinition = z.infer<typeof streamDefinitonSchema>;
-
-export const unmanagedElasticsearchAsset = z.object({
-  type: z.enum(['ingest_pipeline', 'component_template', 'index_template', 'data_stream']),
-  id: z.string(),
-});
-export type UnmanagedElasticsearchAsset = z.infer<typeof unmanagedElasticsearchAsset>;
-
-export const streamDefinitonSchema = streamWithoutIdDefinitonSchema.extend({
-  id: z.string(),
-  unmanaged_elasticsearch_assets: z.optional(z.array(unmanagedElasticsearchAsset)),
-});
-
-export type StreamDefinition = z.infer<typeof streamDefinitonSchema>;
-
-export const streamDefinitonWithoutChildrenSchema = streamDefinitonSchema.omit({ children: true });
-
-export type StreamWithoutChildrenDefinition = z.infer<typeof streamDefinitonWithoutChildrenSchema>;
-
-export const readStreamDefinitonSchema = streamDefinitonSchema.extend({
-  inheritedFields: z.array(fieldDefinitionSchema.extend({ from: z.string() })).default([]),
-});
-
-export type ReadStreamDefinition = z.infer<typeof readStreamDefinitonSchema>;

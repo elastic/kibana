@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { JsonObject } from '@kbn/utility-types';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { WiredStreamConfigDefinition } from '@kbn/streams-schema';
 import { enableStreams, fetchDocument, indexDocument, putStream } from './helpers/requests';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { waitForDocumentInIndex } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
@@ -29,53 +29,54 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('Place processing steps', async () => {
-      const body = {
-        fields: [
-          {
-            name: '@timestamp',
-            type: 'date',
-          },
-          {
-            name: 'message',
-            type: 'match_only_text',
-          },
-          {
-            name: 'message2',
-            type: 'match_only_text',
-          },
-          {
-            name: 'host.name',
-            type: 'keyword',
-          },
-          {
-            name: 'log.level',
-            type: 'keyword',
-          },
-        ],
-        processing: [
-          {
-            config: {
-              type: 'grok',
-              field: 'message',
-              patterns: [
-                '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
-              ],
+      const body: WiredStreamConfigDefinition = {
+        wired: {
+          fields: {
+            '@timestamp': {
+              type: 'date',
             },
-          } as JsonObject,
-          {
-            config: {
-              type: 'dissect',
-              field: 'message2',
-              pattern: '%{log.logger} %{message3}',
+            message: {
+              type: 'match_only_text',
             },
-            condition: {
-              field: 'log.level',
-              operator: 'eq',
-              value: 'info',
+            message2: {
+              type: 'match_only_text',
             },
-          } as JsonObject,
-        ],
-        children: [],
+            'host.name': {
+              type: 'keyword',
+            },
+            'log.level': {
+              type: 'keyword',
+            },
+          },
+        },
+        ingest: {
+          processing: [
+            {
+              config: {
+                grok: {
+                  field: 'message',
+                  patterns: [
+                    '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
+                  ],
+                },
+              },
+            },
+            {
+              config: {
+                dissect: {
+                  field: 'message2',
+                  pattern: '%{log.logger} %{message3}',
+                },
+              },
+              condition: {
+                field: 'log.level',
+                operator: 'eq',
+                value: 'info',
+              },
+            },
+          ],
+        },
+        routing: [],
       };
       const response = await putStream(supertest, 'logs', body);
       expect(response).to.have.property('acknowledged', true);
