@@ -131,6 +131,7 @@ export const functionRt = t.intersection([
   }),
   t.partial({
     parameters: t.any,
+    strict: toBooleanRt,
   }),
 ]);
 

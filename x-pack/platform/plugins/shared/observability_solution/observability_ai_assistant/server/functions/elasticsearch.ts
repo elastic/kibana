@@ -15,6 +15,7 @@ export function registerElasticsearchFunction({
 }: FunctionRegistrationParameters) {
   functions.registerFunction(
     {
+      strict: false,
       name: ELASTICSEARCH_FUNCTION_NAME,
       description:
         'Call Elasticsearch APIs on behalf of the user. Make sure the request body is valid for the API that you are using. Only call this function when the user has explicitly requested it.',
