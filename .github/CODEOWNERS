@@ -859,6 +859,7 @@ x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
+x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
 x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
 x-pack/platform/plugins/shared/integration_assistant @elastic/security-scalability
@@ -890,7 +891,6 @@ x-pack/plugins/features @elastic/kibana-core
 x-pack/plugins/fields_metadata @elastic/obs-ux-logs-team
 x-pack/plugins/file_upload @elastic/kibana-presentation @elastic/ml-ui
 x-pack/plugins/fleet @elastic/fleet
-x-pack/plugins/global_search @elastic/appex-sharedux
 x-pack/plugins/global_search_providers @elastic/appex-sharedux
 x-pack/plugins/graph @elastic/kibana-visualizations
 x-pack/plugins/index_management @elastic/kibana-management
@@ -1827,7 +1827,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 #CC# /src/plugins/saved_objects/ @elastic/kibana-core
 #CC# /x-pack/plugins/cloud/ @elastic/kibana-core
 #CC# /x-pack/plugins/features/ @elastic/kibana-core
-#CC# /x-pack/plugins/global_search/ @elastic/kibana-core
+#CC# /x-pack/platform/plugins/shared/global_search/ @elastic/kibana-core
 #CC# /src/plugins/newsfeed @elastic/kibana-core
 #CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
 
