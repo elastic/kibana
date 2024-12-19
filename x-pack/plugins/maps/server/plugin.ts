@@ -202,16 +202,10 @@ export class MapsPlugin implements Plugin {
             },
             ui: uiAllPrivileges,
             ...(version === 'v1' && {
-              replacedBy: {
-                default: [
-                  { feature: 'maps_v2', privileges: ['all'] },
-                  { feature: 'savedQueryManagement', privileges: ['all'] },
-                ],
-                minimal: [
-                  { feature: 'maps_v2', privileges: ['minimal_all'] },
-                  { feature: 'savedQueryManagement', privileges: ['minimal_all'] },
-                ],
-              },
+              replacedBy: [
+                { feature: 'maps_v2', privileges: ['all'] },
+                { feature: 'savedQueryManagement', privileges: ['all'] },
+              ],
             }),
           },
           read: {

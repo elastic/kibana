@@ -30,7 +30,6 @@ xpack.features.overrides:
         - feature: "observability"
           privileges: [ "read" ]
   ### Dashboards feature should be moved from Analytics category to the Observability one.
-  dashboard.category: "observability"
   dashboard_v2.category: "observability"
   ### Discover feature should be moved from Analytics category to the Observability one and its privileges are
   ### fine-tuned to grant access to Observability app.

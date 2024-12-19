@@ -80,7 +80,6 @@ xpack.features.overrides:
   ### Shared images feature is hidden in Role management since it's not needed.
   filesSharedImage.hidden: true
   ### Maps feature is hidden in Role management since it's automatically granted by Dashboard feature.
-  maps.hidden: true
   maps_v2.hidden: true
   ### Reporting feature is supposed to give access to reporting capabilities across different features.
   reporting:

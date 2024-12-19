@@ -257,6 +257,7 @@ export class FeatureRegistry {
               );
             }
 
+            // Enabled privileges cannot be replaced with disabled ones.
             if (referencedPrivilege.disabled && !privilege.disabled) {
               throw new Error(
                 `Cannot replace privilege "${privilegeId}" of deprecated feature "${feature.id}" with disabled privilege "${privilegeReference}" of feature "${featureReference.feature}".`

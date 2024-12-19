@@ -165,7 +165,7 @@ The `savedQueryManagement` feature privilege now globally controls access to sav
 . If `savedQueryManagement` is `read`, the user can load queries from the UI and access read APIs, but cannot save queries from the UI or make changes to queries through APIs.
 . If `savedQueryManagement` is `all`, the user can both load and save queries from the UI and through APIs.
 *Action* +
-Existing user roles are automatically migrated to include the `savedQueryManagement` privilege as required to prevent breaking changes. No action is required for existing roles. For new roles, ensure that the `savedQueryManagement` privilege is set as needed.
+Existing user roles that were previously implicitly granted access to saved queries through the dashboard, discover, visualize, or maps feature privileges will retain that access to prevent breaking changes. While no action is required for existing roles, it’s still advisable to audit relevant roles and re-save them to migrate to the latest privileges model. For new roles, ensure that the savedQueryManagement privilege is set as needed.
 ====
 
 [float]
