@@ -225,7 +225,7 @@ class ConversationalChainFn {
             chat_history: chatHistory,
           },
           {
-            // signal: streamController.signal,
+            signal: streamController.signal,
             callbacks: [
               {
                 // callback for chat based models (OpenAI)
