@@ -466,7 +466,7 @@
     "@kbn/ebt-tools": "link:packages/kbn-ebt-tools",
     "@kbn/ecs-data-quality-dashboard": "link:x-pack/solutions/security/packages/ecs_data_quality_dashboard",
     "@kbn/ecs-data-quality-dashboard-plugin": "link:x-pack/solutions/security/plugins/ecs_data_quality_dashboard",
-    "@kbn/elastic-agent-utils": "link:packages/kbn-elastic-agent-utils",
+    "@kbn/elastic-agent-utils": "link:src/platform/packages/shared/kbn-elastic-agent-utils",
     "@kbn/elastic-assistant": "link:x-pack/platform/packages/shared/kbn-elastic-assistant",
     "@kbn/elastic-assistant-common": "link:x-pack/platform/packages/shared/kbn-elastic-assistant-common",
     "@kbn/elastic-assistant-plugin": "link:x-pack/solutions/security/plugins/elastic_assistant",
