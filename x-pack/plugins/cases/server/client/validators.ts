@@ -44,22 +44,34 @@ export const validateDuplicatedKeysInRequest = ({
 export const validateDuplicatedObservableTypesInRequest = ({
   requestFields = [],
 }: {
-  requestFields?: Array<{ label: string }>;
+  requestFields?: Array<{ label: string; key: string }>;
 }) => {
-  const stringifyItem = (item: { label: string }) => item.label.toLowerCase();
+  const extractLabelFromItem = (item: { label: string }) => item.label.toLowerCase();
+  const extractKeyFromItem = (item: { key: string }) => item.key.toLowerCase();
 
   // NOTE: this prevents adding duplicates for the builtin types
-  const builtinLabels = OBSERVABLE_TYPES_BUILTIN.map(stringifyItem);
+  const builtinLabels = OBSERVABLE_TYPES_BUILTIN.map(extractLabelFromItem);
+  const builtinKeys = OBSERVABLE_TYPES_BUILTIN.map(extractKeyFromItem);
 
   const uniqueLabels = new Set<string>(builtinLabels);
+  const uniqueKeys = new Set<string>(builtinKeys);
+
   const duplicatedLabels = new Set<string>();
 
   requestFields.forEach((item) => {
-    const stringifiedItem = stringifyItem(item);
-    if (uniqueLabels.has(stringifiedItem)) {
-      duplicatedLabels.add(stringifiedItem);
+    const observableTypeLabel = extractLabelFromItem(item);
+    const observableTypeKey = extractKeyFromItem(item);
+
+    if (uniqueKeys.has(observableTypeKey)) {
+      duplicatedLabels.add(observableTypeLabel);
     } else {
-      uniqueLabels.add(stringifiedItem);
+      uniqueKeys.add(observableTypeKey);
+    }
+
+    if (uniqueLabels.has(observableTypeLabel)) {
+      duplicatedLabels.add(observableTypeLabel);
+    } else {
+      uniqueLabels.add(observableTypeLabel);
     }
   });
 

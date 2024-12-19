@@ -62,29 +62,65 @@ describe('validators', () => {
   });
 
   describe('validateDuplicatedObservableTypesInRequest', () => {
-    it('returns fields in request that have duplicated observable types', () => {
+    it('returns fields in request that have duplicated observable types (by labels)', () => {
       expect(() =>
         validateDuplicatedObservableTypesInRequest({
           requestFields: [
             {
               label: 'triplicated_label',
+              key: '3aa53239-a608-4ccd-a69f-cb7d08d0b5cb',
             },
             {
               label: 'triplicated_label',
+              key: 'a71629ae-05eb-48d5-a669-bb9f3eec81b6',
             },
             {
               label: 'triplicated_label',
+              key: 'd5ff16a2-ead3-4f1d-b888-39376bfad8f2',
             },
             {
               label: 'duplicated_label',
+              key: '9774be21-abc7-4aa4-9443-86636fea40bc',
             },
             {
               label: 'duplicated_label',
+              key: 'fb638551-3b76-4bd9-8b45-7a86ddcb3b80',
             },
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"Invalid duplicated observable types in request: triplicated_label,duplicated_label"`
+      );
+    });
+
+    it('returns fields in request that have duplicated observable types (by keys)', () => {
+      expect(() =>
+        validateDuplicatedObservableTypesInRequest({
+          requestFields: [
+            {
+              label: 'a',
+              key: 'triplicated_key',
+            },
+            {
+              label: 'b',
+              key: 'triplicated_key',
+            },
+            {
+              label: 'c',
+              key: 'triplicated_key',
+            },
+            {
+              label: 'd',
+              key: 'duplicated_key',
+            },
+            {
+              label: 'e',
+              key: 'duplicated_key',
+            },
+          ],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid duplicated observable types in request: b,c,e"`
       );
     });
 
@@ -94,9 +130,11 @@ describe('validators', () => {
           requestFields: [
             {
               label: '1',
+              key: '1',
             },
             {
               label: '2',
+              key: '2',
             },
           ],
         })
@@ -109,6 +147,7 @@ describe('validators', () => {
           requestFields: [
             {
               label: 'email',
+              key: 'email',
             },
           ],
         })
