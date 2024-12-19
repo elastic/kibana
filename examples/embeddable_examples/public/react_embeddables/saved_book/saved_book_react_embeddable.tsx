@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -20,7 +28,6 @@ import {
   SerializedPanelState,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { serializeBookAttributes, stateManagerFromAttributes } from './book_state';
@@ -156,6 +163,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
       return {
         api,
         Component: () => {
+          const { euiTheme } = useEuiTheme();
           const [authorName, numberOfPages, bookTitle, synopsis] = useBatchedPublishingSubjects(
             bookAttributesManager.authorName,
             bookAttributesManager.numberOfPages,
@@ -187,7 +195,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
               )}
               <div
                 css={css`
-                  padding: ${euiThemeVars.euiSizeM};
+                  padding: ${euiTheme.size.m};
                 `}
               >
                 <EuiFlexGroup
