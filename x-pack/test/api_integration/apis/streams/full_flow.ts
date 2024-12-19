@@ -135,6 +135,137 @@ export default function ({ getService }: FtrProviderContext) {
           log: { level: 'info', logger: 'nginx' },
         });
       });
+
+      it('Fork logs to logs.nginx.error with invalid condition', async () => {
+        const body = {
+          stream: {
+            id: 'logs.nginx.error',
+            fields: [],
+            processing: [],
+          },
+          condition: { field: 'log', operator: 'eq', value: 'error' },
+        };
+        const response = await forkStream(supertest, 'logs.nginx', body);
+        expect(response).to.have.property('acknowledged', true);
+      });
+
+      it('Index an Nginx error log message, should goto logs.nginx.error but fails', async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:20.000Z',
+          message: JSON.stringify({
+            'log.level': 'error',
+            'log.logger': 'nginx',
+            message: 'test',
+          }),
+        };
+        const response = await indexDocument(esClient, 'logs', doc);
+        expect(response.result).to.eql('created');
+
+        await waitForDocumentInIndex({
+          esClient,
+          indexName: 'logs.nginx',
+          retryService,
+          logger,
+          docCountTarget: 2,
+        });
+
+        const result = await fetchDocument(esClient, 'logs.nginx', response._id);
+        expect(result._index).to.match(/^\.ds\-logs.nginx-.*/);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:20.000Z',
+          message: 'test',
+          log: { level: 'error', logger: 'nginx' },
+        });
+      });
+
+      it('Fork logs to logs.number-test', async () => {
+        const body = {
+          stream: {
+            id: 'logs.number-test',
+            fields: [],
+            processing: [],
+          },
+          condition: { field: 'code', operator: 'gte', value: '500' },
+        };
+        const response = await forkStream(supertest, 'logs', body);
+        expect(response).to.have.property('acknowledged', true);
+      });
+
+      it('Index documents with numbers and strings for logs.number-test condition', async () => {
+        const doc1 = {
+          '@timestamp': '2024-01-01T00:00:20.000Z',
+          message: JSON.stringify({
+            code: '500',
+            message: 'test',
+          }),
+        };
+        const doc2 = {
+          '@timestamp': '2024-01-01T00:00:20.000Z',
+          message: JSON.stringify({
+            code: 500,
+            message: 'test',
+          }),
+        };
+        const response1 = await indexDocument(esClient, 'logs', doc1);
+        expect(response1.result).to.eql('created');
+        const response2 = await indexDocument(esClient, 'logs', doc2);
+        expect(response2.result).to.eql('created');
+
+        await waitForDocumentInIndex({
+          esClient,
+          indexName: 'logs.number-test',
+          retryService,
+          logger,
+          docCountTarget: 2,
+          retries: 20,
+        });
+      });
+
+      it('Fork logs to logs.string-test', async () => {
+        const body = {
+          stream: {
+            id: 'logs.string-test',
+            fields: [],
+            processing: [],
+          },
+          condition: {
+            or: [
+              { field: 'message', operator: 'contains', value: '500' },
+              { field: 'message', operator: 'contains', value: 400 },
+            ],
+          },
+        };
+        const response = await forkStream(supertest, 'logs', body);
+        expect(response).to.have.property('acknowledged', true);
+      });
+
+      it('Index documents with numbers and strings for logs.string-test condition', async () => {
+        const doc1 = {
+          '@timestamp': '2024-01-01T00:00:20.000Z',
+          message: JSON.stringify({
+            message: 'status_code: 500',
+          }),
+        };
+        const doc2 = {
+          '@timestamp': '2024-01-01T00:00:20.000Z',
+          message: JSON.stringify({
+            message: 'status_code: 400',
+          }),
+        };
+        const response1 = await indexDocument(esClient, 'logs', doc1);
+        expect(response1.result).to.eql('created');
+        const response2 = await indexDocument(esClient, 'logs', doc2);
+        expect(response2.result).to.eql('created');
+
+        await waitForDocumentInIndex({
+          esClient,
+          indexName: 'logs.string-test',
+          retryService,
+          logger,
+          docCountTarget: 2,
+          retries: 20,
+        });
+      });
     });
   });
 }

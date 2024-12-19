@@ -14,7 +14,9 @@ import { fetchAlertsFields, FetchAlertsFieldsParams } from '../apis/fetch_alerts
 
 export type UseFetchAlertsFieldsQueryParams = FetchAlertsFieldsParams;
 
-export const queryKeyPrefix = ['alerts', fetchAlertsFields.name];
+// Query key prefix MUST contain explicit strings, not fetchAlertsFields.name
+// Production builds cannot guarantee a unique function name
+export const queryKeyPrefix = ['alerts', 'fetchAlertsFields'];
 
 /**
  * Fetch alerts indexes browser fields for the given feature ids

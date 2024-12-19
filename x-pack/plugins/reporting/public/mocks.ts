@@ -17,7 +17,6 @@ const createSetupContract = (): Setup => {
   const coreSetup = coreMock.createSetup();
   const apiClient = new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0');
   return {
-    usesUiCapabilities: jest.fn().mockImplementation(() => true),
     components: getSharedComponents(apiClient, Rx.from(coreSetup.getStartServices())),
   };
 };

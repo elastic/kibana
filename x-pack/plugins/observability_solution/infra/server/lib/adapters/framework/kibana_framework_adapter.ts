@@ -13,8 +13,7 @@ import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import { TimeseriesVisData } from '@kbn/vis-type-timeseries-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { TSVBMetricModel } from '@kbn/metrics-data-access-plugin/common';
-import { InfraConfig } from '../../../plugin';
-import type { InfraPluginRequestHandlerContext } from '../../../types';
+import type { InfraConfig, InfraPluginRequestHandlerContext } from '../../../types';
 import {
   CallWithRequestParams,
   InfraDatabaseGetIndicesAliasResponse,
@@ -53,9 +52,8 @@ export class KibanaFramework {
     config: InfraRouteConfig<Params, Query, Body, Method>,
     handler: RequestHandler<Params, Query, Body, InfraPluginRequestHandlerContext>
   ) {
-    const defaultOptions = {
-      tags: ['access:infra'],
-    };
+    const defaultSecurity = { authz: { requiredPrivileges: ['infra'] } };
+
     const routeConfig = {
       path: config.path,
       validate: config.validate,
@@ -66,7 +64,8 @@ export class KibanaFramework {
        * using `as ...` below to ensure the route config has
        * the correct options type.
        */
-      options: { ...config.options, ...defaultOptions },
+      options: { ...config.options },
+      security: defaultSecurity,
     };
     switch (config.method) {
       case 'get':
@@ -90,15 +89,12 @@ export class KibanaFramework {
   public registerVersionedRoute<Method extends RouteMethod = any>(
     config: InfraVersionedRouteConfig<Method>
   ) {
-    const defaultOptions = {
-      tags: ['access:infra'],
-    };
+    const defaultSecurity = { authz: { requiredPrivileges: ['infra'] } };
+
     const routeConfig = {
       access: config.access,
       path: config.path,
-      // Currently we have no use of custom options beyond tags, this can be extended
-      // beyond defaultOptions if it's needed.
-      options: defaultOptions,
+      security: defaultSecurity,
     };
     switch (config.method) {
       case 'get':

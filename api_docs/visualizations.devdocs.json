@@ -1463,13 +1463,7 @@
                 "label": "attributeService",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "embeddable",
-                    "scope": "public",
-                    "docId": "kibEmbeddablePluginApi",
-                    "section": "def-public.AttributeService",
-                    "text": "AttributeService"
-                  },
+                  "AttributeService",
                   "<",
                   "VisualizeSavedObjectAttributes",
                   ", ",
@@ -1477,44 +1471,6 @@
                   ", ",
                   "VisualizeByReferenceInput",
                   ", unknown> | undefined"
-                ],
-                "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "visualizations",
-                "id": "def-public.VisualizeEmbeddable.Unnamed.$5",
-                "type": "Object",
-                "tags": [],
-                "label": "parent",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "embeddable",
-                    "scope": "public",
-                    "docId": "kibEmbeddablePluginApi",
-                    "section": "def-public.IContainer",
-                    "text": "IContainer"
-                  },
-                  "<{}, ",
-                  {
-                    "pluginId": "embeddable",
-                    "scope": "public",
-                    "docId": "kibEmbeddablePluginApi",
-                    "section": "def-public.ContainerInput",
-                    "text": "ContainerInput"
-                  },
-                  "<{}>, ",
-                  {
-                    "pluginId": "embeddable",
-                    "scope": "public",
-                    "docId": "kibEmbeddablePluginApi",
-                    "section": "def-public.ContainerOutput",
-                    "text": "ContainerOutput"
-                  },
-                  "> | undefined"
                 ],
                 "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable.tsx",
                 "deprecated": false,
@@ -6818,207 +6774,7 @@
         "label": "VisualizeEmbeddableContract",
         "description": [],
         "signature": [
-          "{ readonly id: string; readonly type: \"visualization\"; viewMode: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          ">; uuid: string; readonly parent?: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IContainer",
-            "text": "IContainer"
-          },
-          "<{}, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerInput",
-            "text": "ContainerInput"
-          },
-          "<{}>, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerOutput",
-            "text": "ContainerOutput"
-          },
-          "> | undefined; destroy: () => void; dataViews: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          "[] | undefined>; hidePanelTitle: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<boolean | undefined>; panelTitle: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<string | undefined>; defaultPanelTitle: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<string | undefined> | undefined; dataLoading: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<boolean | undefined>; blockingError: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<Error | undefined>; panelDescription: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<string | undefined>; defaultPanelDescription: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<string | undefined> | undefined; disabledActionIds: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<string[] | undefined>; setDisabledActionIds: (ids: string[] | undefined) => void; parentApi: (",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.PresentationContainer",
-            "text": "PresentationContainer"
-          },
-          " & Partial<Pick<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
-          },
-          ", \"hidePanelTitle\"> & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesViewMode",
-            "text": "PublishesViewMode"
-          },
-          ">) | undefined; hasLockedHoverActions$: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<boolean>; lockHoverActions: (lock: boolean) => void; disableTriggers: boolean; savedObjectId: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<string | undefined>; timeRange$: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined>; filters$: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[] | undefined>; isCompatibleWithUnifiedSearch: (() => boolean) | undefined; query$: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<",
+          "{ readonly id: string; readonly type: \"visualization\"; destroy: () => void; getQuery: () => ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -7034,23 +6790,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          " | undefined>; getQuery: () => ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.AggregateQuery",
-            "text": "AggregateQuery"
-          },
-          " | undefined; canLinkToLibrary: (() => Promise<boolean>) | undefined; canUnlinkFromLibrary: (() => Promise<boolean>) | undefined; onEdit: () => Promise<void>; isEditingEnabled: () => boolean; getEditHref: () => Promise<string | undefined>; getTypeDisplayName: () => string; getFilters: () => ",
+          " | undefined; getEditHref: () => Promise<string | undefined>; getFilters: () => ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -7058,15 +6798,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; setTimeRange: (timeRange: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined) => void; linkToLibrary: (() => Promise<void>) | undefined; unlinkFromLibrary: (() => Promise<void>) | undefined; getExplicitInput: () => ",
+          "[]; getExplicitInput: () => Readonly<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -7074,23 +6806,7 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          "; getDescription: () => string; phase$: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PhaseEvent",
-            "text": "PhaseEvent"
-          },
-          " | undefined>; setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; setPanelDescription: (newTitle: string | undefined) => void; render: (domNode: HTMLElement) => Promise<void>; supportedTriggers: () => string[]; getInspectorAdapters: () => ",
+          ">; getDescription: () => string; render: (domNode: HTMLElement) => Promise<void>; supportedTriggers: () => string[]; getInspectorAdapters: () => ",
           {
             "pluginId": "inspector",
             "scope": "common",
@@ -7164,7 +6880,7 @@
           "VisualizeByValueInput",
           ">; getInputAsRefType: () => Promise<",
           "VisualizeByReferenceInput",
-          ">; readonly runtimeId: number; readonly isContainer: boolean; readonly deferEmbeddableLoad: boolean; catchError?: ((error: ",
+          ">; readonly runtimeId: number; readonly deferEmbeddableLoad: boolean; catchError?: ((error: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -7172,39 +6888,7 @@
             "section": "def-common.ErrorLike",
             "text": "ErrorLike"
           },
-          ", domNode: HTMLElement | Element) => any) | undefined; fatalError?: Error | undefined; getAppContext: () => ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.EmbeddableAppContext",
-            "text": "EmbeddableAppContext"
-          },
-          " | undefined; refreshInputFromParent: () => void; getIsContainer: () => this is ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IContainer",
-            "text": "IContainer"
-          },
-          "<{}, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerInput",
-            "text": "ContainerInput"
-          },
-          "<{}>, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerOutput",
-            "text": "ContainerOutput"
-          },
-          ">; getUpdated$: () => Readonly<",
+          ", domNode: HTMLElement | Element) => any) | undefined; fatalError?: Error | undefined; getUpdated$: () => Readonly<",
           "Observable",
           "<",
           {
@@ -7230,7 +6914,7 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          ">) => Promise<boolean>; getPersistableInput: () => ",
+          ">) => Promise<boolean>; getPersistableInput: () => Readonly<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -7238,7 +6922,7 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          "; getInput: () => Readonly<",
+          ">; getInput: () => Readonly<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -7246,248 +6930,9 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          ">; getTitle: () => string; getRoot: () => ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IEmbeddable",
-            "text": "IEmbeddable"
-          },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ", ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
-          },
-          ", any> | ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IContainer",
-            "text": "IContainer"
-          },
-          "<{}, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerInput",
-            "text": "ContainerInput"
-          },
-          "<{}>, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerOutput",
-            "text": "ContainerOutput"
-          },
-          ">; untilInitializationFinished: () => Promise<void>; updateOutput: (outputChanges: Partial<",
+          ">; getTitle: () => string; untilInitializationFinished: () => Promise<void>; updateOutput: (outputChanges: Partial<",
           "VisualizeOutput",
           ">) => void; }"
-        ],
-        "path": "src/plugins/visualizations/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-public.VisualizeEmbeddableFactoryContract",
-        "type": "Type",
-        "tags": [],
-        "label": "VisualizeEmbeddableFactoryContract",
-        "description": [],
-        "signature": [
-          "{ readonly type: \"visualization\"; create: (input: ",
-          {
-            "pluginId": "visualizations",
-            "scope": "public",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.VisualizeInput",
-            "text": "VisualizeInput"
-          },
-          " & { savedVis?: ",
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.SerializedVis",
-            "text": "SerializedVis"
-          },
-          "<",
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.VisParams",
-            "text": "VisParams"
-          },
-          "> | undefined; }, parent?: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IContainer",
-            "text": "IContainer"
-          },
-          "<{}, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerInput",
-            "text": "ContainerInput"
-          },
-          "<{}>, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerOutput",
-            "text": "ContainerOutput"
-          },
-          "> | undefined) => Promise<",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ErrorEmbeddable",
-            "text": "ErrorEmbeddable"
-          },
-          " | ",
-          {
-            "pluginId": "visualizations",
-            "scope": "public",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.VisualizeEmbeddable",
-            "text": "VisualizeEmbeddable"
-          },
-          " | undefined>; inject: (_state: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableStateWithType",
-            "text": "EmbeddableStateWithType"
-          },
-          ", references: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectReference",
-            "text": "SavedObjectReference"
-          },
-          "[]) => ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableStateWithType",
-            "text": "EmbeddableStateWithType"
-          },
-          "; extract: (_state: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableStateWithType",
-            "text": "EmbeddableStateWithType"
-          },
-          ") => { state: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableStateWithType",
-            "text": "EmbeddableStateWithType"
-          },
-          "; references: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectReference",
-            "text": "SavedObjectReference"
-          },
-          "[]; }; getDisplayName: () => string; isEditable: () => Promise<boolean>; createFromSavedObject: (savedObjectId: string, input: Partial<",
-          {
-            "pluginId": "visualizations",
-            "scope": "public",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.VisualizeInput",
-            "text": "VisualizeInput"
-          },
-          "> & { id: string; }, parent?: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IContainer",
-            "text": "IContainer"
-          },
-          "<{}, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerInput",
-            "text": "ContainerInput"
-          },
-          "<{}>, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerOutput",
-            "text": "ContainerOutput"
-          },
-          "> | undefined) => Promise<",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ErrorEmbeddable",
-            "text": "ErrorEmbeddable"
-          },
-          " | ",
-          {
-            "pluginId": "visualizations",
-            "scope": "public",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.VisualizeEmbeddable",
-            "text": "VisualizeEmbeddable"
-          },
-          ">; readonly savedObjectMetaData: ",
-          {
-            "pluginId": "savedObjectsFinder",
-            "scope": "public",
-            "docId": "kibSavedObjectsFinderPluginApi",
-            "section": "def-public.SavedObjectMetaData",
-            "text": "SavedObjectMetaData"
-          },
-          "<VisualizationAttributes>; getCurrentAppId: () => Promise<string | undefined>; checkTitle: (props: ",
-          {
-            "pluginId": "savedObjects",
-            "scope": "public",
-            "docId": "kibSavedObjectsPluginApi",
-            "section": "def-public.OnSaveProps",
-            "text": "OnSaveProps"
-          },
-          ") => Promise<boolean>; }"
         ],
         "path": "src/plugins/visualizations/public/index.ts",
         "deprecated": false,
@@ -9703,7 +9148,7 @@
             "label": "mode",
             "description": [],
             "signature": [
-              "\"custom\" | \"full\" | \"dataBounds\""
+              "\"full\" | \"custom\" | \"dataBounds\""
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -15616,7 +15061,7 @@
         "label": "GaugeCentralMajorMode",
         "description": [],
         "signature": [
-          "\"none\" | \"custom\" | \"auto\""
+          "\"none\" | \"auto\" | \"custom\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
@@ -15646,7 +15091,7 @@
         "label": "GaugeLabelMajorMode",
         "description": [],
         "signature": [
-          "\"none\" | \"custom\" | \"auto\""
+          "\"none\" | \"auto\" | \"custom\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
@@ -16062,7 +15507,7 @@
         "label": "Operation",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"terms\" | \"range\" | \"cumulative_sum\" | \"date_histogram\" | \"average\" | \"percentile\" | \"last_value\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
+          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"terms\" | \"range\" | \"average\" | \"date_histogram\" | \"percentile\" | \"last_value\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/operations.ts",
         "deprecated": false,
@@ -16092,7 +15537,7 @@
         "label": "OperationWithSourceField",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"terms\" | \"range\" | \"date_histogram\" | \"average\" | \"percentile\" | \"last_value\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\""
+          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"terms\" | \"range\" | \"average\" | \"date_histogram\" | \"percentile\" | \"last_value\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/operations.ts",
         "deprecated": false,

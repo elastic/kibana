@@ -19,7 +19,7 @@ const DYNAMIC_ACTION_ID = `${ACTION_HELLO_WORLD}-Waldo`;
 
 interface Props {
   uiActionsStartService: UiActionsStart;
-  startServices: Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'>;
+  startServices: Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
 }
 
 export const HelloWorldExample = ({ uiActionsStartService, startServices }: Props) => {

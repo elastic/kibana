@@ -31,7 +31,6 @@ export interface UsageStats {
   'search:timeout': number;
   'visualization:visualize:legacyHeatmapChartsLibrary': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
-  'discover:searchFieldsFromSource': boolean;
   'discover:showFieldStatistics': boolean;
   'discover:showMultiFields': boolean;
   enableESQL: boolean;
@@ -52,7 +51,6 @@ export interface UsageStats {
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
   'observability:logsExplorer:allowedDataViews': string[];
   'observability:logSources': string[];
-  'observability:enableLogsStream': boolean;
   'observability:newLogsOverview': boolean;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;

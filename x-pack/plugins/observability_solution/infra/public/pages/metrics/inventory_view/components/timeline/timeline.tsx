@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import { first, last } from 'lodash';
-import { EuiLoadingChart, EuiText, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import { EuiLoadingChart, EuiText, EuiEmptyPrompt, EuiButton, useEuiTheme } from '@elastic/eui';
 import {
   Axis,
   Chart,
@@ -27,7 +27,7 @@ import {
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { Metric } from '../../../../../../common/http_api/infra_ml';
 import { useTimelineChartTheme } from '../../../../../hooks/use_timeline_chart_theme';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
@@ -56,7 +56,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   const { metric, nodeType, accountId, region } = useWaffleOptionsContext();
   const { currentTime, jumpToTime, stopAutoReload } = useWaffleTimeContext();
   const { filterQueryAsJson } = useWaffleFiltersContext();
-
+  const { euiTheme } = useEuiTheme();
   const chartTheme = useTimelineChartTheme();
 
   const { loading, error, startTime, endTime, timeseries, reload } = useTimeline(
@@ -238,7 +238,11 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
               <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
                 <EuiFlexItem
                   grow={false}
-                  style={{ backgroundColor: '#D36086', height: 5, width: 10 }}
+                  style={{
+                    backgroundColor: euiTheme.colors.backgroundFilledAccent,
+                    height: 5,
+                    width: 10,
+                  }}
                 />
                 <EuiFlexItem>
                   <EuiText size={'xs'}>
@@ -261,7 +265,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
               dataValues={generateAnnotationData(
                 anomalies.map((a) => [a.startTime, a.influencers])
               )}
-              style={{ fill: '#D36086' }}
+              style={{ fill: euiTheme.colors.backgroundFilledAccent }}
             />
           )}
           <MetricExplorerSeriesChart
@@ -298,32 +302,32 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   );
 };
 
-const TimelineContainer = euiStyled.div`
-  background-color: ${(props) => props.theme.eui.euiPageBackgroundColor};
-  border-top: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
+const TimelineContainer = styled.div`
+  background-color: ${(props) => props.theme.euiTheme.colors.body};
+  border-top: 1px solid ${(props) => props.theme.euiTheme.colors.lightShade};
   height: 220px;
   width: 100%;
-  padding: ${(props) => props.theme.eui.euiSizeS} ${(props) => props.theme.eui.euiSizeM};
+  padding: ${(props) => props.theme.euiTheme.size.s} ${(props) => props.theme.euiTheme.size.m};
   display: flex;
   flex-direction: column;
 `;
 
-const TimelineHeader = euiStyled.div`
+const TimelineHeader = styled.div`
   display: flex;
   width: 100%;
-  padding: ${(props) => props.theme.eui.euiSizeS} ${(props) => props.theme.eui.euiSizeM};
+  padding: ${(props) => props.theme.euiTheme.size.s} ${(props) => props.theme.euiTheme.size.m};
   @media only screen and (max-width: 767px) {
-      margin-top: 30px;
+    margin-top: 30px;
   }
 `;
 
-const TimelineChartContainer = euiStyled.div`
-  padding-left: ${(props) => props.theme.eui.euiSizeXS};
+const TimelineChartContainer = styled.div`
+  padding-left: ${(props) => props.theme.euiTheme.size.xs};
   width: 100%;
   height: 100%;
 `;
 
-const TimelineLoadingContainer = euiStyled.div`
+const TimelineLoadingContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;

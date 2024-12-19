@@ -35,3 +35,7 @@ export interface RuleType<
 }
 
 export type RuleTypeIndex = Map<string, RuleType>;
+
+export type RuleTypeWithDescription = RuleType<string, string> & { description?: string };
+
+export type RuleTypeIndexWithDescriptions = Map<string, RuleTypeWithDescription>;

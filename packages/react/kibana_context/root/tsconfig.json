@@ -22,6 +22,10 @@
     "@kbn/core-i18n-browser",
     "@kbn/core-base-common",
     "@kbn/core-analytics-browser",
-    "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-user-profile-browser",
+    "@kbn/core-user-profile-browser-mocks",
+    "@kbn/core-execution-context-browser",
+    "@kbn/core-execution-context-browser-mocks",
+    "@kbn/shared-ux-router"
   ]
 }

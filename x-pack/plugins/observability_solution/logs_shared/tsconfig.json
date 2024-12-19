@@ -8,9 +8,12 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "types/**/*"
+    "types/**/*",
+    "emotion.d.ts"
   ],
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n",
@@ -28,7 +31,6 @@
     "@kbn/logging-mocks",
     "@kbn/kibana-react-plugin",
     "@kbn/test-subj-selector",
-    "@kbn/observability-shared-plugin",
     "@kbn/datemath",
     "@kbn/core-http-browser",
     "@kbn/ui-actions-plugin",
@@ -51,5 +53,8 @@
     "@kbn/field-formats-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/saved-search-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/analytics",
+    "@kbn/usage-collection-plugin",
   ]
 }

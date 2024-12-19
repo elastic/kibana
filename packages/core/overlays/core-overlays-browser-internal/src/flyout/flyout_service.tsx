@@ -15,6 +15,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
@@ -65,6 +66,7 @@ interface StartDeps {
   analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
   targetDomElement: Element;
 }
 
@@ -73,7 +75,13 @@ export class FlyoutService {
   private activeFlyout: FlyoutRef | null = null;
   private targetDomElement: Element | null = null;
 
-  public start({ analytics, i18n, theme, targetDomElement }: StartDeps): OverlayFlyoutStart {
+  public start({
+    analytics,
+    i18n,
+    theme,
+    userProfile,
+    targetDomElement,
+  }: StartDeps): OverlayFlyoutStart {
     this.targetDomElement = targetDomElement;
 
     return {
@@ -121,7 +129,12 @@ export class FlyoutService {
         };
 
         render(
-          <KibanaRenderContextProvider analytics={analytics} i18n={i18n} theme={theme}>
+          <KibanaRenderContextProvider
+            analytics={analytics}
+            i18n={i18n}
+            theme={theme}
+            userProfile={userProfile}
+          >
             {getWrapper(<MountWrapper mount={mount} className="kbnOverlayMountWrapper" />)}
           </KibanaRenderContextProvider>,
           this.targetDomElement

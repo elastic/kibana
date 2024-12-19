@@ -308,14 +308,18 @@ export const reindexServiceFactory = (
       });
     }
 
-    // Delete the task from ES .tasks index
-    const deleteTaskResp = await esClient.delete({
-      index: '.tasks',
-      id: taskId,
-    });
-
-    if (deleteTaskResp.result !== 'deleted') {
-      throw error.reindexTaskCannotBeDeleted(`Could not delete reindexing task ${taskId}`);
+    try {
+      // Best effort, delete the task from ES .tasks index...
+      await esClient.delete({
+        index: '.tasks',
+        id: taskId,
+      });
+    } catch (e) {
+      // We explicitly ignore authz related error codes bc we expect this to be
+      // very common when deleting from .tasks
+      if (e?.statusCode !== 401 && e?.statusCode !== 403) {
+        log.warn(e);
+      }
     }
 
     return reindexOp;
@@ -396,24 +400,21 @@ export const reindexServiceFactory = (
         names.push(sourceName);
       }
 
-      // Otherwise, query for required privileges for this index.
-      const body = {
-        cluster: ['manage'],
-        index: [
-          {
-            names,
-            allow_restricted_indices: true,
-            privileges: ['all'],
-          },
-          {
-            names: ['.tasks'],
-            privileges: ['read', 'delete'],
-          },
-        ],
-      } as any;
-
       const resp = await esClient.security.hasPrivileges({
-        body,
+        body: {
+          cluster: ['manage'],
+          index: [
+            {
+              names,
+              allow_restricted_indices: true,
+              privileges: ['all'],
+            },
+            {
+              names: ['.tasks'],
+              privileges: ['read'],
+            },
+          ],
+        },
       });
 
       return resp.has_all_requested;

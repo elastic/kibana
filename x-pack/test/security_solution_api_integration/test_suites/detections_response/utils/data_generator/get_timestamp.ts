@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import type { IndexingInterval } from './types';
 
 export const getTimestamp = (interval?: IndexingInterval) => {
   if (interval) {
-    return faker.date.between(...interval).toISOString();
+    return faker.date.between({ from: interval[0], to: interval[1] }).toISOString();
   }
 
   return new Date().toISOString();

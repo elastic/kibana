@@ -14,7 +14,8 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import { TelemetryService } from '..';
 import type { TelemetryConstants } from '../..';
 
-interface RenderBannerConfig extends Pick<CoreStart, 'analytics' | 'i18n' | 'theme'> {
+interface RenderBannerConfig
+  extends Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'> {
   http: HttpStart;
   overlays: OverlayStart;
   onSeen: () => void;

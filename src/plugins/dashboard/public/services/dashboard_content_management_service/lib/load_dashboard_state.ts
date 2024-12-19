@@ -11,11 +11,10 @@ import { has } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 import { injectSearchSourceReferences } from '@kbn/data-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { Filter, Query } from '@kbn/es-query';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
-import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
 
+import { cleanFiltersForSerialize } from '../../../utils/clean_filters_for_serialize';
 import { getDashboardContentManagementCache } from '..';
 import { convertPanelsArrayToPanelMap, injectReferences } from '../../../../common';
 import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
@@ -32,7 +31,6 @@ import type {
   LoadDashboardReturn,
 } from '../types';
 import { convertNumberToDashboardVersion } from './dashboard_versioning';
-import { migrateDashboardInput } from './migrate_dashboard_input';
 
 export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
@@ -171,34 +169,32 @@ export const loadDashboardState = async ({
 
   const panelMap = convertPanelsArrayToPanelMap(panels ?? []);
 
-  const { dashboardInput, anyMigrationRun } = migrateDashboardInput({
-    ...DEFAULT_DASHBOARD_INPUT,
-    ...options,
-
-    id: embeddableId,
-    refreshInterval,
-    timeRestore,
-    description,
-    timeRange,
-    filters,
-    panels: panelMap,
-    query,
-    title,
-
-    viewMode: ViewMode.VIEW, // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
-    tags: savedObjectsTaggingService?.getTaggingApi()?.ui.getTagIdsFromReferences(references) ?? [],
-
-    controlGroupInput: attributes.controlGroupInput,
-
-    ...(version && { version: convertNumberToDashboardVersion(version) }),
-  });
-
   return {
     managed,
     references,
     resolveMeta,
-    dashboardInput,
-    anyMigrationRun,
+    dashboardInput: {
+      ...DEFAULT_DASHBOARD_INPUT,
+      ...options,
+
+      id: embeddableId,
+      refreshInterval,
+      timeRestore,
+      description,
+      timeRange,
+      filters,
+      panels: panelMap,
+      query,
+      title,
+
+      viewMode: 'view', // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
+      tags:
+        savedObjectsTaggingService?.getTaggingApi()?.ui.getTagIdsFromReferences(references) ?? [],
+
+      controlGroupInput: attributes.controlGroupInput,
+
+      ...(version && { version: convertNumberToDashboardVersion(version) }),
+    },
     dashboardFound: true,
     dashboardId: savedObjectId,
   };

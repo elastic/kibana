@@ -50,12 +50,6 @@ Object {
     "pollIntervalErrorMultiplier": 10,
     "timeout": "PT4M",
   },
-  "roles": Object {
-    "allow": Array [
-      "reporting_user",
-    ],
-    "enabled": true,
-  },
   "statefulSettings": Object {
     "enabled": true,
   },
@@ -110,12 +104,6 @@ Object {
     "pollInterval": "PT3S",
     "pollIntervalErrorMultiplier": 10,
     "timeout": "PT4M",
-  },
-  "roles": Object {
-    "allow": Array [
-      "reporting_user",
-    ],
-    "enabled": true,
   },
   "statefulSettings": Object {
     "enabled": true,

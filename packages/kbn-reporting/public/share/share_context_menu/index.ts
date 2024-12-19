@@ -21,6 +21,7 @@ export type StartServices = [
     | 'analytics'
     | 'i18n'
     | 'theme'
+    | 'userProfile'
     // used extensively in Reporting share context menus and modal
     | 'notifications'
   >,
@@ -30,7 +31,6 @@ export type StartServices = [
 
 export interface ExportModalShareOpts {
   apiClient: ReportingAPIClient;
-  usesUiCapabilities: boolean;
   license: ILicense;
   application: ApplicationStart;
   startServices$: Rx.Observable<StartServices>;
@@ -38,7 +38,6 @@ export interface ExportModalShareOpts {
 
 export interface ExportPanelShareOpts {
   apiClient: ReportingAPIClient;
-  usesUiCapabilities: boolean;
   license: ILicense;
   application: ApplicationStart;
   startServices$: Rx.Observable<StartServices>;
