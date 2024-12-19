@@ -24,24 +24,24 @@ fmt.Println(searchResp, err)`,
   "log"
   "strings"
 
-  "github.com/elastic/elasticsearch-serverless-go"
+  "github.com/elastic/go-elasticsearch/v8"
 )
 
 func main() {
   cfg := elasticsearch.Config{
-    Address: "${url}",
+    Addresses: []string{"${url}"},
     APIKey: "${apiKey}",
   }
-  es, err := elasticsearch.NewClient(cfg)
+  es, err := elasticsearch.NewTypedClient(cfg)
   if err != nil {
     log.Fatalf("Error creating the client: %s", err)
   }
 }`,
   docLink: docLinks.goClient,
   github: {
-    link: 'https://github.com/elastic/elasticsearch-serverless-go',
+    link: 'https://github.com/elastic/go-elasticsearch',
     label: i18n.translate('xpack.serverlessSearch.languages.go.githubLabel', {
-      defaultMessage: 'elasticsearch-serverless-go',
+      defaultMessage: 'go-elasticsearch',
     }),
   },
   iconType: 'go.svg',
@@ -70,15 +70,15 @@ fmt.Println(ingestResult, err)`,
   "log"
   "strings"
 
-  "github.com/elastic/elasticsearch-serverless-go"
+  "github.com/elastic/go-elasticsearch/v8"
 )
 
 func main() {
   cfg := elasticsearch.Config{
-    Address: "${url}",
+    Addresses: []string{"${url}"},
     APIKey: "${apiKey}",
   }
-  es, err := elasticsearch.NewClient(cfg)
+  es, err := elasticsearch.NewTypedClient(cfg)
   if err != nil {
     log.Fatalf("Error creating the client: %s", err)
   }
@@ -91,7 +91,7 @@ func main() {
 
   fmt.Println(res, err)
 }`,
-  installClient: 'go get -u github.com/elastic/elasticsearch-serverless-go@latest',
+  installClient: 'go get -u github.com/elastic/go-elasticsearch/v8@latest',
   name: i18n.translate('xpack.serverlessSearch.languages.go', {
     defaultMessage: 'Go',
   }),
