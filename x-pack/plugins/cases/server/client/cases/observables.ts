@@ -115,7 +115,7 @@ export const addObservable = async (
 
     return decodeOrThrow(CaseRt)(res);
   } catch (error) {
-    throw Boom.badRequest(`Failed to add observable: ${JSON.stringify(params)}: ${error}`);
+    throw Boom.badRequest(`Failed to add observable: ${error}`);
   }
 };
 
