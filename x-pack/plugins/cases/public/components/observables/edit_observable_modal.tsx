@@ -27,7 +27,7 @@ export const EditObservableModal: FC<EditObservableModalProps> = ({
 }) => {
   const { isLoading, mutateAsync: patchObservable } = usePatchObservable(
     caseData.id,
-    observable.id as string
+    observable.id
   );
   const handleUpdateObservable = async (updatedObservable: ObservablePatch) => {
     patchObservable({
