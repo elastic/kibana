@@ -157,23 +157,16 @@ export const enhancedEsSearchStrategyProvider = (
   ): Promise<IEsSearchResponse> {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const legacyConfig = await firstValueFrom(legacyConfig$);
-    const { body, index, ...params } = request.params!;
-    const method = 'POST';
-    const path = encodeURI(`/${index}/_rollup_search`);
-    const querystring = {
-      ...getShardTimeout(legacyConfig),
-      ...(await getIgnoreThrottled(uiSettingsClient)),
-      ...(await getDefaultSearchParams(uiSettingsClient)),
-      ...params,
-    };
+    const { index, ...params } = request.params!;
 
     try {
-      const esResponse = await client.transport.request(
+      const esResponse = await client.rollup.rollupSearch(
         {
-          method,
-          path,
-          body,
-          querystring,
+          index: index!,
+          ...getShardTimeout(legacyConfig),
+          ...(await getIgnoreThrottled(uiSettingsClient)),
+          ...(await getDefaultSearchParams(uiSettingsClient)),
+          ...params,
         },
         {
           signal: options?.abortSignal,
