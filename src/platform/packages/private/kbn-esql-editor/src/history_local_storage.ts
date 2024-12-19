@@ -87,11 +87,11 @@ export const addQueriesToCache = (
 
     // queries to store in the localstorage
     allQueries = sortedByDate.slice(0, maxQueriesAllowed);
-    // clear and reset the queries in the cache
-    cachedQueries.clear();
     allQueries.forEach((queryItem) => {
       cachedQueries.set(queryItem.queryString, queryItem);
     });
   }
+  // clear and reset the queries in the cache
+  cachedQueries.clear();
   localStorage.setItem(QUERY_HISTORY_ITEM_KEY, JSON.stringify(allQueries));
 };
