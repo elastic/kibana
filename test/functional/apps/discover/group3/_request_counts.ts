@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
   const log = getService('log');
+  const retry = getService('retry');
 
   describe('discover request counts', function describeIndexTests() {
     before(async function () {
@@ -41,6 +42,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         enableESQL: true,
       });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -49,22 +52,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    beforeEach(async () => {
-      await common.navigateToApp('discover');
-      await header.waitUntilLoadingHasFinished();
-    });
+    const expectSearchCount = async (type: 'ese' | 'esql', searchCount: number) => {
+      await retry.try(async () => {
+        if (searchCount === 0) {
+          await browser.execute(async () => {
+            performance.clearResourceTimings();
+          });
+        }
+        await waitForLoadingToFinish();
+        const endpoint = type === 'esql' ? `${type}_async` : type;
+        const requests = await browser.execute(() =>
+          performance
+            .getEntries()
+            .filter((entry: any) => ['fetch', 'xmlhttprequest'].includes(entry.initiatorType))
+        );
 
-    const getSearchCount = async (type: 'ese' | 'esql') => {
-      const requests = await browser.execute(() =>
-        performance
-          .getEntries()
-          .filter((entry: any) => ['fetch', 'xmlhttprequest'].includes(entry.initiatorType))
-      );
-      const endpoint = type === 'esql' ? `${type}_async` : type;
-      const result = requests.filter((entry) =>
-        entry.name.endsWith(`/internal/search/${endpoint}`)
-      );
-      return result.length;
+        const result = requests.filter((entry) =>
+          entry.name.endsWith(`/internal/search/${endpoint}`)
+        );
+
+        const count = result.length;
+        if (count !== searchCount) {
+          log.warning('Request count differs:', result);
+        }
+        expect(count).to.be(searchCount);
+      }, 5);
     };
 
     const waitForLoadingToFinish = async () => {
@@ -74,15 +86,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     const expectSearches = async (type: 'ese' | 'esql', expected: number, cb: Function) => {
-      await browser.execute(async () => {
-        performance.clearResourceTimings();
-      });
-      let searchCount = await getSearchCount(type);
-      expect(searchCount).to.be(0);
+      await expectSearchCount(type, 0);
       await cb();
-      await waitForLoadingToFinish();
-      searchCount = await getSearchCount(type);
-      expect(searchCount).to.be(expected);
+      await expectSearchCount(type, expected);
     };
 
     const getSharedTests = ({
@@ -109,10 +115,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           performance.setResourceTimingBufferSize(Number.MAX_SAFE_INTEGER);
         });
         await waitForLoadingToFinish();
-        const searchCount = await getSearchCount(type);
         // one more requests for fields in ESQL mode
         const actualExpectedRequests = type === 'esql' ? expectedRequests + 1 : expectedRequests;
-        expect(searchCount).to.be(actualExpectedRequests);
+        await expectSearchCount(type, actualExpectedRequests);
       });
 
       it(`should send no more than ${expectedRequests} requests (documents + chart) when refreshing`, async () => {
@@ -248,9 +253,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('ES|QL mode', () => {
       const type = 'esql';
+      before(async () => {
+        await common.navigateToApp('discover');
+        await header.waitUntilLoadingHasFinished();
+        await discover.selectTextBaseLang();
+      });
 
       beforeEach(async () => {
-        await discover.selectTextBaseLang();
         await monacoEditor.setCodeEditorValue('from logstash-* | where bytes > 1000 ');
         await queryBar.clickQuerySubmitButton();
         await waitForLoadingToFinish();
