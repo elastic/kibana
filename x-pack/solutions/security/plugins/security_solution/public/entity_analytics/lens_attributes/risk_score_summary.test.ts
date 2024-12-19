@@ -27,6 +27,14 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('2cc5663b-f062-43f8-8688-fc8166c2ca8e'),
 }));
 
+const riskColors = {
+  [RiskSeverity.Critical]: '#FF0000',
+  [RiskSeverity.High]: '#FFA500',
+  [RiskSeverity.Moderate]: '#FFD700',
+  [RiskSeverity.Low]: '#008000',
+  [RiskSeverity.Unknown]: '#808080',
+};
+
 describe('getRiskScoreSummaryAttributes', () => {
   it('should render', () => {
     const { result } = renderHook(
@@ -37,6 +45,7 @@ describe('getRiskScoreSummaryAttributes', () => {
             query: `user.name: test.user`,
             spaceId: 'default',
             riskEntity: RiskScoreEntity.user,
+            riskColors,
           }),
         }),
       { wrapper }
@@ -54,6 +63,7 @@ describe('getRiskScoreSummaryAttributes', () => {
             query: `user.name: test.user`,
             spaceId: 'default',
             riskEntity: RiskScoreEntity.user,
+            riskColors,
           }),
         }),
       { wrapper }
@@ -73,7 +83,9 @@ describe('getRiskScoreSummaryAttributes', () => {
             query,
             spaceId: 'default',
             riskEntity: RiskScoreEntity.user,
+            riskColors,
           }),
+
           applyGlobalQueriesAndFilters: false,
         }),
       { wrapper }
