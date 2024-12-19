@@ -16,7 +16,7 @@ import {
   mockGetSearchDsl,
 } from '../repository.test.mock';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import type { SavedObjectsCreateOptions } from '@kbn/core-saved-objects-api-server';
 import {
@@ -234,8 +234,8 @@ describe('#create', () => {
       it(`defaults to empty references array`, async () => {
         await createSuccess(type, attributes, { id });
         expect(
-          (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
-            .references
+          (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+            .document!.references
         ).toEqual([]);
       });
 
@@ -244,7 +244,7 @@ describe('#create', () => {
           await createSuccess(type, attributes, { id, references });
           expect(
             (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
-              .body!.references
+              .document!.references
           ).toEqual(references);
           client.create.mockClear();
         };
@@ -259,7 +259,7 @@ describe('#create', () => {
           await createSuccess(type, attributes, { id, references });
           expect(
             (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
-              .body!.references
+              .document!.references
           ).not.toBeDefined();
           client.create.mockClear();
         };

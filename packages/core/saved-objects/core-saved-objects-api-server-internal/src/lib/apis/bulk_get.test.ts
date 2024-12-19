@@ -15,7 +15,7 @@ import {
 } from '../repository.test.mock';
 
 import type { Payload } from '@hapi/boom';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import type { SavedObjectsBulkGetObject } from '@kbn/core-saved-objects-api-server';
 import { type SavedObjectsRawDocSource, type SavedObject } from '@kbn/core-saved-objects-server';

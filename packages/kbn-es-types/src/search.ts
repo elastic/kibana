@@ -8,7 +8,7 @@
  */
 
 import type { ValuesType, UnionToIntersection } from 'utility-types';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/types';
 import * as estypesWithoutBodyKey from '@elastic/elasticsearch/lib/api/types';
 
 interface AggregationsAggregationContainer extends Record<string, any> {
@@ -61,7 +61,7 @@ type ValueTypeOfField<T> = T extends Record<string, string | number>
 
 type MaybeArray<T> = T | T[];
 
-type Fields = Required<Required<estypes.SearchRequest>['body']>['fields'];
+type Fields = Required<Required<estypes.SearchRequest>>['fields'];
 type DocValueFields = MaybeArray<string | estypes.QueryDslFieldAndFormat>;
 
 export type ChangePointType =
@@ -639,8 +639,8 @@ export type InferSearchResponseOf<
     | (estypesWithoutBodyKey.SearchRequest & { body?: never }) = estypes.SearchRequest,
   TOptions extends { restTotalHitsAsInt?: boolean } = {}
 > = Omit<estypes.SearchResponse<TDocument>, 'aggregations' | 'hits'> &
-  (TSearchRequest['body'] extends TopLevelAggregationRequest
-    ? WrapAggregationResponse<SearchResponseOf<TSearchRequest['body'], TDocument>>
+  (TSearchRequest extends TopLevelAggregationRequest
+    ? WrapAggregationResponse<SearchResponseOf<TSearchRequest, TDocument>>
     : TSearchRequest extends TopLevelAggregationRequest
     ? WrapAggregationResponse<SearchResponseOf<TSearchRequest, TDocument>>
     : { aggregations?: InvalidAggregationRequest }) & {
@@ -656,7 +656,7 @@ export type InferSearchResponseOf<
             };
           }) & {
         hits: HitsOf<
-          TSearchRequest extends estypes.SearchRequest ? TSearchRequest['body'] : TSearchRequest,
+          TSearchRequest extends estypes.SearchRequest ? TSearchRequest : TSearchRequest,
           TDocument
         >;
       };
