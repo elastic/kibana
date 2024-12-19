@@ -155,9 +155,22 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       defaultMessage: 'Overall',
     }),
     items: [
-      { title: 'badge', description: stateValues.state },
       {
-        title: 'Create time',
+        title: i18n.translate(
+          'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.status',
+          {
+            defaultMessage: 'Status',
+          }
+        ),
+        description: stateValues.state,
+      },
+      {
+        title: i18n.translate(
+          'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.createTime',
+          {
+            defaultMessage: 'Create time',
+          }
+        ),
         description: formatHumanReadableDateTimeSeconds(
           moment(item.config.create_time).unix() * 1000
         ),
