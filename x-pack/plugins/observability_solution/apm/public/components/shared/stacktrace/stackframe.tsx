@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiAccordion } from '@elastic/eui';
+import { EuiAccordion, useEuiFontSize } from '@elastic/eui';
 import React from 'react';
 import styled from '@emotion/styled';
 import {
@@ -19,8 +19,8 @@ import { Variables } from './variables';
 const ContextContainer = styled.div<{ isLibraryFrame: boolean }>`
   position: relative;
   font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
-  font-size: ${({ theme }) => theme.euiTheme.size.s};
-  border: 1px solid ${({ theme }) => theme.euiTheme.colors.lightShade};
+  font-size: ${() => useEuiFontSize('s').fontSize};
+  border: ${({ theme }) => theme.euiTheme.border.thin};
   border-radius: ${({ theme }) => theme.euiTheme.border.radius.small};
   background: ${({ isLibraryFrame, theme }) =>
     isLibraryFrame ? theme.euiTheme.colors.emptyShade : theme.euiTheme.colors.lightestShade};

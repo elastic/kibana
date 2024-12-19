@@ -7,6 +7,7 @@
 
 import React from 'react';
 import styled from '@emotion/styled';
+import { useEuiFontSize } from '@elastic/eui';
 import {
   InfraFormatter,
   InfraWaffleMapBounds,
@@ -68,7 +69,7 @@ const GradientLegendTick = styled.div`
 
 const GradientLegendTickLine = styled.div`
   position: absolute;
-  background-color: ${(props) => props.theme.euiTheme.border.color};
+  background-color: ${(props) => props.theme.euiTheme.colors.backgroundBaseSubdued};
   width: 1px;
   left: 0;
   top: 15px;
@@ -83,7 +84,7 @@ const GradientLegendTickLine = styled.div`
 
 const GradientLegendTickLabel = styled.div`
   position: absolute;
-  font-size: 11px;
+  font-size: ${() => useEuiFontSize('xxs').fontSize};
   text-align: center;
   top: 0;
   left: 0;
