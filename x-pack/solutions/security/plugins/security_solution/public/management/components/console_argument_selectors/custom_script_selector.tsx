@@ -107,7 +107,7 @@ export const CustomScriptSelector = memo<
       });
       // TODO fix focus back to the input and not Back > button
     },
-    [onChange, state, selectorRef]
+    [onChange, state]
   );
 
   return (
