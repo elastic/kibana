@@ -40,6 +40,15 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
+
+    const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
+    if (onlyRunQuickChecks) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
+
+      console.log([...new Set(pipeline)].join('\n'));
+      return;
+    }
+
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
     if (await doAnyChangesMatch([/^packages\/kbn-handlebars/])) {
@@ -224,7 +233,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       (await doAnyChangesMatch([
         /^packages\/kbn-securitysolution-.*/,
-        /^x-pack\/plugins\/security_solution/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^x-pack\/test\/defend_workflows_cypress/,
         /^x-pack\/test\/security_solution_cypress/,
         /^fleet_packages\.json/,
@@ -242,11 +251,11 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^packages\/kbn-securitysolution-.*/,
         /^x-pack\/plugins\/alerting/,
         /^x-pack\/plugins\/data_views\/common/,
-        /^x-pack\/plugins\/lists/,
+        /^x-pack\/solutions\/security\/plugins\/lists/,
         /^x-pack\/plugins\/rule_registry\/common/,
-        /^x-pack\/plugins\/security_solution/,
-        /^x-pack\/plugins\/security_solution_ess/,
-        /^x-pack\/plugins\/security_solution_serverless/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
         /^x-pack\/plugins\/task_manager/,
         /^x-pack\/solutions\/security\/plugins\/timelines/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
@@ -254,10 +263,10 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/plugins\/triggers_actions_ui\/server\/connector_types\/openai/,
         /^x-pack\/plugins\/triggers_actions_ui\/server\/connector_types\/bedrock/,
         /^x-pack\/plugins\/usage_collection\/public/,
-        /^x-pack\/plugins\/elastic_assistant/,
-        /^x-pack\/packages\/security-solution/,
-        /^x-pack\/packages\/kbn-elastic-assistant/,
-        /^x-pack\/packages\/kbn-elastic-assistant-common/,
+        /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
+        /^x-pack\/solutions\/security\/packages/,
+        /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
+        /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/test\/security_solution_cypress/,
       ])) ||
@@ -290,19 +299,18 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^packages\/kbn-es-query/,
         /^packages\/kbn-i18n/,
         /^packages\/kbn-i18n-react/,
-        /^x-pack\/solutions\/security\/packages\/expandable-flyout/,
         /^packages\/kbn-grouping/,
         /^packages\/kbn-resizable-layout/,
         /^packages\/kbn-rison/,
-        /^packages\/kbn-rule-data-utils/,
+        /^src\/platform\/packages\/shared\/kbn-rule-data-utils/,
         /^packages\/kbn-safer-lodash-set/,
         /^packages\/kbn-search-types/,
         /^packages\/kbn-securitysolution-.*/,
-        /^packages\/kbn-securitysolution-ecs/,
-        /^packages\/kbn-securitysolution-io-ts-alerting-types/,
-        /^packages\/kbn-securitysolution-io-ts-list-types/,
-        /^packages\/kbn-securitysolution-list-hooks/,
-        /^packages\/kbn-securitysolution-t-grid/,
+        /^src\/platform\/packages\/shared\/kbn-securitysolution-ecs/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-io-ts-alerting-types/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-io-ts-list-types/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-list-hooks/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-t-grid/,
         /^packages\/kbn-ui-theme/,
         /^packages\/kbn-utility-types/,
         /^packages\/react/,
@@ -321,18 +329,18 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^src\/plugins\/ui_actions/,
         /^src\/plugins\/unified_histogram/,
         /^src\/plugins\/unified_search/,
-        /^x-pack\/packages\/kbn-elastic-assistant/,
-        /^x-pack\/packages\/kbn-elastic-assistant-common/,
-        /^x-pack\/packages\/security-solution/,
+        /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
+        /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
+        /^x-pack\/solutions\/security\/packages/,
         /^x-pack\/plugins\/alerting/,
         /^x-pack\/plugins\/cases/,
         /^x-pack\/plugins\/data_views\/common/,
-        /^x-pack\/plugins\/elastic_assistant/,
-        /^x-pack\/plugins\/lists/,
+        /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
+        /^x-pack\/solutions\/security\/plugins\/lists/,
         /^x-pack\/plugins\/rule_registry\/common/,
-        /^x-pack\/plugins\/security_solution/,
-        /^x-pack\/plugins\/security_solution_ess/,
-        /^x-pack\/plugins\/security_solution_serverless/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
         /^x-pack\/plugins\/task_manager/,
         /^x-pack\/solutions\/security\/plugins\/threat_intelligence/,
         /^x-pack\/solutions\/security\/plugins\/timelines/,
@@ -352,7 +360,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       ((await doAnyChangesMatch([
         /^x-pack\/platform\/plugins\/shared\/osquery/,
         /^x-pack\/test\/osquery_cypress/,
-        /^x-pack\/plugins\/security_solution/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
       ])) ||
         GITHUB_PR_LABELS.includes('ci:all-cypress-suites')) &&
       !GITHUB_PR_LABELS.includes('ci:skip-cypress-osquery')
@@ -365,8 +373,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       (await doAnyChangesMatch([
         /^x-pack\/packages\/kbn-cloud-security-posture/,
-        /^x-pack\/plugins\/cloud_security_posture/,
-        /^x-pack\/plugins\/security_solution/,
+        /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^x-pack\/test\/security_solution_cypress/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')

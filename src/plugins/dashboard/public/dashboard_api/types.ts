@@ -60,10 +60,7 @@ import {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
-import {
-  DashboardLocatorParams,
-  DashboardStateFromSettingsFlyout,
-} from '../dashboard_container/types';
+import { DashboardLocatorParams } from '../dashboard_container/types';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
@@ -94,23 +91,19 @@ export interface DashboardCreationOptions {
   getEmbeddableAppContext?: (dashboardId?: string) => EmbeddableAppContext;
 }
 
-export interface DashboardState extends DashboardOptions {
-  // filter context to be passed to children
+export type DashboardSettings = DashboardOptions & {
+  description?: DashboardAttributes['description'];
+  tags: string[];
+  timeRestore: DashboardAttributes['timeRestore'];
+  title: DashboardAttributes['description'];
+};
+
+export interface DashboardState extends DashboardSettings {
   query: Query;
   filters: Filter[];
-  timeRestore: boolean;
   timeRange?: TimeRange;
   refreshInterval?: RefreshInterval;
-
-  // dashboard meta info
-  title: string;
-  tags: string[];
   viewMode: ViewMode;
-  description?: string;
-
-  // settings from DashboardOptions
-
-  // dashboard contents
   panels: DashboardPanelMap;
 
   /**
@@ -153,7 +146,7 @@ export type DashboardApi = CanExpandPanels &
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
     forceRefresh: () => void;
-    getSettings: () => DashboardStateFromSettingsFlyout;
+    getSettings: () => DashboardSettings;
     getSerializedState: () => {
       attributes: DashboardAttributes;
       references: SavedObjectReference[];
@@ -178,7 +171,7 @@ export type DashboardApi = CanExpandPanels &
     setPanels: (panels: DashboardPanelMap) => void;
     setQuery: (query?: Query | undefined) => void;
     setScrollToPanelId: (id: string | undefined) => void;
-    setSettings: (settings: DashboardStateFromSettingsFlyout) => void;
+    setSettings: (settings: DashboardSettings) => void;
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
     unifiedSearchFilters$: PublishesUnifiedSearch['filters$'];
