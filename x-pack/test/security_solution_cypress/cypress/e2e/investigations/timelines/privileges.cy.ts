@@ -10,39 +10,20 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 
-import { ALERTS_URL, TIMELINES_URL } from '../../../urls/navigation';
-import { ACTIVE_TIMELINE_BOTTOM_BAR, NOTES_TAB_BUTTON } from '../../../screens/timeline';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { createRule } from '../../../tasks/api_calls/rules';
-import { getNewRule } from '../../../objects/rule';
-import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { TIMELINES_URL, hostsUrl } from '../../../urls/navigation';
+import { ACTIVE_TIMELINE_BOTTOM_BAR } from '../../../screens/timeline';
 import { TIMELINES } from '../../../screens/security_header';
 import {
   NAV_SEARCH_INPUT,
   NAV_SEARCH_NO_RESULTS,
   NAV_SEARCH_RESULTS,
 } from '../../../screens/search_bar';
-import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
-import { openTimelineById } from '../../../tasks/timeline';
-import { addNoteToTimeline } from '../../../tasks/api_calls/notes';
-import { getTimeline } from '../../../objects/timeline';
 
 describe('Privileges', { tags: ['@ess', '@skipInServerless'] }, () => {
-  before(() => {
-    cy.task('esArchiverLoad', { archiveName: 'endpoint' });
-  });
-
-  after(() => {
-    cy.task('esArchiverUnload', { archiveName: 'endpoint' });
-  });
-
   describe('Timeline', () => {
     it('should not show timeline elements for users with insufficient privileges', () => {
-      deleteAlertsAndRules();
       login(ROLES.timeline_none);
-      createRule(getNewRule());
-      visitWithTimeRange(ALERTS_URL);
-      waitForAlertsToPopulate();
+      visitWithTimeRange(hostsUrl('allHosts'));
       // no timeline bottom bar
       cy.get(ACTIVE_TIMELINE_BOTTOM_BAR).should('not.exist');
       // no link to the timelines page
@@ -53,11 +34,8 @@ describe('Privileges', { tags: ['@ess', '@skipInServerless'] }, () => {
     });
 
     it('should show timeline elements for users with sufficient privileges', () => {
-      deleteAlertsAndRules();
-      login(ROLES.t3_analyst);
-      createRule(getNewRule());
-      visitWithTimeRange(ALERTS_URL);
-      waitForAlertsToPopulate();
+      login();
+      visitWithTimeRange(hostsUrl('allHosts'));
       cy.get(ACTIVE_TIMELINE_BOTTOM_BAR).should('exist');
       cy.get(TIMELINES).should('exist');
       cy.get(NAV_SEARCH_INPUT).type('Timelines');
@@ -66,34 +44,19 @@ describe('Privileges', { tags: ['@ess', '@skipInServerless'] }, () => {
   });
 
   describe('Notes', () => {
-    let currTimelineId = '';
-    before(() => {
-      deleteTimelines();
-      login();
-      visit(TIMELINES_URL);
-      createTimeline(getTimeline())
-        .then((response) => response.body.savedObjectId)
-        .then((timelineId) => {
-          currTimelineId = timelineId;
-          addNoteToTimeline(getTimeline().notes, timelineId).should((response) =>
-            expect(response.status).to.equal(200)
-          );
-        });
-    });
-
-    it('should show notes tab to users with privileges', () => {
+    it('should show notes in search for users with privileges', () => {
       login(ROLES.t3_analyst);
       visit(TIMELINES_URL);
-      openTimelineById(currTimelineId);
-      cy.get(NOTES_TAB_BUTTON).should('exist');
-      cy.get(NOTES_TAB_BUTTON).contains('1');
+      cy.get(NAV_SEARCH_INPUT).type('Notes');
+      cy.get(NAV_SEARCH_RESULTS).contains('Notes');
     });
 
-    it('should not show notes tab to users with insufficient privileges', () => {
+    it('should not show notes in search for users with insufficient privileges', () => {
       login(ROLES.notes_none);
       visit(TIMELINES_URL);
-      openTimelineById(currTimelineId);
-      cy.get(NOTES_TAB_BUTTON).should('be.disabled');
+      // no search result for notes in the nav search
+      cy.get(NAV_SEARCH_INPUT).type('Notes');
+      cy.get(NAV_SEARCH_NO_RESULTS).should('exist');
     });
   });
 });

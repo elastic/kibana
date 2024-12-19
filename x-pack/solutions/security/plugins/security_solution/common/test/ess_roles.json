@@ -173,17 +173,21 @@
             "filebeat-*",
             "logs-*",
             "packetbeat-*",
-            "winlogbeat-*"
+            "winlogbeat-*",
+            ".lists*",
+            ".items*",
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["read", "write"]
         },
         {
-          "names": [".alerts-security*", ".siem-signals-*"],
-          "privileges": ["read", "write"]
-        },
-        {
-          "names": [".lists*", ".items*"],
-          "privileges": ["read", "write"]
+          "names": [
+            ".alerts-security*",
+            ".preview.alerts-security*",
+            ".internal.preview.alerts-security*",
+            ".siem-signals-*"
+          ],
+          "privileges": ["read", "write", "manage"]
         },
         {
           "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
@@ -199,10 +203,10 @@
           "siemV2": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
-          "securitySolutionCasesV2": ["read"],
+          "securitySolutionCasesV2": ["all"],
           "securitySolutionTimeline": ["none"],
-          "securitySolutionNotes": ["none"],
-          "actions": ["read"],
+          "securitySolutionNotes": ["all"],
+          "actions": ["all"],
           "builtInAlerts": ["all"]
         },
         "spaces": ["*"],
@@ -224,17 +228,21 @@
             "filebeat-*",
             "logs-*",
             "packetbeat-*",
-            "winlogbeat-*"
+            "winlogbeat-*",
+            ".lists*",
+            ".items*",
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["read", "write"]
         },
         {
-          "names": [".alerts-security*", ".siem-signals-*"],
-          "privileges": ["read", "write"]
-        },
-        {
-          "names": [".lists*", ".items*"],
-          "privileges": ["read", "write"]
+          "names": [
+            ".alerts-security*",
+            ".preview.alerts-security*",
+            ".internal.preview.alerts-security*",
+            ".siem-signals-*"
+          ],
+          "privileges": ["read", "write", "manage"]
         },
         {
           "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
@@ -251,9 +259,9 @@
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
-          "securitySolutionTimeline": ["read"],
+          "securitySolutionTimeline": ["all"],
           "securitySolutionNotes": ["none"],
-          "actions": ["read"],
+          "actions": ["all"],
           "builtInAlerts": ["all"]
         },
         "spaces": ["*"],
