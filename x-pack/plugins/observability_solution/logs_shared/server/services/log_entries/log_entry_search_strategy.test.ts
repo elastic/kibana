@@ -6,7 +6,7 @@
  */
 
 import { errors, TransportResult } from '@elastic/elasticsearch';
-import { AsyncSearchSubmitResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AsyncSearchSubmitResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   elasticsearchServiceMock,
   httpServerMock,
