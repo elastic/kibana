@@ -32,19 +32,10 @@ import {
   LensSerializedState,
   VisualizationContext,
 } from '../types';
-import {
-  createMockDatasource,
-  createMockVisualization,
-  defaultDoc,
-  makeDefaultServices,
-} from '../../mocks';
-import {
-  Datasource,
-  DatasourceMap,
-  UserMessage,
-  Visualization,
-  VisualizationMap,
-} from '../../types';
+import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
+import { Datasource, DatasourceMap, Visualization, VisualizationMap } from '../../types';
+import { initializeInternalApi } from '../initializers/initialize_internal_api';
+import { initializeVisualizationContext } from '../initializers/initialize_visualization_context';
 
 const LensApiMock: LensApi = {
   // Static props
@@ -263,7 +254,7 @@ export function createExpressionRendererMock(): jest.Mock<
   ));
 }
 
-function getValidExpressionParams(
+export function getValidExpressionParams(
   overrides: Partial<ExpressionWrapperProps> = {}
 ): ExpressionWrapperProps {
   return {
@@ -284,38 +275,22 @@ function getValidExpressionParams(
   };
 }
 
-const LensInternalApiMock: LensInternalApi = {
-  dataViews: new BehaviorSubject<DataView[] | undefined>(undefined),
-  attributes$: new BehaviorSubject<LensRuntimeState['attributes']>(defaultDoc),
-  overrides$: new BehaviorSubject<LensRuntimeState['overrides']>(undefined),
-  disableTriggers$: new BehaviorSubject<LensRuntimeState['disableTriggers']>(undefined),
-  dataLoading$: new BehaviorSubject<boolean | undefined>(undefined),
-  hasRenderCompleted$: new BehaviorSubject<boolean>(true),
-  expressionParams$: new BehaviorSubject<ExpressionWrapperProps | null>(getValidExpressionParams()),
-  expressionAbortController$: new BehaviorSubject<AbortController | undefined>(undefined),
-  renderCount$: new BehaviorSubject<number>(0),
-  messages$: new BehaviorSubject<UserMessage[]>([]),
-  validationMessages$: new BehaviorSubject<UserMessage[]>([]),
-  isNewlyCreated$: new BehaviorSubject<boolean>(true),
-  updateAttributes: jest.fn(),
-  updateOverrides: jest.fn(),
-  dispatchRenderStart: jest.fn(),
-  dispatchRenderComplete: jest.fn(),
-  updateDataLoading: jest.fn(),
-  updateExpressionParams: jest.fn(),
-  updateAbortController: jest.fn(),
-  updateDataViews: jest.fn(),
-  updateMessages: jest.fn(),
-  resetAllMessages: jest.fn(),
-  dispatchError: jest.fn(),
-  updateValidationMessages: jest.fn(),
-  setAsCreated: jest.fn(),
-  getDisplayOptions: jest.fn(() => ({})),
-};
+function getInternalApiWithFunctionWrappers() {
+  const newApi = initializeInternalApi(getLensRuntimeStateMock(), {}, makeEmbeddableServices());
+  const fns: Array<keyof LensInternalApi> = (
+    Object.keys(newApi) as Array<keyof LensInternalApi>
+  ).filter((key) => typeof newApi[key] === 'function');
+  for (const fn of fns) {
+    const originalFn = newApi[fn];
+    // @ts-expect-error
+    newApi[fn] = jest.fn(originalFn);
+  }
+  return newApi;
+}
 
 export function getLensInternalApiMock(overrides: Partial<LensInternalApi> = {}): LensInternalApi {
   return {
-    ...LensInternalApiMock,
+    ...getInternalApiWithFunctionWrappers(),
     ...overrides,
   };
 }
@@ -324,19 +299,16 @@ export function getVisualizationContextHelperMock(
   attributesOverrides?: Partial<LensRuntimeState['attributes']>,
   contextOverrides?: Omit<Partial<VisualizationContext>, 'doc'>
 ) {
-  return {
-    getVisualizationContext: jest.fn(() => ({
-      mergedSearchContext: {},
-      indexPatterns: {},
-      indexPatternRefs: [],
-      activeVisualizationState: undefined,
-      activeDatasourceState: undefined,
-      activeData: undefined,
-      ...contextOverrides,
-      doc: getLensAttributesMock(attributesOverrides),
-    })),
-    updateVisualizationContext: jest.fn(),
-  };
+  const attributes = getLensAttributesMock(attributesOverrides);
+  const helper = initializeVisualizationContext(
+    getLensInternalApiMock({
+      attributes$: new BehaviorSubject(attributes),
+    })
+  );
+  if (contextOverrides) {
+    helper.updateVisualizationContext({ doc: attributes, ...contextOverrides });
+  }
+  return helper;
 }
 
 export function createUnifiedSearchApi(
