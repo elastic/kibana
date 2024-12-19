@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  MappingProperty,
-  PropertyName,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingProperty, PropertyName } from '@elastic/elasticsearch/lib/api/types';
 
 import type { ExperimentalDataStreamFeature } from '../../common/types';
 

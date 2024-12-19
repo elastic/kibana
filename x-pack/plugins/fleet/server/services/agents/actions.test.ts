@@ -135,7 +135,7 @@ describe('Agent actions', () => {
 
         expect(esClient.create).toBeCalledWith(
           expect.objectContaining({
-            body: expect.objectContaining({
+            document: expect.objectContaining({
               signed: {
                 data: expect.any(String),
                 signature: expect.any(String),
@@ -180,7 +180,7 @@ describe('Agent actions', () => {
 
       expect(esClient.create).toBeCalledWith(
         expect.objectContaining({
-          body: expect.not.objectContaining({
+          document: expect.not.objectContaining({
             signed: expect.any(Object),
           }),
         })
@@ -235,7 +235,7 @@ describe('Agent actions', () => {
       await bulkCreateAgentActions(esClient, newActions);
       expect(esClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.arrayContaining([
+          operations: expect.arrayContaining([
             expect.arrayContaining([
               expect.objectContaining({
                 signed: {
@@ -274,7 +274,7 @@ describe('Agent actions', () => {
       await bulkCreateAgentActions(esClient, newActions);
       expect(esClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.arrayContaining([
+          operations: expect.arrayContaining([
             expect.arrayContaining([
               expect.not.objectContaining({
                 signed: {
@@ -350,7 +350,7 @@ describe('Agent actions', () => {
       expect(esClient.create).toBeCalledTimes(2);
       expect(esClient.create).toBeCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
+          document: expect.objectContaining({
             type: 'CANCEL',
             data: { target_id: 'action1' },
             agents: ['agent1', 'agent2'],
@@ -359,7 +359,7 @@ describe('Agent actions', () => {
       );
       expect(esClient.create).toBeCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
+          document: expect.objectContaining({
             type: 'CANCEL',
             data: { target_id: 'action1' },
             agents: ['agent3', 'agent4'],

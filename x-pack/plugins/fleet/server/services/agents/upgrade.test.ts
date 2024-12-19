@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import { appContextService } from '../app_context';
 import type { Agent } from '../../types';
@@ -58,10 +58,10 @@ describe('sendUpgradeAgentsActions (plural)', () => {
 
     // calls ES update with correct values
     const calledWith = esClient.bulk.mock.calls[0][0];
-    const ids = (calledWith as estypes.BulkRequest)?.body
+    const ids = (calledWith as estypes.BulkRequest)?.operations
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
-    const docs = (calledWith as estypes.BulkRequest)?.body
+    const docs = (calledWith as estypes.BulkRequest)?.operations
       ?.filter((i: any) => i.doc)
       .map((i: any) => i.doc);
 
@@ -80,10 +80,10 @@ describe('sendUpgradeAgentsActions (plural)', () => {
     // calls ES update with correct values
     const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
     const calledWith = esClient.bulk.mock.calls[0][0];
-    const ids = (calledWith as estypes.BulkRequest)?.body
+    const ids = (calledWith as estypes.BulkRequest)?.operations
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
-    const docs = (calledWith as estypes.BulkRequest)?.body
+    const docs = (calledWith as estypes.BulkRequest)?.operations
       ?.filter((i: any) => i.doc)
       .map((i: any) => i.doc);
     expect(ids).toEqual(onlyRegular);
@@ -95,7 +95,7 @@ describe('sendUpgradeAgentsActions (plural)', () => {
     // hosted policy is updated in action results with error
     const calledWithActionResults = esClient.bulk.mock.calls[1][0] as estypes.BulkRequest;
     // bulk write two line per create
-    expect(calledWithActionResults.body?.length).toBe(2);
+    expect(calledWithActionResults.operations?.length).toBe(2);
     const expectedObject = expect.objectContaining({
       '@timestamp': expect.anything(),
       action_id: expect.anything(),
@@ -103,7 +103,7 @@ describe('sendUpgradeAgentsActions (plural)', () => {
       error:
         'Cannot upgrade agent in hosted agent policy hosted-agent-policy in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
     });
-    expect(calledWithActionResults.body?.[1] as any).toEqual(expectedObject);
+    expect(calledWithActionResults.operations?.[1]).toEqual(expectedObject);
   });
 
   it('can upgrade from hosted agent policy with force=true', async () => {
@@ -118,10 +118,10 @@ describe('sendUpgradeAgentsActions (plural)', () => {
 
     // calls ES update with correct values
     const calledWith = esClient.bulk.mock.calls[0][0];
-    const ids = (calledWith as estypes.BulkRequest)?.body
+    const ids = (calledWith as estypes.BulkRequest)?.operations
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
-    const docs = (calledWith as estypes.BulkRequest)?.body
+    const docs = (calledWith as estypes.BulkRequest)?.operations
       ?.filter((i: any) => i.doc)
       .map((i: any) => i.doc);
     expect(ids).toEqual(idsToAction);

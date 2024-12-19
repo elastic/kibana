@@ -107,9 +107,7 @@ describe('Agents CRUD test', () => {
       expect(searchMock).toHaveBeenCalledWith(
         expect.objectContaining({
           aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
-          body: {
-            query: expect.any(Object),
-          },
+          query: expect.any(Object),
           index: '.fleet-agents',
           size: 0,
           fields: ['status'],
@@ -164,7 +162,7 @@ describe('Agents CRUD test', () => {
         })
       );
 
-      expect(searchMock.mock.calls.at(-1)[0].body.query).toEqual(
+      expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
         toElasticsearchQuery(
           _joinFilters(['fleet-agents.policy_id: 123', 'NOT status:unenrolled'])!
         )

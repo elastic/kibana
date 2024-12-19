@@ -10,7 +10,7 @@ import type {
   IndicesIndexSettings,
   MappingDynamicTemplate,
   MappingTypeMapping,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 
 import pMap from 'p-map';
 import { isResponseError } from '@kbn/es-errors';

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
@@ -40,7 +40,7 @@ describe('reassignAgent', () => {
       expect(esClient.update).toBeCalledTimes(1);
       const calledWith = esClient.update.mock.calls[0];
       expect(calledWith[0]?.id).toBe(agentInRegularDoc._id);
-      expect((calledWith[0] as estypes.UpdateRequest)?.body?.doc).toHaveProperty(
+      expect((calledWith[0] as estypes.UpdateRequest)?.doc).toHaveProperty(
         'policy_id',
         regularAgentPolicySO.id
       );
@@ -101,14 +101,14 @@ describe('reassignAgent', () => {
       // calls ES update with correct values
       const calledWith = esClient.bulk.mock.calls[0][0];
       // only 1 are regular and bulk write two line per update
-      expect((calledWith as estypes.BulkRequest).body?.length).toBe(2);
+      expect((calledWith as estypes.BulkRequest).operations?.length).toBe(2);
       // @ts-expect-error
-      expect(calledWith.body[0].update._id).toEqual(agentInRegularDoc._id);
+      expect(calledWith.operations[0].update._id).toEqual(agentInRegularDoc._id);
 
       // hosted policy is updated in action results with error
       const calledWithActionResults = esClient.bulk.mock.calls[1][0] as estypes.BulkRequest;
       // bulk write two line per create
-      expect(calledWithActionResults.body?.length).toBe(4);
+      expect(calledWithActionResults.operations?.length).toBe(4);
       const expectedObject = expect.objectContaining({
         '@timestamp': expect.anything(),
         action_id: expect.anything(),
@@ -116,7 +116,7 @@ describe('reassignAgent', () => {
         error:
           'Cannot reassign an agent from hosted agent policy hosted-agent-policy in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
       });
-      expect(calledWithActionResults.body?.[1] as any).toEqual(expectedObject);
+      expect(calledWithActionResults.operations?.[1]).toEqual(expectedObject);
     });
 
     it('should report errors from ES agent update call', async () => {
@@ -147,7 +147,7 @@ describe('reassignAgent', () => {
         agent_id: agentInRegularDoc._id,
         error: 'version conflict',
       });
-      expect(calledWithActionResults.body?.[1] as any).toEqual(expectedObject);
+      expect(calledWithActionResults.operations?.[1]).toEqual(expectedObject);
     });
   });
 });

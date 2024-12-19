@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 
 import { appContextService } from '../../..';
 

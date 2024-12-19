@@ -112,7 +112,7 @@ describe('update_agent_tags', () => {
     await updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['one'], []);
 
     const agentAction = esClient.create.mock.calls[0][0] as any;
-    expect(agentAction?.body).toEqual(
+    expect(agentAction?.document).toEqual(
       expect.objectContaining({
         action_id: expect.anything(),
         agents: [expect.any(String)],
@@ -122,11 +122,11 @@ describe('update_agent_tags', () => {
     );
 
     const actionResults = esClient.bulk.mock.calls[0][0] as any;
-    const agentIds = actionResults?.body
+    const agentIds = actionResults?.operations
       ?.filter((i: any) => i.agent_id)
       .map((i: any) => i.agent_id);
     expect(agentIds.length).toEqual(1);
-    expect(actionResults.body[1].error).not.toBeDefined();
+    expect(actionResults.operations[1].error).not.toBeDefined();
   });
 
   it('should skip hosted agent from total when agentIds are passed', async () => {
@@ -144,7 +144,7 @@ describe('update_agent_tags', () => {
     );
 
     const agentAction = esClientMock.create.mock.calls[0][0] as any;
-    expect(agentAction?.body).toEqual(
+    expect(agentAction?.document).toEqual(
       expect.objectContaining({
         action_id: expect.anything(),
         agents: [expect.any(String)],
@@ -165,7 +165,7 @@ describe('update_agent_tags', () => {
     await updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['one'], []);
 
     const agentAction = esClient.create.mock.calls[0][0] as any;
-    expect(agentAction?.body).toEqual(
+    expect(agentAction?.document).toEqual(
       expect.objectContaining({
         action_id: expect.anything(),
         agents: ['failure1'],
@@ -175,7 +175,7 @@ describe('update_agent_tags', () => {
     );
 
     const errorResults = esClient.bulk.mock.calls[0][0] as any;
-    expect(errorResults.body[1].error).toEqual('error reason');
+    expect(errorResults.operations[1].error).toEqual('error reason');
   });
 
   it('should throw error on version conflicts', async () => {
@@ -217,10 +217,10 @@ describe('update_agent_tags', () => {
     ).rejects.toThrowError('Version conflict of 100 agents');
 
     const agentAction = esClient.create.mock.calls[0][0] as any;
-    expect(agentAction?.body.agents.length).toEqual(100);
+    expect(agentAction?.document.agents.length).toEqual(100);
 
     const errorResults = esClient.bulk.mock.calls[0][0] as any;
-    expect(errorResults.body[1].error).toEqual('version conflict on last retry');
+    expect(errorResults.operations[1].error).toEqual('version conflict on last retry');
   });
 
   it('should combine action agents from updated, failures and version conflicts on last retry', async () => {
@@ -249,7 +249,7 @@ describe('update_agent_tags', () => {
     ).rejects.toThrowError('Version conflict of 1 agents');
 
     const agentAction = esClient.create.mock.calls[0][0] as any;
-    expect(agentAction?.body.agents.length).toEqual(3);
+    expect(agentAction?.document.agents.length).toEqual(3);
   });
 
   it('should run add tags async when actioning more agents than batch size', async () => {
@@ -367,7 +367,7 @@ describe('update_agent_tags', () => {
     );
 
     const agentAction = esClient.create.mock.calls[0][0] as any;
-    expect(agentAction?.body).toEqual(
+    expect(agentAction?.document).toEqual(
       expect.objectContaining({
         action_id: expect.anything(),
         agents: [expect.any(String)],
