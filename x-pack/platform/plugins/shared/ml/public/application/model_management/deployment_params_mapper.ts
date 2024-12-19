@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { NLPSettings } from '../../../common/constants/app';
 import type { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
 import type { CloudInfo } from '../services/ml_server_info';

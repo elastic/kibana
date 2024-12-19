@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -47,11 +47,9 @@ export const getCategoryCountRequest = (
 
   return {
     index,
-    body: {
-      query,
-      size: 0,
-      track_total_hits: true,
-    },
+    query,
+    size: 0,
+    track_total_hits: true,
   };
 };
 
@@ -64,8 +62,13 @@ export const getCategoryCountMSearchRequest = (
 ): estypes.MsearchRequestItem[] =>
   categories.flatMap((category) => [
     { index: params.index },
-    getCategoryCountRequest(params, fieldName, category, from, to)
-      .body as estypes.MsearchMultisearchBody,
+    getCategoryCountRequest(
+      params,
+      fieldName,
+      category,
+      from,
+      to
+    ) as estypes.MsearchMultisearchBody,
   ]);
 
 export const fetchCategoryCounts = async (

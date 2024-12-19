@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 export type Datafeed = estypes.MlDatafeed;
 export type Aggregation = Record<string, estypes.AggregationsAggregationContainer>;

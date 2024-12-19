@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { Query } from '@kbn/es-query';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';

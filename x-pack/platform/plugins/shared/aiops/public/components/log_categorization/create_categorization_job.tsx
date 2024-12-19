@@ -11,7 +11,7 @@ import React from 'react';
 import moment from 'moment';
 import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
   type CreateCategorizationADJobContext,

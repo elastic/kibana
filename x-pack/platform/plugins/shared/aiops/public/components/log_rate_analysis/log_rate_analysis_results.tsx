@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { isEqual } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import {
   EuiButtonIcon,

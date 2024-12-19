@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 

@@ -11,7 +11,7 @@ import type {
   IndicesCreateRequest,
   IndicesIndexSettings,
   MappingTypeMapping,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { INDEX_META_DATA_CREATED_BY } from '../common/constants';
 import { ImportResponse, ImportFailure, InputData, IngestPipelineWrapper } from '../common/types';
 
@@ -94,7 +94,8 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping
   ) {
-    const body: IndicesCreateRequest['body'] = {
+    const params: IndicesCreateRequest = {
+      index,
       mappings: {
         _meta: {
           created_by: INDEX_META_DATA_CREATED_BY,
@@ -104,21 +105,21 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
     };
 
     if (settings && Object.keys(settings).length) {
-      body.settings = settings;
+      params.settings = settings;
     }
 
-    await asCurrentUser.indices.create({ index, body }, { maxRetries: 0 });
+    await asCurrentUser.indices.create(params, { maxRetries: 0 });
   }
 
   async function indexData(index: string, pipelineId: string | undefined, data: InputData) {
     try {
-      const body = [];
+      const operations = [];
       for (let i = 0; i < data.length; i++) {
-        body.push({ index: {} });
-        body.push(data[i]);
+        operations.push({ index: {} });
+        operations.push(data[i]);
       }
 
-      const bulkRequest: BulkRequest = { index, body };
+      const bulkRequest: BulkRequest = { index, operations };
       if (pipelineId !== undefined) {
         bulkRequest.pipeline = pipelineId;
       }

@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import moment from 'moment-timezone';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import { EuiButton, EuiButtonEmpty, EuiIconTip, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
 

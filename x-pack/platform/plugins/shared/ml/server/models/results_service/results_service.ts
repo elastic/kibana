@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { sortBy, slice, get, cloneDeep } from 'lodash';
 import moment from 'moment';
 import Boom from '@hapi/boom';
@@ -196,27 +196,25 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
 
     const body = await mlClient.anomalySearch(
       {
-        body: {
-          size: maxRecords,
-          query: {
-            bool: {
-              filter: [
-                {
-                  query_string: {
-                    query: 'result_type:record',
-                    analyze_wildcard: false,
-                  },
+        size: maxRecords,
+        query: {
+          bool: {
+            filter: [
+              {
+                query_string: {
+                  query: 'result_type:record',
+                  analyze_wildcard: false,
                 },
-                {
-                  bool: {
-                    must: boolCriteria,
-                  },
+              },
+              {
+                bool: {
+                  must: boolCriteria,
                 },
-              ],
-            },
+              },
+            ],
           },
-          sort: [{ record_score: { order: 'desc' } }],
         },
+        sort: [{ record_score: { order: 'desc' } }],
       },
       jobIds
     );
@@ -389,24 +387,22 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
 
     const body = await mlClient.anomalySearch(
       {
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter,
-            },
+        size: 0,
+        query: {
+          bool: {
+            filter,
           },
-          aggs: {
-            byJobId: {
-              terms: {
-                field: 'job_id',
-                size: maxJobs,
-              },
-              aggs: {
-                maxTimestamp: {
-                  max: {
-                    field: 'timestamp',
-                  },
+        },
+        aggs: {
+          byJobId: {
+            terms: {
+              field: 'job_id',
+              size: maxJobs,
+            },
+            aggs: {
+              maxTimestamp: {
+                max: {
+                  field: 'timestamp',
                 },
               },
             },
@@ -435,12 +431,10 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
   async function getCategoryExamples(jobId: string, categoryIds: any, maxExamples: number) {
     const body = await mlClient.anomalySearch(
       {
-        body: {
-          size: ANOMALIES_TABLE_DEFAULT_QUERY_SIZE, // Matches size of records in anomaly summary table.
-          query: {
-            bool: {
-              filter: [{ term: { job_id: jobId } }, { terms: { category_id: categoryIds } }],
-            },
+        size: ANOMALIES_TABLE_DEFAULT_QUERY_SIZE, // Matches size of records in anomaly summary table.
+        query: {
+          bool: {
+            filter: [{ term: { job_id: jobId } }, { terms: { category_id: categoryIds } }],
           },
         },
       },
@@ -472,12 +466,10 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
   async function getCategoryDefinition(jobId: string, categoryId: string) {
     const body = await mlClient.anomalySearch<any>(
       {
-        body: {
-          size: 1,
-          query: {
-            bool: {
-              filter: [{ term: { job_id: jobId } }, { term: { category_id: categoryId } }],
-            },
+        size: 1,
+        query: {
+          bool: {
+            filter: [{ term: { job_id: jobId } }, { term: { category_id: categoryId } }],
           },
         },
       },
@@ -515,18 +507,16 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     }
     const body = await mlClient.anomalySearch<MlAnomalyCategorizerStatsDoc>(
       {
-        body: {
-          query: {
-            bool: {
-              must: mustMatchClauses,
-              filter: [
-                {
-                  term: {
-                    job_id: jobId,
-                  },
+        query: {
+          bool: {
+            must: mustMatchClauses,
+            filter: [
+              {
+                term: {
+                  job_id: jobId,
                 },
-              ],
-            },
+              },
+            ],
           },
         },
       },
@@ -604,22 +594,20 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       ];
       const results = await mlClient.anomalySearch<any>(
         {
-          body: {
-            size: 0,
-            query: {
-              bool: {
-                must: mustMatchClauses,
-                filter: [
-                  {
-                    terms: {
-                      job_id: jobIdsWithStopOnWarnSet,
-                    },
+          size: 0,
+          query: {
+            bool: {
+              must: mustMatchClauses,
+              filter: [
+                {
+                  terms: {
+                    job_id: jobIdsWithStopOnWarnSet,
                   },
-                ],
-              },
+                },
+              ],
             },
-            aggs,
           },
+          aggs,
         },
         jobIds
       );

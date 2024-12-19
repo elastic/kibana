@@ -14,7 +14,7 @@ import type {
   MlDatafeedState,
   MlJobState,
   MlJobStats,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   ActionGroup,
   AlertInstanceContext,

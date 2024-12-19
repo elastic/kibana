@@ -10,7 +10,7 @@ import semverGte from 'semver/functions/gte';
 import type { Duration } from 'moment';
 import moment from 'moment';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import numeral from '@elastic/numeral';
 
 import { i18n } from '@kbn/i18n';

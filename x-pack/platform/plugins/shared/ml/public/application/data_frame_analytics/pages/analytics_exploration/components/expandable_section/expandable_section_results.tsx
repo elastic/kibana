@@ -38,7 +38,7 @@ import {
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
 

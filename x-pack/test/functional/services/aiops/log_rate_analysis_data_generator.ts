@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 
@@ -58,7 +58,7 @@ function getArtificialLogsWithDeviation(
   includeTextField = false,
   includeGaps = false
 ) {
-  const bulkBody: estypes.BulkRequest<GeneratedDoc, GeneratedDoc>['body'] = [];
+  const bulkBody: estypes.BulkRequest<GeneratedDoc, GeneratedDoc>['operations'] = [];
   const action = { index: { _index: index } };
   let tsOffset = 0;
 

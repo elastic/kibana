@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -670,7 +670,7 @@ export function getMlClient(
       );
       const [modelId] = getModelIdsFromRequest(p);
       if (modelId !== undefined) {
-        const model = (p[0] as estypes.MlPutTrainedModelRequest).body;
+        const model = p[0];
         const job = getJobDetailsFromTrainedModel(model);
         await mlSavedObjectService.createTrainedModel(modelId, job);
       }

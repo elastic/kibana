@@ -6,7 +6,7 @@
  */
 
 import type { FeatureCollection, Feature, Geometry } from 'geojson';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { htmlIdGenerator } from '@elastic/eui';
 import type { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { FIELD_ORIGIN, STYLE_TYPE } from '@kbn/maps-plugin/common';
@@ -196,7 +196,7 @@ export async function getResultsForJobId(
   }
 
   // Query to look for the highest scoring anomaly.
-  const body: estypes.SearchRequest['body'] = {
+  const body: estypes.SearchRequest = {
     query: {
       bool,
     },
@@ -221,12 +221,7 @@ export async function getResultsForJobId(
   let resp: ESSearchResponse<MLAnomalyDoc> | null = null;
 
   try {
-    resp = await mlResultsService.anomalySearch(
-      {
-        body,
-      },
-      [jobId]
-    );
+    resp = await mlResultsService.anomalySearch(body, [jobId]);
   } catch (error) {
     // search may fail if the job doesn't already exist
     // ignore this error as the outer function call will raise a toast
