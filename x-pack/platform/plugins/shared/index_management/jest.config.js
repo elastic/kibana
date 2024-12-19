@@ -7,11 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/index_management'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/index_management',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/index_management'],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/index_management',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/index_management/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/index_management/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };
