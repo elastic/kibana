@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
     "isolatedModules": true
@@ -7,7 +7,7 @@
   "include": [
     "common/**/*",
     "server/**/*",
-    "../../../typings/*",
+    "../../../../../typings/*",
     "schema/*.json",
   ],
   "kbn_references": [

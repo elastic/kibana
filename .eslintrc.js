@@ -1906,7 +1906,7 @@ module.exports = {
         'src/plugins/telemetry/**',
         'src/platform/plugins/shared/telemetry_collection_manager/**',
         'src/plugins/telemetry_management_section/**',
-        'x-pack/plugins/telemetry_collection_xpack/**',
+        'x-pack/platform/plugins/private/telemetry_collection_xpack/**',
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
@@ -1930,7 +1930,7 @@ module.exports = {
         'src/plugins/telemetry/**',
         'src/platform/plugins/shared/telemetry_collection_manager/**',
         'src/plugins/telemetry_management_section/**',
-        'x-pack/plugins/telemetry_collection_xpack/**',
+        'x-pack/platform/plugins/private/telemetry_collection_xpack/**',
       ],
       rules: {
         '@typescript-eslint/prefer-ts-expect-error': 'error',
