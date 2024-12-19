@@ -109,6 +109,9 @@ export const ACTION_STATE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/state`;
 /** Endpoint Agent Routes */
 export const AGENT_STATUS_ROUTE = `/internal${BASE_ENDPOINT_ROUTE}/agent_status`;
 
+/** Custom Scripts Routes */
+export const CUSTOM_SCRIPTS_ROUTE = `/internal${BASE_ENDPOINT_ROUTE}/custom_scripts`;
+
 export const failedFleetActionErrorCode = '424';
 
 export const ENDPOINT_DEFAULT_PAGE = 0;
