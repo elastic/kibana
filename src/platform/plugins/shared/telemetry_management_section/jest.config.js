@@ -14,5 +14,7 @@ module.exports = {
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/telemetry_management_section',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/platform/plugins/shared/telemetry_management_section/public/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/src/platform/plugins/shared/telemetry_management_section/public/**/*.{ts,tsx}',
+  ],
 };

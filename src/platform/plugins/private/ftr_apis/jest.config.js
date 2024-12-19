@@ -13,5 +13,7 @@ module.exports = {
   roots: ['<rootDir>/src/platform/plugins/private/ftr_apis'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/private/ftr_apis',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/platform/plugins/private/ftr_apis/{common,public,server}/**/*.{js,ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/src/platform/plugins/private/ftr_apis/{common,public,server}/**/*.{js,ts,tsx}',
+  ],
 };

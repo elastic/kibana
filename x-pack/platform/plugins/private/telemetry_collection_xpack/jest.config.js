@@ -12,5 +12,7 @@ module.exports = {
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/private/telemetry_collection_xpack',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/platform/plugins/private/telemetry_collection_xpack/server/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/platform/plugins/private/telemetry_collection_xpack/server/**/*.{ts,tsx}',
+  ],
 };
