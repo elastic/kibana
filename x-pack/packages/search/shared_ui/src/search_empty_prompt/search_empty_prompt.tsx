@@ -28,10 +28,7 @@ interface SearchEmptyPromptProps {
   description?: string;
   icon?: string | React.JSXElementConstructor<any>;
   isComingSoon?: boolean;
-<<<<<<< HEAD
-=======
   comingSoonLabel?: string;
->>>>>>> 4f4772f63e6 ([Search] Moving search-empty-prompt to a shared package (#204545))
   title: string;
 }
 
