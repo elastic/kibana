@@ -22,7 +22,7 @@ export const useCardStyles = () => {
       .headerCardLink,
       .headerCardLink * {
         text-decoration: underline;
-        text-decoration-color: ${euiTheme.colors.primaryText};
+        text-decoration-color: ${euiTheme.colors.textPrimary};
       }
     }
 
@@ -32,9 +32,9 @@ export const useCardStyles = () => {
 
     ${isDarkMode
       ? `
-          background-color: ${euiTheme.colors.lightestShade};
+          background-color: ${euiTheme.colors.backgroundBaseSubdued};
           box-shadow: none;
-          border: 1px solid ${euiTheme.colors.mediumShade};
+          border: 1px solid ${euiTheme.colors.borderBaseFormsControl};
         `
       : ''}
   `;
