@@ -8,7 +8,7 @@
 import type {
   SecurityIndicesPrivileges,
   SecurityRoleDescriptor,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 
 import {
   FLEET_APM_PACKAGE,
