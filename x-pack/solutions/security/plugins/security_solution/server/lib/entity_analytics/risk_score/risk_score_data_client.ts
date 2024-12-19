@@ -242,6 +242,7 @@ export class RiskScoreDataClient {
       esClient,
       logger: this.options.logger,
       transformId: getLatestTransformId(namespace),
+      deleteData: true,
     }).catch(addError);
 
     await esClient.indices
