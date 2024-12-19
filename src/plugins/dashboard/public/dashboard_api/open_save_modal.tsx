@@ -32,6 +32,7 @@ export async function openSaveModal({
   isManaged,
   lastSavedId,
   panelReferences,
+  searchSourceReferences,
   viewMode,
 }: {
   controlGroupReferences?: Reference[];
@@ -39,6 +40,7 @@ export async function openSaveModal({
   isManaged: boolean;
   lastSavedId: string | undefined;
   panelReferences: Reference[];
+  searchSourceReferences: Reference[];
   viewMode: ViewMode;
 }) {
   if (viewMode === 'edit' && isManaged) {
@@ -101,8 +103,9 @@ export async function openSaveModal({
           const saveResult = await dashboardContentManagementService.saveDashboardState({
             controlGroupReferences,
             panelReferences,
+            searchSourceReferences,
             saveOptions,
-            currentState: dashboardStateToSave,
+            dashboardState: dashboardStateToSave,
             lastSavedId,
           });
 

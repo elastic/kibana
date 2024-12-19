@@ -81,10 +81,16 @@ export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolea
 
 export interface SaveDashboardProps {
   controlGroupReferences?: Reference[];
-  currentState: DashboardState;
+  dashboardState: DashboardState;
   saveOptions: SavedDashboardSaveOpts;
   panelReferences?: Reference[];
+  searchSourceReferences?: Reference[];
   lastSavedId?: string;
+}
+
+export interface GetDashboardStateReturn {
+  attributes: DashboardAttributes;
+  references: Reference[];
 }
 
 export interface SaveDashboardReturn {
