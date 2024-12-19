@@ -18,7 +18,7 @@ import {
 import type { Edge, FitViewOptions, Node, ReactFlowInstance } from '@xyflow/react';
 import { useGeneratedHtmlId } from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui';
-import { SvgDefsMarker } from '../edge/styles';
+import { SvgDefsMarker } from '../edge/markers';
 import {
   HexagonNode,
   PentagonNode,
@@ -243,7 +243,9 @@ const processGraph = (
         data: {
           ...edgeData,
           sourceShape: nodesById[edgeData.source].shape,
+          sourceColor: nodesById[edgeData.source].color,
           targetShape: nodesById[edgeData.target].shape,
+          targetColor: nodesById[edgeData.target].color,
         },
       };
     });
