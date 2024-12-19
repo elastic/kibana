@@ -224,6 +224,7 @@ export function loadEmbeddableData(
         handleEvent,
         disableTriggers,
         updateBlockingErrors,
+        forceDSL: (parentApi as { forceDSL?: boolean }).forceDSL,
         getDisplayOptions: internalApi.getDisplayOptions,
       }),
       getUsedDataViews(

@@ -135,7 +135,10 @@ export type LensEmbeddableStartServices = Simplify<
     coreStart: CoreStart;
     capabilities: RecursiveReadonly<Capabilities>;
     expressionRenderer: ReactExpressionRendererType;
-    documentToExpression: (doc: LensDocument) => Promise<DocumentToExpressionReturnType>;
+    documentToExpression: (
+      doc: LensDocument,
+      forceDSL?: boolean
+    ) => Promise<DocumentToExpressionReturnType>;
     injectFilterReferences: FilterManager['inject'];
     visualizationMap: VisualizationMap;
     datasourceMap: DatasourceMap;
@@ -261,6 +264,7 @@ export interface LensSharedProps {
   className?: string;
   noPadding?: boolean;
   viewMode?: ViewMode;
+  forceDSL?: boolean;
 }
 
 interface LensRequestHandlersProps {
@@ -323,7 +327,13 @@ export type LensComponentProps = Simplify<
  */
 export type LensComponentForwardedProps = Pick<
   LensComponentProps,
-  'style' | 'className' | 'noPadding' | 'abortController' | 'executionContext' | 'viewMode'
+  | 'style'
+  | 'className'
+  | 'noPadding'
+  | 'abortController'
+  | 'executionContext'
+  | 'viewMode'
+  | 'forceDSL'
 >;
 
 /**
@@ -347,7 +357,10 @@ export type LensRendererProps = Simplify<LensRendererPrivateProps>;
 export type LensRuntimeState = Simplify<
   Omit<ComponentSerializedProps, 'attributes' | 'references'> & {
     attributes: NonNullable<LensSerializedState['attributes']>;
-  } & Pick<LensComponentForwardedProps, 'viewMode' | 'abortController' | 'executionContext'> &
+  } & Pick<
+      LensComponentForwardedProps,
+      'viewMode' | 'abortController' | 'executionContext' | 'forceDSL'
+    > &
     ContentManagementProps
 >;
 
