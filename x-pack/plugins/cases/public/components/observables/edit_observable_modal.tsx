@@ -32,9 +32,8 @@ export const EditObservableModal: FC<EditObservableModalProps> = ({
   const handleUpdateObservable = async (updatedObservable: ObservablePatch) => {
     patchObservable({
       observable: updatedObservable,
-    }).then(() => {
-      closeModal();
     });
+    closeModal();
   };
 
   return (
