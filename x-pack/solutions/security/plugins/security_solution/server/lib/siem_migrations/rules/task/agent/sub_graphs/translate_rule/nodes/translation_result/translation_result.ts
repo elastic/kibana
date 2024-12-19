@@ -23,10 +23,10 @@ export const translationResultNode: GraphNode = async (state) => {
   if (!query) {
     translationResult = RuleTranslationResult.UNTRANSLATABLE;
   } else {
-    if (state.validation_errors?.esql_errors) {
-      translationResult = RuleTranslationResult.PARTIAL;
-    } else if (query.startsWith('FROM logs-*')) {
+    if (query.startsWith('FROM logs-*')) {
       elasticRule.query = query.replace('FROM logs-*', 'FROM [indexPattern]');
+      translationResult = RuleTranslationResult.PARTIAL;
+    } else if (state.validation_errors?.esql_errors) {
       translationResult = RuleTranslationResult.PARTIAL;
     } else if (query.match(/\[(macro|lookup):.*?\]/)) {
       translationResult = RuleTranslationResult.PARTIAL;
