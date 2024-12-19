@@ -11,7 +11,6 @@ import {
   getLensApiMock,
   getLensAttributesMock,
   getLensInternalApiMock,
-  getVisualizationContextHelperMock,
   makeEmbeddableServices,
 } from './mocks';
 import { BehaviorSubject, filter, firstValueFrom } from 'rxjs';
@@ -23,7 +22,6 @@ import {
   LensEmbeddableStartServices,
   LensInternalApi,
   LensPublicCallbacks,
-  VisualizationContextHelper,
 } from './types';
 import {
   HasParentApi,
@@ -73,7 +71,6 @@ type ChangeFnType = ({
   parentApi,
   internalApi,
   services,
-  visualizationContextHelper,
 }: {
   api: LensApi;
   internalApi: LensInternalApi;
@@ -83,7 +80,6 @@ type ChangeFnType = ({
       searchSessionId$: BehaviorSubject<string>;
     };
   services: LensEmbeddableStartServices;
-  visualizationContextHelper: VisualizationContextHelper;
 }) => Promise<void | boolean>;
 
 async function callDataLoader(
@@ -124,7 +120,6 @@ async function callDataLoader(
     dataOverrides: { id: 'form_based' },
   });
   services.documentToExpression = jest.fn().mockResolvedValue({ ast: 'expression_string' });
-  const visualizationContextHelper = getVisualizationContextHelperMock();
   const { cleanup } = loadEmbeddableData(
     faker.string.uuid(),
     getState,
@@ -132,7 +127,6 @@ async function callDataLoader(
     parentApi,
     internalApi,
     services,
-    visualizationContextHelper
   );
   // there's a debounce, so skip to the next tick
   jest.advanceTimersByTime(100);
@@ -144,7 +138,6 @@ async function callDataLoader(
     parentApi,
     internalApi,
     services,
-    visualizationContextHelper,
   });
   // fallback to true if undefined is returned
   const expectRerender = result ?? true;

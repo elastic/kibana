@@ -10,7 +10,6 @@ import {
   getLensApiMock,
   getLensAttributesMock,
   getLensInternalApiMock,
-  getVisualizationContextHelperMock,
   makeEmbeddableServices,
 } from '../mocks';
 import { faker } from '@faker-js/faker';
@@ -50,10 +49,9 @@ function buildUserMessagesApi(metaInfo?: SharingSavedObjectProps) {
     visOverrides: { id: 'lnsXY' },
     dataOverrides: { id: 'form_based' },
   });
-  const visualizationContextHelper = getVisualizationContextHelperMock();
   // fill the context with some data
-  visualizationContextHelper.updateVisualizationContext({
-    doc: getLensAttributesMock({
+  internalApi.updateVisualizationContext({
+    activeAttributes: getLensAttributesMock({
       state: {
         datasourceStates: { form_based: { something: {} } },
         visualization: { activeId: 'lnsXY', state: {} },
@@ -68,12 +66,11 @@ function buildUserMessagesApi(metaInfo?: SharingSavedObjectProps) {
   const userMessagesApi = buildUserMessagesHelpers(
     api,
     internalApi,
-    visualizationContextHelper.getVisualizationContext,
     services,
     onBeforeBadgesRender,
     metaInfo
   );
-  return { api, internalApi, userMessagesApi, visualizationContextHelper, onBeforeBadgesRender };
+  return { api, internalApi, userMessagesApi, onBeforeBadgesRender };
 }
 
 describe('User Messages API', () => {
@@ -193,11 +190,11 @@ describe('User Messages API', () => {
     });
 
     it('should return basic validation for missing parts of the config', () => {
-      const { userMessagesApi, visualizationContextHelper } = buildUserMessagesApi();
+      const { userMessagesApi, internalApi } = buildUserMessagesApi();
       // no doc scenario
-      visualizationContextHelper.updateVisualizationContext({
-        ...visualizationContextHelper.getVisualizationContext(),
-        doc: undefined,
+      internalApi.updateVisualizationContext({
+        ...internalApi.getVisualizationContext(),
+        activeAttributes: undefined,
       });
       for (const locationId of ALL_LOCATIONS) {
         expect(userMessagesApi.getUserMessages(locationId).map(({ uniqueId }) => uniqueId)).toEqual(
