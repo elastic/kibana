@@ -43,8 +43,8 @@ export const InputTypeOptions: Array<EuiComboBoxOptionOption<InputType>> = [
   { value: 'udp', label: 'UDP' },
 ];
 
-const isValidName = (name: string) => /^[a-z_]+$/.test(name);
-const getNameFromTitle = (title: string) => title.toLowerCase().replaceAll(/[^a-z]/g, '_');
+const isValidName = (name: string) => /^[a-z0-9_]+$/.test(name);
+const getNameFromTitle = (title: string) => title.toLowerCase().replaceAll(/[^a-z0-9]/g, '_');
 
 interface DataStreamStepProps {
   integrationSettings: State['integrationSettings'];

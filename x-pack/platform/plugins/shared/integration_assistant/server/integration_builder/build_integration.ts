@@ -77,7 +77,7 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
   return zipBuffer;
 }
 export function isValidName(input: string): boolean {
-  const regex = /^[a-zA-Z_]+$/;
+  const regex = /^[a-zA-Z0-9_]+$/;
   return input.length > 0 && regex.test(input);
 }
 function createDirectories(
