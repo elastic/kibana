@@ -6173,7 +6173,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logs-shared-plugin@link:x-pack/plugins/observability_solution/logs_shared":
+"@kbn/logs-shared-plugin@link:x-pack/platform/plugins/shared/logs_shared":
   version "0.0.0"
   uid ""
 
