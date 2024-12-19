@@ -25,15 +25,14 @@ describe('Data streams API', () => {
     jest.resetAllMocks();
   });
 
-  describe('Update data retention for DS - PUT /internal/index_management/{name}/data_retention', () => {
+  describe('Update data retention for DS - PUT /internal/index_management/data_retention', () => {
     const updateDataLifecycle = router.getMockESApiFn('indices.putDataLifecycle');
 
     it('updates data lifecycle for a given data stream', async () => {
       const mockRequest: RequestMock = {
         method: 'put',
-        path: addBasePath('/data_streams/{name}/data_retention'),
-        params: { name: 'foo' },
-        body: { dataRetention: '7d' },
+        path: addBasePath('/data_streams/data_retention'),
+        body: { dataRetention: '7d', dataStreams: ['foo'] },
       };
 
       updateDataLifecycle.mockResolvedValue({ success: true });
@@ -48,9 +47,8 @@ describe('Data streams API', () => {
     it('should return an error if it fails', async () => {
       const mockRequest: RequestMock = {
         method: 'put',
-        path: addBasePath('/data_streams/{name}/data_retention'),
-        params: { name: 'foo' },
-        body: { dataRetention: '7d' },
+        path: addBasePath('/data_streams/data_retention'),
+        body: { dataRetention: '7d', dataStreams: ['foo'] },
       };
 
       const error = new Error('Oh no!');

@@ -14,13 +14,16 @@ import { safeExec } from './exec';
 
 export const findRemoteName = async (repo: string) => {
   const res = await safeExec('git remote -v', true, false);
+  repo = repo.toLowerCase();
   const remotes = res.stdout
     .trim()
     .split('\n')
     .map((line) => line.split(/\t| /).filter(Boolean))
     .filter((chunks) => chunks.length >= 2);
   return remotes.find(
-    ([, url]) => url.includes(`github.com/${repo}`) || url.includes(`github.com:${repo}`)
+    ([, url]) =>
+      url.toLowerCase().includes(`github.com/${repo}`) ||
+      url.toLowerCase().includes(`github.com:${repo}`)
   )?.[0];
 };
 
