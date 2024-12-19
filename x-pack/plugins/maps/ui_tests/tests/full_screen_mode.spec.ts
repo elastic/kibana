@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
-import { test } from '../fixtures';
+import { expect, tags, test } from '@kbn/scout';
 
 test.describe('Maps full screen mode', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -20,7 +19,7 @@ test.describe('Maps full screen mode', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
       `Could not find the Full screen button, using selector ${sel}`
     ).toBeVisible();
   });
-  test('full screen mode hides the kbn app wrapper', async ({ page, pageObjects }) => {
+  test('full screen mode hides the kbn app wrapper', async ({ page }) => {
     expect(
       await page.testSubj.locator('kbnAppWrapper visibleChrome').waitFor({ state: 'visible' })
     );
@@ -30,7 +29,7 @@ test.describe('Maps full screen mode', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
   test('layer control is visible', async ({ page }) => {
     expect(await page.testSubj.locator('addLayerButton').waitFor({ state: 'visible' }));
   });
-  test('displays reenMode();exit full screen logo button', async ({ page, pageObjects }) => {
+  test('displays reenMode();exit full screen logo button', async ({ page }) => {
     await page.testSubj.click('mapsFullScreenMode');
     const sel = 'exitFullScreenModeButton';
     await expect(
