@@ -312,7 +312,6 @@ packages/kbn-config-schema @elastic/kibana-core
 packages/kbn-content-management-utils @elastic/kibana-data-discovery
 packages/kbn-crypto @elastic/kibana-security
 packages/kbn-crypto-browser @elastic/kibana-core
-packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 packages/kbn-cypress-config @elastic/kibana-operations
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 packages/kbn-data-view-utils @elastic/kibana-data-discovery
@@ -943,6 +942,7 @@ x-pack/plugins/upgrade_assistant @elastic/kibana-core
 x-pack/solutions/observability/packages/alert_details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting_test_data @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/get_padded_alert_time_range_util @elastic/obs-ux-management-team
+x-pack/solutions/observability/packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 x-pack/solutions/observability/packages/kbn-investigation-shared @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/observability_ai/observability_ai_common @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/observability_ai/observability_ai_server @elastic/obs-ai-assistant
@@ -3299,7 +3299,7 @@ x-pack/solutions/observability/packages/alerting_test_data @elastic/obs-ux-manag
 x-pack/solutions/observability/packages/get_padded_alert_time_range_util @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/solutions/observability/packages/kbn-apm-types @elastic/obs-ux-infra_services-team
-x-pack/solutions/observability/packages/kbn-custom-integrations @elastic/obs-ux-logs-team
+x-pack/solutions/observability/x-pack/solutions/observability/packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 x-pack/solutions/observability/packages/kbn-investigation-shared @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/kbn-timerange @elastic/obs-ux-logs-team
 x-pack/solutions/observability/packages/kbn-xstate-utils @elastic/obs-ux-logs-team
