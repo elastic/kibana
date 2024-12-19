@@ -33,7 +33,7 @@ export const enableStreamsRoute = createServerRoute({
     getScopedClients,
   }): Promise<{ acknowledged: true; message: string }> => {
     try {
-      const { scopedClusterClient } = await getScopedClients({ request });
+      const { scopedClusterClient, assetClient } = await getScopedClients({ request });
       const alreadyEnabled = await streamsEnabled({ scopedClusterClient });
       if (alreadyEnabled) {
         return { acknowledged: true, message: 'Streams was already enabled' };
@@ -41,6 +41,7 @@ export const enableStreamsRoute = createServerRoute({
       await createStreamsIndex(scopedClusterClient);
       await syncStream({
         scopedClusterClient,
+        assetClient,
         definition: rootStreamDefinition,
         logger,
       });
