@@ -39,6 +39,7 @@ import {
   getValuesFromQueryField,
   getFlyoutStyling,
   appendStatsByToQuery,
+  areValuesIntervalsValid,
 } from './helpers';
 import { EsqlControlFlyoutType } from '../types';
 import { ChooseColumnPopover } from './choose_column_popover';
@@ -54,6 +55,8 @@ interface ValueControlFormProps {
   initialState?: ESQLControlState;
 }
 
+const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
+
 export function ValueControlForm({
   controlType,
   initialState,
@@ -64,7 +67,12 @@ export function ValueControlForm({
   onCreateControl,
   onEditControl,
 }: ValueControlFormProps) {
-  const valuesField = useMemo(() => getValuesFromQueryField(queryString), [queryString]);
+  const valuesField = useMemo(() => {
+    if (controlType === EsqlControlType.VALUES) {
+      return getValuesFromQueryField(queryString);
+    }
+    return null;
+  }, [controlType, queryString]);
   const suggestedVariableName = useMemo(() => {
     const existingVariables = esqlVariablesService.getVariablesByType(controlType);
 
@@ -72,11 +80,18 @@ export function ValueControlForm({
       return initialState.variableName;
     }
 
-    if (valuesField) {
+    if (valuesField && controlType === EsqlControlType.VALUES) {
       // variables names can't have special characters, only underscore
       const fieldVariableName = valuesField.replace(/[^a-zA-Z0-9]/g, '_');
       return getRecurrentVariableName(
         fieldVariableName,
+        existingVariables.map((variable) => variable.key)
+      );
+    }
+
+    if (controlType === EsqlControlType.TIME_LITERAL) {
+      return getRecurrentVariableName(
+        'interval',
         existingVariables.map((variable) => variable.key)
       );
     }
@@ -87,11 +102,21 @@ export function ValueControlForm({
   }, [controlType, initialState, valuesField]);
 
   const [controlFlyoutType, setControlFlyoutType] = useState<EsqlControlFlyoutType>(
-    EsqlControlFlyoutType.VALUES_FROM_QUERY
+    controlType === EsqlControlType.TIME_LITERAL
+      ? EsqlControlFlyoutType.STATIC_VALUES
+      : EsqlControlFlyoutType.VALUES_FROM_QUERY
   );
 
   const [availableValuesOptions, setAvailableValuesOptions] = useState<EuiComboBoxOptionOption[]>(
-    []
+    controlType === EsqlControlType.TIME_LITERAL
+      ? SUGGESTED_INTERVAL_VALUES.map((option) => {
+          return {
+            label: option,
+            'data-test-subj': option,
+            key: option,
+          };
+        })
+      : []
   );
 
   const [selectedValues, setSelectedValues] = useState<EuiComboBoxOptionOption[]>(
@@ -117,15 +142,47 @@ export function ValueControlForm({
 
   const isControlInEditMode = useMemo(() => !!initialState, [initialState]);
 
+  const areValuesValid = useMemo(() => {
+    return controlType === EsqlControlType.TIME_LITERAL
+      ? areValuesIntervalsValid(selectedValues.map((option) => option.label))
+      : true;
+  }, [controlType, selectedValues]);
+
   useEffect(() => {
     const variableExists =
       esqlVariablesService.variableExists(variableName.replace('?', '')) && !isControlInEditMode;
-    setFormIsInvalid(!valuesQuery || !variableName || variableExists);
-  }, [isControlInEditMode, valuesQuery, variableName]);
+    setFormIsInvalid(!valuesQuery || !variableName || variableExists || !areValuesValid);
+  }, [areValuesValid, isControlInEditMode, valuesQuery, variableName]);
 
   const onValuesChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
     setSelectedValues(selectedOptions);
   }, []);
+
+  const onCreateOption = useCallback(
+    (searchValue: string, flattenedOptions: EuiComboBoxOptionOption[] = []) => {
+      if (!searchValue) {
+        return;
+      }
+
+      const normalizedSearchValue = searchValue.trim().toLowerCase();
+
+      const newOption = {
+        value: searchValue,
+        label: searchValue,
+      };
+
+      if (
+        flattenedOptions.findIndex(
+          (option) => option.label.trim().toLowerCase() === normalizedSearchValue
+        ) === -1
+      ) {
+        setAvailableValuesOptions([...availableValuesOptions, newOption]);
+      }
+
+      setSelectedValues((prevSelected) => [...prevSelected, newOption]);
+    },
+    [availableValuesOptions]
+  );
 
   const onVariableNameChange = useCallback(
     (e: { target: { value: React.SetStateAction<string> } }) => {
@@ -210,6 +267,7 @@ export function ValueControlForm({
       title: label || variableName,
       variableName,
       variableType: controlType,
+      // ToDo: Distinguish if the control comes from a query or static values
       esqlQuery: valuesQuery || queryString,
       grow,
     };
@@ -256,7 +314,7 @@ export function ValueControlForm({
         `}
       >
         <ControlType
-          isDisabled={false}
+          isDisabled={controlType === EsqlControlType.TIME_LITERAL}
           initialControlFlyoutType={controlFlyoutType}
           setControlFlyoutType={setControlFlyoutType}
         />
@@ -346,14 +404,15 @@ export function ValueControlForm({
           >
             <EuiComboBox
               aria-label={i18n.translate('esql.flyout.values.placeholder', {
-                defaultMessage: 'Select the options',
+                defaultMessage: 'Select the options or add a new one',
               })}
               placeholder={i18n.translate('esql.flyout.values.placeholder', {
-                defaultMessage: 'Select the options',
+                defaultMessage: 'Select the options or add a new one',
               })}
               options={availableValuesOptions}
               selectedOptions={selectedValues}
               onChange={onValuesChange}
+              onCreateOption={onCreateOption}
               fullWidth
               compressed
               css={css`

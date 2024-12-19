@@ -13,7 +13,6 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import { monaco } from '@kbn/monaco';
 import { esqlVariablesService } from '@kbn/esql-variables/common';
 import type { ESQLControlState } from '../types';
-import { IntervalControlForm } from './interval_control_form';
 import { ValueControlForm } from './value_control_form';
 import { FieldControlForm } from './field_control_form';
 import { updateQueryStringWithVariable } from './helpers';
@@ -73,19 +72,7 @@ export function ESQLControlsFlyout({
     [addToESQLVariablesService, controlType, onSaveControlCb]
   );
 
-  if (controlType === EsqlControlType.TIME_LITERAL) {
-    return (
-      <IntervalControlForm
-        queryString={queryString}
-        controlType={controlType}
-        closeFlyout={closeFlyout}
-        onCancelControlCb={onCancelControlCb}
-        initialState={initialState}
-        onCreateControl={onCreateControl}
-        onEditControl={onEditControl}
-      />
-    );
-  } else if (controlType === EsqlControlType.VALUES) {
+  if (controlType === EsqlControlType.VALUES || controlType === EsqlControlType.TIME_LITERAL) {
     return (
       <ValueControlForm
         queryString={queryString}
