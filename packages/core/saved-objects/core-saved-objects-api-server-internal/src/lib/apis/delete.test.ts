@@ -16,7 +16,7 @@ import {
   mockGetSearchDsl,
 } from '../repository.test.mock';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import type { SavedObjectsDeleteOptions } from '@kbn/core-saved-objects-api-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';

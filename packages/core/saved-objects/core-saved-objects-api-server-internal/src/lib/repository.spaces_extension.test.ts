@@ -18,7 +18,7 @@ import {
   mockDeleteLegacyUrlAliases,
 } from './repository.test.mock';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import { SavedObjectsRepository } from './repository';
 import { loggerMock } from '@kbn/logging-mocks';
