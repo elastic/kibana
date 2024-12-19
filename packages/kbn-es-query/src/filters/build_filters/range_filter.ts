@@ -187,6 +187,20 @@ export const buildRangeFilter = (
   }
 };
 
+export const buildSimpleNumberRangeFilter = (
+  fieldName: string,
+  params: RangeFilterParams,
+  value: string,
+  dataViewId: string
+) => {
+  return buildRangeFilter(
+    { name: fieldName, type: 'number' },
+    params,
+    { id: dataViewId, title: dataViewId },
+    value
+  );
+};
+
 /**
  * @internal
  */
