@@ -51,7 +51,8 @@ export function metricsRoute(params: MetricsRouteParams) {
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route is opted out from authorization. It can be accessed with JWT credentials.',
         },
       },
       options: {

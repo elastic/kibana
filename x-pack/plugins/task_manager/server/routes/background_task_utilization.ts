@@ -114,7 +114,8 @@ export function backgroundTaskUtilizationRoute(
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason:
+              'This route is opted out from authorization. It can be accessed with JWT credentials.',
           },
         },
         // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
