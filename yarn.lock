@@ -6169,7 +6169,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logs-explorer-plugin@link:x-pack/plugins/observability_solution/logs_explorer":
+"@kbn/logs-explorer-plugin@link:x-pack/solutions/observability/plugins/logs_explorer":
   version "0.0.0"
   uid ""
 
