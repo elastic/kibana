@@ -743,7 +743,6 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       fullWidth
                       languageId="xjson"
                       height={200}
-                      useDarkTheme={isDarkMode}
                     />
                   </FormRow>
                 </EuiPanel>
@@ -882,7 +881,6 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                           fullWidth
                           languageId="xjson"
                           height={200}
-                          useDarkTheme={isDarkMode}
                         />
                       </FormRow>
                     </>
@@ -967,7 +965,6 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                         fullWidth
                         languageId="xjson"
                         height={200}
-                        useDarkTheme={isDarkMode}
                       />
                     </FormRow>
                   </>
