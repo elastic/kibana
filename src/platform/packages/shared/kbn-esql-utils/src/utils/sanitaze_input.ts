@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ReferenceOrValueEmbeddable } from './types';
-export { isReferenceOrValueEmbeddable } from './types';
+export function sanitazeESQLInput(input: string): string | undefined {
+  return `\`${input.replace(/`/g, '``')}\``;
+}
