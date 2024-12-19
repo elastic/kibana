@@ -11,9 +11,10 @@ import type { BehaviorSubject } from 'rxjs';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { FetchStatus } from '../../types';
-import type {
+import {
   DataDocuments$,
   DataMain$,
+  DataMainMsgParams,
   DataMsg,
   DataTotalHits$,
   SavedSearchData,
@@ -37,7 +38,24 @@ export function sendCompleteMsg(main$: DataMain$, foundDocuments = true) {
   if (main$.getValue().fetchStatus === FetchStatus.COMPLETE) {
     return;
   }
-  main$.next({ fetchStatus: FetchStatus.COMPLETE, foundDocuments, error: undefined });
+  main$.next({
+    ...main$.getValue(),
+    fetchStatus: FetchStatus.COMPLETE,
+    foundDocuments,
+    error: undefined,
+  });
+}
+
+/**
+ * Send message when data fetching starts via main observable
+ */
+export function sendFetchStartMsg(main$: DataMain$, params: DataMainMsgParams) {
+  main$.next({
+    ...main$.getValue(),
+    params,
+    fetchStatus: FetchStatus.LOADING,
+    fetchTime: new Date().toISOString(),
+  });
 }
 
 /**
@@ -45,7 +63,7 @@ export function sendCompleteMsg(main$: DataMain$, foundDocuments = true) {
  */
 export function sendPartialMsg(main$: DataMain$) {
   if (main$.getValue().fetchStatus === FetchStatus.LOADING) {
-    main$.next({ fetchStatus: FetchStatus.PARTIAL });
+    main$.next({ ...main$.getValue(), fetchStatus: FetchStatus.PARTIAL });
   }
 }
 
@@ -57,7 +75,7 @@ export function sendLoadingMsg<T extends DataMsg>(
   props?: Omit<T, 'fetchStatus'>
 ) {
   if (data$.getValue().fetchStatus !== FetchStatus.LOADING) {
-    data$.next({ ...props, fetchStatus: FetchStatus.LOADING } as T);
+    data$.next({ ...data$.getValue(), ...props, fetchStatus: FetchStatus.LOADING } as T);
   }
 }
 
@@ -108,7 +126,14 @@ export function sendErrorMsg(data$: DataMain$ | DataDocuments$ | DataTotalHits$,
  * Needed when data view is switched or a new runtime field is added
  */
 export function sendResetMsg(data: SavedSearchData, initialFetchStatus: FetchStatus) {
-  data.main$.next({ fetchStatus: initialFetchStatus, foundDocuments: undefined });
+  const dataView = data.main$.getValue().params?.dataView;
+  data.main$.next({
+    fetchStatus: initialFetchStatus,
+    foundDocuments: undefined,
+    params: {
+      dataView,
+    },
+  });
   data.documents$.next({ fetchStatus: initialFetchStatus, result: [] });
   data.totalHits$.next({ fetchStatus: initialFetchStatus, result: undefined });
 }
