@@ -15,7 +15,7 @@ import { createPrebuiltRules } from '../../../../detection_engine/prebuilt_rules
 import type { IDetectionRulesClient } from '../../../../detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine';
 import type { StoredRuleMigration } from '../../types';
-import { getPrebuiltRules, getUniquePrebuiltRuleIds } from './prebuilt_rules';
+import { getPrebuiltRulesByIds, getUniquePrebuiltRuleIds } from './prebuilt_rules';
 import {
   MAX_CUSTOM_RULES_TO_CREATE_IN_PARALLEL,
   MAX_TRANSLATED_RULES_TO_INSTALL,
@@ -35,7 +35,11 @@ const installPrebuiltRules = async (
 ): Promise<UpdateRuleMigrationData[]> => {
   // Get required prebuilt rules
   const prebuiltRulesIds = getUniquePrebuiltRuleIds(rulesToInstall);
-  const prebuiltRules = await getPrebuiltRules(rulesClient, savedObjectsClient, prebuiltRulesIds);
+  const prebuiltRules = await getPrebuiltRulesByIds(
+    rulesClient,
+    savedObjectsClient,
+    prebuiltRulesIds
+  );
 
   const { installed: alreadyInstalledRules, installable } = Object.values(prebuiltRules).reduce(
     (acc, item) => {

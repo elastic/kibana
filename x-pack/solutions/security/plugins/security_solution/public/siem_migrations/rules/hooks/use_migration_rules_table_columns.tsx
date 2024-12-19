@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import type { RelatedIntegration } from '../../../../common/api/detection_engine';
 import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { TableColumn } from '../components/rules_table_columns';
 import {
@@ -17,15 +18,20 @@ import {
   createStatusColumn,
   createUpdatedColumn,
 } from '../components/rules_table_columns';
+import { createIntegrationsColumn } from '../components/rules_table_columns/integrations';
 
 export const useMigrationRulesTableColumns = ({
   disableActions,
   openMigrationRuleDetails,
   installMigrationRule,
+  getMigrationRuleData,
 }: {
   disableActions?: boolean;
   openMigrationRuleDetails: (rule: RuleMigration) => void;
   installMigrationRule: (migrationRule: RuleMigration, enable?: boolean) => void;
+  getMigrationRuleData: (
+    ruleId: string
+  ) => { relatedIntegrations?: RelatedIntegration[]; isIntegrationsLoading?: boolean } | undefined;
 }): TableColumn[] => {
   return useMemo(
     () => [
@@ -35,12 +41,13 @@ export const useMigrationRulesTableColumns = ({
       createRiskScoreColumn(),
       createSeverityColumn(),
       createAuthorColumn(),
+      createIntegrationsColumn({ getMigrationRuleData }),
       createActionsColumn({
         disableActions,
         openMigrationRuleDetails,
         installMigrationRule,
       }),
     ],
-    [disableActions, installMigrationRule, openMigrationRuleDetails]
+    [disableActions, getMigrationRuleData, installMigrationRule, openMigrationRuleDetails]
   );
 };

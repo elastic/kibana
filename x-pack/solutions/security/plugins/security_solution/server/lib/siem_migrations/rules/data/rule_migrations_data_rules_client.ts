@@ -43,6 +43,7 @@ export interface RuleMigrationFilters {
   ids?: string[];
   installable?: boolean;
   prebuilt?: boolean;
+  custom?: boolean;
   failed?: boolean;
   notFullyTranslated?: boolean;
   searchTerm?: string;
@@ -404,6 +405,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
       ids,
       installable,
       prebuilt,
+      custom,
       searchTerm,
       failed,
       notFullyTranslated,
@@ -425,6 +427,9 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     }
     if (prebuilt) {
       filter.push(searchConditions.isPrebuilt());
+    }
+    if (custom) {
+      filter.push(searchConditions.isCustom());
     }
     if (searchTerm?.length) {
       filter.push(searchConditions.matchTitle(searchTerm));

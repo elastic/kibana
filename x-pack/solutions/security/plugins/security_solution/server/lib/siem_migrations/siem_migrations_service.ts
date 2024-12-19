@@ -31,7 +31,7 @@ export class SiemMigrationsService {
   }
 
   createRulesClient(params: SiemRuleMigrationsCreateClientParams): SiemRuleMigrationsClient {
-    return this.rules.createClient(params);
+    return this.rules.createClient({ ...params });
   }
 
   stop() {
