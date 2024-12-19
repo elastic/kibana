@@ -296,6 +296,7 @@ packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 packages/kbn-cases-components @elastic/response-ops
 packages/kbn-cbor @elastic/kibana-operations
 packages/kbn-chart-icons @elastic/kibana-visualizations
+packages/kbn-charts-theme @elastic/kibana-visualizations
 packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
 packages/kbn-ci-stats-core @elastic/kibana-operations

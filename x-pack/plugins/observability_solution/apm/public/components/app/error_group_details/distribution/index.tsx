@@ -14,13 +14,12 @@ import {
   ScaleType,
   Settings,
   Tooltip,
-  LIGHT_THEME,
-  DARK_THEME,
   LegendValue,
 } from '@elastic/charts';
-import { EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -41,7 +40,7 @@ interface Props {
 
 export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
   const { core } = useApmPluginContext();
-  const { colorMode } = useEuiTheme();
+  const baseTheme = useElasticChartsTheme();
 
   const { urlParams } = useLegacyUrlParams();
   const { comparisonEnabled } = urlParams;
@@ -96,7 +95,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
             showLegend
             legendValues={[LegendValue.CurrentAndLastValue]}
             legendPosition={Position.Bottom}
-            theme={colorMode === 'DARK' ? DARK_THEME : LIGHT_THEME}
+            baseTheme={baseTheme}
             locale={i18n.getLocale()}
           />
           <Axis
