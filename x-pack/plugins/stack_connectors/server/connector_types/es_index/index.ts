@@ -25,10 +25,7 @@ import {
   ALERT_HISTORY_PREFIX,
   buildAlertHistoryDocument,
 } from '@kbn/actions-plugin/common';
-import {
-  BulkOperationType,
-  BulkResponseItem,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { BulkOperationType, BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
 
 export type ESIndexConnectorType = ConnectorType<
   ConnectorTypeConfigType,

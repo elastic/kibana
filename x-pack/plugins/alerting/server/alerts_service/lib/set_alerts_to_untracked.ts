@@ -20,7 +20,7 @@ import {
   ALERT_UUID,
   AlertStatus,
 } from '@kbn/rule-data-utils';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { RulesClientContext } from '../../rules_client';
 import { AlertingAuthorizationEntity } from '../../authorization/types';
 

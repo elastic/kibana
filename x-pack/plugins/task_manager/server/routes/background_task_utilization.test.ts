@@ -15,7 +15,7 @@ import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/us
 import { MonitoringStats } from '../monitoring';
 import { configSchema, TaskManagerConfig } from '../config';
 import { backgroundTaskUtilizationRoute } from './background_task_utilization';
-import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');

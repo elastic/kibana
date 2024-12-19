@@ -21,7 +21,7 @@ import {
 import {
   AggregationsStringTermsBucketKeys,
   AggregationsTermsAggregateBase,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { InvalidateAPIKeyResult } from '../rules_client';
 import { AlertingConfig } from '../config';
 import { timePeriodBeforeDate } from '../lib/get_cadence';

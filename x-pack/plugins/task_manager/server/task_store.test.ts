@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { Client } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import _ from 'lodash';
 import { first } from 'rxjs';
 
