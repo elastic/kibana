@@ -175,6 +175,19 @@ export const getTransformOptions = ({
   },
   source: {
     index: source,
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              '@timestamp': {
+                gte: 'now-24h',
+              },
+            },
+          },
+        ],
+      },
+    },
   },
   frequency: '1h', // 1h is the maximum value
   sync: {
