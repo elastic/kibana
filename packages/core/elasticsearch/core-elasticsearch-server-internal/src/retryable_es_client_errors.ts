@@ -30,6 +30,8 @@ export const isRetryableEsClientError = (e: EsErrors.ElasticsearchClientError): 
     e instanceof EsErrors.TimeoutError ||
     (e instanceof EsErrors.ResponseError &&
       (retryResponseStatuses.includes(e?.statusCode!) ||
+        // Our proxy may return 404 error with "Unknown resource" while resources are being created, we want to retry these errors. Ideally, the proxy would return 503s. See original issue https://github.com/elastic/kibana/issues/199502
+        (e?.statusCode === 404 && e?.body?.message === 'Unknown resource.') ||
         // ES returns a 400 Bad Request when trying to close or delete an
         // index while snapshots are in progress. This should have been a 503
         // so once https://github.com/elastic/elasticsearch/issues/65883 is
