@@ -35,28 +35,26 @@ export const buildManagedUserDetailsQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: false,
-    body: {
-      query: { bool: { filter, should, minimum_should_match: 1 } },
-      size: 0,
-      aggs: {
-        datasets: {
-          terms: {
-            field: 'event.dataset',
-          },
-          aggs: {
-            latest_hit: {
-              top_hits: {
-                fields: ['*', '_index', '_id'], // '_index' and '_id' are not returned by default
-                _source: false,
-                size: 1,
-                sort: [
-                  {
-                    '@timestamp': {
-                      order: 'desc' as const,
-                    },
+    query: { bool: { filter, should, minimum_should_match: 1 } },
+    size: 0,
+    aggs: {
+      datasets: {
+        terms: {
+          field: 'event.dataset',
+        },
+        aggs: {
+          latest_hit: {
+            top_hits: {
+              fields: ['*', '_index', '_id'], // '_index' and '_id' are not returned by default
+              _source: false,
+              size: 1,
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc' as const,
                   },
-                ],
-              },
+                },
+              ],
             },
           },
         },
@@ -65,5 +63,5 @@ export const buildManagedUserDetailsQuery = ({
     sort: [{ '@timestamp': 'desc' }],
   };
 
-  return dslQuery;
+  return dslQuery as ISearchRequestParams;
 };
