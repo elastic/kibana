@@ -165,7 +165,7 @@ async function rewritePromptForConnector({
     parameters: {
       type: 'object',
       additionalProperties: false,
-      required: ['rewrittenUserPrompt', 'queryFilters'],
+      required: ['rewrittenUserPrompt'],
       properties: {
         rewrittenUserPrompt: {
           type: 'string',
