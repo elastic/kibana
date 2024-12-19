@@ -15,7 +15,7 @@ your services or apps.
 ## Example
 
 ```ts
-import { createStateContainer } from 'src/plugins/kibana_utils';
+import { createStateContainer } from 'src/platform/plugins/shared/kibana_utils';
 
 const container = createStateContainer(
   { count: 0 },
@@ -41,8 +41,8 @@ See demos [here](../../demos/state_containers/).
 You can run them with
 
 ```
-npx -q ts-node src/plugins/kibana_utils/demos/state_containers/counter.ts
-npx -q ts-node src/plugins/kibana_utils/demos/state_containers/todomvc.ts
+npx -q ts-node src/platform/plugins/shared/kibana_utils/demos/state_containers/counter.ts
+npx -q ts-node src/platform/plugins/shared/kibana_utils/demos/state_containers/todomvc.ts
 ```
 
 ## Reference

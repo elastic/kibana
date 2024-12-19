@@ -624,6 +624,7 @@ src/platform/plugins/shared/files @elastic/appex-sharedux
 src/platform/plugins/shared/guided_onboarding @elastic/appex-sharedux
 src/platform/plugins/shared/home @elastic/appex-sharedux
 src/platform/plugins/shared/kibana_react @elastic/appex-sharedux
+src/platform/plugins/shared/kibana_utils @elastic/appex-sharedux
 src/platform/plugins/shared/management @elastic/kibana-management
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/bfetch @elastic/appex-sharedux
@@ -662,7 +663,6 @@ src/plugins/input_control_vis @elastic/kibana-presentation
 src/plugins/inspector @elastic/kibana-presentation
 src/plugins/interactive_setup @elastic/kibana-security
 src/plugins/kibana_usage_collection @elastic/kibana-core
-src/plugins/kibana_utils @elastic/appex-sharedux
 src/plugins/links @elastic/kibana-presentation
 src/plugins/maps_ems @elastic/kibana-presentation
 src/plugins/navigation @elastic/appex-sharedux
