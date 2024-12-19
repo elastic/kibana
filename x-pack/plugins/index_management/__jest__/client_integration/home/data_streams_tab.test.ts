@@ -449,6 +449,158 @@ describe('Data Streams tab', () => {
       });
     });
 
+    describe('bulk update data retention', () => {
+      beforeAll(async () => {
+        const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
+
+        const ds1 = createDataStreamPayload({
+          name: 'dataStream1',
+          lifecycle: {
+            enabled: false,
+          },
+        });
+        const ds2 = createDataStreamPayload({
+          name: 'dataStream2',
+          lifecycle: {
+            enabled: true,
+          },
+        });
+
+        setLoadDataStreamsResponse([ds1, ds2]);
+        setLoadDataStreamResponse(ds1.name, ds1);
+
+        testBed = await setup(httpSetup, {
+          history: createMemoryHistory(),
+          url: urlServiceMock,
+        });
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+      });
+
+      test('can set data retention period for mutliple data streams', async () => {
+        const {
+          actions: {
+            selectDataStream,
+            clickManageDataStreamsButton,
+            clickBulkEditDataRetentionButton,
+          },
+        } = testBed;
+
+        selectDataStream('dataStream1', true);
+        selectDataStream('dataStream2', true);
+        clickManageDataStreamsButton();
+
+        clickBulkEditDataRetentionButton();
+
+        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
+          success: true,
+        });
+
+        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream2', {
+          success: true,
+        });
+
+        // set data retention value
+        testBed.form.setInputValue('dataRetentionValue', '7');
+        // Set data retention unit
+        testBed.find('show-filters-button').simulate('click');
+        testBed.find('filter-option-h').simulate('click');
+
+        await act(async () => {
+          testBed.find('saveButton').simulate('click');
+        });
+        testBed.component.update();
+
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/data_streams/data_retention`,
+          expect.objectContaining({
+            body: JSON.stringify({
+              dataRetention: '7h',
+              dataStreams: ['dataStream1', 'dataStream2'],
+            }),
+          })
+        );
+      });
+
+      test('can disable lifecycle', async () => {
+        const {
+          actions: {
+            selectDataStream,
+            clickManageDataStreamsButton,
+            clickBulkEditDataRetentionButton,
+          },
+        } = testBed;
+
+        selectDataStream('dataStream1', true);
+        selectDataStream('dataStream2', true);
+        clickManageDataStreamsButton();
+
+        clickBulkEditDataRetentionButton();
+
+        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
+          success: true,
+        });
+
+        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream2', {
+          success: true,
+        });
+
+        testBed.form.toggleEuiSwitch('dataRetentionEnabledField.input');
+
+        await act(async () => {
+          testBed.find('saveButton').simulate('click');
+        });
+        testBed.component.update();
+
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/data_streams/data_retention`,
+          expect.objectContaining({
+            body: JSON.stringify({ enabled: false, dataStreams: ['dataStream1', 'dataStream2'] }),
+          })
+        );
+      });
+
+      test('allows to set infinite retention period', async () => {
+        const {
+          actions: {
+            selectDataStream,
+            clickManageDataStreamsButton,
+            clickBulkEditDataRetentionButton,
+          },
+        } = testBed;
+
+        selectDataStream('dataStream1', true);
+        selectDataStream('dataStream2', true);
+        clickManageDataStreamsButton();
+
+        clickBulkEditDataRetentionButton();
+
+        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
+          success: true,
+        });
+
+        httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream2', {
+          success: true,
+        });
+
+        testBed.form.toggleEuiSwitch('infiniteRetentionPeriod.input');
+
+        await act(async () => {
+          testBed.find('saveButton').simulate('click');
+        });
+        testBed.component.update();
+
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/data_streams/data_retention`,
+          expect.objectContaining({
+            body: JSON.stringify({ dataStreams: ['dataStream1', 'dataStream2'] }),
+          })
+        );
+      });
+    });
+
     describe('detail panel', () => {
       test('opens when the data stream name in the table is clicked', async () => {
         const { actions, findDetailPanel, findDetailPanelTitle } = testBed;
@@ -557,8 +709,10 @@ describe('Data Streams tab', () => {
           testBed.component.update();
 
           expect(httpSetup.put).toHaveBeenLastCalledWith(
-            `${API_BASE_PATH}/data_streams/dataStream1/data_retention`,
-            expect.objectContaining({ body: JSON.stringify({ dataRetention: '7h' }) })
+            `${API_BASE_PATH}/data_streams/data_retention`,
+            expect.objectContaining({
+              body: JSON.stringify({ dataRetention: '7h', dataStreams: ['dataStream1'] }),
+            })
           );
         });
 
@@ -583,8 +737,10 @@ describe('Data Streams tab', () => {
           testBed.component.update();
 
           expect(httpSetup.put).toHaveBeenLastCalledWith(
-            `${API_BASE_PATH}/data_streams/dataStream1/data_retention`,
-            expect.objectContaining({ body: JSON.stringify({ enabled: false }) })
+            `${API_BASE_PATH}/data_streams/data_retention`,
+            expect.objectContaining({
+              body: JSON.stringify({ enabled: false, dataStreams: ['dataStream1'] }),
+            })
           );
         });
 
@@ -609,8 +765,8 @@ describe('Data Streams tab', () => {
           testBed.component.update();
 
           expect(httpSetup.put).toHaveBeenLastCalledWith(
-            `${API_BASE_PATH}/data_streams/dataStream1/data_retention`,
-            expect.objectContaining({ body: JSON.stringify({}) })
+            `${API_BASE_PATH}/data_streams/data_retention`,
+            expect.objectContaining({ body: JSON.stringify({ dataStreams: ['dataStream1'] }) })
           );
         });
       });
@@ -664,6 +820,7 @@ describe('Data Streams tab', () => {
           enabled: true,
           data_retention: '7d',
         },
+        ilmPolicyName: 'testILM',
         indices: [
           {
             managedBy: 'Index Lifecycle Management',
@@ -1028,17 +1185,20 @@ describe('Data Streams tab', () => {
 
       test('displays/hides delete action depending on data streams privileges', async () => {
         const {
-          actions: { selectDataStream },
+          actions: { selectDataStream, clickManageDataStreamsButton },
           find,
         } = testBed;
 
         selectDataStream('dataStreamNoDelete', true);
+        clickManageDataStreamsButton();
         expect(find('deleteDataStreamsButton').exists()).toBeFalsy();
 
         selectDataStream('dataStreamWithDelete', true);
+        clickManageDataStreamsButton();
         expect(find('deleteDataStreamsButton').exists()).toBeFalsy();
 
         selectDataStream('dataStreamNoDelete', false);
+        clickManageDataStreamsButton();
         expect(find('deleteDataStreamsButton').exists()).toBeTruthy();
       });
 
