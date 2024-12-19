@@ -164,7 +164,7 @@
     "xpack.timelines": "solutions/security/plugins/timelines",
     "xpack.transform": "platform/plugins/private/transform",
     "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
-    "xpack.upgradeAssistant": "plugins/upgrade_assistant",
+    "xpack.upgradeAssistant": "platform/plugins/private/upgrade_assistant",
     "xpack.uptime": [
       "solutions/observability/plugins/uptime"
     ],
