@@ -9,11 +9,11 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/guided_onboarding'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/guided_onboarding',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/shared/guided_onboarding'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/guided_onboarding',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/guided_onboarding/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/src/platform/plugins/shared/guided_onboarding/{common,public,server}/**/*.{ts,tsx}',
   ],
 };
