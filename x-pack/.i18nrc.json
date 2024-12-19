@@ -157,7 +157,7 @@
     "xpack.snapshotRestore": "platform/plugins/private/snapshot_restore",
     "xpack.spaces": "plugins/spaces",
     "xpack.savedObjectsTagging": [
-      "plugins/saved_objects_tagging"
+      "platform/plugins/private/saved_objects_tagging"
     ],
     "xpack.taskManager": "legacy/plugins/task_manager",
     "xpack.threatIntelligence": "solutions/security/plugins/threat_intelligence",

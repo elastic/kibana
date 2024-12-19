@@ -853,6 +853,7 @@ x-pack/platform/plugins/private/remote_clusters @elastic/kibana-management
 x-pack/platform/plugins/private/reporting @elastic/appex-sharedux
 x-pack/platform/plugins/private/rollup @elastic/kibana-management
 x-pack/platform/plugins/private/runtime_fields @elastic/kibana-management
+x-pack/platform/plugins/private/saved_objects_tagging @elastic/appex-sharedux
 x-pack/platform/plugins/private/snapshot_restore @elastic/kibana-management
 x-pack/platform/plugins/private/transform @elastic/ml-ui
 x-pack/platform/plugins/private/translations @elastic/kibana-localization
@@ -920,7 +921,6 @@ x-pack/plugins/observability_solution/observability_shared @elastic/observabilit
 x-pack/plugins/observability_solution/profiling @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/profiling_data_access @elastic/obs-ux-infra_services-team
 x-pack/plugins/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
-x-pack/plugins/saved_objects_tagging @elastic/appex-sharedux
 x-pack/plugins/search_assistant @elastic/search-kibana
 x-pack/plugins/search_connectors @elastic/search-kibana
 x-pack/plugins/search_homepage @elastic/search-kibana
