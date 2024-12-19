@@ -703,7 +703,7 @@ using the CURL scripts in the scripts folder.
 |This plugin contains various LLM tasks.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/logs_data_access/README.md[logsDataAccess]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/logs_data_access/README.md[logsDataAccess]
 |Exposes services to access logs data.
 
 
