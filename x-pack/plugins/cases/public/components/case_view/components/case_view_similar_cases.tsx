@@ -25,7 +25,7 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
   const [pageSize, setPageSize] = useState(CASES_TABLE_PER_PAGE_VALUES[0]);
 
   const { data = initialData, isFetching: isLoadingCases } = useGetSimilarCases({
-    caseData,
+    caseId: caseData.id,
     page: pageIndex + 1,
     perPage: pageSize,
   });

@@ -8,7 +8,7 @@
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { casesQueriesKeys } from './constants';
-import type { CasesSimilarResponseUI, CaseUI } from './types';
+import type { CasesSimilarResponseUI } from './types';
 import { useToasts } from '../common/lib/kibana';
 import * as i18n from './translations';
 import { getSimilarCases } from './api';
@@ -22,7 +22,7 @@ export const initialData: CasesSimilarResponseUI = {
 };
 
 export const useGetSimilarCases = (params: {
-  caseData: CaseUI;
+  caseId: string;
   perPage: number;
   page: number;
 }): UseQueryResult<CasesSimilarResponseUI> => {
@@ -32,7 +32,7 @@ export const useGetSimilarCases = (params: {
     casesQueriesKeys.cases(params),
     ({ signal }) => {
       return getSimilarCases({
-        caseId: params.caseData.id,
+        caseId: params.caseId,
         perPage: params.perPage,
         page: params.page,
         signal,
