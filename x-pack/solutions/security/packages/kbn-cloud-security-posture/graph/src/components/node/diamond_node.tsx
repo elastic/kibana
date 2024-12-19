@@ -11,7 +11,6 @@ import { Handle, Position } from '@xyflow/react';
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import {
   NodeShapeContainer,
-  NodeLabel,
   NodeShapeOnHoverSvg,
   NodeShapeSvg,
   NodeIcon,
@@ -20,6 +19,7 @@ import {
 } from './styles';
 import { DiamondHoverShape, DiamondShape } from './shapes/diamond_shape';
 import { NodeExpandButton } from './node_expand_button';
+import { Label } from './label';
 
 const NODE_WIDTH = 99;
 const NODE_HEIGHT = 98;
@@ -81,7 +81,7 @@ export const DiamondNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           style={HandleStyleOverride}
         />
       </NodeShapeContainer>
-      <NodeLabel>{label ? label : id}</NodeLabel>
+      <Label text={label ? label : id} />
     </>
   );
 });
