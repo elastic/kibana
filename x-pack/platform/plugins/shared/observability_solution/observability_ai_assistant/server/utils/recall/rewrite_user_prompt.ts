@@ -91,6 +91,14 @@ async function rewritePromptForConnector({
 
   const keywordExample = lowCardinalityKeywordFields[0];
   const dateFieldExample = timestampFields[0];
+  if (!keywordExample && !dateFieldExample) {
+    logger.error(`No keyword fields and no date fields found for index pattern ${indexPattern}`);
+    return {
+      userPrompt,
+      indexPattern,
+      filters: [],
+    };
+  }
 
   const queryFilterItems = compact([
     ...lowCardinalityKeywordFields.map(
@@ -147,8 +155,16 @@ async function rewritePromptForConnector({
           {
             "rewrittenUserPrompt": "front page bugs",
             "queryFilters": [
-              { "field": "${keywordExample.field}", "value": "${keywordExample.values[0]}" },
-              { "field": "${dateFieldExample}", "gte": "now-7d/d", "lte": "now/d" }
+              ${
+                keywordExample
+                  ? `{ field: "${keywordExample?.field}", value: ${keywordExample?.values[0]} }`
+                  : ''
+              },
+              ${
+                dateFieldExample
+                  ? `{ "field": "${dateFieldExample}", "gte": "now-7d/d", "lte": "now/d" }`
+                  : ''
+              }
             ],
           }
           """
@@ -281,7 +297,7 @@ async function getLowCardinalityKeywordFields({
     );
 
     // Return the low-cardinality fields
-    return keywordItems.filter(({ values }) => values.length < 10);
+    return keywordItems.filter(({ values }) => values.length > 0 && values.length < 10);
   } catch (error) {
     logger.error(`Error retrieving low-cardinality fields: ${error.message}`);
     return [];
