@@ -14,11 +14,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiButton, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 
-import {
-  TextAreaField,
-  SelectField,
-  TextField,
-} from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { TextAreaField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
 import type { ObservablePatch, ObservablePost } from '../../../common/types/api';
@@ -26,6 +22,7 @@ import type { Observable } from '../../../common/types/domain';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import * as i18n from './translations';
 import { fieldsConfig, normalizeValueType } from './fields_config';
+import { getDynamicValueField } from './builder';
 
 export interface ObservableFormFieldsProps {
   observable?: Observable;
@@ -52,6 +49,12 @@ export const ObservableFormFields = memo(({ observable }: ObservableFormFieldsPr
     [validateFields]
   );
 
+  // NOTE: dynamic, because of field config changes, depending on the selectedTypeKey
+  const ValueComponent = useMemo(
+    () => getDynamicValueField(normalizeValueType(selectedTypeKey)),
+    [selectedTypeKey]
+  );
+
   return (
     <>
       {!observable && (
@@ -70,17 +73,7 @@ export const ObservableFormFields = memo(({ observable }: ObservableFormFieldsPr
           config={fieldsConfig.typeKey}
         />
       )}
-      <UseField
-        path="value"
-        config={fieldsConfig.value[normalizeValueType(selectedTypeKey)]}
-        componentProps={{
-          placeholder: i18n.VALUE_PLACEHOLDER,
-          euiFieldProps: {
-            'data-test-subj': 'observable-value-field',
-          },
-        }}
-        component={TextField}
-      />
+      <ValueComponent />
       <UseField
         path="description"
         componentProps={{ euiFieldProps: { 'data-test-subj': 'observable-description-textarea' } }}
