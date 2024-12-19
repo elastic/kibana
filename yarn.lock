@@ -6901,7 +6901,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-objects-management-plugin@link:src/plugins/saved_objects_management":
+"@kbn/saved-objects-management-plugin@link:src/platform/plugins/shared/saved_objects_management":
   version "0.0.0"
   uid ""
 
