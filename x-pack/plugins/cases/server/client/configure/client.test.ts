@@ -1207,20 +1207,6 @@ describe('client', () => {
       describe('observableTypes', () => {
         it('throws when trying to set duplicate observableTypes', async () => {
           clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(true);
-          clientArgs.services.caseConfigureService.get.mockResolvedValue({
-            // @ts-ignore: these are all the attributes needed for the test
-            attributes: {
-              templates: [
-                {
-                  key: 'template_1',
-                  name: 'template 1',
-                  description: 'this is test description',
-                  tags: ['foo', 'bar'],
-                  caseFields: null,
-                },
-              ],
-            },
-          });
 
           await expect(
             update(
@@ -1620,6 +1606,30 @@ describe('client', () => {
             )
           ).rejects.toThrow(
             'Failed to create case configuration: Error: In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
+          );
+        });
+      });
+
+      describe('observableTypes', () => {
+        it('throws when trying to set duplicate observableTypes', async () => {
+          clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+
+          await expect(
+            create(
+              {
+                ...baseRequest,
+                observableTypes: [
+                  {
+                    key: 'e638af17-ebb6-4678-a937-b734bffee36a',
+                    label: OBSERVABLE_TYPE_IPV4.label,
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to create case configuration: Error: Invalid duplicated observable types in request: ipv4'
           );
         });
       });
