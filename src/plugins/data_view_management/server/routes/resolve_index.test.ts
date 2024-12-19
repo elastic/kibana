@@ -23,6 +23,12 @@ const mockResponseIndices = {
   data_streams: [],
 };
 
+const mockResponseEmpty = {
+  indices: [],
+  aliases: [],
+  data_streams: [],
+};
+
 const mockError403 = {
   meta: {
     body: {
@@ -74,7 +80,7 @@ const mockError404 = {
   },
 };
 
-describe('preview_scripted_field route', () => {
+describe('resolve_index route', () => {
   let mockCoreSetup: MockedKeys<CoreSetup>;
 
   beforeEach(() => {
@@ -114,6 +120,41 @@ describe('preview_scripted_field route', () => {
 
     expect(mockResponse.ok).toBeCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({ body: mockResponseIndices });
+  });
+
+  it('should return 200 for a search for indices with wildcard', async () => {
+    const mockClient = {
+      indices: {
+        resolveIndex: jest.fn().mockResolvedValue(mockResponseEmpty),
+      },
+    };
+    const mockContext = {
+      core: {
+        elasticsearch: { client: { asCurrentUser: mockClient } },
+      },
+    };
+    const mockRequest = httpServerMock.createKibanaRequest({
+      params: {
+        query: 'asdf*',
+      },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    registerResolveIndexRoute(mockCoreSetup.http.createRouter());
+
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+    const handler = mockRouter.get.mock.calls[0][1];
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
+
+    expect(mockClient.indices.resolveIndex.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "expand_wildcards": "open",
+        "name": "asdf*",
+      }
+    `);
+
+    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok.mock.calls[0][0]).toEqual({ body: mockResponseEmpty });
   });
 
   it('returns 404 when hitting a 403 from Elasticsearch', async () => {
