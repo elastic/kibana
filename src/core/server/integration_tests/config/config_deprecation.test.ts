@@ -26,14 +26,17 @@ describe('configuration deprecations', () => {
   });
 
   if (getFips() === 0) {
-    it('should not log deprecation warnings for default configuration', async () => {
+    it('should log one warning for default configuration, the http/tls deprecation warning', async () => {
       root = createRoot();
 
       await root.preboot();
       await root.setup();
 
       const logs = loggingSystemMock.collect(mockLoggingSystem);
-      expect(logs.warn.flat()).toHaveLength(0);
+      expect(logs.warn.flat()).toHaveLength(1);
+      expect(logs.warn.flat()[0]).toEqual(
+        'TLS is not enabled, or the HTTP protocol is set to HTTP/1. Enabling TLS and using HTTP/2 improves security and performance.'
+      );
     });
   } else {
     it('fips is enabled and the default configuration has been overridden', () => {
