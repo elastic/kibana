@@ -129,7 +129,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
               data-test-subj="editDownloadSourcesFlyout.hostInput"
               fullWidth
               {...inputs.hostInput.props}
-              placeholder="https://artifacts.elastic.co/downloads/"
+              placeholder="https://artifacts.elastic.co/downloads"
             />
           </EuiFormRow>
           <EuiFormRow
