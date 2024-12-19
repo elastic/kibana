@@ -8,8 +8,6 @@
     "apmOss": "src/plugins/apm_oss",
     "autocomplete": "x-pack/solutions/security/packages/kbn-securitysolution-autocomplete/src",
     "avcBanner": "src/platform/packages/shared/kbn-avc-banner/src",
-    "bfetch": "src/plugins/bfetch",
-    "bfetchError": "packages/kbn-bfetch-error",
     "cases": ["packages/kbn-cases-components"],
     "cellActions": "src/platform/packages/shared/kbn-cell-actions",
     "charts": "src/plugins/charts",
