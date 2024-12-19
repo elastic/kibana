@@ -8,13 +8,29 @@
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 
-const ArrowMarker = ({ id, color }: { id: string; color: string }) => {
+const getArrowPoints = (width: number, height: number): string => {
+  return `${-width},${-height} 0,0 ${-width},${height} ${-width},${-height}`;
+};
+
+const ArrowMarker = ({
+  id,
+  color,
+  width = 5,
+  height = 4,
+}: {
+  id: string;
+  color: string;
+  width?: number;
+  height?: number;
+}) => {
+  const points = getArrowPoints(width, height);
+
   return (
     <marker
       id={id}
-      markerWidth="14.4" // Increased by 20% from 12 to 14.4
-      markerHeight="14.4" // Increased by 20% from 12 to 14.4
-      viewBox="-12 -12 24 24" // Increased by 20% from "-10 -10 20 20" to "-12 -12 24 24"
+      markerWidth={width * 2.4} // Scale marker width
+      markerHeight={height * 3} // Scale marker height
+      viewBox={`${-width * 2} ${-height * 2.5} ${width * 4} ${height * 5}`} // Dynamic viewBox
       markerUnits="strokeWidth"
       orient="auto-start-reverse"
       refX="0"
@@ -23,8 +39,8 @@ const ArrowMarker = ({ id, color }: { id: string; color: string }) => {
       <polyline
         strokeLinecap="round"
         strokeLinejoin="round"
-        points="-6,-4.8 0,0 -6,4.8 -6,-4.8" // Adjusted by 20%
-        strokeWidth="1.2" // Increased by 20%
+        points={points}
+        strokeWidth="1"
         stroke={color}
         fill={color}
       />
@@ -68,9 +84,9 @@ export const SvgDefsMarker = () => {
   return (
     <svg css={{ position: 'absolute', width: 0, height: 0 }}>
       <defs>
-        <ArrowMarker id="arrowPrimary" color={euiTheme.colors.primary} />
-        <ArrowMarker id="arrowDanger" color={euiTheme.colors.danger} />
-        <ArrowMarker id="arrowWarning" color={euiTheme.colors.warning} />
+        <ArrowMarker id="arrowPrimary" color={euiTheme.colors.primary} width={6} height={4.8} />
+        <ArrowMarker id="arrowDanger" color={euiTheme.colors.danger} width={6} height={4.8} />
+        <ArrowMarker id="arrowWarning" color={euiTheme.colors.warning} width={6} height={4.8} />
         <DotMarker id="dotPrimary" color={euiTheme.colors.primary} />
         <DotMarker id="dotDanger" color={euiTheme.colors.danger} />
         <DotMarker id="dotWarning" color={euiTheme.colors.warning} />
