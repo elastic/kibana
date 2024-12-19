@@ -66,7 +66,6 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "apm-server-schema": "58a8c6468edae3d1dc520f0134f59cf3f4fd7eff",
         "apm-service-group": "66dfc1ddd40bad8f693c873bf6002ca30079a4ae",
         "apm-telemetry": "4df255b8b022f5d160687db736b9abcd6ab173fe",
-        "app_search_telemetry": "36234f19573ad397ac30197c45ac219921cc3106",
         "application_usage_daily": "20142d23fe5d05ba22b4bc46614d99883bc488f0",
         "application_usage_totals": "a29ab014edc20382b9ce22ede221b18cee5d93a6",
         "background-task-node": "e61f0ea9923fa05b3af0aae6c6baf2f0283e14b3",
@@ -182,7 +181,6 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "usage-counter": "1690e9b642393c467e560fd14dd317dea24a14ee",
         "usage-counters": "48782b3bcb6b5a23ba6f2bfe3a380d835e68890a",
         "visualization": "93a3e73994ad836fe2b1dccbe208238f41f63da0",
-        "workplace_search_telemetry": "52b32b47ee576f554ac77cb1d5896dfbcfe9a1fb",
       }
     `);
   });
