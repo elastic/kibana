@@ -43,17 +43,6 @@ import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/rou
 import { readAlertsIndexExistsRoute } from '../lib/detection_engine/routes/index/read_alerts_index_exists_route';
 import { registerResolverRoutes } from '../endpoint/routes/resolver';
 import { registerWorkflowInsightsRoutes } from '../endpoint/routes/workflow_insights';
-import {
-  createEsIndexRoute,
-  createPrebuiltSavedObjectsRoute,
-  createStoredScriptRoute,
-  deleteEsIndicesRoute,
-  deletePrebuiltSavedObjectsRoute,
-  deleteStoredScriptRoute,
-  getRiskScoreIndexStatusRoute,
-  installRiskScoresRoute,
-  readPrebuiltDevToolContentRoute,
-} from '../lib/risk_score/routes';
 import { registerManageExceptionsRoutes } from '../lib/exceptions/api/register_routes';
 import { registerDashboardsRoutes } from '../lib/dashboards/routes';
 import { registerTagsRoutes } from '../lib/tags/routes';
@@ -130,17 +119,6 @@ export const initRoutes = (
 
   // Privileges API to get the generic user privileges
   readPrivilegesRoute(router, hasEncryptionKey);
-
-  // risky score module
-  createEsIndexRoute(router, logger);
-  deleteEsIndicesRoute(router);
-  createStoredScriptRoute(router, logger);
-  deleteStoredScriptRoute(router);
-  readPrebuiltDevToolContentRoute(router);
-  createPrebuiltSavedObjectsRoute(router, logger);
-  deletePrebuiltSavedObjectsRoute(router);
-  getRiskScoreIndexStatusRoute(router);
-  installRiskScoresRoute(router, logger);
 
   // Dashboards
   registerDashboardsRoutes(router, logger);

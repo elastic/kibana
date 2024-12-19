@@ -21,11 +21,10 @@ export const createUserRiskEnrichments: CreateRiskEnrichment = async ({
   logger,
   events,
   spaceId,
-  isNewRiskScoreModuleInstalled,
 }) => {
   return createSingleFieldMatchEnrichment({
     name: 'User Risk',
-    index: [getUserRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)],
+    index: [getUserRiskIndex(spaceId, true)],
     services,
     logger,
     events,
