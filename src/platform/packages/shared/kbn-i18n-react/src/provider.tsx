@@ -8,8 +8,8 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
+import { IntlProvider } from 'react-intl';
 import { i18n } from '@kbn/i18n';
-import { IntlProvider } from '..';
 
 /**
  * The library uses the provider pattern to scope an i18n context to a tree

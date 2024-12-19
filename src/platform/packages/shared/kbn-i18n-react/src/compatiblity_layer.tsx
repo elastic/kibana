@@ -8,9 +8,9 @@
  */
 
 import React, { PropsWithChildren, FC } from 'react';
+import { FormattedRelativeTime, IntlShape } from 'react-intl';
 import { selectUnit } from '@formatjs/intl-utils';
 import moment from 'moment';
-import { FormattedRelativeTime, IntlShape } from '..';
 import { I18nProvider } from './provider';
 
 export interface FormattedRelativeProps {

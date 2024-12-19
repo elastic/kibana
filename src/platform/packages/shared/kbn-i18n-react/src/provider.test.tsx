@@ -9,9 +9,9 @@
 
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
+import { i18n } from '@kbn/i18n';
 import { injectI18n } from './inject';
 import { I18nProvider } from './provider';
-import { i18n } from '@kbn/i18n';
 
 describe('I18nProvider', () => {
   test('throws if i18n is not initialized', () => {
