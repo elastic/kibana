@@ -21,7 +21,8 @@ import { getFullCloudUrl } from '../common/utils';
 import { readInstanceSizeMb } from './env';
 import { defineRoutes } from './routes';
 import { CloudRequestHandlerContext } from './routes/types';
-import { setupSavedObjects } from './saved_objects';
+import { CLOUD_DATA_SAVED_OBJECT_TYPE, setupSavedObjects } from './saved_objects';
+import { persistTokenCloudData } from './cloud_data';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -174,6 +175,7 @@ export interface CloudStart {
 export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   private readonly config: CloudConfigType;
   private readonly logger: Logger;
+  private hasHandlePersistingTokenCloud: boolean = false;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.config = this.context.config.get<CloudConfigType>();
@@ -199,6 +201,33 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       projectId,
       projectType,
       orchestratorTarget,
+    });
+
+    core.http.registerOnPostAuth((request, response, toolkit) => {
+      // packages/core/apps/core-apps-server-internal/src/core_app.ts L175
+      const isCommonDefaultRoute = request.route.routePath === '/app/{id}/{any*}';
+      if (isCommonDefaultRoute && !this.hasHandlePersistingTokenCloud) {
+        const queryOnboardingToken = request.url.searchParams.get('onboarding_token');
+        if (queryOnboardingToken) {
+          core
+            .getStartServices()
+            .then(async ([coreStart]) => {
+              const soClient = coreStart.savedObjects.createInternalRepository([
+                CLOUD_DATA_SAVED_OBJECT_TYPE,
+              ]);
+              const solutionType = this.config.onboarding?.default_solution;
+              await persistTokenCloudData(soClient, {
+                logger: this.logger,
+                onboardingToken: queryOnboardingToken,
+                solutionType,
+              });
+              this.setHandlePersistingTokenCloud(true);
+            })
+            .catch((errorMsg) => this.logger.error(errorMsg));
+        }
+      }
+
+      return toolkit.next();
     });
 
     let decodedId: DecodedCloudId | undefined;
@@ -259,5 +288,9 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       baseUrl,
       projectsUrl,
     };
+  }
+
+  private setHandlePersistingTokenCloud(val: boolean) {
+    this.hasHandlePersistingTokenCloud = val;
   }
 }
