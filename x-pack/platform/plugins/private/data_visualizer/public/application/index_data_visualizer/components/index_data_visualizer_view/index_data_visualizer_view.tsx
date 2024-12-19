@@ -523,7 +523,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
           }
           rightSideGroupProps={{
             gutterSize: 's',
-            'data-test-subj': 'dataComparisonTimeRangeSelectorSection',
+            'data-test-subj': 'dataVisualizerTimeRangeSelectorSection',
           }}
           rightSideItems={[
             <DatePickerWrapper
