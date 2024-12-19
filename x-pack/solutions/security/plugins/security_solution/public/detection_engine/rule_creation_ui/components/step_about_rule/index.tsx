@@ -50,7 +50,7 @@ const CommonUseField = getUseField({ component: Field });
 
 interface StepAboutRuleProps extends RuleStepProps {
   ruleType: Type;
-  machineLearningJobId: string[];
+  machineLearningJobId: string[] | undefined;
   index: string[];
   dataViewId: string | undefined;
   timestampOverride: string;

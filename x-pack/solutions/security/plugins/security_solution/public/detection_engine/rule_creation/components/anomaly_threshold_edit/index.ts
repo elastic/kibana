@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { useContext } from 'react';
-import { ThemeContext } from 'styled-components';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
-
-export function useTheme(): EuiTheme {
-  const theme = useContext(ThemeContext);
-  return theme;
-}
+export { AnomalyThresholdEdit } from './anomaly_threshold_edit';

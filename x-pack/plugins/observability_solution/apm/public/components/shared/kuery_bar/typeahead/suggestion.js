@@ -7,72 +7,73 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { EuiIcon } from '@elastic/eui';
+import styled from '@emotion/styled';
+import { EuiIcon, useEuiFontSize } from '@elastic/eui';
 import { unit } from '../../../../utils/style';
 import { tint } from 'polished';
 
 function getIconColor(type, theme) {
   switch (type) {
     case 'field':
-      return theme.eui.euiColorVis7;
+      return theme.euiTheme.colors.vis.euiColorVis7;
     case 'value':
-      return theme.eui.euiColorVis0;
+      return theme.euiTheme.colors.vis.euiColorVis0;
     case 'operator':
-      return theme.eui.euiColorVis1;
+      return theme.euiTheme.colors.vis.euiColorVis1;
     case 'conjunction':
-      return theme.eui.euiColorVis3;
+      return theme.euiTheme.colors.vis.euiColorVis3;
     case 'recentSearch':
-      return theme.eui.euiColorMediumShade;
+      return theme.euiTheme.colors.mediumShade;
   }
 }
 
-const Description = euiStyled.div`
-  color: ${({ theme }) => theme.eui.euiColorDarkShade};
+const Description = styled.div`
+  color: ${({ theme }) => theme.euiTheme.colors.darkShade};
 
   p {
     display: inline;
 
     span {
-      font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
-      color: ${({ theme }) => theme.eui.euiColorFullShade};
-      padding: 0 ${({ theme }) => theme.eui.euiSizeXS};
+      font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
+      color: ${({ theme }) => theme.euiTheme.colors.fullShade};
+      padding: 0 ${({ theme }) => theme.euiTheme.size.xs};
       display: inline-block;
     }
   }
 `;
 
-const ListItem = euiStyled.li`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  height: ${({ theme }) => theme.eui.euiSizeXL};
+const ListItem = styled.li`
+  font-size: ${() => useEuiFontSize('xs').fontSize};
+  height: ${({ theme }) => theme.euiTheme.size.xl};
   align-items: center;
   display: flex;
-  background: ${({ selected, theme }) => (selected ? theme.eui.euiColorLightestShade : 'initial')};
+  background: ${({ selected, theme }) =>
+    selected ? theme.euiTheme.colors.lightestShade : 'initial'};
   cursor: pointer;
-  border-radius: ${({ theme }) => theme.eui.euiBorderRadiusSmall};
+  border-radius: ${({ theme }) => theme.euiTheme.border.radius.small};
 
   ${Description} {
     p span {
       background: ${({ selected, theme }) =>
-        selected ? theme.eui.euiColorEmptyShade : theme.eui.euiColorLightestShade};
+        selected ? theme.euiTheme.colors.emptyShade : theme.euiTheme.colors.lightestShade};
     }
   }
 `;
 
-const Icon = euiStyled.div`
-  flex: 0 0 ${({ theme }) => theme.eui.euiSizeXL};
+const Icon = styled.div`
+  flex: 0 0 ${({ theme }) => theme.euiTheme.size.xl};
   background: ${({ type, theme }) => tint(0.9, getIconColor(type, theme))};
   color: ${({ type, theme }) => getIconColor(type, theme)};
   width: 100%;
   height: 100%;
   text-align: center;
-  line-height: ${({ theme }) => theme.eui.euiSizeXL};
+  line-height: ${({ theme }) => theme.euiTheme.size.xl};
 `;
 
-const TextValue = euiStyled.div`
+const TextValue = styled.div`
   flex: 0 0 ${unit * 16}px;
-  color: ${({ theme }) => theme.eui.euiColorDarkestShade};
-  padding: 0 ${({ theme }) => theme.eui.euiSizeS};
+  color: ${({ theme }) => theme.euiTheme.colors.darkestShade};
+  padding: 0 ${({ theme }) => theme.euiTheme.size.s};
 `;
 
 function getEuiIconType(type) {

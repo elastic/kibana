@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const NEW_TERMS_FIELD_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.newTermsField.placeholderText',
-  {
-    defaultMessage: 'Select a field',
-  }
-);
+export { MachineLearningJobIdEdit } from './machine_learning_job_id_edit';

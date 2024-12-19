@@ -21,7 +21,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
@@ -80,10 +80,10 @@ function getSpanTypes(span: Span) {
   };
 }
 
-const ContainerWithMarginRight = euiStyled.div`
+const ContainerWithMarginRight = styled.div`
   /* add margin to all direct descendants */
   & > * {
-    margin-right: ${({ theme }) => theme.eui.euiSizeXS};
+    margin-right: ${({ theme }) => theme.euiTheme.size.xs};
   }
 `;
 
