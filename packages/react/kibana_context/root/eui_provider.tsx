@@ -11,7 +11,7 @@ import React, { FC, PropsWithChildren, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import createCache from '@emotion/cache';
 
-import { EuiProvider, EuiProviderProps, euiStylisPrefixer } from '@elastic/eui';
+import { EuiProvider, EuiProviderProps, euiStylisPrefixer, EuiThemeAmsterdam } from '@elastic/eui';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import { getColorMode, defaultTheme } from '@kbn/react-kibana-context-common';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
@@ -78,7 +78,16 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   const globalStyles = globalStylesProp === false ? false : undefined;
 
   return (
-    <EuiProvider {...{ cache, modify, colorMode, globalStyles, utilityClasses: globalStyles }}>
+    <EuiProvider
+      {...{
+        cache,
+        modify,
+        colorMode,
+        globalStyles,
+        utilityClasses: globalStyles,
+        theme: EuiThemeAmsterdam,
+      }}
+    >
       {children}
     </EuiProvider>
   );
