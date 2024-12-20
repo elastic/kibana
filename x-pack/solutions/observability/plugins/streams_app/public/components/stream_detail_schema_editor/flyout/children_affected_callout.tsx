@@ -13,7 +13,7 @@ import { StreamConfigDefinition } from '@kbn/streams-schema';
 export const ChildrenAffectedCallout = ({
   childStreams,
 }: {
-  childStreams: StreamConfigDefinition['routing'];
+  childStreams: StreamConfigDefinition['ingest']['routing'];
 }) => {
   return (
     <EuiCallOut

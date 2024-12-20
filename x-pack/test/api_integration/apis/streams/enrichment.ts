@@ -30,25 +30,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('Place processing steps', async () => {
       const body: WiredStreamConfigDefinition = {
-        wired: {
-          fields: {
-            '@timestamp': {
-              type: 'date',
-            },
-            message: {
-              type: 'match_only_text',
-            },
-            message2: {
-              type: 'match_only_text',
-            },
-            'host.name': {
-              type: 'keyword',
-            },
-            'log.level': {
-              type: 'keyword',
-            },
-          },
-        },
         ingest: {
           processing: [
             {
@@ -76,6 +57,25 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ],
           routing: [],
+          wired: {
+            fields: {
+              '@timestamp': {
+                type: 'date',
+              },
+              message: {
+                type: 'match_only_text',
+              },
+              message2: {
+                type: 'match_only_text',
+              },
+              'host.name': {
+                type: 'keyword',
+              },
+              'log.level': {
+                type: 'keyword',
+              },
+            },
+          },
         },
       };
       const response = await putStream(supertest, 'logs', body);
