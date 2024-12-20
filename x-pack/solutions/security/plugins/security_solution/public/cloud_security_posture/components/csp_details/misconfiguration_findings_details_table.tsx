@@ -9,7 +9,10 @@ import React, { memo, useCallback, useEffect, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon } from '@elastic/eui';
 import type { MisconfigurationFindingDetailFields } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
-import { useMisconfigurationFindings } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
+import {
+  useMisconfigurationFindings,
+  MISCONFIGURATION,
+} from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
 import { i18n } from '@kbn/i18n';
 import {
   MISCONFIGURATION_STATUS,
@@ -93,8 +96,8 @@ export const MisconfigurationFindingsDetailsTable = memo(
     const [currentFilter, setCurrentFilter] = useState<string>('');
 
     const [sortField, setSortField] = useState<
-      'result.evaluation' | 'rule.name' | 'resource' | 'rule'
-    >('result.evaluation');
+      MISCONFIGURATION.RESULT_EVALUATION | MISCONFIGURATION.RULE_NAME | 'resource' | 'rule'
+    >(MISCONFIGURATION.RESULT_EVALUATION);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
     const obj: { [key: string]: string } = {};
@@ -208,7 +211,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
         ),
       },
       {
-        field: 'result.evaluation',
+        field: MISCONFIGURATION.RESULT_EVALUATION,
         render: (result: 'failed' | 'passed' | undefined) => <CspEvaluationBadge type={result} />,
         name: i18n.translate(
           'xpack.securitySolution.flyout.left.insights.misconfigurations.table.resultColumnName',
@@ -220,7 +223,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
         sortable: true,
       },
       {
-        field: 'rule.name',
+        field: MISCONFIGURATION.RULE_NAME,
         render: (ruleName: string) => <EuiText size="s">{ruleName}</EuiText>,
         name: i18n.translate(
           'xpack.securitySolution.flyout.left.insights.misconfigurations.table.ruleColumnName',

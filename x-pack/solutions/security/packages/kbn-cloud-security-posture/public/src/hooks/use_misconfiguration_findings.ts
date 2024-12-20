@@ -23,9 +23,13 @@ import {
   getMisconfigurationAggregationCount,
 } from '../utils/hooks_utils';
 
+export enum MISCONFIGURATION {
+  RESULT_EVALUATION = 'result.evaluation',
+  RULE_NAME = 'rule.name',
+}
 export interface MisconfigurationFindingTableDetailsFields {
-  'result.evaluation': string;
-  'rule.name': string;
+  [MISCONFIGURATION.RESULT_EVALUATION]: string;
+  [MISCONFIGURATION.RULE_NAME]: string;
 }
 
 export type MisconfigurationFindingDetailFields = Pick<CspFinding, 'rule' | 'resource'> &
@@ -57,8 +61,8 @@ export const useMisconfigurationFindings = (options: UseCspOptions) => {
         rows: hits.hits.map((finding) => ({
           rule: finding?._source?.rule,
           resource: finding?._source?.resource,
-          'rule.name': finding?._source?.rule?.name,
-          'result.evaluation': finding._source?.result?.evaluation,
+          [MISCONFIGURATION.RULE_NAME]: finding?._source?.rule?.name,
+          [MISCONFIGURATION.RESULT_EVALUATION]: finding._source?.result?.evaluation,
         })) as MisconfigurationFindingDetailFields[],
       };
     },

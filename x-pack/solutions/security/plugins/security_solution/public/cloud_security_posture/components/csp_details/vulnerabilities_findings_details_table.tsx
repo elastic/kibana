@@ -18,7 +18,10 @@ import type {
   VulnerabilitiesFindingDetailFields,
   VulnerabilitiesPackage,
 } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_findings';
-import { useVulnerabilitiesFindings } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_findings';
+import {
+  useVulnerabilitiesFindings,
+  VULNERABILITY,
+} from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_findings';
 import {
   getVulnerabilityStats,
   CVSScoreBadge,
@@ -44,15 +47,14 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
   }, []);
 
   const [currentFilter, setCurrentFilter] = useState<string>('');
-
   const [sortField, setSortField] = useState<
     | 'score'
     | 'vulnerability'
     | 'resource'
-    | 'vulnerability.severity'
-    | 'vulnerability.id'
-    | 'vulnerability.package.name'
-  >('vulnerability.severity');
+    | VULNERABILITY.SEVERITY
+    | VULNERABILITY.ID
+    | VULNERABILITY.PACKAGE_NAME
+  >(VULNERABILITY.SEVERITY);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const obj: { [key: string]: string } = {};
@@ -177,7 +179,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
       ),
     },
     {
-      field: 'vulnerability.id',
+      field: VULNERABILITY.ID,
       render: (id: string) => <EuiText size="s">{id}</EuiText>,
       name: i18n.translate(
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.resultColumnName',
@@ -201,7 +203,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
       sortable: true,
     },
     {
-      field: 'vulnerability.severity',
+      field: VULNERABILITY.SEVERITY,
       render: (severity: string) => (
         <>
           <EuiText size="s">
@@ -217,7 +219,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
       sortable: true,
     },
     {
-      field: 'vulnerability.package.name',
+      field: VULNERABILITY.PACKAGE_NAME,
       render: (packageName: string) => <EuiText size="s">{packageName}</EuiText>,
       name: i18n.translate(
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
