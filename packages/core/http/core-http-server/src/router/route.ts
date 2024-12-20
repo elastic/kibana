@@ -128,7 +128,7 @@ export interface RouteDeprecationInfo {
   documentationUrl: string;
   /**
    * The description message to be displayed for the deprecation.
-   * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
+   * Check the README for writing deprecations in `src/core/packages/core/server/deprecations/README.mdx`
    */
   message?: string;
   /**

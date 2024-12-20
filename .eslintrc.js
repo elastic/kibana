@@ -1915,7 +1915,7 @@ module.exports = {
     {
       files: [
         // core-team owned code
-        'src/core/**',
+        'src/core/packages/core/**',
         'x-pack/plugins/features/**',
         'x-pack/plugins/licensing/**',
         'x-pack/plugins/global_search/**',
