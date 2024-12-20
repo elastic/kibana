@@ -6,13 +6,13 @@
  */
 
 import { groupBy } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
@@ -169,13 +169,13 @@ export async function getAgentTags(
   }
 
   const kueryNode = _joinFilters(filters);
-  const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
+  const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
   const runtimeFields = await buildAgentStatusRuntimeField(soClient);
   try {
     const result = await esClient.search<{}, { tags: { buckets: Array<{ key: string }> } }>({
       index: AGENTS_INDEX,
       size: 0,
-      body,
+      ...query,
       fields: Object.keys(runtimeFields),
       runtime_mappings: runtimeFields,
       aggs: {
@@ -546,17 +546,15 @@ export async function getAgentVersionsForAgentPolicyIds(
       FleetServerAgent,
       Record<'agent_versions', { buckets: Array<{ key: string; doc_count: number }> }>
     >({
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  policy_id: agentPolicyIds,
-                },
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                policy_id: agentPolicyIds,
               },
-            ],
-          },
+            },
+          ],
         },
       },
       index: AGENTS_INDEX,
@@ -628,7 +626,7 @@ export async function updateAgent(
   await esClient.update({
     id: agentId,
     index: AGENTS_INDEX,
-    body: { doc: agentSOAttributesToFleetServerAgentDoc(data) },
+    doc: agentSOAttributesToFleetServerAgentDoc(data),
     refresh: 'wait_for',
   });
 }
@@ -645,7 +643,7 @@ export async function bulkUpdateAgents(
     return;
   }
 
-  const body = updateData.flatMap(({ agentId, data }) => [
+  const operations = updateData.flatMap(({ agentId, data }) => [
     {
       update: {
         _id: agentId,
@@ -658,7 +656,7 @@ export async function bulkUpdateAgents(
   ]);
 
   const res = await esClient.bulk({
-    body,
+    operations,
     index: AGENTS_INDEX,
     refresh: 'wait_for',
   });
@@ -676,9 +674,7 @@ export async function deleteAgent(esClient: ElasticsearchClient, agentId: string
     await esClient.update({
       id: agentId,
       index: AGENTS_INDEX,
-      body: {
-        doc: { active: false },
-      },
+      doc: { active: false },
     });
   } catch (err) {
     if (isESClientError(err) && err.meta.statusCode === 404) {

@@ -286,6 +286,23 @@
             "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.AuthenticatedUser.api_key",
+            "type": "Object",
+            "tags": [],
+            "label": "api_key",
+            "description": [
+              "\nMetadata of the API key that was used to authenticate the user."
+            ],
+            "signature": [
+              "ApiKeyDescriptor",
+              " | undefined"
+            ],
+            "path": "packages/core/security/core-security-common/src/authentication/authenticated_user.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

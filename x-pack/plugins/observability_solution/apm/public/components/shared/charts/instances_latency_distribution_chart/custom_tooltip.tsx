@@ -6,13 +6,12 @@
  */
 
 import { TooltipInfo } from '@elastic/charts';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getServiceNodeName } from '../../../../../common/service_nodes';
 import { asTransactionRate, TimeFormatter } from '../../../../../common/utils/formatters';
-import { useTheme } from '../../../../hooks/use_theme';
 
 type ServiceInstanceMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
@@ -92,7 +91,7 @@ function MultipleInstanceCustomTooltip({
   latencyFormatter,
   values,
 }: TooltipInfo & { latencyFormatter: TimeFormatter }) {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   return (
     <>
@@ -127,10 +126,7 @@ function MultipleInstanceCustomTooltip({
               >
                 <div className="echTooltip__item--color" style={{ backgroundColor: color }} />
               </div>
-              <div
-                className="echTooltip__item--container"
-                style={{ paddingLeft: theme.eui.euiSizeS }}
-              >
+              <div className="echTooltip__item--container" style={{ paddingLeft: euiTheme.size.s }}>
                 <span className="echTooltip__label">{latencyLabel}</span>
                 <span className="echTooltip__value">{latencyFormatter(latency).formatted}</span>
               </div>
@@ -142,10 +138,7 @@ function MultipleInstanceCustomTooltip({
               >
                 <div className="echTooltip__item--color" style={{ backgroundColor: color }} />
               </div>
-              <div
-                className="echTooltip__item--container"
-                style={{ paddingLeft: theme.eui.euiSizeS }}
-              >
+              <div className="echTooltip__item--container" style={{ paddingLeft: euiTheme.size.s }}>
                 <span className="echTooltip__label">{throughputLabel}</span>
                 <span className="echTooltip__value">{asTransactionRate(throughput)}</span>
               </div>
@@ -166,7 +159,7 @@ function MultipleInstanceCustomTooltip({
  */
 export function CustomTooltip(props: TooltipInfo & { latencyFormatter: TimeFormatter }) {
   const { values } = props;
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   return (
     <div className="echTooltip">
@@ -175,7 +168,7 @@ export function CustomTooltip(props: TooltipInfo & { latencyFormatter: TimeForma
       ) : (
         <SingleInstanceCustomTooltip {...props} />
       )}
-      <div style={{ padding: theme.eui.euiSizeXS }}>
+      <div style={{ padding: euiTheme.size.xs }}>
         <EuiIcon type="filter" /> {clickToFilterDescription}
       </div>
     </div>
