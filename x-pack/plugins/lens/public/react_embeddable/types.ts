@@ -100,8 +100,12 @@ interface LensApiProps {}
 
 export type LensSavedObjectAttributes = Omit<LensDocument, 'savedObjectId' | 'type'>;
 
+/**
+ * This visualization context can have a different attributes than the
+ * one stored in the Lens API attributes
+ */
 export interface VisualizationContext {
-  doc: LensDocument | undefined;
+  activeAttributes: LensDocument | undefined;
   mergedSearchContext: ExecutionContextSearch;
   indexPatterns: IndexPatternMap;
   indexPatternRefs: IndexPatternRef[];
@@ -111,6 +115,7 @@ export interface VisualizationContext {
 }
 
 export interface VisualizationContextHelper {
+  // the doc prop here is a convenience reference to the internalApi.attributes
   getVisualizationContext: () => VisualizationContext;
   updateVisualizationContext: (newContext: Partial<VisualizationContext>) => void;
 }
@@ -130,7 +135,10 @@ export type LensEmbeddableStartServices = Simplify<
     coreStart: CoreStart;
     capabilities: RecursiveReadonly<Capabilities>;
     expressionRenderer: ReactExpressionRendererType;
-    documentToExpression: (doc: LensDocument) => Promise<DocumentToExpressionReturnType>;
+    documentToExpression: (
+      doc: LensDocument,
+      forceDSL?: boolean
+    ) => Promise<DocumentToExpressionReturnType>;
     injectFilterReferences: FilterManager['inject'];
     visualizationMap: VisualizationMap;
     datasourceMap: DatasourceMap;
@@ -256,6 +264,7 @@ export interface LensSharedProps {
   className?: string;
   noPadding?: boolean;
   viewMode?: ViewMode;
+  forceDSL?: boolean;
 }
 
 interface LensRequestHandlersProps {
@@ -318,7 +327,13 @@ export type LensComponentProps = Simplify<
  */
 export type LensComponentForwardedProps = Pick<
   LensComponentProps,
-  'style' | 'className' | 'noPadding' | 'abortController' | 'executionContext' | 'viewMode'
+  | 'style'
+  | 'className'
+  | 'noPadding'
+  | 'abortController'
+  | 'executionContext'
+  | 'viewMode'
+  | 'forceDSL'
 >;
 
 /**
@@ -342,7 +357,10 @@ export type LensRendererProps = Simplify<LensRendererPrivateProps>;
 export type LensRuntimeState = Simplify<
   Omit<ComponentSerializedProps, 'attributes' | 'references'> & {
     attributes: NonNullable<LensSerializedState['attributes']>;
-  } & Pick<LensComponentForwardedProps, 'viewMode' | 'abortController' | 'executionContext'> &
+  } & Pick<
+      LensComponentForwardedProps,
+      'viewMode' | 'abortController' | 'executionContext' | 'forceDSL'
+    > &
     ContentManagementProps
 >;
 
@@ -399,7 +417,8 @@ export type LensApi = Simplify<
 // there's some overlapping between this and the LensApi but they are shared references
 export type LensInternalApi = Simplify<
   Pick<IntegrationCallbacks, 'updateAttributes' | 'updateOverrides'> &
-    PublishesDataViews & {
+    PublishesDataViews &
+    VisualizationContextHelper & {
       attributes$: PublishingSubject<LensRuntimeState['attributes']>;
       overrides$: PublishingSubject<LensOverrides['overrides']>;
       disableTriggers$: PublishingSubject<LensPanelProps['disableTriggers']>;
