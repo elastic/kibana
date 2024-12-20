@@ -30,8 +30,8 @@
     ],
     "xpack.customBranding": "plugins/custom_branding",
     "xpack.dashboard": "plugins/dashboard_enhanced",
-    "xpack.dataQuality": "plugins/data_quality",
-    "xpack.datasetQuality": "plugins/observability_solution/dataset_quality",
+    "xpack.dataQuality": "platform/plugins/shared/data_quality",
+    "xpack.datasetQuality": "platform/plugins/shared/dataset_quality",
     "xpack.dataUsage": "platform/plugins/private/data_usage",
     "xpack.discover": "plugins/discover_enhanced",
     "xpack.crossClusterReplication": "platform/plugins/private/cross_cluster_replication",
@@ -59,10 +59,10 @@
     "xpack.idxMgmt": "platform/plugins/shared/index_management",
     "xpack.idxMgmtPackage": "packages/index-management",
     "xpack.indexLifecycleMgmt": "platform/plugins/private/index_lifecycle_management",
-    "xpack.infra": "plugins/observability_solution/infra",
-    "xpack.logsDataAccess": "plugins/observability_solution/logs_data_access",
-    "xpack.logsExplorer": "plugins/observability_solution/logs_explorer",
-    "xpack.logsShared": "plugins/observability_solution/logs_shared",
+    "xpack.infra": "solutions/observability/plugins/infra",
+    "xpack.logsDataAccess": "platform/plugins/shared/logs_data_access",
+    "xpack.logsExplorer": "solutions/observability/plugins/logs_explorer",
+    "xpack.logsShared": "platform/plugins/shared/logs_shared",
     "xpack.fleet": "plugins/fleet",
     "xpack.ingestPipelines": "platform/plugins/shared/ingest_pipelines",
     "xpack.integrationAssistant": "platform/plugins/shared/integration_assistant",
@@ -106,11 +106,11 @@
       "solutions/observability/plugins/observability_ai_assistant_app"
     ],
     "xpack.observabilityAiAssistantManagement": "solutions/observability/plugins/observability_ai_assistant_management",
-    "xpack.observabilityLogsExplorer": "plugins/observability_solution/observability_logs_explorer",
-    "xpack.observability_onboarding": "plugins/observability_solution/observability_onboarding",
+    "xpack.observabilityLogsExplorer": "solutions/observability/plugins/observability_logs_explorer",
+    "xpack.observability_onboarding": "solutions/observability/plugins/observability_onboarding",
     "xpack.observabilityShared": "plugins/observability_solution/observability_shared",
     "xpack.observabilityLogsOverview": [
-      "packages/observability/logs_overview/src/components"
+      "platform/packages/shared/observability/logs_overview/src/components"
     ],
     "xpack.osquery": [
       "platform/plugins/shared/osquery"

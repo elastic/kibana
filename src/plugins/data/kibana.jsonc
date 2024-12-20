@@ -18,7 +18,6 @@
     "browser": true,
     "server": true,
     "requiredPlugins": [
-      "bfetch",
       "expressions",
       "uiActions",
       "share",

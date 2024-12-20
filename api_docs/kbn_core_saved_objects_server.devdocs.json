@@ -10755,26 +10755,6 @@
                 "path": "x-pack/plugins/cases/server/saved_object_types/connector_mappings.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
-              },
-              {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
               },
@@ -10785,6 +10765,26 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
               },
               {
                 "plugin": "graph",
@@ -10801,18 +10801,6 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/observability_solution/apm/server/saved_objects/apm_service_groups.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/server/lib/sources/saved_object_type.ts"
-              },
-              {
-                "plugin": "slo",
-                "path": "x-pack/solutions/observability/plugins/slo/server/saved_objects/slo.ts"
               },
               {
                 "plugin": "lists",
@@ -10841,6 +10829,18 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/saved_object_mappings.ts"
+              },
+              {
+                "plugin": "visualizations",
+                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/server/lib/sources/saved_object_type.ts"
+              },
+              {
+                "plugin": "slo",
+                "path": "x-pack/solutions/observability/plugins/slo/server/saved_objects/slo.ts"
               },
               {
                 "plugin": "synthetics",
@@ -11594,10 +11594,6 @@
                 "path": "x-pack/plugins/maps/server/saved_objects/setup_saved_objects.ts"
               },
               {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
-              },
-              {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/saved_objects/exception_list.ts"
               },
@@ -11616,6 +11612,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_saved_object_mappings.ts"
+              },
+              {
+                "plugin": "visualizations",
+                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
               },
               {
                 "plugin": "@kbn/core-test-helpers-so-type-serializer",

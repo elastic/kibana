@@ -1612,22 +1612,6 @@
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/embeddables/default_embeddable_factory_provider.ts"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/embeddables/default_embeddable_factory_provider.ts"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/types.ts"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/types.ts"
-          },
-          {
             "plugin": "savedObjects",
             "path": "src/plugins/saved_objects/public/types.ts"
           },
