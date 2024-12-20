@@ -89,9 +89,10 @@ const updateUnderlyingMapping = async ({
   }
 
   try {
-    await retryTransientEsErrors(() => esClient.indices.putMapping({ index, simulatedMapping }), {
-      logger,
-    });
+    await retryTransientEsErrors(
+      () => esClient.indices.putMapping({ index, ...simulatedMapping }),
+      { logger }
+    );
 
     return;
   } catch (err) {
