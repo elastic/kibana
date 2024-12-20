@@ -530,7 +530,7 @@ packages/kbn-import-resolver @elastic/kibana-operations
 x-pack/solutions/security/packages/index-adapter @elastic/security-threat-hunting
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
 x-pack/platform/plugins/private/index_lifecycle_management @elastic/kibana-management
-x-pack/plugins/index_management @elastic/kibana-management
+x-pack/platform/plugins/shared/index_management @elastic/kibana-management
 x-pack/platform/packages/shared/index-management/index_management_shared_types @elastic/kibana-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
 x-pack/platform/packages/private/ml/inference_integration_flyout @elastic/ml-ui
