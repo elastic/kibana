@@ -109,8 +109,6 @@ const UserActionRt = rt.intersection([
 export const UserActionsRt = rt.array(UserActionRt);
 
 type UserActionWithAttributes<T> = T & rt.TypeOf<typeof UserActionCommonAttributesRt>;
-
-export type UserActionCommonAttributes = rt.TypeOf<typeof UserActionCommonAttributesRt>;
 export type UserActionWithDeprecatedResponse<T> = T &
   rt.TypeOf<typeof CaseUserActionInjectedDeprecatedIdsRt>;
 
