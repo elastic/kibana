@@ -7,7 +7,7 @@
 {kib} supports several ways to explore the data displayed in a dashboard more in depth:
 
 * The **query bar**, using KQL expressions by default.
-* The **Time range**, that allows you to display data only for the period that you want to focus on. You can set a global time range for the entire dashboard, or specify a custom time range for each panel.
+* The **time range**, that allows you to display data only for the period that you want to focus on. You can set a global time range for the entire dashboard, or specify a custom time range for each panel.
 * **Controls**, that dashboard creators can add to help viewers filter on specific values.
 * **Filter pills**, that you can add and combine by clicking on specific parts of the dashboard visualizations, or by defining conditions manually from the filter editor. The filter editor is a good alternative if you're not comfortable with using KQL expressions in the main query bar.
 * View the data of a panel and the requests used to build it.
@@ -15,6 +15,28 @@
 //You can combine the filters with any panel filter to display the data you want to see.
 
 This section shows the most common ways for you to filter dashboard data. For more information about {kib} and {es} filtering capabilities, refer to <<kibana-concepts-analysts,{kib} concepts>>.
+
+[float]
+=== Use filter pills
+
+Use filter pills to focus in on the specific data you want.
+
+[role="screenshot"]
+image::images/dashboard_filter_pills_8.15.0.png[Filter pills, width=50%]
+
+[float]
+==== Add pills by interacting with visualizations
+
+You can interact with some panel visualizations to explore specific data more in depth. Upon clicking, filter pills are added and applied to the entire dashboard, so that surrounding panels and visualizations also reflect your browsing.
+
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt93fcc34395a310d4/6750e7e9b09fe993fbc0824a/add-filter-pills-8.17.gif[Browsing a chart creates a filter dynamically]
+
+[float]
+==== Add pills using the filter editor
+
+As an alternative to the main query bar, you can filter dashboard data by defining individual conditions on specific fields and values, and by combining these conditions together in a filter pill.
+
+image::images/dashboard-filter-editor.png[Filter editor with 2 conditions]
 
 [float]
 === Filter dashboards using the KQL query bar
@@ -66,7 +88,7 @@ Filter the data with one or more options that you select.
 
 . Select the available options.
 +
-The *Exists* query returns all documents that contain an indexed value for the field. 
+Selecting _Exists_ returns all documents that contain an indexed value for the field. 
 
 . Select how to filter the options.
 
@@ -114,29 +136,6 @@ Filter the data within a specified range of time.
 
 [role="screenshot"]
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt672f3aaadf9ea5a6/6750dd6c2452f972af0a88b4/dashboard_timeslidercontrol_8.17.0.gif[Time slider control]
-
-[float]
-=== Use filter pills
-
-Use filter pills to focus in on the specific data you want.
-
-[role="screenshot"]
-image::images/dashboard_filter_pills_8.15.0.png[Filter pills, width=50%]
-
-[float]
-==== Add pills by interacting with visualizations
-
-You can interact with some panel visualizations to explore specific data more in depth. Upon clicking, filter pills are added and applied to the entire dashboard, so that surrounding panels and visualizations also reflect your browsing.
-
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt93fcc34395a310d4/6750e7e9b09fe993fbc0824a/add-filter-pills-8.17.gif[Browsing a chart creates a filter dynamically]
-
-[float]
-==== Add pills using the filter editor
-
-As an alternative to the main query bar, you can filter dashboard data by defining individual conditions on specific fields and values, and by combining these conditions together in a filter pill.
-
-image::images/dashboard-filter-editor.png[Filter editor with 2 conditions]
-
 
 [float]
 [[download-csv]]

@@ -54,10 +54,10 @@ TIP: Range sliders are for Number type fields only.
 
 . Specify the additional settings:
 
-* For option lists:
+* For Options lists:
 
 ** Define whether users can select multiple values to filter with the control, or only one.
-** For option list controls on _string_ and _IP address_ type fields, you can define how the control's embedded search should behave: 
+** For Options list controls on _string_ and _IP address_ type fields, you can define how the control's embedded search should behave: 
 
 *** **Prefix**: Show options that _start with_ the entered value.
 *** **Contains**: Show options that _contain_ the entered value. This setting option is only available for _string_ type fields. Results can take longer to show with this option.
