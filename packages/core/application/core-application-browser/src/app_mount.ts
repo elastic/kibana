@@ -67,7 +67,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * import ReactDOM from 'react-dom';
    * import { Router, Route } from 'react-router-dom';
    *
-   * import { CoreStart, AppMountParameters } from 'src/core/public';
+   * import { CoreStart, AppMountParameters } from '@kbn/core/public';
    * import { MyPluginDepsStart } from './plugin';
    *
    * export renderApp = ({ element, history }: AppMountParameters) => {
@@ -117,7 +117,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * import ReactDOM from 'react-dom';
    * import { BrowserRouter, Route } from 'react-router-dom';
    *
-   * import { CoreStart, AppMountParameters } from 'src/core/public';
+   * import { CoreStart, AppMountParameters } from '@kbn/core/public';
    * import { MyPluginDepsStart } from './plugin';
    *
    * export renderApp = ({ appBasePath, element }: AppMountParameters) => {
@@ -152,7 +152,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * import ReactDOM from 'react-dom';
    * import { BrowserRouter, Route } from 'react-router-dom';
    *
-   * import { CoreStart, AppMountParameters } from 'src/core/public';
+   * import { CoreStart, AppMountParameters } from '@kbn/core/public';
    * import { MyPluginDepsStart } from './plugin';
    *
    * export renderApp = ({ element, history, onAppLeave }: AppMountParameters) => {
@@ -190,7 +190,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * import ReactDOM from 'react-dom';
    * import { BrowserRouter, Route } from 'react-router-dom';
    *
-   * import { CoreStart, AppMountParameters } from 'src/core/public';
+   * import { CoreStart, AppMountParameters } from '@kbn/core/public';
    * import { MyPluginDepsStart } from './plugin';
    *
    * export renderApp = ({ element, history, setHeaderActionMenu }: AppMountParameters) => {
@@ -216,7 +216,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * import React from 'react';
    * import ReactDOM from 'react-dom';
    *
-   * import { AppMountParameters } from 'src/core/public';
+   * import { AppMountParameters } from '@kbn/core/public';
    * import { wrapWithTheme } from 'src/plugins/kibana_react';
    * import { MyApp } from './app';
    *

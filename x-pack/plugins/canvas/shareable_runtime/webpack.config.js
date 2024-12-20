@@ -34,7 +34,10 @@ module.exports = {
   },
   resolve: {
     alias: {
-      core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/images'),
+      core_app_image_assets: path.resolve(
+        KIBANA_ROOT,
+        'src/core/packages/core/public/styles/core_app/images'
+      ),
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.scss'],
     mainFields: ['browser', 'main'],
@@ -162,7 +165,10 @@ module.exports = {
               additionalData(content, loaderContext) {
                 return `@import ${stringifyRequest(
                   loaderContext,
-                  path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
+                  path.resolve(
+                    KIBANA_ROOT,
+                    'src/core/packages/core/public/styles/core_app/_globals_v8light.scss'
+                  )
                 )};\n${content}`;
               },
               implementation: require('sass-embedded'),

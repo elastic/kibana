@@ -176,7 +176,7 @@ export class CoreUsageDataService
 
   private async getSavedObjectAliasUsageData(elasticsearch: ElasticsearchServiceStart) {
     // Note: this agg can be changed to use `savedObjectsRepository.find` in the future after `filters` is supported.
-    // See src/core/server/saved_objects/service/lib/aggregations/aggs_types/bucket_aggs.ts for supported aggregations.
+    // See src/core/packages/core/server/saved_objects/service/lib/aggregations/aggs_types/bucket_aggs.ts for supported aggregations.
     const resp = await elasticsearch.client.asInternalUser.search<
       unknown,
       { aliases: UsageDataAggs }

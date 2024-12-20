@@ -244,7 +244,7 @@
     "@kbn/content-management-utils": "link:packages/kbn-content-management-utils",
     "@kbn/controls-example-plugin": "link:examples/controls_example",
     "@kbn/controls-plugin": "link:src/plugins/controls",
-    "@kbn/core": "link:src/core",
+    "@kbn/core": "link:src/core/packages/core",
     "@kbn/core-analytics-browser": "link:packages/core/analytics/core-analytics-browser",
     "@kbn/core-analytics-browser-internal": "link:packages/core/analytics/core-analytics-browser-internal",
     "@kbn/core-analytics-server": "link:packages/core/analytics/core-analytics-server",

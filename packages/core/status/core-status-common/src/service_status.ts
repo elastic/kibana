@@ -55,7 +55,7 @@ export type ServiceStatusLevelId = 'available' | 'degraded' | 'unavailable' | 'c
  * represent higher severities. Note that the default `Array.prototype.sort` implementation does not correctly sort
  * these values.
  *
- * A snapshot serializer is available in `src/core/server/test_utils` to ease testing of these values with Jest.
+ * A snapshot serializer is available in `src/core/packages/core/server/test_utils` to ease testing of these values with Jest.
  *
  * @public
  */

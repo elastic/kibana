@@ -88,7 +88,7 @@ my_plugin/
 ```ts
 // my_plugin/public/index.ts
 
-import { PluginInitializer } from '../../src/core/public';
+import { PluginInitializer } from '../../src/core/packages/core/public';
 import { MyPlugin, MyPluginSetup, MyPluginStart } from './plugin';
 
 export const plugin: PluginInitializer<MyPluginSetup, MyPluginStart> = () => new MyPlugin();
@@ -103,7 +103,7 @@ export {
 ```ts
 // my_plugin/public/plugin.ts
 
-import { CoreSetup, CoreStart, Plugin } from '../../src/core/public';
+import { CoreSetup, CoreStart, Plugin } from '../../src/core/packages/core/public';
 import { OtherPluginSetup, OtherPluginStart } from '../other_plugin';
 import { ThirdPluginSetup, ThirdPluginStart } from '../third_plugin';
 
@@ -164,7 +164,7 @@ leverage this pattern.
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart, AppMountParameters } from 'src/core/public';
+import { CoreStart, AppMountParameters } from '@kbn/core/public';
 
 import { MyAppRoot } from './components/app.ts';
 
@@ -184,7 +184,7 @@ export const renderApp = (
 ```ts
 // my_plugin/public/plugin.ts
 
-import { Plugin } from '../../src/core/public';
+import { Plugin } from '../../src/core/packages/core/public';
 
 export class MyPlugin implements Plugin {
   public setup(core) {
@@ -328,7 +328,7 @@ The folder should contain a file per type, named after the snake_case name of th
 
 ```typescript
 // src/plugins/my-plugin/server/saved_objects/my_type.ts
-import { SavedObjectsType } from 'src/core/server';
+import { SavedObjectsType } from '@kbn/core/server';
 
 export const myType: SavedObjectsType = {
   name: 'my-type',

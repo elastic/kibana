@@ -29,9 +29,9 @@ import { map } from 'lodash';
 import getopts from 'getopts';
 import jestFlags from './jest_flags.json';
 
-// yarn test:jest src/core/server/saved_objects
-// yarn test:jest src/core/public/core_system.test.ts
-// :kibana/src/core/server/saved_objects yarn test:jest
+// yarn test:jest src/core/packages/core/server/saved_objects
+// yarn test:jest src/core/packages/core/public/core_system.test.ts
+// :kibana/src/core/packages/core/server/saved_objects yarn test:jest
 
 export function runJest(configName = 'jest.config.js') {
   const unknownFlag: string[] = [];

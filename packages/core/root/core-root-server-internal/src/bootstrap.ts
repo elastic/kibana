@@ -31,7 +31,7 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
     return;
   }
 
-  // `bootstrap` is exported from the `src/core/server/index` module,
+  // `bootstrap` is exported from the `src/core/packages/core/server/index` module,
   // meaning that any test importing, implicitly or explicitly, anything concrete
   // from `core/server` will load `dev-utils`. As some tests are mocking the `fs` package,
   // and as `REPO_ROOT` is initialized on the fly when importing `dev-utils` and requires
