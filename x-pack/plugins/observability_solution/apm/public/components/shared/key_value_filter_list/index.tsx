@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { isEmpty } from 'lodash';
 
 interface KeyValue {
@@ -35,7 +35,8 @@ const StyledEuiAccordion = styled(EuiAccordion)`
 `;
 
 const StyledEuiDescriptionList = styled(EuiDescriptionList)`
-  margin: ${({ theme }) => `${theme.eui.euiSizeS} ${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS}`};
+  margin: ${({ theme }) =>
+    `${theme.euiTheme.size.s} ${theme.euiTheme.size.s} 0 ${theme.euiTheme.size.s}`};
   .descriptionList__title,
   .descriptionList__description {
     margin-top: 0;

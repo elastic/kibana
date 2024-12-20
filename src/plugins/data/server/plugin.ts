@@ -9,7 +9,6 @@
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
-import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
@@ -47,7 +46,6 @@ export interface DataPluginStart {
 }
 
 export interface DataPluginSetupDependencies {
-  bfetch: BfetchServerSetup;
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsSetup;
@@ -85,7 +83,7 @@ export class DataServerPlugin
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { bfetch, expressions, usageCollection, fieldFormats }: DataPluginSetupDependencies
+    { expressions, usageCollection, fieldFormats }: DataPluginSetupDependencies
   ) {
     this.scriptsService.setup(core);
     const querySetup = this.queryService.setup(core);
@@ -94,7 +92,6 @@ export class DataServerPlugin
     core.uiSettings.register(getUiSettings(core.docLinks, this.config.enableUiSettingsValidations));
 
     const searchSetup = this.searchService.setup(core, {
-      bfetch,
       expressions,
       usageCollection,
     });
