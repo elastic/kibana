@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { isCommentUserAction } from '../../../../../common/utils/user_actions';
 import type { attachmentApiV1, userActionApiV1 } from '../../../../../common/types/api';
 import { INTERNAL_CASE_FIND_USER_ACTIONS_URL } from '../../../../../common/constants';
 import { createCaseError } from '../../../../common/error';
@@ -34,6 +35,7 @@ export const findUserActionsRoute = createCasesRoute({
       const caseId = request.params.case_id;
 
       const options = request.query as userActionApiV1.UserActionFindRequest;
+
       const userActionsResponse: userActionApiV1.UserActionFindResponse =
         await casesClient.userActions.find({
           caseId,
@@ -41,38 +43,29 @@ export const findUserActionsRoute = createCasesRoute({
         });
 
       const commentIds = userActionsResponse.userActions
+        .filter(isCommentUserAction)
         .map((userAction) => userAction.comment_id)
         .filter(Boolean) as string[];
 
-      let comments: attachmentApiV1.BulkGetAttachmentsResponse;
+      let attachmentRes: attachmentApiV1.BulkGetAttachmentsResponse = {
+        attachments: [],
+        errors: [],
+      };
+
       if (commentIds.length > 0) {
-        comments = await casesClient.attachments.bulkGet({
+        attachmentRes = await casesClient.attachments.bulkGet({
           caseID: caseId,
           attachmentIDs: commentIds,
         });
       }
 
-      const userActionWithUpdatedComments = userActionsResponse.userActions.map((userAction) => {
-        const comment = comments.attachments.find((c) => c.id === userAction.comment_id);
-
-        if (userAction.type === 'comment' && comment?.comment) {
-          return {
-            ...userAction,
-            payload: {
-              ...userAction.payload,
-              latest: { updated_at: comment.updated_at, comment: comment.comment },
-            },
-          };
-        }
-
-        return userAction;
-      });
+      const res: userActionApiV1.UserActionInternalFindResponse = {
+        ...userActionsResponse,
+        latestAttachments: attachmentRes.attachments,
+      };
 
       return response.ok({
-        body: {
-          ...userActionsResponse,
-          userActions: userActionWithUpdatedComments,
-        },
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

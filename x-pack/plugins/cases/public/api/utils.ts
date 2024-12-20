@@ -94,9 +94,6 @@ export const convertUserActionsToCamelCase = (userActions: UserActions) => {
         ...camelCaseUserActionWithoutPayload,
         payload: {
           comment: convertAttachmentToCamelCase(userAction.payload.comment),
-          ...(userAction.payload.latest
-            ? { latest: convertAttachmentToCamelCase(userAction.payload.latest) }
-            : {}),
         },
       };
     }
