@@ -28,7 +28,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
  *
  * @example
  * ```ts
- * import { DeprecationsDetails, GetDeprecationsContext, CoreSetup } from 'src/core/server';
+ * import { DeprecationsDetails, GetDeprecationsContext, CoreSetup } from '@kbn/core/server';
  * import { i18n } from '@kbn/i18n';
  *
  * async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecationsContext): Promise<DeprecationsDetails[]> {

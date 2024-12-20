@@ -20,12 +20,10 @@ export interface DeprecationDetailsMessage {
 export interface BaseDeprecationDetails {
   /**
    * The title of the deprecation.
-   * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
    */
   title: string;
   /**
    * The description message to be displayed for the deprecation.
-   * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
    */
   message: string | DeprecationDetailsMessage | Array<string | DeprecationDetailsMessage>;
   /**
@@ -72,7 +70,7 @@ export interface BaseDeprecationDetails {
      * Specify a list of manual steps users need to follow to
      * fix the deprecation before upgrade. Required even if an API
      * corrective action is set in case the API fails.
-     * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
+     * Check the README for writing deprecations in `src/core/packages/core/server/deprecations/README.mdx`
      */
     manualSteps: string[];
     /**

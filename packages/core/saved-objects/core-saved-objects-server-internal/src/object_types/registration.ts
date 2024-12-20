@@ -32,7 +32,7 @@ const legacyUrlAliasType: SavedObjectsType = {
   hidden: false,
   migrations: {
     // NOTE TO MAINTAINERS: If you add a migration here, be sure to update the alias creation code in the document migrator accordingly,
-    // see: `src/core/server/saved_objects/migrations/core/document_migrator.ts`
+    // see: `src/core/packages/core/server/saved_objects/migrations/core/document_migrator.ts`
     '8.2.0': (doc) => {
       // In version 8.2.0 we added the "purpose" field. Any aliases created before this were created because of saved object conversion.
       const purpose: LegacyUrlAlias['purpose'] = 'savedObjectConversion';

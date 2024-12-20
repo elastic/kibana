@@ -204,7 +204,7 @@ export function getWebpackConfig(
                         loaderContext,
                         Path.resolve(
                           worker.repoRoot,
-                          `src/core/public/styles/core_app/_globals_${theme}.scss`
+                          `src/core/packages/core/public/styles/core_app/_globals_${theme}.scss`
                         )
                       )};\n${content}`;
                     },
@@ -307,7 +307,7 @@ export function getWebpackConfig(
       alias: {
         core_app_image_assets: Path.resolve(
           worker.repoRoot,
-          'src/core/public/styles/core_app/images'
+          'src/core/packages/core/public/styles/core_app/images'
         ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
         'react-dom$':

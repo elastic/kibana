@@ -6,7 +6,7 @@ All non-default configs except booleans and numbers will be reported as `[redact
 
 ```ts
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from 'src/core/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 
 export const configSchema = schema.object({
   usageCounters: schema.object({

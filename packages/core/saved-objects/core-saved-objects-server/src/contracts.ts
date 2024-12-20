@@ -37,7 +37,7 @@ import type { SavedObjectsExtensions } from './extensions/extensions';
  *
  * @example
  * ```ts
- * import { SavedObjectsClient, CoreSetup } from 'src/core/server';
+ * import { SavedObjectsClient, CoreSetup } from '@kbn/core/server';
  *
  * export class Plugin() {
  *   setup: (core: CoreSetup) => {
@@ -50,7 +50,7 @@ import type { SavedObjectsExtensions } from './extensions/extensions';
  *
  * @example
  * ```ts
- * import { SavedObjectsClient, CoreSetup } from 'src/core/server';
+ * import { SavedObjectsClient, CoreSetup } from '@kbn/core/server';
  * import { mySoType } from './saved_objects'
  *
  * export class Plugin() {
@@ -93,7 +93,7 @@ export interface SavedObjectsServiceSetup {
    * @example
    * ```ts
    * // src/plugins/my_plugin/server/saved_objects/my_type.ts
-   * import { SavedObjectsType } from 'src/core/server';
+   * import { SavedObjectsType } from '@kbn/core/server';
    * import * as migrations from './migrations';
    * import * as schemas from './schemas';
    *
@@ -122,7 +122,7 @@ export interface SavedObjectsServiceSetup {
    * };
    *
    * // src/plugins/my_plugin/server/plugin.ts
-   * import { SavedObjectsClient, CoreSetup } from 'src/core/server';
+   * import { SavedObjectsClient, CoreSetup } from '@kbn/core/server';
    * import { myType } from './saved_objects';
    *
    * export class Plugin() {

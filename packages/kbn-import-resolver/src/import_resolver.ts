@@ -136,10 +136,10 @@ export class ImportResolver {
   private adaptReq(req: string, dirname: string): string | undefined {
     // handle typescript aliases
     if (req === 'kibana/public') {
-      return this.adaptReq('src/core/public', dirname);
+      return this.adaptReq('src/core/packages/core/public', dirname);
     }
     if (req === 'kibana/server') {
-      return this.adaptReq('src/core/server', dirname);
+      return this.adaptReq('src/core/packages/core/server', dirname);
     }
 
     // turn root-relative paths into relative paths
