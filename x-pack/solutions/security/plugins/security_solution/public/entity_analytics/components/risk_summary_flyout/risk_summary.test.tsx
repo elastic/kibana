@@ -41,6 +41,7 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
+          isLinkEnabled
         />
       </TestProviders>
     );
@@ -63,6 +64,28 @@ describe('FlyoutRiskSummary', () => {
         (mockHostRiskScoreState.data?.[0].host.risk.category_2_score ?? 0)
       }`
     );
+
+    expect(getByTestId('riskInputsTitleLink')).toBeInTheDocument();
+    expect(getByTestId('riskInputsTitleIcon')).toBeInTheDocument();
+  });
+
+  it('renders link without icon when in preview mode', () => {
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders>
+        <FlyoutRiskSummary
+          riskScoreData={mockHostRiskScoreState}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+          recalculatingScore={false}
+          isLinkEnabled
+          isPreviewMode
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('risk-summary-table')).toBeInTheDocument();
+    expect(getByTestId('riskInputsTitleLink')).toBeInTheDocument();
+    expect(queryByTestId('riskInputsTitleIcon')).not.toBeInTheDocument();
   });
 
   it('renders risk summary table when riskScoreData is empty', () => {
@@ -73,6 +96,7 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
+          isLinkEnabled
         />
       </TestProviders>
     );
@@ -87,6 +111,7 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
+          isLinkEnabled
         />
       </TestProviders>
     );
@@ -94,7 +119,7 @@ describe('FlyoutRiskSummary', () => {
     expect(queryByTestId('riskInputsTitleLink')).not.toBeInTheDocument();
   });
 
-  it('risk summary header does not render expand icon when in preview mode', () => {
+  it('risk summary header does not render link when link is not enabled', () => {
     const { queryByTestId } = render(
       <TestProviders>
         <FlyoutRiskSummary
@@ -102,13 +127,12 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isPreviewMode
+          isLinkEnabled={false}
         />
       </TestProviders>
     );
 
     expect(queryByTestId('riskInputsTitleLink')).not.toBeInTheDocument();
-    expect(queryByTestId('riskInputsTitleIcon')).not.toBeInTheDocument();
   });
 
   it('renders visualization embeddable', () => {
@@ -119,6 +143,7 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
+          isLinkEnabled
         />
       </TestProviders>
     );
@@ -134,6 +159,7 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
+          isLinkEnabled
         />
       </TestProviders>
     );
@@ -149,6 +175,7 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
+          isLinkEnabled
         />
       </TestProviders>
     );
@@ -176,6 +203,7 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
+          isLinkEnabled
         />
       </TestProviders>
     );
@@ -198,6 +226,7 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
+          isLinkEnabled
         />
       </TestProviders>
     );
@@ -220,6 +249,7 @@ describe('FlyoutRiskSummary', () => {
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
+          isLinkEnabled
         />
       </TestProviders>
     );
