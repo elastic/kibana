@@ -61,7 +61,7 @@ describe('SiemRuleMigrationsDataService', () => {
         expect.objectContaining({ name: `${INDEX_PATTERN}-integrations` })
       );
       expect(prebuiltRulesAdapter.setComponentTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ name: `${INDEX_PATTERN}-prebuiltRules` })
+        expect.objectContaining({ name: `${INDEX_PATTERN}-prebuiltrules` })
       );
     });
 
@@ -79,7 +79,7 @@ describe('SiemRuleMigrationsDataService', () => {
         expect.objectContaining({ name: `${INDEX_PATTERN}-integrations` })
       );
       expect(prebuiltRulesAdapter.setIndexTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ name: `${INDEX_PATTERN}-prebuiltRules` })
+        expect.objectContaining({ name: `${INDEX_PATTERN}-prebuiltrules` })
       );
     });
   });
