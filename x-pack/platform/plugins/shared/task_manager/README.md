@@ -61,7 +61,7 @@ The task_manager can be configured via `taskManager` config options (e.g. `taskM
 
 Plugins define tasks by calling the `registerTaskDefinitions` method on the `server.plugins.task_manager` object.
 
-A sample task can be found in the [x-pack/test/plugin_api_integration/plugins/task_manager](../../test/plugin_api_integration/plugins/task_manager/index.js) folder.
+A sample task can be found in the [x-pack/test/plugin_api_integration/platform/plugins/shared/task_manager](../../../../test/plugin_api_integration/platform/plugins/shared/task_manager/index.js) folder.
 
 ```js
 export class Plugin {
@@ -618,7 +618,7 @@ The task manager's public API is create / delete / list. Updates aren't directly
    Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
 
    ```
-   yarn test:jest x-pack/plugins/task_manager --watch
+   yarn test:jest x-pack/platform/plugins/shared/task_manager --watch
    ```
 - Integration tests:
    ```
