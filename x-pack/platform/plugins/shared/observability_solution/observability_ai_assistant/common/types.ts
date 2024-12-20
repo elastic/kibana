@@ -30,6 +30,16 @@ export interface PendingMessage {
   error?: any;
 }
 
+interface MessageImageAttachment {
+  type: 'image';
+  source: {
+    data: string;
+    mimeType: string;
+  };
+}
+
+type MessageAttachment = MessageImageAttachment;
+
 export interface Message {
   '@timestamp': string;
   message: {
@@ -42,6 +52,7 @@ export interface Message {
       trigger: MessageRole.Assistant | MessageRole.User | MessageRole.Elastic;
     };
     data?: string;
+    attachments?: MessageAttachment[];
   };
 }
 

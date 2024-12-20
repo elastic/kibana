@@ -201,7 +201,10 @@ const includedHiddenTypes = [
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 ];
 
-export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartContract> {
+export class ActionsPlugin
+  implements
+    Plugin<PluginSetupContract, PluginStartContract, ActionsPluginsSetup, ActionsPluginsStart>
+{
   private readonly logger: Logger;
   private readonly actionsConfig: ActionsConfig;
   private taskRunnerFactory?: TaskRunnerFactory;

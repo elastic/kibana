@@ -29,6 +29,7 @@ export {
 } from './events';
 export {
   MessageRole,
+  type MessageContent,
   type Message,
   type AssistantMessage,
   type UserMessage,

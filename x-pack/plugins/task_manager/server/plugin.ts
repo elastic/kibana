@@ -125,7 +125,7 @@ export class TaskManagerPlugin
   }
 
   public setup(
-    core: CoreSetup<TaskManagerStartContract, unknown>,
+    core: CoreSetup<object, TaskManagerStartContract>,
     plugins: { usageCollection?: UsageCollectionSetup }
   ): TaskManagerSetupContract {
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);

@@ -10,6 +10,7 @@ export {
   ChatCompletionEventType,
   ToolChoiceType,
   type Message,
+  type MessageContent,
   type AssistantMessage,
   type ToolMessage,
   type UserMessage,
