@@ -8,7 +8,6 @@
 import type { FC, ChangeEvent } from 'react';
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { Subscription } from 'rxjs';
-import styled from 'styled-components';
 import { css } from '@emotion/css';
 import deepEqual from 'fast-deep-equal';
 import { EuiFormRow, EuiSpacer, EuiTextArea, useEuiTheme } from '@elastic/eui';
@@ -25,25 +24,6 @@ import { EQL_ERROR_CODES } from '../../../../common/hooks/eql/api';
 import type { EqlQueryBarFooterProps } from './footer';
 import { EqlQueryBarFooter } from './footer';
 import * as i18n from './translations';
-
-const StyledFormRow = styled(EuiFormRow)`
-  border: ${({ theme }) => theme.eui.euiBorderThin};
-  border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-
-  .euiFormRow__labelWrapper {
-    background: ${({ theme }) => theme.eui.euiColorLightestShade};
-    border-top-left-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-    border-top-right-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-    padding: 8px 10px;
-    margin-bottom: 0px;
-    label {
-      color: ${({ theme }) => theme.eui.euiTextSubduedColor};
-      &.euiFormLabel-isInvalid {
-        color: ${({ theme }) => theme.eui.euiColorDangerText};
-      }
-    }
-  }
-`;
 
 export interface EqlQueryBarProps {
   dataTestSubj: string;
@@ -79,8 +59,8 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
 
   const textAreaStyles = useMemo(
     () => css`
-      box-shadow: none;
-      border-radius: 0;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
       min-height: ${euiTheme.size.xl};
     `,
     [euiTheme.size.xl]
@@ -173,7 +153,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   );
 
   return (
-    <StyledFormRow
+    <EuiFormRow
       label={field.label}
       labelAppend={field.labelAppend}
       helpText={field.helpText}
@@ -202,7 +182,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
         />
         {showFilterBar && (
           <>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="xs" />
             <FilterBar
               data-test-subj="eqlFilterBar"
               indexPattern={indexPattern}
@@ -216,6 +196,6 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
           </>
         )}
       </>
-    </StyledFormRow>
+    </EuiFormRow>
   );
 };
