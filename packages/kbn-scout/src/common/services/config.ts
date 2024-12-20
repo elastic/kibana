@@ -10,7 +10,7 @@
 import path from 'path';
 import fs from 'fs';
 import { ToolingLog } from '@kbn/tooling-log';
-import { ScoutServerConfig } from '../../types';
+import { ScoutTestConfig } from '../../types';
 import { serviceLoadedMsg } from '../../playwright/utils';
 
 export function createScoutConfig(configDir: string, configName: string, log: ToolingLog) {
@@ -21,7 +21,7 @@ export function createScoutConfig(configDir: string, configName: string, log: To
   const configPath = path.join(configDir, `${configName}.json`);
   log.info(`Reading test servers confiuration from file: ${configPath}`);
 
-  const config = JSON.parse(fs.readFileSync(configPath, 'utf-8')) as ScoutServerConfig;
+  const config = JSON.parse(fs.readFileSync(configPath, 'utf-8')) as ScoutTestConfig;
 
   log.debug(serviceLoadedMsg('config'));
 

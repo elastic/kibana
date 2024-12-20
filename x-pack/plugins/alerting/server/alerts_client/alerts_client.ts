@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+
 import {
   ALERT_INSTANCE_ID,
   ALERT_RULE_UUID,
@@ -18,6 +19,8 @@ import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { DeepPartial } from '@kbn/utility-types';
+import { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import { CLUSTER_BLOCK_EXCEPTION, isClusterBlockError } from '../lib/error_with_type';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
   SummarizedAlerts,
@@ -65,6 +68,7 @@ import {
   filterMaintenanceWindows,
   filterMaintenanceWindowsIds,
 } from '../task_runner/maintenance_windows';
+import { ErrorWithType } from '../lib/error_with_type';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -80,6 +84,7 @@ interface AlertsAffectedByMaintenanceWindows {
   alertIds: string[];
   maintenanceWindowIds: string[];
 }
+
 export class AlertsClient<
   AlertData extends RuleAlertData,
   LegacyState extends AlertInstanceState,
@@ -568,6 +573,8 @@ export class AlertsClient<
 
         // If there were individual indexing errors, they will be returned in the success response
         if (response && response.errors) {
+          this.throwIfHasClusterBlockException(response);
+
           await resolveAlertConflicts({
             logger: this.options.logger,
             esClient,
@@ -584,6 +591,9 @@ export class AlertsClient<
           });
         }
       } catch (err) {
+        if (isClusterBlockError(err)) {
+          throw err;
+        }
         this.options.logger.error(
           `Error writing ${alertsToIndex.length} alerts to ${this.indexTemplateAndPattern.alias} ${this.ruleInfoMessage} - ${err.message}`,
           this.logTags
@@ -812,5 +822,18 @@ export class AlertsClient<
 
   public isUsingDataStreams(): boolean {
     return this._isUsingDataStreams;
+  }
+
+  private throwIfHasClusterBlockException(response: BulkResponse) {
+    response.items.forEach((item) => {
+      const op = item.create || item.index || item.update || item.delete;
+      if (op?.error && op.error.type === CLUSTER_BLOCK_EXCEPTION) {
+        throw new ErrorWithType({
+          message: op.error.reason || 'Unknown reason',
+          type: CLUSTER_BLOCK_EXCEPTION,
+          stack: op.error.stack_trace,
+        });
+      }
+    });
   }
 }
