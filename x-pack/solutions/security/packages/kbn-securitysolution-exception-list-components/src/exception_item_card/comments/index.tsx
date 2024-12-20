@@ -7,14 +7,16 @@
 
 import React, { memo } from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
-import { EuiAccordion, EuiCommentList, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
+import {
+  EuiAccordion,
+  EuiCommentList,
+  EuiFlexItem,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/css';
 import * as i18n from '../translations';
-
-const accordionCss = css`
-  color: ${euiThemeVars.euiColorPrimary};
-`;
 
 export interface ExceptionItemCardCommentsProps {
   comments: EuiCommentProps[];
@@ -23,6 +25,11 @@ export interface ExceptionItemCardCommentsProps {
 
 export const ExceptionItemCardComments = memo<ExceptionItemCardCommentsProps>(
   ({ comments, dataTestSubj }) => {
+    const { euiTheme } = useEuiTheme();
+    const accordionCss = css`
+      color: ${euiTheme.colors.textPrimary};
+    `;
+
     if (!comments.length) return null;
     return (
       <EuiFlexItem data-test-subj={dataTestSubj}>
