@@ -168,9 +168,9 @@ describe('#bulkCreate', () => {
         getId = () => expect.any(String),
       }: { method: string; _index?: string; getId?: (type: string, id?: string) => string }
     ) => {
-      const body = [];
+      const operations = [];
       for (const { type, id, if_primary_term: ifPrimaryTerm, if_seq_no: ifSeqNo } of objects) {
-        body.push({
+        operations.push({
           [method]: {
             _index,
             _id: getId(type, id),
@@ -179,10 +179,10 @@ describe('#bulkCreate', () => {
               : {}),
           },
         });
-        body.push(expect.any(Object));
+        operations.push(expect.any(Object));
       }
       expect(client.bulk).toHaveBeenCalledWith(
-        expect.objectContaining({ body }),
+        expect.objectContaining({ operations }),
         expect.anything()
       );
     };
@@ -290,9 +290,9 @@ describe('#bulkCreate', () => {
 
       it(`formats the ES request`, async () => {
         await bulkCreateSuccess(client, repository, [obj1, obj2]);
-        const body = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
+        const operations = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
         expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
+          expect.objectContaining({ operations }),
           expect.anything()
         );
       });
@@ -301,9 +301,12 @@ describe('#bulkCreate', () => {
         const obj1WithManagedTrue = { ...obj1, managed: true };
         const obj2WithManagedTrue = { ...obj2, managed: true };
         await bulkCreateSuccess(client, repository, [obj1WithManagedTrue, obj2WithManagedTrue]);
-        const body = [...expectObjArgs(obj1WithManagedTrue), ...expectObjArgs(obj2WithManagedTrue)];
+        const operations = [
+          ...expectObjArgs(obj1WithManagedTrue),
+          ...expectObjArgs(obj2WithManagedTrue),
+        ];
         expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
+          expect.objectContaining({ operations }),
           expect.anything()
         );
       });
@@ -333,9 +336,9 @@ describe('#bulkCreate', () => {
 
           await bulkCreateSuccess(client, repository, objects);
           const expected = expect.not.objectContaining({ originId: expect.anything() });
-          const body = [expect.any(Object), expected, expect.any(Object), expected];
+          const operations = [expect.any(Object), expected, expect.any(Object), expected];
           expect(client.bulk).toHaveBeenCalledWith(
-            expect.objectContaining({ body }),
+            expect.objectContaining({ operations }),
             expect.anything()
           );
         });
@@ -360,9 +363,9 @@ describe('#bulkCreate', () => {
             ];
             await bulkCreateSuccess(client, repository, objects);
             const expected = expect.objectContaining({ originId: 'some-originId' });
-            const body = [expect.any(Object), expected, expect.any(Object), expected];
+            const operations = [expect.any(Object), expected, expect.any(Object), expected];
             expect(client.bulk).toHaveBeenCalledWith(
-              expect.objectContaining({ body }),
+              expect.objectContaining({ operations }),
               expect.anything()
             );
           });
@@ -375,9 +378,9 @@ describe('#bulkCreate', () => {
             ];
             await bulkCreateSuccess(client, repository, objects);
             const expected = expect.not.objectContaining({ originId: expect.anything() });
-            const body = [expect.any(Object), expected, expect.any(Object), expected];
+            const operations = [expect.any(Object), expected, expect.any(Object), expected];
             expect(client.bulk).toHaveBeenCalledWith(
-              expect.objectContaining({ body }),
+              expect.objectContaining({ operations }),
               expect.anything()
             );
           });
@@ -389,9 +392,9 @@ describe('#bulkCreate', () => {
             ];
             await bulkCreateSuccess(client, repository, objects);
             const expected = expect.objectContaining({ originId: 'existing-originId' });
-            const body = [expect.any(Object), expected, expect.any(Object), expected];
+            const operations = [expect.any(Object), expected, expect.any(Object), expected];
             expect(client.bulk).toHaveBeenCalledWith(
-              expect.objectContaining({ body }),
+              expect.objectContaining({ operations }),
               expect.anything()
             );
           });
@@ -401,9 +404,9 @@ describe('#bulkCreate', () => {
       it(`adds namespace to request body for any types that are single-namespace`, async () => {
         await bulkCreateSuccess(client, repository, [obj1, obj2], { namespace });
         const expected = expect.objectContaining({ namespace });
-        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        const operations = [expect.any(Object), expected, expect.any(Object), expected];
         expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
+          expect.objectContaining({ operations }),
           expect.anything()
         );
       });
@@ -412,9 +415,9 @@ describe('#bulkCreate', () => {
       it(`adds managed=false to request body if declared for any types that are single-namespace`, async () => {
         await bulkCreateSuccess(client, repository, [obj1, obj2], { namespace, managed: false });
         const expected = expect.objectContaining({ namespace, managed: false });
-        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        const operations = [expect.any(Object), expected, expect.any(Object), expected];
         expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
+          expect.objectContaining({ operations }),
           expect.anything()
         );
       });
@@ -422,9 +425,9 @@ describe('#bulkCreate', () => {
       it(`adds managed=true to request body if declared for any types that are single-namespace`, async () => {
         await bulkCreateSuccess(client, repository, [obj1, obj2], { namespace, managed: true });
         const expected = expect.objectContaining({ namespace, managed: true });
-        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        const operations = [expect.any(Object), expected, expect.any(Object), expected];
         expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
+          expect.objectContaining({ operations }),
           expect.anything()
         );
       });
@@ -432,9 +435,9 @@ describe('#bulkCreate', () => {
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
         await bulkCreateSuccess(client, repository, [obj1, obj2], { namespace: 'default' });
         const expected = expect.not.objectContaining({ namespace: 'default' });
-        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        const operations = [expect.any(Object), expected, expect.any(Object), expected];
         expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
+          expect.objectContaining({ operations }),
           expect.anything()
         );
       });
@@ -446,9 +449,9 @@ describe('#bulkCreate', () => {
         ];
         await bulkCreateSuccess(client, repository, objects, { namespace });
         const expected = expect.not.objectContaining({ namespace: expect.anything() });
-        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        const operations = [expect.any(Object), expected, expect.any(Object), expected];
         expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
+          expect.objectContaining({ operations }),
           expect.anything()
         );
       });
@@ -468,9 +471,9 @@ describe('#bulkCreate', () => {
           await bulkCreateSuccess(client, repository, objects, { namespace, overwrite: true });
           const expected1 = expect.objectContaining({ namespaces: [namespace ?? 'default'] });
           const expected2 = expect.objectContaining({ namespaces: ['*'] });
-          const body = [expect.any(Object), expected1, expect.any(Object), expected2];
+          const operations = [expect.any(Object), expected1, expect.any(Object), expected2];
           expect(client.bulk).toHaveBeenCalledWith(
-            expect.objectContaining({ body }),
+            expect.objectContaining({ operations }),
             expect.anything()
           );
           client.bulk.mockClear();
@@ -503,7 +506,7 @@ describe('#bulkCreate', () => {
             },
           ]);
           await bulkCreateSuccess(client, repository, objects, { namespace, overwrite: true });
-          const body = [
+          const operations = [
             { index: expect.objectContaining({ _id: `${ns2}:dashboard:${o1.id}` }) },
             expect.objectContaining({ namespace: ns2 }),
             {
@@ -525,7 +528,7 @@ describe('#bulkCreate', () => {
             })
           );
           expect(client.bulk).toHaveBeenCalledWith(
-            expect.objectContaining({ body }),
+            expect.objectContaining({ operations }),
             expect.anything()
           );
           client.bulk.mockClear();
@@ -539,12 +542,12 @@ describe('#bulkCreate', () => {
         const test = async (namespace?: string) => {
           const objects = [{ ...obj1, type: 'dashboard', initialNamespaces: ['default'] }];
           await bulkCreateSuccess(client, repository, objects, { namespace, overwrite: true });
-          const body = [
+          const operations = [
             { index: expect.objectContaining({ _id: `dashboard:${obj1.id}` }) },
             expect.not.objectContaining({ namespace: 'default' }),
           ];
           expect(client.bulk).toHaveBeenCalledWith(
-            expect.objectContaining({ body }),
+            expect.objectContaining({ operations }),
             expect.anything()
           );
           client.bulk.mockClear();
@@ -558,9 +561,9 @@ describe('#bulkCreate', () => {
           const objects = [obj1, { ...obj2, type: NAMESPACE_AGNOSTIC_TYPE }];
           await bulkCreateSuccess(client, repository, objects, { namespace, overwrite: true });
           const expected = expect.not.objectContaining({ namespaces: expect.anything() });
-          const body = [expect.any(Object), expected, expect.any(Object), expected];
+          const operations = [expect.any(Object), expected, expect.any(Object), expected];
           expect(client.bulk).toHaveBeenCalledWith(
-            expect.objectContaining({ body }),
+            expect.objectContaining({ operations }),
             expect.anything()
           );
           client.bulk.mockClear();
@@ -652,9 +655,9 @@ describe('#bulkCreate', () => {
         const result = await repository.bulkCreate(objects);
         expect(client.bulk).toHaveBeenCalled();
         const objCall = isBulkError ? expectObjArgs(obj) : [];
-        const body = [...expectObjArgs(obj1), ...objCall, ...expectObjArgs(obj2)];
+        const operations = [...expectObjArgs(obj1), ...objCall, ...expectObjArgs(obj2)];
         expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
+          expect.objectContaining({ operations }),
           expect.anything()
         );
         expect(result).toEqual({
@@ -765,7 +768,7 @@ describe('#bulkCreate', () => {
         );
         expect(client.bulk).toHaveBeenCalled();
         expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body: [...expectObjArgs(o1), ...expectObjArgs(o5)] }),
+          expect.objectContaining({ operations: [...expectObjArgs(o1), ...expectObjArgs(o5)] }),
           expect.anything()
         );
         expect(result).toEqual({

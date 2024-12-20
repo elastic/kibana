@@ -16,6 +16,7 @@ import {
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsCreateOptions } from '@kbn/core-saved-objects-api-server';
+import { CreateRequest, type IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import type { PreflightCheckForCreateResult } from './internals/preflight_check_for_create';
 import { getSavedObjectNamespaces, getCurrentTime, normalizeNamespace, setManaged } from './utils';
@@ -152,19 +153,19 @@ export const performCreate = async <T>(
 
   const raw = serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc<T>);
 
-  const requestParams = {
+  const requestParams: IndexRequest | CreateRequest = {
     id: raw._id,
     index: commonHelper.getIndexForType(type),
     refresh,
-    body: raw._source,
+    document: raw._source,
     ...(overwrite && version ? decodeRequestVersion(version) : {}),
     require_alias: true,
   };
 
   const { body, statusCode, headers } =
     id && overwrite
-      ? await client.index(requestParams, { meta: true })
-      : await client.create(requestParams, { meta: true });
+      ? await client.index(requestParams as IndexRequest, { meta: true })
+      : await client.create(requestParams as CreateRequest, { meta: true });
 
   // throw if we can't verify a 404 response is from Elasticsearch
   if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {

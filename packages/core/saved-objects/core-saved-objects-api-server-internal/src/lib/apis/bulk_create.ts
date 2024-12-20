@@ -282,7 +282,7 @@ export const performBulkCreate = async <T>(
     ? await client.bulk({
         refresh,
         require_alias: true,
-        body: bulkCreateParams,
+        operations: bulkCreateParams,
       })
     : undefined;
 

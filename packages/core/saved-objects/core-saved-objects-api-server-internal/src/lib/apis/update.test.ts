@@ -190,7 +190,7 @@ describe('#update', () => {
         expect(client.index).toHaveBeenCalledTimes(1);
         expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({
-            body: expect.objectContaining({
+            document: expect.objectContaining({
               globalType: {
                 foo: 'bar',
                 title: 'Testing',
@@ -219,7 +219,7 @@ describe('#update', () => {
         expect(client.index).toHaveBeenCalledTimes(1);
         expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({
-            body: expect.objectContaining({
+            document: expect.objectContaining({
               globalType: {
                 foo: 'bar',
               },
@@ -385,7 +385,7 @@ describe('#update', () => {
             index: '.kibana-test_8.0.0-testing',
             refresh: 'wait_for',
             require_alias: true,
-            body: expect.objectContaining({
+            document: expect.objectContaining({
               multiNamespaceIsolatedType: { title: 'Testing' },
               namespaces: ['default'],
               references: [],

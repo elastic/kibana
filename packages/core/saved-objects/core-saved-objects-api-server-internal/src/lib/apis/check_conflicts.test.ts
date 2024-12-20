@@ -100,14 +100,12 @@ describe('#checkConflicts', () => {
     ) => {
       expect(client.mget).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: {
-            docs: objects.map(({ type, id }) =>
-              expect.objectContaining({
-                _index,
-                _id: getId(type, id),
-              })
-            ),
-          },
+          docs: objects.map(({ type, id }) =>
+            expect.objectContaining({
+              _index,
+              _id: getId(type, id),
+            })
+          ),
         }),
         expect.anything()
       );

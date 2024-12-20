@@ -278,7 +278,7 @@ async function bulkGetObjectsAndAliases(
 
   const bulkGetResponse = docsToBulkGet.length
     ? await client.mget<SavedObjectsRawDocSource>(
-        { body: { docs: docsToBulkGet } },
+        { docs: docsToBulkGet },
         { ignore: [404], meta: true }
       )
     : undefined;

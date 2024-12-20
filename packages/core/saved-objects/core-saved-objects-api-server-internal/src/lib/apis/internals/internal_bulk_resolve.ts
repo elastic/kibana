@@ -141,7 +141,7 @@ export async function internalBulkResolve<T>(
 
   const bulkGetResponse = docsToBulkGet.length
     ? await client.mget<SavedObjectsRawDocSource>(
-        { body: { docs: docsToBulkGet } },
+        { docs: docsToBulkGet },
         { ignore: [404], meta: true }
       )
     : undefined;
@@ -330,7 +330,7 @@ async function fetchAndUpdateAliases(
   const bulkUpdateResponse = await client.bulk({
     refresh: false,
     require_alias: true,
-    body: bulkUpdateDocs,
+    operations: bulkUpdateDocs,
   });
   return bulkUpdateResponse.items.map((item) => {
     // Map the bulk update response to the `_source` fields that were returned for each document
