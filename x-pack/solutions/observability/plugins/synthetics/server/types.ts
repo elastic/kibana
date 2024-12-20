@@ -22,7 +22,6 @@ import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
-import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -75,7 +74,6 @@ export interface SyntheticsPluginsSetupDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
   telemetry: TelemetryPluginSetup;
-  bfetch: BfetchServerSetup;
   share: SharePluginSetup;
 }
 

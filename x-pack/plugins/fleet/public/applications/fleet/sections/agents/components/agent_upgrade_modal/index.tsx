@@ -230,7 +230,6 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     },
   ];
   const [selectedVersion, setSelectedVersion] = useState(preselected);
-  const [selectedVersionStr, setSelectedVersionStr] = useState('');
 
   // latest agent version might be earlier than kibana version
   const latestAgentVersion = useAgentVersion();
@@ -296,6 +295,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       isSubmitting ||
       (isUpdating && updatingAgents === 0) ||
       !selectedVersion[0].value ||
+      !semverValid(selectedVersion[0].value) ||
       (isSingleAgent && !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value)) ||
       (isSingleAgent &&
         !isSingleAgentFleetServer &&
@@ -566,11 +566,11 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           <EuiFieldText
             fullWidth
             placeholder="Enter version"
-            value={selectedVersionStr}
+            value={selectedVersion[0].value}
             data-test-subj="agentUpgradeModal.VersionInput"
             onChange={(e) => {
               const newValue = e.target.value;
-              setSelectedVersionStr(newValue);
+
               setSelectedVersion([{ label: newValue, value: newValue }]);
             }}
             isInvalid={!!semverErrors}
