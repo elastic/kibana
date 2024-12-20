@@ -18,8 +18,7 @@ import expect from 'expect';
 import { refreshSavedObjectIndices } from '../../refresh_index';
 
 const MAX_RETRIES = 2;
-const ATTEMPT_TIMEOUT = 120000;
-const TOTAL_TIMEOUT = ATTEMPT_TIMEOUT * (1 + MAX_RETRIES);
+const TOTAL_TIMEOUT = 6 * 60000; // 6 mins, applies to all attempts (1 + MAX_RETRIES)
 
 /**
  * Installs the `security_detection_engine` package via fleet API. This will
