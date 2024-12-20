@@ -160,6 +160,7 @@ const DEV_DIRECTORIES = [
   'test_utils',
   'test_utilities',
   'test_helpers',
+  'test-helpers',
   'tests_client_integration',
   'tsd_tests',
 ];
