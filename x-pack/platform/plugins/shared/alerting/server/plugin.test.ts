@@ -184,7 +184,7 @@ describe('Alerting Plugin', () => {
             expect(() =>
               setup.registerType({
                 ...sampleRuleType,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                 minimumLicenseRequired: 'foo' as any,
               })
             ).toThrowErrorMatchingInlineSnapshot(`"\\"foo\\" is not a valid license type"`);

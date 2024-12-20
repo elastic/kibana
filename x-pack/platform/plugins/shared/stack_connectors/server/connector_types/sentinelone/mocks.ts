@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { DeepPartial } from '@kbn/utility-types';
 import { merge } from 'lodash';
 import { AxiosResponse } from 'axios/index';

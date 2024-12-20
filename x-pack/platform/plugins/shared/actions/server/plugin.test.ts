@@ -298,7 +298,7 @@ describe('Actions Plugin', () => {
 
       beforeEach(async () => {
         // coreMock.createSetup doesn't support Plugin generics
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         setup = await plugin.setup(coreSetup as any, pluginsSetup);
       });
 
@@ -307,7 +307,7 @@ describe('Actions Plugin', () => {
           setup.registerType({
             ...sampleActionType,
             // we're faking an invalid value, this requires stripping the typing
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
             minimumLicenseRequired: 'foo' as any,
           })
         ).toThrowErrorMatchingInlineSnapshot(`"\\"foo\\" is not a valid license type"`);
@@ -358,7 +358,7 @@ describe('Actions Plugin', () => {
       it('should correctly return whether connector is preconfigured', async () => {
         setup(getConfig());
         // coreMock.createSetup doesn't support Plugin generics
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
 
         expect(pluginSetup.isPreconfiguredConnector('preconfiguredServerLog')).toEqual(true);
@@ -386,7 +386,7 @@ describe('Actions Plugin', () => {
       it('should set connector type enabled', async () => {
         setup(getConfig());
         // coreMock.createSetup doesn't support Plugin generics
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
         const coreStart = coreMock.createStart();
         const pluginsStart = {
@@ -429,7 +429,7 @@ describe('Actions Plugin', () => {
       it('should set connector type enabled and check isActionTypeEnabled with plugin setup method', async () => {
         setup(getConfig());
         // coreMock.createSetup doesn't support Plugin generics
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
 
         pluginSetup.registerType({
@@ -466,7 +466,7 @@ describe('Actions Plugin', () => {
       it('should set all the connector types enabled when null or ["*"] passed', async () => {
         setup(getConfig());
         // coreMock.createSetup doesn't support Plugin generics
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
         const coreStart = coreMock.createStart();
         const pluginsStart = {
@@ -509,7 +509,7 @@ describe('Actions Plugin', () => {
       it('should set all the connector types disabled when [] passed', async () => {
         setup(getConfig());
         // coreMock.createSetup doesn't support Plugin generics
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
         const coreStart = coreMock.createStart();
         const pluginsStart = {
@@ -552,7 +552,7 @@ describe('Actions Plugin', () => {
       it('should throw if the enabledActionTypes is already set by the config', async () => {
         setup({ ...getConfig(), enabledActionTypes: ['.email'] });
         // coreMock.createSetup doesn't support Plugin generics
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
 
         expect(() => pluginSetup.setEnabledConnectorTypes(['.index'])).toThrow(
@@ -702,7 +702,7 @@ describe('Actions Plugin', () => {
         it('should handle preconfigured actions', async () => {
           setup(getConfig());
           // coreMock.createSetup doesn't support Plugin generics
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
           const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
           pluginSetup.registerType({
             id: '.server-log',
@@ -728,7 +728,6 @@ describe('Actions Plugin', () => {
         it('should handle preconfiguredAlertHistoryEsIndex = true', async () => {
           setup(getConfig({ preconfiguredAlertHistoryEsIndex: true }));
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
           pluginSetup.registerType({
             id: '.index',
@@ -765,7 +764,7 @@ describe('Actions Plugin', () => {
             })
           );
           // coreMock.createSetup doesn't support Plugin generics
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
           await plugin.setup(coreSetup as any, pluginsSetup);
           const pluginStart = await plugin.start(coreStart, pluginsStart);
 
@@ -780,7 +779,7 @@ describe('Actions Plugin', () => {
         it('should set system actions correctly', async () => {
           setup(getConfig());
           // coreMock.createSetup doesn't support Plugin generics
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
           const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
 
           const platinumLicense = licensingMock.createLicense({
@@ -848,7 +847,7 @@ describe('Actions Plugin', () => {
           );
 
           // coreMock.createSetup doesn't support Plugin generics
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
           const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
 
           pluginSetup.registerType({
@@ -890,7 +889,7 @@ describe('Actions Plugin', () => {
 
       it('passes through the notifyUsage option when set to true', async () => {
         // coreMock.createSetup doesn't support Plugin generics
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
         pluginSetup.registerType(actionType);
         const pluginStart = plugin.start(coreStart, pluginsStart);
@@ -918,7 +917,7 @@ describe('Actions Plugin', () => {
 
       it('passes through the notifyUsage option when set to true', async () => {
         // coreMock.createSetup doesn't support Plugin generics
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
         pluginSetup.registerType(actionType);
         const pluginStart = plugin.start(coreStart, pluginsStart);
@@ -933,7 +932,7 @@ describe('Actions Plugin', () => {
     describe('getActionsHealth()', () => {
       it('should return hasPermanentEncryptionKey false if canEncrypt of encryptedSavedObjects is false', async () => {
         // coreMock.createSetup doesn't support Plugin generics
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
         expect(pluginSetup.getActionsHealth()).toEqual({ hasPermanentEncryptionKey: false });
       });
@@ -952,7 +951,7 @@ describe('Actions Plugin', () => {
     describe('isSystemActionConnector()', () => {
       it('should return true if the connector is a system connector', async () => {
         // coreMock.createSetup doesn't support Plugin generics
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
 
         pluginSetup.registerType({
@@ -975,7 +974,7 @@ describe('Actions Plugin', () => {
 
       it('should return false if the connector is not a system connector', async () => {
         // coreMock.createSetup doesn't support Plugin generics
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
 
         pluginSetup.registerType({

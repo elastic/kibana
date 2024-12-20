@@ -6,7 +6,6 @@
  */
 
 // TODO: https://github.com/elastic/kibana/issues/110907
-/* eslint-disable @kbn/eslint/no_export_all */
 
 import { PluginInitializerContext } from '@kbn/core/server';
 
