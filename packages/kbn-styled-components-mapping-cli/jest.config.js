@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-babel-styled-components-mapping-cli'],
+  roots: ['<rootDir>/packages/kbn-styled-components-mapping-cli'],
 };
