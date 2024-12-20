@@ -93,8 +93,7 @@ position: ${i + 1}
 
 export function contextLimitCheck(
   modelLimit: number | undefined,
-  prompt: ChatPromptTemplate,
-  streamController: AbortController
+  prompt: ChatPromptTemplate
 ): (input: ContextInputs) => Promise<ContextInputs> {
   return async (input) => {
     if (!modelLimit) return input;
@@ -104,7 +103,6 @@ export function contextLimitCheck(
     const aboveContextLimit = approxPromptTokens > modelLimit;
 
     if (aboveContextLimit) {
-      streamController.abort();
       throw new ContextLimitError(
         'Context exceeds the model limit',
         modelLimit,
@@ -138,7 +136,6 @@ class ConversationalChainFn {
     client: AssistClient,
     msgs: ChatMessage[]
   ): Promise<ReadableStream<DataStreamString>> {
-    const streamController = new AbortController();
     return createDataStream({
       execute: async (dataStream) => {
         const messages = msgs ?? [];
@@ -203,9 +200,7 @@ class ConversationalChainFn {
             });
             return inputs;
           }),
-          RunnableLambda.from(
-            contextLimitCheck(this.options?.rag?.inputTokensLimit, prompt, streamController)
-          ),
+          RunnableLambda.from(contextLimitCheck(this.options?.rag?.inputTokensLimit, prompt)),
           RunnableLambda.from(registerContextTokenCounts(dataStream)),
           prompt,
           this.options.model.withConfig({ metadata: { type: 'question_answer_qa' } }),
@@ -225,7 +220,6 @@ class ConversationalChainFn {
             chat_history: chatHistory,
           },
           {
-            signal: streamController.signal,
             callbacks: [
               {
                 // callback for chat based models (OpenAI)
@@ -286,7 +280,6 @@ class ConversationalChainFn {
       },
       onError: (error: unknown) => {
         if (error instanceof Error) {
-          streamController.abort();
           return error.message;
         }
         return 'An error occurred while processing the request';

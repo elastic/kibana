@@ -523,11 +523,9 @@ describe('conversational chain', () => {
         question: 'This is a test question.',
         chat_history: 'This is a test chat history.',
       };
-      const signalController = new AbortController();
-      const result = await contextLimitCheck(undefined, prompt, signalController)(input);
+      const result = await contextLimitCheck(undefined, prompt)(input);
 
       expect(result).toBe(input);
-      expect(signalController.signal.aborted).toBe(false);
     });
 
     it('should return the input if within modelLimit', async () => {
@@ -536,10 +534,8 @@ describe('conversational chain', () => {
         question: 'This is a test question.',
         chat_history: 'This is a test chat history.',
       };
-      const signalController = new AbortController();
-      const result = await contextLimitCheck(10000, prompt, signalController)(input);
+      const result = await contextLimitCheck(10000, prompt)(input);
       expect(result).toEqual(input);
-      expect(signalController.signal.aborted).toBe(false);
     });
 
     it('should clip context if exceeds modelLimit', async () => {
@@ -549,10 +545,9 @@ describe('conversational chain', () => {
         question: 'This is a test question.',
         chat_history: 'This is a test chat history.',
       };
-      const signalController = new AbortController();
-      await expect(
-        contextLimitCheck(33, prompt, signalController)(input)
-      ).rejects.toMatchInlineSnapshot(`[ContextLimitError: Context exceeds the model limit]`);
+      await expect(contextLimitCheck(33, prompt)(input)).rejects.toMatchInlineSnapshot(
+        `[ContextLimitError: Context exceeds the model limit]`
+      );
     });
   });
 });
