@@ -62,11 +62,11 @@ export const performRemoveReferencesTo = async <T>(
         lang: 'painless',
       },
       conflicts: 'proceed',
-      ...getSearchDsl(mappings, registry, {
+      ...(getSearchDsl(mappings, registry, {
         namespaces: namespace ? [namespace] : undefined,
         type: allTypes,
         hasReference: { type, id },
-      }),
+      }) as Omit<ReturnType<typeof getSearchDsl>, 'sort'>), // TS is complaining and it's unlikely that we sort here
     },
     { ignore: [404], meta: true }
   );
