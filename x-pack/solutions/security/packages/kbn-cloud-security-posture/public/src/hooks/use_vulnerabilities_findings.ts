@@ -35,9 +35,15 @@ export interface VulnerabilitiesPackage extends Vulnerability {
   };
 }
 
-export type VulnerabilitiesFindingDetailFields = Pick<Vulnerability, 'id' | 'severity' | 'score'> &
-  Pick<VulnerabilitiesPackage, 'package'> &
-  Pick<CspVulnerabilityFinding, 'vulnerability' | 'resource'>;
+export interface VulnerabilitiesFindingTableDetailsFields {
+  'vulnerability.id': string;
+  'vulnerability.severity': string;
+  'vulnerability.package.name': string;
+}
+
+export type VulnerabilitiesFindingDetailFields = Pick<Vulnerability, 'score'> &
+  Pick<CspVulnerabilityFinding, 'vulnerability' | 'resource'> &
+  VulnerabilitiesFindingTableDetailsFields;
 
 interface FindingsAggs {
   count: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
@@ -70,10 +76,10 @@ export const useVulnerabilitiesFindings = (options: UseCspOptions) => {
         rows: hits.hits.map((finding) => ({
           vulnerability: finding._source?.vulnerability,
           resource: finding._source?.resource,
-          id: finding._source?.vulnerability?.id,
           score: finding._source?.vulnerability?.score,
-          severity: finding._source?.vulnerability?.severity,
-          package: finding._source?.package,
+          'vulnerability.id': finding._source?.vulnerability?.id,
+          'vulnerability.severity': finding._source?.vulnerability?.severity,
+          'vulnerability.package.name': finding._source?.package?.name,
         })) as VulnerabilitiesFindingDetailFields[],
       };
     },

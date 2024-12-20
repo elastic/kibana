@@ -8,12 +8,11 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon } from '@elastic/eui';
+import type { MisconfigurationFindingDetailFields } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
 import { useMisconfigurationFindings } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
 import { i18n } from '@kbn/i18n';
 import {
   MISCONFIGURATION_STATUS,
-  type CspFinding,
-  type CspFindingResult,
   buildMisconfigurationEntityFlyoutPreviewQuery,
 } from '@kbn/cloud-security-posture-common';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -31,8 +30,6 @@ import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
-
-type MisconfigurationFindingDetailFields = Pick<CspFinding, 'result' | 'rule' | 'resource'>;
 
 const getFindingsStats = (
   passedFindingsStats: number,
@@ -95,17 +92,13 @@ export const MisconfigurationFindingsDetailsTable = memo(
 
     const [currentFilter, setCurrentFilter] = useState<string>('');
 
-    const formatName = (name: string) => {
-      if (name === 'result') return 'result.evaluation';
-      if (name === 'rule') return 'rule.name';
-      else return '';
-    };
-
-    const [sortField, setSortField] = useState<'result' | 'rule' | 'resource'>('result');
+    const [sortField, setSortField] = useState<
+      'result.evaluation' | 'rule.name' | 'resource' | 'rule'
+    >('result.evaluation');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
     const obj: { [key: string]: string } = {};
-    obj[formatName(sortField)] = sortDirection;
+    obj[sortField] = sortDirection;
 
     const { data } = useMisconfigurationFindings({
       query: buildMisconfigurationEntityFlyoutPreviewQuery(field, value, currentFilter),
@@ -215,8 +208,8 @@ export const MisconfigurationFindingsDetailsTable = memo(
         ),
       },
       {
-        field: 'result',
-        render: (result: CspFindingResult) => <CspEvaluationBadge type={result?.evaluation} />,
+        field: 'result.evaluation',
+        render: (result: 'failed' | 'passed' | undefined) => <CspEvaluationBadge type={result} />,
         name: i18n.translate(
           'xpack.securitySolution.flyout.left.insights.misconfigurations.table.resultColumnName',
           {
@@ -227,8 +220,8 @@ export const MisconfigurationFindingsDetailsTable = memo(
         sortable: true,
       },
       {
-        field: 'rule',
-        render: (rule: CspBenchmarkRuleMetadata) => <EuiText size="s">{rule?.name}</EuiText>,
+        field: 'rule.name',
+        render: (ruleName: string) => <EuiText size="s">{ruleName}</EuiText>,
         name: i18n.translate(
           'xpack.securitySolution.flyout.left.insights.misconfigurations.table.ruleColumnName',
           {

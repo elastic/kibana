@@ -45,21 +45,18 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
 
   const [currentFilter, setCurrentFilter] = useState<string>('');
 
-  const formatName = (name: string) => {
-    if (name === 'id') return 'vulnerability.id';
-    if (name === 'severity') return 'vulnerability.severity';
-    if (name === 'score') return 'vulnerability.score.base';
-    if (name === 'package') return 'vulnerability.package.name';
-    else return '';
-  };
-
   const [sortField, setSortField] = useState<
-    'id' | 'score' | 'severity' | 'package' | 'vulnerability' | 'resource'
-  >('severity');
+    | 'score'
+    | 'vulnerability'
+    | 'resource'
+    | 'vulnerability.severity'
+    | 'vulnerability.id'
+    | 'vulnerability.package.name'
+  >('vulnerability.severity');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const obj: { [key: string]: string } = {};
-  obj[formatName(sortField)] = sortDirection;
+  obj[sortField === 'score' ? 'vulnerability.score.base' : sortField] = sortDirection;
 
   const sorting: EuiTableSortingType<VulnerabilitiesFindingDetailFields> = {
     sort: {
@@ -180,7 +177,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
       ),
     },
     {
-      field: 'id',
+      field: 'vulnerability.id',
       render: (id: string) => <EuiText size="s">{id}</EuiText>,
       name: i18n.translate(
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.resultColumnName',
@@ -204,7 +201,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
       sortable: true,
     },
     {
-      field: 'severity',
+      field: 'vulnerability.severity',
       render: (severity: string) => (
         <>
           <EuiText size="s">
@@ -220,10 +217,8 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
       sortable: true,
     },
     {
-      field: 'package',
-      render: (packages: { version?: string; name?: string; fixed_version?: string }) => (
-        <EuiText size="s">{packages?.name}</EuiText>
-      ),
+      field: 'vulnerability.package.name',
+      render: (packageName: string) => <EuiText size="s">{packageName}</EuiText>,
       name: i18n.translate(
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
         { defaultMessage: 'Package' }

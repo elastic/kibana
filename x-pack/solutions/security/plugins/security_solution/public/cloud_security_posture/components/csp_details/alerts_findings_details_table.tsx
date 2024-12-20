@@ -38,24 +38,28 @@ import { ALERT_PREVIEW_BANNER } from '../../../flyout/document_details/preview/c
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
 import { useNonClosedAlerts } from '../../hooks/use_non_closed_alerts';
 
+enum KIBANA_ALERTS {
+  SEVERITY = 'kibana.alert.severity',
+  RULE_NAME = 'kibana.alert.rule.name',
+  WORKFLOW_STATUS = 'kibana.alert.workflow_status',
+}
+
 type AlertSeverity = 'low' | 'medium' | 'high' | 'critical';
 
 interface ResultAlertsField {
   _id: string[];
   _index: string[];
-  'kibana.alert.rule.uuid': string[];
-  'kibana.alert.severity': AlertSeverity[];
-  'kibana.alert.rule.name': string[];
-  'kibana.alert.workflow_status': string[];
+  [KIBANA_ALERTS.SEVERITY]: AlertSeverity[];
+  [KIBANA_ALERTS.RULE_NAME]: string[];
+  [KIBANA_ALERTS.WORKFLOW_STATUS]: string[];
 }
 
 interface ContextualFlyoutAlertsField {
   id: string;
   index: string;
-  ruleUuid: string;
-  ruleName: string;
-  severity: AlertSeverity;
-  status: string;
+  [KIBANA_ALERTS.SEVERITY]: AlertSeverity;
+  [KIBANA_ALERTS.RULE_NAME]: string;
+  [KIBANA_ALERTS.WORKFLOW_STATUS]: string;
 }
 
 interface AlertsDetailsFields {
@@ -77,15 +81,14 @@ export const AlertsDetailsTable = memo(
     const [pageSize, setPageSize] = useState(10);
 
     const [sortField, setSortField] = useState<
-      'id' | 'ruleName' | 'severity' | 'status' | 'index' | 'ruleUuid'
-    >('severity');
+      | 'id'
+      | 'index'
+      | KIBANA_ALERTS.SEVERITY
+      | KIBANA_ALERTS.WORKFLOW_STATUS
+      | KIBANA_ALERTS.RULE_NAME
+    >(KIBANA_ALERTS.SEVERITY);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-    const formatName = (name: string) => {
-      if (name === 'ruleName') return 'kibana.alert.rule.name';
-      else if (name === 'severity') return 'kibana.alert.severity';
-      else return 'kibana.alert.workflow_status';
-    };
     const sorting: EuiTableSortingType<ContextualFlyoutAlertsField> = {
       sort: {
         field: sortField,
@@ -112,16 +115,7 @@ export const AlertsDetailsTable = memo(
     const { to, from } = useGlobalTime();
     const { signalIndexName } = useSignalIndex();
     const { data, setQuery } = useQueryAlerts({
-      query: buildEntityAlertsQuery(
-        field,
-        to,
-        from,
-        value,
-        500,
-        '',
-        formatName(sortField),
-        sortDirection
-      ),
+      query: buildEntityAlertsQuery(field, to, from, value, 500, '', sortField, sortDirection),
       queryName: ALERTS_QUERY_NAMES.BY_RULE_BY_STATUS,
       indexName: signalIndexName,
     });
@@ -151,16 +145,7 @@ export const AlertsDetailsTable = memo(
       filter: () => {
         setCurrentFilter(key);
         setQuery(
-          buildEntityAlertsQuery(
-            field,
-            to,
-            from,
-            value,
-            500,
-            key,
-            formatName(sortField),
-            sortDirection
-          )
+          buildEntityAlertsQuery(field, to, from, value, 500, key, sortField, sortDirection)
         );
       },
       isCurrentFilter: currentFilter === key,
@@ -176,10 +161,9 @@ export const AlertsDetailsTable = memo(
         return {
           id: item.fields?._id?.[0],
           index: item.fields?._index?.[0],
-          ruleName: item.fields?.['kibana.alert.rule.name']?.[0],
-          ruleUuid: item.fields?.['kibana.alert.rule.uuid']?.[0],
-          severity: item.fields?.['kibana.alert.severity']?.[0],
-          status: item.fields?.['kibana.alert.workflow_status']?.[0],
+          [KIBANA_ALERTS.RULE_NAME]: item.fields?.[KIBANA_ALERTS.RULE_NAME]?.[0],
+          [KIBANA_ALERTS.SEVERITY]: item.fields?.[KIBANA_ALERTS.SEVERITY]?.[0],
+          [KIBANA_ALERTS.WORKFLOW_STATUS]: item.fields?.[KIBANA_ALERTS.WORKFLOW_STATUS]?.[0],
         };
       }
     );
@@ -206,18 +190,7 @@ export const AlertsDetailsTable = memo(
           setSortField(fieldSort);
           setSortDirection(direction);
 
-          setQuery(
-            buildEntityAlertsQuery(
-              field,
-              to,
-              from,
-              value,
-              500,
-              '',
-              formatName(fieldSort),
-              direction
-            )
-          );
+          setQuery(buildEntityAlertsQuery(field, to, from, value, 500, '', fieldSort, direction));
         }
       },
       [field, from, setQuery, to, value]
@@ -255,7 +228,7 @@ export const AlertsDetailsTable = memo(
         ),
       },
       {
-        field: 'ruleName',
+        field: KIBANA_ALERTS.RULE_NAME,
         render: (ruleName: string) => <EuiText size="s">{ruleName}</EuiText>,
         name: i18n.translate(
           'xpack.securitySolution.flyout.left.insights.alerts.table.ruleNameColumnName',
@@ -267,7 +240,7 @@ export const AlertsDetailsTable = memo(
         sortable: true,
       },
       {
-        field: 'severity',
+        field: KIBANA_ALERTS.SEVERITY,
         render: (severity: AlertSeverity) => (
           <EuiText size="s">
             <SeverityBadge value={severity} data-test-subj="severityPropertyValue" />
@@ -283,7 +256,7 @@ export const AlertsDetailsTable = memo(
         sortable: true,
       },
       {
-        field: 'status',
+        field: KIBANA_ALERTS.WORKFLOW_STATUS,
         render: (status: string) => <EuiText size="s">{capitalize(status)}</EuiText>,
         name: i18n.translate(
           'xpack.securitySolution.flyout.left.insights.alerts.table.statusColumnName',
