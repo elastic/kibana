@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useRef, useEffect, useState } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useTheme } from '../../../../../../hooks/use_theme';
+import styled from '@emotion/styled';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
 import { TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../../common/utils/formatters';
@@ -37,68 +36,68 @@ interface IBarStyleProps {
   color: string;
 }
 
-const Container = euiStyled.div<IContainerStyleProps>`
+const Container = styled.div<IContainerStyleProps>`
   position: relative;
   display: block;
   user-select: none;
-  padding-top: ${({ theme }) => theme.eui.euiSizeS};
-  padding-bottom: ${({ theme }) => theme.eui.euiSizeM};
+  padding-top: ${({ theme }) => theme.euiTheme.size.s};
+  padding-bottom: ${({ theme }) => theme.euiTheme.size.m};
   margin-right: ${(props) => props.timelineMargins.right}px;
   margin-left: ${(props) =>
     props.hasToggle
       ? props.timelineMargins.left - 30 // fix margin if there is a toggle
-      : props.timelineMargins.left}px ;
+      : props.timelineMargins.left}px;
   background-color: ${({ isSelected, theme }) =>
-    isSelected ? theme.eui.euiColorLightestShade : 'initial'};
+    isSelected ? theme.euiTheme.colors.lightestShade : 'initial'};
   cursor: pointer;
 
   &:hover {
-    background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
+    background-color: ${({ theme }) => theme.euiTheme.colors.lightestShade};
   }
 `;
 
-const ItemBar = euiStyled.div<IBarStyleProps>`
+const ItemBar = styled.div<IBarStyleProps>`
   box-sizing: border-box;
   position: relative;
-  height: ${({ theme }) => theme.eui.euiSize};
+  height: ${({ theme }) => theme.euiTheme.size.base};
   min-width: 2px;
   background-color: ${(props) => props.color};
 `;
 
-const ItemText = euiStyled.span`
+const ItemText = styled.span`
   position: absolute;
   right: 0;
   display: flex;
   align-items: center;
-  height: ${({ theme }) => theme.eui.euiSizeL};
+  height: ${({ theme }) => theme.euiTheme.size.l};
   max-width: 100%;
 
   /* add margin to all direct descendants */
   & > * {
-    margin-right: ${({ theme }) => theme.eui.euiSizeS};
+    margin-right: ${({ theme }) => theme.euiTheme.size.s};
     white-space: nowrap;
   }
 `;
 
-const CriticalPathItemBar = euiStyled.div`
+const CriticalPathItemBar = styled.div`
   box-sizing: border-box;
   position: relative;
-  height: ${({ theme }) => theme.eui.euiSizeS};
-  top : ${({ theme }) => theme.eui.euiSizeS};
+  height: ${({ theme }) => theme.euiTheme.size.s};
+  top: ${({ theme }) => theme.euiTheme.size.s};
   min-width: 2px;
   background-color: transparent;
   display: flex;
   flex-direction: row;
 `;
 
-const CriticalPathItemSegment = euiStyled.div<{
+const CriticalPathItemSegment = styled.div<{
   left: number;
   width: number;
   color: string;
 }>`
   box-sizing: border-box;
   position: absolute;
-  height: ${({ theme }) => theme.eui.euiSizeS};
+  height: ${({ theme }) => theme.euiTheme.size.s};
   left: ${(props) => props.left * 100}%;
   width: ${(props) => props.width * 100}%;
   min-width: 2px;
@@ -311,7 +310,7 @@ function RelatedErrors({
   errorCount: number;
 }) {
   const apmRouter = useApmRouter();
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
@@ -348,7 +347,7 @@ function RelatedErrors({
       <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
         <EuiBadge
           href={isMobileAgentName(item.doc.agent.name) ? mobileHref : href}
-          color={theme.eui.euiColorDanger}
+          color={euiTheme.colors.danger}
           iconType="arrowRight"
         >
           {i18n.translate('xpack.apm.waterfall.errorCount', {
