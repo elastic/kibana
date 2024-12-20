@@ -8,6 +8,8 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/types';
+// TODO: Remove when all usages have been migrated to non-body
+import { SearchRequest as SearchRequestWithBodyKey } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Field, QueryDslFieldAndFormat } from '@elastic/elasticsearch/lib/api/types';
 import {
   InferSearchResponseOf,
@@ -22,7 +24,8 @@ import {
 } from './search';
 
 export type ESFilter = estypes.QueryDslQueryContainer;
-export type ESSearchRequest = estypes.SearchRequest;
+// For now, we also accept with body to unblock the migration to without body.
+export type ESSearchRequest = estypes.SearchRequest | SearchRequestWithBodyKey;
 export type AggregationOptionsByType = Required<estypes.AggregationsAggregationContainer>;
 
 // Typings for Elasticsearch queries and aggregations. These are intended to be
