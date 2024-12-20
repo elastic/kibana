@@ -15,6 +15,7 @@ import {
   InjectedMetadataTheme,
 } from '@kbn/core-injected-metadata-common-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import { ConsoleMessagesSetting } from '@kbn/core-console-messages-common';
 
 /** @internal */
 export interface InjectedMetadataParams {
@@ -63,6 +64,7 @@ export interface InternalInjectedMetadataSetup {
         overrides: Record<string, unknown>;
       }
     | undefined;
+  isConsoleMessagesEnabled: () => ConsoleMessagesSetting;
 }
 
 /** @internal */
