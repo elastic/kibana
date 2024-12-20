@@ -32,6 +32,7 @@ import {
   removeEmptyFields,
   customFieldsFormSerializer,
 } from './utils';
+import type { CustomFieldConfiguration } from '../../common/types/domain';
 
 describe('Utils', () => {
   const connector = {
@@ -522,47 +523,65 @@ describe('Utils', () => {
       jest.clearAllMocks();
     });
 
+    const createMockConfig = (type: CustomFieldTypes) =>
+      ({
+        key: 'test_key',
+        label: 'Test label',
+        required: false,
+        type,
+      } as CustomFieldConfiguration);
+
     it('returns the string when the value is a non-empty string', async () => {
       expect(
-        convertCustomFieldValue({ value: 'my text value', type: CustomFieldTypes.TEXT })
+        convertCustomFieldValue({
+          value: 'my text value',
+          config: createMockConfig(CustomFieldTypes.TEXT),
+        })
       ).toMatchInlineSnapshot(`"my text value"`);
     });
 
     it('returns null when value is empty string', async () => {
       expect(
-        convertCustomFieldValue({ value: '', type: CustomFieldTypes.TEXT })
+        convertCustomFieldValue({ value: '', config: createMockConfig(CustomFieldTypes.TEXT) })
       ).toMatchInlineSnapshot('null');
     });
 
     it('returns value as it is when value is true', async () => {
       expect(
-        convertCustomFieldValue({ value: true, type: CustomFieldTypes.TOGGLE })
+        convertCustomFieldValue({ value: true, config: createMockConfig(CustomFieldTypes.TOGGLE) })
       ).toMatchInlineSnapshot('true');
     });
 
     it('returns value as it is when value is false', async () => {
       expect(
-        convertCustomFieldValue({ value: false, type: CustomFieldTypes.TOGGLE })
+        convertCustomFieldValue({ value: false, config: createMockConfig(CustomFieldTypes.TOGGLE) })
       ).toMatchInlineSnapshot('false');
     });
     it('returns value as integer number when value is integer string and type is number', () => {
-      expect(convertCustomFieldValue({ value: '123', type: CustomFieldTypes.NUMBER })).toEqual(123);
+      expect(
+        convertCustomFieldValue({ value: '123', config: createMockConfig(CustomFieldTypes.NUMBER) })
+      ).toEqual(123);
     });
 
     it('returns value as null when value is float string and type is number', () => {
-      expect(convertCustomFieldValue({ value: '0.5', type: CustomFieldTypes.NUMBER })).toEqual(
-        null
-      );
+      expect(
+        convertCustomFieldValue({ value: '0.5', config: createMockConfig(CustomFieldTypes.NUMBER) })
+      ).toEqual(null);
     });
 
     it('returns value as null when value is null and type is number', () => {
-      expect(convertCustomFieldValue({ value: null, type: CustomFieldTypes.NUMBER })).toEqual(null);
+      expect(
+        convertCustomFieldValue({ value: null, config: createMockConfig(CustomFieldTypes.NUMBER) })
+      ).toEqual(null);
     });
 
     it('returns value as null when value is characters string and type is number', () => {
-      expect(convertCustomFieldValue({ value: 'fdgdg', type: CustomFieldTypes.NUMBER })).toEqual(
-        null
-      );
+      expect(
+        convertCustomFieldValue({
+          value: 'fdgdg',
+          config: createMockConfig(CustomFieldTypes.NUMBER),
+        })
+      ).toEqual(null);
     });
   });
 
@@ -581,44 +600,56 @@ describe('Utils', () => {
       expect(res).toMatchInlineSnapshot(
         [...customFieldsMock, fieldToAdd],
         `
-              Array [
-                Object {
-                  "key": "test_key_1",
-                  "type": "text",
-                  "value": "My text test value 1",
-                },
-                Object {
-                  "key": "test_key_2",
-                  "type": "toggle",
-                  "value": true,
-                },
-                Object {
-                  "key": "test_key_3",
-                  "type": "text",
-                  "value": null,
-                },
-                Object {
-                  "key": "test_key_4",
-                  "type": "toggle",
-                  "value": null,
-                },
-                Object {
-                  "key": "test_key_5",
-                  "type": "number",
-                  "value": 1234,
-                },
-                Object {
-                  "key": "test_key_6",
-                  "type": "number",
-                  "value": null,
-                },
-                Object {
-                  "key": "my_test_key",
-                  "type": "text",
-                  "value": "my_test_value",
-                },
-              ]
-          `
+        Array [
+          Object {
+            "key": "test_key_1",
+            "type": "text",
+            "value": "My text test value 1",
+          },
+          Object {
+            "key": "test_key_2",
+            "type": "toggle",
+            "value": true,
+          },
+          Object {
+            "key": "test_key_3",
+            "type": "text",
+            "value": null,
+          },
+          Object {
+            "key": "test_key_4",
+            "type": "toggle",
+            "value": null,
+          },
+          Object {
+            "key": "test_key_5",
+            "type": "number",
+            "value": 1234,
+          },
+          Object {
+            "key": "test_key_6",
+            "type": "number",
+            "value": null,
+          },
+          Object {
+            "key": "test_key_7",
+            "type": "list",
+            "value": Object {
+              "option_1": "Option 1",
+            },
+          },
+          Object {
+            "key": "test_key_8",
+            "type": "list",
+            "value": null,
+          },
+          Object {
+            "key": "my_test_key",
+            "type": "text",
+            "value": "my_test_value",
+          },
+        ]
+      `
       );
     });
 
@@ -637,46 +668,60 @@ describe('Utils', () => {
           { ...customFieldsMock[3] },
           { ...customFieldsMock[4] },
           { ...customFieldsMock[5] },
+          { ...customFieldsMock[6] },
+          { ...customFieldsMock[7] },
         ],
         `
-              Array [
-                Object {
-                  "field": Object {
-                    "value": Array [
-                      "My text test value 1!!!",
-                    ],
-                  },
-                  "key": "test_key_1",
-                  "type": "text",
-                  "value": "My text test value 1",
-                },
-                Object {
-                  "key": "test_key_2",
-                  "type": "toggle",
-                  "value": true,
-                },
-                Object {
-                  "key": "test_key_3",
-                  "type": "text",
-                  "value": null,
-                },
-                Object {
-                  "key": "test_key_4",
-                  "type": "toggle",
-                  "value": null,
-                },
-                Object {
-                  "key": "test_key_5",
-                  "type": "number",
-                  "value": 1234,
-                },
-                Object {
-                  "key": "test_key_6",
-                  "type": "number",
-                  "value": null,
-                },
-              ]
-          `
+        Array [
+          Object {
+            "field": Object {
+              "value": Array [
+                "My text test value 1!!!",
+              ],
+            },
+            "key": "test_key_1",
+            "type": "text",
+            "value": "My text test value 1",
+          },
+          Object {
+            "key": "test_key_2",
+            "type": "toggle",
+            "value": true,
+          },
+          Object {
+            "key": "test_key_3",
+            "type": "text",
+            "value": null,
+          },
+          Object {
+            "key": "test_key_4",
+            "type": "toggle",
+            "value": null,
+          },
+          Object {
+            "key": "test_key_5",
+            "type": "number",
+            "value": 1234,
+          },
+          Object {
+            "key": "test_key_6",
+            "type": "number",
+            "value": null,
+          },
+          Object {
+            "key": "test_key_7",
+            "type": "list",
+            "value": Object {
+              "option_1": "Option 1",
+            },
+          },
+          Object {
+            "key": "test_key_8",
+            "type": "list",
+            "value": null,
+          },
+        ]
+      `
       );
     });
 
@@ -691,54 +736,87 @@ describe('Utils', () => {
       expect(res).toMatchInlineSnapshot(
         [...customFieldsConfigurationMock, fieldToAdd],
         `
-              Array [
-                Object {
-                  "defaultValue": "My default value",
-                  "key": "test_key_1",
-                  "label": "My test label 1",
-                  "required": true,
-                  "type": "text",
-                },
-                Object {
-                  "defaultValue": true,
-                  "key": "test_key_2",
-                  "label": "My test label 2",
-                  "required": true,
-                  "type": "toggle",
-                },
-                Object {
-                  "key": "test_key_3",
-                  "label": "My test label 3",
-                  "required": false,
-                  "type": "text",
-                },
-                Object {
-                  "key": "test_key_4",
-                  "label": "My test label 4",
-                  "required": false,
-                  "type": "toggle",
-                },
-                Object {
-                  "defaultValue": 123,
-                  "key": "test_key_5",
-                  "label": "My test label 5",
-                  "required": true,
-                  "type": "number",
-                },
-                Object {
-                  "key": "test_key_6",
-                  "label": "My test label 6",
-                  "required": false,
-                  "type": "number",
-                },
-                Object {
-                  "key": "my_test_key",
-                  "label": "my_test_label",
-                  "required": true,
-                  "type": "text",
-                },
-              ]
-          `
+        Array [
+          Object {
+            "defaultValue": "My default value",
+            "key": "test_key_1",
+            "label": "My test label 1",
+            "required": true,
+            "type": "text",
+          },
+          Object {
+            "defaultValue": true,
+            "key": "test_key_2",
+            "label": "My test label 2",
+            "required": true,
+            "type": "toggle",
+          },
+          Object {
+            "key": "test_key_3",
+            "label": "My test label 3",
+            "required": false,
+            "type": "text",
+          },
+          Object {
+            "key": "test_key_4",
+            "label": "My test label 4",
+            "required": false,
+            "type": "toggle",
+          },
+          Object {
+            "defaultValue": 123,
+            "key": "test_key_5",
+            "label": "My test label 5",
+            "required": true,
+            "type": "number",
+          },
+          Object {
+            "key": "test_key_6",
+            "label": "My test label 6",
+            "required": false,
+            "type": "number",
+          },
+          Object {
+            "defaultValue": "option_1",
+            "key": "test_key_7",
+            "label": "My test label 7",
+            "options": Array [
+              Object {
+                "key": "option_1",
+                "label": "Option 1",
+              },
+              Object {
+                "key": "option_2",
+                "label": "Option 2",
+              },
+            ],
+            "required": true,
+            "type": "list",
+          },
+          Object {
+            "key": "test_key_8",
+            "label": "My test label 8",
+            "options": Array [
+              Object {
+                "key": "option_1",
+                "label": "Option 1",
+              },
+              Object {
+                "key": "option_2",
+                "label": "Option 2",
+              },
+            ],
+            "required": false,
+            "type": "list",
+          },
+          Object {
+            "key": "my_test_key",
+            "label": "my_test_label",
+            "required": true,
+            "type": "text",
+          },
+        ]
+      `
       );
     });
 
@@ -757,50 +835,85 @@ describe('Utils', () => {
           { ...customFieldsConfigurationMock[3] },
           { ...customFieldsConfigurationMock[4] },
           { ...customFieldsConfigurationMock[5] },
+          { ...customFieldsConfigurationMock[6] },
+          { ...customFieldsConfigurationMock[7] },
         ],
         `
-              Array [
-                Object {
-                  "defaultValue": "My default value",
-                  "key": "test_key_1",
-                  "label": "My test label 1!!!",
-                  "required": true,
-                  "type": "text",
-                },
-                Object {
-                  "defaultValue": true,
-                  "key": "test_key_2",
-                  "label": "My test label 2",
-                  "required": true,
-                  "type": "toggle",
-                },
-                Object {
-                  "key": "test_key_3",
-                  "label": "My test label 3",
-                  "required": false,
-                  "type": "text",
-                },
-                Object {
-                  "key": "test_key_4",
-                  "label": "My test label 4",
-                  "required": false,
-                  "type": "toggle",
-                },
-                Object {
-                  "defaultValue": 123,
-                  "key": "test_key_5",
-                  "label": "My test label 5",
-                  "required": true,
-                  "type": "number",
-                },
-                Object {
-                  "key": "test_key_6",
-                  "label": "My test label 6",
-                  "required": false,
-                  "type": "number",
-                },
-              ]
-          `
+        Array [
+          Object {
+            "defaultValue": "My default value",
+            "key": "test_key_1",
+            "label": "My test label 1!!!",
+            "required": true,
+            "type": "text",
+          },
+          Object {
+            "defaultValue": true,
+            "key": "test_key_2",
+            "label": "My test label 2",
+            "required": true,
+            "type": "toggle",
+          },
+          Object {
+            "key": "test_key_3",
+            "label": "My test label 3",
+            "required": false,
+            "type": "text",
+          },
+          Object {
+            "key": "test_key_4",
+            "label": "My test label 4",
+            "required": false,
+            "type": "toggle",
+          },
+          Object {
+            "defaultValue": 123,
+            "key": "test_key_5",
+            "label": "My test label 5",
+            "required": true,
+            "type": "number",
+          },
+          Object {
+            "key": "test_key_6",
+            "label": "My test label 6",
+            "required": false,
+            "type": "number",
+          },
+          Object {
+            "defaultValue": "option_1",
+            "key": "test_key_7",
+            "label": "My test label 7",
+            "options": Array [
+              Object {
+                "key": "option_1",
+                "label": "Option 1",
+              },
+              Object {
+                "key": "option_2",
+                "label": "Option 2",
+              },
+            ],
+            "required": true,
+            "type": "list",
+          },
+          Object {
+            "key": "test_key_8",
+            "label": "My test label 8",
+            "options": Array [
+              Object {
+                "key": "option_1",
+                "label": "Option 1",
+              },
+              Object {
+                "key": "option_2",
+                "label": "Option 2",
+              },
+            ],
+            "required": false,
+            "type": "list",
+          },
+        ]
+      `
       );
     });
   });
