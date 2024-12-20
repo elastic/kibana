@@ -209,8 +209,8 @@ export class OptimizerConfig {
               type: 'entry',
               id: 'core',
               sourceRoot: options.repoRoot,
-              contextDir: Path.resolve(options.repoRoot, 'src/core'),
-              outputDir: Path.resolve(options.outputRoot, 'src/core/target/public'),
+              contextDir: Path.resolve(options.repoRoot, 'src/core/packages/core'),
+              outputDir: Path.resolve(options.outputRoot, 'src/core/packages/core/target/public'),
               pageLoadAssetSizeLimit: limits.pageLoadAssetSize?.core,
               remoteInfo: {
                 pkgId: '@kbn/core',
