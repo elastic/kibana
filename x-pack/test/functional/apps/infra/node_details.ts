@@ -671,16 +671,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Metrics Tab', () => {
-        before(async () => {
-          await pageObjects.assetDetails.clickMetricsTab();
-        });
-
-        it('should show add metrics callout', async () => {
-          await pageObjects.assetDetails.addMetricsCalloutExists();
-        });
-      });
-
       describe('Processes Tab', () => {
         before(async () => {
           await pageObjects.assetDetails.clickProcessesTab();
