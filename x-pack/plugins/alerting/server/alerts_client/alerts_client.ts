@@ -242,7 +242,7 @@ export class AlertsClient<
       aggregations,
     } = await esClient.search<Alert & AlertData, Aggregation>({
       index,
-      body: queryBody,
+      ...queryBody,
       ignore_unavailable: true,
     });
 
@@ -568,7 +568,7 @@ export class AlertsClient<
           refresh: this.isServerless ? true : 'wait_for',
           index: this.indexTemplateAndPattern.alias,
           require_alias: !this.isUsingDataStreams(),
-          body: bulkBody,
+          operations: bulkBody,
         });
 
         // If there were individual indexing errors, they will be returned in the success response

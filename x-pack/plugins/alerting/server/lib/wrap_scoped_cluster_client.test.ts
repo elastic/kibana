@@ -11,7 +11,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { createWrappedScopedClusterClientFactory } from './wrap_scoped_cluster_client';
 
 const esQuery = {
-  body: { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } },
+  query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } },
 };
 const eqlQuery = {
   index: 'foo',
@@ -20,9 +20,7 @@ const eqlQuery = {
 const esqlQueryRequest = {
   method: 'POST',
   path: '/_query',
-  body: {
-    query: 'from .kibana_task_manager',
-  },
+  query: 'from .kibana_task_manager',
 };
 
 let logger = loggingSystemMock.create().get();
@@ -73,7 +71,7 @@ describe('wrapScopedClusterClient', () => {
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
-        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {} and 5000ms requestTimeout`
+        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}} - with options {} and 5000ms requestTimeout`
       );
       expect(loggingSystemMock.collect(logger).trace[0][0]).toEqual(
         `result of executing query for rule .test-rule-type:abcdefg in space my-space: {\"body\":{},\"statusCode\":200,\"headers\":{\"x-elastic-product\":\"Elasticsearch\"},\"warnings\":[],\"meta\":{}}`
@@ -102,7 +100,7 @@ describe('wrapScopedClusterClient', () => {
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
-        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {} and 5000ms requestTimeout`
+        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}} - with options {} and 5000ms requestTimeout`
       );
       expect(loggingSystemMock.collect(logger).trace[0][0]).toEqual(
         `result of executing query for rule .test-rule-type:abcdefg in space my-space: {\"body\":{},\"statusCode\":200,\"headers\":{\"x-elastic-product\":\"Elasticsearch\"},\"warnings\":[],\"meta\":{}}`

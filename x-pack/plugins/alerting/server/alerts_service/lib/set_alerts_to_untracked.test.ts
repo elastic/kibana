@@ -457,63 +457,59 @@ describe('setAlertsToUntracked()', () => {
 
     expect(clusterClient.updateByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: expect.objectContaining({
-          query: {
-            bool: {
-              must: [
-                {
-                  term: {
-                    'kibana.alert.status': {
-                      value: 'active', // This has to be active
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  'kibana.alert.status': {
+                    value: 'active', // This has to be active
+                  },
+                },
+              },
+            ],
+            filter: [
+              {
+                bool: {
+                  must: {
+                    term: {
+                      'kibana.alert.rule.name': 'test',
                     },
                   },
                 },
-              ],
-              filter: [
-                {
-                  bool: {
-                    must: {
-                      term: {
-                        'kibana.alert.rule.name': 'test',
-                      },
-                    },
-                  },
-                },
-              ],
-            },
+              },
+            ],
           },
-        }),
+        },
       })
     );
 
     expect(clusterClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: expect.objectContaining({
-          query: {
-            bool: {
-              must: [
-                {
-                  term: {
-                    'kibana.alert.status': {
-                      value: 'untracked', // This has to be untracked
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  'kibana.alert.status': {
+                    value: 'untracked', // This has to be untracked
+                  },
+                },
+              },
+            ],
+            filter: [
+              {
+                bool: {
+                  must: {
+                    term: {
+                      'kibana.alert.rule.name': 'test',
                     },
                   },
                 },
-              ],
-              filter: [
-                {
-                  bool: {
-                    must: {
-                      term: {
-                        'kibana.alert.rule.name': 'test',
-                      },
-                    },
-                  },
-                },
-              ],
-            },
+              },
+            ],
           },
-        }),
+        },
       })
     );
 
@@ -596,32 +592,30 @@ describe('setAlertsToUntracked()', () => {
 
     expect(clusterClient.updateByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: expect.objectContaining({
-          query: {
-            bool: {
-              must: [
-                {
-                  term: {
-                    'kibana.alert.status': {
-                      value: 'active', // This has to be active
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  'kibana.alert.status': {
+                    value: 'active', // This has to be active
+                  },
+                },
+              },
+            ],
+            filter: [
+              {
+                bool: {
+                  must: {
+                    term: {
+                      'kibana.alert.rule.name': 'test',
                     },
                   },
                 },
-              ],
-              filter: [
-                {
-                  bool: {
-                    must: {
-                      term: {
-                        'kibana.alert.rule.name': 'test',
-                      },
-                    },
-                  },
-                },
-              ],
-            },
+              },
+            ],
           },
-        }),
+        },
       })
     );
 

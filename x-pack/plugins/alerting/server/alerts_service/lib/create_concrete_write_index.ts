@@ -45,7 +45,7 @@ const updateTotalFieldLimitSetting = async ({
       () =>
         esClient.indices.putSettings({
           index,
-          body: { 'index.mapping.total_fields.limit': totalFieldsLimit },
+          settings: { 'index.mapping.total_fields.limit': totalFieldsLimit },
         }),
       { logger }
     );
@@ -89,10 +89,9 @@ const updateUnderlyingMapping = async ({
   }
 
   try {
-    await retryTransientEsErrors(
-      () => esClient.indices.putMapping({ index, body: simulatedMapping }),
-      { logger }
-    );
+    await retryTransientEsErrors(() => esClient.indices.putMapping({ index, simulatedMapping }), {
+      logger,
+    });
 
     return;
   } catch (err) {
@@ -183,18 +182,16 @@ export async function setConcreteWriteIndex(opts: SetConcreteWriteIndexOpts) {
     await retryTransientEsErrors(
       () =>
         esClient.indices.updateAliases({
-          body: {
-            actions: [
-              { remove: { index: concreteIndex.index, alias: concreteIndex.alias } },
-              {
-                add: {
-                  index: concreteIndex.index,
-                  alias: concreteIndex.alias,
-                  is_write_index: true,
-                },
+          actions: [
+            { remove: { index: concreteIndex.index, alias: concreteIndex.alias } },
+            {
+              add: {
+                index: concreteIndex.index,
+                alias: concreteIndex.alias,
+                is_write_index: true,
               },
-            ],
-          },
+            },
+          ],
         }),
       { logger }
     );
