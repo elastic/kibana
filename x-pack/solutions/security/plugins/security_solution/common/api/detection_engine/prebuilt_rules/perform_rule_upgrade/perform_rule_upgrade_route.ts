@@ -26,7 +26,6 @@ export const PickVersionValuesEnum = PickVersionValues.enum;
 export const FIELDS_TO_UPGRADE_TO_CURRENT_VERSION = [
   'enabled',
   'exceptions_list',
-  'alert_suppression',
   'actions',
   'throttle',
   'response_actions',
