@@ -102,7 +102,7 @@ describe('elasticsearch clients errors', () => {
     '    at KibanaTransport._request (`);
       // it contains the offending line for troubleshooting.
       expect(str).toContain(
-        'src/core/packages/core/server/integration_tests/elasticsearch/errors.test.ts:80:7'
+        'src/core/packages/core/server/integration_tests/elasticsearch/errors.test.ts:82:7'
       );
     }
   });
