@@ -20,8 +20,5 @@
     "@kbn/server-route-repository",
     "@kbn/licensing-plugin",
     "@kbn/logging",
-    "@kbn/datemath",
-    "@kbn/zod",
-    "@kbn/es-query",
   ]
 }

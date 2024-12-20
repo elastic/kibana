@@ -23,11 +23,12 @@ interface MessageBase<TRole extends MessageRole> {
   role: TRole;
 }
 
-interface MessageContentText {
+export interface MessageContentText {
   type: 'text';
   text: string;
 }
-interface MessageContentImage {
+
+export interface MessageContentImage {
   type: 'image';
   source: { data: string; mimeType: string };
 }

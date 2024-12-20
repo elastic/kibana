@@ -9,7 +9,11 @@ import type { RootSchema } from '@kbn/core/public';
 import { AssistantScope } from '@kbn/ai-assistant-common';
 import type { Message } from '../../../common';
 
-export const messageSchema: RootSchema<Message & { scopes: AssistantScope[] }> = {
+export const messageSchema: RootSchema<
+  Omit<Message, 'message'> & { message: Omit<Message['message'], 'attachments'> } & {
+    scopes: AssistantScope[];
+  }
+> = {
   '@timestamp': {
     type: 'text',
     _meta: {

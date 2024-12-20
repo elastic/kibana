@@ -25,7 +25,9 @@ export interface UnifiedSearchServerPluginSetupDependencies {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UnifiedSearchServerPluginStartDependencies {}
 
-export class UnifiedSearchServerPlugin implements Plugin<UnifiedSearchServerPluginSetup> {
+export class UnifiedSearchServerPlugin
+  implements Plugin<UnifiedSearchServerPluginSetup, UnifiedSearchServerPluginStart>
+{
   private readonly autocompleteService: AutocompleteService;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -35,13 +37,16 @@ export class UnifiedSearchServerPlugin implements Plugin<UnifiedSearchServerPlug
   public setup(
     core: CoreSetup<UnifiedSearchServerPluginStartDependencies, UnifiedSearchServerPluginStart>,
     {}: UnifiedSearchServerPluginSetupDependencies
-  ) {
+  ): UnifiedSearchServerPluginSetup {
     return {
       autocomplete: this.autocompleteService.setup(core),
     };
   }
 
-  public start(core: CoreStart, {}: UnifiedSearchServerPluginStartDependencies) {
+  public start(
+    core: CoreStart,
+    {}: UnifiedSearchServerPluginStartDependencies
+  ): UnifiedSearchServerPluginStart {
     return {};
   }
 

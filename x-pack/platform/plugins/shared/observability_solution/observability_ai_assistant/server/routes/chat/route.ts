@@ -291,6 +291,11 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
       requiredPrivileges: ['ai_assistant'],
     },
   },
+  options: {
+    body: {
+      maxBytes: 10 * 1024 * 1024,
+    },
+  },
   params: chatCompleteInternalRt,
   handler: async (resources): Promise<Readable> => {
     return observableIntoStream(await chatComplete(resources));

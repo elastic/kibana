@@ -9,7 +9,6 @@
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/i18n",
-    "@kbn/core-saved-objects-api-server",
     "@kbn/data-plugin",
     "@kbn/inspector-plugin",
     "@kbn/observability-plugin",

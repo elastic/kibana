@@ -7,10 +7,10 @@
 
 import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
-import type { DataDefinitionRegistryServerRouteRepository } from '@kbn/data-definition-registry-plugin/server';
 import { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
 import { once } from 'lodash';
 import { lastValueFrom, map } from 'rxjs';
+import type { DataDefinitionRegistryServerRouteRepository } from '../server';
 import type { IDataDefinitionRegistryPublicPlugin } from './types';
 
 export function createPlugin(

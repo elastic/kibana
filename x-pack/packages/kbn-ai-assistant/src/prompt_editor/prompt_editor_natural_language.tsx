@@ -9,14 +9,15 @@ import { css } from '@emotion/css';
 import { EuiInputPopover, EuiSelectable, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
-import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
+import type { Message, MessageAttachment } from '@kbn/observability-ai-assistant-plugin/common';
 
 interface Props {
   disabled: boolean;
   prompt: string | undefined;
   lastUsedPrompts: string[];
   onChange: (message: Message['message']) => void;
-  onChangeHeight: (height: number) => void;
+  onAttachmentAdd: (attachment: MessageAttachment) => void;
+  onChangeHeight: () => void;
   onFocus: () => void;
   onBlur: () => void;
 }
@@ -42,12 +43,15 @@ export function PromptEditorNaturalLanguage({
   lastUsedPrompts,
   onChange,
   onChangeHeight,
+  onAttachmentAdd,
   onFocus,
   onBlur,
 }: Props) {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const [isSelectablePopoverOpen, setSelectablePopoverOpen] = useState(false);
+
+  const [imagesUploading, setImagesUploading] = useState(false);
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     handleResizeTextArea();
@@ -58,6 +62,39 @@ export function PromptEditorNaturalLanguage({
     });
   };
 
+  const handlePaste = (event: React.ClipboardEvent) => {
+    const pastedImages = Array.from(event.clipboardData.items).filter(
+      (item) => item.type.startsWith('image/') || item.getAsFile()?.type.startsWith('image/')
+    );
+
+    if (pastedImages.length) {
+      setImagesUploading(true);
+      Promise.all(
+        pastedImages.map((imageItem) => {
+          const file = imageItem.getAsFile();
+          if (!file) {
+            return undefined;
+          }
+
+          const reader = new FileReader();
+          reader.addEventListener('load', () => {
+            onAttachmentAdd({
+              type: 'image',
+              title: file.name,
+              source: {
+                data: reader.result!.toString(),
+                mimeType: file.type,
+              },
+            });
+          });
+          reader.readAsDataURL(file);
+        })
+      ).finally(() => {
+        setImagesUploading(false);
+      });
+    }
+  };
+
   const handleResizeTextArea = useCallback(() => {
     if (textAreaRef.current) {
       textAreaRef.current.style.minHeight = 'auto';
@@ -66,7 +103,7 @@ export function PromptEditorNaturalLanguage({
 
       textAreaRef.current.style.minHeight = cappedHeight + 'px';
 
-      onChangeHeight(cappedHeight);
+      onChangeHeight?.();
     }
   }, [onChangeHeight]);
 
@@ -128,7 +165,7 @@ export function PromptEditorNaturalLanguage({
         <EuiTextArea
           className={textAreaClassName}
           data-test-subj="observabilityAiAssistantChatPromptEditorTextArea"
-          disabled={disabled}
+          disabled={disabled || imagesUploading}
           fullWidth
           inputRef={textAreaRef}
           placeholder={i18n.translate('xpack.aiAssistant.prompt.placeholder', {
@@ -141,6 +178,7 @@ export function PromptEditorNaturalLanguage({
           onFocus={onFocus}
           onKeyDown={handleKeydown}
           onBlur={onBlur}
+          onPaste={handlePaste}
         />
       }
       panelMinWidth={300}

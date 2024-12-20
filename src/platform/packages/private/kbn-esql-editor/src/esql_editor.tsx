@@ -627,7 +627,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       bottom: 8,
     },
     quickSuggestions: true,
-    readOnly: isDisabled,
+    readOnly: isDisabled || isSuggestionLoading,
     renderLineHighlight: 'line',
     renderLineHighlightOnlyWhenFocus: true,
     scrollbar: {

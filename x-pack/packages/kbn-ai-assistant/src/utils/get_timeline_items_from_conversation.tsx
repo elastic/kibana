@@ -275,6 +275,7 @@ export function getTimelineItemsfromConversation({
         currentUser,
         function_call: message.message.function_call,
         loading: false,
+        attachments: message.message.attachments,
         message,
       };
     }),

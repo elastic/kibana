@@ -11,7 +11,13 @@ import {
   EuiAccordion,
   EuiComment,
   EuiErrorBoundary,
+  EuiFlexGroup,
+  EuiIcon,
   EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { Message } from '@kbn/observability-ai-assistant-plugin/common';
@@ -27,6 +33,7 @@ import { ChatItemActions } from './chat_item_actions';
 import { ChatItemAvatar } from './chat_item_avatar';
 import { ChatItemContentInlinePromptEditor } from './chat_item_content_inline_prompt_editor';
 import { ChatTimelineItem } from './chat_timeline';
+import { AttachmentPreview } from './attachment_preview';
 
 export interface ChatItemProps extends Omit<ChatTimelineItem, 'message'> {
   onActionClick: ChatActionClickHandler;
@@ -87,6 +94,7 @@ export function ChatItem({
   error,
   loading,
   title,
+  attachments,
   onActionClick,
   onEditSubmit,
   onFeedbackClick,
@@ -100,6 +108,8 @@ export function ChatItem({
   const [expanded, setExpanded] = useState<boolean>(Boolean(element));
 
   const actions = [canCopy, collapsed].filter(Boolean);
+
+  const theme = useEuiTheme();
 
   const noBodyMessageClassName = css`
     ${moreCompactHeaderClassName}
@@ -145,6 +155,7 @@ export function ChatItem({
         functionCall={functionCall}
         content={content}
         role={role}
+        attachments={attachments}
         onSubmit={handleInlineEditSubmit}
         onActionClick={onActionClick}
         onSendTelemetry={onSendTelemetry}
@@ -192,6 +203,27 @@ export function ChatItem({
       <EuiPanel hasShadow={false} paddingSize="s">
         {element ? <EuiErrorBoundary>{element}</EuiErrorBoundary> : null}
         {contentElement}
+        {!editing && attachments?.length ? (
+          <>
+            <EuiSpacer size="s" />
+            <EuiPanel hasShadow={false} color="subdued">
+              <EuiFlexGroup direction="column" gutterSize="s">
+                {attachments.map((attachment) => {
+                  return (
+                    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+                      <EuiIcon type="image" size="s" color="primary" />
+                      <EuiToolTip content={<AttachmentPreview attachment={attachment} />}>
+                        <EuiText size="xs" color={theme.euiTheme.colors.primary}>
+                          {attachment.title}
+                        </EuiText>
+                      </EuiToolTip>
+                    </EuiFlexGroup>
+                  );
+                })}
+              </EuiFlexGroup>
+            </EuiPanel>
+          </>
+        ) : null}
         {error ? <FailedToLoadResponse /> : null}
       </EuiPanel>
 

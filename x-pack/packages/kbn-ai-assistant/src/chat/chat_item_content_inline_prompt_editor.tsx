@@ -22,6 +22,7 @@ interface Props {
   loading: boolean;
   role: Message['message']['role'];
   content: Message['message']['content'];
+  attachments?: Message['message']['attachments'];
   functionCall: Message['message']['function_call'];
   onActionClick: ChatActionClickHandler;
   onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
@@ -45,6 +46,7 @@ export function ChatItemContentInlinePromptEditor({
   functionCall,
   content,
   role,
+  attachments,
   onActionClick,
   onSendTelemetry,
   onSubmit,
@@ -72,6 +74,7 @@ export function ChatItemContentInlinePromptEditor({
         initialFunctionCall={functionCall}
         initialContent={content}
         initialRole={role}
+        initialAttachments={attachments}
         onChangeHeight={noop}
         onSubmit={onSubmit}
         onSendTelemetry={onSendTelemetry}

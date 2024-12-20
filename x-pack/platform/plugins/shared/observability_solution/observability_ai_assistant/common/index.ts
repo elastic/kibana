@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { Message, Conversation, KnowledgeBaseEntry } from './types';
+export type { Message, MessageAttachment, Conversation, KnowledgeBaseEntry } from './types';
 export type { ConversationCreateRequest } from './types';
 export { KnowledgeBaseEntryRole, MessageRole } from './types';
 export type { FunctionDefinition, CompatibleJSONSchema } from './functions/types';

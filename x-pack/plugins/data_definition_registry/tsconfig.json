@@ -19,5 +19,13 @@
     "@kbn/server-route-repository",
     "@kbn/licensing-plugin",
     "@kbn/logging",
+    "@kbn/server-route-repository-client",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/inference-plugin",
+    "@kbn/inference-common",
+    "@kbn/sse-utils",
+    "@kbn/genai-utils-server",
+    "@kbn/genai-utils-common",
+    "@kbn/zod",
   ]
 }

@@ -235,7 +235,7 @@ function messagesToOpenAI({
                       return {
                         type: 'image_url',
                         image_url: {
-                          url: `data:${contentPart.source.mimeType};base64,{${contentPart.source.data}}`,
+                          url: contentPart.source.data,
                         },
                       } satisfies ChatCompletionContentPartImage;
                     }

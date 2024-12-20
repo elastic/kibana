@@ -32,13 +32,15 @@ export interface PendingMessage {
 
 interface MessageImageAttachment {
   type: 'image';
+  title: string;
+  description?: string;
   source: {
     data: string;
     mimeType: string;
   };
 }
 
-type MessageAttachment = MessageImageAttachment;
+export type MessageAttachment = MessageImageAttachment;
 
 export interface Message {
   '@timestamp': string;
