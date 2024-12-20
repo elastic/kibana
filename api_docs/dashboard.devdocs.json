@@ -1076,7 +1076,23 @@
           },
           "<string | undefined>; forceRefresh: () => void; getSettings: () => ",
           "DashboardSettings",
-          "; getDashboardPanelFromId: (id: string) => ",
+          "; getSerializedState: () => { attributes: ",
+          {
+            "pluginId": "dashboard",
+            "scope": "server",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-server.DashboardAttributes",
+            "text": "DashboardAttributes"
+          },
+          "; references: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectReference",
+            "text": "SavedObjectReference"
+          },
+          "[]; }; getDashboardPanelFromId: (id: string) => ",
           {
             "pluginId": "dashboard",
             "scope": "common",
@@ -1971,6 +1987,101 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-common.generateNewPanelIds",
+        "type": "Function",
+        "tags": [],
+        "label": "generateNewPanelIds",
+        "description": [
+          "\nWhen saving a dashboard as a copy, we should generate new IDs for all panels so that they are\nproperly refreshed when navigating between Dashboards"
+        ],
+        "signature": [
+          "(panels: ",
+          {
+            "pluginId": "dashboard",
+            "scope": "common",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-common.DashboardPanelMap",
+            "text": "DashboardPanelMap"
+          },
+          ", references?: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          "[] | undefined) => { panels: ",
+          {
+            "pluginId": "dashboard",
+            "scope": "common",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-common.DashboardPanelMap",
+            "text": "DashboardPanelMap"
+          },
+          "; references: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          "[]; }"
+        ],
+        "path": "src/plugins/dashboard/common/lib/dashboard_panel_converters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.generateNewPanelIds.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "panels",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dashboard",
+                "scope": "common",
+                "docId": "kibDashboardPluginApi",
+                "section": "def-common.DashboardPanelMap",
+                "text": "DashboardPanelMap"
+              }
+            ],
+            "path": "src/plugins/dashboard/common/lib/dashboard_panel_converters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.generateNewPanelIds.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/dashboard/common/lib/dashboard_panel_converters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],

@@ -1329,21 +1329,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_ENABLE_LOGS_STREAM",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_ENABLE_LOGS_STREAM",
-        "description": [],
-        "signature": [
-          "\"observability:enableLogsStream\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE",
         "type": "string",
         "tags": [],

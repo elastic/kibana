@@ -1931,7 +1931,7 @@
           "label": "setComponents",
           "description": [],
           "signature": [
-            "(components: Partial<{ GetStarted: React.ComponentType<{ indicesExist?: boolean | undefined; }>; DashboardsLandingCallout: React.ComponentType<{}>; EnablementModalCallout: React.ComponentType<{}>; }>) => void"
+            "(components: Partial<{ GetStarted: React.ComponentType<{ indicesExist?: boolean | undefined; }>; DashboardsLandingCallout: React.ComponentType<{}>; AdditionalChargesMessage: React.ComponentType<{}>; }>) => void"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
           "deprecated": false,
@@ -1946,7 +1946,7 @@
               "label": "components",
               "description": [],
               "signature": [
-                "{ GetStarted?: React.ComponentType<{ indicesExist?: boolean | undefined; }> | undefined; DashboardsLandingCallout?: React.ComponentType<{}> | undefined; EnablementModalCallout?: React.ComponentType<{}> | undefined; }"
+                "{ GetStarted?: React.ComponentType<{ indicesExist?: boolean | undefined; }> | undefined; DashboardsLandingCallout?: React.ComponentType<{}> | undefined; AdditionalChargesMessage?: React.ComponentType<{}> | undefined; }"
               ],
               "path": "x-pack/solutions/security/plugins/security_solution/public/contract_components.ts",
               "deprecated": false,

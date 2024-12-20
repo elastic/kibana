@@ -14,7 +14,7 @@
       "tags": [],
       "label": "DatasetQualityPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/dataset_quality/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,7 +28,7 @@
       "tags": [],
       "label": "DatasetQualityPluginStart",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/dataset_quality/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -46,7 +46,7 @@
             "DatasetQualityProps",
             ">"
           ],
-          "path": "x-pack/plugins/observability_solution/dataset_quality/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -64,7 +64,7 @@
             "DatasetQualityController",
             ">"
           ],
-          "path": "x-pack/plugins/observability_solution/dataset_quality/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -81,7 +81,7 @@
                 "DatasetQualityPublicState",
                 "> | undefined; }"
               ],
-              "path": "x-pack/plugins/observability_solution/dataset_quality/public/controller/dataset_quality/create_controller.ts",
+              "path": "x-pack/platform/plugins/shared/dataset_quality/public/controller/dataset_quality/create_controller.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -101,7 +101,7 @@
             "DatasetQualityDetailsProps",
             ">"
           ],
-          "path": "x-pack/plugins/observability_solution/dataset_quality/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -119,7 +119,7 @@
             "DatasetQualityDetailsController",
             ">"
           ],
-          "path": "x-pack/plugins/observability_solution/dataset_quality/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -136,7 +136,7 @@
                 "DatasetQualityDetailsPublicStateUpdate",
                 "; }"
               ],
-              "path": "x-pack/plugins/observability_solution/dataset_quality/public/controller/dataset_quality_details/create_controller.ts",
+              "path": "x-pack/platform/plugins/shared/dataset_quality/public/controller/dataset_quality_details/create_controller.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -168,7 +168,7 @@
         "signature": [
           "(dataStreamName: string) => { type: \"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\"; dataset: string; namespace: string; }"
         ],
-        "path": "x-pack/plugins/observability_solution/dataset_quality/common/utils/dataset_name.ts",
+        "path": "x-pack/platform/plugins/shared/dataset_quality/common/utils/dataset_name.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -182,7 +182,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/observability_solution/dataset_quality/common/utils/dataset_name.ts",
+            "path": "x-pack/platform/plugins/shared/dataset_quality/common/utils/dataset_name.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -200,7 +200,7 @@
         "tags": [],
         "label": "DatasetQualityConfig",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/dataset_quality/common/plugin_config.ts",
+        "path": "x-pack/platform/plugins/shared/dataset_quality/common/plugin_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -589,7 +589,7 @@
           },
           " ? ClientRequestParamsOfType<TRouteParamsRT> : TRouteParamsRT extends undefined ? {} : never : never"
         ],
-        "path": "x-pack/plugins/observability_solution/dataset_quality/common/rest/create_call_dataset_quality_api.ts",
+        "path": "x-pack/platform/plugins/shared/dataset_quality/common/rest/create_call_dataset_quality_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -968,7 +968,7 @@
           },
           " | undefined; } | undefined> ? TWrappedResponseType : TReturnType : never"
         ],
-        "path": "x-pack/plugins/observability_solution/dataset_quality/common/rest/create_call_dataset_quality_api.ts",
+        "path": "x-pack/platform/plugins/shared/dataset_quality/common/rest/create_call_dataset_quality_api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -991,7 +991,7 @@
           },
           ", \"body\"> & { pathname: string; method?: string | undefined; body?: any; }"
         ],
-        "path": "x-pack/plugins/observability_solution/dataset_quality/common/fetch_options.ts",
+        "path": "x-pack/platform/plugins/shared/dataset_quality/common/fetch_options.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
