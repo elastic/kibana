@@ -76,7 +76,7 @@ interface Props {
 export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient, isServerless }) => {
   const modalTitleId = useGeneratedHtmlId();
 
-  const { onChange, colorMode, isLoading } = useAppearance({
+  const { onChange, colorMode, isLoading, initialColorModeValue } = useAppearance({
     uiSettingsClient,
     defaultColorMode: isServerless ? 'system' : 'space_default',
   });
@@ -162,7 +162,9 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient, isSer
         <EuiButton
           data-test-subj="appearanceModalSaveButton"
           onClick={async () => {
-            await onChange({ colorMode }, true);
+            if (colorMode !== initialColorModeValue) {
+              await onChange({ colorMode }, true);
+            }
             closeModal();
           }}
           fill

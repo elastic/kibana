@@ -23,7 +23,7 @@ export const useAppearance = ({ uiSettingsClient, defaultColorMode }: Deps) => {
   // we don't allow the user to change the theme color.
   const valueSetInKibanaConfig = uiSettingsClient.isOverridden('theme:darkMode');
 
-  const { userProfileData, isLoading, update } = useUpdateUserProfile({
+  const { userProfileData, isLoading, update, userProfileLoaded } = useUpdateUserProfile({
     notificationSuccess: {
       title: i18n.translate('xpack.cloudLinks.userMenuLinks.appearance.successNotificationTitle', {
         defaultMessage: 'Appearance settings updated',
@@ -46,6 +46,8 @@ export const useAppearance = ({ uiSettingsClient, defaultColorMode }: Deps) => {
     };
 
   const [colorMode, setColorMode] = useState<ColorMode>(colorModeUserProfile);
+  const [initialColorModeValue, setInitialColorModeValue] =
+    useState<ColorMode>(colorModeUserProfile);
 
   const onChange = useCallback(
     ({ colorMode: updatedColorMode }: { colorMode?: ColorMode }, persist: boolean) => {
@@ -77,11 +79,21 @@ export const useAppearance = ({ uiSettingsClient, defaultColorMode }: Deps) => {
     setColorMode(colorModeUserProfile);
   }, [colorModeUserProfile]);
 
+  useEffect(() => {
+    if (userProfileLoaded) {
+      const storedValue = userProfileData?.userSettings?.darkMode;
+      if (storedValue) {
+        setInitialColorModeValue(storedValue);
+      }
+    }
+  }, [userProfileData, userProfileLoaded]);
+
   return {
     isVisible: valueSetInKibanaConfig ? false : Boolean(userProfileData),
     setColorMode,
     colorMode,
     onChange,
     isLoading,
+    initialColorModeValue,
   };
 };
