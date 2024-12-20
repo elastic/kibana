@@ -11,9 +11,9 @@ import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_ent
 import {
   DocumentAnalysis,
   TruncatedDocumentAnalysis,
-} from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
-import { sortAndTruncateAnalyzedFields } from '@kbn/observability-utils-common/llm/log_analysis/sort_and_truncate_analyzed_fields';
-import { analyzeDocuments } from '@kbn/observability-utils-server/entities/analyze_documents';
+} from '@kbn/genai-utils-common/src/data_analysis/types';
+import { sortAndTruncateAnalyzedFields } from '@kbn/genai-utils-common/src/data_analysis/sort_and_truncate_analyzed_fields';
+import { getDataAnalysis } from '@kbn/genai-utils-server/src/data_analysis/get_data_analysis';
 import { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
 import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { kqlQuery } from '@kbn/observability-utils-server/es/queries/kql_query';
@@ -379,8 +379,8 @@ export async function analyzeFetchedRelatedEntities({
         return limiter(async () => {
           const groupValue = hit.fields![groupingField][0] as string;
 
-          const analysisForGroupingField = await analyzeDocuments({
-            esClient,
+          const analysisForGroupingField = await getDataAnalysis({
+            esClient: esClient.client,
             start,
             end,
             index,

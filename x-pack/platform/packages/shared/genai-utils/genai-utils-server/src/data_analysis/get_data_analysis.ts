@@ -4,45 +4,64 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { mapValues } from 'lodash';
-import { mergeSampleDocumentsWithFieldCaps } from '@kbn/observability-utils-common/llm/log_analysis/merge_sample_documents_with_field_caps';
-import { DocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
-import type { ObservabilityElasticsearchClient } from '../es/client/create_observability_es_client';
-import { kqlQuery } from '../es/queries/kql_query';
-import { rangeQuery } from '../es/queries/range_query';
+import { mergeSampleDocumentsWithFieldCaps } from '@kbn/genai-utils-common/src/data_analysis/merge_sample_documents_with_field_caps';
+import { DocumentAnalysis } from '@kbn/genai-utils-common/src/data_analysis/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
-export async function analyzeDocuments({
+export async function getDataAnalysis({
   esClient,
   kuery,
   start,
   end,
   index,
 }: {
-  esClient: ObservabilityElasticsearchClient;
+  esClient: ElasticsearchClient;
   kuery: string;
   start: number;
   end: number;
   index: string | string[];
 }): Promise<DocumentAnalysis> {
+  const rangeQuery = {
+    range: {
+      '@timestamp': {
+        gte: start,
+        lte: end,
+        format: 'epoch_millis',
+      },
+    },
+  };
+
   const [fieldCaps, hits] = await Promise.all([
-    esClient.fieldCaps('get_field_caps_for_document_analysis', {
+    esClient.fieldCaps({
       index,
       fields: '*',
       index_filter: {
         bool: {
-          filter: rangeQuery(start, end),
+          filter: rangeQuery,
         },
       },
     }),
     esClient
-      .search('get_document_samples', {
+      .search({
         index,
         size: 1000,
         track_total_hits: true,
         query: {
           bool: {
-            must: [...kqlQuery(kuery), ...rangeQuery(start, end)],
+            must: [
+              ...(kuery
+                ? [
+                    {
+                      kql: {
+                        query: kuery,
+                      },
+                    } as QueryDslQueryContainer,
+                  ]
+                : []),
+              rangeQuery,
+            ],
             should: [
               {
                 function_score: {
@@ -68,7 +87,7 @@ export async function analyzeDocuments({
         hits: response.hits.hits.map((hit) =>
           mapValues(hit.fields!, (value) => (value.length === 1 ? value[0] : value))
         ),
-        total: response.hits.total,
+        total: response.hits.total as { value: number },
       })),
   ]);
 

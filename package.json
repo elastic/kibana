@@ -547,6 +547,8 @@
     "@kbn/ftr-apis-plugin": "link:src/plugins/ftr_apis",
     "@kbn/functional-with-es-ssl-cases-test-plugin": "link:x-pack/test/functional_with_es_ssl/plugins/cases",
     "@kbn/gen-ai-streaming-response-example-plugin": "link:x-pack/examples/gen_ai_streaming_response_example",
+    "@kbn/genai-utils-common": "link:x-pack/platform/packages/shared/genai-utils/genai-utils-common",
+    "@kbn/genai-utils-server": "link:x-pack/platform/packages/shared/genai-utils/genai-utils-server",
     "@kbn/generate-console-definitions": "link:packages/kbn-generate-console-definitions",
     "@kbn/generate-csv": "link:packages/kbn-generate-csv",
     "@kbn/global-search-bar-plugin": "link:x-pack/plugins/global_search_bar",

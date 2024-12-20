@@ -10,9 +10,12 @@ import { ChatCompletionEventType, ChatCompletionMessageEvent } from '@kbn/infere
 import { correctCommonEsqlMistakes, extractEsqlQueries } from '@kbn/inference-plugin/common';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import { ServerSentEventBase } from '@kbn/sse-utils';
+import { getDataAnalysis } from '@kbn/genai-utils-server/src/data_analysis/get_data_analysis';
+import { sortAndTruncateAnalyzedFields } from '@kbn/genai-utils-common/src/data_analysis/sort_and_truncate_analyzed_fields';
 import { z } from '@kbn/zod';
 import { Observable, filter, of, switchMap } from 'rxjs';
 import { badRequest } from '@hapi/boom';
+import { castArray, isEmpty } from 'lodash';
 import type { DynamicDataAsset, EsqlQueryDefinition } from '../../data_definition_registry/types';
 import { createDataDefinitionRegistryServerRoute } from '../create_data_definition_registry_server_route';
 
@@ -132,6 +135,7 @@ const suggestQueryRoute = createDataDefinitionRegistryServerRoute({
     request,
     plugins,
     logger,
+    context,
   }): Promise<
     Observable<
       ServerSentEventBase<
@@ -142,7 +146,8 @@ const suggestQueryRoute = createDataDefinitionRegistryServerRoute({
       >
     >
   > => {
-    const [registryClient, inferenceClient] = await Promise.all([
+    const [esClient, registryClient, inferenceClient] = await Promise.all([
+      context.core.then(({ elasticsearch }) => elasticsearch.client.asCurrentUser),
       registry.getClientWithRequest(request),
       plugins.inference.start().then((inferenceStart) => inferenceStart.getClient({ request })),
     ]);
@@ -163,6 +168,85 @@ const suggestQueryRoute = createDataDefinitionRegistryServerRoute({
 
     if (!connectorId) {
       throw badRequest(`No connector given and no other connector found`);
+    }
+
+    const taskPromptBase = `The user is editing an ES|QL query in Kibana Discover.
+    They have asked for the query to be auto-completed.`;
+
+    const givenIndices = castArray(index ?? []).filter(Boolean);
+    const indices = castArray(isEmpty(givenIndices) ? ['*:*', '*'] : givenIndices);
+
+    const { data_streams: dataStreams } = await esClient.indices.resolveIndex({
+      name: indices.join(','),
+      allow_no_indices: true,
+    });
+
+    let dataStreamMappingPrompt: string = '';
+
+    if (dataStreams.length) {
+      const selectedDataStreamsResponse = await inferenceClient.output({
+        stream: false,
+        connectorId,
+        id: 'select_data_stream',
+        input: `${taskPromptBase}
+  
+          Your current task is to select data streams for which you want to retrieve
+          the mappings and sample data for. You can use this to generate queries
+          that are using the right field names. You can specify a data stream or
+          an index pattern. You will get back one set of mappings for each specified
+          stream or index pattern, so make sure you separate data streams to not mix
+          up data.
+  
+          The following data streams are available:
+  
+          ${dataStreams.map((dataStream) => `- ${dataStream.name}`).join('\n')}
+        `,
+        schema: {
+          type: 'object',
+          properties: {
+            streams: {
+              type: 'array',
+              items: {
+                type: 'string',
+                description: 'Data stream or index pattern',
+              },
+            },
+          },
+          required: ['streams'],
+        } as const,
+      });
+
+      const selectedDataStreams = selectedDataStreamsResponse.output.streams;
+
+      if (selectedDataStreams.length) {
+        const allDataAnalysis = await Promise.all(
+          selectedDataStreams.map(async (dataStream) => {
+            const analysis = await getDataAnalysis({
+              esClient,
+              start,
+              end,
+              index: dataStream,
+              kuery: kuery ?? '',
+            });
+
+            return {
+              dataStream,
+              ...analysis,
+              fields: analysis.fields.filter((field) => !field.empty),
+            };
+          })
+        );
+
+        dataStreamMappingPrompt = `The following data streams could be relevant:
+        
+        ${allDataAnalysis
+          .map((analysis) => {
+            return `### ${analysis.dataStream}
+          
+          ${JSON.stringify(sortAndTruncateAnalyzedFields(analysis))}`;
+          })
+          .join('\n\n')}`;
+      }
     }
 
     function generateQuery(errors: string[]): Observable<
@@ -209,7 +293,9 @@ const suggestQueryRoute = createDataDefinitionRegistryServerRoute({
             
             ${errors.join('\n\n')}`
                 : ''
-            }`,
+            }
+                
+            ${dataStreamMappingPrompt}`,
       }).pipe(
         filter((event): event is ChatCompletionMessageEvent => {
           return event.type === ChatCompletionEventType.ChatCompletionMessage;

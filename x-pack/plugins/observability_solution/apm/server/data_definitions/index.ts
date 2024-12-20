@@ -172,6 +172,7 @@ export function registerDataDefinitions({
         ...getTransactionQueries(options),
         ...(hasDataForAgentMetrics['elastic/java'] ? getElasticJavaMetricQueries() : []),
         ...getExitSpanQueries(options),
+        ...getErrorQueries(options),
       ];
 
       return queries;
@@ -448,4 +449,22 @@ function getExitSpanAvgLatencyQuery(type: ApmDocumentType) {
   }
 
   return `STATS avg_latency_ms = WEIGHTED_AVG(${SPAN_DURATION}, COALESCE(span.representative_count, 1)) * 1000`;
+}
+
+function getErrorQueries({ availability, indices }: QueryFactoryOptions) {
+  if (availability.hasErrorEvents) {
+    const baseQuery = getSourceCommandsForDocumentType({
+      type: ApmDocumentType.ErrorEvent,
+      indices,
+    });
+
+    return [
+      {
+        id: 'apm:list_service_error_groups',
+        description: 'List error groups per service',
+        query: `${baseQuery} | STATS BY service.name, error.grouping_name`,
+      },
+    ];
+  }
+  return [];
 }
