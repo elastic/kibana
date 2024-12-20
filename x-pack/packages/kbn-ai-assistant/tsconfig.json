@@ -39,5 +39,6 @@
     "@kbn/ai-assistant-common",
     "@kbn/inference-common",
     "@kbn/storybook",
+    "@kbn/ai-assistant-icon",
   ]
 }

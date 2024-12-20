@@ -9,7 +9,6 @@
 
 import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
 
@@ -97,8 +96,8 @@ export const useDashboardMenuItems = ({
       dashboardApi.clearOverlays();
       const switchModes = switchToViewMode
         ? () => {
-            dashboardApi.setViewMode(ViewMode.VIEW);
-            getDashboardBackupService().storeViewMode(ViewMode.VIEW);
+            dashboardApi.setViewMode('view');
+            getDashboardBackupService().storeViewMode('view');
           }
         : undefined;
       if (!hasUnsavedChanges) {
@@ -112,7 +111,7 @@ export const useDashboardMenuItems = ({
           setIsResetting(false);
           switchModes?.();
         }
-      }, viewMode as ViewMode);
+      }, viewMode);
     },
     [dashboardApi, hasUnsavedChanges, viewMode, isMounted]
   );
@@ -146,8 +145,8 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardEditMode',
         className: 'eui-hideFor--s eui-hideFor--xs', // hide for small screens - editing doesn't work in mobile mode.
         run: () => {
-          getDashboardBackupService().storeViewMode(ViewMode.EDIT);
-          dashboardApi.setViewMode(ViewMode.EDIT);
+          getDashboardBackupService().storeViewMode('edit');
+          dashboardApi.setViewMode('edit');
           dashboardApi.clearOverlays();
         },
         disableButton: disableTopNav,
@@ -171,13 +170,13 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardInteractiveSaveMenuItem',
         run: dashboardInteractiveSave,
         label:
-          viewMode === ViewMode.VIEW
+          viewMode === 'view'
             ? topNavStrings.viewModeInteractiveSave.label
             : Boolean(lastSavedId)
             ? topNavStrings.editModeInteractiveSave.label
             : topNavStrings.quickSave.label,
         description:
-          viewMode === ViewMode.VIEW
+          viewMode === 'view'
             ? topNavStrings.viewModeInteractiveSave.description
             : topNavStrings.editModeInteractiveSave.description,
       } as TopNavMenuData,
@@ -232,7 +231,7 @@ export const useDashboardMenuItems = ({
         isResetting ||
         !hasUnsavedChanges ||
         hasOverlays ||
-        (viewMode === ViewMode.EDIT && (isSaveInProgress || !lastSavedId)),
+        (viewMode === 'edit' && (isSaveInProgress || !lastSavedId)),
       isLoading: isResetting,
       run: () => resetChanges(),
     };
