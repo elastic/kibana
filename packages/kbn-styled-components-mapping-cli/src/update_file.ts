@@ -30,7 +30,10 @@ module.exports = {
    *
    * Used by \`kbn-babel-preset\` and \`kbn-eslint-config\`.
    */
-  USES_STYLED_COMPONENTS: [`;
+  USES_STYLED_COMPONENTS: [
+    /packages[\\/\\\\]kbn-ui-shared-deps-npm[\\/\\\\]/,
+    /packages[\\/\\\\]kbn-ui-shared-deps-src[\\/\\\\]/,
+`;
 
 const babelFileSuffix = `  ],
 };
