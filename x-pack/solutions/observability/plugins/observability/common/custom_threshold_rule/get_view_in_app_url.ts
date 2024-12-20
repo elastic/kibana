@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { getGroupFilters } from './helpers/get_group';
 import { SearchConfigurationWithExtractedReferenceType } from './types';
 import type { CustomThresholdExpressionMetric } from './types';
@@ -19,7 +19,7 @@ export interface GetViewInAppUrlArgs {
   dataViewId?: string;
   endedAt?: string;
   groups?: Group[];
-  logsLocator?: LocatorPublic<LogsLocatorParams>;
+  logsLocator?: LocatorPublic<DiscoverAppLocatorParams>;
   metrics?: CustomThresholdExpressionMetric[];
   startedAt?: string;
   spaceId?: string;

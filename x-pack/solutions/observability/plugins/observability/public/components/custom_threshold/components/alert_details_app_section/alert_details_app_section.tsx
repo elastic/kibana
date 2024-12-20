@@ -35,7 +35,7 @@ import type {
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import moment from 'moment';
-import { LOGS_LOCATOR_ID, LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import { getGroupFilters } from '../../../../../common/custom_threshold_rule/helpers/get_group';
 import { useLicense } from '../../../../hooks/use_license';
@@ -137,7 +137,7 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
         const appUrl = getViewInAppUrl({
           dataViewId: dataView?.id,
           groups,
-          logsLocator: locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID),
+          logsLocator: locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR),
           metrics: criterion?.metrics,
           searchConfiguration:
             ruleParams.searchConfiguration as SearchConfigurationWithExtractedReferenceType,

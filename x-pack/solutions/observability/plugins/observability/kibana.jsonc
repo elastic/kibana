@@ -61,6 +61,7 @@
     ],
     "requiredBundles": [
       "data",
+      "discover",
       "kibanaReact",
       "kibanaUtils",
       "unifiedSearch",

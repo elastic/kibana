@@ -19,7 +19,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
+import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { i18n } from '@kbn/i18n';
@@ -94,7 +94,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
 
-    const logsLocator = plugins.share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
+    const logsLocator =
+      plugins.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
     const alertDetailsContextualInsightsService = new AlertDetailsContextualInsightsService();
 

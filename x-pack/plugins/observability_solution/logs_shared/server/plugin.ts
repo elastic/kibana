@@ -26,7 +26,6 @@ import {
   LogsSharedServerPluginStartDeps,
   UsageCollector,
 } from './types';
-import { LogsLocatorDefinition } from '../common/locators';
 
 export class LogsSharedPlugin
   implements
@@ -94,22 +93,9 @@ export class LogsSharedPlugin
 
     core.uiSettings.register(featureFlagUiSettings);
 
-    const logsLocator = plugins.share.url.locators.create(
-      new LogsLocatorDefinition({
-        locators: plugins.share.url.locators,
-        getLogSourcesService: async () => {
-          const [_, pluginsStart] = await core.getStartServices();
-          return pluginsStart.logsDataAccess.services.logSourcesService;
-        },
-      })
-    );
-
     return {
       ...domainLibs,
       logViews,
-      locators: {
-        logsLocator,
-      },
       registerUsageCollectorActions: (usageCollector: UsageCollector) => {
         Object.assign(this.usageCollector, usageCollector);
       },

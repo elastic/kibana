@@ -16,7 +16,7 @@ import {
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type {
   CustomMetricExpressionParams,
@@ -59,7 +59,7 @@ const getDataViewId = (searchConfiguration?: SearchConfigurationWithExtractedRef
 export const registerObservabilityRuleTypes = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
   uiSettings: IUiSettingsClient,
-  logsLocator?: LocatorPublic<LogsLocatorParams>
+  logsLocator?: LocatorPublic<DiscoverAppLocatorParams>
 ) => {
   const validateCustomThresholdWithUiSettings = ({
     criteria,

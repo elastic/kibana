@@ -17,7 +17,7 @@ import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
-import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { getEsQueryConfig } from '../../../utils/get_es_query_config';
 import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
@@ -50,7 +50,7 @@ import { MissingGroupsRecord } from './lib/check_missing_group';
 
 export interface CustomThresholdLocators {
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
-  logsLocator?: LocatorPublic<LogsLocatorParams>;
+  logsLocator?: LocatorPublic<DiscoverAppLocatorParams>;
 }
 
 export const createCustomThresholdExecutor = ({
