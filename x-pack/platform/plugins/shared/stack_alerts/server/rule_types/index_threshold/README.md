@@ -122,4 +122,4 @@ server    log   [17:32:10.060] [warning][actions][actions][plugins] \
 
 ## Data Apis via the TriggersActionsUi plugin and its http endpoints
 
-The Index Threshold Alert Type is backed by Apis exposed by the [TriggersActionsUi plugin](../../../../triggers_actions_ui/README.md).
+The Index Threshold Alert Type is backed by Apis exposed by the [TriggersActionsUi plugin](../../../../../../triggers_actions_ui/README.md).
