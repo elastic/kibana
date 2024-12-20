@@ -65,6 +65,7 @@ describe('preflightCheckForCreate', () => {
         docs: results.map(({ found, disabled }, i) => {
           return found
             ? {
+                // @ts-expect-error
                 _id: params!.docs![i]._id, // needed for mockRawDocExistsInNamespaces mock implementation and existingDocument assertions
                 _index: 'doesnt-matter',
                 _source: {

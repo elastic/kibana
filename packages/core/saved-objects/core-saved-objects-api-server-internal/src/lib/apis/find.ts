@@ -191,10 +191,7 @@ export const performFind = async <T = unknown, A = unknown>(
     preference,
     rest_total_hits_as_int: true,
     size: perPage,
-    size: perPage,
     seq_no_primary_term: true,
-    from: perPage * (page - 1),
-    _source: includedFields(allowedTypes, fields),
     ...(aggsObject ? { aggs: aggsObject } : {}),
     ...getSearchDsl(mappings, registry, {
       search,
