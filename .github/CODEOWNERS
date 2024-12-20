@@ -264,6 +264,7 @@ packages/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/
 packages/kbn-axe-config @elastic/kibana-qa
 packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-babel-register @elastic/kibana-operations
+packages/kbn-babel-styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
 packages/kbn-babel-transform @elastic/kibana-operations
 packages/kbn-bazel-runner @elastic/kibana-operations
 packages/kbn-calculate-auto @elastic/obs-ux-management-team
