@@ -22,7 +22,12 @@ export async function installPrebuiltRulesPackage(
   config: ConfigType,
   context: SecuritySolutionApiRequestHandlerContext
 ) {
-  const pkgVersion = await findLatestPackageVersion(config, context, PREBUILT_RULES_PACKAGE_NAME);
+  let pkgVersion = config.prebuiltRulesPackageVersion;
+
+  if (!pkgVersion) {
+    // Find latest package if the version isn't specified in the config
+    pkgVersion = await findLatestPackageVersion(context, PREBUILT_RULES_PACKAGE_NAME);
+  }
 
   return context
     .getInternalFleetServices()
@@ -33,7 +38,7 @@ export async function installEndpointPackage(
   config: ConfigType,
   context: SecuritySolutionApiRequestHandlerContext
 ) {
-  const pkgVersion = await findLatestPackageVersion(config, context, ENDPOINT_PACKAGE_NAME);
+  const pkgVersion = await findLatestPackageVersion(context, ENDPOINT_PACKAGE_NAME);
 
   return context.getInternalFleetServices().packages.ensureInstalledPackage({
     pkgName: ENDPOINT_PACKAGE_NAME,
@@ -42,25 +47,21 @@ export async function installEndpointPackage(
 }
 
 async function findLatestPackageVersion(
-  config: ConfigType,
   context: SecuritySolutionApiRequestHandlerContext,
   packageName: string
 ) {
-  let pkgVersion = config.prebuiltRulesPackageVersion;
+  const securityAppClient = context.getAppClient();
+  const packageClient = context.getInternalFleetServices().packages;
 
-  // Find latest package if the version isn't specified in the config
-  if (!pkgVersion) {
-    const securityAppClient = context.getAppClient();
-    // Use prerelease versions in dev environment
-    const isPrerelease =
-      securityAppClient.getBuildFlavor() === 'traditional' &&
-      (securityAppClient.getKibanaVersion().includes('-SNAPSHOT') ||
-        securityAppClient.getKibanaBranch() === 'main');
+  // Use prerelease versions in dev environment
+  const isPrerelease =
+    securityAppClient.getBuildFlavor() === 'traditional' &&
+    (securityAppClient.getKibanaVersion().includes('-SNAPSHOT') ||
+      securityAppClient.getKibanaBranch() === 'main');
 
-    const result = await context
-      .getInternalFleetServices()
-      .packages.fetchFindLatestPackage(packageName, { prerelease: isPrerelease });
-    pkgVersion = result.version;
-  }
-  return pkgVersion;
+  const result = await packageClient.fetchFindLatestPackage(packageName, {
+    prerelease: isPrerelease,
+  });
+
+  return result.version;
 }
