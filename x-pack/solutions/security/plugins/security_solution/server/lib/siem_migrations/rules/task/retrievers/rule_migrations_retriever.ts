@@ -32,13 +32,13 @@ export class RuleMigrationsRetriever {
   public async initialize() {
     await Promise.all([
       this.resources.initialize(),
-      // // Populates the indices used for RAG searches on prebuilt rules and integrations.
-      // this.clients.data.prebuiltRules.create({
-      //   rulesClient: this.clients.rules,
-      //   soClient: this.clients.savedObjects,
-      // }),
-      // // Will use Fleet API client for integration retrieval as an argument once feature is available
-      // this.clients.data.integrations.create(),
+      // Populates the indices used for RAG searches on prebuilt rules and integrations.
+      this.clients.data.prebuiltRules.create({
+        rulesClient: this.clients.rules,
+        soClient: this.clients.savedObjects,
+      }),
+      // Will use Fleet API client for integration retrieval as an argument once feature is available
+      this.clients.data.integrations.create(),
     ]).catch((error) => {
       throw new Error(`Failed to initialize RuleMigrationsRetriever: ${error}`);
     });

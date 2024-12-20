@@ -9,7 +9,7 @@ import type { BaseMessage } from '@langchain/core/messages';
 import { Annotation, messagesStateReducer } from '@langchain/langgraph';
 import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type {
-  ElasticRule,
+  ElasticRulePartial,
   OriginalRule,
   RuleMigration,
 } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
@@ -38,7 +38,7 @@ export const translateRuleState = Annotation.Root({
     reducer: (current, value) => value ?? current,
     default: () => '',
   }),
-  elastic_rule: Annotation<Partial<ElasticRule>>({
+  elastic_rule: Annotation<ElasticRulePartial>({
     reducer: (state, action) => ({ ...state, ...action }),
     default: () => ({}),
   }),
