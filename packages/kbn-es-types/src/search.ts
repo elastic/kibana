@@ -657,7 +657,7 @@ export type InferSearchResponseOf<
             };
           }) & {
         hits: HitsOf<
-          TSearchRequest extends estypes.SearchRequest ? TSearchRequest : TSearchRequest['body'],
+          TSearchRequest extends SearchRequestWithBodyKey ? TSearchRequest['body'] : TSearchRequest,
           TDocument
         >;
       };

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { rangeQuery, typedSearch } from '@kbn/observability-plugin/server/utils/queries';
 import * as t from 'io-ts';
 import moment from 'moment';
-import { ESSearchRequest } from '@kbn/es-types';
 import { alertDetailsContextRt } from '@kbn/observability-plugin/server/services';
 import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { CONTAINER_ID } from '@kbn/apm-types';
