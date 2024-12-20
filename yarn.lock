@@ -5189,7 +5189,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/custom-icons@link:packages/kbn-custom-icons":
+"@kbn/custom-icons@link:src/platform/packages/shared/kbn-custom-icons":
   version "0.0.0"
   uid ""
 
@@ -5197,7 +5197,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/custom-integrations@link:packages/kbn-custom-integrations":
+"@kbn/custom-integrations@link:x-pack/solutions/observability/packages/kbn-custom-integrations":
   version "0.0.0"
   uid ""
 
@@ -5221,7 +5221,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-quality-plugin@link:x-pack/plugins/data_quality":
+"@kbn/data-quality-plugin@link:x-pack/platform/plugins/shared/data_quality":
   version "0.0.0"
   uid ""
 
@@ -5269,7 +5269,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dataset-quality-plugin@link:x-pack/plugins/observability_solution/dataset_quality":
+"@kbn/dataset-quality-plugin@link:x-pack/platform/plugins/shared/dataset_quality":
   version "0.0.0"
   uid ""
 
@@ -5361,7 +5361,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/discover-contextual-components@link:packages/kbn-discover-contextual-components":
+"@kbn/discover-contextual-components@link:src/platform/packages/shared/kbn-discover-contextual-components":
   version "0.0.0"
   uid ""
 
@@ -5409,7 +5409,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/elastic-agent-utils@link:packages/kbn-elastic-agent-utils":
+"@kbn/elastic-agent-utils@link:src/platform/packages/shared/kbn-elastic-agent-utils":
   version "0.0.0"
   uid ""
 
@@ -5721,7 +5721,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/fields-metadata-plugin@link:x-pack/plugins/fields_metadata":
+"@kbn/fields-metadata-plugin@link:x-pack/platform/plugins/shared/fields_metadata":
   version "0.0.0"
   uid ""
 
@@ -5953,7 +5953,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/infra-plugin@link:x-pack/plugins/observability_solution/infra":
+"@kbn/infra-plugin@link:x-pack/solutions/observability/plugins/infra":
   version "0.0.0"
   uid ""
 
@@ -6157,15 +6157,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logs-data-access-plugin@link:x-pack/plugins/observability_solution/logs_data_access":
+"@kbn/logs-data-access-plugin@link:x-pack/platform/plugins/shared/logs_data_access":
   version "0.0.0"
   uid ""
 
-"@kbn/logs-explorer-plugin@link:x-pack/plugins/observability_solution/logs_explorer":
+"@kbn/logs-explorer-plugin@link:x-pack/solutions/observability/plugins/logs_explorer":
   version "0.0.0"
   uid ""
 
-"@kbn/logs-shared-plugin@link:x-pack/plugins/observability_solution/logs_shared":
+"@kbn/logs-shared-plugin@link:x-pack/platform/plugins/shared/logs_shared":
   version "0.0.0"
   uid ""
 
@@ -6489,19 +6489,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-logs-explorer-plugin@link:x-pack/plugins/observability_solution/observability_logs_explorer":
+"@kbn/observability-logs-explorer-plugin@link:x-pack/solutions/observability/plugins/observability_logs_explorer":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-logs-overview@link:x-pack/packages/observability/logs_overview":
+"@kbn/observability-logs-overview@link:x-pack/platform/packages/shared/observability/logs_overview":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-onboarding-e2e@link:x-pack/plugins/observability_solution/observability_onboarding/e2e":
+"@kbn/observability-onboarding-e2e@link:x-pack/solutions/observability/plugins/observability_onboarding/e2e":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-onboarding-plugin@link:x-pack/plugins/observability_solution/observability_onboarding":
+"@kbn/observability-onboarding-plugin@link:x-pack/solutions/observability/plugins/observability_onboarding":
   version "0.0.0"
   uid ""
 
@@ -6665,7 +6665,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/react-hooks@link:packages/kbn-react-hooks":
+"@kbn/react-hooks@link:src/platform/packages/shared/kbn-react-hooks":
   version "0.0.0"
   uid ""
 
@@ -6833,7 +6833,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/router-utils@link:packages/kbn-router-utils":
+"@kbn/router-utils@link:src/platform/packages/shared/kbn-router-utils":
   version "0.0.0"
   uid ""
 
@@ -7681,7 +7681,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/timerange@link:packages/kbn-timerange":
+"@kbn/timerange@link:src/platform/packages/shared/kbn-timerange":
   version "0.0.0"
   uid ""
 
@@ -7953,7 +7953,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/xstate-utils@link:packages/kbn-xstate-utils":
+"@kbn/xstate-utils@link:src/platform/packages/shared/kbn-xstate-utils":
   version "0.0.0"
   uid ""
 
