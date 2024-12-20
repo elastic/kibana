@@ -7,11 +7,11 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/triggers_actions_ui'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/triggers_actions_ui',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/triggers_actions_ui'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/triggers_actions_ui',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/triggers_actions_ui/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/triggers_actions_ui/{common,public,server}/**/*.{ts,tsx}',
   ],
 };
