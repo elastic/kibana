@@ -163,21 +163,7 @@ export const REMOVE_EXTENSION = ['packages/kbn-plugin-generator/template/**/*.ej
  * @type {Array}
  */
 export const TEMPORARILY_IGNORED_PATHS = [
-  'src/core/packages/core/server/core_app/assets/favicons/android-chrome-192x192.png',
-  'src/core/packages/core/server/core_app/assets/favicons/android-chrome-256x256.png',
-  'src/core/packages/core/server/core_app/assets/favicons/android-chrome-512x512.png',
-  'src/core/packages/core/server/core_app/assets/favicons/apple-touch-icon.png',
-  'src/core/packages/core/server/core_app/assets/favicons/favicon-16x16.png',
-  'src/core/packages/core/server/core_app/assets/favicons/favicon-32x32.png',
-  'src/core/packages/core/server/core_app/assets/favicons/mstile-70x70.png',
-  'src/core/packages/core/server/core_app/assets/favicons/mstile-144x144.png',
-  'src/core/packages/core/server/core_app/assets/favicons/mstile-150x150.png',
-  'src/core/packages/core/server/core_app/assets/favicons/mstile-310x150.png',
-  'src/core/packages/core/server/core_app/assets/favicons/mstile-310x310.png',
-  'src/core/packages/core/server/core_app/assets/favicons/safari-pinned-tab.svg',
   'test/functional/apps/management/exports/_import_objects-conflicts.json',
-  'x-pack/legacy/platform/plugins/shared/index_management/public/lib/editSettings.js',
-  'x-pack/legacy/platform/plugins/shared/license_management/public/store/reducers/licenseManagement.js',
   'x-pack/plugins/monitoring/public/icons/health-gray.svg',
   'x-pack/plugins/monitoring/public/icons/health-green.svg',
   'x-pack/plugins/monitoring/public/icons/health-red.svg',
