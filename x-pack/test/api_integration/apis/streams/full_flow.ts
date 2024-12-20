@@ -53,7 +53,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:00.000Z',
           message: 'test',
-          log: { level: 'info', logger: 'nginx' },
+          'log.level': 'info',
+          'log.logger': 'nginx',
         });
       });
 
@@ -92,7 +93,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:10.000Z',
           message: 'test',
-          log: { level: 'info', logger: 'nginx' },
+          'log.level': 'info',
+          'log.logger': 'nginx',
         });
       });
 
@@ -132,7 +134,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: 'test',
-          log: { level: 'info', logger: 'nginx' },
+          'log.level': 'info',
+          'log.logger': 'nginx',
         });
       });
 
@@ -174,7 +177,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: 'test',
-          log: { level: 'error', logger: 'nginx' },
+          'log.level': 'error',
+          'log.logger': 'nginx',
         });
       });
 
