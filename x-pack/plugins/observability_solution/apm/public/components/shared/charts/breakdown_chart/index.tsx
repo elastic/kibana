@@ -21,7 +21,7 @@ import {
   Tooltip,
   LegendValue,
 } from '@elastic/charts';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
@@ -36,7 +36,6 @@ import {
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { useChartPointerEventContext } from '../../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';
 import { ChartContainer } from '../chart_container';
 import { isTimeseriesEmpty, onBrushEnd } from '../helper/helper';
@@ -74,7 +73,7 @@ export function BreakdownChart({
   const {
     query: { rangeFrom, rangeTo },
   } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const min = moment.utc(start).valueOf();
@@ -82,7 +81,7 @@ export function BreakdownChart({
 
   const xFormatter = niceTimeFormatter([min, max]);
 
-  const annotationColor = theme.eui.euiColorSuccess;
+  const annotationColor = euiTheme.colors.accentSecondary;
 
   const isEmpty = isTimeseriesEmpty(timeseries);
 

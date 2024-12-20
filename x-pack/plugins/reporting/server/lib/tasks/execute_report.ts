@@ -12,7 +12,7 @@ import { Writable } from 'stream';
 import { finished } from 'stream/promises';
 import { setTimeout } from 'timers/promises';
 
-import { UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import {
   CancellationToken,

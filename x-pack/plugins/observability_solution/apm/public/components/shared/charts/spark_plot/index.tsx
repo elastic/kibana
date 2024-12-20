@@ -16,12 +16,11 @@ import {
   Settings,
   Tooltip,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingChart } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { Coordinate } from '../../../../../typings/timeseries';
-import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
 
@@ -93,7 +92,7 @@ export function SparkPlotItem({
   comparisonSeries?: Coordinate[];
   comparisonSeriesColor?: string;
 }) {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const defaultChartThemes = useChartThemes();
   const comparisonChartTheme = getComparisonChartTheme();
   const hasComparisonSeries = !!comparisonSeries?.length;
@@ -110,7 +109,7 @@ export function SparkPlotItem({
   };
 
   const chartSize = {
-    height: theme.eui.euiSizeL,
+    height: euiTheme.size.l,
     width: compact ? unit * 4 : unit * 5,
   };
 
@@ -201,7 +200,7 @@ export function SparkPlotItem({
         justifyContent: 'center',
       }}
     >
-      <EuiIcon type="visLine" color={theme.eui.euiColorMediumShade} />
+      <EuiIcon type="visLine" color={euiTheme.colors.mediumShade} />
     </div>
   );
 }
