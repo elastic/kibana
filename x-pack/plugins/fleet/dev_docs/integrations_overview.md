@@ -143,7 +143,7 @@ Contains screenshots rendered on the integrations detail page for the integratio
 
 ## `kibana` directory
 
-Contains top level Kibana assets (dashboards, visualizations, saved searches etc) for the integration.
+Contains top level Kibana assets (dashboards, visualizations, Discover sessions etc) for the integration.
 
 ## Relationship diagram
 
