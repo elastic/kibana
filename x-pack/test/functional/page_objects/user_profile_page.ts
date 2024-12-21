@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { DarkModeValue as ColorMode } from '@kbn/user-profile-components';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function UserProfilePageProvider({ getService }: FtrProviderContext) {
@@ -26,9 +27,8 @@ export function UserProfilePageProvider({ getService }: FtrProviderContext) {
     return await testSubjects.find('windowReloadButton');
   };
 
-  const getThemeKeypadButton = async (option: string) => {
-    option = option[0].toUpperCase() + option.substring(1).toLowerCase();
-    return await testSubjects.find(`themeKeyPadItem${option}`);
+  const getThemeKeypadButton = async (colorMode: ColorMode) => {
+    return await testSubjects.find(`themeKeyPadItem${colorMode}`);
   };
 
   const saveUserProfileChanges = async (): Promise<void> => {
@@ -40,8 +40,8 @@ export function UserProfilePageProvider({ getService }: FtrProviderContext) {
     });
   };
 
-  const changeUserProfileTheme = async (theme: string): Promise<void> => {
-    const themeModeButton = await getThemeKeypadButton(theme);
+  const changeUserProfileTheme = async (colorMode: ColorMode): Promise<void> => {
+    const themeModeButton = await getThemeKeypadButton(colorMode);
     expect(themeModeButton).not.to.be(null);
     await themeModeButton.click();
 

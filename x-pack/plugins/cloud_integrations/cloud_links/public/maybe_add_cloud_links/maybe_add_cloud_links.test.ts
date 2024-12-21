@@ -21,6 +21,7 @@ describe('maybeAddCloudLinks', () => {
       security,
       share: sharePluginMock.createStartContract(),
       cloud: { ...cloudMock.createStart(), isCloudEnabled: false },
+      isServerless: false,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
@@ -39,6 +40,7 @@ describe('maybeAddCloudLinks', () => {
       core,
       share: sharePluginMock.createStartContract(),
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
+      isServerless: false,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
@@ -113,6 +115,7 @@ describe('maybeAddCloudLinks', () => {
       core,
       share: sharePluginMock.createStartContract(),
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
+      isServerless: false,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
@@ -188,6 +191,7 @@ describe('maybeAddCloudLinks', () => {
       core,
       share: sharePluginMock.createStartContract(),
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
+      isServerless: false,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));

@@ -14,6 +14,10 @@ import { mergeMap, map, takeUntil, filter } from 'rxjs';
 import { parse } from 'url';
 import { setEuiDevProviderWarning } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
@@ -54,6 +58,7 @@ import { Header, LoadingIndicator, ProjectHeader } from './ui';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
+import { handleSystemColorModeChange } from './handle_system_colormode_change';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
@@ -76,6 +81,10 @@ export interface StartDeps {
   injectedMetadata: InternalInjectedMetadataStart;
   notifications: NotificationsStart;
   customBranding: CustomBrandingStart;
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
+  userProfile: UserProfileService;
+  uiSettings: IUiSettingsClient;
 }
 
 /** @internal */
@@ -238,9 +247,21 @@ export class ChromeService {
     injectedMetadata,
     notifications,
     customBranding,
+    i18n: i18nService,
+    theme,
+    userProfile,
+    uiSettings,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
     this.handleEuiFullScreenChanges();
+
+    handleSystemColorModeChange({
+      notifications,
+      coreStart: { i18n: i18nService, theme, userProfile },
+      stop$: this.stop$,
+      http,
+      uiSettings,
+    });
     // commented out until https://github.com/elastic/kibana/issues/201805 can be fixed
     // this.handleEuiDevProviderWarning(notifications);
 
