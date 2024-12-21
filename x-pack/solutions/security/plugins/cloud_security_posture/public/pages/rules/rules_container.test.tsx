@@ -47,7 +47,7 @@ const getWrapper =
         ...coreStart.application,
         capabilities: {
           ...coreStart.application.capabilities,
-          siem: { crud: canUpdate },
+          siemV2: { crud: canUpdate },
         },
       },
     };
