@@ -6121,7 +6121,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/links-plugin@link:src/plugins/links":
+"@kbn/links-plugin@link:src/platform/plugins/private/links":
   version "0.0.0"
   uid ""
 
