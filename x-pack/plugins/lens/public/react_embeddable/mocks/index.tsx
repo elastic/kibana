@@ -30,7 +30,6 @@ import {
   LensRendererProps,
   LensRuntimeState,
   LensSerializedState,
-  VisualizationContext,
 } from '../types';
 import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
 import { Datasource, DatasourceMap, Visualization, VisualizationMap } from '../../types';
@@ -274,35 +273,23 @@ export function getValidExpressionParams(
   };
 }
 
-const LensInternalApiMock = initializeInternalApi(
-  getLensRuntimeStateMock(),
-  {},
-  makeEmbeddableServices()
-);
+function getInternalApiWithFunctionWrappers() {
+  const newApi = initializeInternalApi(getLensRuntimeStateMock(), {}, makeEmbeddableServices());
+  const fns: Array<keyof LensInternalApi> = (
+    Object.keys(newApi) as Array<keyof LensInternalApi>
+  ).filter((key) => typeof newApi[key] === 'function');
+  for (const fn of fns) {
+    const originalFn = newApi[fn];
+    // @ts-expect-error
+    newApi[fn] = jest.fn(originalFn);
+  }
+  return newApi;
+}
 
 export function getLensInternalApiMock(overrides: Partial<LensInternalApi> = {}): LensInternalApi {
   return {
-    ...LensInternalApiMock,
+    ...getInternalApiWithFunctionWrappers(),
     ...overrides,
-  };
-}
-
-export function getVisualizationContextHelperMock(
-  attributesOverrides?: Partial<LensRuntimeState['attributes']>,
-  contextOverrides?: Omit<Partial<VisualizationContext>, 'doc'>
-) {
-  return {
-    getVisualizationContext: jest.fn(() => ({
-      activeAttributes: getLensAttributesMock(attributesOverrides),
-      mergedSearchContext: {},
-      indexPatterns: {},
-      indexPatternRefs: [],
-      activeVisualizationState: undefined,
-      activeDatasourceState: undefined,
-      activeData: undefined,
-      ...contextOverrides,
-    })),
-    updateVisualizationContext: jest.fn(),
   };
 }
 
