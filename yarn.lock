@@ -5209,7 +5209,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dashboard-plugin@link:src/plugins/dashboard":
+"@kbn/dashboard-plugin@link:src/platform/plugins/shared/dashboard":
   version "0.0.0"
   uid ""
 
