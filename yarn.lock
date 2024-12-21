@@ -6621,7 +6621,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/presentation-panel-plugin@link:src/plugins/presentation_panel":
+"@kbn/presentation-panel-plugin@link:src/platform/plugins/private/presentation_panel":
   version "0.0.0"
   uid ""
 

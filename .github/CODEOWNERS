@@ -612,6 +612,7 @@ src/platform/packages/shared/serverless/settings/security_project @elastic/secur
 src/platform/plugins/private/input_control_vis @elastic/kibana-presentation
 src/platform/plugins/private/links @elastic/kibana-presentation
 src/platform/plugins/private/maps_ems @elastic/kibana-presentation
+src/platform/plugins/private/presentation_panel @elastic/kibana-presentation
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/platform/plugins/shared/console @elastic/kibana-management
 src/platform/plugins/shared/controls @elastic/kibana-presentation
@@ -666,7 +667,6 @@ src/plugins/kibana_utils @elastic/appex-sharedux
 src/plugins/navigation @elastic/appex-sharedux
 src/plugins/newsfeed @elastic/kibana-core
 src/plugins/no_data_page @elastic/appex-sharedux
-src/plugins/presentation_panel @elastic/kibana-presentation
 src/plugins/presentation_util @elastic/kibana-presentation
 src/plugins/saved_objects @elastic/appex-sharedux
 src/plugins/saved_objects_finder @elastic/kibana-data-discovery

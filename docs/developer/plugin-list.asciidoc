@@ -278,7 +278,7 @@ Content is fetched from the remote (https://feeds.elastic.co) once a day, with p
 |Helps to globally configure the no data page components
 
 
-|{kib-repo}blob/{branch}/src/plugins/presentation_panel/README.md[presentationPanel]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/presentation_panel/README.md[presentationPanel]
 |The Presentation Panel is the point of contact between any React component and any registered UI actions. Components provided to the Presentation Panel should use an imperative handle to expose methods and state.
 
 
