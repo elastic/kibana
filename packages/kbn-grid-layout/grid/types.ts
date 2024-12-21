@@ -58,6 +58,7 @@ export interface ActivePanel {
 
 export interface GridLayoutStateManager {
   gridLayout$: BehaviorSubject<GridLayoutData>;
+  stableGridLayout$: BehaviorSubject<GridLayoutData>;
   expandedPanelId$: BehaviorSubject<string | undefined>;
   isMobileView$: BehaviorSubject<boolean>;
   accessMode$: BehaviorSubject<GridAccessMode>;
@@ -78,7 +79,7 @@ export interface PanelInteractionEvent {
   /**
    * The type of interaction being performed.
    */
-  type: 'drag' | 'resize';
+  type: 'drag' | 'resize' | 'keyboardDrag' | 'keyboardResize';
 
   /**
    * The id of the panel being interacted with.
