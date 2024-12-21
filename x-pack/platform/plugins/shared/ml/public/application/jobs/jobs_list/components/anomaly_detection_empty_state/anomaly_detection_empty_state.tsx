@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiEmptyPrompt, EuiImage, EuiLink } from '@elastic/eui';
 import adImage from './anomaly_detection_kibana.png';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
-import { useMlKibana, useMlLocator, useNavigateToPath } from '../../../../contexts/kibana';
+import { useMlKibana, useMlManagementLocator } from '../../../../contexts/kibana';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check';
 
@@ -23,15 +23,15 @@ export const AnomalyDetectionEmptyState: FC = () => {
     services: { docLinks },
   } = useMlKibana();
 
-  const mlLocator = useMlLocator();
-  const navigateToPath = useNavigateToPath();
+  const mlLocator = useMlManagementLocator();
 
   const redirectToCreateJobSelectIndexPage = async () => {
     if (!mlLocator) return;
-    const path = await mlLocator.getUrl({
-      page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
+
+    await mlLocator.navigate({
+      sectionId: 'ml',
+      appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX}`,
     });
-    await navigateToPath(path, true);
   };
 
   return (
