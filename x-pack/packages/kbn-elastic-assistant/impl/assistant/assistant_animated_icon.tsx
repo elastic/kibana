@@ -7,7 +7,6 @@
 
 import React from 'react';
 import styled from '@emotion/styled';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { AssistantAvatar } from './assistant_avatar/assistant_avatar';
 
 const Container = styled.div`
@@ -18,8 +17,8 @@ const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: ${euiThemeVars.euiSizeXXL};
-  margin-bottom: ${euiThemeVars.euiSizeL};
+  margin-top: ${({ theme }) => theme.euiTheme.size.xxl};
+  margin-bottom: ${({ theme }) => theme.euiTheme.size.l};
 
   :before,
   :after {
@@ -45,7 +44,7 @@ const Animation = styled.div`
     top: 0;
     left: 0;
     z-index: 0;
-    border: 1px solid ${euiThemeVars.euiColorPrimary};
+    border: 1px solid ${(props) => props.theme.euiTheme.border.color};
     border-radius: inherit;
     animation: 4s cubic-bezier(0.42, 0, 0.37, 1) 0.5s infinite normal none running pulsing;
   }
