@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -16,6 +16,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiIcon,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -25,14 +26,11 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
-
 import { EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
 
-import { SEARCH_INDEX_PATH } from '../../../enterprise_search_content/routes';
 import { healthColorsMap } from '../../../shared/constants/health_colors';
-import { generateEncodedPath } from '../../../shared/encode_path_params';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
+
+import { KibanaLogic } from '../../../shared/kibana';
 
 import { SearchApplicationIndicesFlyoutLogic } from './search_application_indices_flyout_logic';
 
@@ -44,7 +42,36 @@ export const SearchApplicationIndicesFlyout: React.FC = () => {
     isFlyoutVisible,
   } = useValues(SearchApplicationIndicesFlyoutLogic);
   const { closeFlyout } = useActions(SearchApplicationIndicesFlyoutLogic);
-
+  const { navigateToUrl, share } = useValues(KibanaLogic);
+  const searchIndicesLocator = useMemo(
+    () => share?.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID'),
+    [share]
+  );
+  const SearchIndicesLinkProps = useCallback(
+    (indexName: string) => {
+      const viewIndicesLinkDefaultProps = {
+        'data-test-subj': 'search-application-index-link',
+        'data-telemetry-id': 'entSearchApplications-list-viewIndex',
+      };
+      if (searchIndicesLocator) {
+        return {
+          ...viewIndicesLinkDefaultProps,
+          href: searchIndicesLocator.getRedirectUrl({}),
+          onClick: async (event: React.MouseEvent<HTMLAnchorElement>) => {
+            event.preventDefault();
+            const url = await searchIndicesLocator.getUrl({ indexName });
+            navigateToUrl(url, {
+              shouldNotCreateHref: true,
+              shouldNotPrepend: true,
+            });
+          },
+        };
+      } else {
+        return { ...viewIndicesLinkDefaultProps, disabled: true };
+      }
+    },
+    [navigateToUrl, searchIndicesLocator]
+  );
   if (!searchApplicationData) return null;
   const { indices } = searchApplicationData;
 
@@ -58,16 +85,7 @@ export const SearchApplicationIndicesFlyout: React.FC = () => {
         }
       ),
       render: (indexName: string) => (
-        <EuiLinkTo
-          data-test-subj="search-application-index-link"
-          data-telemetry-id="entSearchApplications-list-viewIndex"
-          to={`${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}${generateEncodedPath(SEARCH_INDEX_PATH, {
-            indexName,
-          })}`}
-          shouldNotCreateHref
-        >
-          {indexName}
-        </EuiLinkTo>
+        <EuiLink {...SearchIndicesLinkProps(indexName)}>{indexName}</EuiLink>
       ),
       sortable: true,
       truncateText: true,
