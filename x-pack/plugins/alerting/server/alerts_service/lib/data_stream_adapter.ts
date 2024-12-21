@@ -16,7 +16,7 @@ import { retryTransientEsErrors } from './retry_transient_es_errors';
 
 export interface DataStreamAdapter {
   isUsingDataStreams(): boolean;
-  getIndexTemplateFields(alias: string, pattern: string): IndexTemplateFields;
+  getIndexTemplateFields(alias: string, patterns: string[]): IndexTemplateFields;
   createStream(opts: CreateConcreteWriteIndexOpts): Promise<void>;
 }
 
@@ -48,7 +48,7 @@ class DataStreamImplementation implements DataStreamAdapter {
     return true;
   }
 
-  getIndexTemplateFields(alias: string, pattern: string): IndexTemplateFields {
+  getIndexTemplateFields(alias: string, patterns: string[]): IndexTemplateFields {
     return {
       data_stream: { hidden: true },
       index_patterns: [alias],
@@ -66,9 +66,9 @@ class AliasImplementation implements DataStreamAdapter {
     return false;
   }
 
-  getIndexTemplateFields(alias: string, pattern: string): IndexTemplateFields {
+  getIndexTemplateFields(alias: string, patterns: string[]): IndexTemplateFields {
     return {
-      index_patterns: [pattern],
+      index_patterns: patterns,
       rollover_alias: alias,
     };
   }
@@ -134,10 +134,15 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
   try {
     // Specify both the index pattern for the backing indices and their aliases
     // The alias prevents the request from finding other namespaces that could match the -* pattern
+    const patterns: string[] = [indexPatterns.pattern];
+    if (indexPatterns.reindexedPattern) {
+      patterns.push(indexPatterns.reindexedPattern);
+    }
+
     const response = await retryTransientEsErrors(
       () =>
         esClient.indices.getAlias({
-          index: indexPatterns.pattern,
+          index: patterns,
           name: indexPatterns.basePattern,
         }),
       { logger }
@@ -151,7 +156,7 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
       }))
     );
 
-    logger.debug(
+    logger.info(
       () =>
         `Found ${concreteIndices.length} concrete indices for ${
           indexPatterns.name
