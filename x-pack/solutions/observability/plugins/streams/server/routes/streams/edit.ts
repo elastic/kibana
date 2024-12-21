@@ -27,6 +27,7 @@ import {
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
 import { getParentId } from '../../lib/streams/helpers/hierarchy';
 import { MalformedChildren } from '../../lib/streams/errors/malformed_children';
+import { AssetClient } from '../../lib/streams/assets/asset_client';
 import { validateCondition } from '../../lib/streams/helpers/condition_fields';
 
 export const editStreamRoute = createServerRoute({
@@ -49,7 +50,7 @@ export const editStreamRoute = createServerRoute({
   }),
   handler: async ({ response, params, logger, request, getScopedClients }) => {
     try {
-      const { scopedClusterClient } = await getScopedClients({ request });
+      const { scopedClusterClient, assetClient } = await getScopedClients({ request });
       const streamDefinition = { ...params.body, id: params.path.id };
 
       if (!streamDefinition.managed) {
@@ -58,6 +59,7 @@ export const editStreamRoute = createServerRoute({
           definition: { ...streamDefinition, id: params.path.id },
           rootDefinition: undefined,
           logger,
+          assetClient,
         });
         return { acknowledged: true };
       }
@@ -91,6 +93,7 @@ export const editStreamRoute = createServerRoute({
 
         await syncStream({
           scopedClusterClient,
+          assetClient,
           definition: childDefinition,
           logger,
         });
@@ -98,6 +101,7 @@ export const editStreamRoute = createServerRoute({
 
       await syncStream({
         scopedClusterClient,
+        assetClient,
         definition: { ...streamDefinition, id: params.path.id, managed: true },
         rootDefinition: parentDefinition,
         logger,
@@ -106,6 +110,7 @@ export const editStreamRoute = createServerRoute({
       if (parentId) {
         parentDefinition = await updateParentStream(
           scopedClusterClient,
+          assetClient,
           parentId,
           params.path.id,
           logger
@@ -133,6 +138,7 @@ export const editStreamRoute = createServerRoute({
 
 async function updateParentStream(
   scopedClusterClient: IScopedClusterClient,
+  assetClient: AssetClient,
   parentId: string,
   id: string,
   logger: Logger
@@ -151,6 +157,7 @@ async function updateParentStream(
 
     await syncStream({
       scopedClusterClient,
+      assetClient,
       definition: parentDefinition,
       logger,
     });

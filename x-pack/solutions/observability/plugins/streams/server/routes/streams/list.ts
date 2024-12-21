@@ -34,9 +34,7 @@ export const listStreamsRoute = createServerRoute({
       const { scopedClusterClient } = await getScopedClients({ request });
       const { definitions } = await listStreams({ scopedClusterClient });
 
-      return {
-        definitions,
-      };
+      return { definitions };
     } catch (e) {
       if (e instanceof DefinitionNotFound) {
         throw notFound(e);

@@ -36,6 +36,7 @@ import {
   upsertIngestPipeline,
 } from './ingest_pipelines/manage_ingest_pipelines';
 import { getProcessingPipelineName, getReroutePipelineName } from './ingest_pipelines/name';
+import { AssetClient } from './assets/asset_client';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
@@ -48,6 +49,7 @@ interface BaseParamsWithDefinition extends BaseParams {
 interface DeleteStreamParams extends BaseParams {
   id: string;
   logger: Logger;
+  assetClient: AssetClient;
 }
 
 export async function deleteUnmanagedStreamObjects({
@@ -107,7 +109,12 @@ export async function deleteUnmanagedStreamObjects({
   }
 }
 
-export async function deleteStreamObjects({ id, scopedClusterClient, logger }: DeleteStreamParams) {
+export async function deleteStreamObjects({
+  id,
+  scopedClusterClient,
+  logger,
+  assetClient,
+}: DeleteStreamParams) {
   await deleteDataStream({
     esClient: scopedClusterClient.asCurrentUser,
     name: id,
@@ -133,6 +140,12 @@ export async function deleteStreamObjects({ id, scopedClusterClient, logger }: D
     id: getReroutePipelineName(id),
     logger,
   });
+  await assetClient.syncAssetList({
+    entityId: id,
+    entityType: 'stream',
+    assetType: 'dashboard',
+    assetIds: [],
+  });
   await scopedClusterClient.asInternalUser.delete({
     id,
     index: STREAMS_INDEX,
@@ -140,12 +153,30 @@ export async function deleteStreamObjects({ id, scopedClusterClient, logger }: D
   });
 }
 
-async function upsertInternalStream({ definition, scopedClusterClient }: BaseParamsWithDefinition) {
+async function upsertInternalStream({
+  definition: { dashboards, ...definition },
+  scopedClusterClient,
+}: BaseParamsWithDefinition) {
   return scopedClusterClient.asInternalUser.index({
     id: definition.id,
     index: STREAMS_INDEX,
     document: { ...definition },
     refresh: 'wait_for',
+  });
+}
+
+async function syncAssets({
+  definition,
+  assetClient,
+}: {
+  definition: StreamDefinition;
+  assetClient: AssetClient;
+}) {
+  await assetClient.syncAssetList({
+    entityId: definition.id,
+    entityType: 'stream',
+    assetType: 'dashboard',
+    assetIds: definition.dashboards ?? [],
   });
 }
 
@@ -158,34 +189,52 @@ export interface ListStreamResponse {
 export async function listStreams({
   scopedClusterClient,
 }: ListStreamsParams): Promise<ListStreamResponse> {
-  const response = await scopedClusterClient.asInternalUser.search<StreamDefinition>({
+  const [managedStreams, unmanagedStreams] = await Promise.all([
+    listManagedStreams({ scopedClusterClient }),
+    listDataStreamsAsStreams({ scopedClusterClient }),
+  ]);
+
+  const allDefinitionsById = new Map(managedStreams.map((stream) => [stream.id, stream]));
+
+  unmanagedStreams.forEach((stream) => {
+    if (!allDefinitionsById.get(stream.id)) {
+      allDefinitionsById.set(stream.id, stream);
+    }
+  });
+
+  return {
+    definitions: Array.from(allDefinitionsById.values()),
+  };
+}
+
+async function listManagedStreams({
+  scopedClusterClient,
+}: ListStreamsParams): Promise<StreamDefinition[]> {
+  const streamsSearchResponse = await scopedClusterClient.asInternalUser.search<StreamDefinition>({
     index: STREAMS_INDEX,
     size: 10000,
     sort: [{ id: 'asc' }],
   });
 
-  const dataStreams = await listDataStreamsAsStreams({ scopedClusterClient });
-  let definitions = response.hits.hits.map((hit) => ({ ...hit._source! }));
-  const hasAccess = await Promise.all(
-    definitions.map((definition) => checkReadAccess({ id: definition.id, scopedClusterClient }))
-  );
-  definitions = definitions.filter((_, index) => hasAccess[index]);
-  const definitionMap = new Map(definitions.map((definition) => [definition.id, definition]));
-  dataStreams.forEach((dataStream) => {
-    if (!definitionMap.has(dataStream.id)) {
-      definitionMap.set(dataStream.id, dataStream);
-    }
+  const streams = streamsSearchResponse.hits.hits.map((hit) => ({
+    ...hit._source!,
+    managed: true,
+  }));
+
+  const privileges = await scopedClusterClient.asCurrentUser.security.hasPrivileges({
+    index: [{ names: streams.map((stream) => stream.id), privileges: ['read'] }],
   });
 
-  return {
-    definitions: Array.from(definitionMap.values()),
-  };
+  return streams.filter((stream) => {
+    return privileges.index[stream.id]?.read === true;
+  });
 }
 
 export async function listDataStreamsAsStreams({
   scopedClusterClient,
 }: ListStreamsParams): Promise<StreamDefinition[]> {
-  const response = await scopedClusterClient.asInternalUser.indices.getDataStream();
+  const response = await scopedClusterClient.asCurrentUser.indices.getDataStream();
+
   return response.data_streams
     .filter((dataStream) => dataStream.template.endsWith('@stream') === false)
     .map((dataStream) => ({
@@ -218,7 +267,7 @@ export async function readStream({
     });
     const definition = response._source as StreamDefinition;
     if (!skipAccessCheck) {
-      const hasAccess = await checkReadAccess({ id, scopedClusterClient });
+      const hasAccess = await checkAccess({ id, scopedClusterClient });
       if (!hasAccess) {
         throw new DefinitionNotFound(`Stream definition for ${id} not found.`);
       }
@@ -421,23 +470,43 @@ export async function checkStreamExists({ id, scopedClusterClient }: ReadStreamP
   }
 }
 
-interface CheckReadAccessParams extends BaseParams {
+interface CheckAccessParams extends BaseParams {
   id: string;
 }
 
-export async function checkReadAccess({
+export async function checkAccess({
   id,
   scopedClusterClient,
-}: CheckReadAccessParams): Promise<boolean> {
-  try {
-    return await scopedClusterClient.asCurrentUser.indices.exists({ index: id });
-  } catch (e) {
-    return false;
-  }
+}: CheckAccessParams): Promise<{ read: boolean; write: boolean }> {
+  return checkAccessBulk({
+    ids: [id],
+    scopedClusterClient,
+  }).then((privileges) => privileges[id]);
 }
 
+interface CheckAccessBulkParams extends BaseParams {
+  ids: string[];
+}
+
+export async function checkAccessBulk({
+  ids,
+  scopedClusterClient,
+}: CheckAccessBulkParams): Promise<Record<string, { read: boolean; write: boolean }>> {
+  const hasPrivilegesResponse = await scopedClusterClient.asCurrentUser.security.hasPrivileges({
+    index: [{ names: ids, privileges: ['read', 'write'] }],
+  });
+
+  return Object.fromEntries(
+    ids.map((id) => {
+      const hasReadAccess = hasPrivilegesResponse.index[id].read === true;
+      const hasWriteAccess = hasPrivilegesResponse.index[id].write === true;
+      return [id, { read: hasReadAccess, write: hasWriteAccess }];
+    })
+  );
+}
 interface SyncStreamParams {
   scopedClusterClient: IScopedClusterClient;
+  assetClient: AssetClient;
   definition: StreamDefinition;
   rootDefinition?: StreamDefinition;
   logger: Logger;
@@ -445,12 +514,13 @@ interface SyncStreamParams {
 
 export async function syncStream({
   scopedClusterClient,
+  assetClient,
   definition,
   rootDefinition,
   logger,
 }: SyncStreamParams) {
   if (!definition.managed) {
-    await syncUnmanagedStream({ scopedClusterClient, definition, logger });
+    await syncUnmanagedStream({ scopedClusterClient, definition, logger, assetClient });
     await upsertInternalStream({
       scopedClusterClient,
       definition,
@@ -499,6 +569,10 @@ export async function syncStream({
   await upsertInternalStream({
     scopedClusterClient,
     definition,
+  });
+  await syncAssets({
+    definition,
+    assetClient,
   });
   await rolloverDataStreamIfNecessary({
     esClient: scopedClusterClient.asCurrentUser,

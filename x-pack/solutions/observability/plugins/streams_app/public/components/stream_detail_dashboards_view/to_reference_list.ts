@@ -5,5 +5,12 @@
  * 2.0.
  */
 
-export type { Asset, AssetType } from './assets';
-export type { StreamDefinition, ReadStreamDefinition } from './types';
+import { SavedObjectReference } from '@kbn/core/public';
+
+export function tagListToReferenceList(tags: string[]): SavedObjectReference[] {
+  return tags.map((tag) => ({
+    id: tag,
+    name: 'tag',
+    type: 'tag',
+  }));
+}
