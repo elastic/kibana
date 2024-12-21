@@ -25,14 +25,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  ESQLLang,
-  ESQL_LANG_ID,
-  ESQL_DARK_THEME_ID,
-  ESQL_LIGHT_THEME_ID,
-  monaco,
-  type ESQLCallbacks,
-} from '@kbn/monaco';
+import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
 import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -99,7 +92,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     fieldsMetadata,
     uiSettings,
   } = kibana.services;
-  const darkMode = core.theme?.getTheme().darkMode;
 
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(query.esql ?? '');
@@ -607,7 +599,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       verticalScrollbarSize: 6,
     },
     scrollBeyondLastLine: false,
-    theme: darkMode ? ESQL_DARK_THEME_ID : ESQL_LIGHT_THEME_ID,
+    theme: ESQL_LANG_ID,
     wordWrap: 'on',
     wrappingIndent: 'none',
   };
