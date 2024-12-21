@@ -215,6 +215,7 @@
     "@kbn/cbor",
     "@kbn/zod",
     "@kbn/cloud-security-posture",
+    "@kbn/asset-inventory-plugin",
     "@kbn/security-solution-distribution-bar",
     "@kbn/cloud-security-posture-common",
     "@kbn/cloud-security-posture-graph",
