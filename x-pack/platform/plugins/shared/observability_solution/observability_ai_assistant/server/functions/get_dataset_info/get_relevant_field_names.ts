@@ -127,6 +127,7 @@ export async function getRelevantFieldNames({
           ],
           functions: [
             {
+              strict: true,
               name: 'select_relevant_fields',
               description: 'The IDs of the fields you consider relevant to the conversation',
               parameters: {

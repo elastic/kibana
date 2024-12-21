@@ -28,6 +28,7 @@ import {
 import { recallFromSearchConnectors } from './recall_from_search_connectors';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
+import { UserPromptAndFiltersForSearchConnector } from '../../utils/recall/rewrite_user_prompt';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
@@ -76,12 +77,12 @@ export class KnowledgeBaseService {
   }
 
   private async recallFromKnowledgeBase({
-    queries,
+    userPrompt,
     categories,
     namespace,
     user,
   }: {
-    queries: Array<{ text: string; boost?: number }>;
+    userPrompt: string;
     categories?: string[];
     namespace: string;
     user?: { name: string };
@@ -92,18 +93,16 @@ export class KnowledgeBaseService {
       index: [resourceNames.aliases.kb],
       query: {
         bool: {
-          should: queries.map(({ text, boost = 1 }) => ({
-            semantic: {
-              field: 'semantic_text',
-              query: text,
-              boost,
+          should: [
+            {
+              semantic: {
+                field: 'semantic_text',
+                query: userPrompt,
+              },
             },
-          })),
+          ],
           filter: [
-            ...getAccessQuery({
-              user,
-              namespace,
-            }),
+            ...getAccessQuery({ user, namespace }),
             ...getCategoryQuery({ categories }),
 
             // exclude user instructions
@@ -128,19 +127,21 @@ export class KnowledgeBaseService {
   }
 
   recall = async ({
+    userPrompt,
+    userPromptAndFiltersForSearchConnectors,
     user,
-    queries,
-    categories,
     namespace,
     esClient,
+    categories,
     uiSettingsClient,
     limit = {},
   }: {
-    queries: Array<{ text: string; boost?: number }>;
-    categories?: string[];
-    user?: { name: string };
+    userPrompt: string;
+    userPromptAndFiltersForSearchConnectors: UserPromptAndFiltersForSearchConnector[];
     namespace: string;
     esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
+    categories?: string[];
+    user?: { name: string };
     uiSettingsClient: IUiSettingsClient;
     limit?: { tokens?: number; size?: number };
   }): Promise<RecalledEntry[]> => {
@@ -148,14 +149,12 @@ export class KnowledgeBaseService {
       return [];
     }
 
-    this.dependencies.logger.debug(
-      () => `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
-    );
+    this.dependencies.logger.debug(() => `Recalling entries from KB for prompt: "${userPrompt}"`);
 
-    const [documentsFromKb, documentsFromConnectors] = await Promise.all([
+    const [documentsFromKb, ...unflattenedDocsFromConnector] = await Promise.all([
       this.recallFromKnowledgeBase({
         user,
-        queries,
+        userPrompt,
         categories,
         namespace,
       }).catch((error) => {
@@ -164,28 +163,32 @@ export class KnowledgeBaseService {
         }
         throw error;
       }),
-      recallFromSearchConnectors({
-        esClient,
-        uiSettingsClient,
-        queries,
-        core: this.dependencies.core,
-        logger: this.dependencies.logger,
-      }).catch((error) => {
-        this.dependencies.logger.debug('Error getting data from search indices');
-        this.dependencies.logger.debug(error);
-        return [];
-      }),
+      ...userPromptAndFiltersForSearchConnectors.map((userPromptAndFiltersForSearchConnector) =>
+        recallFromSearchConnectors({
+          userPromptAndFiltersForSearchConnector,
+          esClient,
+          uiSettingsClient,
+          core: this.dependencies.core,
+          logger: this.dependencies.logger,
+        }).catch((error) => {
+          this.dependencies.logger.debug('Error getting data from search indices');
+          this.dependencies.logger.debug(error);
+          return [] as RecalledEntry[];
+        })
+      ),
     ]);
+
+    const docsFromConnectors = unflattenedDocsFromConnector.flat();
 
     this.dependencies.logger.debug(
       `documentsFromKb: ${JSON.stringify(documentsFromKb.slice(0, 5), null, 2)}`
     );
     this.dependencies.logger.debug(
-      `documentsFromConnectors: ${JSON.stringify(documentsFromConnectors.slice(0, 5), null, 2)}`
+      `documentsFromConnectors: ${JSON.stringify(docsFromConnectors.slice(0, 5), null, 2)}`
     );
 
     const sortedEntries = orderBy(
-      documentsFromKb.concat(documentsFromConnectors),
+      documentsFromKb.concat(docsFromConnectors),
       'score',
       'desc'
     ).slice(0, limit.size ?? 20);
