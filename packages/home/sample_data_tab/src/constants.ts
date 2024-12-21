@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Corresponds to src/plugins/home/server/services/sample_data/routes
+// Corresponds to src/platform/plugins/shared/home/server/services/sample_data/routes
 export const URL_SAMPLE_DATA_API = '/api/sample_data';
 
 // TODO: clintandrewhall pull from config
