@@ -855,6 +855,7 @@ x-pack/platform/plugins/private/watcher @elastic/kibana-management
 x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
+x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
 x-pack/platform/plugins/shared/data_quality @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/dataset_quality @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
@@ -881,7 +882,6 @@ x-pack/plugins/cloud_integrations/cloud_experiments @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_full_story @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_links @elastic/kibana-core
 x-pack/plugins/custom_branding @elastic/appex-sharedux
-x-pack/plugins/dashboard_enhanced @elastic/kibana-presentation
 x-pack/plugins/discover_enhanced @elastic/kibana-data-discovery
 x-pack/plugins/drilldowns/url_drilldown @elastic/appex-sharedux
 x-pack/plugins/embeddable_enhanced @elastic/kibana-presentation
