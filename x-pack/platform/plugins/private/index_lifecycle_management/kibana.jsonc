@@ -3,7 +3,7 @@
   "id": "@kbn/index-lifecycle-management-plugin",
   "owner": "@elastic/kibana-management",
   "group": "platform",
-  "visibility": "private",
+  "visibility": "shared",
   "plugin": {
     "id": "indexLifecycleManagement",
     "server": true,
