@@ -5441,7 +5441,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/embeddable-plugin@link:src/plugins/embeddable":
+"@kbn/embeddable-plugin@link:src/platform/plugins/shared/embeddable":
   version "0.0.0"
   uid ""
 
