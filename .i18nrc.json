@@ -19,7 +19,7 @@
     "dashboard": "src/plugins/dashboard",
     "cloud": "packages/cloud",
     "domDragDrop": "packages/kbn-dom-drag-drop",
-    "controls": "src/plugins/controls",
+    "controls": "src/platform/plugins/shared/controls",
     "data": "src/plugins/data",
     "observabilityAlertDetails": "x-pack/solutions/observability/packages/alert_details",
     "dataViews": "src/plugins/data_views",

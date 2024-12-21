@@ -9,10 +9,10 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/controls'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/controls',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/shared/controls'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/controls',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/plugins/controls/{common,public,server}/**/*.{ts,tsx}'],
-  setupFiles: ['<rootDir>/src/plugins/controls/jest_setup.ts'],
+  collectCoverageFrom: ['<rootDir>/src/platform/plugins/shared/controls/{common,public,server}/**/*.{ts,tsx}'],
+  setupFiles: ['<rootDir>/src/platform/plugins/shared/controls/jest_setup.ts'],
 };

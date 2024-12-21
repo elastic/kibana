@@ -4273,7 +4273,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/controls-plugin@link:src/plugins/controls":
+"@kbn/controls-plugin@link:src/platform/plugins/shared/controls":
   version "0.0.0"
   uid ""
 
