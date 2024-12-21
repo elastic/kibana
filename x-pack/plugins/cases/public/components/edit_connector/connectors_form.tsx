@@ -146,7 +146,7 @@ const ConnectorsFormComponent: React.FC<Props> = ({
             <EuiFlexItem grow={false}>
               <EuiButton
                 disabled={!enableSave}
-                color="success"
+                color="primary"
                 data-test-subj="edit-connectors-submit"
                 fill
                 iconType="save"

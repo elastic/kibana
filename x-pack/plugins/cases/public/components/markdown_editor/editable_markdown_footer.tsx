@@ -36,7 +36,7 @@ const EditableMarkdownFooterComponent: React.FC<EditableMarkdownFooterProps> = (
       <EuiFlexItem grow={false}>
         <EuiButton
           data-test-subj="editable-save-markdown"
-          color="success"
+          color="primary"
           fill
           iconType="save"
           onClick={handleSaveAction}
