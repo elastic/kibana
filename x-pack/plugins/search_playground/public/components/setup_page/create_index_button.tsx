@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -15,27 +15,33 @@ export const CreateIndexButton: React.FC = () => {
   const {
     services: { application, share },
   } = useKibana();
+
   const createIndexLocator = useMemo(
-    () =>
-      share.url.locators.get('CREATE_INDEX_LOCATOR_ID') ??
-      share.url.locators.get('SEARCH_CREATE_INDEX'),
+    () => share.url.locators.get('SEARCH_CREATE_INDEX'),
     [share.url.locators]
   );
-  const handleNavigateToIndex = useCallback(async () => {
-    const createIndexUrl = await createIndexLocator?.getUrl({});
 
-    if (createIndexUrl) {
-      application?.navigateToUrl(createIndexUrl);
+  const createIndexLinkProps = useMemo(() => {
+    if (createIndexLocator) {
+      return {
+        href: createIndexLocator.getRedirectUrl({}),
+        onClick: async (event: React.MouseEvent<HTMLAnchorElement>) => {
+          event.preventDefault();
+          const url = await createIndexLocator.getUrl({});
+          application?.navigateToUrl(url);
+        },
+      };
     }
+    return null;
   }, [application, createIndexLocator]);
 
-  return createIndexLocator ? (
+  return createIndexLocator && createIndexLinkProps ? (
     <EuiButton
       color="primary"
       iconType="plusInCircle"
       fill
-      onClick={handleNavigateToIndex}
       data-test-subj="createIndexButton"
+      {...createIndexLinkProps}
     >
       <FormattedMessage
         id="xpack.searchPlayground.createIndexButton"
