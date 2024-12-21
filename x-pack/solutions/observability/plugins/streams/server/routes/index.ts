@@ -7,6 +7,7 @@
 
 import { esqlRoutes } from './esql/route';
 import { deleteStreamRoute } from './streams/delete';
+import { streamDetailRoute } from './streams/details';
 import { disableStreamsRoute } from './streams/disable';
 import { editStreamRoute } from './streams/edit';
 import { enableStreamsRoute } from './streams/enable';
@@ -31,6 +32,7 @@ export const streamsRouteRepository = {
   ...esqlRoutes,
   ...disableStreamsRoute,
   ...sampleStreamRoute,
+  ...streamDetailRoute,
   ...unmappedFieldsRoute,
   ...schemaFieldsSimulationRoute,
 };
