@@ -16,7 +16,8 @@
     ".storybook/**/*.tsx",
   ],
   "exclude": [
-    "target/**/*"
+    "target/**/*",
+    "packages/**/*"
   ],
   "kbn_references": [
     "@kbn/core-http-browser",
