@@ -23,7 +23,7 @@ async function discoverAuth(parsedTarget: Url, log: ToolingLog) {
       const response = await fetch(url);
       status = response.status;
     } catch (err) {
-      log.debug(`${url} resulted in ${err.message}`);
+      log.error(`${url} resulted in ${err.message}`);
       status = 0;
     }
 
@@ -136,7 +136,7 @@ export async function getServiceUrls({
 
   const kibanaUrlWithAuth = format({
     ...parsedKibanaUrl,
-    auth: parsedKibanaUrl.auth || auth,
+    auth: parsedKibanaUrl.auth || 'elastic:changeme',
   });
 
   const validatedKibanaUrl = await getKibanaUrl({ kibana: kibanaUrlWithAuth, log });

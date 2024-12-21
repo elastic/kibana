@@ -7,7 +7,7 @@
 
 /// <reference types="@kbn/ambient-ftr-types"/>
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
@@ -18,7 +18,7 @@ import {
   customThresholdAIAssistantLogCount,
 } from '../../alert_templates/templates';
 
-describe('alert function', () => {
+describe('Alert function', () => {
   const ruleIds: any[] = [];
 
   before(async () => {
@@ -31,12 +31,19 @@ describe('alert function', () => {
     ruleIds.push(responseApmRule.data.id);
 
     logger.info('Creating dataview');
-
-    await kibanaClient.callKibana(
-      'post',
-      { pathname: '/api/content_management/rpc/create' },
-      customThresholdAIAssistantLogCount.dataViewParams
-    );
+    try {
+      await kibanaClient.callKibana(
+        'post',
+        { pathname: '/api/content_management/rpc/create' },
+        customThresholdAIAssistantLogCount.dataViewParams
+      );
+    } catch (error) {
+      if (error?.status === 409) {
+        logger.info('Data view already exists, skipping creation');
+      } else {
+        throw error;
+      }
+    }
 
     logger.info('Creating logs rule');
     const responseLogsRule = await kibanaClient.callKibana<RuleResponse>(
@@ -47,13 +54,11 @@ describe('alert function', () => {
     ruleIds.push(responseLogsRule.data.id);
 
     logger.debug('Cleaning APM indices');
-
     await synthtraceEsClients.apmSynthtraceEsClient.clean();
 
     const myServiceInstance = apm.service('my-service', 'production', 'go').instance('my-instance');
 
     logger.debug('Indexing synthtrace data');
-
     await synthtraceEsClients.apmSynthtraceEsClient.index(
       timerange(moment().subtract(15, 'minutes'), moment())
         .interval('1m')
@@ -78,7 +83,6 @@ describe('alert function', () => {
     );
 
     logger.debug('Triggering a rule run');
-
     await Promise.all(
       ruleIds.map((ruleId) =>
         kibanaClient.callKibana<void>('post', {
@@ -143,7 +147,7 @@ describe('alert function', () => {
       'post',
       { pathname: `/api/content_management/rpc/delete` },
       {
-        contentTypeId: 'index-pattern',
+        contentTypeId: customThresholdAIAssistantLogCount.dataViewParams.contentTypeId,
         id: customThresholdAIAssistantLogCount.dataViewParams.options.id,
         options: { force: true },
         version: 1,
