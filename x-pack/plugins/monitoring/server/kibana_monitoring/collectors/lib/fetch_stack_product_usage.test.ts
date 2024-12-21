@@ -54,10 +54,10 @@ describe('fetchStackProductUsage', () => {
       ]
     );
     const params = searchMock.mock.calls[0][0];
-    expect(params.body.query.bool.must[0].term.type.value).toBe('kibana_stats');
-    expect(params.body.query.bool.must[1].term.cluster_uuid.value).toBe(clusterUuid);
-    expect(params.body.query.bool.must[2].range.timestamp.gte).toBe('now-1h');
-    expect(params.body.query.bool.must[3].term.type.value).toBe('foo');
+    expect(params.query.bool.must[0].term.type.value).toBe('kibana_stats');
+    expect(params.query.bool.must[1].term.cluster_uuid.value).toBe(clusterUuid);
+    expect(params.query.bool.must[2].range.timestamp.gte).toBe('now-1h');
+    expect(params.query.bool.must[3].term.type.value).toBe('foo');
   });
 
   it('should get the usage data', async () => {
