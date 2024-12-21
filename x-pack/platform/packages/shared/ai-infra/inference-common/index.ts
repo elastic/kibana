@@ -95,3 +95,4 @@ export {
 } from './src/errors';
 
 export { truncateList } from './src/truncate_list';
+export { defaultInferenceEndpoints } from './src/inference_endpoints';
