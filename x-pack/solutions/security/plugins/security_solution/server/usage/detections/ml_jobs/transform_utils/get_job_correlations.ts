@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  MlDatafeedStats,
-  MlJob,
-  MlJobStats,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MlDatafeedStats, MlJob, MlJobStats } from '@elastic/elasticsearch/lib/api/types';
 import type { MlJobMetric } from '../types';
 
 export interface GetJobCorrelations {
