@@ -28,6 +28,7 @@ import {
   RuleMigrationResourceType,
   RuleMigrationResource,
 } from '../../rule_migration.gen';
+import { RelatedIntegration } from '../../../../api/detection_engine/model/rule_schema/common_attributes.gen';
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import { ConnectorId, LangSmithOptions } from '../../common.gen';
 
@@ -78,6 +79,14 @@ export const GetRuleMigrationResponse = z.object({
   total: z.number(),
   data: z.array(RuleMigration),
 });
+
+/**
+ * The map of related integrations, with the integration id as a key
+ */
+export type GetRuleMigrationIntegrationsResponse = z.infer<
+  typeof GetRuleMigrationIntegrationsResponse
+>;
+export const GetRuleMigrationIntegrationsResponse = z.object({}).catchall(RelatedIntegration);
 
 export type GetRuleMigrationPrebuiltRulesRequestParams = z.infer<
   typeof GetRuleMigrationPrebuiltRulesRequestParams
