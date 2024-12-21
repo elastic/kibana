@@ -10,8 +10,7 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { AsyncSubject, defer, from, lastValueFrom, map, type Subscription } from 'rxjs';
 
-import type { IconType } from '@elastic/eui';
-import { COMMON_EMBEDDABLE_GROUPING, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { VisGroups, type BaseVisType, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
@@ -26,14 +25,6 @@ import {
 interface UseGetDashboardPanelsArgs {
   api: PresentationContainer;
   createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
-}
-
-export interface FactoryGroup {
-  id: string;
-  appName: string;
-  icon?: IconType;
-  factories: EmbeddableFactory[];
-  order: number;
 }
 
 const sortGroupPanelsByOrder = <T extends { order: number }>(panelGroups: T[]): T[] => {

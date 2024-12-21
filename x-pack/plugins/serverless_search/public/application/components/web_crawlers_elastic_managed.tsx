@@ -9,11 +9,9 @@ import { EuiLink, EuiPageTemplate, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
-
 import { useKibanaServices } from '../hooks/use_kibana';
-import { ElasticManagedWebCrawlersCommingSoon } from './web_crawlers/elastic_managed_web_crawler_coming_soon';
+import { ElasticManagedWebCrawlersEmptyPrompt } from './web_crawlers/elastic_managed_web_crawlers_empty_prompt';
 
 export const WebCrawlersElasticManaged = () => {
   const { console: consolePlugin } = useKibanaServices();
@@ -54,7 +52,7 @@ export const WebCrawlersElasticManaged = () => {
         </EuiText>
       </EuiPageTemplate.Header>
       <EuiPageTemplate.Section restrictWidth color="subdued">
-        <ElasticManagedWebCrawlersCommingSoon />
+        <ElasticManagedWebCrawlersEmptyPrompt />
       </EuiPageTemplate.Section>
       {embeddableConsole}
     </EuiPageTemplate>
