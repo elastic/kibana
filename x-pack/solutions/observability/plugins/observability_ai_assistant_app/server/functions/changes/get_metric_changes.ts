@@ -134,11 +134,13 @@ export async function getMetricChanges({
     aggregations: {
       groups: {
         ...groupAgg,
+        // @ts-expect-error missing change_point aggregation
         aggs: subAggs,
       },
     },
   });
 
+  // @ts-expect-error missing change_point aggregation
   const groups = (response.aggregations?.groups.buckets || []) as Array<
     AggregateOfMap<typeof subAggs, unknown> & { key?: string; key_as_string?: string }
   >;
