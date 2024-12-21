@@ -10,18 +10,12 @@ import { EuiText } from '@elastic/eui';
 import React from 'react';
 
 import {
-  singleEntryThreat,
-  containsInvalidItems,
-  customValidators,
-} from '../../../../common/components/threat_match/helpers';
-import {
   isEsqlRule,
-  isThreatMatchRule,
   isSuppressionRuleConfiguredWithGroupBy,
 } from '../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_imports';
-import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
+import type { FormSchema, ValidationFunc } from '../../../../shared_imports';
+import { FIELD_TYPES } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import { dataViewIdValidatorFactory } from '../../validators/data_view_id_validator_factory';
@@ -33,12 +27,7 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/components/translations';
-import {
-  INDEX_HELPER_TEXT,
-  THREAT_MATCH_INDEX_HELPER_TEXT,
-  THREAT_MATCH_REQUIRED,
-  THREAT_MATCH_EMPTIES,
-} from './translations';
+import { INDEX_HELPER_TEXT } from './translations';
 import { queryRequiredValidatorFactory } from '../../validators/query_required_validator_factory';
 import { kueryValidatorFactory } from '../../validators/kuery_validator_factory';
 
@@ -177,109 +166,9 @@ export const schema: FormSchema<DefineStepRule> = {
     ),
   },
   threshold: {},
-  threatIndex: {
-    type: FIELD_TYPES.COMBO_BOX,
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThreatIndexPatternsLabel',
-      {
-        defaultMessage: 'Indicator index patterns',
-      }
-    ),
-    helpText: <EuiText size="xs">{THREAT_MATCH_INDEX_HELPER_TEXT}</EuiText>,
-    validations: [
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ formData }] = args;
-          const needsValidation = isThreatMatchRule(formData.ruleType);
-          if (!needsValidation) {
-            return;
-          }
-          return fieldValidators.emptyField(
-            i18n.translate(
-              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchoutputIndiceNameFieldRequiredError',
-              {
-                defaultMessage: 'A minimum of one index pattern is required.',
-              }
-            )
-          )(...args);
-        },
-      },
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ formData, value }] = args;
-          const needsValidation = isThreatMatchRule(formData.ruleType);
-          if (!needsValidation) {
-            return;
-          }
-
-          return customValidators.forbiddenField(value, '*');
-        },
-      },
-    ],
-  },
-  threatMapping: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThreatMappingLabel',
-      {
-        defaultMessage: 'Indicator mapping',
-      }
-    ),
-    validations: [
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ path, formData }] = args;
-          const needsValidation = isThreatMatchRule(formData.ruleType);
-          if (!needsValidation) {
-            return;
-          }
-          if (singleEntryThreat(formData.threatMapping)) {
-            return {
-              code: 'ERR_FIELD_MISSING',
-              path,
-              message: THREAT_MATCH_REQUIRED,
-            };
-          } else if (containsInvalidItems(formData.threatMapping)) {
-            return {
-              code: 'ERR_FIELD_MISSING',
-              path,
-              message: THREAT_MATCH_EMPTIES,
-            };
-          } else {
-            return undefined;
-          }
-        },
-      },
-    ],
-  },
-  threatQueryBar: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThreatQueryBarLabel',
-      {
-        defaultMessage: 'Indicator index query',
-      }
-    ),
-    validations: [
-      {
-        validator: (...args) => {
-          const [{ formData }] = args;
-          if (!isThreatMatchRule(formData.ruleType)) {
-            return;
-          }
-
-          return queryRequiredValidatorFactory(formData.ruleType)(...args);
-        },
-      },
-      {
-        validator: kueryValidatorFactory(),
-      },
-    ],
-  },
+  threatIndex: {},
+  threatMapping: {},
+  threatQueryBar: {},
   newTermsFields: {},
   historyWindowSize: {},
   [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: {
