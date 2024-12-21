@@ -12,6 +12,7 @@ import {
   TECH_PREVIEW_BADGE,
   CREATE_INTEGRATION_LANDING_PAGE,
   BUTTON_FOOTER_NEXT,
+  BUTTON_FOOTER_BACK,
   INTEGRATION_TITLE_INPUT,
   INTEGRATION_DESCRIPTION_INPUT,
   DATASTREAM_TITLE_INPUT,
@@ -45,19 +46,19 @@ describe('Add Integration - Automatic Import', () => {
     deleteConnectors();
     createBedrockConnector();
     // Mock API Responses
-    cy.intercept('POST', '/internal/automatic_import/ecs', {
+    cy.intercept('POST', '/api/integration_assistant/ecs', {
       statusCode: 200,
       body: {
         results: ecsResultsForJson,
       },
     });
-    cy.intercept('POST', '/internal/automatic_import/categorization', {
+    cy.intercept('POST', '/api/integration_assistant/categorization', {
       statusCode: 200,
       body: {
         results: categorizationResultsForJson,
       },
     });
-    cy.intercept('POST', '/internal/automatic_import/related', {
+    cy.intercept('POST', '/api/integration_assistant/related', {
       statusCode: 200,
       body: {
         results: relatedResultsForJson,
@@ -84,8 +85,14 @@ describe('Add Integration - Automatic Import', () => {
     cy.getBySel(BUTTON_FOOTER_NEXT).click();
 
     // Integration details Page
-    cy.getBySel(INTEGRATION_TITLE_INPUT).type('Test Integration');
     cy.getBySel(INTEGRATION_DESCRIPTION_INPUT).type('Test Integration Description');
+    cy.getBySel(INTEGRATION_TITLE_INPUT).type('Test Integration\n');
+
+    // Pressing Enter key in a single-line input should have moved us to the next step.
+    // Now we can test the back and next buttons.
+    cy.getBySel(DATASTREAM_TITLE_INPUT).should('exist');
+    cy.getBySel(BUTTON_FOOTER_BACK).click();
+    cy.getBySel(INTEGRATION_TITLE_INPUT).should('exist');
     cy.getBySel(BUTTON_FOOTER_NEXT).click();
 
     // Datastream details page
