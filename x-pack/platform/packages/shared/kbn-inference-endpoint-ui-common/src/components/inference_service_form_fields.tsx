@@ -260,31 +260,31 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({ p
     // Set values from the provider secrets and config to the schema
     const existingConfiguration = providerSchema
       ? providerSchema.map((item: ConfigEntryView) => {
-          const itemValue: ConfigEntryView = item;
-          itemValue.isValid = true;
-          if (item.sensitive && secrets?.providerSecrets) {
-            const secretValue = secrets.providerSecrets[item.key];
-            if (
-              typeof secretValue === 'string' ||
-              typeof secretValue === 'number' ||
-              typeof secretValue === 'boolean' ||
-              secretValue === null
-            ) {
-              itemValue.value = secretValue;
-            }
-          } else if (config?.providerConfig) {
-            const configValue = config.providerConfig[item.key];
-            if (
-              typeof configValue === 'string' ||
-              typeof configValue === 'number' ||
-              typeof configValue === 'boolean' ||
-              configValue === null
-            ) {
-              itemValue.value = configValue;
-            }
+        const itemValue: ConfigEntryView = item;
+        itemValue.isValid = true;
+        if (item.sensitive && secrets?.providerSecrets) {
+          const secretValue = secrets.providerSecrets[item.key];
+          if (
+            typeof secretValue === 'string' ||
+            typeof secretValue === 'number' ||
+            typeof secretValue === 'boolean' ||
+            secretValue === null
+          ) {
+            itemValue.value = secretValue;
           }
-          return itemValue;
-        })
+        } else if (config?.providerConfig) {
+          const configValue = config.providerConfig[item.key];
+          if (
+            typeof configValue === 'string' ||
+            typeof configValue === 'number' ||
+            typeof configValue === 'boolean' ||
+            configValue === null
+          ) {
+            itemValue.value = configValue;
+          }
+        }
+        return itemValue;
+      })
       : [];
 
     setOptionalProviderFormFields(existingConfiguration.filter((p) => !p.required && !p.sensitive));
