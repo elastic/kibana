@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { parseDuration } from '@kbn/alerting-plugin/common';
+import { DEFAULT_RULE_EXECUTION_LOOKBACK } from '../../../../../../../../common/detection_engine/constants';
 import { type FormSchema, type FormData, UseField } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_schedule_rule/schema';
 import type { RuleSchedule } from '../../../../../../../../common/api/detection_engine';
-import { secondsToDurationString } from '../../../../../../../detections/pages/detection_engine/rules/helpers';
 import { ScheduleItemField } from '../../../../../../rule_creation/components/schedule_item_field';
+import { safeHumanizeLookbackDuration } from '../../utils/safe_humanize_lookback';
 
 export const ruleScheduleSchema = {
   interval: schema.interval,
@@ -35,12 +35,12 @@ export function RuleScheduleEdit(): JSX.Element {
 }
 
 export function ruleScheduleDeserializer(defaultValue: FormData) {
-  const lookbackSeconds = parseDuration(defaultValue.rule_schedule.lookback) / 1000;
-  const lookbackHumanized = secondsToDurationString(lookbackSeconds);
-
   return {
     interval: defaultValue.rule_schedule.interval,
-    from: lookbackHumanized,
+    from: safeHumanizeLookbackDuration(
+      defaultValue.rule_schedule.lookback,
+      DEFAULT_RULE_EXECUTION_LOOKBACK
+    ),
   };
 }
 

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiDescriptionList, EuiText } from '@elastic/eui';
+import { EuiDescriptionList, EuiFlexGroup, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -62,18 +62,28 @@ export const RuleScheduleSection = ({
     return null;
   }
 
-  const ruleSectionListItems = [];
-
-  ruleSectionListItems.push(
+  const ruleSectionListItems = [
     {
       title: <span data-test-subj="intervalPropertyTitle">{i18n.INTERVAL_FIELD_LABEL}</span>,
       description: <Interval interval={rule.interval} />,
     },
     {
       title: <span data-test-subj="fromPropertyTitle">{i18n.FROM_FIELD_LABEL}</span>,
-      description: <From from={rule.from} interval={rule.interval} />,
-    }
-  );
+      description:
+        rule.to === 'now' ? (
+          <From from={rule.from} interval={rule.interval} />
+        ) : (
+          <EuiToolTip content={i18n.RULE_LOOKBACK_INCONSISTENCY_WARNING}>
+            <EuiText color="warning">
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <From from={rule.from} interval={rule.interval} />
+                <EuiIcon type="warning" />
+              </EuiFlexGroup>
+            </EuiText>
+          </EuiToolTip>
+        ),
+    },
+  ];
 
   return (
     <div data-test-subj="listItemColumnStepRuleDescription">
