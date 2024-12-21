@@ -14,7 +14,7 @@ import { Subject } from 'rxjs';
 import { omit, defaults, get } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsBulkDeleteResponse, Logger } from '@kbn/core/server';
 
 import {

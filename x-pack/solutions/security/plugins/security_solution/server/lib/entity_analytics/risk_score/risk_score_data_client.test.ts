@@ -106,33 +106,31 @@ describe('RiskScoreDataClient', () => {
           esClient,
           template: {
             name: `.risk-score.risk-score-${namespace}-index-template`,
-            body: {
-              data_stream: { hidden: true },
-              index_patterns: [`risk-score.risk-score-${namespace}`],
-              composed_of: [`.risk-score-mappings-${namespace}`],
-              template: {
-                lifecycle: {},
-                settings: {
-                  'index.mapping.total_fields.limit': totalFieldsLimit,
-                },
-                mappings: {
-                  dynamic: false,
-                  _meta: {
-                    kibana: {
-                      version: '8.9.0',
-                    },
-                    managed: true,
-                    namespace,
+            data_stream: { hidden: true },
+            index_patterns: [`risk-score.risk-score-${namespace}`],
+            composed_of: [`.risk-score-mappings-${namespace}`],
+            template: {
+              lifecycle: {},
+              settings: {
+                'index.mapping.total_fields.limit': totalFieldsLimit,
+              },
+              mappings: {
+                dynamic: false,
+                _meta: {
+                  kibana: {
+                    version: '8.9.0',
                   },
+                  managed: true,
+                  namespace,
                 },
               },
-              _meta: {
-                kibana: {
-                  version: '8.9.0',
-                },
-                managed: true,
-                namespace,
+            },
+            _meta: {
+              kibana: {
+                version: '8.9.0',
               },
+              managed: true,
+              namespace,
             },
           },
         });

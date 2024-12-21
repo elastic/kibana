@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { SecurityAlert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_LAST_DETECTED,
