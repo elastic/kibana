@@ -630,6 +630,7 @@ src/platform/plugins/shared/expression_reveal_image @elastic/kibana-presentation
 src/platform/plugins/shared/expression_shape @elastic/kibana-presentation
 src/platform/plugins/shared/inspector @elastic/kibana-presentation
 src/platform/plugins/shared/management @elastic/kibana-management
+src/platform/plugins/shared/presentation_util @elastic/kibana-presentation
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_gauge @elastic/kibana-visualizations
@@ -667,7 +668,6 @@ src/plugins/kibana_utils @elastic/appex-sharedux
 src/plugins/navigation @elastic/appex-sharedux
 src/plugins/newsfeed @elastic/kibana-core
 src/plugins/no_data_page @elastic/appex-sharedux
-src/plugins/presentation_util @elastic/kibana-presentation
 src/plugins/saved_objects @elastic/appex-sharedux
 src/plugins/saved_objects_finder @elastic/kibana-data-discovery
 src/plugins/saved_objects_management @elastic/kibana-core

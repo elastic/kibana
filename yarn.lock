@@ -6629,7 +6629,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/presentation-util-plugin@link:src/plugins/presentation_util":
+"@kbn/presentation-util-plugin@link:src/platform/plugins/shared/presentation_util":
   version "0.0.0"
   uid ""
 
