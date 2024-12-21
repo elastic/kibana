@@ -5637,7 +5637,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-metric-plugin@link:src/plugins/expression_metric":
+"@kbn/expression-metric-plugin@link:src/platform/plugins/shared/expression_metric":
   version "0.0.0"
   uid ""
 
