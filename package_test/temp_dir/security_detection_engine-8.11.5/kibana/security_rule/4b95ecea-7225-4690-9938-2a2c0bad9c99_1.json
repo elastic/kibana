@@ -1,0 +1,56 @@
+{
+    "attributes": {
+        "anomaly_threshold": 75,
+        "author": [
+            "Elastic"
+        ],
+        "description": "A machine learning job has detected a rare process writing data to an external device. Malicious actors often use benign-looking processes to mask their data exfiltration activities. The discovery of such a process that has no legitimate reason to write data to external devices can indicate exfiltration.",
+        "from": "now-2h",
+        "interval": "15m",
+        "license": "Elastic License v2",
+        "machine_learning_job_id": "ded_rare_process_writing_to_external_device",
+        "name": "Unusual Process Writing Data to an External Device",
+        "note": "",
+        "references": [
+            "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html",
+            "https://docs.elastic.co/en/integrations/ded"
+        ],
+        "related_integrations": [
+            {
+                "package": "ded",
+                "version": "^2.0.0"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "4b95ecea-7225-4690-9938-2a2c0bad9c99",
+        "setup": "The Data Exfiltration Detection integration must be enabled and related ML jobs configured for this rule to be effective. Please refer to this rule's references for more information.",
+        "severity": "low",
+        "tags": [
+            "Use Case: Data Exfiltration Detection",
+            "Rule Type: ML",
+            "Rule Type: Machine Learning",
+            "Tactic: Exfiltration"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0010",
+                    "name": "Exfiltration",
+                    "reference": "https://attack.mitre.org/tactics/TA0010/"
+                },
+                "technique": [
+                    {
+                        "id": "T1052",
+                        "name": "Exfiltration Over Physical Medium",
+                        "reference": "https://attack.mitre.org/techniques/T1052/"
+                    }
+                ]
+            }
+        ],
+        "type": "machine_learning",
+        "version": 1
+    },
+    "id": "4b95ecea-7225-4690-9938-2a2c0bad9c99_1",
+    "type": "security-rule"
+}

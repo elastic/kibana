@@ -1,0 +1,115 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies newly seen removable devices by device friendly name using registry modification events. While this activity is not inherently malicious, analysts can use those events to aid monitoring for data exfiltration over those devices.",
+        "from": "now-9m",
+        "history_window_start": "now-7d",
+        "index": [
+            "logs-endpoint.events.*",
+            "winlogbeat-*",
+            "logs-windows.*",
+            "endgame-*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "First Time Seen Removable Device",
+        "new_terms_fields": [
+            "registry.path"
+        ],
+        "query": "event.category:\"registry\" and host.os.type:\"windows\" and registry.value:\"FriendlyName\" and registry.path:*USBSTOR*\n",
+        "references": [
+            "https://winreg-kb.readthedocs.io/en/latest/sources/system-keys/USB-storage.html",
+            "https://learn.microsoft.com/en-us/windows-hardware/drivers/usbcon/usb-device-specific-registry-settings"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "registry.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "registry.value",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "0859355c-0f08-4b43-8ff5-7d2a4789fc08",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Initial Access",
+            "Tactic: Exfiltration",
+            "Data Source: Elastic Endgame",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0001",
+                    "name": "Initial Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0001/"
+                },
+                "technique": [
+                    {
+                        "id": "T1091",
+                        "name": "Replication Through Removable Media",
+                        "reference": "https://attack.mitre.org/techniques/T1091/"
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0010",
+                    "name": "Exfiltration",
+                    "reference": "https://attack.mitre.org/tactics/TA0010/"
+                },
+                "technique": [
+                    {
+                        "id": "T1052",
+                        "name": "Exfiltration Over Physical Medium",
+                        "reference": "https://attack.mitre.org/techniques/T1052/",
+                        "subtechnique": [
+                            {
+                                "id": "T1052.001",
+                                "name": "Exfiltration over USB",
+                                "reference": "https://attack.mitre.org/techniques/T1052/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "new_terms",
+        "version": 2
+    },
+    "id": "0859355c-0f08-4b43-8ff5-7d2a4789fc08_2",
+    "type": "security-rule"
+}

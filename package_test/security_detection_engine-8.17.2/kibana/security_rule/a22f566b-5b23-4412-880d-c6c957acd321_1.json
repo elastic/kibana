@@ -1,0 +1,148 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies when a user has assumed a role using a new MFA device. Users can assume a role to obtain temporary credentials and access AWS resources using the AssumeRole API of AWS Security Token Service (STS). While a new MFA device is not always indicative of malicious behavior it should be verified as adversaries can use this technique for persistence and privilege escalation.",
+    "false_positives": [
+      "AWS administrators or automated processes might regularly assume roles for legitimate administrative purposes and to perform periodic tasks such as data backups, updates, or deployments."
+    ],
+    "history_window_start": "now-10d",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "AWS STS AssumeRole with New MFA Device",
+    "new_terms_fields": [
+      "user.id",
+      "aws.cloudtrail.flattened.request_parameters.serialNumber"
+    ],
+    "note": "",
+    "query": "event.dataset:aws.cloudtrail\n    and event.provider:sts.amazonaws.com\n    and event.action:(AssumeRole or AssumeRoleWithSAML or AssumeRoleWithWebIdentity)\n    and event.outcome:success\n    and user.id:* \n    and aws.cloudtrail.flattened.request_parameters.serialNumber:*\n",
+    "references": [
+      "https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html",
+      "https://github.com/RhinoSecurityLabs/cloudgoat/blob/d5863b80afd082d853f2e8df1955c6393695a4da/scenarios/iam_privesc_by_key_rotation/README.md"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.flattened.request_parameters.serialNumber",
+        "type": "unknown"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "user.id",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "a22f566b-5b23-4412-880d-c6c957acd321",
+    "setup": "The AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS STS",
+      "Use Case: Identity and Access Audit",
+      "Tactic: Privilege Escalation",
+      "Tactic: Persistence",
+      "Tactic: Lateral Movement"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1556",
+            "name": "Modify Authentication Process",
+            "reference": "https://attack.mitre.org/techniques/T1556/",
+            "subtechnique": [
+              {
+                "id": "T1556.006",
+                "name": "Multi-Factor Authentication",
+                "reference": "https://attack.mitre.org/techniques/T1556/006/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": [
+          {
+            "id": "T1548",
+            "name": "Abuse Elevation Control Mechanism",
+            "reference": "https://attack.mitre.org/techniques/T1548/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0008",
+          "name": "Lateral Movement",
+          "reference": "https://attack.mitre.org/tactics/TA0008/"
+        },
+        "technique": [
+          {
+            "id": "T1550",
+            "name": "Use Alternate Authentication Material",
+            "reference": "https://attack.mitre.org/techniques/T1550/",
+            "subtechnique": [
+              {
+                "id": "T1550.001",
+                "name": "Application Access Token",
+                "reference": "https://attack.mitre.org/techniques/T1550/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 1
+  },
+  "id": "a22f566b-5b23-4412-880d-c6c957acd321_1",
+  "type": "security-rule"
+}

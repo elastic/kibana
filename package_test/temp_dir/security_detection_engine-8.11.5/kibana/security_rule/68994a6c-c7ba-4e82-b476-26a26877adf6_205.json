@@ -1,0 +1,101 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Assigning the administrative role to a user will grant them access to the Google Admin console and grant them administrator privileges which allow them to access and manage various resources and applications. An adversary may create a new administrator account for persistence or apply the admin role to an existing user to carry out further intrusion efforts. Users with super-admin privileges can bypass single-sign on if enabled in Google Workspace.",
+        "false_positives": [
+            "Google Workspace admin role assignments may be modified by system administrators. Verify that the configuration change was expected. Exceptions can be added to this rule to filter expected behavior."
+        ],
+        "from": "now-130m",
+        "index": [
+            "filebeat-*",
+            "logs-google_workspace*"
+        ],
+        "interval": "10m",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Google Workspace Admin Role Assigned to a User",
+        "note": "## Triage and analysis\n\n### Investigating Google Workspace Admin Role Assigned to a User\n\nGoogle Workspace roles allow administrators to assign specific permissions to users or groups. These assignments should follow the principle of least privilege (PoLP). Admin roles in Google Workspace grant users access to the Google Admin console, where more domain-wide settings are accessible. Google Workspace contains prebuilt administrator roles for performing business functions related to users, groups, and services. Custom administrator roles can be created when prebuilt roles are not sufficient.\n\nAdministrator roles assigned to users will grant them additional permissions and privileges within the Google Workspace domain. Administrative roles also give users access to the admin console, where domain-wide settings can be adjusted. Threat actors might rely on these new privileges to advance their intrusion efforts and laterally move throughout the organization. Users with unexpected administrative privileges may also cause operational dysfunction if unfamiliar settings are adjusted without warning.\n\nThis rule identifies when a Google Workspace administrative role is assigned to a user.\n\n#### Possible investigation steps\n\n- Identify the associated user accounts by reviewing `user.name` or `user.email` fields in the alert.\n  - The `user.target.email` field contains the user who received the admin role.\n- Identify the role given to the user by reviewing the `google_workspace.admin.role.name` field in the alert.\n- After identifying the involved user, verify their administrative privileges are scoped properly.\n- To identify other users with this role, search the alert for `event.action: ASSIGN_ROLE`.\n  - Add `google_workspace.admin.role.name` with the role added as an additional filter.\n  - Adjust the relative time accordingly to identify all users that were assigned this admin role.\n- Identify if the user account was recently created by searching for `event.action: CREATE_USER`.\n  - Add `user.email` with the target user account that recently received this new admin role.\n- After identifying the involved user, create a filter with their `user.name` or `user.target.email`. Review the last 48 hours of their activity for anything that may indicate a compromise.\n\n### False positive analysis\n\n- After identifying user account that added the admin role, verify the action was intentional.\n- Verify that the target user who was assigned the admin role should have administrative privileges in Google Workspace.\n- Review organizational units or groups the target user might have been added to and ensure the admin role permissions align.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Disable or limit the account during the investigation and response.\n- Identify the possible impact of the incident and prioritize accordingly; the following actions can help you gain context:\n    - Identify the account role in the cloud environment.\n    - Assess the criticality of affected services and servers.\n    - Work with your IT team to identify and minimize the impact on users.\n    - Identify if the attacker is moving laterally and compromising other accounts, servers, or services.\n    - Identify any regulatory or legal ramifications related to this activity.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords or delete API keys as needed to revoke the attacker's access to the environment. Work with your IT teams to minimize the impact on business operations during these actions.\n- Review the permissions assigned to the implicated user to ensure that the least privilege principle is being followed.\n- Implement security best practices [outlined](https://support.google.com/a/answer/7587183) by Google.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection via the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n\n\n\n### Important Information Regarding Google Workspace Event Lag Times\n- As per Google's documentation, Google Workspace administrators may observe lag times ranging from minutes up to 3 days between the time of an event's occurrence and the event being visible in the Google Workspace admin/audit logs.\n- This rule is configured to run every 10 minutes with a lookback time of 130 minutes.\n- To reduce the risk of false negatives, consider reducing the interval that the Google Workspace (formerly G Suite) Filebeat module polls Google's reporting API for new events.\n- By default, `var.interval` is set to 2 hours (2h). Consider changing this interval to a lower value, such as 10 minutes (10m).\n- See the following references for further information:\n  - https://support.google.com/a/answer/7061566\n  - https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-google_workspace.html",
+        "query": "event.dataset:\"google_workspace.admin\" and event.category:\"iam\" and event.action:\"ASSIGN_ROLE\"\n  and google_workspace.event.type:\"DELEGATED_ADMIN_SETTINGS\" and google_workspace.admin.role.name : *_ADMIN_ROLE\n",
+        "references": [
+            "https://support.google.com/a/answer/172176?hl=en"
+        ],
+        "related_integrations": [
+            {
+                "package": "google_workspace",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "google_workspace.admin.role.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "google_workspace.event.type",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "68994a6c-c7ba-4e82-b476-26a26877adf6",
+        "setup": "The Google Workspace Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "high",
+        "tags": [
+            "Elastic",
+            "Cloud",
+            "Google Workspace",
+            "Continuous Monitoring",
+            "SecOps",
+            "Identity and Access",
+            "Persistence",
+            "Investigation Guide"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1098",
+                        "name": "Account Manipulation",
+                        "reference": "https://attack.mitre.org/techniques/T1098/",
+                        "subtechnique": [
+                            {
+                                "id": "T1098.003",
+                                "name": "Additional Cloud Roles",
+                                "reference": "https://attack.mitre.org/techniques/T1098/003/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 205
+    },
+    "id": "68994a6c-c7ba-4e82-b476-26a26877adf6_205",
+    "type": "security-rule"
+}

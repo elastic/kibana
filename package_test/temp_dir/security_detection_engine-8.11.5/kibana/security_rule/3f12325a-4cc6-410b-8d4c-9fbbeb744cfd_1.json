@@ -1,0 +1,109 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule monitors for common command line flags leveraged by the Chisel client utility followed by a connection attempt. Chisel is a command-line utility used for creating and managing TCP and UDP tunnels, enabling port forwarding and secure communication between machines. Attackers can abuse the Chisel utility to establish covert communication channels, bypass network restrictions, and carry out malicious activities by creating tunnels that allow unauthorized access to internal systems.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Protocol Tunneling via Chisel Client",
+        "query": "sequence by host.id, process.entity_id with maxspan=1s\n  [process where host.os.type == \"linux\" and event.action == \"exec\" and event.type == \"start\" and \n   process.args == \"client\" and process.args : (\"R*\", \"*:*\", \"*socks*\", \"*.*\") and process.args_count \u003e= 4 and \n   process.parent.name in (\"bash\", \"dash\", \"ash\", \"sh\", \"tcsh\", \"csh\", \"zsh\", \"ksh\", \"fish\")]\n  [network where host.os.type == \"linux\" and event.action == \"connection_attempted\" and event.type == \"start\" and \n   destination.ip != null and destination.ip != \"127.0.0.1\" and destination.ip != \"::1\" and \n   not process.name : (\n     \"python*\", \"php*\", \"perl\", \"ruby\", \"lua*\", \"openssl\", \"nc\", \"netcat\", \"ncat\", \"telnet\", \"awk\", \"java\", \"telnet\",\n     \"ftp\", \"socat\", \"curl\", \"wget\", \"dpkg\", \"docker\", \"dockerd\", \"yum\", \"apt\", \"rpm\", \"dnf\", \"ssh\", \"sshd\")]\n",
+        "references": [
+            "https://blog.bitsadmin.com/living-off-the-foreign-land-windows-as-offensive-platform",
+            "https://book.hacktricks.xyz/generic-methodologies-and-resources/tunneling-and-port-forwarding"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "destination.ip",
+                "type": "ip"
+            },
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args_count",
+                "type": "long"
+            },
+            {
+                "ecs": true,
+                "name": "process.entity_id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "3f12325a-4cc6-410b-8d4c-9fbbeb744cfd",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Command and Control",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0011",
+                    "name": "Command and Control",
+                    "reference": "https://attack.mitre.org/tactics/TA0011/"
+                },
+                "technique": [
+                    {
+                        "id": "T1572",
+                        "name": "Protocol Tunneling",
+                        "reference": "https://attack.mitre.org/techniques/T1572/"
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 1
+    },
+    "id": "3f12325a-4cc6-410b-8d4c-9fbbeb744cfd_1",
+    "type": "security-rule"
+}

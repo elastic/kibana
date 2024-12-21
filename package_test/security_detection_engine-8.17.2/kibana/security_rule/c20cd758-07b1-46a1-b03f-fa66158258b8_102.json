@@ -1,0 +1,131 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "Identifies digitally signed (trusted) processes loading unsigned DLLs. Attackers may plant their payloads into the application folder and invoke the legitimate application to execute the payload, masking actions they perform under a legitimate, trusted, and potentially elevated system or software process.",
+    "from": "now-119m",
+    "index": [
+      "logs-endpoint.events.library-*"
+    ],
+    "interval": "60m",
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Unsigned DLL Loaded by a Trusted Process",
+    "query": "library where host.os.type == \"windows\" and\n   (dll.Ext.relative_file_creation_time <= 500 or\n    dll.Ext.relative_file_name_modify_time <= 500 or\n    dll.Ext.device.product_id : (\"Virtual DVD-ROM\", \"Virtual Disk\")) and dll.hash.sha256 != null and\n    process.code_signature.status :\"trusted\" and not dll.code_signature.status : (\"trusted\", \"errorExpired\", \"errorCode_endpoint*\") and\n    /* DLL loaded from the process.executable current directory */\n    endswith~(substring(dll.path, 0, length(dll.path) - (length(dll.name) + 1)), substring(process.executable, 0, length(process.executable) - (length(process.name) + 1)))\n    and not user.id : \"S-1-5-18\" and\n    not dll.hash.sha256 : (\n        \"19588e6a318894abe8094374bee233e666f319de909c69f12a6047b14473e299\",\n        \"6e8bee250c8cc1b65150522f33794759f5c65f58fff17c5cbf6422ad68b421d2\",\n        \"55de11531dc0e566cb91f26e48d1301a161a4b8b24abed42304d711412368760\",\n        \"56a5148d00c2d9e58415be2d64eca922a58063fe26d9af1c87084aa383c9058e\",\n        \"83ee0ff920144edb2c2f4ea10130f55443493290886985a63233fa2431e450f9\",\n        \"0d0d8f2eaff6b5f75e63d9721d5a0480b30e70792fe0d3a24d76fd3e61b05982\",\n        \"8b6ce3a640e2d6f36b0001be2a1abb765ae51e62c314a15911e75138cbb544bb\",\n        \"ea02a19dd824cb7d611b8821d1b9e6a076714a195d027d1ff918128a64ac5220\",\n        \"02a6d001e6dd944738e09b720e49dcb1272cb782b870e5ae319d4600bc192225\",\n        \"e7714a1d6ac3f4c4ae22564b9ca301e486f5f42691859c0a687246c47b5cf5c9\",\n        \"17f0f709fb7f6190c03b19b6198fd863b6f0d79f46ccfebac6064be747a4cb3e\",\n        \"cb7ab3788d10940df874acd97b1821bbb5ee4a91f3eec11982bb5bf7a3c96443\",\n        \"c944ee510721a1d30d42227cc3061dfdcbc144c952381afcfe4f6e82c5435ffc\",\n        \"967189adfbc889fde89aafc867f7a1f02731f8592cf6fd5a4ace1929213e2e13\",\n        \"4a824526749790603eb66777f79787128dd282162a3904a4c1135de43b14d029\",\n        \"620a7e658af05cc848091b8a639854b9b15700a9061b4a3d078523653133a4af\",\n        \"cb220267fb0116b298bab6a09a764420d630c52026f7d750f8ffca4818389327\",\n        \"0da1f856d92d6b95f10ed8c3f629cd15468c906de9352fb4ae629139d1412eed\",\n        \"e1646c7778c24407a17881908037a49ecfcb5a980d155212d544302653a3ef62\",\n        \"e102c9c5b22ceb60dc516ab4124bea8ec8e808b08eec48ea7ac674d13fca82ef\",\n        \"c7544e1f9927afdf6e8cd7063020b572e60fe8f00af39227eb831d331df38225\",\n        \"3668c6749db59a6cbc5293d0a4f904f76d6fb5048704449dd53894916f408a57\",\n        \"7705851ba047a8154402aca92621b60be0e0e9d9b52b19bf8be540305bd53dba\",\n        \"b5acf358ff97127eac9ef4c664a980b937376b5295ef23d77ee338225de10d60\",\n        \"394d2d862f2ddce71f28d9b933b21a7d6c621c80ef28652574f758f77f01f716\",\n        \"e958d03db79e9f1d2770c70a5bc24904aa3e2d27a8d5637684cf8166b38908f2\",\n        \"284701380f33a30b25e8eb9822e7f47179238e91d08bd3fb5a117145de7e0d8d\",\n        \"497471497886f18ca16f7facab7d76dc9bfadd69deb9c6e4ea9bdc0869a15628\",\n        \"739bedcfc8eb860927eb2057474be5b39518aaaa6703f9f85307a432fa1f236e\",\n        \"8f4c72e3c7de1ab5d894ec7813f65c5298ecafc183f31924b44a427433ffca42\",\n        \"1ac4753056179b358132c55ca3086d550849ae30259ba94f334826c2fbf6c57e\",\n        \"53e8fecd7d4b1b74064eba9bfa6a361d52929f440954931b4ba65615148bf0ea\",\n        \"e9088afd8871dbad5eda47a9d8abf3b08dd2e17c423ba8a05f9b6ad6751f9b7c\",\n        \"ab27eb05130db2f92499234b69ff97ee6429c7824efcb7324ae3e404e2b405bf\",\n        \"553451008520a5f0110d84192cba40208fb001c27454f946e85e6fb2e6553292\"\n    )\n",
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "dll.Ext.device.product_id",
+        "type": "unknown"
+      },
+      {
+        "ecs": false,
+        "name": "dll.Ext.relative_file_creation_time",
+        "type": "unknown"
+      },
+      {
+        "ecs": false,
+        "name": "dll.Ext.relative_file_name_modify_time",
+        "type": "unknown"
+      },
+      {
+        "ecs": true,
+        "name": "dll.code_signature.status",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "dll.hash.sha256",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "dll.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "dll.path",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.code_signature.status",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.executable",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "user.id",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "c20cd758-07b1-46a1-b03f-fa66158258b8",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Defense Evasion",
+      "Rule Type: BBR",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1574",
+            "name": "Hijack Execution Flow",
+            "reference": "https://attack.mitre.org/techniques/T1574/",
+            "subtechnique": [
+              {
+                "id": "T1574.001",
+                "name": "DLL Search Order Hijacking",
+                "reference": "https://attack.mitre.org/techniques/T1574/001/"
+              },
+              {
+                "id": "T1574.002",
+                "name": "DLL Side-Loading",
+                "reference": "https://attack.mitre.org/techniques/T1574/002/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 102
+  },
+  "id": "c20cd758-07b1-46a1-b03f-fa66158258b8_102",
+  "type": "security-rule"
+}
