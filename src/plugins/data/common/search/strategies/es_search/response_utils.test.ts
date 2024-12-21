@@ -8,7 +8,7 @@
  */
 
 import { getTotalLoaded, shimHitsTotal } from './response_utils';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 describe('response utils', () => {
   describe('getTotalLoaded', () => {
