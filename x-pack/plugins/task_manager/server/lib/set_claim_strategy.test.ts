@@ -151,6 +151,22 @@ describe('setClaimStrategy', () => {
     expect(logger.info).not.toHaveBeenCalled();
   });
 
+  test(`should honor config-provided poll_interval`, () => {
+    const config = { ...getConfigWithoutClaimStrategy(), poll_interval: 120000 };
+    const returnedConfig = setClaimStrategy({
+      config,
+      logger,
+      isCloud: false,
+      isElasticStaffOwned: false,
+      isServerless: false,
+    });
+
+    expect(returnedConfig.claim_strategy).toBe(CLAIM_STRATEGY_UPDATE_BY_QUERY);
+    expect(returnedConfig.poll_interval).toBe(120000);
+
+    expect(logger.info).not.toHaveBeenCalled();
+  });
+
   test(`should set claim strategy to update_by_query if cloud and not serverless with undefined deploymentId`, () => {
     const config = getConfigWithoutClaimStrategy();
     const returnedConfig = setClaimStrategy({
