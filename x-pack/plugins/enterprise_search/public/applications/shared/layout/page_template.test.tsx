@@ -11,7 +11,6 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -124,22 +123,6 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
 
       expect(wrapper.find(Loading).exists()).toBe(true);
       expect(wrapper.find('.emptyState').exists()).toBe(false);
-    });
-  });
-
-  describe('read-only mode', () => {
-    it('renders a callout if in read-only mode', () => {
-      setMockValues({ readOnlyMode: true });
-      const wrapper = shallow(<EnterpriseSearchPageTemplateWrapper />);
-
-      expect(wrapper.find(EuiCallOut).exists()).toBe(true);
-    });
-
-    it('does not render a callout if not in read-only mode', () => {
-      setMockValues({ readOnlyMode: false });
-      const wrapper = shallow(<EnterpriseSearchPageTemplateWrapper />);
-
-      expect(wrapper.find(EuiCallOut).exists()).toBe(false);
     });
   });
 

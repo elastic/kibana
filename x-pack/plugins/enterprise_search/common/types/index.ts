@@ -5,35 +5,9 @@
  * 2.0.
  */
 
-import {
-  Account as AppSearchAccount,
-  ConfiguredLimits as AppSearchConfiguredLimits,
-} from './app_search';
-import {
-  WorkplaceSearchInitialData,
-  ConfiguredLimits as WorkplaceSearchConfiguredLimits,
-} from './workplace_search';
-
 export interface InitialAppData {
-  access?: ProductAccess;
-  appSearch?: AppSearchAccount;
-  configuredLimits?: ConfiguredLimits;
-  enterpriseSearchVersion?: string;
   features?: ProductFeatures;
   kibanaVersion?: string;
-  readOnlyMode?: boolean;
-  searchOAuth?: SearchOAuth;
-  workplaceSearch?: WorkplaceSearchInitialData;
-}
-
-export interface ConfiguredLimits {
-  appSearch: AppSearchConfiguredLimits;
-  workplaceSearch: WorkplaceSearchConfiguredLimits;
-}
-
-export interface ProductAccess {
-  hasAppSearchAccess: boolean;
-  hasWorkplaceSearchAccess: boolean;
 }
 
 export interface ProductFeatures {
@@ -42,7 +16,6 @@ export interface ProductFeatures {
   hasDocumentLevelSecurityEnabled: boolean;
   hasIncrementalSyncEnabled: boolean;
   hasNativeConnectors: boolean;
-  hasWebCrawler: boolean;
 }
 
 export interface SearchOAuth {

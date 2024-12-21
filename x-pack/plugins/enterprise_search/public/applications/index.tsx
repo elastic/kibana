@@ -25,19 +25,17 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { Router } from '@kbn/shared-ux-router';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
-import { ClientConfigType, InitialAppData, ProductAccess } from '../../common/types';
+import { ClientConfigType, InitialAppData } from '../../common/types';
 import { PluginsStart, ClientData, ESConfig, UpdateSideNavDefinitionFn } from '../plugin';
 
-import { externalUrl } from './shared/enterprise_search_url';
 import { mountFlashMessagesLogic } from './shared/flash_messages';
-import { getCloudEnterpriseSearchHost } from './shared/get_cloud_enterprise_search_host/get_cloud_enterprise_search_host';
 import { mountHttpLogic } from './shared/http';
 import { mountKibanaLogic } from './shared/kibana';
 import { mountLicensingLogic } from './shared/licensing';
 
 /**
  * This file serves as a reusable wrapper to share Kibana-level context and other helpers
- * between various Enterprise Search plugins (e.g. AppSearch, WorkplaceSearch, ES landing page)
+ * between various Enterprise Search plugins (e.g. ES landing page, Search Applications, Behavior Analytics)
  * which should be imported and passed in as the first param in plugin.ts.
  */
 
@@ -58,19 +56,7 @@ export const renderApp = (
   },
   { config, data, esConfig }: { config: ClientConfigType; data: ClientData; esConfig: ESConfig }
 ) => {
-  const {
-    access,
-    appSearch,
-    configuredLimits,
-    enterpriseSearchVersion,
-    errorConnectingMessage,
-    features,
-    kibanaVersion,
-    publicUrl,
-    readOnlyMode,
-    searchOAuth,
-    workplaceSearch,
-  } = data;
+  const { features, kibanaVersion } = data;
   const { history } = params;
   const { application, chrome, http, notifications, uiSettings } = core;
   const { capabilities, navigateToUrl } = application;
@@ -85,15 +71,6 @@ export const renderApp = (
     ml,
   } = plugins;
 
-  const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
-  externalUrl.enterpriseSearchUrl = publicUrl || entCloudHost || config.host || '';
-
-  const noProductAccess: ProductAccess = {
-    hasAppSearchAccess: false,
-    hasWorkplaceSearchAccess: false,
-  };
-
-  const productAccess = access || noProductAccess;
   const productFeatures = features ?? { ...DEFAULT_PRODUCT_FEATURES };
 
   const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
@@ -126,7 +103,6 @@ export const renderApp = (
     lens,
     ml,
     navigateToUrl,
-    productAccess,
     productFeatures,
     renderHeaderActions: (HeaderActions) =>
       params.setHeaderActionMenu(
@@ -145,9 +121,7 @@ export const renderApp = (
     license$: plugins.licensing?.license$ || of(undefined),
   });
   const unmountHttpLogic = mountHttpLogic({
-    errorConnectingMessage,
     http,
-    readOnlyMode,
   });
 
   const unmountFlashMessagesLogic = mountFlashMessagesLogic({ notifications });
@@ -167,17 +141,7 @@ export const renderApp = (
               <CloudContext>
                 <Provider store={store}>
                   <Router history={params.history}>
-                    <App
-                      access={productAccess}
-                      appSearch={appSearch}
-                      configuredLimits={configuredLimits}
-                      enterpriseSearchVersion={enterpriseSearchVersion}
-                      features={features}
-                      kibanaVersion={kibanaVersion}
-                      readOnlyMode={readOnlyMode}
-                      searchOAuth={searchOAuth}
-                      workplaceSearch={workplaceSearch}
-                    />
+                    <App features={features} kibanaVersion={kibanaVersion} />
                   </Router>
                 </Provider>
               </CloudContext>

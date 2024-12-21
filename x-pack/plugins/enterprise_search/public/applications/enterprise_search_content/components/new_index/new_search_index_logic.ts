@@ -8,7 +8,6 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Actions } from '../../../shared/api_logic/create_api_logic';
-import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 import {
   AddConnectorApiLogic,
   AddConnectorApiLogicArgs,
@@ -88,15 +87,12 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
   },
   listeners: ({ actions, values }) => ({
     apiIndexCreated: () => {
-      if (!KibanaLogic.values.productAccess.hasAppSearchAccess) return;
       flashIndexCreatedToast();
     },
     connectorIndexCreated: () => {
-      if (!KibanaLogic.values.productAccess.hasAppSearchAccess) return;
       flashIndexCreatedToast();
     },
     crawlerIndexCreated: () => {
-      if (!KibanaLogic.values.productAccess.hasAppSearchAccess) return;
       flashIndexCreatedToast();
     },
     setRawName: async (_, breakpoint) => {

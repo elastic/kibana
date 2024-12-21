@@ -170,7 +170,6 @@ export const CODE_PATH_LOGSTASH = 'logstash';
 export const CODE_PATH_APM = 'apm';
 export const CODE_PATH_LICENSE = 'license';
 export const CODE_PATH_LOGS = 'logs';
-export const CODE_PATH_ENTERPRISE_SEARCH = 'enterprise_search';
 
 /**
  * The header sent by telemetry service when hitting Elasticsearch to identify query source

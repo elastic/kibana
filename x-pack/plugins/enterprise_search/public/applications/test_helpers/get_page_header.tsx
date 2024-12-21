@@ -12,7 +12,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiPageHeaderProps, EuiTab } from '@elastic/eui';
 
 /*
- * Given an AppSearchPageTemplate or WorkplaceSearchPageTemplate, these
+ * Given an WorkplaceSearchPageTemplate, these
  * helpers dive into various parts of the EuiPageHeader to make assertions
  * slightly less of a pain in shallow renders
  */

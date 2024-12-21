@@ -35,7 +35,7 @@ import './setup_guide.scss';
 
 interface Props {
   children: React.ReactNode;
-  productEuiIcon: 'logoAppSearch' | 'logoWorkplaceSearch' | 'logoEnterpriseSearch';
+  productEuiIcon: 'logoEnterpriseSearch';
   productName: string;
 }
 

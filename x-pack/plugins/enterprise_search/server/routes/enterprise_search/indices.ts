@@ -72,12 +72,7 @@ import {
 } from '../../utils/identify_exceptions';
 import { getPrefixedInferencePipelineProcessorName } from '../../utils/ml_inference_pipeline_utils';
 
-export function registerIndexRoutes({
-  router,
-  enterpriseSearchRequestHandler,
-  log,
-  ml,
-}: RouteDependencies) {
+export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.get(
     { path: '/internal/enterprise_search/search_indices', validate: false },
     elasticsearchErrorHandler(log, async (context, _, response) => {
@@ -198,18 +193,7 @@ export function registerIndexRoutes({
       const { client } = (await context.core).elasticsearch;
 
       try {
-        const crawler = await fetchCrawlerByIndexName(client, indexName);
         const connector = await fetchConnectorByIndexName(client.asCurrentUser, indexName);
-
-        if (crawler) {
-          const crawlerRes = await enterpriseSearchRequestHandler.createRequest({
-            path: `/api/ent/v1/internal/indices/${indexName}`,
-          })(context, request, response);
-
-          if (crawlerRes.status !== 200) {
-            throw new Error(crawlerRes.payload.message);
-          }
-        }
 
         if (connector) {
           if (connector.service_type === CRAWLER_SERVICE_TYPE) {

@@ -332,10 +332,6 @@
     "dynamic": false,
     "properties": {}
   },
-  "app_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
   "application_usage_daily": {
     "dynamic": false,
     "properties": {
@@ -3772,9 +3768,5 @@
         "type": "integer"
       }
     }
-  },
-  "workplace_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
   }
 }
