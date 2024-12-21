@@ -447,7 +447,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Description
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/actions/README.md[actions]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/actions/README.md[actions]
 |The Kibana actions plugin provides a framework to create executable actions. You can:
 
 
@@ -455,7 +455,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |The plugin provides APIs and components for AIOps features, including the “Log rate analysis” UI, maintained by the ML team.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/alerting/README.md[alerting]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/alerting/README.md[alerting]
 |The Kibana Alerting plugin provides a common place to set up rules. You can:
 
 
@@ -479,7 +479,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |"Never look back. The past is done. The future is a blank canvas." ― Suzy Kassem, Rise Up and Salute the Sun
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cases/README.md[cases]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/cases/README.md[cases]
 |This plugin provides cases management in Kibana
 
 
@@ -584,7 +584,7 @@ security and spaces filtering.
 |This plugin provides a user interface to interact with the Entity Manager.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/event_log/README.md[eventLog]
 |The event log plugin provides a persistent history of alerting and action
 activities.
 
@@ -800,7 +800,7 @@ Elastic.
 |Welcome to the Kibana rollup plugin! This plugin provides Kibana support for Elasticsearch's rollup feature. Please refer to the Elasticsearch documentation to understand rollup indices and how to create rollup jobs.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/rule_registry/README.md[ruleRegistry]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/rule_registry/README.md[ruleRegistry]
 |The rule registry plugin aims to make it easy for rule type producers to have their rules produce the data that they need to build rich experiences on top of a unified experience, without the risk of mapping conflicts.
 
 
@@ -903,14 +903,14 @@ This plugin is only enabled when the application is built for serverless project
 |See Configuring Kibana Spaces.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/stack_alerts/README.md[stackAlerts]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/stack_alerts/README.md[stackAlerts]
 |This plugin provides alertTypes shipped with Kibana for use with the
 the alerting plugin.  When enabled, it will register
 the alertTypes by the Stack in the alerting plugin, register associated HTTP
 routes, etc.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/stack_connectors/README.md[stackConnectors]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/stack_connectors/README.md[stackConnectors]
 |The stack_connectors plugin provides connector types shipped with Kibana, built on top of the framework provided in the actions plugin.
 
 
@@ -927,7 +927,7 @@ routes, etc.
 in their infrastructure.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/task_manager/README.md[taskManager]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/task_manager/README.md[taskManager]
 |The task manager is a generic system for running background tasks.
 
 
@@ -952,7 +952,7 @@ in their infrastructure.
 For adding localizations and instrument a ui to support translated content, see https://github.com/elastic/kibana/tree/main/packages/kbn-i18n
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/triggers_actions_ui/README.md[triggersActionsUi]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/triggers_actions_ui/README.md[triggersActionsUi]
 |The Kibana alerts and actions UI plugin provides a user interface for managing alerts and actions.
 As a developer you can reuse and extend built-in alerts and actions UI functionality:
 
