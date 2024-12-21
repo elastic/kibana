@@ -46,11 +46,11 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
   });
   stateContainer.internalState.transitions.setDataRequestParams({
-    timeRangeRel: {
+    timeRangeRelative: {
       from: '2020-05-14T11:05:13.590',
       to: '2020-05-14T11:20:13.590',
     },
-    timeRangeAbs: {
+    timeRangeAbsolute: {
       from: '2020-05-14T11:05:13.590',
       to: '2020-05-14T11:20:13.590',
     },

@@ -255,8 +255,8 @@ export function getDataStateContainer({
           }
 
           internalStateContainer.transitions.setDataRequestParams({
-            timeRangeAbs: timefilter.getAbsoluteTime(),
-            timeRangeRel: timefilter.getTime(),
+            timeRangeAbsolute: timefilter.getAbsoluteTime(),
+            timeRangeRelative: timefilter.getTime(),
           });
 
           await profilesManager.resolveDataSourceProfile({

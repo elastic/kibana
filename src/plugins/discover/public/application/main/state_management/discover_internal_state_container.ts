@@ -19,8 +19,8 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
 
 interface InternalStateDataRequestParams {
-  timeRangeAbs?: TimeRange;
-  timeRangeRel?: TimeRange;
+  timeRangeAbsolute?: TimeRange;
+  timeRangeRelative?: TimeRange;
 }
 
 export interface InternalState {

@@ -105,8 +105,8 @@ async function mountComponent(
   });
   stateContainer.internalState.transitions.setDataView(dataView);
   stateContainer.internalState.transitions.setDataRequestParams({
-    timeRangeAbs: time,
-    timeRangeRel: time,
+    timeRangeAbsolute: time,
+    timeRangeRelative: time,
   });
 
   const props = {
