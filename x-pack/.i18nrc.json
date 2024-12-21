@@ -46,7 +46,7 @@
     "xpack.dataVisualizer": "platform/plugins/private/data_visualizer",
     "xpack.exploratoryView": "solutions/observability/plugins/exploratory_view",
     "xpack.fileUpload": "plugins/file_upload",
-    "xpack.inferenceEndpointUICommon": "packages/kbn-inference-endpoint-ui-common",
+    "xpack.inferenceEndpointUICommon": "platform/packages/shared/kbn-inference-endpoint-ui-common",
     "xpack.globalSearch": [
       "plugins/global_search"
     ],

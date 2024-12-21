@@ -41,12 +41,11 @@ interface InferenceServicesProps {
   providers: InferenceProvider[];
 }
 
-export const InferenceServices: React.FC<InferenceServicesProps> = ({ providers }) => {
+export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({ providers }) => {
   const [isProviderPopoverOpen, setProviderPopoverOpen] = useState(false);
   const [providerSchema, setProviderSchema] = useState<ConfigEntryView[]>([]);
   const [taskTypeOptions, setTaskTypeOptions] = useState<TaskTypeOption[]>([]);
   const [selectedTaskType, setSelectedTaskType] = useState<string>(DEFAULT_TASK_TYPE);
-  const [taskTypeFormFields] = useState<ConfigEntryView[]>([]);
 
   const { updateFieldValues, setFieldValue, validateFields, isSubmitting } = useFormContext();
   const [requiredProviderFormFields, setRequiredProviderFormFields] = useState<ConfigEntryView[]>(
@@ -336,7 +335,6 @@ export const InferenceServices: React.FC<InferenceServicesProps> = ({ providers 
             optionalProviderFormFields={optionalProviderFormFields}
             onSetProviderConfigEntry={onSetProviderConfigEntry}
             onTaskTypeOptionsSelect={onTaskTypeOptionsSelect}
-            taskTypeFormFields={taskTypeFormFields}
             taskTypeOptions={taskTypeOptions}
             selectedTaskType={selectedTaskType}
           />

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { InferenceServices } from './src/components/inference_services';
+export { InferenceServiceFormFields } from './src/components/inference_service_form_fields';
 
 export * from './src/types/types';

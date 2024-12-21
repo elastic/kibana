@@ -51,7 +51,6 @@ interface AdditionalOptionsFieldsProps {
   onSetProviderConfigEntry: (key: string, value: unknown) => Promise<void>;
   onTaskTypeOptionsSelect: (taskType: string, provider?: string) => void;
   selectedTaskType?: string;
-  taskTypeFormFields: ConfigEntryView[];
   taskTypeOptions: TaskTypeOption[];
 }
 
@@ -59,7 +58,6 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
   config,
   taskTypeOptions,
   optionalProviderFormFields,
-  taskTypeFormFields,
   selectedTaskType,
   onSetProviderConfigEntry,
   onTaskTypeOptionsSelect,

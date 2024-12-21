@@ -7,7 +7,7 @@
 
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useCallback, useState } from 'react';
-import { InferenceServices } from '@kbn/inference-endpoint-ui-common';
+import { InferenceServiceFormFields } from '@kbn/inference-endpoint-ui-common';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useProviders } from '../../hooks/use_providers';
 import * as i18n from './translations';
@@ -47,7 +47,7 @@ export const InferenceForm: React.FC<InferenceFormProps> = ({ onSubmitSuccess })
 
   return providers ? (
     <Form form={form}>
-      <InferenceServices providers={providers} />
+      <InferenceServiceFormFields providers={providers} />
       <EuiSpacer />
       <EuiFlexGroup justifyContent="flexStart">
         <EuiFlexItem grow={false}>

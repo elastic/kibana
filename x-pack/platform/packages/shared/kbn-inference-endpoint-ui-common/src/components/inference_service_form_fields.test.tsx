@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InferenceServices } from './inference_services';
+import { InferenceServiceFormFields } from './inference_service_form_fields';
 import { FieldType, InferenceProvider } from '../types/types';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -124,7 +124,7 @@ describe('Inference Services', () => {
   it('renders', () => {
     render(
       <MockFormProvider>
-        <InferenceServices providers={providers} />
+        <InferenceServiceFormFields providers={providers} />
       </MockFormProvider>
     );
 
@@ -134,7 +134,7 @@ describe('Inference Services', () => {
   it('renders Selectable', async () => {
     render(
       <MockFormProvider>
-        <InferenceServices providers={providers} />
+        <InferenceServiceFormFields providers={providers} />
       </MockFormProvider>
     );
 
@@ -145,7 +145,7 @@ describe('Inference Services', () => {
   it('renders selected provider fields - hugging_face', async () => {
     render(
       <MockFormProvider>
-        <InferenceServices providers={providers} />
+        <InferenceServiceFormFields providers={providers} />
       </MockFormProvider>
     );
 
@@ -165,7 +165,7 @@ describe('Inference Services', () => {
   it('re-renders fields when selected to anthropic from hugging_face', async () => {
     render(
       <MockFormProvider>
-        <InferenceServices providers={providers} />
+        <InferenceServiceFormFields providers={providers} />
       </MockFormProvider>
     );
 
