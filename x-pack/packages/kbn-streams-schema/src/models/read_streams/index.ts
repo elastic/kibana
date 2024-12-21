@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export type { StreamDefinition, ReadStreamDefinition } from './types';
+export * from './ingest_read_stream';
+export * from './wired_read_stream';
+export * from './read_stream';

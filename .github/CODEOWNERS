@@ -763,6 +763,7 @@ x-pack/packages/kbn-ai-assistant @elastic/search-kibana
 x-pack/packages/kbn-alerting-comparators @elastic/response-ops
 x-pack/packages/kbn-alerting-state-types @elastic/response-ops
 x-pack/packages/kbn-random-sampling @elastic/kibana-visualizations
+x-pack/packages/kbn-streams-schema @elastic/streams-program-team
 x-pack/packages/kbn-synthetics-private-location @elastic/obs-ux-management-team
 x-pack/packages/maps/vector_tile_utils @elastic/kibana-presentation
 x-pack/packages/observability/observability_utils/observability_utils_browser @elastic/observability-ui

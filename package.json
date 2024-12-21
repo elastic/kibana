@@ -945,6 +945,7 @@
     "@kbn/std": "link:packages/kbn-std",
     "@kbn/streams-app-plugin": "link:x-pack/solutions/observability/plugins/streams_app",
     "@kbn/streams-plugin": "link:x-pack/solutions/observability/plugins/streams",
+    "@kbn/streams-schema": "link:x-pack/packages/kbn-streams-schema",
     "@kbn/synthetics-plugin": "link:x-pack/solutions/observability/plugins/synthetics",
     "@kbn/synthetics-private-location": "link:x-pack/packages/kbn-synthetics-private-location",
     "@kbn/task-manager-fixture-plugin": "link:x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture",
