@@ -95,7 +95,7 @@ describe('SiemRuleMigrationsService', () => {
         expect(mockDataCreateClient).toHaveBeenCalledWith({
           spaceId: createClientParams.spaceId,
           currentUser: createClientParams.currentUser,
-          esClient: esClusterClient.asInternalUser,
+          esScopedClient: esClusterClient.asScoped(),
         });
       });
 
