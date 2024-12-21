@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { mockQuery, mockAlertCountByRuleResult, parsedAlertCountByRuleResult } from './mock_data';
-import type {
-  UseAlertCountByRuleByStatus,
-  UseAlertCountByRuleByStatusProps,
-} from './use_alert_count_by_rule_by_status';
+import type { UseAlertCountByRuleByStatusProps } from './use_alert_count_by_rule_by_status';
 import { useAlertCountByRuleByStatus } from './use_alert_count_by_rule_by_status';
 
 const dateNow = new Date('2022-04-15T12:00:00.000Z').valueOf();
@@ -53,7 +50,7 @@ jest.mock('../../../detections/containers/detection_engine/alerts/use_signal_ind
 const renderUseAlertCountByRuleByStatus = (
   overrides: Partial<UseAlertCountByRuleByStatusProps> = {}
 ) =>
-  renderHook<UseAlertCountByRuleByStatusProps, ReturnType<UseAlertCountByRuleByStatus>>(() =>
+  renderHook(() =>
     useAlertCountByRuleByStatus({
       skip: false,
       field: 'test_field',
