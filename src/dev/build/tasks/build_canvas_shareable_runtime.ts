@@ -19,9 +19,9 @@ export const BuildCanvasShareableRuntime: Task = {
       log.info('Skipping Canvas shareable runtime for serverless builds');
       return;
     }
-    await del(config.resolveFromRepo('x-pack/plugins/canvas/shareable_runtime/build'));
+    await del(config.resolveFromRepo('x-pack/platform/plugins/private/canvas/shareable_runtime/build'));
 
-    await exec(log, process.execPath, ['plugins/canvas/scripts/shareable_runtime'], {
+    await exec(log, process.execPath, ['platform/plugins/private/canvas/scripts/shareable_runtime'], {
       cwd: config.resolveFromRepo('x-pack'),
       level: 'info',
     });

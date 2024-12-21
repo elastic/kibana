@@ -4057,7 +4057,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/canvas-plugin@link:x-pack/plugins/canvas":
+"@kbn/canvas-plugin@link:x-pack/platform/plugins/private/canvas":
   version "0.0.0"
   uid ""
 
