@@ -14,7 +14,10 @@ import {
 } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
-import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
+import type {
+  RuleMigrationDataStats,
+  RuleMigrationFilters,
+} from '../data/rule_migrations_data_rules_client';
 import { getRuleMigrationAgent } from './agent';
 import type { MigrateRuleState } from './agent/types';
 import { RuleMigrationsRetriever } from './retrievers';
@@ -49,7 +52,7 @@ export class RuleMigrationsTaskClient {
     // Just in case some previous execution was interrupted without cleaning up
     await this.data.rules.updateStatus(
       migrationId,
-      SiemMigrationStatus.PROCESSING,
+      { status: SiemMigrationStatus.PROCESSING },
       SiemMigrationStatus.PENDING,
       { refresh: true }
     );
@@ -203,12 +206,15 @@ export class RuleMigrationsTaskClient {
   }
 
   /** Updates all the rules in a migration to be re-executed */
-  public async updateToRetry(migrationId: string): Promise<{ updated: boolean }> {
+  public async updateToRetry(
+    migrationId: string,
+    filter: RuleMigrationFilters = {}
+  ): Promise<{ updated: boolean }> {
     if (this.migrationsRunning.has(migrationId)) {
       return { updated: false };
     }
     // Update all the rules in the migration to pending
-    await this.data.rules.updateStatus(migrationId, undefined, SiemMigrationStatus.PENDING, {
+    await this.data.rules.updateStatus(migrationId, filter, SiemMigrationStatus.PENDING, {
       refresh: true,
     });
     return { updated: true };
