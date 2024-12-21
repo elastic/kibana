@@ -62,6 +62,10 @@ describe('getReindexProgressLabel', () => {
     expect(getReindexProgressLabel(1, ReindexStep.reindexStarted)).toBe('90%');
   });
 
+  it('returns 92% when index settings have been restored', () => {
+    expect(getReindexProgressLabel(null, ReindexStep.indexSettingsRestored)).toBe('92%');
+  });
+
   it('returns 95% when alias has been created', () => {
     expect(getReindexProgressLabel(null, ReindexStep.aliasCreated)).toBe('95%');
   });
@@ -83,6 +87,12 @@ describe('getReindexProgressLabel', () => {
       expect(getReindexProgressLabel(1, ReindexStep.reindexStarted, withExistingAliases)).toBe(
         '85%'
       );
+    });
+
+    it('returns 87% when alias has been created', () => {
+      expect(
+        getReindexProgressLabel(null, ReindexStep.indexSettingsRestored, withExistingAliases)
+      ).toBe('87%');
     });
 
     it('returns 90% when alias has been created', () => {
