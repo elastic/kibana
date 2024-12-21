@@ -30,6 +30,7 @@ export function defineQueryRolesRoutes({
       options: {
         summary: `Query roles`,
         access: 'public',
+        tags: ['oas-tags:roles'],
       },
       validate: {
         body: schema.object({
@@ -73,6 +74,25 @@ export function defineQueryRolesRoutes({
           };
         } = { bool: { must: [], should: [], must_not: [] } };
 
+        const nonReservedRolesQuery = [
+          {
+            term: {
+              'metadata._reserved': false,
+            },
+          },
+          {
+            bool: {
+              must_not: {
+                exists: {
+                  field: 'metadata._reserved',
+                },
+              },
+            },
+          },
+        ];
+        queryPayload.bool.should.push(...nonReservedRolesQuery);
+        queryPayload.bool.minimum_should_match = 1;
+
         if (query) {
           queryPayload.bool.must.push({
             wildcard: {
@@ -85,22 +105,6 @@ export function defineQueryRolesRoutes({
 
         if (showReservedRoles) {
           queryPayload.bool.should.push({ term: { 'metadata._reserved': true } });
-        } else if (showReservedRoles === false) {
-          queryPayload.bool.should.push({
-            term: {
-              'metadata._reserved': false,
-            },
-          });
-          queryPayload.bool.should.push({
-            bool: {
-              must_not: {
-                exists: {
-                  field: 'metadata._reserved',
-                },
-              },
-            },
-          });
-          queryPayload.bool.minimum_should_match = 1;
         }
 
         if (filters?.spaceId) {

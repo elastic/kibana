@@ -290,7 +290,7 @@ export const RolesGridPage: FC<Props> = ({
         name: i18n.translate('xpack.security.management.roles.descriptionColumnName', {
           defaultMessage: 'Role Description',
         }),
-        sortable: true,
+        sortable: false,
         truncateText: { lines: 3 },
         render: (description: string, record: Role) => (
           <EuiToolTip position="top" content={description} display="block">
