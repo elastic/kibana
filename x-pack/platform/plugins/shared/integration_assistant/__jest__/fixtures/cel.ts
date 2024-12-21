@@ -5,18 +5,25 @@
  * 2.0.
  */
 
-export const celTestState = {
+import { CelInputState } from '../../server/types';
+
+export const celTestState: CelInputState = {
   dataStreamName: 'testDataStream',
-  apiDefinition: 'apiDefinition',
   lastExecutedChain: 'testchain',
   finalized: false,
   apiQuerySummary: 'testQuerySummary',
-  exampleCelPrograms: [],
   currentProgram: 'testProgram',
   stateVarNames: ['testVar'],
   stateSettings: { test: 'testDetails' },
+  configFields: { test: { config1: 'config1testDetails' } },
   redactVars: ['testRedact'],
   results: { test: 'testResults' },
+  path: './testPath',
+  authType: 'basic',
+  openApiPathDetails: {},
+  openApiSchemas: {},
+  openApiAuthSchema: {},
+  hasProgramHeaders: false,
 };
 
 export const celQuerySummaryMockedResponse = `To cover all events in a chronological manner for the device_tasks endpoint, you should use the /v1/device_tasks GET route with pagination parameters. Specifically, use the pageSize and pageToken query parameters. Start with a large pageSize and use the nextPageToken from each response to fetch subsequent pages until all events are retrieved.
@@ -83,16 +90,25 @@ export const celStateDetailsMockedResponse = [
     name: 'config1',
     default: 50,
     redact: false,
+    configurable: true,
+    description: 'config1 description',
+    type: 'number',
   },
   {
     name: 'config2',
     default: '',
     redact: true,
+    configurable: false,
+    description: 'config2 description',
+    type: 'string',
   },
   {
     name: 'config3',
     default: 'event',
     redact: false,
+    configurable: false,
+    description: 'config3 description',
+    type: 'string',
   },
 ];
 
@@ -100,6 +116,14 @@ export const celStateSettings = {
   config1: 50,
   config2: '',
   config3: 'event',
+};
+
+export const celConfigFields = {
+  config1: {
+    default: 50,
+    type: 'number',
+    description: 'config1 description',
+  },
 };
 
 export const celRedact = ['config2'];
@@ -111,5 +135,13 @@ export const celExpectedResults = {
     config2: '',
     config3: 'event',
   },
+  configFields: {
+    config1: {
+      default: 50,
+      type: 'number',
+      description: 'config1 description',
+    },
+  },
+  needsAuthConfigBlock: false,
   redactVars: ['config2'],
 };
