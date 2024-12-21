@@ -21,6 +21,7 @@ interface GetMatchPrebuiltRuleNodeParams {
 
 interface GetMatchedRuleResponse {
   match: string;
+  summary: string;
 }
 
 export const getMatchPrebuiltRuleNode = ({
@@ -35,6 +36,9 @@ export const getMatchPrebuiltRuleNode = ({
       query,
       techniqueIds.join(',')
     );
+    if (prebuiltRules.length === 0) {
+      return {};
+    }
 
     const outputParser = new JsonOutputParser();
     const mostRelevantRule = MATCH_PREBUILT_RULE_PROMPT.pipe(model).pipe(outputParser);
@@ -62,6 +66,7 @@ export const getMatchPrebuiltRuleNode = ({
       const matchedRule = prebuiltRules.find((r) => r.name === response.match);
       if (matchedRule) {
         return {
+          comments: [response.summary],
           elastic_rule: {
             title: matchedRule.name,
             description: matchedRule.description,
@@ -71,16 +76,6 @@ export const getMatchPrebuiltRuleNode = ({
           translation_result: RuleTranslationResult.FULL,
         };
       }
-    }
-    const lookupTypes = ['inputlookup', 'outputlookup'];
-    if (
-      state.original_rule?.query &&
-      lookupTypes.some((type) => state.original_rule.query.includes(type))
-    ) {
-      logger.debug(
-        `Rule: ${state.original_rule?.title} did not match any prebuilt rule, but contains inputlookup, dropping`
-      );
-      return { translation_result: RuleTranslationResult.UNTRANSLATABLE };
     }
     return {};
   };

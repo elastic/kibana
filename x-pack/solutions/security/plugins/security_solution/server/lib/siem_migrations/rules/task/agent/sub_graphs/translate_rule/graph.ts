@@ -9,11 +9,12 @@ import { END, START, StateGraph } from '@langchain/langgraph';
 import { isEmpty } from 'lodash/fp';
 import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import { getEcsMappingNode } from './nodes/ecs_mapping';
-import { getFilterIndexPatternsNode } from './nodes/filter_index_patterns';
+import { translationResultNode } from './nodes/translation_result';
 import { getFixQueryErrorsNode } from './nodes/fix_query_errors';
 import { getRetrieveIntegrationsNode } from './nodes/retrieve_integrations';
 import { getTranslateRuleNode } from './nodes/translate_rule';
 import { getValidationNode } from './nodes/validation';
+import { getInlineQueryNode } from './nodes/inline_query';
 import { translateRuleState } from './state';
 import type { TranslateRuleGraphParams, TranslateRuleState } from './types';
 
@@ -32,22 +33,27 @@ export function getTranslateRuleGraph({
     connectorId,
     logger,
   });
+  const inlineQueryNode = getInlineQueryNode({ model, ruleMigrationsRetriever });
   const validationNode = getValidationNode({ logger });
   const fixQueryErrorsNode = getFixQueryErrorsNode({ inferenceClient, connectorId, logger });
   const retrieveIntegrationsNode = getRetrieveIntegrationsNode({ model, ruleMigrationsRetriever });
   const ecsMappingNode = getEcsMappingNode({ inferenceClient, connectorId, logger });
-  const filterIndexPatternsNode = getFilterIndexPatternsNode({ logger });
 
   const translateRuleGraph = new StateGraph(translateRuleState)
     // Nodes
+    .addNode('inlineQuery', inlineQueryNode)
+    .addNode('retrieveIntegrations', retrieveIntegrationsNode)
     .addNode('translateRule', translateRuleNode)
     .addNode('validation', validationNode)
     .addNode('fixQueryErrors', fixQueryErrorsNode)
-    .addNode('retrieveIntegrations', retrieveIntegrationsNode)
     .addNode('ecsMapping', ecsMappingNode)
-    .addNode('filterIndexPatterns', filterIndexPatternsNode)
+    .addNode('translationResult', translationResultNode)
     // Edges
-    .addEdge(START, 'retrieveIntegrations')
+    .addEdge(START, 'inlineQuery')
+    .addConditionalEdges('inlineQuery', translatableRouter, [
+      'retrieveIntegrations',
+      'translationResult',
+    ])
     .addEdge('retrieveIntegrations', 'translateRule')
     .addEdge('translateRule', 'validation')
     .addEdge('fixQueryErrors', 'validation')
@@ -55,14 +61,21 @@ export function getTranslateRuleGraph({
     .addConditionalEdges('validation', validationRouter, [
       'fixQueryErrors',
       'ecsMapping',
-      'filterIndexPatterns',
+      'translationResult',
     ])
-    .addEdge('filterIndexPatterns', END);
+    .addEdge('translationResult', END);
 
   const graph = translateRuleGraph.compile();
   graph.name = 'Translate Rule Graph';
   return graph;
 }
+
+const translatableRouter = (state: TranslateRuleState) => {
+  if (!state.inline_query) {
+    return 'translationResult';
+  }
+  return 'retrieveIntegrations';
+};
 
 const validationRouter = (state: TranslateRuleState) => {
   if (
@@ -76,5 +89,5 @@ const validationRouter = (state: TranslateRuleState) => {
       return 'ecsMapping';
     }
   }
-  return 'filterIndexPatterns';
+  return 'translationResult';
 };

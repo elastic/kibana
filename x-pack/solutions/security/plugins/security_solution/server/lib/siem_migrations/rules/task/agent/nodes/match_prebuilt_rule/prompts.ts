@@ -28,10 +28,11 @@ Here are some context for you to reference for your task, read it carefully as y
 </splunk_rule>
 
 <guidelines>
-- Always reply with a JSON object with the key "match" and the value being the most relevant matched elastic detection rule name. Do not reply with anything else.
+- Always reply with a JSON object with the key "match" and the value being the most relevant matched elastic detection rule name, and a "summary" entry with the reasons behind the match. Do not reply with anything else.
 - Only reply with exact matches, if you are unsure or do not find a very confident match, always reply with an empty string value in the match key, do not guess or reply with anything else.
-- If there is one Elastic rule in the list that covers the same usecase, set the name of the matching rule as a value of the match key. Do not reply with anything else.
-- If there are multiple rules in the list that cover the same usecase, answer with the most specific of them, for example: "Linux User Account Creation" is more specific than "User Account Creation".
+- If there is one Elastic rule in the list that covers the same use case, set the name of the matching rule as a value of the match key. Do not reply with anything else.
+- If there are multiple rules in the list that cover the same use case, answer with the most specific of them, for example: "Linux User Account Creation" is more specific than "User Account Creation".
+- Finally, write a "summary" in markdown format with the reasons behind the rule matching, or otherwise, why none of the rules suggested matched. Starting with "## Matching Summary".
 </guidelines>
 
 <example_response>
@@ -41,8 +42,10 @@ Description: The following analytic detects the suspicious add user account type
 </splunk_rule>
 A: Please find the match JSON object below:
 \`\`\`json
-{{"match": "Linux User Account Creation"}}
+{{"match": "Linux User Account Creation":}}
 \`\`\`
+## Matching Summary
+The Splunk rule "Linux Auditd Add User Account Type" is matched with the Elastic rule "Linux User Account Creation" because both rules cover the same use case of detecting user account creation on Linux systems.
 </example_response>
 `,
   ],
