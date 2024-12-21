@@ -6,6 +6,7 @@
  */
 
 import React, { Fragment, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiInMemoryTable,
   EuiLink,
@@ -17,11 +18,22 @@ import {
   EuiTextColor,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { AlertsStatus } from '../../../alerts/status';
-import './ccr.scss';
+
+/**
+ * We want the collapsed table (that shows the shard data) to be inline
+ * with the columns from the main table so we need to remove the padding
+ */
+const ccrListingTableStyle = css`
+  .euiTableRow-isExpandedRow > .euiTableRowCell > .euiTableCellContent {
+    padding: 0;
+  }
+`;
 
 function toSeconds(ms) {
   return Math.floor(ms / 1000) + 's';
@@ -194,7 +206,7 @@ export const Ccr = (props) => {
 
     return (
       <EuiInMemoryTable
-        className="monitoringElasticsearchCcrListingTable"
+        css={ccrListingTableStyle}
         columns={[
           {
             field: 'index',
