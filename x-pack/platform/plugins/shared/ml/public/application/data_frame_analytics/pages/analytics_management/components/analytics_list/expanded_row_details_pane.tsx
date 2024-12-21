@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiBasicTable,
-  EuiBetaBadge,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiFlexGroup,
@@ -41,35 +40,24 @@ export const OverallDetails: FC<{
   overallDetails: SectionConfig;
 }> = ({ overallDetails }) => (
   <EuiFlexGroup alignItems="center" wrap data-test-subj={overallDetails.dataTestSubj}>
-    {overallDetails.items.map((item) => {
-      const key = item.title;
-      if (item.title === 'badge') {
-        return (
-          <EuiFlexItem grow={false} key={key}>
-            <EuiBetaBadge label={item.description} color="subdued" title={item.title} />
+    {overallDetails.items.map((item) => (
+      <EuiFlexItem grow={false} key={item.title}>
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiDescriptionListDescription className="descriptionListTitle">
+              <EuiText size="xs">{item.title}</EuiText>
+            </EuiDescriptionListDescription>
           </EuiFlexItem>
-        );
-      }
-
-      return (
-        <EuiFlexItem grow={false} key={key}>
-          <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiDescriptionListDescription className="descriptionListTitle">
-                <EuiText size="xs">{item.title}</EuiText>
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiDescriptionListTitle className="descriptionListDescription">
-                <EuiText size="s">
-                  <h5>{item.description}</h5>
-                </EuiText>
-              </EuiDescriptionListTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      );
-    })}
+          <EuiFlexItem>
+            <EuiDescriptionListTitle className="descriptionListDescription">
+              <EuiText size="s">
+                <h5>{item.description}</h5>
+              </EuiText>
+            </EuiDescriptionListTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    ))}
   </EuiFlexGroup>
 );
 
