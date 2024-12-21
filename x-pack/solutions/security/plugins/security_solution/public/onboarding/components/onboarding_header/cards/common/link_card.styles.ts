@@ -22,7 +22,7 @@ export const useCardStyles = () => {
       .headerCardLink,
       .headerCardLink * {
         text-decoration: underline;
-        text-decoration-color: ${euiTheme.colors.primaryText};
+        text-decoration-color: ${euiTheme.colors.textPrimary};
       }
     }
 
