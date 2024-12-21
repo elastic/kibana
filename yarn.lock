@@ -5617,7 +5617,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-error-plugin@link:src/plugins/expression_error":
+"@kbn/expression-error-plugin@link:src/platform/plugins/shared/expression_error":
   version "0.0.0"
   uid ""
 
