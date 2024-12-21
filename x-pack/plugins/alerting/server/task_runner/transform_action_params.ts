@@ -14,8 +14,8 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   RuleTypeParams,
-  SanitizedRule,
 } from '../types';
+import { ActionSchedulerRule } from './action_scheduler/types';
 
 export interface TransformActionParamsOptions {
   actionsPlugin: ActionsPluginStartContract;
@@ -146,7 +146,7 @@ export function transformSummaryActionParams({
   kibanaBaseUrl,
 }: {
   alerts: SummarizedAlertsWithAll;
-  rule: SanitizedRule<RuleTypeParams>;
+  rule: ActionSchedulerRule<RuleTypeParams>;
   ruleTypeId: string;
   actionsPlugin: ActionsPluginStartContract;
   actionId: string;
