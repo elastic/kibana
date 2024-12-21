@@ -1878,6 +1878,8 @@
       "@kbn/streams-app-plugin/*": ["x-pack/solutions/observability/plugins/streams_app/*"],
       "@kbn/streams-plugin": ["x-pack/solutions/observability/plugins/streams"],
       "@kbn/streams-plugin/*": ["x-pack/solutions/observability/plugins/streams/*"],
+      "@kbn/styled-components-mapping-cli": ["packages/kbn-styled-components-mapping-cli"],
+      "@kbn/styled-components-mapping-cli/*": ["packages/kbn-styled-components-mapping-cli/*"],
       "@kbn/synthetics-e2e": ["x-pack/solutions/observability/plugins/synthetics/e2e"],
       "@kbn/synthetics-e2e/*": ["x-pack/solutions/observability/plugins/synthetics/e2e/*"],
       "@kbn/synthetics-plugin": ["x-pack/solutions/observability/plugins/synthetics"],

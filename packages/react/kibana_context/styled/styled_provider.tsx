@@ -9,9 +9,9 @@
 
 import type { DecoratorFn } from '@storybook/react';
 import React from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
+
 import * as styledComponents from 'styled-components';
-// eslint-disable-next-line @kbn/eslint/module_migration
+
 import { ThemedStyledComponentsModule, ThemeProvider, ThemeProviderProps } from 'styled-components';
 import { euiThemeVars, euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 

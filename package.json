@@ -1506,6 +1506,7 @@
     "@kbn/sort-package-json": "link:packages/kbn-sort-package-json",
     "@kbn/stdio-dev-helpers": "link:packages/kbn-stdio-dev-helpers",
     "@kbn/storybook": "link:packages/kbn-storybook",
+    "@kbn/styled-components-mapping-cli": "link:packages/kbn-styled-components-mapping-cli",
     "@kbn/synthetics-e2e": "link:x-pack/solutions/observability/plugins/synthetics/e2e",
     "@kbn/telemetry-tools": "link:packages/kbn-telemetry-tools",
     "@kbn/test": "link:packages/kbn-test",

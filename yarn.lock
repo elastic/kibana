@@ -7573,6 +7573,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/styled-components-mapping-cli@link:packages/kbn-styled-components-mapping-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/synthetics-e2e@link:x-pack/solutions/observability/plugins/synthetics/e2e":
   version "0.0.0"
   uid ""
