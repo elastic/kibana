@@ -87,6 +87,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
   return (
     <>
       <EuiAccordion
+        data-test-subj={'endpointDetailsInsightsWrapper'}
         id={'workflow-insights-wrapper'}
         buttonContent={
           <EuiText size={'m'}>
