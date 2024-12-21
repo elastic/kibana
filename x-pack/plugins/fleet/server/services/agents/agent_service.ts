@@ -13,9 +13,9 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 

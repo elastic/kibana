@@ -412,6 +412,22 @@
             "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.disableAutoFocus",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableAutoFocus",
+            "description": [
+              "The component by default focuses on the editor when it is mounted, this flag disables it"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
