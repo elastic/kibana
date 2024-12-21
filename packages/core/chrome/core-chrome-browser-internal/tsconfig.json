@@ -60,10 +60,9 @@
     "@kbn/core-theme-browser",
     "@kbn/core-user-profile-browser",
     "@kbn/core-ui-settings-browser",
-    "@kbn/core",
     "@kbn/core-user-profile-common",
     "@kbn/react-kibana-mount",
-    "@kbn/core-theme-browser-internal",
+    "@kbn/core-theme-browser-internal"
   ],
   "exclude": [
     "target/**/*",

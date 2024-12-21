@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreMock, httpServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { handleSystemColorModeChange } from './handle_system_colormode_change';
 import { ReplaySubject } from 'rxjs';
@@ -34,7 +38,11 @@ describe('handleSystemColorModeChange', () => {
   });
 
   const getDeps = () => {
-    const coreStart = coreMock.createStart();
+    const coreStart = {
+      i18n: i18nServiceMock.createStartContract(),
+      theme: themeServiceMock.createStartContract(),
+      userProfile: userProfileServiceMock.createStart(),
+    };
     const notifications = notificationServiceMock.createStartContract();
     const http = httpServiceMock.createStartContract();
     const uiSettings = uiSettingsServiceMock.createStartContract();
