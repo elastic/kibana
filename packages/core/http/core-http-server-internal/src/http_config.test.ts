@@ -577,6 +577,22 @@ describe('cdn', () => {
   });
 });
 
+describe('http1 protocol', () => {
+  it('uses http1 as default if protocol is empty and ssl is not enabled', () => {
+    expect(
+      config.schema.validate({
+        ssl: {
+          enabled: false,
+        },
+      })
+    ).toEqual(
+      expect.objectContaining({
+        protocol: 'http1',
+      })
+    );
+  });
+});
+
 describe('http2 protocol', () => {
   it('throws if http2 is enabled but TLS is not', () => {
     expect(() =>
@@ -632,6 +648,22 @@ describe('http2 protocol', () => {
         ssl: {
           enabled: true,
           supportedProtocols: ['TLSv1.1'],
+          certificate: '/path/to/certificate',
+          key: '/path/to/key',
+        },
+      })
+    ).toEqual(
+      expect.objectContaining({
+        protocol: 'http2',
+      })
+    );
+  });
+  it('uses http2 as default if protocol is empty and ssl is enabled', () => {
+    expect(
+      config.schema.validate({
+        ssl: {
+          enabled: true,
+          supportedProtocols: ['TLSv1.2'],
           certificate: '/path/to/certificate',
           key: '/path/to/key',
         },
