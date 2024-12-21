@@ -12,8 +12,12 @@ import { waitFor, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { ConfigureCases } from '.';
-import { noCasesSettingsPermission, TestProviders, createAppMockRenderer } from '../../common/mock';
-import { customFieldsConfigurationMock, templatesConfigurationMock } from '../../containers/mock';
+import {
+  observableTypesMock,
+  customFieldsConfigurationMock,
+  templatesConfigurationMock,
+} from '../../containers/mock';
+import { TestProviders, createAppMockRenderer, noCasesSettingsPermission } from '../../common/mock';
 import type { AppMockRenderer } from '../../common/mock';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
@@ -71,7 +75,7 @@ describe('ConfigureCases', () => {
 
   beforeEach(() => {
     useGetActionTypesMock.mockImplementation(() => useActionTypesResponse);
-    useLicenseMock.mockReturnValue({ isAtLeastGold: () => true });
+    useLicenseMock.mockReturnValue({ isAtLeastGold: () => true, isAtLeastPlatinum: () => false });
   });
 
   describe('rendering', () => {
@@ -1257,6 +1261,160 @@ describe('ConfigureCases', () => {
     });
   });
 
+  describe('observable types', () => {
+    let appMockRender: AppMockRenderer;
+    const persistCaseConfigure = jest.fn();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appMockRender = createAppMockRenderer();
+      usePersistConfigurationMock.mockImplementation(() => ({
+        ...usePersistConfigurationMockResponse,
+        mutate: persistCaseConfigure,
+      }));
+      useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true, isAtLeastGold: () => true });
+    });
+
+    it('should render observable types section', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      expect(await screen.findByTestId('observable-types-form-group')).toBeInTheDocument();
+      expect(await screen.findByTestId('add-observable-type')).toBeInTheDocument();
+    });
+
+    it('opens fly out for when click on add observable type', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      await userEvent.click(screen.getByTestId('add-observable-type'));
+
+      expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+    });
+
+    it('closes fly out for when click on cancel', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      await userEvent.click(screen.getByTestId('add-observable-type'));
+
+      expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('common-flyout-cancel'));
+
+      expect(await screen.findByTestId('observable-types-form-group')).toBeInTheDocument();
+      expect(screen.queryByTestId('common-flyout')).not.toBeInTheDocument();
+    });
+
+    it('closes fly out and updates the data when click on save', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      await userEvent.click(screen.getByTestId('add-observable-type'));
+
+      expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('observable-type-label-input'));
+      await userEvent.paste('added');
+
+      await userEvent.click(screen.getByTestId('common-flyout-save'));
+
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith(
+          expect.objectContaining({
+            observableTypes: [expect.objectContaining({ key: expect.any(String), label: 'added' })],
+          })
+        );
+      });
+
+      expect(await screen.findByTestId('observable-types-form-group')).toBeInTheDocument();
+      expect(screen.queryByTestId('common-flyout')).not.toBeInTheDocument();
+    });
+
+    it('updates observable type correctly', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          observableTypes: observableTypesMock,
+        },
+      }));
+
+      appMockRender.render(<ConfigureCases />);
+
+      const list = screen.getByTestId('observable-types-list');
+
+      await userEvent.click(
+        within(list).getByTestId(`${observableTypesMock[0].key}-observable-type-edit`)
+      );
+
+      expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+
+      expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent(
+        i18n.EDIT_OBSERVABLE_TYPE
+      );
+
+      await userEvent.click(screen.getByTestId('observable-type-label-input'));
+      await userEvent.paste('updated');
+      await userEvent.click(screen.getByTestId('common-flyout-save'));
+
+      const updatedObservableTypes = structuredClone(observableTypesMock);
+      updatedObservableTypes[0].label = 'test_observable_type_1updated';
+
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith({
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+          closureType: 'close-by-user',
+          customFields: [],
+          templates: [],
+          observableTypes: updatedObservableTypes,
+          id: '',
+          version: '',
+        });
+      });
+    });
+
+    it('deletes observable types correctly', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          observableTypes: observableTypesMock,
+        },
+      }));
+
+      appMockRender.render(<ConfigureCases />);
+
+      const list = screen.getByTestId('observable-types-list');
+
+      await userEvent.click(
+        within(list).getByTestId(`${observableTypesMock[0].key}-observable-type-delete`)
+      );
+
+      expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByText('Delete'));
+
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith({
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+          customFields: [],
+          closureType: 'close-by-user',
+          observableTypes: [observableTypesMock[1]],
+          templates: [],
+          id: '',
+          version: '',
+        });
+      });
+    });
+  });
+
   describe('rendering with license limitations', () => {
     let appMockRender: AppMockRenderer;
     let persistCaseConfigure: jest.Mock;
@@ -1273,7 +1431,10 @@ describe('ConfigureCases', () => {
       useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
 
       // Updated
-      useLicenseMock.mockReturnValue({ isAtLeastGold: () => false });
+      useLicenseMock.mockReturnValue({
+        isAtLeastGold: () => false,
+        isAtLeastPlatinum: () => false,
+      });
     });
 
     it('should not render connectors and closure options', () => {
@@ -1285,6 +1446,13 @@ describe('ConfigureCases', () => {
     it('should render custom field section', () => {
       appMockRender.render(<ConfigureCases />);
       expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
+    });
+
+    it('should not render observable types section', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      expect(screen.queryByTestId('observable-types-form-group')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('add-observable-type')).not.toBeInTheDocument();
     });
 
     describe('when the previously selected connector doesnt appear due to license downgrade or because it was deleted', () => {

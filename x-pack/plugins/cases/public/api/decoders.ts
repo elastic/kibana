@@ -13,11 +13,13 @@ import type {
   CasesFindResponse,
   CasesBulkGetResponse,
   CasesMetricsResponse,
+  CasesSimilarResponse,
 } from '../../common/types/api';
 import {
   CasesFindResponseRt,
   CasesBulkGetResponseRt,
   CasesMetricsResponseRt,
+  CasesSimilarResponseRt,
 } from '../../common/types/api';
 import { createToasterPlainError } from '../containers/utils';
 import { throwErrors } from '../../common';
@@ -35,3 +37,9 @@ export const decodeCasesBulkGetResponse = (res: CasesBulkGetResponse) => {
 
   return res;
 };
+
+export const decodeCasesSimilarResponse = (respCases?: CasesSimilarResponse) =>
+  pipe(
+    CasesSimilarResponseRt.decode(respCases),
+    fold(throwErrors(createToasterPlainError), identity)
+  );

@@ -13,6 +13,7 @@ import { useLicense } from './use_license';
 export interface UseCasesFeatures {
   isAlertsEnabled: boolean;
   isSyncAlertsEnabled: boolean;
+  observablesAuthorized: boolean;
   caseAssignmentAuthorized: boolean;
   pushToServiceAuthorized: boolean;
   metricsFeatures: SingleCaseMetricsFeature[];
@@ -38,6 +39,7 @@ export const useCasesFeatures = (): UseCasesFeatures => {
       metricsFeatures: features.metrics,
       caseAssignmentAuthorized: hasLicenseGreaterThanPlatinum,
       pushToServiceAuthorized: hasLicenseGreaterThanPlatinum,
+      observablesAuthorized: hasLicenseGreaterThanPlatinum,
     }),
     [features.alerts.enabled, features.alerts.sync, features.metrics, hasLicenseGreaterThanPlatinum]
   );
