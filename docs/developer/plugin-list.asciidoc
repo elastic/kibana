@@ -150,7 +150,7 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Expression Partition Visualization plugin adds a partitionVis renderer and pieVis, mosaicVis, treemapVis, waffleVis functions to the expression plugin. The renderer will display the pie, waffle, treemap and mosaic charts.
 
 
-|{kib-repo}blob/{branch}/src/plugins/expression_repeat_image/README.md[expressionRepeatImage]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/expression_repeat_image/README.md[expressionRepeatImage]
 |Expression Repeat Image plugin adds a repeatImage function to the expression plugin and an associated renderer. The renderer will display the given image in mutliple instances.
 
 
