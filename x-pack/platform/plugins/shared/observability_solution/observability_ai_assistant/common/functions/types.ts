@@ -8,6 +8,7 @@ import type { JSONSchema7TypeName } from 'json-schema';
 import type { Observable } from 'rxjs';
 import { ChatCompletionChunkEvent, MessageAddEvent } from '../conversation_complete';
 import { FunctionVisibility } from './function_visibility';
+import { MessageAttachment } from '..';
 export { FunctionVisibility };
 
 type JSONSchemaOrPrimitive = CompatibleJSONSchema | string | number | boolean;

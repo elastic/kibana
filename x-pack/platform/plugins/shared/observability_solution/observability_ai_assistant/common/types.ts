@@ -130,6 +130,7 @@ export enum KnowledgeBaseType {
 }
 
 export interface ObservabilityAIAssistantScreenContextRequest {
+  instructions?: string;
   starterPrompts?: StarterPrompt[];
   screenDescription?: string;
   data?: Array<{
@@ -163,6 +164,7 @@ export interface StarterPrompt {
 }
 
 export interface ObservabilityAIAssistantScreenContext {
+  instructions?: string;
   screenDescription?: string;
   data?: Array<{
     name: string;

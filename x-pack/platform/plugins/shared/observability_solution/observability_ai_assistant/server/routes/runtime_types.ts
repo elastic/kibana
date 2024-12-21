@@ -154,6 +154,7 @@ export const starterPromptRt: t.Type<StarterPrompt> = t.intersection([
 ]);
 
 export const screenContextRt: t.Type<ObservabilityAIAssistantScreenContextRequest> = t.partial({
+  instructions: t.string,
   description: t.string,
   data: t.array(
     t.type({

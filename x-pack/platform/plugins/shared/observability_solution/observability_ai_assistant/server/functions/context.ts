@@ -76,7 +76,11 @@ export function registerContextFunction({
         });
 
         return {
-          content: { ...content, learnings: relevantDocuments as unknown as Serializable },
+          content: {
+            ...content,
+            learnings: relevantDocuments as unknown as Serializable,
+            instructions: `This context does not include a visual description of the page`,
+          },
           data: {
             scores,
             suggestions,

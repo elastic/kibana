@@ -19,6 +19,7 @@ import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_c
 import { SharedProviders } from '../../utils/shared_providers';
 import { ObservabilityAIAssistantAppPluginStartDependencies } from '../../types';
 import { useNavControlScope } from '../../hooks/use_nav_control_scope';
+import { useScreenshotScreenContext } from '../../hooks/use_screenshot_screen_context';
 
 interface NavControlWithProviderDeps {
   appService: AIAssistantAppService;
@@ -65,6 +66,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
 
   useNavControlScreenContext();
   useNavControlScope();
+  useScreenshotScreenContext();
 
   const chatService = useAbortableAsync(
     ({ signal }) => {

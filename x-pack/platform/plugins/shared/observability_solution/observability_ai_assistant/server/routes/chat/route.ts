@@ -145,6 +145,11 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
       }),
     ]),
   }),
+  options: {
+    body: {
+      maxBytes: 10 * 1024 * 1024,
+    },
+  },
   handler: async (resources): Promise<Readable> => {
     const { params } = resources;
 
@@ -310,6 +315,11 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
     },
   },
   params: chatCompletePublicRt,
+  options: {
+    body: {
+      maxBytes: 10 * 1024 * 1024,
+    },
+  },
   handler: async (resources): Promise<Readable> => {
     const { params, logger } = resources;
 
