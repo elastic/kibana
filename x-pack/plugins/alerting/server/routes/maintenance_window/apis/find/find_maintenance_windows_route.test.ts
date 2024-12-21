@@ -102,6 +102,8 @@ describe('findMaintenanceWindowsRoute', () => {
         query: {
           page: 1,
           per_page: 3,
+          search: 'mw name',
+          status: ['running'],
         },
       }
     );
@@ -125,7 +127,12 @@ describe('findMaintenanceWindowsRoute', () => {
 
     await handler(context, req, res);
 
-    expect(maintenanceWindowClient.find).toHaveBeenCalledWith({ page: 1, perPage: 3 });
+    expect(maintenanceWindowClient.find).toHaveBeenCalledWith({
+      page: 1,
+      perPage: 3,
+      search: 'mw name',
+      status: ['running'],
+    });
     expect(res.ok).toHaveBeenLastCalledWith({
       body: {
         data: mockMaintenanceWindows.data.map((data) => rewriteMaintenanceWindowRes(data)),

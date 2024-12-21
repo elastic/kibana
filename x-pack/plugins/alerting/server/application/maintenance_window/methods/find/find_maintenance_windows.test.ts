@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { findMaintenanceWindows } from './find_maintenance_windows';
+import { findMaintenanceWindows, getStatusFilter } from './find_maintenance_windows';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -15,6 +15,7 @@ import { SavedObjectsFindResponse } from '@kbn/core/server';
 import {
   MaintenanceWindowClientContext,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+  MaintenanceWindowStatus,
 } from '../../../../../common';
 import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
 import { findMaintenanceWindowsParamsSchema } from './schemas';
@@ -95,10 +96,28 @@ describe('MaintenanceWindowClient - find', () => {
       per_page: 5,
     } as unknown as SavedObjectsFindResponse);
 
-    const result = await findMaintenanceWindows(mockContext, {});
+    const result = await findMaintenanceWindows(mockContext, { status: ['running'] });
 
-    expect(spy).toHaveBeenCalledWith({});
+    expect(spy).toHaveBeenCalledWith({ status: ['running'] });
     expect(savedObjectsClient.find).toHaveBeenLastCalledWith({
+      filter: {
+        arguments: [
+          {
+            isQuoted: false,
+            type: 'literal',
+            value: 'maintenance-window.attributes.events',
+          },
+          {
+            isQuoted: true,
+            type: 'literal',
+            value: 'now',
+          },
+        ],
+        function: 'is',
+        type: 'function',
+      },
+      sortField: 'updatedAt',
+      sortOrder: 'desc',
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
     });
 
@@ -107,5 +126,163 @@ describe('MaintenanceWindowClient - find', () => {
     expect(result.data[1].id).toEqual('test-2');
     expect(result.page).toEqual(1);
     expect(result.perPage).toEqual(5);
+  });
+});
+
+describe('getStatusFilter', () => {
+  it('return proper filter for running status', () => {
+    expect(getStatusFilter(['running'])).toMatchInlineSnapshot(`
+      Object {
+        "arguments": Array [
+          Object {
+            "isQuoted": false,
+            "type": "literal",
+            "value": "maintenance-window.attributes.events",
+          },
+          Object {
+            "isQuoted": true,
+            "type": "literal",
+            "value": "now",
+          },
+        ],
+        "function": "is",
+        "type": "function",
+      }
+    `);
+  });
+
+  it('return proper filter for upcomimg status', () => {
+    expect(getStatusFilter(['upcoming'])).toMatchInlineSnapshot(`
+      Object {
+        "arguments": Array [
+          Object {
+            "arguments": Array [
+              Object {
+                "arguments": Array [
+                  Object {
+                    "isQuoted": false,
+                    "type": "literal",
+                    "value": "maintenance-window.attributes.events",
+                  },
+                  Object {
+                    "isQuoted": true,
+                    "type": "literal",
+                    "value": "now",
+                  },
+                ],
+                "function": "is",
+                "type": "function",
+              },
+            ],
+            "function": "not",
+            "type": "function",
+          },
+          Object {
+            "arguments": Array [
+              Object {
+                "isQuoted": false,
+                "type": "literal",
+                "value": "maintenance-window.attributes.events",
+              },
+              "gt",
+              Object {
+                "isQuoted": true,
+                "type": "literal",
+                "value": "now",
+              },
+            ],
+            "function": "range",
+            "type": "function",
+          },
+        ],
+        "function": "and",
+        "type": "function",
+      }
+    `);
+  });
+
+  it('return proper filter for fininshed status', () => {
+    expect(getStatusFilter(['finished'])).toMatchInlineSnapshot(`
+      Object {
+        "arguments": Array [
+          Object {
+            "arguments": Array [
+              Object {
+                "arguments": Array [
+                  Object {
+                    "isQuoted": false,
+                    "type": "literal",
+                    "value": "maintenance-window.attributes.events",
+                  },
+                  "gte",
+                  Object {
+                    "isQuoted": true,
+                    "type": "literal",
+                    "value": "now",
+                  },
+                ],
+                "function": "range",
+                "type": "function",
+              },
+            ],
+            "function": "not",
+            "type": "function",
+          },
+          Object {
+            "arguments": Array [
+              Object {
+                "isQuoted": false,
+                "type": "literal",
+                "value": "maintenance-window.attributes.expirationDate",
+              },
+              "gt",
+              Object {
+                "isQuoted": true,
+                "type": "literal",
+                "value": "now",
+              },
+            ],
+            "function": "range",
+            "type": "function",
+          },
+        ],
+        "function": "and",
+        "type": "function",
+      }
+    `);
+  });
+
+  it('return proper filter for archived status', () => {
+    expect(getStatusFilter(['archived'])).toMatchInlineSnapshot(`
+      Object {
+        "arguments": Array [
+          Object {
+            "isQuoted": false,
+            "type": "literal",
+            "value": "maintenance-window.attributes.expirationDate",
+          },
+          "lt",
+          Object {
+            "isQuoted": true,
+            "type": "literal",
+            "value": "now",
+          },
+        ],
+        "function": "range",
+        "type": "function",
+      }
+    `);
+  });
+
+  it('return empty string if status does not exist', () => {
+    expect(getStatusFilter(['weird' as MaintenanceWindowStatus])).toBeUndefined();
+  });
+
+  it('return empty string if pass empty arguments', () => {
+    expect(getStatusFilter()).toBeUndefined();
+  });
+
+  it('return empty string if pass empty array', () => {
+    expect(getStatusFilter([])).toBeUndefined();
   });
 });
