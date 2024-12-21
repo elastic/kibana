@@ -10,10 +10,10 @@ import type { GetLensAttributes } from '../../../types';
 const layerId = uuidv4();
 const internalReferenceId = uuidv4();
 
-export const getRulePreviewLensAttributes: GetLensAttributes = (
+export const getRulePreviewLensAttributes: GetLensAttributes = ({
   stackByField = 'event.category',
-  extraOptions
-) => {
+  extraOptions,
+}) => {
   return {
     title: 'Rule preview',
     description: '',

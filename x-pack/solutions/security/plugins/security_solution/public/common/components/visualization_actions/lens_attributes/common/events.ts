@@ -11,10 +11,10 @@ const layerId = uuidv4();
 // Exported for testing purposes
 export const stackByFieldAccessorId = '34919782-4546-43a5-b668-06ac934d3acd';
 
-export const getEventsHistogramLensAttributes: GetLensAttributes = (
+export const getEventsHistogramLensAttributes: GetLensAttributes = ({
   stackByField,
-  extraOptions = {}
-) => {
+  extraOptions = {},
+}) => {
   return {
     title: 'Events',
     description: '',
@@ -27,6 +27,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
           position: 'right',
           legendSize: 'xlarge',
           legendStats: ['currentAndLastValue'],
+          showSingleSeries: true,
         },
         valueLabels: 'hide',
         preferredSeriesType: 'bar_stacked',

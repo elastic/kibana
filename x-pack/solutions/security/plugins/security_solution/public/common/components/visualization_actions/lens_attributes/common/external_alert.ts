@@ -8,9 +8,9 @@
 import { COUNT, TOP_VALUE } from '../../translations';
 import type { GetLensAttributes, LensAttributes } from '../../types';
 
-export const getExternalAlertLensAttributes: GetLensAttributes = (
-  stackByField = 'event.module'
-) => {
+export const getExternalAlertLensAttributes: GetLensAttributes = ({
+  stackByField = 'event.module',
+}) => {
   return {
     title: 'External alerts',
     description: '',

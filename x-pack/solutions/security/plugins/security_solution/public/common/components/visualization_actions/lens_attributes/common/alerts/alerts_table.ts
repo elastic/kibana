@@ -62,10 +62,10 @@ const getTopValuesOfBreakdownFieldColumnSettings = (
   },
 });
 
-export const getAlertsTableLensAttributes: GetLensAttributes = (
+export const getAlertsTableLensAttributes: GetLensAttributes = ({
   stackByField = 'kibana.alert.rule.name',
-  extraOptions
-) => {
+  extraOptions,
+}) => {
   const breakdownFieldProvided = !isEmpty(extraOptions?.breakdownField);
   const countField =
     extraOptions?.breakdownField && breakdownFieldProvided
