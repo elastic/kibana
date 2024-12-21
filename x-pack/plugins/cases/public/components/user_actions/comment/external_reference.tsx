@@ -18,14 +18,14 @@ type BuilderArgs = Pick<
   | 'handleDeleteComment'
   | 'userProfiles'
 > & {
-  comment: SnakeToCamelCase<ExternalReferenceAttachment>;
+  attachment: SnakeToCamelCase<ExternalReferenceAttachment>;
   isLoading: boolean;
 };
 
 export const createExternalReferenceAttachmentUserActionBuilder = ({
   userAction,
   userProfiles,
-  comment,
+  attachment,
   externalReferenceAttachmentTypeRegistry,
   caseData,
   isLoading,
@@ -34,15 +34,15 @@ export const createExternalReferenceAttachmentUserActionBuilder = ({
   return createRegisteredAttachmentUserActionBuilder({
     userAction,
     userProfiles,
-    comment,
+    attachment,
     registry: externalReferenceAttachmentTypeRegistry,
     caseData,
     handleDeleteComment,
     isLoading,
-    getId: () => comment.externalReferenceAttachmentTypeId,
+    getId: () => attachment.externalReferenceAttachmentTypeId,
     getAttachmentViewProps: () => ({
-      externalReferenceId: comment.externalReferenceId,
-      externalReferenceMetadata: comment.externalReferenceMetadata,
+      externalReferenceId: attachment.externalReferenceId,
+      externalReferenceMetadata: attachment.externalReferenceMetadata,
     }),
   });
 };
