@@ -144,7 +144,7 @@ describe('Use cases toast hook', () => {
           theCase: mockCase,
           attachments: [basicComment as SupportedCaseAttachment],
         });
-        validateTitle('Another horrible breach!! has been updated');
+        validateTitle('Case Another horrible breach!! updated');
       });
     });
 
