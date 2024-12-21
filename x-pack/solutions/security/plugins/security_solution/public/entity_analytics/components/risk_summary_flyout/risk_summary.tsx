@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
@@ -45,6 +44,7 @@ import {
   SUMMARY_TABLE_MIN_WIDTH,
 } from './common';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
+import { useRiskSeverityColors } from '../../common/utils';
 
 export interface RiskSummaryProps<T extends RiskScoreEntity> {
   riskScoreData: RiskScoreState<T>;
@@ -68,7 +68,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
   const riskData = data && data.length > 0 ? data[0] : undefined;
   const entityData = getEntityData(riskData);
   const { euiTheme } = useEuiTheme();
-
+  const riskColors = useRiskSeverityColors();
   const lensAttributes = useMemo(() => {
     const entityName = entityData?.name ?? '';
     const fieldName = isUserRiskData(riskData) ? 'user.name' : 'host.name';
@@ -78,8 +78,9 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
       query: `${fieldName}: ${entityName}`,
       spaceId: 'default',
       riskEntity: isUserRiskData(riskData) ? RiskScoreEntity.user : RiskScoreEntity.host,
+      riskColors,
     });
-  }, [entityData?.name, entityData?.risk?.calculated_level, riskData]);
+  }, [entityData?.name, entityData?.risk?.calculated_level, riskData, riskColors]);
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
   const rows = useMemo(() => getItems(entityData), [entityData]);
@@ -246,7 +247,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
                   css={css`
                     position: absolute;
                     right: 0;
-                    top: -${euiThemeVars.euiSize};
+                    top: -${euiTheme.size.base};
                   `}
                 >
                   <InspectButton
