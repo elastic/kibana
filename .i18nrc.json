@@ -71,7 +71,7 @@
     "indexPatternEditor": "src/plugins/data_view_editor",
     "indexPatternFieldEditor": "src/plugins/data_view_field_editor",
     "indexPatternManagement": "src/plugins/data_view_management",
-    "inputControl": "src/plugins/input_control_vis",
+    "inputControl": "src/platform/plugins/private/input_control_vis",
     "inspector": "src/plugins/inspector",
     "inspectorViews": "src/legacy/core_plugins/inspector_views",
     "interactiveSetup": "src/plugins/interactive_setup",

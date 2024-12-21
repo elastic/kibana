@@ -221,7 +221,7 @@ for use in their own application.
 Images can be added either by URL or by uploading the image file via file service.
 
 
-|{kib-repo}blob/{branch}/src/plugins/input_control_vis/README.md[inputControlVis]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/input_control_vis/README.md[inputControlVis]
 |Contains the input control visualization allowing to place custom filter controls on a dashboard.
 
 
