@@ -147,7 +147,7 @@
     "visDefaultEditor": "src/plugins/vis_default_editor",
     "visTypeGauge": "src/plugins/vis_types/gauge",
     "visTypeHeatmap": "src/plugins/vis_types/heatmap",
-    "visTypeMarkdown": "src/plugins/vis_type_markdown",
+    "visTypeMarkdown": "src/platform/plugins/private/vis_type_markdown",
     "visTypeMetric": "src/plugins/vis_types/metric",
     "visTypePie": "src/plugins/vis_types/pie",
     "visTypeTable": "src/plugins/vis_types/table",

@@ -613,6 +613,7 @@ src/platform/plugins/private/input_control_vis @elastic/kibana-presentation
 src/platform/plugins/private/links @elastic/kibana-presentation
 src/platform/plugins/private/maps_ems @elastic/kibana-presentation
 src/platform/plugins/private/presentation_panel @elastic/kibana-presentation
+src/platform/plugins/private/vis_type_markdown @elastic/kibana-presentation
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/platform/plugins/shared/console @elastic/kibana-management
 src/platform/plugins/shared/controls @elastic/kibana-presentation
@@ -686,7 +687,6 @@ src/plugins/unified_search @elastic/kibana-visualizations
 src/plugins/url_forwarding @elastic/kibana-visualizations
 src/plugins/usage_collection @elastic/kibana-core
 src/plugins/vis_default_editor @elastic/kibana-visualizations
-src/plugins/vis_type_markdown @elastic/kibana-presentation
 src/plugins/vis_types/gauge @elastic/kibana-visualizations
 src/plugins/vis_types/heatmap @elastic/kibana-visualizations
 src/plugins/vis_types/metric @elastic/kibana-visualizations
