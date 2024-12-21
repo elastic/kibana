@@ -254,6 +254,11 @@ export function getDataStateContainer({
             return;
           }
 
+          internalStateContainer.transitions.setDataRequestParams({
+            timeRangeAbs: timefilter.getAbsoluteTime(),
+            timeRangeRel: timefilter.getTime(),
+          });
+
           await profilesManager.resolveDataSourceProfile({
             dataSource: appStateContainer.getState().dataSource,
             dataView: getSavedSearch().searchSource.getField('index'),
