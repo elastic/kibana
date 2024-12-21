@@ -12,6 +12,7 @@ import { DashboardApp } from './dashboard_app';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
 import { FilterBar } from './fiter_bar';
+import { MapsPage } from './maps_page';
 import { createLazyPageObject } from './utils';
 
 export interface PageObjects {
@@ -19,6 +20,7 @@ export interface PageObjects {
   discover: DiscoverApp;
   dashboard: DashboardApp;
   filterBar: FilterBar;
+  maps: MapsPage;
 }
 
 /**
@@ -33,6 +35,7 @@ export function createCorePageObjects(page: ScoutPage): PageObjects {
     dashboard: createLazyPageObject(DashboardApp, page),
     discover: createLazyPageObject(DiscoverApp, page),
     filterBar: createLazyPageObject(FilterBar, page),
+    maps: createLazyPageObject(MapsPage, page),
     // Add new page objects here
   };
 }
