@@ -62,6 +62,12 @@ function getSavedObjectMock(agentPolicyAttributes: any) {
       ...mockPolicy,
     };
   });
+  mock.update.mockImplementation(async (type: string, id: string) => {
+    return {
+      id,
+      ...mockPolicy,
+    };
+  });
   mock.bulkGet.mockImplementation(async (options) => {
     return {
       saved_objects: [],
@@ -1050,6 +1056,7 @@ describe('Agent policy', () => {
       // ignore unrelated unique name constraint
       agentPolicyService.requireUniqueName = async () => {};
       const soClient = savedObjectsClientMock.create();
+      soClient.update.mockResolvedValue({} as any);
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       soClient.get.mockResolvedValue({
@@ -1109,6 +1116,8 @@ describe('Agent policy', () => {
         type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
 
+      soClient.update.mockResolvedValueOnce({} as any);
+
       await agentPolicyService.update(soClient, esClient, 'test-agent-policy', {
         name: 'Test Agent Policy',
         namespace: 'default',
@@ -1158,6 +1167,7 @@ describe('Agent policy', () => {
         type: 'mocked',
         references: [],
       });
+      soClient.update.mockResolvedValueOnce({} as any);
 
       await expect(
         agentPolicyService.update(soClient, esClient, 'test-id', {
@@ -1213,6 +1223,7 @@ describe('Agent policy', () => {
         type: 'mocked',
         references: [],
       });
+      soClient.update.mockResolvedValueOnce({} as any);
 
       await expect(
         agentPolicyService.update(soClient, esClient, 'test-id', {
@@ -1266,6 +1277,7 @@ describe('Agent policy', () => {
         type: 'mocked',
         references: [],
       });
+      soClient.update.mockResolvedValueOnce({} as any);
 
       await expect(
         agentPolicyService.update(soClient, esClient, 'test-id', {
@@ -1293,6 +1305,7 @@ describe('Agent policy', () => {
         type: 'mocked',
         references: [],
       });
+      soClient.update.mockResolvedValue({} as any);
 
       await expect(
         agentPolicyService.update(soClient, esClient, 'test-id', {
@@ -1436,6 +1449,7 @@ describe('Agent policy', () => {
       soClient.bulkGet.mockResolvedValue({
         saved_objects: [mockSo],
       });
+      soClient.update.mockResolvedValueOnce({} as any);
       await agentPolicyService.deployPolicy(soClient, 'policy123');
 
       expect(esClient.bulk).toBeCalledWith(
