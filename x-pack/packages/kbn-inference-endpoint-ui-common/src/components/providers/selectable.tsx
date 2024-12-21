@@ -5,47 +5,37 @@
  * 2.0.
  */
 
-import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
-import { EuiSelectable, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
-import React, { memo, useCallback, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { ServiceProviderKeys } from '../../../../../common/inference/constants';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSelectable,
+  EuiSelectableOption,
+  EuiSelectableProps,
+} from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+
 import {
   ProviderSolution,
   SERVICE_PROVIDERS,
   ServiceProviderIcon,
   ServiceProviderName,
-} from '../render_service_provider/service_provider';
+} from './render_service_provider/service_provider';
+import { ServiceProviderKeys } from '../../constants';
+import { InferenceProvider } from '../../types/types';
+import * as i18n from '../../translations';
 
-/**
- * Modifies options by creating new property `providerTitle`(with value of `title`), and by setting `title` to undefined.
- * Thus prevents appearing default browser tooltip on option hover (attribute `title` that gets rendered on li element)
- *
- * @param {EuiSelectableOption[]} options
- * @returns {EuiSelectableOption[]} modified options
- */
-
-export interface SelectableProviderProps {
-  isLoading: boolean;
-  getSelectableOptions: (searchProviderValue?: string) => EuiSelectableOption[];
+interface SelectableProviderProps {
+  providers: InferenceProvider[];
   onClosePopover: () => void;
   onProviderChange: (provider?: string) => void;
 }
 
-const SelectableProviderComponent: React.FC<SelectableProviderProps> = ({
-  isLoading,
-  getSelectableOptions,
+export const SelectableProvider: React.FC<SelectableProviderProps> = ({
+  providers,
   onClosePopover,
   onProviderChange,
 }) => {
-  const [searchProviderValue, setSearchProviderValue] = useState<string>('');
-  const onSearchProvider = useCallback(
-    (val: string) => {
-      setSearchProviderValue(val);
-    },
-    [setSearchProviderValue]
-  );
-
   const renderProviderOption = useCallback<NonNullable<EuiSelectableProps['renderOption']>>(
     (option, searchValue) => {
       const provider = Object.keys(SERVICE_PROVIDERS).includes(option.label)
@@ -88,17 +78,6 @@ const SelectableProviderComponent: React.FC<SelectableProviderProps> = ({
     []
   );
 
-  const handleProviderChange = useCallback<NonNullable<EuiSelectableProps['onChange']>>(
-    (options) => {
-      const selectedProvider = options.filter((option) => option.checked === 'on');
-      if (selectedProvider != null && selectedProvider.length > 0) {
-        onProviderChange(selectedProvider[0].label);
-      }
-      onClosePopover();
-    },
-    [onClosePopover, onProviderChange]
-  );
-
   const EuiSelectableContent = useCallback<NonNullable<EuiSelectableProps['children']>>(
     (list, search) => (
       <>
@@ -112,34 +91,43 @@ const SelectableProviderComponent: React.FC<SelectableProviderProps> = ({
   const searchProps: EuiSelectableProps['searchProps'] = useMemo(
     () => ({
       'data-test-subj': 'provider-super-select-search-box',
-      placeholder: i18n.translate(
-        'xpack.stackConnectors.components.inference.selectable.providerSearch',
-        {
-          defaultMessage: 'Search',
-        }
-      ),
-      onSearch: onSearchProvider,
+      placeholder: i18n.SEARCHLABEL,
       incremental: false,
       compressed: true,
       fullWidth: true,
     }),
-    [onSearchProvider]
+    []
   );
+
+  const handleProviderChange = useCallback<NonNullable<EuiSelectableProps['onChange']>>(
+    (options) => {
+      const selectedProvider = options.filter((option) => option.checked === 'on');
+      if (selectedProvider != null && selectedProvider.length > 0) {
+        onProviderChange(selectedProvider[0].label);
+      }
+      onClosePopover();
+    },
+    [onClosePopover, onProviderChange]
+  );
+
+  const getSelectableOptions = useCallback(() => {
+    return providers?.map((p) => ({
+      label: p.service,
+      key: p.service,
+    })) as EuiSelectableOption[];
+  }, [providers]);
 
   return (
     <EuiSelectable
-      data-test-subj="selectable-provider-input"
-      isLoading={isLoading}
+      data-test-subj="add-inference-selectable-service"
       renderOption={renderProviderOption}
       onChange={handleProviderChange}
       searchable
       searchProps={searchProps}
       singleSelection={true}
-      options={getSelectableOptions(searchProviderValue)}
+      options={getSelectableOptions()}
     >
       {EuiSelectableContent}
     </EuiSelectable>
   );
 };
-
-export const SelectableProvider = memo(SelectableProviderComponent);
