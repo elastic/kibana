@@ -180,7 +180,7 @@ want to incorporate their own functions, types, and renderers into the service
 for use in their own application.
 
 
-|{kib-repo}blob/{branch}/src/plugins/expression_shape/README.md[expressionShape]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/expression_shape/README.md[expressionShape]
 |Expression Shape plugin adds a shape function to the expression plugin and an associated renderer. The renderer will display the given shape with selected decorations.
 
 

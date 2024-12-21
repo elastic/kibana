@@ -50,7 +50,7 @@
     "expressionRepeatImage": "src/platform/plugins/shared/expression_repeat_image",
     "expressionRevealImage": "src/platform/plugins/shared/expression_reveal_image",
     "expressions": "src/plugins/expressions",
-    "expressionShape": "src/plugins/expression_shape",
+    "expressionShape": "src/platform/plugins/shared/expression_shape",
     "expressionTagcloud": "src/plugins/chart_expressions/expression_tagcloud",
     "eventAnnotation": "src/plugins/event_annotation",
     "eventAnnotationListing": "src/plugins/event_annotation_listing",

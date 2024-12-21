@@ -5657,7 +5657,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-shape-plugin@link:src/plugins/expression_shape":
+"@kbn/expression-shape-plugin@link:src/platform/plugins/shared/expression_shape":
   version "0.0.0"
   uid ""
 
