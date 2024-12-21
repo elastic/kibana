@@ -487,7 +487,7 @@ describe('create_signals', () => {
       trackTotalHits: false,
       runtimeMappings: undefined,
     });
-    expect(query.body.sort[0]).toEqual({
+    expect(query.sort[0]).toEqual({
       '@timestamp': {
         order: 'desc',
         unmapped_type: 'date',
@@ -508,13 +508,13 @@ describe('create_signals', () => {
       sortOrder: 'desc',
       runtimeMappings: undefined,
     });
-    expect(query.body.sort[0]).toEqual({
+    expect(query.sort[0]).toEqual({
       'event.ingested': {
         order: 'desc',
         unmapped_type: 'date',
       },
     });
-    expect(query.body.sort[1]).toEqual({
+    expect(query.sort[1]).toEqual({
       '@timestamp': {
         order: 'desc',
         unmapped_type: 'date',
