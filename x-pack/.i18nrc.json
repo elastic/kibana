@@ -45,7 +45,7 @@
     "xpack.features": "plugins/features",
     "xpack.dataVisualizer": "platform/plugins/private/data_visualizer",
     "xpack.exploratoryView": "solutions/observability/plugins/exploratory_view",
-    "xpack.fileUpload": "plugins/file_upload",
+    "xpack.fileUpload": "platform/plugins/private/file_upload",
     "xpack.globalSearch": [
       "plugins/global_search"
     ],

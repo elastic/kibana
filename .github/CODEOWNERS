@@ -841,6 +841,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration @elastic
 x-pack/platform/plugins/private/cross_cluster_replication @elastic/kibana-management
 x-pack/platform/plugins/private/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 x-pack/platform/plugins/private/data_visualizer @elastic/ml-ui
+x-pack/platform/plugins/private/file_upload @elastic/kibana-presentation @elastic/ml-ui
 x-pack/platform/plugins/private/grokdebugger @elastic/kibana-management
 x-pack/platform/plugins/private/index_lifecycle_management @elastic/kibana-management
 x-pack/platform/plugins/private/license_api_guard @elastic/kibana-management
@@ -889,7 +890,6 @@ x-pack/plugins/encrypted_saved_objects @elastic/kibana-security
 x-pack/plugins/enterprise_search @elastic/search-kibana
 x-pack/plugins/event_log @elastic/response-ops
 x-pack/plugins/features @elastic/kibana-core
-x-pack/plugins/file_upload @elastic/kibana-presentation @elastic/ml-ui
 x-pack/plugins/fleet @elastic/fleet
 x-pack/plugins/global_search @elastic/appex-sharedux
 x-pack/plugins/global_search_bar @elastic/appex-sharedux

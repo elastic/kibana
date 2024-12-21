@@ -532,7 +532,7 @@
     "@kbn/field-types": "link:packages/kbn-field-types",
     "@kbn/field-utils": "link:packages/kbn-field-utils",
     "@kbn/fields-metadata-plugin": "link:x-pack/platform/plugins/shared/fields_metadata",
-    "@kbn/file-upload-plugin": "link:x-pack/plugins/file_upload",
+    "@kbn/file-upload-plugin": "link:x-pack/platform/plugins/private/file_upload",
     "@kbn/files-example-plugin": "link:examples/files_example",
     "@kbn/files-management-plugin": "link:src/plugins/files_management",
     "@kbn/files-plugin": "link:src/plugins/files",
