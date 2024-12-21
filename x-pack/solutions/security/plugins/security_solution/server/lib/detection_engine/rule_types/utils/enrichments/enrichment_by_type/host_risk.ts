@@ -21,11 +21,10 @@ export const createHostRiskEnrichments: CreateRiskEnrichment = async ({
   logger,
   events,
   spaceId,
-  isNewRiskScoreModuleInstalled,
 }) => {
   return createSingleFieldMatchEnrichment({
     name: 'Host Risk',
-    index: [getHostRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)],
+    index: [getHostRiskIndex(spaceId, true)],
     services,
     logger,
     events,
