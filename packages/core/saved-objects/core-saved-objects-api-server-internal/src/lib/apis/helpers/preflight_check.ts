@@ -88,10 +88,7 @@ export class PreflightCheckHelper {
       }));
 
     const bulkGetMultiNamespaceDocsResponse = bulkGetMultiNamespaceDocs.length
-      ? await this.client.mget(
-          { body: { docs: bulkGetMultiNamespaceDocs } },
-          { ignore: [404], meta: true }
-        )
+      ? await this.client.mget({ docs: bulkGetMultiNamespaceDocs }, { ignore: [404], meta: true })
       : undefined;
     // fail fast if we can't verify a 404 response is from Elasticsearch
     if (
