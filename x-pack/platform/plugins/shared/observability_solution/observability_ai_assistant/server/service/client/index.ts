@@ -255,7 +255,6 @@ export class ObservabilityAIAssistantClient {
                         ...chatParams,
                         simulateFunctionCalling,
                         connectorId,
-                        signal,
                       });
                     },
                     tracer: completeTracer,
@@ -290,7 +289,6 @@ export class ObservabilityAIAssistantClient {
                   // inject a chat function with predefined parameters
                   return this.chat(name, {
                     ...chatParams,
-                    signal,
                     simulateFunctionCalling,
                     connectorId,
                   });
@@ -468,17 +466,13 @@ export class ObservabilityAIAssistantClient {
       connectorId,
       functions,
       functionCall,
-      signal,
       simulateFunctionCalling,
-      tracer,
     }: {
       messages: Message[];
       connectorId: string;
       functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
       functionCall?: string;
-      signal: AbortSignal;
       simulateFunctionCalling?: boolean;
-      tracer: LangTracer;
     }
   ): Observable<ChatCompletionChunkEvent | TokenCountEvent | ChatCompletionMessageEvent> => {
     let tools: Record<string, { description: string; schema: any }> | undefined;
