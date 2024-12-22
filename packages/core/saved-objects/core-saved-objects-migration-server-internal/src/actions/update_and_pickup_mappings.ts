@@ -52,11 +52,14 @@ export const updateAndPickupMappings = ({
     'update_mappings_succeeded'
   > = () => {
     return client.indices
-      .putMapping({
-        index,
-        timeout: DEFAULT_TIMEOUT,
-        ...mappings,
-      })
+      .putMapping(
+        {
+          index,
+
+          ...mappings,
+        },
+        { requestTimeout: DEFAULT_TIMEOUT }
+      )
       .then(() => {
         // Ignore `acknowledged: false`. When the coordinating node accepts
         // the new cluster state update but not all nodes have applied the

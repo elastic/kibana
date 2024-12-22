@@ -81,13 +81,13 @@ export function waitForIndexStatus({
         {
           index,
           wait_for_status: status,
-          timeout,
         },
         {
           /* Don't reject on status code 408 so that we can handle the timeout
            * explicitly with a custom response type and provide more context in the error message
            */
           ignore: [408],
+          requestTimeout: timeout,
         }
       )
       .then((res) => {

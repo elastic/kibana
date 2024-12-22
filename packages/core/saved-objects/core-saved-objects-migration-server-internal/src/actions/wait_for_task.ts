@@ -81,11 +81,13 @@ export const waitForTask =
   > =>
   () => {
     return client.tasks
-      .get({
-        task_id: taskId,
-        wait_for_completion: true,
-        timeout,
-      })
+      .get(
+        {
+          task_id: taskId,
+          wait_for_completion: true,
+        },
+        { requestTimeout: timeout }
+      )
       .then((body) => {
         const failures = body.response?.failures ?? [];
         return Either.right({
