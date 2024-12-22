@@ -6,17 +6,17 @@
  */
 
 import type { EventTypeOpts } from '@kbn/core/public';
-import type { Message, Conversation } from '../../../common';
+import type { Conversation } from '../../../common';
 import type { Feedback } from '../../components/buttons/feedback_buttons';
 import { ObservabilityAIAssistantTelemetryEventType } from '../telemetry_event_type';
-import { messageSchema } from './common';
+import { messageSchema, type MessageWithoutAttachments } from './common';
 
 export interface ChatFeedback {
   messageWithFeedback: {
-    message: Message;
+    message: MessageWithoutAttachments;
     feedback: Feedback;
   };
-  conversation: Conversation;
+  conversation: Omit<Conversation, 'messages'> & { messages: MessageWithoutAttachments[] };
 }
 
 export const chatFeedbackEventSchema: EventTypeOpts<ChatFeedback> = {

@@ -6,7 +6,7 @@
  */
 
 import { InferenceClient } from '@kbn/inference-plugin/server';
-import { TruncatedDocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
+import type { TruncatedDocumentAnalysis } from '@kbn/genai-utils-common/src/data_analysis/types';
 import { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
 import { RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { formatEntity } from '../../util/format_entity';

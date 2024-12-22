@@ -9,8 +9,12 @@ import type { RootSchema } from '@kbn/core/public';
 import { AssistantScope } from '@kbn/ai-assistant-common';
 import type { Message } from '../../../common';
 
+export type MessageWithoutAttachments = Omit<Message, 'message'> & {
+  message: Omit<Message['message'], 'attachments'>;
+};
+
 export const messageSchema: RootSchema<
-  Omit<Message, 'message'> & { message: Omit<Message['message'], 'attachments'> } & {
+  MessageWithoutAttachments & {
     scopes: AssistantScope[];
   }
 > = {

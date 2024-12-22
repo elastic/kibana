@@ -17,7 +17,7 @@ import { registerWithCustomIntegrations } from './register_custom_integration';
 import { routes } from './routes';
 import type { ConfigSchema } from '../common/app';
 
-export class DataVisualizerPlugin implements Plugin {
+export class DataVisualizerPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   private readonly _logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {

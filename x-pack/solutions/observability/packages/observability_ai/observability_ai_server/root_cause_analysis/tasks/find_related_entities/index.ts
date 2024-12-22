@@ -7,10 +7,10 @@
 
 import { InferenceClient } from '@kbn/inference-plugin/server';
 import { Logger } from '@kbn/logging';
-import {
+import type {
   DocumentAnalysis,
   TruncatedDocumentAnalysis,
-} from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
+} from '@kbn/genai-utils-common/src/data_analysis/types';
 import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
 import {

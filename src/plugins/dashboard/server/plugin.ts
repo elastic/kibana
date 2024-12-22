@@ -45,7 +45,7 @@ interface StartDeps {
 }
 
 export class DashboardPlugin
-  implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps>
+  implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps>
 {
   private readonly logger: Logger;
 

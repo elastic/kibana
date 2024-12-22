@@ -6,22 +6,25 @@
  */
 
 import { merge, uniqueId } from 'lodash';
-import type { DeepPartial } from 'utility-types';
+import type { DeepPartial, Assign } from '@kbn/utility-types';
 import {
   type Conversation,
   type Message,
   MessageRole,
 } from '@kbn/observability-ai-assistant-plugin/common';
 
-type BuildMessageProps = DeepPartial<Message> & {
-  message: {
-    role: MessageRole;
-    function_call?: {
-      name: string;
-      trigger: MessageRole.Assistant | MessageRole.User | MessageRole.Elastic;
+type BuildMessageProps = Assign<
+  DeepPartial<Message>,
+  {
+    message: {
+      role: MessageRole;
+      function_call?: {
+        name: string;
+        trigger: MessageRole.Assistant | MessageRole.User | MessageRole.Elastic;
+      };
     };
-  };
-};
+  }
+>;
 
 export function buildMessage(params: BuildMessageProps): Message {
   return merge(
@@ -38,7 +41,6 @@ export function buildSystemMessage(
   }
 ) {
   return buildMessage(
-    // @ts-expect-error upgrade typescript v5.1.6
     merge({}, params, {
       message: { role: MessageRole.System },
     })
@@ -51,7 +53,6 @@ export function buildUserMessage(
   }
 ) {
   return buildMessage(
-    // @ts-expect-error upgrade typescript v5.1.6
     merge(
       {
         message: {
@@ -72,7 +73,6 @@ export function buildAssistantMessage(
   }
 ) {
   return buildMessage(
-    // @ts-expect-error upgrade typescript v5.1.6
     merge(
       {
         message: {

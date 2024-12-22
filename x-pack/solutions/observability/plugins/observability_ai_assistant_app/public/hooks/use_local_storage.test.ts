@@ -10,7 +10,7 @@ import { useLocalStorage } from './use_local_storage';
 
 describe('useLocalStorage', () => {
   const key = 'testKey';
-  const defaultValue = 'defaultValue';
+  const defaultValue: string = 'defaultValue';
 
   beforeEach(() => {
     localStorage.clear();

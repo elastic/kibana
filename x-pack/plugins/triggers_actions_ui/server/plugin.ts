@@ -25,7 +25,9 @@ interface TriggersActionsPluginStart {
   alerting: AlertingServerStart;
 }
 
-export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> {
+export class TriggersActionsPlugin
+  implements Plugin<void, PluginStartContract, PluginsSetup, TriggersActionsPluginStart>
+{
   private readonly logger: Logger;
   private readonly data: PluginStartContract['data'];
 

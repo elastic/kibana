@@ -6,11 +6,10 @@
  */
 
 import type { EventTypeOpts } from '@kbn/core/public';
-import type { Message } from '../../../common';
 import { ObservabilityAIAssistantTelemetryEventType } from '../telemetry_event_type';
-import { messageSchema } from './common';
+import { MessageWithoutAttachments, messageSchema } from './common';
 
-export const userSentPromptEventSchema: EventTypeOpts<Message> = {
+export const userSentPromptEventSchema: EventTypeOpts<MessageWithoutAttachments> = {
   eventType: ObservabilityAIAssistantTelemetryEventType.UserSentPromptInChat,
   schema: messageSchema,
 };
