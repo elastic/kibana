@@ -8,9 +8,9 @@
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
 import { login } from '../../../tasks/login';
-import { visit, visitWithTimeRange } from '../../../tasks/navigation';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 
-import { TIMELINES_URL, hostsUrl } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 import { ACTIVE_TIMELINE_BOTTOM_BAR } from '../../../screens/timeline';
 import { TIMELINES } from '../../../screens/security_header';
 import {
@@ -46,15 +46,17 @@ describe('Privileges', { tags: ['@ess', '@skipInServerless'] }, () => {
   describe('Notes', () => {
     it('should show notes in search for users with privileges', () => {
       login(ROLES.t3_analyst);
-      visit(TIMELINES_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
+      cy.get(NAV_SEARCH_INPUT).focus();
       cy.get(NAV_SEARCH_INPUT).type('Notes');
       cy.get(NAV_SEARCH_RESULTS).contains('Notes');
     });
 
     it('should not show notes in search for users with insufficient privileges', () => {
       login(ROLES.notes_none);
-      visit(TIMELINES_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
       // no search result for notes in the nav search
+      cy.get(NAV_SEARCH_INPUT).focus();
       cy.get(NAV_SEARCH_INPUT).type('Notes');
       cy.get(NAV_SEARCH_NO_RESULTS).should('exist');
     });

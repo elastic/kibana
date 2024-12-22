@@ -204,7 +204,6 @@
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
-          "securitySolutionTimeline": ["none"],
           "securitySolutionNotes": ["all"],
           "actions": ["all"],
           "builtInAlerts": ["all"]
@@ -260,7 +259,6 @@
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
           "securitySolutionTimeline": ["all"],
-          "securitySolutionNotes": ["none"],
           "actions": ["all"],
           "builtInAlerts": ["all"]
         },
