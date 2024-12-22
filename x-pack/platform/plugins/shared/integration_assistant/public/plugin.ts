@@ -7,11 +7,8 @@
 
 import type { CoreStart, Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 import { BehaviorSubject } from 'rxjs';
-import type {
-  IntegrationAssistantPluginSetup,
-  IntegrationAssistantPluginStart,
-  IntegrationAssistantPluginStartDependencies,
-} from './types';
+import type { IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart } from './types';
+import type { IntegrationAssistantPluginStartDependencies } from '../server/types';
 import { getCreateIntegrationLazy } from './components/create_integration';
 import { getCreateIntegrationCardButtonLazy } from './components/create_integration_card_button';
 import {
