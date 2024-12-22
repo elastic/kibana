@@ -5,43 +5,76 @@
  * 2.0.
  */
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { memoize } from 'lodash';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 
-export function useLocalStorage<T>(key: string, defaultValue: T) {
-  // This is necessary to fix a race condition issue.
-  // It guarantees that the latest value will be always returned after the value is updated
-  const [storageUpdate, setStorageUpdate] = useState(0);
+type AllowedValue = string | number | boolean | Record<string, any> | any[];
 
-  const item = useMemo(() => {
-    return getFromStorage(key, defaultValue);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, storageUpdate, defaultValue]);
+function createInMemorySubject<T extends AllowedValue>(key: string, defaultValue: T) {
+  const currentValue = getFromStorage(key, defaultValue);
 
-  const saveToStorage = useCallback(
-    (value: T) => {
-      if (value === undefined) {
-        window.localStorage.removeItem(key);
-      } else {
-        window.localStorage.setItem(key, JSON.stringify(value));
-        setStorageUpdate(storageUpdate + 1);
-      }
+  const subject$ = new BehaviorSubject(currentValue);
+
+  function onStorageUpdate(event: StorageEvent) {
+    if (event.key === key) {
+      subject$.next(event.newValue ? JSON.parse(event.newValue) : defaultValue);
+    }
+  }
+
+  window.addEventListener('storage', onStorageUpdate);
+
+  return {
+    asObservable: () => subject$.asObservable(),
+    get: () => subject$.value,
+    next: (value: T | ((prev: T) => T)) => {
+      const nextValue = typeof value === 'function' ? value(subject$.value) : value;
+      window.localStorage.setItem(key, JSON.stringify(value));
+      subject$.next(nextValue);
     },
-    [key, storageUpdate]
+  };
+}
+
+const createInMemorySubjectMemoized = memoize(
+  createInMemorySubject,
+  (key: string, defaultValue?: unknown) => key
+);
+
+type SetValue<T extends AllowedValue> = (next: T | ((prev: T) => T)) => void;
+
+export function useLocalStorage<T extends AllowedValue>(
+  key: string,
+  defaultValue: T | (() => T)
+): [T, SetValue<T>] {
+  const defaultValueRef = useRef<T>(
+    typeof defaultValue === 'function' ? defaultValue() : defaultValue
   );
 
-  useEffect(() => {
-    function onUpdate(event: StorageEvent) {
-      if (event.key === key) {
-        setStorageUpdate(storageUpdate + 1);
-      }
-    }
-    window.addEventListener('storage', onUpdate);
-    return () => {
-      window.removeEventListener('storage', onUpdate);
-    };
-  }, [key, setStorageUpdate, storageUpdate]);
+  const subject = useMemo(() => {
+    return createInMemorySubjectMemoized(key, defaultValueRef.current);
+  }, [key]);
 
-  return useMemo(() => [item, saveToStorage] as const, [item, saveToStorage]);
+  const [value, setValue] = useState(() => subject.get());
+
+  useEffect(() => {
+    const subscription = subject.asObservable().subscribe((next) => {
+      setValue(next);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [subject]);
+
+  const setter = useMemo(() => {
+    return (valueOrCallback: T | ((prev: T) => T)) => {
+      const val =
+        typeof valueOrCallback === 'function' ? valueOrCallback(subject.get()) : valueOrCallback;
+      subject.next(val);
+    };
+  }, [subject]);
+
+  return [value, setter];
 }
 
 function getFromStorage<T>(keyName: string, defaultValue: T) {

@@ -49,7 +49,8 @@ export function registerContextFunction({
         );
 
         const content = {
-          screen_description: screenDescription,
+          textual_screen_description: screenDescription,
+          visual_screen_description: 'not_requested',
           learnings: [],
           ...(dataWithinTokenLimit.length ? { data_on_screen: dataWithinTokenLimit } : {}),
         };
