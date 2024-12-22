@@ -28,6 +28,7 @@ export function registerContextFunction({
 }: FunctionRegistrationParameters & { isKnowledgeBaseReady: boolean }) {
   functions.registerFunction(
     {
+      strict: false,
       name: CONTEXT_FUNCTION_NAME,
       description:
         'This function provides context as to what the user is looking at on their screen, and recalled documents from the knowledge base that matches their query',
@@ -64,12 +65,18 @@ export function registerContextFunction({
 
         const userPrompt = userMessage?.message.content!;
 
+        const coreContext = await resources.context.core;
+        const esClient = coreContext.elasticsearch.client;
+        const uiSettingsClient = coreContext.uiSettings.client;
+
         const { scores, relevantDocuments, suggestions } = await recallAndScore({
+          esClient,
+          uiSettingsClient,
           recall: client.recall,
           chat,
           logger: resources.logger,
           userPrompt,
-          context: screenDescription,
+          screenDescription,
           messages,
           signal,
           analytics,

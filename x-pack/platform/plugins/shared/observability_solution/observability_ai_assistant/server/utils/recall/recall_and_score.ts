@@ -6,31 +6,36 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { AnalyticsServiceStart } from '@kbn/core/server';
+import { AnalyticsServiceStart, IScopedClusterClient, IUiSettingsClient } from '@kbn/core/server';
 import { scoreSuggestions } from './score_suggestions';
 import type { Message } from '../../../common';
 import type { ObservabilityAIAssistantClient } from '../../service/client';
 import type { FunctionCallChatFunction } from '../../service/types';
 import { RecallRanking, recallRankingEventType } from '../../analytics/recall_ranking';
 import { RecalledEntry } from '../../service/knowledge_base_service';
+import { rewriteUserPromptForSearchConnectors } from './rewrite_user_prompt';
 
 export type RecalledSuggestion = Pick<RecalledEntry, 'id' | 'text' | 'score'>;
 
 export async function recallAndScore({
+  esClient,
+  uiSettingsClient,
   recall,
   chat,
   analytics,
   userPrompt,
-  context,
+  screenDescription,
   messages,
   logger,
   signal,
 }: {
+  esClient: IScopedClusterClient;
+  uiSettingsClient: IUiSettingsClient;
   recall: ObservabilityAIAssistantClient['recall'];
   chat: FunctionCallChatFunction;
   analytics: AnalyticsServiceStart;
   userPrompt: string;
-  context: string;
+  screenDescription: string;
   messages: Message[];
   logger: Logger;
   signal: AbortSignal;
@@ -39,14 +44,21 @@ export async function recallAndScore({
   scores?: Array<{ id: string; score: number }>;
   suggestions: RecalledSuggestion[];
 }> {
-  const queries = [
-    { text: userPrompt, boost: 3 },
-    { text: context, boost: 1 },
-  ].filter((query) => query.text.trim());
+  // rewrite user prompt to include context and message history
+  const userPromptAndFiltersForSearchConnectors = await rewriteUserPromptForSearchConnectors({
+    esClient,
+    uiSettingsClient,
+    logger,
+    messages,
+    userPrompt,
+    screenDescription,
+    signal,
+    chat,
+  });
 
-  const suggestions: RecalledSuggestion[] = (await recall({ queries })).map(
-    ({ id, text, score }) => ({ id, text, score })
-  );
+  const suggestions: RecalledSuggestion[] = (
+    await recall({ userPrompt, screenDescription, userPromptAndFiltersForSearchConnectors })
+  ).map(({ id, text, score }) => ({ id, text, score }));
 
   if (!suggestions.length) {
     return {
@@ -62,13 +74,13 @@ export async function recallAndScore({
       logger,
       messages,
       userPrompt,
-      context,
+      context: screenDescription,
       signal,
       chat,
     });
 
     analytics.reportEvent<RecallRanking>(recallRankingEventType, {
-      prompt: queries.map((query) => query.text).join('\n\n'),
+      prompt: userPrompt,
       scoredDocuments: suggestions.map((suggestion) => {
         const llmScore = scores.find((score) => score.id === suggestion.id);
         return {

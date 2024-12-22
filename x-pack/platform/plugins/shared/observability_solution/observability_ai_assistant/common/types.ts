@@ -124,7 +124,7 @@ export interface ObservabilityAIAssistantScreenContextRequest {
     description: string;
     value: any;
   }>;
-  actions?: Array<{ name: string; description: string; parameters?: ToolSchema }>;
+  actions?: Array<{ strict?: boolean; name: string; description: string; parameters?: ToolSchema }>;
 }
 
 export type ScreenContextActionRespondFunction<TArguments> = ({}: {
