@@ -17,6 +17,12 @@ export const registerCreateRoute = ({
   router.put(
     {
       path: addBasePath('/create'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: schema.object({
           job: schema.object(

@@ -30,7 +30,16 @@ export function registerAppRoutes({
   lib: { handleEsError },
 }: RouteDependencies) {
   router.get(
-    { path: addBasePath('privileges'), validate: false },
+    {
+      path: addBasePath('privileges'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
 
