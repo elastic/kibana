@@ -15,7 +15,7 @@ import { KibanaThemeProvider, KibanaServices } from '@kbn/kibana-react-plugin/pu
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { NotificationsStart, ApplicationStart } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { DARK_THEME, LIGHT_THEME } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { KibanaContextProvider } from '../public/common/lib/kibana';
 import { ExperimentalFeaturesService } from '../public/common/experimental_features_service';
 import { getHttp } from './context/http';
@@ -50,6 +50,8 @@ const notifications: NotificationsStart = {
   showErrorDialog: () => {},
 };
 
+const userProfile = { getUserProfile$: () => of(null) };
+
 export const StorybookContextDecorator: FC<PropsWithChildren<StorybookContextDecoratorProps>> = (
   props
 ) => {
@@ -72,10 +74,13 @@ export const StorybookContextDecorator: FC<PropsWithChildren<StorybookContextDec
       isUsingRuleCreateFlyout: false,
     },
   });
+
+  const baseTheme = useElasticChartsTheme();
+
   return (
     <I18nProvider>
       <EuiThemeProvider darkMode={darkMode}>
-        <KibanaThemeProvider theme$={EMPTY}>
+        <KibanaThemeProvider theme$={EMPTY} userProfile={userProfile}>
           <KibanaContextProvider
             services={{
               notifications,
@@ -97,7 +102,7 @@ export const StorybookContextDecorator: FC<PropsWithChildren<StorybookContextDec
               ruleTypeRegistry: getRuleTypeRegistry(),
               charts: {
                 theme: {
-                  useChartsBaseTheme: () => (darkMode ? DARK_THEME : LIGHT_THEME),
+                  useChartsBaseTheme: () => baseTheme,
                   useSparklineOverrides: () => ({
                     lineSeriesStyle: {
                       point: {

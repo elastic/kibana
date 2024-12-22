@@ -22,7 +22,6 @@
     "@kbn/data-views-plugin",
     "@kbn/i18n-react",
     "@kbn/monaco",
-    "@kbn/es-query",
     "@kbn/field-formats-plugin",
     "@kbn/interpreter",
     "@kbn/react-field",

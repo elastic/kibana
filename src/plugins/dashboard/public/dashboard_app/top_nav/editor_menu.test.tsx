@@ -9,31 +9,22 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { buildMockDashboard } from '../../mocks';
+import { buildMockDashboardApi } from '../../mocks';
 import { EditorMenu } from './editor_menu';
 
-import { DashboardApi } from '../../dashboard_api/types';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
-import {
-  embeddableService,
-  uiActionsService,
-  visualizationsService,
-} from '../../services/kibana_services';
+import { uiActionsService, visualizationsService } from '../../services/kibana_services';
 
-jest.spyOn(embeddableService, 'getEmbeddableFactories').mockReturnValue(new Map().values());
 jest.spyOn(uiActionsService, 'getTriggerCompatibleActions').mockResolvedValue([]);
 jest.spyOn(visualizationsService, 'getByGroup').mockReturnValue([]);
 jest.spyOn(visualizationsService, 'getAliases').mockReturnValue([]);
 
 describe('editor menu', () => {
   it('renders without crashing', async () => {
+    const { api } = buildMockDashboardApi();
     render(<EditorMenu createNewVisType={jest.fn()} />, {
       wrapper: ({ children }) => {
-        return (
-          <DashboardContext.Provider value={buildMockDashboard() as DashboardApi}>
-            {children}
-          </DashboardContext.Provider>
-        );
+        return <DashboardContext.Provider value={api}>{children}</DashboardContext.Provider>;
       },
     });
   });

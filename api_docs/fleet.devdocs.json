@@ -1685,40 +1685,40 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/lib/telemetry/collectors/installation_stats_collector.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/public/test/mocks.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/public/test/mocks.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/private_location/synthetics_private_location.ts"
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/private_location/synthetics_private_location.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/server/lib/telemetry/collectors/installation_stats_collector.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/public/test/mocks.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/public/test/mocks.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/services/metadata/endpoint_metadata_service.test.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/metadata/endpoint_metadata_service.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/support/endpoint_package_policies.test.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/metadata/support/endpoint_package_policies.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
               }
             ]
           },
@@ -24573,40 +24573,40 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/lib/telemetry/collectors/installation_stats_collector.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/public/test/mocks.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/public/test/mocks.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/private_location/synthetics_private_location.ts"
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/private_location/synthetics_private_location.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/server/lib/telemetry/collectors/installation_stats_collector.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/public/test/mocks.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/public/test/mocks.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/services/metadata/endpoint_metadata_service.test.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/metadata/endpoint_metadata_service.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/support/endpoint_package_policies.test.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/metadata/support/endpoint_package_policies.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
               }
             ]
           },
@@ -28710,7 +28710,7 @@
         "label": "PackageSpecCategory",
         "description": [],
         "signature": [
-          "\"connector\" | \"monitoring\" | \"security\" | \"observability\" | \"custom\" | \"infrastructure\" | \"kubernetes\" | \"cloud\" | \"advanced_analytics_ueba\" | \"analytics_engine\" | \"application_observability\" | \"auditd\" | \"authentication\" | \"aws\" | \"azure\" | \"big_data\" | \"cdn_security\" | \"config_management\" | \"connector_client\" | \"containers\" | \"crawler\" | \"credential_management\" | \"crm\" | \"custom_logs\" | \"database_security\" | \"datastore\" | \"dns_security\" | \"edr_xdr\" | \"cloudsecurity_cdr\" | \"elasticsearch_sdk\" | \"elastic_stack\" | \"email_security\" | \"firewall_security\" | \"google_cloud\" | \"iam\" | \"ids_ips\" | \"java_observability\" | \"language_client\" | \"languages\" | \"load_balancer\" | \"message_queue\" | \"native_search\" | \"network\" | \"network_security\" | \"notification\" | \"os_system\" | \"process_manager\" | \"productivity\" | \"productivity_security\" | \"proxy_security\" | \"sdk_search\" | \"stream_processing\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"virtualization\" | \"vpn_security\" | \"vulnerability_management\" | \"web\" | \"web_application_firewall\" | \"websphere\" | \"workplace_search_content_source\" | \"app_search\" | \"enterprise_search\" | \"workplace_search\""
+          "\"connector\" | \"monitoring\" | \"security\" | \"observability\" | \"infrastructure\" | \"kubernetes\" | \"cloud\" | \"custom\" | \"advanced_analytics_ueba\" | \"analytics_engine\" | \"application_observability\" | \"auditd\" | \"authentication\" | \"aws\" | \"azure\" | \"big_data\" | \"cdn_security\" | \"config_management\" | \"connector_client\" | \"containers\" | \"crawler\" | \"credential_management\" | \"crm\" | \"custom_logs\" | \"database_security\" | \"datastore\" | \"dns_security\" | \"edr_xdr\" | \"cloudsecurity_cdr\" | \"elasticsearch_sdk\" | \"elastic_stack\" | \"email_security\" | \"firewall_security\" | \"google_cloud\" | \"iam\" | \"ids_ips\" | \"java_observability\" | \"language_client\" | \"languages\" | \"load_balancer\" | \"message_queue\" | \"native_search\" | \"network\" | \"network_security\" | \"notification\" | \"os_system\" | \"process_manager\" | \"productivity\" | \"productivity_security\" | \"proxy_security\" | \"sdk_search\" | \"stream_processing\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"virtualization\" | \"vpn_security\" | \"vulnerability_management\" | \"web\" | \"web_application_firewall\" | \"websphere\" | \"workplace_search_content_source\" | \"app_search\" | \"enterprise_search\" | \"workplace_search\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
         "deprecated": false,

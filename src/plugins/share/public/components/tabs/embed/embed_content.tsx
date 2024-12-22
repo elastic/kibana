@@ -23,7 +23,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { format as formatUrl, parse as parseUrl } from 'url';
 import { AnonymousAccessState } from '../../../../common';
 
-import { type IShareContext } from '../../context';
+import type { IShareContext, ShareContextObjectTypeConfig } from '../../context';
 
 type EmbedProps = Pick<
   IShareContext,
@@ -32,8 +32,9 @@ type EmbedProps = Pick<
   | 'shareableUrl'
   | 'embedUrlParamExtensions'
   | 'objectType'
+  | 'isDirty'
 > & {
-  setIsNotSaved: () => void;
+  objectConfig?: ShareContextObjectTypeConfig;
 };
 
 interface UrlParams {
@@ -52,7 +53,8 @@ export const EmbedContent = ({
   shareableUrlForSavedObject,
   shareableUrl,
   objectType,
-  setIsNotSaved,
+  objectConfig = {},
+  isDirty,
 }: EmbedProps) => {
   const isMounted = useMountedState();
   const [urlParams, setUrlParams] = useState<UrlParams | undefined>(undefined);
@@ -62,10 +64,6 @@ export const EmbedContent = ({
   const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
   const [anonymousAccessParameters] = useState<AnonymousAccessState['accessURLParameters']>(null);
   const [usePublicUrl] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (objectType !== 'dashboard') setIsNotSaved();
-  }, [url, setIsNotSaved, objectType]);
 
   const makeUrlEmbeddable = useCallback((tempUrl: string): string => {
     const embedParam = '?embed=true';
@@ -252,12 +250,20 @@ export const EmbedContent = ({
       />
     );
 
+  const { draftModeCallOut: DraftModeCallout } = objectConfig;
+
   return (
     <>
       <EuiForm>
         <EuiText size="s">{helpText}</EuiText>
         <EuiSpacer />
         {renderUrlParamExtensions()}
+        {isDirty && DraftModeCallout && (
+          <>
+            <EuiSpacer size="m" />
+            {DraftModeCallout}
+          </>
+        )}
         <EuiSpacer />
       </EuiForm>
       <EuiFlexGroup justifyContent="flexEnd" responsive={false}>

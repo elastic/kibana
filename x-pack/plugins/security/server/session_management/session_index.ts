@@ -8,15 +8,13 @@
 import type {
   AggregateName,
   AggregationsMultiTermsAggregate,
+  BulkOperationContainer,
   CreateRequest,
   IndicesCreateRequest,
   MsearchRequestItem,
   SearchHit,
-} from '@elastic/elasticsearch/lib/api/types';
-import type {
-  BulkOperationContainer,
   SortResults,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import semver from 'semver';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -830,6 +828,10 @@ export class SessionIndex {
         {
           index: this.aliasName,
           keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
+          // @ts-expect-error client support this option, but it is not documented and typed yet.
+          // once support added we should remove this expected type error
+          // https://github.com/elastic/elasticsearch-specification/issues/3144
+          allow_partial_search_results: true,
         },
         { ignore: [404], meta: true }
       );
@@ -841,6 +843,10 @@ export class SessionIndex {
           {
             index: this.aliasName,
             keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
+            // @ts-expect-error client support this option, but it is not documented and typed yet.
+            // once support added we should remove this expected type error
+            // https://github.com/elastic/elasticsearch-specification/issues/3144
+            allow_partial_search_results: true,
           },
           { meta: true }
         ));
@@ -857,7 +863,6 @@ export class SessionIndex {
           size: SESSION_INDEX_CLEANUP_BATCH_SIZE,
           sort: '_shard_doc',
           track_total_hits: false, // for performance
-          allow_partial_search_results: true,
         });
         const { hits } = searchResponse.hits;
         if (hits.length > 0) {
