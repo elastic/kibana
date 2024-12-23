@@ -20,7 +20,7 @@ fi
 
 cat << EOF | buildkite-agent pipeline upload
 steps:
-  - label: "Update CI cache for ES $BUILDKITE_BRANCH snapshot"
+  - label: "Update cache for ES $BUILDKITE_BRANCH snapshot"
     trigger: kibana-vm-images
     async: true
     build:
