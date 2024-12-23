@@ -74,7 +74,7 @@
       "plugins/logstash"
     ],
     "xpack.main": "legacy/plugins/xpack_main",
-    "xpack.maps": ["plugins/maps"],
+    "xpack.maps": ["platform/plugins/shared/maps"],
     "xpack.metricsData": "plugins/observability_solution/metrics_data_access",
     "xpack.ml": [
       "platform/packages/shared/ml/anomaly_utils",

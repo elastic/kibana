@@ -7,9 +7,9 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/maps'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/maps',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/maps'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/maps',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/maps/{common,public,server}/**/*.{js,ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/platform/plugins/shared/maps/{common,public,server}/**/*.{js,ts,tsx}'],
 };

@@ -68,7 +68,7 @@ export const IGNORE_FILE_GLOBS = [
   'packages/kbn-handlebars/src/upstream/**/*',
   'packages/kbn-handlebars/.patches/**/*',
 
-  'x-pack/plugins/maps/server/fonts/**/*',
+  'x-pack/platform/plugins/shared/maps/server/fonts/**/*',
 
   'x-pack/plugins/observability_solution/profiling/Makefile',
 
