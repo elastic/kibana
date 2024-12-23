@@ -5,7 +5,16 @@ Object {
   "streams": Array [
     Object {
       "elasticsearch_assets": Array [],
-      "inheritedFields": Object {},
+      "inherited_fields": Object {
+        "@timestamp": Object {
+          "from": "logs",
+          "type": "date",
+        },
+        "message": Object {
+          "from": "logs",
+          "type": "match_only_text",
+        },
+      },
       "name": "logs.nginx",
       "stream": Object {
         "ingest": Object {
@@ -26,21 +35,21 @@ Object {
               },
             },
           ],
-        },
-        "routing": Array [
-          Object {
-            "condition": Object {
-              "field": "log.level",
-              "operator": "eq",
-              "value": "error",
+          "routing": Array [
+            Object {
+              "condition": Object {
+                "field": "log.level",
+                "operator": "eq",
+                "value": "error",
+              },
+              "name": "logs.errors",
             },
-            "name": "logs.errors",
-          },
-        ],
-        "wired": Object {
-          "fields": Object {
-            "new_field": Object {
-              "type": "long",
+          ],
+          "wired": Object {
+            "fields": Object {
+              "new_field": Object {
+                "type": "long",
+              },
             },
           },
         },
@@ -48,7 +57,16 @@ Object {
     },
     Object {
       "elasticsearch_assets": Array [],
-      "inheritedFields": Object {},
+      "inherited_fields": Object {
+        "@timestamp": Object {
+          "from": "logs",
+          "type": "date",
+        },
+        "message": Object {
+          "from": "logs",
+          "type": "match_only_text",
+        },
+      },
       "name": "logs.nginx",
       "stream": Object {
         "ingest": Object {
@@ -69,17 +87,17 @@ Object {
               },
             },
           ],
-        },
-        "routing": Array [
-          Object {
-            "condition": Object {
-              "field": "log.level",
-              "operator": "eq",
-              "value": "error",
+          "routing": Array [
+            Object {
+              "condition": Object {
+                "field": "log.level",
+                "operator": "eq",
+                "value": "error",
+              },
+              "name": "logs.errors",
             },
-            "name": "logs.errors",
-          },
-        ],
+          ],
+        },
       },
     },
   ],
