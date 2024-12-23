@@ -37,6 +37,7 @@
     "@kbn/ml-plugin",
     "@kbn/share-plugin",
     "@kbn/ai-assistant-common",
+    "@kbn/inference-common",
     "@kbn/storybook",
     "@kbn/ai-assistant-icon",
   ]
