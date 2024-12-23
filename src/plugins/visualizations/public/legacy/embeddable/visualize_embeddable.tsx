@@ -21,15 +21,9 @@ import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Warnings } from '@kbn/charts-plugin/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
-import {
-  Adapters,
-  Embeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
-  FilterableEmbeddable,
-  ReferenceOrValueEmbeddable,
-  SavedObjectEmbeddableInput,
-} from '@kbn/embeddable-plugin/public';
+import { Adapters } from '@kbn/inspector-plugin/public';
+import { Embeddable, EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
+import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 import {
   ExpressionAstExpression,
   ExpressionLoader,
@@ -105,12 +99,7 @@ export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeIn
  * VisualizeEmbeddable is no longer registered with the legacy embeddable system and is only
  * used within the visualize editor.
  */
-export class VisualizeEmbeddable
-  extends Embeddable<VisualizeInput, VisualizeOutput>
-  implements
-    ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput>,
-    FilterableEmbeddable
-{
+export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
   private timeRange?: TimeRange;

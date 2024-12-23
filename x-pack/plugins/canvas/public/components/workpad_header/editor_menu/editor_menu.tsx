@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   VisGroups,
@@ -13,19 +13,12 @@ import {
   type VisTypeAlias,
   type VisParams,
 } from '@kbn/visualizations-plugin/public';
-import {
-  EmbeddableFactory,
-  EmbeddableFactoryDefinition,
-  EmbeddableInput,
-} from '@kbn/embeddable-plugin/public';
 import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
 
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../../lib/ui_metric';
 import { CANVAS_APP } from '../../../../common/lib';
 import { ElementSpec } from '../../../../types';
 import { EditorMenu as Component } from './editor_menu.component';
-import { embeddableInputToExpression } from '../../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
-import { EmbeddableInput as CanvasEmbeddableInput } from '../../../../canvas_plugin_src/expression_types';
 import { useCanvasApi } from '../../hooks/use_canvas_api';
 import { ADD_CANVAS_ELEMENT_TRIGGER } from '../../../state/triggers/add_canvas_element_trigger';
 import {
@@ -41,37 +34,12 @@ interface Props {
   addElement: (element: Partial<ElementSpec>) => void;
 }
 
-interface UnwrappedEmbeddableFactory {
-  factory: EmbeddableFactory;
-  isEditable: boolean;
-}
-
 export const EditorMenu: FC<Props> = ({ addElement }) => {
   const { pathname, search, hash } = useLocation();
   const stateTransferService = embeddableService.getStateTransfer();
   const canvasApi = useCanvasApi();
 
   const [addPanelActions, setAddPanelActions] = useState<Array<Action<object>>>([]);
-
-  const embeddableFactories = useMemo(
-    () => (embeddableService ? Array.from(embeddableService.getEmbeddableFactories()) : []),
-    []
-  );
-
-  const [unwrappedEmbeddableFactories, setUnwrappedEmbeddableFactories] = useState<
-    UnwrappedEmbeddableFactory[]
-  >([]);
-
-  useEffect(() => {
-    Promise.all(
-      embeddableFactories.map<Promise<UnwrappedEmbeddableFactory>>(async (factory) => ({
-        factory,
-        isEditable: await factory.isEditable(),
-      }))
-    ).then((factories) => {
-      setUnwrappedEmbeddableFactories(factories);
-    });
-  }, [embeddableFactories]);
 
   useEffect(() => {
     let mounted = true;
@@ -123,33 +91,6 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
     [stateTransferService, pathname, search, hash]
   );
 
-  const createNewEmbeddableFromFactory = useCallback(
-    (factory: EmbeddableFactoryDefinition) => async () => {
-      if (trackCanvasUiMetric) {
-        trackCanvasUiMetric(METRIC_TYPE.CLICK, factory.type);
-      }
-
-      let embeddableInput;
-      if (factory.getExplicitInput) {
-        embeddableInput = await factory.getExplicitInput();
-      } else {
-        const newEmbeddable = await factory.create({} as EmbeddableInput);
-        embeddableInput = newEmbeddable?.getInput();
-      }
-
-      if (embeddableInput) {
-        const expression = embeddableInputToExpression(
-          embeddableInput as CanvasEmbeddableInput,
-          factory.type,
-          undefined,
-          true
-        );
-        addElement({ expression });
-      }
-    },
-    [addElement]
-  );
-
   const createNewEmbeddableFromAction = useCallback(
     (action: Action, context: ActionExecutionContext<object>, closePopover: () => void) =>
       (event: React.MouseEvent) => {
@@ -190,31 +131,17 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
     )
     .filter(({ disableCreate }: VisTypeAlias) => !disableCreate);
 
-  const factories = unwrappedEmbeddableFactories
-    .filter(
-      ({ isEditable, factory: { type, canCreateNew, isContainerType } }) =>
-        isEditable &&
-        !isContainerType &&
-        canCreateNew() &&
-        !['visualization', 'ml', 'links'].some((factoryType) => {
-          return type.includes(factoryType);
-        })
-    )
-    .map(({ factory }) => factory);
-
   const promotedVisTypes = getVisTypesByGroup(VisGroups.PROMOTED);
   const legacyVisTypes = getVisTypesByGroup(VisGroups.LEGACY);
 
   return (
     <Component
       createNewVisType={createNewVisType}
-      createNewEmbeddableFromFactory={createNewEmbeddableFromFactory}
       createNewEmbeddableFromAction={createNewEmbeddableFromAction}
       promotedVisTypes={([] as Array<BaseVisType<VisParams>>).concat(
         promotedVisTypes,
         legacyVisTypes
       )}
-      factories={factories}
       addPanelActions={addPanelActions}
       visTypeAliases={visTypeAliases}
     />

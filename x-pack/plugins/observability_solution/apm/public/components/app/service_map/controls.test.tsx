@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { euiLightVars as lightTheme } from '@kbn/ui-theme';
-import { render } from '@testing-library/react';
 import cytoscape from 'cytoscape';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { ThemeContext } from 'styled-components';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { Controls } from './controls';
 import { CytoscapeContext } from './cytoscape';
+import { renderWithTheme } from '../../../utils/test_helpers';
 
 const cy = cytoscape({
   elements: [{ classes: 'primary', data: { id: 'test node' } }],
@@ -27,11 +25,8 @@ function Wrapper({ children }: { children?: ReactNode }) {
           '/service-map?rangeFrom=now-15m&rangeTo=now&environment=ENVIRONMENT_ALL&kuery=',
         ]}
       >
-        <MockApmPluginContextWrapper>
-          <ThemeContext.Provider value={{ eui: lightTheme }}>{children}</ThemeContext.Provider>
-        </MockApmPluginContextWrapper>
+        <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
       </MemoryRouter>
-      s
     </CytoscapeContext.Provider>
   );
 }
@@ -39,7 +34,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
 describe('Controls', () => {
   describe('with a primary node', () => {
     it('links to the full map', async () => {
-      const result = render(<Controls />, { wrapper: Wrapper });
+      const result = renderWithTheme(<Controls />, { wrapper: Wrapper });
       const { findByTestId } = result;
 
       const button = await findByTestId('viewFullMapButton');

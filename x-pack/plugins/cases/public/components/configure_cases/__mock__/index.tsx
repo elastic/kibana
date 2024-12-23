@@ -32,6 +32,7 @@ const mockConfigurationData = {
   version: '',
   id: '',
   owner: mockedTestProvidersOwner[0],
+  observableTypes: [],
 };
 
 export const useCaseConfigureResponse = {

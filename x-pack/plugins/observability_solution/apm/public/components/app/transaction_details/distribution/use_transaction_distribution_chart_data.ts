@@ -7,6 +7,7 @@
 
 import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useEuiTheme } from '@elastic/eui';
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
 import { EVENT_OUTCOME } from '../../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../../common/event_outcome';
@@ -16,11 +17,10 @@ import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { isErrorMessage } from '../../correlations/utils/is_error_message';
 import { useFetchParams } from '../../correlations/use_fetch_params';
 import { getTransactionDistributionChartData } from '../../correlations/get_transaction_distribution_chart_data';
-import { useTheme } from '../../../../hooks/use_theme';
 
 export const useTransactionDistributionChartData = () => {
   const params = useFetchParams();
-  const euiTheme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const {
     core: { notifications },
