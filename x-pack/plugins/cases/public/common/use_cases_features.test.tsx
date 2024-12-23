@@ -46,6 +46,7 @@ describe('useCasesFeatures', () => {
         metricsFeatures: [],
         caseAssignmentAuthorized: false,
         pushToServiceAuthorized: false,
+        observablesAuthorized: false,
       });
     }
   );
@@ -65,6 +66,7 @@ describe('useCasesFeatures', () => {
       metricsFeatures: [CaseMetricsFeature.CONNECTORS],
       caseAssignmentAuthorized: false,
       pushToServiceAuthorized: false,
+      observablesAuthorized: false,
     });
   });
 
@@ -92,6 +94,7 @@ describe('useCasesFeatures', () => {
         metricsFeatures: [],
         caseAssignmentAuthorized: expectedResult,
         pushToServiceAuthorized: expectedResult,
+        observablesAuthorized: expectedResult,
       });
     }
   );
