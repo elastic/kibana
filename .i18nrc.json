@@ -162,7 +162,7 @@
     "unifiedDocViewer": ["src/platform/plugins/shared/unified_doc_viewer", "src/platform/packages/shared/kbn-unified-doc-viewer"],
     "unifiedSearch": "src/plugins/unified_search",
     "unifiedFieldList": "src/platform/packages/shared/kbn-unified-field-list",
-    "unifiedHistogram": "src/plugins/unified_histogram",
+    "unifiedHistogram": "src/platform/plugins/shared/unified_histogram",
     "unifiedDataTable": "src/platform/packages/shared/kbn-unified-data-table",
     "unsavedChangesBadge": "packages/kbn-unsaved-changes-badge",
     "unsavedChangesPrompt": "src/platform/packages/shared/kbn-unsaved-changes-prompt",
