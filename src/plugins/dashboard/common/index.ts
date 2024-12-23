@@ -32,6 +32,7 @@ export { prefixReferencesFromPanel } from './dashboard_container/persistable_sta
 export {
   convertPanelsArrayToPanelMap,
   convertPanelMapToPanelsArray,
+  generateNewPanelIds,
 } from './lib/dashboard_panel_converters';
 
 export const UI_SETTINGS = {

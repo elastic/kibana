@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { modelVersion1 } from './model_versions';
+import { modelVersion1, modelVersion2 } from './model_versions';
 
 describe('Model versions', () => {
   describe('1', () => {
@@ -55,5 +55,28 @@ describe('Model versions', () => {
         ]
       `);
     });
+  });
+
+  describe('2', () => {
+    expect(modelVersion2.changes).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "addedMappings": Object {
+            "observables": Object {
+              "properties": Object {
+                "typeKey": Object {
+                  "type": "keyword",
+                },
+                "value": Object {
+                  "type": "keyword",
+                },
+              },
+              "type": "nested",
+            },
+          },
+          "type": "mappings_addition",
+        },
+      ]
+    `);
   });
 });
