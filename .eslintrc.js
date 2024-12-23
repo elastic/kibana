@@ -160,6 +160,7 @@ const DEV_DIRECTORIES = [
   'test_utils',
   'test_utilities',
   'test_helpers',
+  'test-helpers',
   'tests_client_integration',
   'tsd_tests',
 ];
@@ -1915,7 +1916,7 @@ module.exports = {
     {
       files: [
         // core-team owned code
-        'src/core/**',
+        'src/core/packages/core/**',
         'x-pack/plugins/features/**',
         'x-pack/plugins/licensing/**',
         'x-pack/plugins/global_search/**',

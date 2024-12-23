@@ -18,10 +18,10 @@ area of Core API's and does not apply to internal types.
 
    ```ts
    // -- good --
-   import { IRouter } from 'src/core/server';
+   import { IRouter } from '@kbn/core/server';
 
    // -- bad --
-   import { IRouter } from 'src/core/server/http/router.ts';
+   import { IRouter } from 'src/core/packages/core/server/http/router.ts';
    ```
 
    > Why? This is required for generating documentation from our inline
