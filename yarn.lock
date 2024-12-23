@@ -4465,7 +4465,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-doc-links-server-internal@link:packages/core/doc-links/core-doc-links-server-internal":
+"@kbn/core-doc-links-server-internal@link:src/core/packages/doc-links/server-internal":
   version "0.0.0"
   uid ""
 
