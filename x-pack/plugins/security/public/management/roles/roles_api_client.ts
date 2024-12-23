@@ -6,7 +6,6 @@
  */
 
 import type { Criteria } from '@elastic/eui';
-import type { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
 
 import type { HttpStart } from '@kbn/core/public';
 import type { QueryRolesResult } from '@kbn/security-plugin-types-common';
@@ -17,7 +16,7 @@ import { API_VERSIONS } from '../../../common/constants';
 import { copyRole } from '../../../common/model';
 
 export interface QueryRoleParams {
-  query: QueryContainer;
+  query: string;
   from: number;
   size: number;
   filters?: {
