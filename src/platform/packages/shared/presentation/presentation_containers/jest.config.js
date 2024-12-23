@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/packages/presentation/presentation_containers'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/presentation/presentation_containers'],
 };
