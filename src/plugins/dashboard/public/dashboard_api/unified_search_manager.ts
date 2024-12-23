@@ -33,10 +33,12 @@ import fastIsEqual from 'fast-deep-equal';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { cloneDeep } from 'lodash';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import {
   GlobalQueryStateFromUrl,
   RefreshInterval,
   connectToQueryState,
+  extractSearchSourceReferences,
   syncGlobalQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
 import moment, { Moment } from 'moment';
@@ -48,6 +50,7 @@ import { DEFAULT_DASHBOARD_INPUT, GLOBAL_STATE_STORAGE_KEY } from '../dashboard_
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
+  timeRestore$: PublishingSubject<boolean | undefined>,
   waitForPanelsToLoad$: Observable<void>,
   getLastSavedState: () => DashboardState | undefined,
   creationOptions?: DashboardCreationOptions
@@ -96,12 +99,6 @@ export function initializeUnifiedSearchManager(
     if (creationOptions?.useUnifiedSearchIntegration) {
       timefilterService.setTime(timeRangeOrDefault);
     }
-  }
-  const timeRestore$ = new BehaviorSubject<boolean | undefined>(
-    initialState?.timeRestore ?? DEFAULT_DASHBOARD_INPUT.timeRestore
-  );
-  function setTimeRestore(timeRestore: boolean) {
-    if (timeRestore !== timeRestore$.value) timeRestore$.next(timeRestore);
   }
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
   const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(initialState.filters);
@@ -312,9 +309,8 @@ export function initializeUnifiedSearchManager(
           return true;
         },
       ],
-      timeRestore: [timeRestore$, setTimeRestore],
     } as StateComparators<
-      Pick<DashboardState, 'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'timeRestore'>
+      Pick<DashboardState, 'filters' | 'query' | 'refreshInterval' | 'timeRange'>
     >,
     internalApi: {
       controlGroupReload$,
@@ -325,24 +321,35 @@ export function initializeUnifiedSearchManager(
           ...lastSavedState.filters,
         ]);
         setQuery(lastSavedState.query);
-        setTimeRestore(lastSavedState.timeRestore);
         if (lastSavedState.timeRestore) {
           setAndSyncRefreshInterval(lastSavedState.refreshInterval);
           setAndSyncTimeRange(lastSavedState.timeRange);
         }
       },
-      getState: (): Pick<
-        DashboardState,
-        'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'timeRestore'
-      > => ({
-        filters: unifiedSearchFilters$.value ?? DEFAULT_DASHBOARD_INPUT.filters,
-        query: query$.value ?? DEFAULT_DASHBOARD_INPUT.query,
-        refreshInterval: refreshInterval$.value,
-        timeRange: timeRange$.value,
-        timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_INPUT.timeRestore,
-      }),
-      setTimeRestore,
-      timeRestore$,
+      getState: (): {
+        state: Pick<
+          DashboardState,
+          'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'timeRestore'
+        >;
+        references: SavedObjectReference[];
+      } => {
+        // pinned filters are not serialized when saving the dashboard
+        const serializableFilters = unifiedSearchFilters$.value?.filter((f) => !isFilterPinned(f));
+        const [{ filter, query }, references] = extractSearchSourceReferences({
+          filter: serializableFilters,
+          query: query$.value,
+        });
+        return {
+          state: {
+            filters: filter ?? DEFAULT_DASHBOARD_INPUT.filters,
+            query: (query as Query) ?? DEFAULT_DASHBOARD_INPUT.query,
+            refreshInterval: refreshInterval$.value,
+            timeRange: timeRange$.value,
+            timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_INPUT.timeRestore,
+          },
+          references,
+        };
+      },
     },
     cleanup: () => {
       controlGroupSubscriptions.unsubscribe();
