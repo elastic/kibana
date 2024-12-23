@@ -10,6 +10,7 @@ import type { QueryContainer } from '@elastic/eui/src/components/search_bar/quer
 
 import type { HttpStart } from '@kbn/core/public';
 import type { QueryRolesResult } from '@kbn/security-plugin-types-common';
+import type { BulkUpdatePayload, BulkUpdateRoleResponse } from '@kbn/security-plugin-types-public';
 
 import type { Role, RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
