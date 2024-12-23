@@ -4317,7 +4317,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-application-common@link:packages/core/application/core-application-common":
+"@kbn/core-application-common@link:src/core/packages/application/common":
   version "0.0.0"
   uid ""
 
