@@ -5025,7 +5025,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-security-server-mocks@link:packages/core/security/core-security-server-mocks":
+"@kbn/core-security-server-mocks@link:src/core/packages/security/server-mocks":
   version "0.0.0"
   uid ""
 
