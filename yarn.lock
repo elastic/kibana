@@ -5149,7 +5149,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-user-profile-server-mocks@link:packages/core/user-profile/core-user-profile-server-mocks":
+"@kbn/core-user-profile-server-mocks@link:src/core/packages/user-profile/server-mocks":
   version "0.0.0"
   uid ""
 
