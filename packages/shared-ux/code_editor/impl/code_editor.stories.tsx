@@ -230,23 +230,25 @@ export const AutomaticResize = {
   argTypes,
 };
 
+const FitToContentComponent = (params: CodeEditorStorybookParams) => {
+  const [value, setValue] = useState('hello');
+  return (
+    <CodeEditor
+      {...params}
+      languageId="plainText"
+      onChange={(newValue) => {
+        setValue(newValue);
+        action('on change');
+      }}
+      value={value}
+      fitToContent={{ minLines: 3, maxLines: 5 }}
+      options={{ automaticLayout: true }}
+    />
+  );
+};
+
 export const FitToContent = {
-  render: (params: CodeEditorStorybookParams) => {
-    const [value, setValue] = useState('hello');
-    return (
-      <CodeEditor
-        {...params}
-        languageId="plainText"
-        onChange={(newValue) => {
-          setValue(newValue);
-          action('on change');
-        }}
-        value={value}
-        fitToContent={{ minLines: 3, maxLines: 5 }}
-        options={{ automaticLayout: true }}
-      />
-    );
-  },
+  render: (params: CodeEditorStorybookParams) => <FitToContentComponent {...params} />,
 
   argTypes,
 };
