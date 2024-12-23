@@ -4789,7 +4789,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-overlays-browser-internal@link:packages/core/overlays/core-overlays-browser-internal":
+"@kbn/core-overlays-browser-internal@link:src/core/packages/overlays/browser-internal":
   version "0.0.0"
   uid ""
 

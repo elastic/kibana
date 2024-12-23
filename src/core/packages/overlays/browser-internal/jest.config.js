@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/overlays/core-overlays-browser-internal'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/overlays/browser-internal'],
 };
