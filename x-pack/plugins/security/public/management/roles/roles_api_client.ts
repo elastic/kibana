@@ -62,7 +62,6 @@ export class RolesAPIClient {
     });
   };
 
-
   public bulkUpdateRoles = async ({
     rolesUpdate,
   }: BulkUpdatePayload): Promise<BulkUpdateRoleResponse> => {

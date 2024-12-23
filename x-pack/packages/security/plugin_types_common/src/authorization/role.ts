@@ -6,6 +6,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+
 import type { FeaturesPrivileges } from './features_privileges';
 
 export interface RoleIndexPrivilege {
