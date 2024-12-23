@@ -3981,11 +3981,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-ftr-e2e@link:x-pack/plugins/observability_solution/apm/ftr_e2e":
+"@kbn/apm-ftr-e2e@link:x-pack/solutions/observability/plugins/apm/ftr_e2e":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-plugin@link:x-pack/plugins/observability_solution/apm":
+"@kbn/apm-plugin@link:x-pack/solutions/observability/plugins/apm":
   version "0.0.0"
   uid ""
 

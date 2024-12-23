@@ -9,7 +9,7 @@ import fs from 'fs';
 import { apmSchema } from '../../server/lib/apm_telemetry/schema';
 
 const markdownFilePath =
-  'x-pack/plugins/observability_solution/apm/dev_docs/apm_telemetry_fields.md';
+  'x-pack/solutions/observability/plugins/apm/dev_docs/apm_telemetry_fields.md';
 
 function extractFieldDescriptions(schema: any, parentKeys: string[] = []): string[] {
   const fieldDescriptions = [];
