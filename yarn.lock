@@ -4865,7 +4865,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-browser@link:packages/core/plugins/core-plugins-browser":
+"@kbn/core-plugins-browser@link:src/core/packages/plugins/browser":
   version "0.0.0"
   uid ""
 
