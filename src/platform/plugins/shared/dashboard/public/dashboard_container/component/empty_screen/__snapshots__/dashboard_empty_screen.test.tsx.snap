@@ -34,7 +34,7 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
                   <img
                     alt=""
                     class="euiImage emotion-euiImage-fullWidth"
-                    src="/platform/plugins/shared/dashboard/assets/dashboards_light.svg"
+                    src="/plugins/dashboard/assets/dashboards_light.svg"
                   />
                 </figure>
               </div>
@@ -155,7 +155,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly and edit mode 1`] 
                   <img
                     alt=""
                     class="euiImage emotion-euiImage-fullWidth"
-                    src="/platform/plugins/shared/dashboard/assets/dashboards_light.svg"
+                    src="/plugins/dashboard/assets/dashboards_light.svg"
                   />
                 </figure>
               </div>
@@ -225,7 +225,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                   <img
                     alt=""
                     class="euiImage emotion-euiImage-fullWidth"
-                    src="/platform/plugins/shared/dashboard/assets/dashboards_light.svg"
+                    src="/plugins/dashboard/assets/dashboards_light.svg"
                   />
                 </figure>
               </div>
@@ -295,7 +295,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
                   <img
                     alt=""
                     class="euiImage emotion-euiImage-fullWidth"
-                    src="/platform/plugins/shared/dashboard/assets/dashboards_light.svg"
+                    src="/plugins/dashboard/assets/dashboards_light.svg"
                   />
                 </figure>
               </div>
