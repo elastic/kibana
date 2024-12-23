@@ -4437,7 +4437,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-common@link:packages/core/deprecations/core-deprecations-common":
+"@kbn/core-deprecations-common@link:src/core/packages/deprecations/common":
   version "0.0.0"
   uid ""
 
