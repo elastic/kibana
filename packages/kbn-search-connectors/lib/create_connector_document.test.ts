@@ -21,7 +21,7 @@ describe('createConnectorDocument', () => {
         name: 'indexName-name',
         pipeline: {
           extract_binary_content: true,
-          name: 'ent-search-generic-ingestion',
+          name: 'search-default-ingestion',
           reduce_whitespace: true,
           run_ml_inference: false,
         },
@@ -103,7 +103,7 @@ describe('createConnectorDocument', () => {
       name: 'indexName-name',
       pipeline: {
         extract_binary_content: true,
-        name: 'ent-search-generic-ingestion',
+        name: 'search-default-ingestion',
         reduce_whitespace: true,
         run_ml_inference: false,
       },

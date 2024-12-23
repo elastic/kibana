@@ -10,6 +10,7 @@ import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { FilterGroup } from './filter_group';
 import * as Hooks from '@kbn/observability-shared-plugin/public/hooks/use_values_list';
+import { EuiThemeProvider } from '@elastic/eui';
 
 describe('FilterGroup', () => {
   it.each([
@@ -97,7 +98,11 @@ describe('FilterGroup', () => {
       });
     }
 
-    const { getByLabelText, getAllByLabelText } = render(<FilterGroup />);
+    const { getByLabelText, getAllByLabelText } = render(
+      <EuiThemeProvider>
+        <FilterGroup />
+      </EuiThemeProvider>
+    );
 
     await waitFor(() => {
       const popoverButton = getByLabelText(popoverButtonLabel);
