@@ -47,6 +47,65 @@ export const ReleaseHostParamsSchema = schema.object({
   comment: schema.string({ minLength: 1 }),
 });
 
+const MachineActionTypeSchema = schema.oneOf([
+  schema.literal('RunAntiVirusScan'),
+  schema.literal('Offboard'),
+  schema.literal('LiveResponse'),
+  schema.literal('CollectInvestigationPackage'),
+  schema.literal('Isolate'),
+  schema.literal('Unisolate'),
+  schema.literal('StopAndQuarantineFile'),
+  schema.literal('RestrictCodeExecution'),
+  schema.literal('UnrestrictCodeExecution'),
+]);
+
+const MachineActionStatusSchema = schema.oneOf([
+  schema.literal('Pending'),
+  schema.literal('InProgress'),
+  schema.literal('Succeeded'),
+  schema.literal('Failed'),
+  schema.literal('TimeOut'),
+  schema.literal('Cancelled'),
+]);
+
+export const GetActionsParamsSchema = schema.object({
+  id: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  status: schema.maybe(
+    schema.oneOf([
+      MachineActionStatusSchema,
+      schema.arrayOf(MachineActionStatusSchema, { minSize: 1 }),
+    ])
+  ),
+  machineId: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  type: schema.maybe(
+    schema.oneOf([MachineActionTypeSchema, schema.arrayOf(MachineActionTypeSchema, { minSize: 1 })])
+  ),
+  requestor: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  creationDateTimeUtc: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  page: schema.maybe(schema.number({ min: 1, defaultValue: 1 })),
+  pageSize: schema.maybe(schema.number({ min: 1, defaultValue: 20 })),
+});
+
 // ----------------------------------
 // Connector Sub-Actions
 // ----------------------------------

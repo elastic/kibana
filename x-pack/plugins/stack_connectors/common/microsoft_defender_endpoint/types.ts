@@ -16,6 +16,7 @@ import {
   ReleaseHostParamsSchema,
   TestConnectorParamsSchema,
   AgentDetailsParamsSchema,
+  GetActionsParamsSchema,
 } from './schema';
 
 export type MicrosoftDefenderEndpointConfig = TypeOf<typeof MicrosoftDefenderEndpointConfigSchema>;
@@ -33,6 +34,18 @@ export interface MicrosoftDefenderEndpointTestConnector {
 }
 
 export type MicrosoftDefenderEndpointAgentDetailsParams = TypeOf<typeof AgentDetailsParamsSchema>;
+
+export type MicrosoftDefenderEndpointGetActionsParams = TypeOf<typeof GetActionsParamsSchema>;
+
+export interface MicrosoftDefenderEndpointGetActionsResponse {
+  '@odata.context': string;
+  '@odata.count'?: number;
+  /** If value is `-1`, then API did not provide a total count */
+  total: number;
+  page: number;
+  pageSize: number;
+  value: MicrosoftDefenderEndpointMachineAction[];
+}
 
 /**
  * @see https://learn.microsoft.com/en-us/defender-endpoint/api/machine
