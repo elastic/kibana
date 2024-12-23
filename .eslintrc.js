@@ -2046,8 +2046,9 @@ module.exports = {
         '**/.storybook/**/*',
         '**/storybook/**/*',
         '**/kbn-storybook/**/*',
-        '**/__stories__/*',
-        '**/mocks/*',
+        '**/__stories__/**/*',
+        '**/mocks/**/*',
+        '**/__mocks__/**/*',
       ],
       rules: {
         // @storybook/addon-essentials contains many packages which are not defined in package.json
