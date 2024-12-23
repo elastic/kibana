@@ -75,7 +75,7 @@ export function getRequestWithStreamOption(
     case OpenAiProviderType.AzureAi:
       return azureAiGetRequestWithStreamOption(url, body, stream);
     case OpenAiProviderType.Other:
-      return otherOpenAiGetRequestWithStreamOption(body, stream);
+      return otherOpenAiGetRequestWithStreamOption(body, stream, defaultModel);
     default:
       return body;
   }
