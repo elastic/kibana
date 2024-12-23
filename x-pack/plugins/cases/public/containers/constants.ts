@@ -23,6 +23,8 @@ export const casesQueriesKeys = {
   casesMetrics: () => [...casesQueriesKeys.casesList(), 'metrics'] as const,
   casesStatuses: () => [...casesQueriesKeys.casesList(), 'statuses'] as const,
   cases: (params: unknown) => [...casesQueriesKeys.casesList(), 'all-cases', params] as const,
+  similarCases: (id: string, params: unknown) =>
+    [...casesQueriesKeys.caseView(), id, 'similar', params] as const,
   caseView: () => [...casesQueriesKeys.all, 'case'] as const,
   case: (id: string) => [...casesQueriesKeys.caseView(), id] as const,
   caseFiles: (id: string, params: unknown) =>
@@ -64,6 +66,9 @@ export const casesMutationsKeys = {
   bulkCreateAttachments: ['bulk-create-attachments'] as const,
   persistCaseConfiguration: ['persist-case-configuration'] as const,
   replaceCustomField: ['replace-custom-field'] as const,
+  postObservable: ['post-observable'] as const,
+  patchObservable: ['patch-observable'] as const,
+  deleteObservable: ['delete-observable'] as const,
 };
 
 const DEFAULT_SEARCH_FIELDS = ['title', 'description'];
