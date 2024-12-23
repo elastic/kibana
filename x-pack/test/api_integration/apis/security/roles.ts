@@ -520,7 +520,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.only('Query Role', () => {
+    describe('Query Role', () => {
       it('should query roles by name', async () => {
         await es.security.putRole({
           name: 'role_to_query',
