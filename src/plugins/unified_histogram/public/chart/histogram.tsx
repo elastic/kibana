@@ -212,6 +212,9 @@ export function Histogram({
       >
         <lens.EmbeddableComponent
           {...lensProps}
+          // forceDSL is set to true to ensure that the Lens always uses DSL to fetch the data
+          // as some consumers (discover) rely on the total hits count which is not provided by ESQL
+          forceDSL={true}
           abortController={abortController}
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}
