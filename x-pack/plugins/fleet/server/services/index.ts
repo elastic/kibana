@@ -20,7 +20,7 @@ export interface AgentPolicyServiceInterface {
   list: (typeof agentPolicyService)['list'];
   delete: (typeof agentPolicyService)['delete'];
   getFullAgentPolicy: (typeof agentPolicyService)['getFullAgentPolicy'];
-  getByIDs: (typeof agentPolicyService)['getByIDs'];
+  getByIds: (typeof agentPolicyService)['getByIds'];
   turnOffAgentTamperProtections: (typeof agentPolicyService)['turnOffAgentTamperProtections'];
   fetchAllAgentPolicyIds: (typeof agentPolicyService)['fetchAllAgentPolicyIds'];
   fetchAllAgentPolicies: (typeof agentPolicyService)['fetchAllAgentPolicies'];

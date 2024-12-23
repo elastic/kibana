@@ -8,7 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import { fetchConnectors } from '@kbn/search-connectors';
+import { NATIVE_CONNECTOR_DEFINITIONS, fetchConnectors } from '@kbn/search-connectors';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 export interface ConnectorMetadata {
@@ -53,6 +53,13 @@ export class AgentlessConnectorsInfraService {
     const allConnectors = await fetchConnectors(this.esClient);
     for (const connector of allConnectors) {
       if (connector.is_native && connector.service_type != null) {
+        if (NATIVE_CONNECTOR_DEFINITIONS[connector.service_type] == null) {
+          this.logger.debug(
+            `Skipping connector ${connector.id}: unsupported service type ${connector.service_type}`
+          );
+          continue;
+        }
+
         nativeConnectors.push({
           id: connector.id,
           name: connector.name,
@@ -76,17 +83,17 @@ export class AgentlessConnectorsInfraService {
         for (const input of policy.inputs) {
           if (input.type === connectorsInputName) {
             if (input.compiled_input != null) {
-              if (input.compiled_input.service_type === null) {
+              if (input.compiled_input.service_type == null) {
                 this.logger.debug(`Policy ${policy.id} is missing service_type, skipping`);
                 continue;
               }
 
-              if (input.compiled_input.connector_id === null) {
+              if (input.compiled_input.connector_id == null) {
                 this.logger.debug(`Policy ${policy.id} is missing connector_id, skipping`);
                 continue;
               }
 
-              if (input.compiled_input.connector_name === null) {
+              if (input.compiled_input.connector_name == null) {
                 this.logger.debug(`Policy ${policy.id} is missing connector_name`);
                 // No need to skip, that's fine
               }
@@ -114,6 +121,20 @@ export class AgentlessConnectorsInfraService {
       `Connector ${connector.id} has no integration policy associated with it, creating`
     );
 
+    if (connector.id == null || connector.id.trim().length === 0) {
+      throw new Error(`Connector id is null or empty`);
+    }
+
+    if (connector.service_type == null || connector.service_type.trim().length === 0) {
+      throw new Error(`Connector ${connector.id} service_type is null or empty`);
+    }
+
+    if (NATIVE_CONNECTOR_DEFINITIONS[connector.service_type] == null) {
+      throw new Error(
+        `Connector ${connector.id} service_type is incompatible with agentless or unsupported`
+      );
+    }
+
     const createdPolicy = await this.agentPolicyService.create(this.soClient, this.esClient, {
       name: `${connector.service_type} connector: ${connector.id}`,
       description: 'Automatically generated',
@@ -123,6 +144,7 @@ export class AgentlessConnectorsInfraService {
       is_protected: false,
       supports_agentless: true,
     });
+
     this.logger.info(
       `Successfully created agent policy ${createdPolicy.id} for agentless connector ${connector.id}`
     );
@@ -141,12 +163,11 @@ export class AgentlessConnectorsInfraService {
       enabled: true,
       inputs: [
         {
-          type: 'connectors-py',
+          type: `${connector.service_type}-connectors-py`,
           enabled: true,
           vars: {
             connector_id: { type: 'string', value: connector.id },
             connector_name: { type: 'string', value: connector.name },
-            service_type: { type: 'string', value: connector.service_type },
           },
           streams: [],
         },
