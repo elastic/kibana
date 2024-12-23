@@ -4697,7 +4697,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-browser@link:packages/core/lifecycle/core-lifecycle-browser":
+"@kbn/core-lifecycle-browser@link:src/core/packages/lifecycle/browser":
   version "0.0.0"
   uid ""
 
