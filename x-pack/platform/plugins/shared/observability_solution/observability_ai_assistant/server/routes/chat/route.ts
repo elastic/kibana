@@ -186,7 +186,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
     }),
   }),
   handler: async (resources): Promise<Readable> => {
-    const { client, simulateFunctionCalling, signal, isCloudEnabled } = await initializeChatRequest(
+    const { client, simulateFunctionCalling, isCloudEnabled } = await initializeChatRequest(
       resources
     );
 
@@ -208,7 +208,6 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
         messages: [],
         userPrompt: prompt,
         recall: client.recall,
-        signal,
       })
     ).pipe(
       map(({ scores, suggestions, relevantDocuments }) => {

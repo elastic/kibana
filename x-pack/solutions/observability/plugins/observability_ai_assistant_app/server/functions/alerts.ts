@@ -116,7 +116,6 @@ export function registerAlertsFunction({
               messages: nextMessages,
               functionCall,
               functions: nextFunctions,
-              signal,
             });
           },
         });
@@ -162,10 +161,9 @@ export function registerAlertsFunction({
           required: ['start', 'end'],
         } as const,
       },
-      async (
-        { arguments: { start: startAsDatemath, end: endAsDatemath, filter, includeRecovered } },
-        signal
-      ) => {
+      async ({
+        arguments: { start: startAsDatemath, end: endAsDatemath, filter, includeRecovered },
+      }) => {
         const alertsClient = await pluginsStart.ruleRegistry.getRacClientWithRequest(
           resources.request as KibanaRequest
         );

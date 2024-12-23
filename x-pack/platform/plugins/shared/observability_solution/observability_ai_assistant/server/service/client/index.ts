@@ -257,7 +257,6 @@ export class ObservabilityAIAssistantClient {
                         connectorId,
                       });
                     },
-                    tracer: completeTracer,
                   })
                 ),
                 shareReplay()

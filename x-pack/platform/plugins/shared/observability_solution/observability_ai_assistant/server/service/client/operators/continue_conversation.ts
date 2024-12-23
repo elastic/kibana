@@ -70,7 +70,7 @@ function executeFunctionAndCatchError({
   // hide token count events from functions to prevent them from
   // having to deal with it as well
 
-  return tracer.startActiveSpan(`execute_function ${name}`, ({ tracer: nextTracer }) =>
+  return tracer.startActiveSpan(`execute_function ${name}`, () =>
     hideTokenCountEvents((hide) => {
       const executeFunctionResponse$ = from(
         functionClient.executeFunction({
@@ -78,7 +78,6 @@ function executeFunctionAndCatchError({
           chat: (operationName, params) => {
             return chat(operationName, {
               ...params,
-              tracer: nextTracer,
               connectorId,
             }).pipe(hide());
           },
@@ -241,7 +240,6 @@ export function continueConversation({
       return chat(operationName, {
         messages: messagesWithUpdatedSystemMessage,
         functions: definitions,
-        tracer,
         connectorId,
       }).pipe(emitWithConcatenatedMessage(), catchFunctionNotFoundError(functionLimitExceeded));
     }

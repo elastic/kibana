@@ -12,7 +12,6 @@ import { Message, MessageRole } from '../../../../common';
 import { concatenateChatCompletionChunks } from '../../../../common/utils/concatenate_chat_completion_chunks';
 import { hideTokenCountEvents } from './hide_token_count_events';
 import { ChatEvent, TokenCountEvent } from '../../../../common/conversation_complete';
-import { LangTracer } from '../instrumentation/lang_tracer';
 
 export const TITLE_CONVERSATION_FUNCTION_NAME = 'title_conversation';
 
@@ -28,12 +27,10 @@ export function getGeneratedTitle({
   messages,
   chat,
   logger,
-  tracer,
 }: {
   messages: Message[];
   chat: ChatFunctionWithoutConnectorAndTokenCount;
   logger: Pick<Logger, 'debug' | 'error'>;
-  tracer: LangTracer;
 }): Observable<string | TokenCountEvent> {
   return hideTokenCountEvents((hide) =>
     chat('generate_title', {
@@ -74,7 +71,6 @@ export function getGeneratedTitle({
         },
       ],
       functionCall: TITLE_CONVERSATION_FUNCTION_NAME,
-      tracer,
     }).pipe(
       hide(),
       concatenateChatCompletionChunks(),

@@ -35,7 +35,6 @@ export async function scoreSuggestions({
   userPrompt,
   context,
   chat,
-  signal,
   logger,
 }: {
   suggestions: RecalledSuggestion[];
@@ -43,7 +42,6 @@ export async function scoreSuggestions({
   userPrompt: string;
   context: string;
   chat: FunctionCallChatFunction;
-  signal: AbortSignal;
   logger: Logger;
 }): Promise<{
   relevantDocuments: RecalledSuggestion[];
@@ -111,7 +109,6 @@ export async function scoreSuggestions({
       messages: [...messages.slice(0, -2), newUserMessage],
       functions: [scoreFunction],
       functionCall: 'score',
-      signal,
     }).pipe(concatenateChatCompletionChunks())
   );
 
