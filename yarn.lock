@@ -4069,7 +4069,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cases-components@link:packages/kbn-cases-components":
+"@kbn/cases-components@link:src/platform/packages/shared/kbn-cases-components":
   version "0.0.0"
   uid ""
 
