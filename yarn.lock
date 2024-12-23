@@ -6521,7 +6521,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-common@link:x-pack/packages/observability/observability_utils/observability_utils_common":
+"@kbn/observability-utils-common@link:x-pack/solutions/observability/packages/utils_common":
   version "0.0.0"
   uid ""
 
