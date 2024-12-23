@@ -4421,7 +4421,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-custom-branding-server@link:packages/core/custom-branding/core-custom-branding-server":
+"@kbn/core-custom-branding-server@link:src/core/packages/custom-branding/server":
   version "0.0.0"
   uid ""
 
