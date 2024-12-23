@@ -4553,7 +4553,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-feature-flags-browser@link:packages/core/feature-flags/core-feature-flags-browser":
+"@kbn/core-feature-flags-browser@link:src/core/packages/feature-flags/browser":
   version "0.0.0"
   uid ""
 

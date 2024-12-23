@@ -293,7 +293,7 @@
     "@kbn/core-execution-context-server-internal": "link:src/core/packages/execution-context/server-internal",
     "@kbn/core-fatal-errors-browser": "link:src/core/packages/fatal-errors/browser",
     "@kbn/core-fatal-errors-browser-internal": "link:src/core/packages/fatal-errors/browser-internal",
-    "@kbn/core-feature-flags-browser": "link:packages/core/feature-flags/core-feature-flags-browser",
+    "@kbn/core-feature-flags-browser": "link:src/core/packages/feature-flags/browser",
     "@kbn/core-feature-flags-browser-internal": "link:packages/core/feature-flags/core-feature-flags-browser-internal",
     "@kbn/core-feature-flags-browser-mocks": "link:packages/core/feature-flags/core-feature-flags-browser-mocks",
     "@kbn/core-feature-flags-server": "link:packages/core/feature-flags/core-feature-flags-server",
