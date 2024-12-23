@@ -6,7 +6,7 @@
  */
 import { uniqBy } from 'lodash';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -96,15 +96,11 @@ export const getSignificantTermRequest = (
     return aggs;
   }, {});
 
-  const body = {
+  return {
+    ...getRequestBase(params),
     query,
     size: 0,
     aggs: wrap(fieldCandidateAggs),
-  };
-
-  return {
-    ...getRequestBase(params),
-    body,
   };
 };
 

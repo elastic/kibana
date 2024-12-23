@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import {
   type SavedObjectsServiceStart,
   type KibanaRequest,
@@ -49,16 +49,13 @@ export function getSavedObjectClientError(error: any) {
 }
 
 export function getJobDetailsFromTrainedModel(
-  model: estypes.MlTrainedModelConfig | estypes.MlPutTrainedModelRequest['body']
+  model: estypes.MlTrainedModelConfig | estypes.MlPutTrainedModelRequest
 ): TrainedModelJob | null {
-  // @ts-ignore types are wrong
   if (model.metadata?.analytics_config === undefined) {
     return null;
   }
 
-  // @ts-ignore types are wrong
   const jobId: string = model.metadata.analytics_config.id;
-  // @ts-ignore types are wrong
   const createTime: number = model.metadata.analytics_config.create_time;
   return { job_id: jobId, create_time: createTime };
 }

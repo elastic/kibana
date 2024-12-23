@@ -27,7 +27,7 @@ import {
   ANALYSIS_CONFIG_TYPE,
 } from '@kbn/ml-data-frame-analytics-utils';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 
 import type { Eval } from '../../../../common';

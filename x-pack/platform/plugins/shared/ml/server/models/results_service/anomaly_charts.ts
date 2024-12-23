@@ -1928,26 +1928,24 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
     const response = await mlClient.anomalySearch<estypes.SearchResponse<MlRecordForInfluencer>>(
       {
-        body: {
-          size: maxResults !== undefined ? maxResults : 100,
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    result_type: 'record',
-                  },
+        size: maxResults !== undefined ? maxResults : 100,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  result_type: 'record',
                 },
-                {
-                  bool: {
-                    must: boolCriteria,
-                  },
+              },
+              {
+                bool: {
+                  must: boolCriteria,
                 },
-              ],
-            },
+              },
+            ],
           },
-          sort: [{ record_score: { order: 'desc' } }],
         },
+        sort: [{ record_score: { order: 'desc' } }],
       },
       jobIds
     );
