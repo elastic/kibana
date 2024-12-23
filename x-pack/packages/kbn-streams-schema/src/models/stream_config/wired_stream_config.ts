@@ -14,6 +14,7 @@ export const wiredStreamConfigDefinitonSchema = z
       processing: z.array(processingDefinitionSchema).default([]),
       wired: z.object({
         fields: fieldDefinitionSchema.default({}),
+        otel_compat_mode: z.optional(z.boolean().default(false)),
       }),
       routing: z.array(streamChildSchema).default([]),
     }),
