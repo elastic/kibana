@@ -119,6 +119,10 @@ export const ATTACK_DISCOVERY = i18n.translate(
   }
 );
 
+export const INVENTORY = i18n.translate('xpack.securitySolution.navigation.inventory', {
+  defaultMessage: 'Inventory',
+});
+
 export const TIMELINES = i18n.translate('xpack.securitySolution.navigation.timelines', {
   defaultMessage: 'Timelines',
 });

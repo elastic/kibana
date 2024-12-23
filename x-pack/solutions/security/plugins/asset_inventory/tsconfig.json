@@ -14,10 +14,5 @@
     "../../../../../typings/**/*"
   ],
   "exclude": ["target/**/*"],
-  "kbn_references": [
-    "@kbn/core",
-    "@kbn/i18n-react",
-    "@kbn/shared-ux-router",
-    "@kbn/securitysolution-es-utils"
-  ]
+  "kbn_references": ["@kbn/core", "@kbn/i18n-react", "@kbn/securitysolution-es-utils"]
 }
