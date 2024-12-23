@@ -4277,7 +4277,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-browser-internal@link:packages/core/analytics/core-analytics-browser-internal":
+"@kbn/core-analytics-browser-internal@link:src/core/packages/analytics/browser-internal":
   version "0.0.0"
   uid ""
 
