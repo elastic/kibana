@@ -4313,7 +4313,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-application-browser@link:packages/core/application/core-application-browser":
+"@kbn/core-application-browser@link:src/core/packages/application/browser":
   version "0.0.0"
   uid ""
 
