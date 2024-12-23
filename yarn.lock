@@ -4417,7 +4417,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-custom-branding-server-mocks@link:packages/core/custom-branding/core-custom-branding-server-mocks":
+"@kbn/core-custom-branding-server-mocks@link:src/core/packages/custom-branding/server-mocks":
   version "0.0.0"
   uid ""
 
