@@ -260,7 +260,7 @@
     "@kbn/core-base-common-internal": "link:src/core/packages/base/common-internal",
     "@kbn/core-base-server-internal": "link:src/core/packages/base/server-internal",
     "@kbn/core-capabilities-browser-internal": "link:src/core/packages/capabilities/browser-internal",
-    "@kbn/core-capabilities-common": "link:packages/core/capabilities/core-capabilities-common",
+    "@kbn/core-capabilities-common": "link:src/core/packages/capabilities/common",
     "@kbn/core-capabilities-server": "link:packages/core/capabilities/core-capabilities-server",
     "@kbn/core-capabilities-server-internal": "link:packages/core/capabilities/core-capabilities-server-internal",
     "@kbn/core-chrome-browser": "link:packages/core/chrome/core-chrome-browser",
