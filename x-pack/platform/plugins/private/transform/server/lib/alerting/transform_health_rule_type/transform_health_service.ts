@@ -60,47 +60,34 @@ export function transformHealthServiceProvider({
    * @param includeTransforms
    * @param excludeTransforms
    */
-  const getResultsTransformIds = async (
+  const getResultsTransformIds = (
+    transforms: Transform[],
     includeTransforms: string[],
     excludeTransforms: string[] | null
-  ): Promise<Set<string>> => {
-    const includeAll = includeTransforms.some((id) => id === ALL_TRANSFORMS_SELECTION);
+  ): Set<string> => {
+    const continuousTransforms: Transform[] = transforms.filter(isContinuousTransform);
 
-    let resultTransformIds: string[] = [];
-
-    // Fetch transforms to make sure assigned transforms exists.
-    const transformsResponse = (
-      await esClient.transform.getTransform({
-        ...(includeAll ? {} : { transform_id: includeTransforms.join(',') }),
-        allow_no_match: true,
-        size: 1000,
-      })
-    ).transforms as Transform[];
-
-    transformsResponse.forEach((t) => {
+    continuousTransforms.forEach((t) => {
       transformsDict.set(t.id, t);
-      // Include only continuously running transforms.
-      if (isContinuousTransform(t)) {
-        resultTransformIds.push(t.id);
-      }
     });
 
-    if (excludeTransforms && excludeTransforms.length > 0) {
-      let excludeIdsSet = new Set(excludeTransforms);
-      if (excludeTransforms.some((id) => id.includes('*'))) {
-        const excludeTransformResponse = (
-          await esClient.transform.getTransform({
-            transform_id: excludeTransforms.join(','),
-            allow_no_match: true,
-            size: 1000,
-          })
-        ).transforms as Transform[];
-        excludeIdsSet = new Set(excludeTransformResponse.map((t) => t.id));
-      }
-      resultTransformIds = resultTransformIds.filter((id) => !excludeIdsSet.has(id));
-    }
-
-    return new Set(resultTransformIds);
+    return new Set(
+      continuousTransforms
+        .filter(
+          (t) =>
+            includeTransforms.some((includedTransformId) =>
+              new RegExp('^' + includedTransformId.replace(/\*/g, '.*') + '$').test(t.id)
+            ) &&
+            (Array.isArray(excludeTransforms) && excludeTransforms.length > 0
+              ? excludeTransforms.every(
+                  (excludedTransformId) =>
+                    new RegExp('^' + excludedTransformId.replace(/\*/g, '.*') + '$').test(t.id) ===
+                    false
+                )
+              : true)
+        )
+        .map((t) => t.id)
+    );
   };
 
   const getTransformStats = memoize(
@@ -270,7 +257,18 @@ export function transformHealthServiceProvider({
      * @param params
      */
     async getHealthChecksResults(params: TransformHealthRuleParams) {
-      const transformIds = await getResultsTransformIds(
+      const includeAll = params.includeTransforms.some((id) => id === ALL_TRANSFORMS_SELECTION);
+
+      const transforms = (
+        await esClient.transform.getTransform({
+          ...(includeAll ? {} : { transform_id: params.includeTransforms.join(',') }),
+          allow_no_match: true,
+          size: 1000,
+        })
+      ).transforms as Transform[];
+
+      const transformIds = getResultsTransformIds(
+        transforms,
         params.includeTransforms,
         params.excludeTransforms
       );
@@ -406,21 +404,10 @@ export function transformHealthServiceProvider({
         // Retrieve result transform IDs
         const { includeTransforms, excludeTransforms } = ruleInstance.params;
 
-        const resultTransformIds = new Set(
-          transforms
-            .filter(
-              (t) =>
-                includeTransforms.some((includedTransformId) =>
-                  new RegExp(includedTransformId.replace(/\*/g, '.*')).test(t.id)
-                ) &&
-                (Array.isArray(excludeTransforms) && excludeTransforms.length > 0
-                  ? excludeTransforms.every(
-                      (excludedTransformId) =>
-                        new RegExp(excludedTransformId.replace(/\*/g, '.*')).test(t.id) === false
-                    )
-                  : true)
-            )
-            .map((t) => t.id)
+        const resultTransformIds = getResultsTransformIds(
+          transforms,
+          includeTransforms,
+          excludeTransforms
         );
 
         resultTransformIds.forEach((transformId) => {

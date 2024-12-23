@@ -28,6 +28,24 @@ describe('transformHealthServiceProvider', () => {
 
     (esClient.transform.getTransform as jest.Mock).mockImplementation(
       async ({ transform_id: transformId }) => {
+        return {
+          transforms: [
+            // Mock continuous transforms
+            ...new Array(102).fill(null).map((_, i) => ({
+              id: `transform${i}`,
+              sync: {
+                time: {
+                  field: 'order_date',
+                  delay: '60s',
+                },
+              },
+            })),
+            {
+              id: 'transform102',
+            },
+          ],
+        } as unknown as TransformGetTransformResponse;
+
         if (transformId === 'transform4,transform6,transform6*') {
           // arrangement for exclude transforms
           return {
@@ -91,14 +109,9 @@ describe('transformHealthServiceProvider', () => {
       testsConfig: null,
     });
 
-    expect(esClient.transform.getTransform).toHaveBeenCalledTimes(2);
+    expect(esClient.transform.getTransform).toHaveBeenCalledTimes(1);
 
     expect(esClient.transform.getTransform).toHaveBeenCalledWith({
-      allow_no_match: true,
-      size: 1000,
-    });
-    expect(esClient.transform.getTransform).toHaveBeenCalledWith({
-      transform_id: 'transform4,transform6,transform6*',
       allow_no_match: true,
       size: 1000,
     });
