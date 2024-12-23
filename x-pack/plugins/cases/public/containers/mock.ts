@@ -16,6 +16,7 @@ import type {
   Cases,
   CaseConnector,
   Attachment,
+  ObservableType,
 } from '../../common/types/domain';
 import {
   CaseSeverity,
@@ -46,9 +47,11 @@ import type {
   CaseUICustomField,
   CasesConfigurationUICustomField,
   CasesConfigurationUITemplate,
+  CasesSimilarResponseUI,
+  ObservableUI,
 } from '../../common/ui/types';
 import { CaseMetricsFeature } from '../../common/types/api';
-import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import type { SnakeToCamelCase } from '../../common/types';
 import { covertToSnakeCase } from './utils';
 import type {
@@ -56,7 +59,11 @@ import type {
   AttachmentViewObject,
   PersistableStateAttachmentType,
 } from '../client/attachment_framework/types';
-import type { CasesFindResponse, UserActionWithResponse } from '../../common/types/api';
+import type {
+  CasesFindResponse,
+  CasesSimilarResponse,
+  UserActionWithResponse,
+} from '../../common/types/api';
 
 export { connectorsMock } from '../common/mock/connectors';
 export const basicCaseId = 'basic-case-id';
@@ -248,6 +255,7 @@ export const basicCase: CaseUI = {
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
   category: null,
   customFields: [],
+  observables: [],
 };
 
 export const basicFileMock: FileJSON = {
@@ -371,6 +379,7 @@ export const mockCase: CaseUI = {
   assignees: [],
   category: null,
   customFields: [],
+  observables: [],
 };
 
 export const basicCasePost: CaseUI = {
@@ -459,6 +468,16 @@ export const allCases: CasesFindResponseUI = {
   countOpenCases: 20,
   countInProgressCases: 40,
   countClosedCases: 130,
+};
+
+export const similarCases: CasesSimilarResponseUI = {
+  cases: cases.map(({ comments, ...theCase }) => ({
+    ...theCase,
+    similarities: { observables: [] },
+  })),
+  page: 1,
+  perPage: 5,
+  total: 10,
 };
 
 export const actionLicenses: ActionLicense[] = [
@@ -620,6 +639,13 @@ export const allCasesSnake: CasesFindResponse = {
   count_closed_cases: 130,
   count_in_progress_cases: 40,
   count_open_cases: 20,
+};
+
+export const similarCasesSnake: CasesSimilarResponse = {
+  cases: casesSnake.map(({ ...theCase }) => ({ ...theCase, similarities: { observables: [] } })),
+  page: 1,
+  per_page: 5,
+  total: 10,
 };
 
 export const getUserAction = (
@@ -1265,5 +1291,35 @@ export const templatesConfigurationMock: CasesConfigurationUITemplate[] = [
         fields: { issueType: 'Task', priority: 'Low', parent: null },
       },
     },
+  },
+];
+
+export const observableTypesMock: ObservableType[] = [
+  {
+    label: 'test_observable_type_1',
+    key: '26f3f226-6611-4371-9242-c959b37c7af6',
+  },
+  {
+    label: 'test_observable_type_2',
+    key: '67ec9e77-f64c-47d9-900c-1142239e0d25',
+  },
+];
+
+export const mockObservables: ObservableUI[] = [
+  {
+    id: 'fa6dfb79-7fd5-44d0-a582-ca196e3a5e69',
+    value: '127.0.0.1',
+    typeKey: OBSERVABLE_TYPE_IPV4.key,
+    description: null,
+    createdAt: '2024-12-11',
+    updatedAt: '2024-12-11',
+  },
+  {
+    id: '096ca782-bd39-4dbf-8cf1-253d18277fdc',
+    value: '10.0.0.1',
+    typeKey: OBSERVABLE_TYPE_IPV4.key,
+    description: null,
+    createdAt: '2024-12-11',
+    updatedAt: '2024-12-11',
   },
 ];
