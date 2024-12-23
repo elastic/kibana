@@ -5193,7 +5193,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/custom-integrations-plugin@link:src/plugins/custom_integrations":
+"@kbn/custom-integrations-plugin@link:src/platform/plugins/shared/custom_integrations":
   version "0.0.0"
   uid ""
 

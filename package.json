@@ -419,7 +419,7 @@
     "@kbn/custom-branding-plugin": "link:x-pack/plugins/custom_branding",
     "@kbn/custom-icons": "link:src/platform/packages/shared/kbn-custom-icons",
     "@kbn/custom-integrations": "link:x-pack/solutions/observability/packages/kbn-custom-integrations",
-    "@kbn/custom-integrations-plugin": "link:src/plugins/custom_integrations",
+    "@kbn/custom-integrations-plugin": "link:src/platform/plugins/shared/custom_integrations",
     "@kbn/dashboard-enhanced-plugin": "link:x-pack/plugins/dashboard_enhanced",
     "@kbn/dashboard-plugin": "link:src/plugins/dashboard",
     "@kbn/data-forge": "link:x-pack/platform/packages/shared/kbn-data-forge",
