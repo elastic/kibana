@@ -7,4 +7,3 @@
 
 export const PLUGIN_ID = 'searchSynonyms';
 export const PLUGIN_NAME = 'Synonyms';
-export const PLUGIN_PATH = '/synonyms';

@@ -9,17 +9,14 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
-  ui: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-  }),
+  enabled: schema.boolean({ defaultValue: false }),
 });
 
 export type SearchPlaygroundConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<SearchPlaygroundConfig> = {
   exposeToBrowser: {
-    ui: true,
+    enabled: true,
   },
   schema: configSchema,
 };

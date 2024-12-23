@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import { BehaviorSubject, type Subscription } from 'rxjs';
-
-import { AppStatus } from '@kbn/core/public';
 import type {
-  AppUpdater,
   CoreSetup,
   Plugin,
   PluginInitializerContext,
   AppMountParameters,
-  CoreStart,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
@@ -31,9 +26,6 @@ export class SearchSynonymsPlugin
   implements Plugin<SearchSynonymsPluginSetup, SearchSynonymsPluginStart>
 {
   private config: SearchSynonymsConfigType;
-  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private licenseSubscription?: Subscription;
-
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<SearchSynonymsConfigType>();
   }
@@ -42,7 +34,7 @@ export class SearchSynonymsPlugin
     core: CoreSetup<AppPluginStartDependencies, SearchSynonymsPluginStart>,
     _: AppPluginSetupDependencies
   ): SearchSynonymsPluginSetup {
-    if (!this.config.ui?.enabled && !core.uiSettings.get<boolean>(SYNONYMS_UI_FLAG, false)) {
+    if (!this.config.enabled || !core.uiSettings.get<boolean>(SYNONYMS_UI_FLAG, false)) {
       return {};
     }
     core.application.register({
@@ -52,15 +44,13 @@ export class SearchSynonymsPlugin
       deepLinks: [
         {
           id: 'synonyms',
-          path: PLUGIN_PATH,
+          path: '/',
           title: i18n.translate('xpack.searchSynonyms.appTitle', {
             defaultMessage: 'Synonyms',
           }),
           visibleIn: ['globalSearch'],
         },
       ],
-      status: AppStatus.inaccessible,
-      updater$: this.appUpdater$,
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
@@ -82,23 +72,9 @@ export class SearchSynonymsPlugin
     return {};
   }
 
-  public start(_: CoreStart, deps: AppPluginStartDependencies): SearchSynonymsPluginStart {
-    const { licensing } = deps;
-    this.licenseSubscription = licensing.license$.subscribe((license) => {
-      const status: AppStatus =
-        license && license.isAvailable && license.isActive && license.hasAtLeast('enterprise')
-          ? AppStatus.accessible
-          : AppStatus.inaccessible;
-
-      this.appUpdater$.next(() => ({ status }));
-    });
+  public start(): SearchSynonymsPluginStart {
     return {};
   }
 
-  public stop() {
-    if (this.licenseSubscription) {
-      this.licenseSubscription.unsubscribe();
-      this.licenseSubscription = undefined;
-    }
-  }
+  public stop() {}
 }

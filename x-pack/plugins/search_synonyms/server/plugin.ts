@@ -41,7 +41,6 @@ export class SearchSynonymsPlugin
 
     plugins.features.registerKibanaFeature({
       id: PLUGIN_ID,
-      minimumLicense: 'enterprise',
       name: PLUGIN_NAME,
       order: 0,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
@@ -51,21 +50,22 @@ export class SearchSynonymsPlugin
       privileges: {
         all: {
           app: ['kibana', PLUGIN_ID],
-          api: [],
+          api: ['synonyms:manage', 'synonyms:read'],
           catalogue: [PLUGIN_ID],
           savedObject: {
             all: [],
             read: [],
           },
-          ui: [],
+          ui: ['read', 'save'],
         },
         read: {
-          disabled: true,
+          app: ['kibana', PLUGIN_ID],
+          api: ['synonyms:read'],
           savedObject: {
             all: [],
             read: [],
           },
-          ui: [],
+          ui: ['read'],
         },
       },
     });

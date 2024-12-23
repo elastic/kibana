@@ -12,13 +12,8 @@ export interface SearchSynonymsPluginSetup {}
 export interface SearchSynonymsPluginStart {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SearchSynonymsConfigType {}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AppPluginSetupDependencies {}
 
 export interface SearchSynonymsConfigType {
-  ui: {
-    enabled: boolean;
-  };
+  enabled: boolean;
 }

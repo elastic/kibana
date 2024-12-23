@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 export * from '../common/types';
 
 export interface AppPluginStartDependencies {
   history: AppMountParameters['history'];
   console?: ConsolePluginStart;
-  licensing: LicensingPluginStart;
   searchNavigation: SearchNavigationPluginStart;
 }
 import { AppMountParameters } from '@kbn/core/public';
