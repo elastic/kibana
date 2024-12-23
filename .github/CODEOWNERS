@@ -169,7 +169,6 @@ packages/kbn-code-owners @elastic/appex-qa
 packages/kbn-coloring @elastic/kibana-visualizations
 packages/kbn-content-management-utils @elastic/kibana-data-discovery
 packages/kbn-crypto @elastic/kibana-security
-packages/kbn-crypto-browser @elastic/kibana-core
 packages/kbn-cypress-config @elastic/kibana-operations
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 packages/kbn-data-view-utils @elastic/kibana-data-discovery
@@ -183,7 +182,6 @@ packages/kbn-dev-utils @elastic/kibana-operations
 packages/kbn-discover-utils @elastic/kibana-data-discovery
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
-packages/kbn-ebt-tools @elastic/kibana-core
 packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-es-query @elastic/kibana-data-discovery
@@ -279,7 +277,6 @@ packages/kbn-reporting/public @elastic/appex-sharedux
 packages/kbn-reporting/server @elastic/appex-sharedux
 packages/kbn-resizable-layout @elastic/kibana-data-discovery
 packages/kbn-rison @elastic/kibana-operations
-packages/kbn-router-to-openapispec @elastic/kibana-core
 packages/kbn-rrule @elastic/response-ops
 packages/kbn-safer-lodash-set @elastic/kibana-security
 packages/kbn-saved-objects-settings @elastic/appex-sharedux
@@ -561,10 +558,16 @@ src/platform/packages/shared/deeplinks/security @elastic/security-solution
 src/platform/packages/shared/kbn-analytics @elastic/kibana-core
 src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
 src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting-explore
+src/platform/packages/shared/kbn-config @elastic/kibana-core
+src/platform/packages/shared/kbn-config-schema @elastic/kibana-core
+src/platform/packages/shared/kbn-crypto-browser @elastic/kibana-core
 src/platform/packages/shared/kbn-custom-icons @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-discover-contextual-components @elastic/obs-ux-logs-team @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-doc-links @elastic/docs
+src/platform/packages/shared/kbn-ebt-tools @elastic/kibana-core
 src/platform/packages/shared/kbn-elastic-agent-utils @elastic/obs-ux-logs-team
+src/platform/packages/shared/kbn-es-errors @elastic/kibana-core
+src/platform/packages/shared/kbn-es-types @elastic/kibana-core @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-esql
@@ -582,6 +585,7 @@ src/platform/packages/shared/kbn-management/settings/utilities @elastic/kibana-m
 src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
 src/platform/packages/shared/kbn-react-hooks @elastic/obs-ux-logs-team
+src/platform/packages/shared/kbn-router-to-openapispec @elastic/kibana-core
 src/platform/packages/shared/kbn-router-utils @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detections-response @elastic/response-ops @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
@@ -596,10 +600,13 @@ src/platform/packages/shared/kbn-server-route-repository-utils @elastic/obs-know
 src/platform/packages/shared/kbn-sse-utils @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-sse-utils-client @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-sse-utils-server @elastic/obs-knowledge-team
+src/platform/packages/shared/kbn-std @elastic/kibana-core
 src/platform/packages/shared/kbn-timerange @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
+src/platform/packages/shared/kbn-utility-types @elastic/kibana-core
 src/platform/packages/shared/kbn-xstate-utils @elastic/obs-ux-logs-team
+src/platform/packages/shared/kbn-zod @elastic/kibana-core
 src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-management
 src/platform/packages/shared/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
 src/platform/plugins/private/ftr_apis @elastic/kibana-core
@@ -829,6 +836,7 @@ x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
 x-pack/platform/packages/shared/observability/alerting_rule_utils @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/observability/logs_overview @elastic/obs-ux-logs-team
+x-pack/platform/plugins/private/cloud_integrations/cloud_chat @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration @elastic/kibana-management
 x-pack/platform/plugins/private/cloud_integrations/cloud_full_story @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_links @elastic/kibana-core
@@ -851,15 +859,19 @@ x-pack/platform/plugins/private/watcher @elastic/kibana-management
 x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
+x-pack/platform/plugins/shared/cloud @elastic/kibana-core
+x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments @elastic/kibana-core
 x-pack/platform/plugins/shared/data_quality @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/dataset_quality @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
+x-pack/platform/plugins/shared/features @elastic/kibana-core
 x-pack/platform/plugins/shared/fields_metadata @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management
 x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
 x-pack/platform/plugins/shared/integration_assistant @elastic/security-scalability
 x-pack/platform/plugins/shared/license_management @elastic/kibana-management
+x-pack/platform/plugins/shared/licensing @elastic/kibana-core
 x-pack/platform/plugins/shared/logs_data_access @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/logs_shared @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/ml @elastic/ml-ui
@@ -880,7 +892,6 @@ x-pack/plugins/embeddable_enhanced @elastic/kibana-presentation
 x-pack/plugins/encrypted_saved_objects @elastic/kibana-security
 x-pack/plugins/enterprise_search @elastic/search-kibana
 x-pack/plugins/event_log @elastic/response-ops
-x-pack/plugins/features @elastic/kibana-core
 x-pack/plugins/file_upload @elastic/kibana-presentation @elastic/ml-ui
 x-pack/plugins/fleet @elastic/fleet
 x-pack/plugins/global_search @elastic/appex-sharedux
