@@ -585,6 +585,17 @@
           }
         }
       },
+      "observables": {
+        "properties": {
+          "typeKey": {
+            "type": "keyword"
+          },
+          "value": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      },
       "owner": {
         "type": "keyword"
       },
