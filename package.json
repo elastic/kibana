@@ -186,7 +186,7 @@
     "@kbn/analytics-plugin-a-plugin": "link:test/analytics/plugins/analytics_plugin_a",
     "@kbn/apm-config-loader": "link:packages/kbn-apm-config-loader",
     "@kbn/apm-data-access-plugin": "link:x-pack/solutions/observability/plugins/apm_data_access",
-    "@kbn/apm-data-view": "link:packages/kbn-apm-data-view",
+    "@kbn/apm-data-view": "link:src/platform/packages/shared/kbn-apm-data-view",
     "@kbn/apm-plugin": "link:x-pack/plugins/observability_solution/apm",
     "@kbn/apm-types": "link:packages/kbn-apm-types",
     "@kbn/apm-utils": "link:packages/kbn-apm-utils",
