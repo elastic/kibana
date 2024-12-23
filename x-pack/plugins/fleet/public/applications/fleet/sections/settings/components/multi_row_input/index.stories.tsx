@@ -33,22 +33,24 @@ const args: Args = {
   disabled: false,
 };
 
+const HostsInputComponent = ({ width, label, helpText, disabled }: Args) => {
+  const [value, setValue] = useState<string[]>([]);
+  return (
+    <div style={{ width }}>
+      <Component
+        id="test-host-input"
+        helpText={helpText}
+        value={value}
+        onChange={setValue}
+        label={label}
+        disabled={disabled}
+      />
+    </div>
+  );
+};
+
 export const HostsInput = {
-  render: ({ width, label, helpText, disabled }: Args) => {
-    const [value, setValue] = useState<string[]>([]);
-    return (
-      <div style={{ width }}>
-        <Component
-          id="test-host-input"
-          helpText={helpText}
-          value={value}
-          onChange={setValue}
-          label={label}
-          disabled={disabled}
-        />
-      </div>
-    );
-  },
+  render: (params: Args) => <HostsInputComponent {...params} />,
 
   args,
 };
@@ -78,23 +80,25 @@ export const HostsInputDisabled = {
   },
 };
 
+const HostsInputUrlComponent = () => {
+  const [value, setValue] = useState<string[]>([]);
+  return (
+    <div style={{ maxWidth: '350px' }}>
+      <Component
+        id="test-host-input"
+        helpText={'Host input help text'}
+        value={value}
+        onChange={setValue}
+        label={'Host input label'}
+        disabled={false}
+        isUrl={true}
+      />
+    </div>
+  );
+};
+
 export const HostsInputUrl = {
-  render: () => {
-    const [value, setValue] = useState<string[]>([]);
-    return (
-      <div style={{ maxWidth: '350px' }}>
-        <Component
-          id="test-host-input"
-          helpText={'Host input help text'}
-          value={value}
-          onChange={setValue}
-          label={'Host input label'}
-          disabled={false}
-          isUrl={true}
-        />
-      </div>
-    );
-  },
+  render: () => <HostsInputUrlComponent />,
 
   args: { value: ['https://test1.com', 'https://test2.com', 'https://test3.com'] },
 
