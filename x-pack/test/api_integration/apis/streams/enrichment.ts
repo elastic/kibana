@@ -96,9 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
         message: '2023-01-01T00:00:10.000Z error test',
         inner_timestamp: '2023-01-01T00:00:10.000Z',
         message2: 'test',
-        log: {
-          level: 'error',
-        },
+        'log.level': 'error',
       });
     });
 
@@ -122,10 +120,8 @@ export default function ({ getService }: FtrProviderContext) {
         '@timestamp': '2024-01-01T00:00:11.000Z',
         message: '2023-01-01T00:00:10.000Z info mylogger this is the message',
         inner_timestamp: '2023-01-01T00:00:10.000Z',
-        log: {
-          level: 'info',
-          logger: 'mylogger',
-        },
+        'log.level': 'info',
+        'log.logger': 'mylogger',
         message2: 'mylogger this is the message',
         message3: 'this is the message',
       });
