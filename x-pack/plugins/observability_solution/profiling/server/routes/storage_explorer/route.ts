@@ -29,7 +29,11 @@ export function registerStorageExplorerRoute({
   router.get(
     {
       path: paths.StorageExplorerSummary,
-      options: { tags: ['access:profiling'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['profiling'],
+        },
+      },
       validate: {
         query: schema.object({
           indexLifecyclePhase: schema.oneOf([
@@ -112,7 +116,11 @@ export function registerStorageExplorerRoute({
   router.get(
     {
       path: paths.StorageExplorerHostStorageDetails,
-      options: { tags: ['access:profiling'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['profiling'],
+        },
+      },
       validate: {
         query: schema.object({
           indexLifecyclePhase: schema.oneOf([
@@ -156,7 +164,11 @@ export function registerStorageExplorerRoute({
   router.get(
     {
       path: paths.StorageExplorerIndicesStorageDetails,
-      options: { tags: ['access:profiling'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['profiling'],
+        },
+      },
       validate: {
         query: schema.object({
           indexLifecyclePhase: schema.oneOf([

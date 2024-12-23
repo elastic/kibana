@@ -15,58 +15,78 @@ import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 jest.mock('./authorization/alerting_authorization');
 
-const features = featuresPluginMock.createStart();
+describe('AlertingAuthorizationClientFactory', () => {
+  const features = featuresPluginMock.createStart();
+  const securityPluginStart = securityMock.createStart();
+  const alertingAuthorizationClientFactoryParams: jest.Mocked<AlertingAuthorizationClientFactoryOpts> =
+    {
+      ruleTypeRegistry: ruleTypeRegistryMock.create(),
+      getSpace: jest.fn(),
+      getSpaceId: jest.fn(),
+      features,
+    };
 
-const securityPluginSetup = securityMock.createSetup();
-const securityPluginStart = securityMock.createStart();
-
-const alertingAuthorizationClientFactoryParams: jest.Mocked<AlertingAuthorizationClientFactoryOpts> =
-  {
-    ruleTypeRegistry: ruleTypeRegistryMock.create(),
-    getSpace: jest.fn(),
-    getSpaceId: jest.fn(),
-    features,
-  };
-
-beforeEach(() => {
-  jest.resetAllMocks();
-});
-
-test('creates an alerting authorization client with proper constructor arguments when security is enabled', async () => {
-  const factory = new AlertingAuthorizationClientFactory();
-  factory.initialize({
-    securityPluginSetup,
-    securityPluginStart,
-    ...alertingAuthorizationClientFactoryParams,
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
-  const request = mockRouter.createKibanaRequest();
 
-  factory.create(request);
+  it('creates an alerting authorization client with proper constructor arguments when security is enabled', async () => {
+    const factory = new AlertingAuthorizationClientFactory();
 
-  const { AlertingAuthorization } = jest.requireMock('./authorization/alerting_authorization');
-  expect(AlertingAuthorization).toHaveBeenCalledWith({
-    request,
-    authorization: securityPluginStart.authz,
-    ruleTypeRegistry: alertingAuthorizationClientFactoryParams.ruleTypeRegistry,
-    features: alertingAuthorizationClientFactoryParams.features,
-    getSpace: expect.any(Function),
-    getSpaceId: expect.any(Function),
+    factory.initialize({
+      securityPluginStart,
+      ...alertingAuthorizationClientFactoryParams,
+    });
+
+    const request = mockRouter.createKibanaRequest();
+
+    await factory.create(request);
+
+    const { AlertingAuthorization } = jest.requireMock('./authorization/alerting_authorization');
+    expect(AlertingAuthorization.create).toHaveBeenCalledWith({
+      request,
+      authorization: securityPluginStart.authz,
+      ruleTypeRegistry: alertingAuthorizationClientFactoryParams.ruleTypeRegistry,
+      features: alertingAuthorizationClientFactoryParams.features,
+      getSpace: expect.any(Function),
+      getSpaceId: expect.any(Function),
+    });
   });
-});
 
-test('creates an alerting authorization client with proper constructor arguments', async () => {
-  const factory = new AlertingAuthorizationClientFactory();
-  factory.initialize(alertingAuthorizationClientFactoryParams);
-  const request = mockRouter.createKibanaRequest();
+  it('creates an alerting authorization client with proper constructor arguments', async () => {
+    const factory = new AlertingAuthorizationClientFactory();
+    factory.initialize(alertingAuthorizationClientFactoryParams);
+    const request = mockRouter.createKibanaRequest();
 
-  factory.create(request);
+    await factory.create(request);
 
-  const { AlertingAuthorization } = jest.requireMock('./authorization/alerting_authorization');
-  expect(AlertingAuthorization).toHaveBeenCalledWith({
-    request,
-    ruleTypeRegistry: alertingAuthorizationClientFactoryParams.ruleTypeRegistry,
-    features: alertingAuthorizationClientFactoryParams.features,
-    getSpace: expect.any(Function),
-    getSpaceId: expect.any(Function),
+    const { AlertingAuthorization } = jest.requireMock('./authorization/alerting_authorization');
+    expect(AlertingAuthorization.create).toHaveBeenCalledWith({
+      request,
+      ruleTypeRegistry: alertingAuthorizationClientFactoryParams.ruleTypeRegistry,
+      features: alertingAuthorizationClientFactoryParams.features,
+      getSpace: expect.any(Function),
+      getSpaceId: expect.any(Function),
+    });
+  });
+
+  it('throws when trying to initialize again and it is already initialized', async () => {
+    const factory = new AlertingAuthorizationClientFactory();
+    factory.initialize(alertingAuthorizationClientFactoryParams);
+
+    expect(() =>
+      factory.initialize(alertingAuthorizationClientFactoryParams)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"AlertingAuthorizationClientFactory already initialized"`
+    );
+  });
+
+  it('throws when trying to create an instance and the factory is not initialized', async () => {
+    const request = mockRouter.createKibanaRequest();
+    const factory = new AlertingAuthorizationClientFactory();
+
+    await expect(() => factory.create(request)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"AlertingAuthorizationClientFactory must be initialized before calling create"`
+    );
   });
 });

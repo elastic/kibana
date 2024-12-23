@@ -39,19 +39,19 @@ Choose the data you want to visualize.
 
 Edit and delete.
 
-. Click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to clear Lens visualization layers] on the panel, then **Edit visualization**. 
+. Hover over the panel and click image:dashboard/images/edit-visualization-icon.png[Edit visualization icon, width=3%] to edit the visualization. The *Edit visualization* flyout appears.
 
-. To change the aggregation *Quick function* and, click the field in the flyout. 
+. To change the aggregation *Quick function*, click the field in the flyout. 
 
 . To delete a field, click image:dashboard/images/trash_can.png[Actions menu icon to delete a field, width=5%] next to the field.
 
-. To duplicate a layer, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to duplicate Lens visualization layers] in the flyout, then select *Duplicate layer*.
+. To duplicate a layer, click image:dashboard/images/vertical-actions-menu.png[Actions menu to duplicate Lens visualization layers] in the flyout, then select *Duplicate layer*.
 
-. To clear the layer configuration, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to clear Lens visualization layers] in the flyout, then select *Clear layer*.
+. To clear the layer configuration, click image:dashboard/images/vertical-actions-menu.png[Actions menu to clear Lens visualization layers] in the flyout, then select *Clear layer*.
 
 . Click **Apply and close**. 
 
-TIP: Use the **Edit visualization** flyout to make edits without having to leave the dashboard, or click **Edit in Lens** to make edits using the Lens application.
+TIP: Use the **Edit visualization** flyout to make edits without having to leave the dashboard, or click **Edit in Lens** in the flyout to make edits using the Lens application.
 
 [float]
 [[change-the-fields]]
@@ -96,13 +96,37 @@ All columns that belong to the same layer pane group are sorted in the table.
 
 * *Text alignment* &mdash; Aligns the values in the cell to the *Left*, *Center*, or *Right*.
 
+* *Color by value* &mdash; Applies color to the cell or text values. To change the color, click the *Edit colors* icon. 
+
 * *Hide column* &mdash; Hides the column for the field.
 
 * *Directly filter on click* &mdash; Turns column values into clickable links that allow you to filter or drill down into the data.
 
 * *Summary row* &mdash; Adds a row that displays the summary value. When specified, allows you to enter a *Summary label*.
 
-* *Color by value* &mdash; Applies color to the cell or text values. To change the color, click *Edit*. 
+[float]
+[[assign-colors-to-terms]]
+===== Assign colors to terms
+
+preview::[]
+
+For term-based metrics, assign a color to each term with color mapping. 
+
+. Create a custom table.
+ 
+. In the layer pane, select a *Rows* or *Metrics* field. 
+
+. In the *Color by value* option, select *Cell* or *Text*.
+
+. Click the *Edit colors* icon.
+
+. Toggle the button to use the Color Mapping feature.
+
+. Select a color palette and mode.
+
+. Click *Add assignment* to assign a color to a specific term, or click *Add all unassigned terms* to assign colors to all terms. Assigning colors to dates is unsupported.
+
+. Configure color assignments. You can also select whether unassigned terms should be mapped to the selected color palette or a single color. 
 
 [float]
 [[drag-and-drop-keyboard-navigation]]
@@ -644,10 +668,10 @@ For area, line, and bar charts, press Shift, then click the series in the legend
 
 [discrete]
 [[is-it-possible-to-use-saved-serches-in-lens]]
-.*How do I visualize saved searches?*
+.*How do I visualize saved Discover sessions?*
 [%collapsible]
 ====
-Visualizing saved searches in unsupported.
+Visualizing saved Discover sessions is unsupported.
 ====
 
 [discrete]

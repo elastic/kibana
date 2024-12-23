@@ -8,6 +8,7 @@
 import { mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
+import type { ClassicNavItem } from '@kbn/search-navigation/public';
 
 import '../../__mocks__/react_router';
 
@@ -15,31 +16,29 @@ jest.mock('../react_router_helpers/link_events', () => ({
   letBrowserHandleEvent: jest.fn(),
 }));
 
-import { ClassicNavItem } from '../types';
-
 import { generateSideNavItems } from './classic_nav_helpers';
 
 describe('generateSideNavItems', () => {
   const deepLinksMap = {
     enterpriseSearch: {
       id: 'enterpriseSearch',
-      url: '/app/enterprise_search/overview',
+      url: '/app/elasticsearch/overview',
       title: 'Overview',
     },
     'enterpriseSearchContent:searchIndices': {
       id: 'enterpriseSearchContent:searchIndices',
       title: 'Indices',
-      url: '/app/enterprise_search/content/search_indices',
+      url: '/app/elasticsearch/content/search_indices',
     },
     'enterpriseSearchContent:connectors': {
       id: 'enterpriseSearchContent:connectors',
       title: 'Connectors',
-      url: '/app/enterprise_search/content/connectors',
+      url: '/app/elasticsearch/content/connectors',
     },
     'enterpriseSearchContent:webCrawlers': {
       id: 'enterpriseSearchContent:webCrawlers',
-      title: 'Web crawlers',
-      url: '/app/enterprise_search/content/crawlers',
+      title: 'Web Crawlers',
+      url: '/app/elasticsearch/content/crawlers',
     },
   } as unknown as Record<string, ChromeNavLink | undefined>;
   beforeEach(() => {
@@ -59,7 +58,7 @@ describe('generateSideNavItems', () => {
 
     expect(generateSideNavItems(classicNavItems, deepLinksMap)).toEqual([
       {
-        href: '/app/enterprise_search/overview',
+        href: '/app/elasticsearch/overview',
         id: 'unit-test',
         isSelected: false,
         name: 'Overview',
@@ -89,7 +88,7 @@ describe('generateSideNavItems', () => {
         id: 'parent',
         items: [
           {
-            href: '/app/enterprise_search/overview',
+            href: '/app/elasticsearch/overview',
             id: 'unit-test',
             isSelected: false,
             name: 'Overview',
@@ -114,7 +113,7 @@ describe('generateSideNavItems', () => {
 
     expect(generateSideNavItems(classicNavItems, deepLinksMap)).toEqual([
       {
-        href: '/app/enterprise_search/overview',
+        href: '/app/elasticsearch/overview',
         id: 'unit-test',
         isSelected: false,
         name: 'Home',
@@ -134,7 +133,7 @@ describe('generateSideNavItems', () => {
       },
       {
         deepLink: {
-          link: 'enterpriseSearchApplications:playground',
+          link: 'searchPlayground',
         },
         id: 'unit-test-missing',
       },
@@ -142,7 +141,7 @@ describe('generateSideNavItems', () => {
 
     expect(generateSideNavItems(classicNavItems, deepLinksMap)).toEqual([
       {
-        href: '/app/enterprise_search/overview',
+        href: '/app/elasticsearch/overview',
         id: 'unit-test',
         isSelected: false,
         name: 'Home',

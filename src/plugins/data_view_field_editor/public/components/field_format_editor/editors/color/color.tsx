@@ -9,7 +9,15 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiBasicTable, EuiButton, EuiColorPicker, EuiFieldText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButton,
+  EuiColorPicker,
+  EuiIcon,
+  EuiFieldText,
+  EuiSelect,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,6 +30,7 @@ import { FormatEditorProps } from '../types';
 interface Color {
   range?: string;
   regex?: string;
+  boolean?: string;
   text: string;
   background: string;
 }
@@ -69,6 +78,90 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
     });
   };
 
+  getFirstColumn = (fieldType: string) => {
+    if (fieldType === 'boolean')
+      return {
+        field: 'boolean',
+        name: (
+          <FormattedMessage
+            id="indexPatternFieldEditor.color.booleanLabel"
+            defaultMessage="Boolean"
+          />
+        ),
+        render: (value: string, item: IndexedColor) => {
+          return (
+            <EuiSelect
+              options={[
+                { value: 'true', text: 'true' },
+                { value: 'false', text: 'false' },
+              ]}
+              value={value}
+              data-test-subj={`colorEditorKeyBoolean ${item.index}`}
+              onChange={(e) => {
+                this.onColorChange(
+                  {
+                    boolean: e.target.value,
+                  },
+                  item.index
+                );
+              }}
+            />
+          );
+        },
+      };
+    if (fieldType === 'string')
+      return {
+        field: 'regex',
+        name: (
+          <FormattedMessage
+            id="indexPatternFieldEditor.color.patternLabel"
+            defaultMessage="Pattern (regular expression)"
+          />
+        ),
+        render: (value: string, item: IndexedColor) => {
+          return (
+            <EuiFieldText
+              value={value}
+              data-test-subj={`colorEditorKeyPattern ${item.index}`}
+              onChange={(e) => {
+                this.onColorChange(
+                  {
+                    regex: e.target.value,
+                  },
+                  item.index
+                );
+              }}
+            />
+          );
+        },
+      };
+    return {
+      field: 'range',
+      name: (
+        <FormattedMessage
+          id="indexPatternFieldEditor.color.rangeLabel"
+          defaultMessage="Range (min:max)"
+        />
+      ),
+      render: (value: string, item: IndexedColor) => {
+        return (
+          <EuiFieldText
+            value={value}
+            data-test-subj={`colorEditorKeyRange ${item.index}`}
+            onChange={(e) => {
+              this.onColorChange(
+                {
+                  range: e.target.value,
+                },
+                item.index
+              );
+            }}
+          />
+        );
+      },
+    };
+  };
+
   render() {
     const { formatParams, fieldType } = this.props;
 
@@ -84,57 +177,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
       [];
 
     const columns = [
-      fieldType === 'string'
-        ? {
-            field: 'regex',
-            name: (
-              <FormattedMessage
-                id="indexPatternFieldEditor.color.patternLabel"
-                defaultMessage="Pattern (regular expression)"
-              />
-            ),
-            render: (value: string, item: IndexedColor) => {
-              return (
-                <EuiFieldText
-                  value={value}
-                  data-test-subj={`colorEditorKeyPattern ${item.index}`}
-                  onChange={(e) => {
-                    this.onColorChange(
-                      {
-                        regex: e.target.value,
-                      },
-                      item.index
-                    );
-                  }}
-                />
-              );
-            },
-          }
-        : {
-            field: 'range',
-            name: (
-              <FormattedMessage
-                id="indexPatternFieldEditor.color.rangeLabel"
-                defaultMessage="Range (min:max)"
-              />
-            ),
-            render: (value: string, item: IndexedColor) => {
-              return (
-                <EuiFieldText
-                  value={value}
-                  data-test-subj={`colorEditorKeyRange ${item.index}`}
-                  onChange={(e) => {
-                    this.onColorChange(
-                      {
-                        range: e.target.value,
-                      },
-                      item.index
-                    );
-                  }}
-                />
-              );
-            },
-          },
+      this.getFirstColumn(fieldType),
       {
         field: 'text',
         name: (
@@ -156,6 +199,32 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
                   item.index
                 );
               }}
+              button={
+                <EuiButton
+                  minWidth="false"
+                  iconType="lettering"
+                  color="text"
+                  onClick={() => {}}
+                  aria-label={i18n.translate(
+                    'indexPatternFieldEditor.color.letteringButtonAriaLabel',
+                    {
+                      defaultMessage: 'Select a text color for item {index}',
+                      values: {
+                        index: item.index,
+                      },
+                    }
+                  )}
+                >
+                  <EuiIcon
+                    aria-label={color}
+                    color={color}
+                    size="l"
+                    type="stopFilled"
+                    data-test-subj={'buttonColorSwatchIcon'}
+                  />
+                </EuiButton>
+              }
+              secondaryInputDisplay="bottom"
             />
           );
         },
@@ -181,6 +250,32 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
                   item.index
                 );
               }}
+              button={
+                <EuiButton
+                  minWidth="false"
+                  iconType="color"
+                  color="text"
+                  onClick={() => {}}
+                  aria-label={i18n.translate(
+                    'indexPatternFieldEditor.color.letteringButtonAriaLabel',
+                    {
+                      defaultMessage: 'Select a background color for item {index}',
+                      values: {
+                        index: item.index,
+                      },
+                    }
+                  )}
+                >
+                  <EuiIcon
+                    aria-label={color}
+                    color={color}
+                    size="l"
+                    type="stopFilled"
+                    data-test-subj={'buttonColorSwatchIcon'}
+                  />
+                </EuiButton>
+              }
+              secondaryInputDisplay="bottom"
             />
           );
         },

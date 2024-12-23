@@ -14,8 +14,10 @@ import {
 } from '../../../common/apm_saved_object_constants';
 export const debugTelemetryRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/debug-telemetry',
-  options: {
-    tags: ['access:apm', 'access:apm_write'],
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'apm_write'],
+    },
   },
   handler: async (resources): Promise<APMTelemetry> => {
     const { plugins, context } = resources;

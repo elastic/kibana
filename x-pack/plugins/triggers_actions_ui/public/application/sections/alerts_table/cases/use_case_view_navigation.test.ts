@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { useCaseViewNavigation } from './use_case_view_navigation';
@@ -25,8 +25,8 @@ describe('useCaseViewNavigation', () => {
     useKibanaMock().services.application.navigateToApp = navigateToApp;
   });
 
-  it('calls navigateToApp with correct arguments', () => {
-    const { result, waitFor } = renderHook(() => useCaseViewNavigation(), {
+  it('calls navigateToApp with correct arguments', async () => {
+    const { result } = renderHook(() => useCaseViewNavigation(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -34,7 +34,7 @@ describe('useCaseViewNavigation', () => {
       result.current.navigateToCaseView({ caseId: 'test-id' });
     });
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(navigateToApp).toHaveBeenCalledWith('testAppId', {
         deepLinkId: 'cases',
         path: '/test-id',
@@ -42,8 +42,8 @@ describe('useCaseViewNavigation', () => {
     });
   });
 
-  it('calls navigateToApp with correct arguments and bypass current app id', () => {
-    const { result, waitFor } = renderHook(() => useCaseViewNavigation('superAppId'), {
+  it('calls navigateToApp with correct arguments and bypass current app id', async () => {
+    const { result } = renderHook(() => useCaseViewNavigation('superAppId'), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -51,7 +51,7 @@ describe('useCaseViewNavigation', () => {
       result.current.navigateToCaseView({ caseId: 'test-id' });
     });
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(navigateToApp).toHaveBeenCalledWith('superAppId', {
         deepLinkId: 'cases',
         path: '/test-id',

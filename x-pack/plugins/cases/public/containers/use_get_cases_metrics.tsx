@@ -26,7 +26,7 @@ export const useGetCasesMetrics = () => {
     ({ signal }) =>
       getCasesMetrics({
         http,
-        query: { owner, features: [CaseMetricsFeature.MTTR] },
+        query: { owner, features: [CaseMetricsFeature.MTTR, CaseMetricsFeature.STATUS] },
         signal,
       }),
     {

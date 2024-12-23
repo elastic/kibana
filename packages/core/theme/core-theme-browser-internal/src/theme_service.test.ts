@@ -45,6 +45,7 @@ describe('ThemeService', () => {
       beforeEach(() => {
         injectedMetadata.getTheme.mockReturnValue({
           version: 'v8',
+          name: 'amsterdam',
           darkMode: false,
           stylesheetPaths: {
             dark: ['dark-1.css'],
@@ -58,6 +59,7 @@ describe('ThemeService', () => {
         const theme = await firstValueFrom(theme$);
         expect(theme).toEqual({
           darkMode: false,
+          name: 'amsterdam',
         });
       });
 
@@ -88,6 +90,7 @@ describe('ThemeService', () => {
       beforeEach(() => {
         injectedMetadata.getTheme.mockReturnValue({
           version: 'v8',
+          name: 'amsterdam',
           darkMode: true,
           stylesheetPaths: {
             dark: ['dark-1.css'],
@@ -101,6 +104,7 @@ describe('ThemeService', () => {
         const theme = await firstValueFrom(theme$);
         expect(theme).toEqual({
           darkMode: true,
+          name: 'amsterdam',
         });
       });
 
@@ -131,6 +135,7 @@ describe('ThemeService', () => {
       beforeEach(() => {
         injectedMetadata.getTheme.mockReturnValue({
           version: 'v8',
+          name: 'amsterdam',
           darkMode: 'system',
           stylesheetPaths: {
             dark: ['dark-1.css'],
@@ -150,6 +155,7 @@ describe('ThemeService', () => {
 
           expect(theme).toEqual({
             darkMode: false,
+            name: 'amsterdam',
           });
 
           expect(window.__kbnThemeTag__).toEqual('v8light');
@@ -177,6 +183,7 @@ describe('ThemeService', () => {
 
           expect(theme).toEqual({
             darkMode: false,
+            name: 'amsterdam',
           });
 
           expect(window.__kbnThemeTag__).toEqual('v8light');
@@ -196,6 +203,7 @@ describe('ThemeService', () => {
 
           expect(theme).toEqual({
             darkMode: true,
+            name: 'amsterdam',
           });
 
           expect(window.__kbnThemeTag__).toEqual('v8dark');
@@ -244,6 +252,7 @@ describe('ThemeService', () => {
     it('exposes a `theme$` observable with the values provided by the injected metadata', async () => {
       injectedMetadata.getTheme.mockReturnValue({
         version: 'v8',
+        name: 'amsterdam',
         darkMode: true,
         stylesheetPaths: {
           dark: [],
@@ -255,6 +264,7 @@ describe('ThemeService', () => {
       const theme = await firstValueFrom(theme$);
       expect(theme).toEqual({
         darkMode: true,
+        name: 'amsterdam',
       });
     });
   });

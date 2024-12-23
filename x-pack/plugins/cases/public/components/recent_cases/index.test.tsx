@@ -262,13 +262,13 @@ describe('RecentCases', () => {
   it('sets all available solutions correctly', () => {
     appMockRender = createAppMockRenderer({ owner: [] });
     /**
-     * We set securitySolutionCases capability to not have
+     * We set securitySolutionCasesV2 capability to not have
      * any access to cases. This tests that we get the owners
      * that have at least read access.
      */
     appMockRender.coreStart.application.capabilities = {
       ...appMockRender.coreStart.application.capabilities,
-      securitySolutionCases: noCasesCapabilities(),
+      securitySolutionCasesV2: noCasesCapabilities(),
     };
 
     appMockRender.render(<RecentCases {...{ ...defaultProps, maxCasesToShow: 2 }} />);

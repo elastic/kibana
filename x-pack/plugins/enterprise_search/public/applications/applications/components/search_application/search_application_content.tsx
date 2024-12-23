@@ -25,7 +25,6 @@ import {
 import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_template';
 
 import { AddIndicesFlyout } from './add_indices_flyout';
-import { SearchApplicationError } from './search_application_error';
 import { SearchApplicationIndices } from './search_application_indices';
 import { SearchApplicationIndicesLogic } from './search_application_indices_logic';
 import { SearchApplicationSchema } from './search_application_schema';
@@ -62,8 +61,6 @@ const getTabBreadCrumb = (tabId: string) => {
   }
 };
 
-const ContentTabs: string[] = Object.values(SearchApplicationContentTabs);
-
 export const SearchApplicationContent = () => {
   const { searchApplicationName, isLoadingSearchApplication, hasSchemaConflicts } = useValues(
     SearchApplicationViewLogic
@@ -73,26 +70,6 @@ export const SearchApplicationContent = () => {
   const { contentTabId = SearchApplicationContentTabs.INDICES } = useParams<{
     contentTabId?: string;
   }>();
-
-  if (!ContentTabs.includes(contentTabId)) {
-    return (
-      <EnterpriseSearchApplicationsPageTemplate
-        pageChrome={[searchApplicationName, pageTitle]}
-        pageViewTelemetry={SearchApplicationViewTabs.CONTENT}
-        isLoading={isLoadingSearchApplication}
-        pageHeader={{
-          bottomBorder: false,
-          className: 'searchApplicationHeaderBackgroundColor',
-          pageTitle,
-          rightSideItems: [],
-        }}
-        searchApplicationName={searchApplicationName}
-        hasSchemaConflicts={hasSchemaConflicts}
-      >
-        <SearchApplicationError notFound />
-      </EnterpriseSearchApplicationsPageTemplate>
-    );
-  }
 
   const onTabClick = (tab: SearchApplicationContentTabs) => () => {
     KibanaLogic.values.navigateToUrl(

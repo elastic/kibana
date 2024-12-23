@@ -270,6 +270,7 @@ describe('alert_form', () => {
                 actionTypeRegistry={actionTypeRegistry}
                 featureId="alerting"
                 producerId="alerting"
+                ruleTypeId=".es-query"
               />
             </KibanaReactContext.Provider>
           </I18nProvider>

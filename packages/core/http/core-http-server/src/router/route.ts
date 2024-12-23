@@ -121,7 +121,9 @@ export type Privilege = string;
  */
 export interface RouteDeprecationInfo {
   /**
-   * link to the documentation for more details on the deprecation.
+   * Link to the documentation for more details on the deprecation.
+   *
+   * @remark See template and instructions in `<REPO_ROOT>/docs/upgrade-notes.asciidoc` for instructions on adding a release note.
    */
   documentationUrl: string;
   /**
@@ -291,6 +293,8 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    *               Can be useful when we grant access to a resource but want to identify a user if possible.
    *
    * Defaults to `true` if an auth mechanism is registered.
+   *
+   * @deprecated Use `security.authc.enabled` instead
    */
   authRequired?: boolean | 'optional';
 
@@ -397,13 +401,6 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * @example 9.0.0
    */
   discontinued?: string;
-
-  /**
-   * Defines the security requirements for a route, including authorization and authentication.
-   *
-   * @remarks This will be surfaced in OAS documentation.
-   */
-  security?: RouteSecurity;
 
   /**
    * Whether this endpoint is being used to serve generated or static HTTP resources
@@ -524,4 +521,13 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * Additional route options {@link RouteConfigOptions}.
    */
   options?: RouteConfigOptions<Method>;
+}
+
+/**
+ * Post Validation Route emitter metadata.
+ */
+export interface PostValidationMetadata {
+  deprecated?: RouteDeprecationInfo;
+  isInternalApiRequest: boolean;
+  isPublicAccess: boolean;
 }

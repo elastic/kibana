@@ -61,6 +61,16 @@ describe('getTokenCountFromOpenAIStream', () => {
     ],
   };
 
+  const usageChunk = {
+    object: 'chat.completion.chunk',
+    choices: [],
+    usage: {
+      prompt_tokens: 50,
+      completion_tokens: 100,
+      total_tokens: 150,
+    },
+  };
+
   const PROMPT_TOKEN_COUNT = 36;
   const COMPLETION_TOKEN_COUNT = 5;
 
@@ -70,55 +80,79 @@ describe('getTokenCountFromOpenAIStream', () => {
   });
 
   describe('when a stream completes', () => {
-    beforeEach(async () => {
-      stream.write('data: [DONE]');
-      stream.complete();
-    });
+    describe('with usage chunk', () => {
+      it('returns the counts from the usage chunk', async () => {
+        stream = createStreamMock();
+        stream.write(`data: ${JSON.stringify(chunk)}`);
+        stream.write(`data: ${JSON.stringify(usageChunk)}`);
+        stream.write('data: [DONE]');
+        stream.complete();
 
-    describe('without function tokens', () => {
-      beforeEach(async () => {
         tokens = await getTokenCountFromOpenAIStream({
           responseStream: stream.transform,
           logger,
           body: JSON.stringify(body),
         });
-      });
 
-      it('counts the prompt tokens', () => {
-        expect(tokens.prompt).toBe(PROMPT_TOKEN_COUNT);
-        expect(tokens.completion).toBe(COMPLETION_TOKEN_COUNT);
-        expect(tokens.total).toBe(PROMPT_TOKEN_COUNT + COMPLETION_TOKEN_COUNT);
+        expect(tokens).toEqual({
+          prompt: usageChunk.usage.prompt_tokens,
+          completion: usageChunk.usage.completion_tokens,
+          total: usageChunk.usage.total_tokens,
+        });
       });
     });
 
-    describe('with function tokens', () => {
+    describe('without usage chunk', () => {
       beforeEach(async () => {
-        tokens = await getTokenCountFromOpenAIStream({
-          responseStream: stream.transform,
-          logger,
-          body: JSON.stringify({
-            ...body,
-            functions: [
-              {
-                name: 'my_function',
-                description: 'My function description',
-                parameters: {
-                  type: 'object',
-                  properties: {
-                    my_property: {
-                      type: 'boolean',
-                      description: 'My function property',
-                    },
-                  },
-                },
-              },
-            ],
-          }),
+        stream.write('data: [DONE]');
+        stream.complete();
+      });
+
+      describe('without function tokens', () => {
+        beforeEach(async () => {
+          tokens = await getTokenCountFromOpenAIStream({
+            responseStream: stream.transform,
+            logger,
+            body: JSON.stringify(body),
+          });
+        });
+
+        it('counts the prompt tokens', () => {
+          expect(tokens.prompt).toBe(PROMPT_TOKEN_COUNT);
+          expect(tokens.completion).toBe(COMPLETION_TOKEN_COUNT);
+          expect(tokens.total).toBe(PROMPT_TOKEN_COUNT + COMPLETION_TOKEN_COUNT);
         });
       });
 
-      it('counts the function tokens', () => {
-        expect(tokens.prompt).toBeGreaterThan(PROMPT_TOKEN_COUNT);
+      describe('with function tokens', () => {
+        beforeEach(async () => {
+          tokens = await getTokenCountFromOpenAIStream({
+            responseStream: stream.transform,
+            logger,
+            body: JSON.stringify({
+              ...body,
+              functions: [
+                {
+                  name: 'my_function',
+                  description: 'My function description',
+                  parameters: {
+                    type: 'object',
+                    properties: {
+                      my_property: {
+                        type: 'boolean',
+                        description: 'My function property',
+                      },
+                    },
+                  },
+                },
+              ],
+            }),
+          });
+        });
+
+        it('counts the function tokens', () => {
+          expect(tokens.prompt).toBeGreaterThan(PROMPT_TOKEN_COUNT);
+        });
       });
     });
   });

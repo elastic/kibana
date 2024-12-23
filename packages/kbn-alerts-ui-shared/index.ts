@@ -19,3 +19,7 @@ export type { AlertsSearchBarProps } from './src/alerts_search_bar/types';
 export * from './src/alert_fields_table';
 export * from './src/alert_filter_controls/types';
 export * from './src/common/types';
+export * from './src/check_action_type_enabled';
+export * from './src/action_variables';
+
+export { useFetchFlappingSettings } from './src/common/hooks/use_fetch_flapping_settings';

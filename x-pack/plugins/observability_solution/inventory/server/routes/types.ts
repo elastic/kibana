@@ -30,10 +30,7 @@ export interface InventoryRouteHandlerResources {
 }
 
 export interface InventoryRouteCreateOptions {
-  options: {
-    timeout?: {
-      idleSocket?: number;
-    };
-    tags: Array<'access:inventory'>;
+  timeout?: {
+    idleSocket?: number;
   };
 }

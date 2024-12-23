@@ -12,7 +12,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { Filter, FilterStateStore } from '@kbn/es-query';
 import { ToastsStart } from '@kbn/core-notifications-browser';
-import { useLoadRuleTypesQuery, useRuleAADFields, useAlertsDataView } from '../common/hooks';
+import { useAlertsDataView } from '../common/hooks';
 import { AlertsSearchBar } from '.';
 import { HttpStart } from '@kbn/core-http-browser';
 
@@ -33,25 +33,6 @@ jest.mocked(useAlertsDataView).mockReturnValue({
       },
     ],
   },
-});
-
-jest.mocked(useLoadRuleTypesQuery).mockReturnValue({
-  ruleTypesState: {
-    isInitialLoad: false,
-    data: new Map(),
-    isLoading: false,
-    error: null,
-  },
-  authorizedToReadAnyRules: false,
-  hasAnyAuthorizedRuleType: false,
-  authorizedRuleTypes: [],
-  authorizedToCreateAnyRules: false,
-  isSuccess: false,
-});
-
-jest.mocked(useRuleAADFields).mockReturnValue({
-  aadFields: [],
-  loading: false,
 });
 
 const unifiedSearchBarMock = jest.fn().mockImplementation((props) => (
@@ -83,7 +64,6 @@ describe('AlertsSearchBar', () => {
         onQuerySubmit={jest.fn()}
         onFiltersUpdated={jest.fn()}
         appName={'test'}
-        featureIds={['observability', 'stackAlerts']}
         unifiedSearchBar={unifiedSearchBarMock}
         toasts={toastsMock}
         http={httpMock}
@@ -108,7 +88,6 @@ describe('AlertsSearchBar', () => {
         http={httpMock}
         dataService={mockDataPlugin}
         appName={'test'}
-        featureIds={['observability', 'stackAlerts']}
       />
     );
 
@@ -157,7 +136,6 @@ describe('AlertsSearchBar', () => {
         http={httpMock}
         dataService={mockDataPlugin}
         appName={'test'}
-        featureIds={['observability', 'stackAlerts']}
       />
     );
 
@@ -166,6 +144,153 @@ describe('AlertsSearchBar', () => {
     await waitFor(() => {
       expect(onFiltersUpdatedMock).toHaveBeenCalledWith(filters);
       expect(mockDataPlugin.query.filterManager.setFilters).toHaveBeenCalledWith(filters);
+    });
+  });
+
+  it('calls the unifiedSearchBar correctly for security rule types', async () => {
+    render(
+      <AlertsSearchBar
+        rangeFrom="now/d"
+        rangeTo="now/d"
+        query=""
+        onQuerySubmit={jest.fn()}
+        toasts={toastsMock}
+        http={httpMock}
+        dataService={mockDataPlugin}
+        appName={'test'}
+        onFiltersUpdated={jest.fn()}
+        unifiedSearchBar={unifiedSearchBarMock}
+        ruleTypeIds={['siem.esqlRuleType', '.esQuery']}
+      />
+    );
+
+    await waitFor(() => {
+      expect(unifiedSearchBarMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          suggestionsAbstraction: undefined,
+        })
+      );
+    });
+  });
+
+  it('calls the unifiedSearchBar correctly for NON security rule types', async () => {
+    render(
+      <AlertsSearchBar
+        rangeFrom="now/d"
+        rangeTo="now/d"
+        query=""
+        onQuerySubmit={jest.fn()}
+        toasts={toastsMock}
+        http={httpMock}
+        dataService={mockDataPlugin}
+        appName={'test'}
+        onFiltersUpdated={jest.fn()}
+        unifiedSearchBar={unifiedSearchBarMock}
+        ruleTypeIds={['.esQuery']}
+      />
+    );
+
+    await waitFor(() => {
+      expect(unifiedSearchBarMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          suggestionsAbstraction: { type: 'alerts', fields: {} },
+        })
+      );
+    });
+  });
+
+  it('calls the unifiedSearchBar with correct index patters', async () => {
+    render(
+      <AlertsSearchBar
+        rangeFrom="now/d"
+        rangeTo="now/d"
+        query=""
+        onQuerySubmit={jest.fn()}
+        toasts={toastsMock}
+        http={httpMock}
+        dataService={mockDataPlugin}
+        appName={'test'}
+        onFiltersUpdated={jest.fn()}
+        unifiedSearchBar={unifiedSearchBarMock}
+        ruleTypeIds={['.esQuery', 'apm.anomaly']}
+      />
+    );
+
+    await waitFor(() => {
+      expect(unifiedSearchBarMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          indexPatterns: [
+            {
+              fields: [
+                { aggregatable: true, name: 'event.action', searchable: true, type: 'string' },
+              ],
+              title: '.esQuery,apm.anomaly',
+            },
+          ],
+        })
+      );
+    });
+  });
+
+  it('calls the unifiedSearchBar with correct index patters without rule types', async () => {
+    render(
+      <AlertsSearchBar
+        rangeFrom="now/d"
+        rangeTo="now/d"
+        query=""
+        onQuerySubmit={jest.fn()}
+        toasts={toastsMock}
+        http={httpMock}
+        dataService={mockDataPlugin}
+        appName={'test'}
+        onFiltersUpdated={jest.fn()}
+        unifiedSearchBar={unifiedSearchBarMock}
+      />
+    );
+
+    await waitFor(() => {
+      expect(unifiedSearchBarMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          indexPatterns: [
+            {
+              fields: [
+                { aggregatable: true, name: 'event.action', searchable: true, type: 'string' },
+              ],
+              title: '.alerts-*',
+            },
+          ],
+        })
+      );
+    });
+  });
+
+  it('calls the unifiedSearchBar with correct index patters without data views', async () => {
+    jest.mocked(useAlertsDataView).mockReturnValue({
+      isLoading: false,
+      dataView: undefined,
+    });
+
+    render(
+      <AlertsSearchBar
+        rangeFrom="now/d"
+        rangeTo="now/d"
+        query=""
+        onQuerySubmit={jest.fn()}
+        toasts={toastsMock}
+        http={httpMock}
+        dataService={mockDataPlugin}
+        appName={'test'}
+        onFiltersUpdated={jest.fn()}
+        unifiedSearchBar={unifiedSearchBarMock}
+      />
+    );
+
+    await waitFor(() => {
+      expect(unifiedSearchBarMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          indexPatterns: [],
+        })
+      );
     });
   });
 });

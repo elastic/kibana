@@ -24,6 +24,7 @@ export const getDefaultServicesApplication = (
     navigateToApp: async (app: string) => {
       action(`Navigate to: ${app}`);
     },
+    isAppRegistered: (appId: string) => true,
     getUrlForApp: (url: string) => url,
     capabilities: getDefaultCapabilities(),
     applications$: of(applications),

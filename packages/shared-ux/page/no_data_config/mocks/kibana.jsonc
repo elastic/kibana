@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/shared-ux-page-no-data-config-mocks",
-  "owner": "@elastic/appex-sharedux"
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

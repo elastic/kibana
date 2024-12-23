@@ -10,7 +10,7 @@ import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 
 const getLabsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/labs',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (): Promise<{ labsItems: string[] }> => {
     const labsItems = Object.entries(uiSettings)
       .filter(([key, value]): boolean | undefined => value.showInLabs)

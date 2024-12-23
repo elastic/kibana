@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
+import type { FunctionComponent } from 'react';
 import type { EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -46,10 +46,7 @@ export type DataGridCellValueElementProps = EuiDataGridCellValueElementProps & {
   isCompressed?: boolean;
 };
 
-export type CustomCellRenderer = Record<
-  string,
-  (props: DataGridCellValueElementProps) => ReactElement
->;
+export type CustomCellRenderer = Record<string, FunctionComponent<DataGridCellValueElementProps>>;
 
 export interface CustomGridColumnProps {
   column: EuiDataGridColumn;

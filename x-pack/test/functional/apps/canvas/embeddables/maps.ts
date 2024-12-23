@@ -18,11 +18,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('maps in canvas', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      // canvas application is only available when installation contains canvas workpads
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+      );
       // open canvas home
       await canvas.goToListingPage();
       // create new workpad
       await canvas.createNewWorkpad();
       await canvas.setWorkpadName('maps tests');
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('by-value', () => {

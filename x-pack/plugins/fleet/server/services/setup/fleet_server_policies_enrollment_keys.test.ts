@@ -17,6 +17,7 @@ import { ensureAgentPoliciesFleetServerKeysAndPolicies } from './fleet_server_po
 jest.mock('../app_context');
 jest.mock('../agent_policy');
 jest.mock('../api_keys');
+jest.mock('../agent_policies/bump_agent_policies_task');
 
 const mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy = jest.mocked(
   ensureDefaultEnrollmentAPIKeyForAgentPolicy

@@ -14,7 +14,7 @@ import {
 } from '../../../../common/constants';
 import { TimeRange } from '../../../../common/http_api/shared';
 import { LegacyRequest } from '../../../types';
-import { getLegacyIndexPattern } from '../../cluster/get_index_patterns';
+import { getLegacyIndexPattern } from '../../../../common/get_index_patterns';
 import { getLivesNodes } from '../../elasticsearch/nodes/get_nodes/get_live_nodes';
 
 interface Bucket {

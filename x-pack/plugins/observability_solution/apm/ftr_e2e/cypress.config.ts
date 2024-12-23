@@ -31,5 +31,6 @@ export default defineCypressConfig({
     baseUrl: 'http://localhost:5601',
     supportFile: './cypress/support/e2e.ts',
     specPattern: './cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+    experimentalMemoryManagement: true,
   },
 });

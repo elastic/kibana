@@ -24,7 +24,6 @@ import { cefLogsSpecProvider } from './cef_logs';
 import { cephMetricsSpecProvider } from './ceph_metrics';
 import { checkpointLogsSpecProvider } from './checkpoint_logs';
 import { ciscoLogsSpecProvider } from './cisco_logs';
-import { cloudwatchLogsSpecProvider } from './cloudwatch_logs';
 import { cockroachdbMetricsSpecProvider } from './cockroachdb_metrics';
 import { consulMetricsSpecProvider } from './consul_metrics';
 import { corednsLogsSpecProvider } from './coredns_logs';
@@ -162,7 +161,6 @@ export const builtInTutorials = [
   prometheusMetricsSpecProvider,
   zookeeperMetricsSpecProvider,
   uptimeMonitorsSpecProvider,
-  cloudwatchLogsSpecProvider,
   awsMetricsSpecProvider,
   mssqlMetricsSpecProvider,
   natsMetricsSpecProvider,

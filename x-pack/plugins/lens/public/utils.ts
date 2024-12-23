@@ -20,7 +20,7 @@ import { ISearchStart } from '@kbn/data-plugin/public';
 import type { DraggingIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { DateRange } from '../common/types';
-import type { Document } from './persistence/saved_object_store';
+import type { LensDocument } from './persistence/saved_object_store';
 import {
   Datasource,
   DatasourceMap,
@@ -100,7 +100,7 @@ export function getTimeZone(uiSettings: IUiSettingsClient) {
 
   return configuredTimeZone;
 }
-export function getActiveDatasourceIdFromDoc(doc?: Document) {
+export function getActiveDatasourceIdFromDoc(doc?: LensDocument) {
   if (!doc) {
     return null;
   }
@@ -109,14 +109,14 @@ export function getActiveDatasourceIdFromDoc(doc?: Document) {
   return firstDatasourceFromDoc || null;
 }
 
-export function getActiveVisualizationIdFromDoc(doc?: Document) {
+export function getActiveVisualizationIdFromDoc(doc?: LensDocument) {
   if (!doc) {
     return null;
   }
   return doc.visualizationType || null;
 }
 
-export const getInitialDatasourceId = (datasourceMap: DatasourceMap, doc?: Document) => {
+export const getInitialDatasourceId = (datasourceMap: DatasourceMap, doc?: LensDocument) => {
   return (doc && getActiveDatasourceIdFromDoc(doc)) || Object.keys(datasourceMap)[0] || null;
 };
 

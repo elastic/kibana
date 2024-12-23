@@ -481,7 +481,7 @@ describe('features', () => {
         name: 'Feature Alpha',
         app: [],
         category: { id: 'alpha', label: 'alpha' },
-        alerting: ['rule-type-1'],
+        alerting: [{ ruleTypeId: 'rule-type-1', consumers: ['alpha'] }],
         privileges: {
           all: {
             savedObject: {
@@ -491,7 +491,7 @@ describe('features', () => {
             ui: ['all-alpha-ui'],
             app: ['all-alpha-app'],
             api: ['all-alpha-api'],
-            alerting: { rule: { all: ['rule-type-1'] } },
+            alerting: { rule: { all: [{ ruleTypeId: 'rule-type-1', consumers: ['alpha'] }] } },
             replacedBy: [{ feature: 'beta', privileges: ['all'] }],
           },
           read: {
@@ -514,7 +514,7 @@ describe('features', () => {
         name: 'Feature Beta',
         app: [],
         category: { id: 'beta', label: 'beta' },
-        alerting: ['rule-type-1'],
+        alerting: [{ ruleTypeId: 'rule-type-1', consumers: ['beta'] }],
         privileges: {
           all: {
             savedObject: {
@@ -524,7 +524,7 @@ describe('features', () => {
             ui: ['all-beta-ui'],
             app: ['all-beta-app'],
             api: ['all-beta-api'],
-            alerting: { rule: { all: ['rule-type-1'] } },
+            alerting: { rule: { all: [{ ruleTypeId: 'rule-type-1', consumers: ['beta'] }] } },
           },
           read: {
             savedObject: {
@@ -604,13 +604,8 @@ describe('features', () => {
       ...alertingOperations.map((operation) =>
         actions.alerting.get('rule-type-1', 'alpha', 'rule', operation)
       ),
-      // To maintain compatibility with the new UI capabilities and new alerting entities that are
-      // feature specific: all.replacedBy: [{ feature: 'beta', privileges: ['all'] }]
       actions.ui.get('navLinks', 'all-beta-app'),
       actions.ui.get('beta', 'all-beta-ui'),
-      ...alertingOperations.map((operation) =>
-        actions.alerting.get('rule-type-1', 'beta', 'rule', operation)
-      ),
     ];
 
     const expectedReadPrivileges = [

@@ -8,14 +8,11 @@
 import type { Socket } from 'net';
 import { lastValueFrom, Observable, of } from 'rxjs';
 
-import type { FakeRawRequest } from '@kbn/core/server';
-import { CoreKibanaRequest } from '@kbn/core/server';
-import {
-  coreMock,
-  httpServerMock,
-  httpServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import type { FakeRawRequest } from '@kbn/core-http-server';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
 
 import {
@@ -233,7 +230,7 @@ describe('#asScoped', () => {
       headers: {},
       path: '/',
     };
-    const request = CoreKibanaRequest.from(fakeRawRequest);
+    const request = kibanaRequestFactory(fakeRawRequest);
 
     await auditSetup.asScoped(request).log({
       message: 'MESSAGE',

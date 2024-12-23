@@ -23,7 +23,7 @@ const linkedParentsRoute = createApmServerRoute({
     }),
     query: t.intersection([kueryRt, rangeRt, t.type({ processorEvent: processorEventRt })]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -63,7 +63,7 @@ const linkedChildrenRoute = createApmServerRoute({
     }),
     query: t.intersection([kueryRt, rangeRt]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{

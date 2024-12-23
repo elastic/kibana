@@ -9,10 +9,12 @@ import { INTERNAL_GET_CASE_CATEGORIES_URL } from '../../../../../common/constant
 import { createCaseError } from '../../../../common/error';
 import { createCasesRoute } from '../../create_cases_route';
 import type { caseApiV1 } from '../../../../../common/types/api';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../../constants';
 
 export const getCategoriesRoute = createCasesRoute({
   method: 'get',
   path: INTERNAL_GET_CASE_CATEGORIES_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   routerOptions: {
     access: 'internal',
   },

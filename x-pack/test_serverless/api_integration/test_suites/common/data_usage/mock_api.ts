@@ -16,7 +16,7 @@ export const setupMockServer = () => {
 };
 
 const autoOpsHandler = http.post(
-  '/',
+  '/monitoring/serverless/v1/projects/fakeprojectid/metrics',
   async ({ request }): Promise<StrictResponse<UsageMetricsAutoOpsResponseSchemaBody>> => {
     return HttpResponse.json(mockAutoOpsResponse);
   }

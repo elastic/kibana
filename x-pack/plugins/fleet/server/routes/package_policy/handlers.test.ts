@@ -407,13 +407,10 @@ describe('When calling package policy', () => {
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
       const request = getUpdateKibanaRequest({ policy_ids: ['1', '2'] } as any);
-      await routeHandler(context, request, response);
-      expect(response.customError).toHaveBeenCalledWith({
-        statusCode: 400,
-        body: {
-          message: 'Cannot change agent policies of an agentless integration',
-        },
-      });
+
+      await expect(() => routeHandler(context, request, response)).rejects.toThrow(
+        /Cannot change agent policies of an agentless integration/
+      );
     });
 
     it('should rename the agentless agent policy to sync with the package policy name if agentless is enabled', async () => {

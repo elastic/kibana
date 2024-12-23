@@ -19,7 +19,7 @@ export function SimulatedFunctionCallingCallout() {
           <EuiText size="s">
             {i18n.translate('xpack.aiAssistant.simulatedFunctionCallingCalloutLabel', {
               defaultMessage:
-                'Simulated function calling is enabled. You might see degradated performance.',
+                'Simulated function calling is enabled. You might see degraded performance.',
             })}
           </EuiText>
         </EuiFlexItem>

@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlTableService } from '../ml/common_table_service';
+import { CreateCaseParams } from '../cases/create';
 
 export interface DashboardAttachmentOptions {
   applyTimeRange: boolean;
@@ -24,6 +25,7 @@ export function ChangePointDetectionPageProvider(
   const browser = getService('browser');
   const elasticChart = getService('elasticChart');
   const dashboardPage = getPageObject('dashboard');
+  const cases = getService('cases');
 
   return {
     async navigateToDataViewSelection() {
@@ -160,6 +162,17 @@ export function ChangePointDetectionPageProvider(
       });
     },
 
+    async clickAttachCasesButton() {
+      await testSubjects.click('aiopsChangePointDetectionAttachToCaseButton');
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail('aiopsChangePointDetectionCaseAttachmentForm');
+      });
+    },
+
+    async clickSubmitCaseAttachButton() {
+      await testSubjects.click('aiopsChangePointDetectionSubmitCaseAttachButton');
+    },
+
     async assertApplyTimeRangeControl(expectedValue: boolean) {
       const isChecked = await testSubjects.isEuiSwitchChecked(
         `aiopsChangePointDetectionAttachToDashboardApplyTimeRangeSwitch`
@@ -280,6 +293,16 @@ export function ChangePointDetectionPageProvider(
         '',
         `aiopsChangePointPanel_${index}`
       );
+    },
+
+    async attachChartsToCases(panelIndex: number, params: CreateCaseParams) {
+      await this.assertPanelExist(panelIndex);
+      await this.openPanelContextMenu(panelIndex);
+      await this.clickAttachChartsButton();
+      await this.clickAttachCasesButton();
+      await this.clickSubmitCaseAttachButton();
+
+      await cases.create.createCaseFromModal(params);
     },
   };
 }

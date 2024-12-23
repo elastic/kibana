@@ -133,6 +133,52 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
           });
         });
+
+        describe('when all query versions have different surrounding whitespace', () => {
+          it('should not show in the upgrade/_review API response', async () => {
+            // Install base prebuilt detection rule
+            await createHistoricalPrebuiltRuleAssetSavedObjects(
+              es,
+              getQueryRuleAssetSavedObjects()
+            );
+            await installPrebuiltRules(es, supertest);
+
+            // Customize a kql_query field on the installed rule
+            await updateRule(supertest, {
+              ...getPrebuiltRuleMock(),
+              rule_id: 'rule-1',
+              type: 'query',
+              query: '\nquery string = true',
+              language: 'kuery',
+              filters: [],
+              saved_id: undefined,
+            } as RuleUpdateProps);
+
+            // Add a v2 rule asset to make the upgrade possible, do NOT update the related kql_query field, and create the new rule assets
+            const updatedRuleAssetSavedObjects = [
+              createRuleAssetSavedObject({
+                rule_id: 'rule-1',
+                version: 2,
+                type: 'query',
+                query: 'query string = true\n',
+                language: 'kuery',
+                filters: [],
+              }),
+            ];
+            await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
+
+            // Call the upgrade review prebuilt rules endpoint and check that there is 1 rule eligible for update but kql_query field is NOT returned
+            const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+            const fieldDiffObject = reviewResponse.rules[0].diff.fields as AllFieldsDiff;
+            expect(fieldDiffObject.kql_query).toBeUndefined();
+
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1); // `version` is considered an updated field
+            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
+            expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+            expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
+            expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
+          });
+        });
       });
 
       describe("when rule field doesn't have an update but has a custom value - scenario ABA", () => {
@@ -1042,11 +1088,11 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(fieldDiffObject.kql_query).toBeUndefined();
 
             expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1); // `version` is considered an updated field
-            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1); // `version` is considered conflict
+            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
             expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
 
             expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
-            expect(reviewResponse.stats.num_rules_with_conflicts).toBe(1);
+            expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
             expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
           });
         });
@@ -1114,7 +1160,7 @@ export default ({ getService }: FtrProviderContext): void => {
             });
 
             expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
-            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(2); // version + query
+            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1); // query
             expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
 
             expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);

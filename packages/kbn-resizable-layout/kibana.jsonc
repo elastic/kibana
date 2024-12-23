@@ -1,6 +1,10 @@
 {
   "type": "shared-browser",
   "id": "@kbn/resizable-layout",
-  "description": "A component for creating resizable layouts containing a fixed width panel and a flexible panel, with support for horizontal and vertical layouts.",
-  "owner": "@elastic/kibana-data-discovery"
+  "owner": [
+    "@elastic/kibana-data-discovery"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "A component for creating resizable layouts containing a fixed width panel and a flexible panel, with support for horizontal and vertical layouts."
 }

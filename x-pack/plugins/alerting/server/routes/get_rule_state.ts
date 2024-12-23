@@ -14,6 +14,7 @@ import {
   INTERNAL_BASE_ALERTING_API_PATH,
   RuleTaskState,
 } from '../types';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from './constants';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -38,6 +39,7 @@ export const getRuleStateRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/state`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'internal',
       },
@@ -47,7 +49,8 @@ export const getRuleStateRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const { id } = req.params;
         const state = await rulesClient.getAlertState({ id });
         return state ? res.ok({ body: rewriteBodyRes(state) }) : res.noContent();

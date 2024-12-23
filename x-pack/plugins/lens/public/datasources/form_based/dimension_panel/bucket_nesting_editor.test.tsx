@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import { GenericIndexPatternColumn } from '../form_based';
@@ -21,7 +22,7 @@ const getFieldByName = (name: string): IndexPatternField | undefined => fieldMap
 
 describe('BucketNestingEditor', () => {
   function mockCol(col: Partial<GenericIndexPatternColumn> = {}): GenericIndexPatternColumn {
-    const result = {
+    return {
       dataType: 'string',
       isBucketed: true,
       label: 'a',
@@ -33,13 +34,11 @@ describe('BucketNestingEditor', () => {
       },
       sourceField: 'a',
       ...col,
-    };
-
-    return result as GenericIndexPatternColumn;
+    } as GenericIndexPatternColumn;
   }
 
   it('should display the top level grouping when at the root', () => {
-    const component = mount(
+    render(
       <BucketNestingEditor
         getFieldByName={getFieldByName}
         columnId="a"
@@ -55,12 +54,12 @@ describe('BucketNestingEditor', () => {
         setColumns={jest.fn()}
       />
     );
-    const nestingSwitch = component.find('[data-test-subj="indexPattern-nesting-switch"]').first();
-    expect(nestingSwitch.prop('checked')).toBeTruthy();
+    const nestingSwitch = screen.getByTestId('indexPattern-nesting-switch');
+    expect(nestingSwitch).toBeChecked();
   });
 
   it('should display the bottom level grouping when appropriate', () => {
-    const component = mount(
+    render(
       <BucketNestingEditor
         columnId="a"
         getFieldByName={getFieldByName}
@@ -76,13 +75,13 @@ describe('BucketNestingEditor', () => {
         setColumns={jest.fn()}
       />
     );
-    const nestingSwitch = component.find('[data-test-subj="indexPattern-nesting-switch"]').first();
-    expect(nestingSwitch.prop('checked')).toBeFalsy();
+    const nestingSwitch = screen.getByTestId('indexPattern-nesting-switch');
+    expect(nestingSwitch).not.toBeChecked();
   });
 
-  it('should reorder the columns when toggled', () => {
+  it('should reorder the columns when toggled', async () => {
     const setColumns = jest.fn();
-    const component = mount(
+    const { rerender } = render(
       <BucketNestingEditor
         columnId="a"
         getFieldByName={getFieldByName}
@@ -99,37 +98,34 @@ describe('BucketNestingEditor', () => {
       />
     );
 
-    component
-      .find('[data-test-subj="indexPattern-nesting-switch"] button')
-      .first()
-      .simulate('click');
-
+    await userEvent.click(screen.getByTestId('indexPattern-nesting-switch'));
     expect(setColumns).toHaveBeenCalledTimes(1);
     expect(setColumns).toHaveBeenCalledWith(['a', 'b', 'c']);
 
-    component.setProps({
-      layer: {
-        columnOrder: ['a', 'b', 'c'],
-        columns: {
-          a: mockCol(),
-          b: mockCol(),
-          c: mockCol({ operationType: 'min', isBucketed: false }),
-        },
-        indexPatternId: 'foo',
-      },
-    });
+    rerender(
+      <BucketNestingEditor
+        columnId="a"
+        getFieldByName={getFieldByName}
+        layer={{
+          columnOrder: ['a', 'b', 'c'],
+          columns: {
+            a: mockCol(),
+            b: mockCol(),
+            c: mockCol({ operationType: 'min', isBucketed: false }),
+          },
+          indexPatternId: 'foo',
+        }}
+        setColumns={setColumns}
+      />
+    );
 
-    component
-      .find('[data-test-subj="indexPattern-nesting-switch"] button')
-      .first()
-      .simulate('click');
-
+    await userEvent.click(screen.getByTestId('indexPattern-nesting-switch'));
     expect(setColumns).toHaveBeenCalledTimes(2);
     expect(setColumns).toHaveBeenLastCalledWith(['b', 'a', 'c']);
   });
 
   it('should display nothing if there are no buckets', () => {
-    const component = mount(
+    const { container } = render(
       <BucketNestingEditor
         columnId="a"
         getFieldByName={getFieldByName}
@@ -146,11 +142,11 @@ describe('BucketNestingEditor', () => {
       />
     );
 
-    expect(component.children().length).toBe(0);
+    expect(container.firstChild).toBeNull();
   });
 
   it('should display nothing if there is one bucket', () => {
-    const component = mount(
+    const { container } = render(
       <BucketNestingEditor
         columnId="a"
         getFieldByName={getFieldByName}
@@ -167,11 +163,11 @@ describe('BucketNestingEditor', () => {
       />
     );
 
-    expect(component.children().length).toBe(0);
+    expect(container.firstChild).toBeNull();
   });
 
   it('should display a dropdown with the parent column selected if 3+ buckets', () => {
-    const component = mount(
+    render(
       <BucketNestingEditor
         columnId="a"
         getFieldByName={getFieldByName}
@@ -188,14 +184,13 @@ describe('BucketNestingEditor', () => {
       />
     );
 
-    const control = component.find('[data-test-subj="indexPattern-nesting-select"]').first();
-
-    expect(control.prop('value')).toEqual('c');
+    const control = screen.getByTestId('indexPattern-nesting-select');
+    expect((control as HTMLSelectElement).value).toEqual('c');
   });
 
-  it('should reorder the columns when a column is selected in the dropdown', () => {
+  it('should reorder the columns when a column is selected in the dropdown', async () => {
     const setColumns = jest.fn();
-    const component = mount(
+    render(
       <BucketNestingEditor
         columnId="a"
         getFieldByName={getFieldByName}
@@ -212,17 +207,15 @@ describe('BucketNestingEditor', () => {
       />
     );
 
-    const control = component.find('[data-test-subj="indexPattern-nesting-select"] select').first();
-    control.simulate('change', {
-      target: { value: 'b' },
-    });
+    const control = screen.getByTestId('indexPattern-nesting-select');
+    await userEvent.selectOptions(control, 'b');
 
     expect(setColumns).toHaveBeenCalledWith(['c', 'b', 'a']);
   });
 
-  it('should move to root if the first dropdown item is selected', () => {
+  it('should move to root if the first dropdown item is selected', async () => {
     const setColumns = jest.fn();
-    const component = mount(
+    render(
       <BucketNestingEditor
         columnId="a"
         getFieldByName={getFieldByName}
@@ -239,15 +232,15 @@ describe('BucketNestingEditor', () => {
       />
     );
 
-    const control = component.find('[data-test-subj="indexPattern-nesting-select"] select').first();
-    control.simulate('change', { target: { value: '' } });
+    const control = screen.getByTestId('indexPattern-nesting-select');
+    await userEvent.selectOptions(control, '');
 
     expect(setColumns).toHaveBeenCalledWith(['a', 'c', 'b']);
   });
 
-  it('should allow the last bucket to be moved', () => {
+  it('should allow the last bucket to be moved', async () => {
     const setColumns = jest.fn();
-    const component = mount(
+    render(
       <BucketNestingEditor
         getFieldByName={getFieldByName}
         columnId="b"
@@ -264,10 +257,8 @@ describe('BucketNestingEditor', () => {
       />
     );
 
-    const control = component.find('[data-test-subj="indexPattern-nesting-select"] select').first();
-    control.simulate('change', {
-      target: { value: '' },
-    });
+    const control = screen.getByTestId('indexPattern-nesting-select');
+    await userEvent.selectOptions(control, '');
 
     expect(setColumns).toHaveBeenCalledWith(['b', 'c', 'a']);
   });

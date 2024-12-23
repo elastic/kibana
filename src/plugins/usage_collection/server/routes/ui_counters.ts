@@ -21,6 +21,12 @@ export function registerUiCountersRoute(
   router.post(
     {
       path: '/api/ui_counters/_report',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           report: reportSchema,

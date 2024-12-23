@@ -8,8 +8,10 @@
 import expect from '@kbn/expect';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import {
+  TINY_ELSER,
   clearKnowledgeBase,
   createKnowledgeBaseModel,
+  deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
 } from '../../../observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
 import { ObservabilityAIAssistantApiClient } from '../../../observability_ai_assistant_api_integration/common/observability_ai_assistant_api_client';
@@ -56,7 +58,14 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       await Promise.all([
         // setup the knowledge base
         observabilityAIAssistantAPIClient
-          .editor({ endpoint: 'POST /internal/observability_ai_assistant/kb/setup' })
+          .admin({
+            endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+            params: {
+              query: {
+                model_id: TINY_ELSER.id,
+              },
+            },
+          })
           .expect(200),
 
         // login as editor
@@ -65,7 +74,12 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     });
 
     after(async () => {
-      await Promise.all([deleteKnowledgeBaseModel(ml), clearKnowledgeBase(es), ui.auth.logout()]);
+      await Promise.all([
+        deleteKnowledgeBaseModel(ml),
+        deleteInferenceEndpoint({ es }),
+        clearKnowledgeBase(es),
+        ui.auth.logout(),
+      ]);
     });
 
     describe('when the LLM calls the "summarize" function for two different users', () => {

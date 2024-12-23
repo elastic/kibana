@@ -10,6 +10,15 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*,profiling-*';
 
+export interface MeteringStatsResponse {
+  datastreams: MeteringStats[];
+}
+export interface MeteringStats {
+  name: string;
+  num_docs: number;
+  size_in_bytes: number;
+}
+
 class DataStreamService {
   public async getAllFleetDataStreams(esClient: ElasticsearchClient) {
     const { data_streams: dataStreamsInfo } = await esClient.indices.getDataStream({
@@ -17,6 +26,18 @@ class DataStreamService {
     });
 
     return dataStreamsInfo;
+  }
+
+  public async getAllFleetMeteringStats(esClient: ElasticsearchClient) {
+    const res = await esClient.transport.request<MeteringStatsResponse>({
+      path: `/_metering/stats`,
+      method: 'GET',
+      querystring: {
+        human: true,
+      },
+    });
+
+    return res.datastreams ?? [];
   }
 
   public async getAllFleetDataStreamsStats(esClient: ElasticsearchClient) {

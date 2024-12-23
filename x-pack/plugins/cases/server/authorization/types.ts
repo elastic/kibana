@@ -63,6 +63,7 @@ export enum WriteOperations {
   UpdateComment = 'updateComment',
   CreateConfiguration = 'createConfiguration',
   UpdateConfiguration = 'updateConfiguration',
+  ReopenCase = 'reopenCase',
 }
 
 /**
@@ -75,7 +76,7 @@ export interface OperationDetails {
   ecsType: ArrayElement<EcsEvent['type']>;
   /**
    * The name of the operation to authorize against for the privilege check.
-   * These values need to match one of the operation strings defined here: x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
+   * These values need to match one of the operation strings defined here: x-pack/packages/security/authorization_core/src/privileges/feature_privilege_builder/cases.ts
    *
    * To avoid the authorization strings getting too large, new operations should generally fit within one of the
    * CasesSupportedOperations. In the situation where a new one is needed we'll have to add it to the security plugin.

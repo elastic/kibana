@@ -455,10 +455,7 @@ describe('Task Run Statistics', () => {
         { start: 0, stop: 0 },
         TaskRunResult.Success
       ),
-      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success, TaskPersistence.Ephemeral),
-      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success, TaskPersistence.Ephemeral),
       mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success),
-      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success, TaskPersistence.Ephemeral),
       mockTaskRunEvent(
         { schedule: { interval: '3s' } },
         { start: 0, stop: 0 },
@@ -490,79 +487,52 @@ describe('Task Run Statistics', () => {
               .toMatchInlineSnapshot(`
               Array [
                 Object {
-                  "ephemeral": 0,
                   "non_recurring": 100,
                   "recurring": 0,
                 },
                 Object {
-                  "ephemeral": 0,
                   "non_recurring": 100,
                   "recurring": 0,
                 },
                 Object {
-                  "ephemeral": 0,
                   "non_recurring": 67,
                   "recurring": 33,
                 },
                 Object {
-                  "ephemeral": 0,
                   "non_recurring": 75,
                   "recurring": 25,
                 },
                 Object {
-                  "ephemeral": 0,
                   "non_recurring": 80,
                   "recurring": 20,
                 },
                 Object {
-                  "ephemeral": 0,
                   "non_recurring": 60,
                   "recurring": 40,
                 },
                 Object {
-                  "ephemeral": 0,
                   "non_recurring": 40,
                   "recurring": 60,
                 },
                 Object {
-                  "ephemeral": 0,
                   "non_recurring": 60,
                   "recurring": 40,
                 },
                 Object {
-                  "ephemeral": 0,
                   "non_recurring": 60,
                   "recurring": 40,
                 },
                 Object {
-                  "ephemeral": 0,
                   "non_recurring": 40,
                   "recurring": 60,
                 },
                 Object {
-                  "ephemeral": 20,
-                  "non_recurring": 40,
+                  "non_recurring": 60,
                   "recurring": 40,
                 },
                 Object {
-                  "ephemeral": 40,
-                  "non_recurring": 40,
-                  "recurring": 20,
-                },
-                Object {
-                  "ephemeral": 40,
-                  "non_recurring": 40,
-                  "recurring": 20,
-                },
-                Object {
-                  "ephemeral": 60,
-                  "non_recurring": 20,
-                  "recurring": 20,
-                },
-                Object {
-                  "ephemeral": 60,
-                  "non_recurring": 20,
-                  "recurring": 20,
+                  "non_recurring": 60,
+                  "recurring": 40,
                 },
               ]
             `);

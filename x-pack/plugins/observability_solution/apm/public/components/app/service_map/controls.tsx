@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiPanel, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useEffect, useState } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useTheme } from '../../../hooks/use_theme';
 import { getLegacyApmHref } from '../../shared/links/apm/apm_link';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { APMQueryParams } from '../../shared/links/url_helpers';
@@ -18,24 +17,24 @@ import { CytoscapeContext } from './cytoscape';
 import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 
-const ControlsContainer = euiStyled('div')`
-  left: ${({ theme }) => theme.eui.euiSize};
+const ControlsContainer = styled('div')`
+  left: ${({ theme }) => theme.euiTheme.size.base};
   position: absolute;
-  top: ${({ theme }) => theme.eui.euiSizeS};
+  top: ${({ theme }) => theme.euiTheme.size.s};
   z-index: 1; /* The element containing the cytoscape canvas has z-index = 0. */
 `;
 
-const Button = euiStyled(EuiButtonIcon)`
+const Button = styled(EuiButtonIcon)`
   display: block;
-  margin: ${({ theme }) => theme.eui.euiSizeXS};
+  margin: ${({ theme }) => theme.euiTheme.size.xs};
 `;
 
-const ZoomInButton = euiStyled(Button)`
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
+const ZoomInButton = styled(Button)`
+  margin-bottom: ${({ theme }) => theme.euiTheme.size.s};
 `;
 
-const Panel = euiStyled(EuiPanel)`
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
+const Panel = styled(EuiPanel)`
+  margin-bottom: ${({ theme }) => theme.euiTheme.size.s};
 `;
 
 const steps = 5;
@@ -97,7 +96,7 @@ function useDebugDownloadUrl(cy?: cytoscape.Core) {
 export function Controls() {
   const { core } = useApmPluginContext();
   const { basePath } = core.http;
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const cy = useContext(CytoscapeContext);
   const { urlParams } = useLegacyUrlParams();
 
@@ -110,7 +109,7 @@ export function Controls() {
   );
 
   const [zoom, setZoom] = useState((cy && cy.zoom()) || 1);
-  const duration = parseInt(theme.eui.euiAnimSpeedFast, 10);
+  const duration = euiTheme.animation.fast ? parseInt(euiTheme.animation.fast, 10) : 0;
   const downloadUrl = useDebugDownloadUrl(cy);
   const viewFullMapUrl = getLegacyApmHref({
     basePath,
@@ -140,9 +139,9 @@ export function Controls() {
     if (cy) {
       const eles = cy.nodes();
       cy.animate({
-        ...getAnimationOptions(theme),
+        ...getAnimationOptions(euiTheme),
         center: { eles },
-        fit: { eles, padding: getNodeHeight(theme) },
+        fit: { eles, padding: getNodeHeight(euiTheme) },
       });
     }
   }

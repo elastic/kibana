@@ -230,10 +230,11 @@ describe('ConnectorUsageReportingTask', () => {
     const response = await taskRunner.run();
 
     expect(logger.warn).toHaveBeenCalledWith(
-      'Missing required project id while running actions:connector_usage_reporting'
+      'Missing required project id while running actions:connector_usage_reporting, reporting task will be deleted'
     );
 
     expect(response).toEqual({
+      shouldDeleteTask: true,
       state: {
         attempts: 0,
         lastReportedUsageDate,
@@ -390,5 +391,28 @@ describe('ConnectorUsageReportingTask', () => {
     expect(logger.error).toHaveBeenCalledWith(
       'Usage data could not be pushed to usage-api. Stopped retrying after 5 attempts. Error:test-error'
     );
+  });
+
+  it('does not schedule the task when the project id is missing', async () => {
+    const core = createSetup();
+    const taskManagerStart = taskManagerStartMock();
+
+    const task = new ConnectorUsageReportingTask({
+      eventLogIndex: 'test-index',
+      projectId: undefined,
+      logger,
+      core,
+      taskManager: mockTaskManagerSetup,
+      config: {
+        url: 'usage-api',
+        ca: {
+          path: './ca.crt',
+        },
+      },
+    });
+
+    await task.start(taskManagerStart);
+
+    expect(taskManagerStart.ensureScheduled).not.toBeCalled();
   });
 });

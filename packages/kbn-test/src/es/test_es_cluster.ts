@@ -21,6 +21,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense } from '@kbn/es';
 import type { ServerlessOptions } from '@kbn/es/src/utils';
+import { getFips } from 'crypto';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
 
@@ -200,12 +201,15 @@ export function createTestEsCluster<
 
   const esArgs = assignArgs(defaultEsArgs, customEsArgs);
 
+  // Use 'trial' license if FIPS mode is enabled, otherwise use the provided license or default to 'basic'
+  const testLicense: ArtifactLicense = getFips() === 1 ? 'trial' : license ? license : 'basic';
+
   const config = {
     version: esVersion,
     installPath: Path.resolve(basePath, clusterName),
     sourcePath: Path.resolve(REPO_ROOT, '../elasticsearch'),
+    license: testLicense,
     password,
-    license,
     basePath,
     esArgs,
     resources: files,

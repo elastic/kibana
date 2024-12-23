@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/search-homepage",
   "owner": "@elastic/search-kibana",
+  "group": "search",
+  "visibility": "private",
   "plugin": {
     "id": "searchHomepage",
     "server": true,

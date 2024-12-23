@@ -12,7 +12,8 @@ export interface IndicesStatusResponse {
 export interface UserStartPrivilegesResponse {
   privileges: {
     canCreateApiKeys: boolean;
-    canCreateIndex: boolean;
+    canManageIndex: boolean;
+    canDeleteDocuments: boolean;
   };
 }
 

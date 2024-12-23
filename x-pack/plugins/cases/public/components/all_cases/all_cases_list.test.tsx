@@ -7,8 +7,7 @@
 
 import React from 'react';
 import moment from 'moment-timezone';
-import { render, waitFor, screen, within } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { render, waitFor, screen, within, renderHook } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
@@ -27,7 +26,6 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyCellValue } from '../empty_value';
 import { useKibana } from '../../common/lib/kibana';
 import { AllCasesList } from './all_cases_list';
-import type { GetCasesColumn, UseCasesColumnsReturnValue } from './use_cases_columns';
 import { useCasesColumns } from './use_cases_columns';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
@@ -267,10 +265,7 @@ describe.skip('AllCasesListGeneric', () => {
       expect(column[key].querySelector('span')).toHaveTextContent(emptyTag);
     };
 
-    const { result } = renderHook<
-      React.PropsWithChildren<GetCasesColumn>,
-      UseCasesColumnsReturnValue
-    >(() => useCasesColumns(defaultColumnArgs), {
+    const { result } = renderHook(() => useCasesColumns(defaultColumnArgs), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 

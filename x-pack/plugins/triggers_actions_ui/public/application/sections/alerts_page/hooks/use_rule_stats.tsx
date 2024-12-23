@@ -23,7 +23,12 @@ const Divider = styled.div`
   height: 100%;
 `;
 
-export const useRuleStats = () => {
+interface Props {
+  ruleTypeIds?: string[];
+  consumers?: string[];
+}
+
+export const useRuleStats = ({ ruleTypeIds, consumers }: Props = {}) => {
   const {
     http,
     notifications: { toasts },
@@ -46,7 +51,10 @@ export const useRuleStats = () => {
     try {
       const response = await loadRuleAggregations({
         http,
+        ruleTypeIds,
+        consumers,
       });
+
       const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus, ruleSnoozedStatus } =
         response;
       if (ruleExecutionStatus && ruleMutedStatus && ruleEnabledStatus && ruleSnoozedStatus) {
@@ -73,7 +81,7 @@ export const useRuleStats = () => {
     } finally {
       setLoading(false);
     }
-  }, [http, toasts]);
+  }, [consumers, http, ruleTypeIds, toasts]);
 
   useEffect(() => {
     loadRuleStats();

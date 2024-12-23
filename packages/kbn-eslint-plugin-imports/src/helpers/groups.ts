@@ -8,18 +8,38 @@
  */
 
 import type { ModuleGroup, ModuleVisibility } from '@kbn/repo-info/types';
+import type { ModuleId } from '@kbn/repo-source-classifier';
 
 /**
  * Checks whether a given ModuleGroup can import from another one
- * @param importerGroup The group of the module that we are checking
+ * @param from The ModuleId object that defines the "import" statement
  * @param importedGroup The group of the imported module
  * @param importedVisibility The visibility of the imported module
- * @returns true if importerGroup is allowed to import from importedGroup/Visibiliy
+ * @returns true if "from" is allowed to import from importedGroup/Visibility
  */
 export function isImportableFrom(
-  importerGroup: ModuleGroup,
+  from: ModuleId,
   importedGroup: ModuleGroup,
   importedVisibility: ModuleVisibility
 ): boolean {
-  return importerGroup === importedGroup || importedVisibility === 'shared';
+  return (
+    (isDevOnly(from) && importedGroup === 'platform') ||
+    from.group === importedGroup ||
+    importedVisibility === 'shared'
+  );
+}
+
+/**
+ * Checks whether the given module is supposed to be used at dev/build/test time only
+ * @param module The module to check
+ * @returns true if the module is a dev-only module, false otherwise
+ * @see Package#isDevOnly (packages/kbn-repo-packages/modern/package.js)
+ */
+function isDevOnly(module: ModuleId) {
+  return (
+    !module.manifest ||
+    !!module.manifest?.devOnly ||
+    module.manifest?.type === 'functional-tests' ||
+    module.manifest?.type === 'test-helper'
+  );
 }

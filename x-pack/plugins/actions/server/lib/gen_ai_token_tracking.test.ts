@@ -24,6 +24,7 @@ describe('getGenAiTokenTracking', () => {
   let mockGetTokenCountFromInvokeStream: jest.Mock;
   let mockGetTokenCountFromInvokeAsyncIterator: jest.Mock;
   beforeEach(() => {
+    jest.clearAllMocks();
     mockGetTokenCountFromBedrockInvoke = (
       getTokenCountFromBedrockInvoke as jest.Mock
     ).mockResolvedValueOnce({
@@ -163,6 +164,103 @@ describe('getGenAiTokenTracking', () => {
     });
   });
 
+  it('should return the total, prompt, and completion token counts when given a valid ConverseResponse for bedrockClientSend subaction', async () => {
+    const actionTypeId = '.bedrock';
+
+    const result = {
+      actionId: '123',
+      status: 'ok' as const,
+      data: {
+        usage: {
+          inputTokens: 50,
+          outputTokens: 50,
+          totalTokens: 100,
+        },
+      },
+    };
+    const validatedParams = {
+      subAction: 'bedrockClientSend',
+    };
+
+    const tokenTracking = await getGenAiTokenTracking({
+      actionTypeId,
+      logger,
+      result,
+      validatedParams,
+    });
+
+    expect(tokenTracking).toEqual({
+      total_tokens: 100,
+      prompt_tokens: 50,
+      completion_tokens: 50,
+    });
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('should return the total, prompt, and completion token counts when given a valid ConverseStreamResponse for bedrockClientSend subaction', async () => {
+    const chunkIterable = {
+      async *[Symbol.asyncIterator]() {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        yield {
+          metadata: {
+            usage: {
+              totalTokens: 100,
+              inputTokens: 40,
+              outputTokens: 60,
+            },
+          },
+        };
+      },
+    };
+    const actionTypeId = '.bedrock';
+
+    const result = {
+      actionId: '123',
+      status: 'ok' as const,
+      data: {
+        tokenStream: chunkIterable,
+      },
+    };
+    const validatedParams = {
+      subAction: 'bedrockClientSend',
+    };
+
+    const tokenTracking = await getGenAiTokenTracking({
+      actionTypeId,
+      logger,
+      result,
+      validatedParams,
+    });
+
+    expect(tokenTracking).toEqual({
+      total_tokens: 100,
+      prompt_tokens: 40,
+      completion_tokens: 60,
+    });
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('should return null when given an invalid Bedrock response for bedrockClientSend subaction', async () => {
+    const actionTypeId = '.bedrock';
+    const result = {
+      actionId: '123',
+      status: 'ok' as const,
+      data: {},
+    };
+    const validatedParams = {
+      subAction: 'bedrockClientSend',
+    };
+
+    const tokenTracking = await getGenAiTokenTracking({
+      actionTypeId,
+      logger,
+      result,
+      validatedParams,
+    });
+
+    expect(tokenTracking).toBeNull();
+    expect(logger.error).toHaveBeenCalled();
+  });
   it('should return the total, prompt, and completion token counts when given a valid OpenAI streamed response', async () => {
     const mockReader = new IncomingMessage(new Socket());
     const actionTypeId = '.gen-ai';

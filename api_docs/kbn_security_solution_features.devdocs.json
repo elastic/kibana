@@ -37,7 +37,7 @@
           },
           "<T>"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,7 +57,9 @@
                 "section": "def-common.KibanaFeatureScope",
                 "text": "KibanaFeatureScope"
               },
-              "[] | undefined; order?: number | undefined; name: string; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
+              "[] | undefined; order?: number | undefined; name: string; alerting?: ",
+              "AlertingKibanaPrivilege",
+              " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
               {
                 "pluginId": "@kbn/core-application-common",
                 "scope": "common",
@@ -85,7 +87,7 @@
               "ReservedKibanaPrivilege",
               "[]; } | undefined; }"
             ],
-            "path": "x-pack/packages/security-solution/features/src/types.ts",
+            "path": "x-pack/solutions/security/packages/features/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -99,7 +101,7 @@
             "signature": [
               "T[]"
             ],
-            "path": "x-pack/packages/security-solution/features/src/types.ts",
+            "path": "x-pack/solutions/security/packages/features/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -121,7 +123,7 @@
               },
               ">"
             ],
-            "path": "x-pack/packages/security-solution/features/src/types.ts",
+            "path": "x-pack/solutions/security/packages/features/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -149,7 +151,7 @@
           },
           ">"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -170,7 +172,9 @@
             "section": "def-common.KibanaFeatureScope",
             "text": "KibanaFeatureScope"
           },
-          "[] | undefined; order?: number | undefined; name: string; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
+          "[] | undefined; order?: number | undefined; name: string; alerting?: ",
+          "AlertingKibanaPrivilege",
+          " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
           {
             "pluginId": "@kbn/core-application-common",
             "scope": "common",
@@ -198,7 +202,7 @@
           "ReservedKibanaPrivilege",
           "[]; } | undefined; }"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -220,7 +224,7 @@
           },
           "[]"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -241,7 +245,7 @@
           " | ",
           "ProductFeatureAttackDiscoveryKey"
         ],
-        "path": "x-pack/packages/security-solution/features/src/product_features_keys.ts",
+        "path": "x-pack/solutions/security/packages/features/src/product_features_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -287,7 +291,7 @@
           },
           ">[] | undefined; }"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -314,7 +318,7 @@
           "AssistantSubFeatureId",
           ">>"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -339,7 +343,7 @@
           },
           "<string>>"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -366,7 +370,7 @@
           "CasesSubFeatureId",
           ">>"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -397,7 +401,7 @@
           },
           "<T>>"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -424,7 +428,7 @@
           "SecuritySubFeatureId",
           ">>"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -469,7 +473,15 @@
             "section": "def-common.RecursivePartial",
             "text": "RecursivePartial"
           },
-          "<{ rule?: { all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined; alert?: { all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined; } | undefined>; cases?: ",
+          "<{ rule?: { all?: ",
+          "AlertingKibanaPrivilege",
+          " | undefined; read?: ",
+          "AlertingKibanaPrivilege",
+          " | undefined; } | undefined; alert?: { all?: ",
+          "AlertingKibanaPrivilege",
+          " | undefined; read?: ",
+          "AlertingKibanaPrivilege",
+          " | undefined; } | undefined; } | undefined>; cases?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -477,7 +489,7 @@
             "section": "def-common.RecursivePartial",
             "text": "RecursivePartial"
           },
-          "<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; } | undefined>; disabled?: ",
+          "<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; } | undefined>; disabled?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -535,7 +547,7 @@
           },
           "<{ all: readonly string[]; read: readonly string[]; }> | undefined; }"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

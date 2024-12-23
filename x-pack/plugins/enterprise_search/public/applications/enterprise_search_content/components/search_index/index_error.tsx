@@ -35,6 +35,8 @@ interface SemanticTextProperty extends MappingPropertyBase {
   type: 'semantic_text';
 }
 
+const isInferencePreconfigured = (inferenceId: string) => inferenceId.startsWith('.');
+
 const parseMapping = (mappings: MappingTypeMapping) => {
   const fields = mappings.properties;
   if (!fields) {
@@ -115,7 +117,7 @@ export const IndexError: React.FC<IndexErrorProps> = ({ indexName }) => {
               field,
             };
           }
-          if (isLocalModel(model)) {
+          if (isLocalModel(model) && !isInferencePreconfigured(model.inference_id)) {
             const modelId = model.service_settings.model_id;
             const modelStats = trainedModelStats?.trained_model_stats.find(
               (value) =>

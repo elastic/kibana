@@ -6,8 +6,7 @@ which are pre-packaged assets that are available for a wide array of popular
 services and platforms. With integrations, you can add monitoring for logs and
 metrics, protect systems from security threats, and more.
 
-All integrations are available in a single view, and
-{kib} guides you there from the *Welcome* screen, home page, and main menu.
+All integrations are available in a single view on the **Integrations** page.
 
 [role="screenshot"]
 image::images/add-integration.png[Integrations page from which you can choose integrations to start collecting and analyzing data]

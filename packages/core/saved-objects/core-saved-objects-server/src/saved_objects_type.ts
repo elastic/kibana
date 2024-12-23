@@ -75,8 +75,11 @@ export interface SavedObjectsType<Attributes = any> {
    */
   mappings: SavedObjectsTypeMappingDefinition;
   /**
-   * An optional map of {@link SavedObjectMigrationFn | migrations} or a function returning a map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
-   * @deprecated Use {@link SavedObjectsType.modelVersions | modelVersions} instead.
+   * An optional map of {@link SavedObjectMigrationFn | migrations} or a function returning a map of
+   * {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
+   *
+   * @deprecated Use {@link SavedObjectsType.modelVersions | modelVersions} for all future migrations instead. We have no plans
+   * to remove legacy migrations at this point, so there's no need to migrate existing migrations to model versions.
    */
   migrations?: SavedObjectMigrationMap | (() => SavedObjectMigrationMap);
   /**
@@ -89,8 +92,8 @@ export interface SavedObjectsType<Attributes = any> {
    */
   schemas?: SavedObjectsValidationMap | (() => SavedObjectsValidationMap);
   /**
-   * If defined, objects of this type will be converted to a 'multiple' or 'multiple-isolated' namespace type when migrating to this
-   * version.
+   * If defined, objects of this type will be converted to a 'multiple' or 'multiple-isolated' namespace type when migrating to
+   * this version.
    *
    * Requirements:
    *

@@ -42,7 +42,7 @@ const serviceMapRoute = createApmServerRoute({
       rangeRt,
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<TransformServiceMapResponse> => {
     const { config, context, params, logger } = resources;
     if (!config.serviceMapEnabled) {
@@ -111,7 +111,7 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
     }),
     query: t.intersection([environmentRt, rangeRt, offsetRt]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceMapServiceNodeInfoResponse> => {
     const { config, context, params } = resources;
 
@@ -154,7 +154,7 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
   params: t.type({
     query: t.intersection([t.type({ dependencyName: t.string }), environmentRt, rangeRt, offsetRt]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceMapServiceDependencyInfoResponse> => {
     const { config, context, params } = resources;
 

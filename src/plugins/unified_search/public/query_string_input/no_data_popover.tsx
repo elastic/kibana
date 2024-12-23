@@ -63,7 +63,7 @@ export function NoDataPopover({
       }}
       content={
         <EuiText size="s">
-          <p style={{ maxWidth: 300 }}>{strings.getNoDataPopoverContent()}</p>
+          <p css={{ maxWidth: 300 }}>{strings.getNoDataPopoverContent()}</p>
         </EuiText>
       }
       minWidth={300}

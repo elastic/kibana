@@ -7,6 +7,8 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import aws from 'aws4';
+import { BedrockRuntimeClient } from '@aws-sdk/client-bedrock-runtime';
+import { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
 import { AxiosError, Method } from 'axios';
 import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
@@ -21,8 +23,9 @@ import {
   StreamingResponseSchema,
   RunActionResponseSchema,
   RunApiLatestResponseSchema,
+  BedrockClientSendParamsSchema,
 } from '../../../common/bedrock/schema';
-import type {
+import {
   Config,
   Secrets,
   RunActionParams,
@@ -34,6 +37,8 @@ import type {
   RunApiLatestResponse,
   BedrockMessage,
   BedrockToolChoice,
+  ConverseActionParams,
+  ConverseActionResponse,
 } from '../../../common/bedrock/types';
 import {
   SUB_ACTION,
@@ -57,13 +62,20 @@ interface SignedRequest {
 export class BedrockConnector extends SubActionConnector<Config, Secrets> {
   private url;
   private model;
+  private bedrockClient;
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
 
     this.url = this.config.apiUrl;
     this.model = this.config.defaultModel;
-
+    this.bedrockClient = new BedrockRuntimeClient({
+      region: extractRegionId(this.config.apiUrl),
+      credentials: {
+        accessKeyId: this.secrets.accessKey,
+        secretAccessKey: this.secrets.secret,
+      },
+    });
     this.registerSubActions();
   }
 
@@ -102,6 +114,12 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
       name: SUB_ACTION.INVOKE_AI_RAW,
       method: 'invokeAIRaw',
       schema: InvokeAIRawActionParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.BEDROCK_CLIENT_SEND,
+      method: 'bedrockClientSend',
+      schema: BedrockClientSendParamsSchema,
     });
   }
 
@@ -222,6 +240,9 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * responsible for making a POST request to the external API endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
+   * @param signal Optional signal to cancel the request.
+   * @param timeout Optional timeout for the request.
+   * @param raw Optional flag to indicate if the response should be returned as raw data.
    */
   public async runApi(
     { body, model: reqModel, signal, timeout, raw }: RunActionParams,
@@ -312,7 +333,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       timeout,
       tools,
       toolChoice,
-    }: InvokeAIActionParams | InvokeAIRawActionParams,
+    }: InvokeAIRawActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<IncomingMessage> {
     const res = (await this.streamApi(
@@ -411,6 +432,33 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     );
     return res;
   }
+
+  /**
+   * Sends a request via the BedrockRuntimeClient to perform a conversation action.
+   * @param params - The parameters for the conversation action.
+   * @param params.signal - The signal to cancel the request.
+   * @param params.command - The command class to be sent to the API. (ConverseCommand | ConverseStreamCommand)
+   * @param connectorUsageCollector - The usage collector for the connector.
+   * @returns A promise that resolves to the response of the conversation action.
+   */
+  public async bedrockClientSend(
+    { signal, command }: ConverseActionParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<ConverseActionResponse> {
+    connectorUsageCollector.addRequestBodyBytes(undefined, command);
+    const res = await this.bedrockClient.send(command, {
+      abortSignal: signal,
+    });
+
+    if ('stream' in res) {
+      const resultStream = res.stream as SmithyMessageDecoderStream<unknown>;
+      // splits the stream in two, [stream = consumer, tokenStream = token tracking]
+      const [stream, tokenStream] = tee(resultStream);
+      return { ...res, stream, tokenStream };
+    }
+
+    return res;
+  }
 }
 
 const formatBedrockBody = ({
@@ -504,3 +552,91 @@ function parseContent(content: Array<{ text?: string; type: string }>): string {
 }
 
 const usesDeprecatedArguments = (body: string): boolean => JSON.parse(body)?.prompt != null;
+
+function extractRegionId(url: string) {
+  const match = (url ?? '').match(/bedrock\.(.*?)\.amazonaws\./);
+  if (match) {
+    return match[1];
+  } else {
+    // fallback to us-east-1
+    return 'us-east-1';
+  }
+}
+
+/**
+ * Splits an async iterator into two independent async iterators which can be independently read from at different speeds.
+ * @param asyncIterator The async iterator returned from Bedrock to split
+ */
+function tee<T>(
+  asyncIterator: SmithyMessageDecoderStream<T>
+): [SmithyMessageDecoderStream<T>, SmithyMessageDecoderStream<T>] {
+  // @ts-ignore options is private, but we need it to create the new streams
+  const streamOptions = asyncIterator.options;
+
+  const streamLeft = new SmithyMessageDecoderStream<T>(streamOptions);
+  const streamRight = new SmithyMessageDecoderStream<T>(streamOptions);
+
+  // Queues to store chunks for each stream
+  const leftQueue: T[] = [];
+  const rightQueue: T[] = [];
+
+  // Promises for managing when a chunk is available
+  let leftPending: ((chunk: T | null) => void) | null = null;
+  let rightPending: ((chunk: T | null) => void) | null = null;
+
+  const distribute = async () => {
+    for await (const chunk of asyncIterator) {
+      // Push the chunk into both queues
+      if (leftPending) {
+        leftPending(chunk);
+        leftPending = null;
+      } else {
+        leftQueue.push(chunk);
+      }
+
+      if (rightPending) {
+        rightPending(chunk);
+        rightPending = null;
+      } else {
+        rightQueue.push(chunk);
+      }
+    }
+
+    // Signal the end of the iterator
+    if (leftPending) {
+      leftPending(null);
+    }
+    if (rightPending) {
+      rightPending(null);
+    }
+  };
+
+  // Start distributing chunks from the iterator
+  distribute().catch(() => {
+    // swallow errors
+  });
+
+  // Helper to create an async iterator for each stream
+  const createIterator = (
+    queue: T[],
+    setPending: (fn: ((chunk: T | null) => void) | null) => void
+  ) => {
+    return async function* () {
+      while (true) {
+        if (queue.length > 0) {
+          yield queue.shift()!;
+        } else {
+          const chunk = await new Promise<T | null>((resolve) => setPending(resolve));
+          if (chunk === null) break; // End of the stream
+          yield chunk;
+        }
+      }
+    };
+  };
+
+  // Assign independent async iterators to each stream
+  streamLeft[Symbol.asyncIterator] = createIterator(leftQueue, (fn) => (leftPending = fn));
+  streamRight[Symbol.asyncIterator] = createIterator(rightQueue, (fn) => (rightPending = fn));
+
+  return [streamLeft, streamRight];
+}

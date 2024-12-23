@@ -161,7 +161,10 @@ export const configValidator = (configObject: Config, validatorServices: Validat
       );
     }
 
-    if (!Object.keys(SUB_ACTION).includes(taskType.toUpperCase())) {
+    if (
+      !taskType.includes('completion') &&
+      !Object.keys(SUB_ACTION).includes(taskType.toUpperCase())
+    ) {
       throw new Error(
         `Task type is not supported${
           taskType && taskType.length ? `: ${taskType}` : ``

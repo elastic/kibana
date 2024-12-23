@@ -39,7 +39,7 @@
           },
           "; }) => Promise<void>"
         ],
-        "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
+        "path": "x-pack/platform/packages/private/kbn-infra-forge/src/run.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -50,7 +50,7 @@
             "tags": [],
             "label": "{ esClient, logger }",
             "description": [],
-            "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
+            "path": "x-pack/platform/packages/private/kbn-infra-forge/src/run.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -64,7 +64,7 @@
                 "signature": [
                   "default"
                 ],
-                "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
+                "path": "x-pack/platform/packages/private/kbn-infra-forge/src/run.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -84,7 +84,7 @@
                     "text": "ToolingLog"
                   }
                 ],
-                "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
+                "path": "x-pack/platform/packages/private/kbn-infra-forge/src/run.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -114,7 +114,7 @@
           },
           "; }) => Promise<string>"
         ],
-        "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
+        "path": "x-pack/platform/packages/private/kbn-infra-forge/src/run.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -125,7 +125,7 @@
             "tags": [],
             "label": "{\n  esClient,\n  lookback,\n  logger,\n}",
             "description": [],
-            "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
+            "path": "x-pack/platform/packages/private/kbn-infra-forge/src/run.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -139,7 +139,7 @@
                 "signature": [
                   "default"
                 ],
-                "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
+                "path": "x-pack/platform/packages/private/kbn-infra-forge/src/run.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -150,7 +150,7 @@
                 "tags": [],
                 "label": "lookback",
                 "description": [],
-                "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
+                "path": "x-pack/platform/packages/private/kbn-infra-forge/src/run.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -170,7 +170,7 @@
                     "text": "ToolingLog"
                   }
                 ],
-                "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
+                "path": "x-pack/platform/packages/private/kbn-infra-forge/src/run.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

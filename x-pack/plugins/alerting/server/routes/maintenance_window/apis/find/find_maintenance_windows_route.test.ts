@@ -62,9 +62,16 @@ describe('findMaintenanceWindowsRoute', () => {
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "access": "internal",
-        "tags": Array [
-          "access:read-maintenance-window",
-        ],
+      }
+    `);
+
+    expect(config.security).toMatchInlineSnapshot(`
+      Object {
+        "authz": Object {
+          "requiredPrivileges": Array [
+            "read-maintenance-window",
+          ],
+        },
       }
     `);
 
@@ -95,6 +102,8 @@ describe('findMaintenanceWindowsRoute', () => {
         query: {
           page: 1,
           per_page: 3,
+          search: 'mw name',
+          status: ['running'],
         },
       }
     );
@@ -103,15 +112,27 @@ describe('findMaintenanceWindowsRoute', () => {
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "access": "internal",
-        "tags": Array [
-          "access:read-maintenance-window",
-        ],
+      }
+    `);
+
+    expect(config.security).toMatchInlineSnapshot(`
+      Object {
+        "authz": Object {
+          "requiredPrivileges": Array [
+            "read-maintenance-window",
+          ],
+        },
       }
     `);
 
     await handler(context, req, res);
 
-    expect(maintenanceWindowClient.find).toHaveBeenCalledWith({ page: 1, perPage: 3 });
+    expect(maintenanceWindowClient.find).toHaveBeenCalledWith({
+      page: 1,
+      perPage: 3,
+      search: 'mw name',
+      status: ['running'],
+    });
     expect(res.ok).toHaveBeenLastCalledWith({
       body: {
         data: mockMaintenanceWindows.data.map((data) => rewriteMaintenanceWindowRes(data)),

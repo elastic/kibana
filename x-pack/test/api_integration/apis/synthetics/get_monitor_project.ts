@@ -22,13 +22,13 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
+    const kibanaServer = getService('kibanaServer');
 
     let projectMonitors: LegacyProjectMonitorsRequest;
     let httpProjectMonitors: LegacyProjectMonitorsRequest;
     let tcpProjectMonitors: LegacyProjectMonitorsRequest;
     let icmpProjectMonitors: LegacyProjectMonitorsRequest;
 
-    let testPolicyId = '';
     const testPrivateLocations = new PrivateLocationTestService(getService);
 
     const setUniqueIds = (request: LegacyProjectMonitorsRequest) => {
@@ -39,12 +39,10 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await testPrivateLocations.installSyntheticsPackage();
 
-      const testPolicyName = 'Fleet test server policy' + Date.now();
-      const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
-      testPolicyId = apiResponse.body.item.id;
-      await testPrivateLocations.setTestLocations([testPolicyId]);
+      await testPrivateLocations.addPrivateLocation();
     });
 
     beforeEach(() => {
@@ -97,6 +95,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         const firstPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .query({
+            per_page: 500,
+          })
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -187,6 +188,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         const firstPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .query({
+            per_page: 500,
+          })
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -281,6 +285,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         const firstPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .query({
+            per_page: 500,
+          })
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -374,6 +381,9 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const firstPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .query({
+            per_page: 500,
+          })
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -483,6 +493,9 @@ export default function ({ getService }: FtrProviderContext) {
               encodeURI(projectName)
             )
           )
+          .query({
+            per_page: 500,
+          })
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);

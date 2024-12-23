@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
+import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test-jest-helpers';
 
 import { ColorFormatEditor } from './color';
 import { FieldFormat, DEFAULT_CONVERTER_COLOR } from '@kbn/field-formats-plugin/common';
@@ -28,10 +28,39 @@ describe('ColorFormatEditor', () => {
     expect(ColorFormatEditor.formatId).toEqual('color');
   });
 
+  it('renders the color swatch icon inside the button', () => {
+    const component = mountWithI18nProvider(
+      <ColorFormatEditor
+        fieldType={'color'}
+        format={format as unknown as FieldFormat}
+        formatParams={formatParams}
+        onChange={onChange}
+        onError={onError}
+      />
+    );
+
+    const button = component.find('[data-test-subj="buttonColorSwatchIcon"]').at(0);
+    expect(button.exists()).toBe(true);
+  });
+
   it('should render string type normally (regex field)', async () => {
     const component = shallowWithI18nProvider(
       <ColorFormatEditor
         fieldType={fieldType}
+        format={format as unknown as FieldFormat}
+        formatParams={formatParams}
+        onChange={onChange}
+        onError={onError}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render boolean type normally', async () => {
+    const component = shallowWithI18nProvider(
+      <ColorFormatEditor
+        fieldType={'boolean'}
         format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}

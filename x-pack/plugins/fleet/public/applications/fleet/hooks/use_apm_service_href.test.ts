@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook } from '@testing-library/react-hooks';
+
+import { waitFor, renderHook } from '@testing-library/react';
 
 import type { DataStream } from '../types';
 import * as useLocatorModule from '../../../hooks/use_locator';
@@ -19,7 +20,8 @@ jest.mock('../../../hooks/use_locator', () => {
 });
 const apmLocatorMock = useLocatorModule.useLocator('APM_LOCATOR')?.getUrl;
 
-describe('useApmServiceHref hook', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/201876
+describe.skip('useApmServiceHref hook', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -29,12 +31,12 @@ describe('useApmServiceHref hook', () => {
       package: 'elastic_agent',
     } as DataStream;
 
-    const { result, waitForNextUpdate } = renderHook(() => useAPMServiceDetailHref(datastream));
+    const { result } = renderHook(() => useAPMServiceDetailHref(datastream));
 
-    await waitForNextUpdate();
-
-    expect(result.current).toMatchObject({ isSuccessful: true, href: undefined });
-    expect(apmLocatorMock).not.toBeCalled();
+    await waitFor(() => {
+      expect(result.current).toMatchObject({ isSuccessful: true, href: undefined });
+      expect(apmLocatorMock).not.toBeCalled();
+    });
   });
 
   const testCases = [
@@ -83,12 +85,12 @@ describe('useApmServiceHref hook', () => {
   it.each(testCases)(
     'it passes the correct params to apm locator for %s',
     async (datastream, locatorParams) => {
-      const { result, waitForNextUpdate } = renderHook(() => useAPMServiceDetailHref(datastream));
+      const { result } = renderHook(() => useAPMServiceDetailHref(datastream));
 
-      await waitForNextUpdate();
-
-      expect(result.current).toMatchObject({ isSuccessful: true, href: '' });
-      expect(apmLocatorMock).toBeCalledWith(expect.objectContaining(locatorParams));
+      await waitFor(() => {
+        expect(result.current).toMatchObject({ isSuccessful: true, href: '' });
+        expect(apmLocatorMock).toBeCalledWith(expect.objectContaining(locatorParams));
+      });
     }
   );
 });

@@ -25,26 +25,26 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 describe('fips', () => {
   let securityConfig: SecurityServiceConfigType;
   describe('#isFipsEnabled', () => {
-    it('should return `true` if config.experimental.fipsMode.enabled is `true`', () => {
-      securityConfig = { experimental: { fipsMode: { enabled: true } } };
+    it('should return `true` if config.fipsMode.enabled is `true`', () => {
+      securityConfig = { fipsMode: { enabled: true } };
 
       expect(isFipsEnabled(securityConfig)).toBe(true);
     });
 
-    it('should return `false` if config.experimental.fipsMode.enabled is `false`', () => {
-      securityConfig = { experimental: { fipsMode: { enabled: false } } };
+    it('should return `false` if config.fipsMode.enabled is `false`', () => {
+      securityConfig = { fipsMode: { enabled: false } };
 
       expect(isFipsEnabled(securityConfig)).toBe(false);
     });
 
-    it('should return `false` if config.experimental.fipsMode.enabled is `undefined`', () => {
+    it('should return `false` if config.fipsMode.enabled is `undefined`', () => {
       expect(isFipsEnabled(securityConfig)).toBe(false);
     });
   });
 
   describe('checkFipsConfig', () => {
-    it('should log an error message if FIPS mode is misconfigured - xpack.security.experimental.fipsMode.enabled true, Nodejs FIPS mode false', async () => {
-      securityConfig = { experimental: { fipsMode: { enabled: true } } };
+    it('should log an error message if FIPS mode is misconfigured - xpack.security.fipsMode.enabled true, Nodejs FIPS mode false', async () => {
+      securityConfig = { fipsMode: { enabled: true } };
       const logger = loggingSystemMock.create().get();
       let fipsException: undefined | CriticalError;
       try {
@@ -56,16 +56,16 @@ describe('fips', () => {
       expect(fipsException).toBeInstanceOf(CriticalError);
       expect(fipsException!.processExitCode).toBe(78);
       expect(fipsException!.message).toEqual(
-        'Configuration mismatch error. xpack.security.experimental.fipsMode.enabled is set to true and the configured Node.js environment has FIPS disabled'
+        'Configuration mismatch error. xpack.security.fipsMode.enabled is set to true and the configured Node.js environment has FIPS disabled'
       );
     });
 
-    it('should log an error message if FIPS mode is misconfigured - xpack.security.experimental.fipsMode.enabled false, Nodejs FIPS mode true', async () => {
+    it('should log an error message if FIPS mode is misconfigured - xpack.security.fipsMode.enabled false, Nodejs FIPS mode true', async () => {
       mockGetFipsFn.mockImplementationOnce(() => {
         return 1;
       });
 
-      securityConfig = { experimental: { fipsMode: { enabled: false } } };
+      securityConfig = { fipsMode: { enabled: false } };
       const logger = loggingSystemMock.create().get();
 
       let fipsException: undefined | CriticalError;
@@ -77,16 +77,16 @@ describe('fips', () => {
       expect(fipsException).toBeInstanceOf(CriticalError);
       expect(fipsException!.processExitCode).toBe(78);
       expect(fipsException!.message).toEqual(
-        'Configuration mismatch error. xpack.security.experimental.fipsMode.enabled is set to false and the configured Node.js environment has FIPS enabled'
+        'Configuration mismatch error. xpack.security.fipsMode.enabled is set to false and the configured Node.js environment has FIPS enabled'
       );
     });
 
-    it('should log an info message if FIPS mode is properly configured - xpack.security.experimental.fipsMode.enabled true, Nodejs FIPS mode true', async () => {
+    it('should log an info message if FIPS mode is properly configured - xpack.security.fipsMode.enabled true, Nodejs FIPS mode true', async () => {
       mockGetFipsFn.mockImplementationOnce(() => {
         return 1;
       });
 
-      securityConfig = { experimental: { fipsMode: { enabled: true } } };
+      securityConfig = { fipsMode: { enabled: true } };
       const logger = loggingSystemMock.create().get();
 
       try {
@@ -113,7 +113,7 @@ describe('fips', () => {
           return 1;
         });
 
-        securityConfig = { experimental: { fipsMode: { enabled: true } } };
+        securityConfig = { fipsMode: { enabled: true } };
       });
 
       afterEach(function () {

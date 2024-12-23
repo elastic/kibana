@@ -140,6 +140,8 @@ actions:
                   default: {}
                   description: The connector configuration details.
                   oneOf:
+                    # AI (.inference) TBD
+                    # - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/inference_config.yaml'
                     # Bedrock (.bedrock)
                     - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/bedrock_config.yaml'
                     # Crowdstrike (.crowdstrike)
@@ -194,6 +196,8 @@ actions:
                   additionalProperties: {}
                   default: {}
                   oneOf:
+                    # AI (.inference)
+                    # - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/inference_secrets.yaml'
                     # Bedrock (.bedrock)
                     - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/bedrock_secrets.yaml'
                     # Crowdstrike (.crowdstrike)
@@ -253,6 +257,8 @@ actions:
                   default: {}
                   description: The connector configuration details.
                   oneOf:
+                    # AI (.inference)
+                    # - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/inference_config.yaml'
                     # Bedrock (.bedrock)
                     - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/bedrock_config.yaml'
                     # Crowdstrike (.crowdstrike)
@@ -307,6 +313,8 @@ actions:
                   additionalProperties: {}
                   default: {}
                   oneOf:
+                    # AI (.inference)
+                    # - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/inference_secrets.yaml'
                     # Bedrock (.bedrock)
                     - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/bedrock_secrets.yaml'
                     # Crowdstrike (.crowdstrike)

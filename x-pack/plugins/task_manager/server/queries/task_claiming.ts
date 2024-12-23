@@ -34,7 +34,6 @@ export interface TaskClaimingOpts {
   logger: Logger;
   strategy: string;
   definitions: TaskTypeDictionary;
-  unusedTypes: string[];
   taskStore: TaskStore;
   maxAttempts: number;
   excludedTaskTypes: string[];
@@ -92,7 +91,6 @@ export class TaskClaiming {
   private readonly taskClaimingBatchesByType: TaskClaimingBatches;
   private readonly taskMaxAttempts: Record<string, number>;
   private readonly excludedTaskTypes: string[];
-  private readonly unusedTypes: string[];
   private readonly taskClaimer: TaskClaimerFn;
   private readonly taskPartitioner: TaskPartitioner;
 
@@ -111,7 +109,6 @@ export class TaskClaiming {
     this.taskClaimingBatchesByType = this.partitionIntoClaimingBatches(this.definitions);
     this.taskMaxAttempts = Object.fromEntries(this.normalizeMaxAttempts(this.definitions));
     this.excludedTaskTypes = opts.excludedTaskTypes;
-    this.unusedTypes = opts.unusedTypes;
     this.taskClaimer = getTaskClaimer(this.logger, opts.strategy);
     this.events$ = new Subject<TaskClaim>();
     this.taskPartitioner = opts.taskPartitioner;
@@ -178,7 +175,6 @@ export class TaskClaiming {
           taskStore: this.taskStore,
           events$: this.events$,
           getCapacity: this.getAvailableCapacity,
-          unusedTypes: this.unusedTypes,
           definitions: this.definitions,
           taskMaxAttempts: this.taskMaxAttempts,
           excludedTaskTypes: this.excludedTaskTypes,

@@ -157,7 +157,7 @@ describe('Agent policy', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
-    mockedAppContextService.getExperimentalFeatures.mockReturnValue({ agentless: false } as any);
+    mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
     jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
     jest
       .mocked(getPackagePolicySavedObjectType)
@@ -315,10 +315,7 @@ describe('Agent policy', () => {
       );
     });
 
-    it('should throw AgentPolicyInvalidError if support_agentless is defined in stateful without agentless feature', async () => {
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ agentless: false } as any);
+    it('should throw AgentPolicyInvalidError if support_agentless is defined in stateful without agentless enabled', async () => {
       jest
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: false } as any);
@@ -339,10 +336,7 @@ describe('Agent policy', () => {
       );
     });
 
-    it('should throw AgentPolicyInvalidError if agentless feature flag is disabled in serverless', async () => {
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ agentless: false } as any);
+    it('should throw AgentPolicyInvalidError if agentless is disabled in serverless', async () => {
       jest
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: true } as any);
@@ -363,10 +357,10 @@ describe('Agent policy', () => {
       );
     });
 
-    it('should create a policy  agentless feature flag is set and in serverless env', async () => {
+    it('should create an agentless policy when agentless config is set and in serverless env', async () => {
       jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ agentless: true } as any);
+        .spyOn(appContextService, 'getConfig')
+        .mockReturnValue({ agentless: { enabled: true } } as any);
       jest
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: true } as any);
@@ -1229,13 +1223,13 @@ describe('Agent policy', () => {
       ).resolves.not.toThrow();
     });
 
-    it('should throw AgentPolicyInvalidError if agentless flag is disabled in serverless', async () => {
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ agentless: false } as any);
+    it('should not throw AgentPolicyInvalidError if support_agentless is defined in serverless', async () => {
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
       jest
         .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isServerlessEnabled: true } as any);
+        .mockReturnValue({ isServerlessEnabled: true, isCloudEnabled: false } as any);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1252,17 +1246,13 @@ describe('Agent policy', () => {
           namespace: 'default',
           supports_agentless: true,
         })
-      ).rejects.toThrowError(
-        new AgentPolicyInvalidError(
-          'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
-        )
-      );
+      ).resolves.not.toThrow();
     });
 
-    it('should not throw in serverless if support_agentless is set and agentless feature flag is set', async () => {
+    it('should not throw in serverless if support_agentless and agentless config is set', async () => {
       jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ agentless: true } as any);
+        .spyOn(appContextService, 'getConfig')
+        .mockReturnValue({ agentless: { enabled: true } } as any);
       jest
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: true } as any);

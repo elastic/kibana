@@ -1,0 +1,86 @@
+.documentation__docs {
+  background: $euiColorEmptyShade;
+}
+
+.documentation__docsHeader {
+  margin: 0;
+}
+
+.documentation__docs--inline {
+  display: flex;
+  flex-direction: column;
+  // make sure docs are rendered in front of monaco
+  z-index: 1;
+}
+
+.documentation__docsContent {
+  .documentation__docs--overlay & {
+    height: 40vh;
+    width:  #{'min(75vh, 90vw)'};
+  }
+
+  .documentation__docs--inline & {
+    flex: 1;
+    min-height: 0;
+  }
+
+  & > * + * {
+    border-left: $euiBorderThin;
+  }
+}
+
+.documentation__docsSidebar {
+  background: $euiColorLightestShade;
+}
+
+.documentation__docsSidebarInner {
+  min-height: 0;
+
+  & > * + * {
+    border-top: $euiBorderThin;
+  }
+}
+
+.documentation__docsSearch {
+  padding: $euiSize;
+}
+
+.documentation__docsNav {
+  @include euiYScroll;
+}
+
+.documentation__docsNavGroup {
+  padding: $euiSize;
+
+  & + & {
+    border-top: $euiBorderThin;
+  }
+}
+
+.documentation__docsNavGroupLink {
+  font-weight: inherit;
+}
+
+.documentation__docsText {
+  padding: $euiSize;
+  @include euiYScroll;
+}
+
+.documentation__docsTextGroup,
+.documentation__docsTextItem {
+  margin-top: $euiSizeXXL;
+}
+
+.documentation__techPreviewBadge {
+  margin-bottom: $euiSizeS;
+}
+
+.documentation__docsTextGroup {
+  border-top: $euiBorderThin;
+  padding-top: $euiSizeXXL;
+}
+
+.documentationOverflow {
+  // Needs to be higher than the modal and all flyouts
+  z-index: $euiZLevel9 + 1;
+}

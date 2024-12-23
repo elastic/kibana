@@ -108,24 +108,27 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         defaultMessage="Edit integration"
       />
     </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      data-test-subj="PackagePolicyActionsUpgradeItem"
-      disabled={
-        !packagePolicy.hasUpgrade ||
-        !canWriteIntegrationPolicies ||
-        !upgradePackagePolicyHref ||
-        agentPolicy?.supports_agentless === true
-      }
-      icon="refresh"
-      href={upgradePackagePolicyHref}
-      key="packagePolicyUpgrade"
-    >
-      <FormattedMessage
-        id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeActionTitle"
-        data-test-subj="UpgradeIntegrationPolicy"
-        defaultMessage="Upgrade integration policy"
-      />
-    </EuiContextMenuItem>,
+    ...(packagePolicy.hasUpgrade
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="PackagePolicyActionsUpgradeItem"
+            disabled={
+              !canWriteIntegrationPolicies ||
+              !upgradePackagePolicyHref ||
+              agentPolicy?.supports_agentless === true
+            }
+            icon="refresh"
+            href={upgradePackagePolicyHref}
+            key="packagePolicyUpgrade"
+          >
+            <FormattedMessage
+              id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeActionTitle"
+              data-test-subj="UpgradeIntegrationPolicy"
+              defaultMessage="Upgrade integration policy"
+            />
+          </EuiContextMenuItem>,
+        ]
+      : []),
     // FIXME: implement Copy package policy action
     // <EuiContextMenuItem disabled icon="copy" onClick={() => {}} key="packagePolicyCopy">
     //   <FormattedMessage

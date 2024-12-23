@@ -23,7 +23,8 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
 
 let mockedLogger: jest.Mocked<Logger>;
 
-describe('Test packages', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/200787
+describe.skip('Test packages', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);

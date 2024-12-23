@@ -5,35 +5,38 @@
  * 2.0.
  */
 
-import type { ConsolePluginStart } from '@kbn/console-plugin/public';
-import { HttpStart } from '@kbn/core-http-browser';
-import { AppMountParameters } from '@kbn/core/public';
-import { MlPluginStart } from '@kbn/ml-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import React from 'react';
-import type { App } from './components/app';
-import type { InferenceEndpointsProvider } from './providers/inference_endpoints_provider';
+import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 export * from '../common/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchInferenceEndpointsPluginSetup {}
-export interface SearchInferenceEndpointsPluginStart {
-  InferenceEdnpointsProvider: React.FC<React.ComponentProps<typeof InferenceEndpointsProvider>>;
-  InferenceEndpoints: React.FC<React.ComponentProps<typeof App>>;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SearchInferenceEndpointsPluginStart {}
 
 export interface AppPluginStartDependencies {
   history: AppMountParameters['history'];
   share: SharePluginStart;
   console?: ConsolePluginStart;
+  licensing: LicensingPluginStart;
+  ml: MlPluginStart;
+  searchNavigation?: SearchNavigationPluginStart;
+  serverless?: ServerlessPluginStart;
 }
 
-export interface AppServicesContext {
-  http: HttpStart;
-  ml?: MlPluginStart;
-  console?: ConsolePluginStart;
+export interface AppPluginSetupDependencies {
+  history: AppMountParameters['history'];
+  share: SharePluginSetup;
+  console?: ConsolePluginSetup;
 }
+
+export type AppServicesContext = CoreStart & AppPluginStartDependencies;
 
 export interface InferenceUsageResponse {
   acknowledge: boolean;

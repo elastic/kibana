@@ -11,6 +11,8 @@ import type {
   DELETE_CASES_CAPABILITY,
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
+  CREATE_COMMENT_CAPABILITY,
+  CASES_REOPEN_CAPABILITY,
 } from '..';
 import type {
   CASES_CONNECTORS_CAPABILITY,
@@ -35,7 +37,6 @@ import type {
 import type {
   CasePatchRequest,
   CasesFindResponse,
-  CasesStatusResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
   GetCaseUsersResponse,
@@ -44,6 +45,7 @@ import type {
   CaseMetricsFeature,
   CasesMetricsResponse,
   SingleCaseMetricsResponse,
+  CasesSimilarResponse,
 } from '../types/api';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
@@ -99,16 +101,20 @@ export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>
 export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & {
   comments: AttachmentUI[];
 };
+export type ObservableUI = CaseUI['observables'][0];
+
 export type CasesUI = CaseUI[];
 export type CasesFindResponseUI = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & {
   cases: CasesUI;
 };
-export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 export type CaseUpdateRequest = SnakeToCamelCase<CasePatchRequest>;
 export type CaseConnectors = SnakeToCamelCase<GetCaseConnectorsResponse>;
 export type CaseUsers = GetCaseUsersResponse;
 export type CaseUICustomField = CaseUI['customFields'][number];
+export type CasesSimilarResponseUI = SnakeToCamelCase<CasesSimilarResponse>;
+export type SimilarCaseUI = Omit<SnakeToCamelCase<CasesSimilarResponseUI['cases'][0]>, 'comments'>;
+export type SimilarCasesUI = SimilarCaseUI[];
 
 export interface ResolvedCase {
   case: CaseUI;
@@ -127,6 +133,7 @@ export type CasesConfigurationUI = Pick<
   | 'id'
   | 'version'
   | 'owner'
+  | 'observableTypes'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];
@@ -189,6 +196,12 @@ export type CaseUser = SnakeToCamelCase<User>;
 export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;
   filterOptions?: FilterOptions;
+}
+
+export interface SimilarCasesProps extends ApiProps {
+  caseId: string;
+  perPage: number;
+  page: number;
 }
 
 export interface ApiProps {
@@ -305,6 +318,8 @@ export interface CasesPermissions {
   push: boolean;
   connectors: boolean;
   settings: boolean;
+  reopenCase: boolean;
+  createComment: boolean;
 }
 
 export interface CasesCapabilities {
@@ -315,4 +330,6 @@ export interface CasesCapabilities {
   [PUSH_CASES_CAPABILITY]: boolean;
   [CASES_CONNECTORS_CAPABILITY]: boolean;
   [CASES_SETTINGS_CAPABILITY]: boolean;
+  [CREATE_COMMENT_CAPABILITY]: boolean;
+  [CASES_REOPEN_CAPABILITY]: boolean;
 }

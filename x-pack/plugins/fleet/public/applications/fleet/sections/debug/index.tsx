@@ -162,7 +162,7 @@ export const DebugPage: React.FunctionComponent<{
           <EuiSpacer size="m" />
           <EuiPageSection>
             {panels.map(({ title, id, component }) => (
-              <>
+              <div key={id}>
                 <EuiAccordion
                   id={id}
                   initialIsOpen
@@ -177,7 +177,7 @@ export const DebugPage: React.FunctionComponent<{
                 </EuiAccordion>
 
                 <EuiHorizontalRule />
-              </>
+              </div>
             ))}
 
             <EuiTitle size="l">

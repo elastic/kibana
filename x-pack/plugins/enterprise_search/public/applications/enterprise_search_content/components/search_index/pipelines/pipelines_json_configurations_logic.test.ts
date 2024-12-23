@@ -53,7 +53,7 @@ describe('IndexPipelinesConfigurationsLogic', () => {
     });
     it('fetchIndexPipelinesDataSuccess selects index ingest pipeline if found', async () => {
       const pipelines = {
-        'ent-search-generic-ingest': {
+        'search-default-ingest': {
           version: 1,
         },
         [indexName]: {
@@ -68,7 +68,7 @@ describe('IndexPipelinesConfigurationsLogic', () => {
     });
     it('fetchIndexPipelinesDataSuccess selects first pipeline as default pipeline', async () => {
       const pipelines = {
-        'ent-search-generic-ingest': {
+        'search-default-ingest': {
           version: 1,
         },
       };
@@ -76,7 +76,7 @@ describe('IndexPipelinesConfigurationsLogic', () => {
       await nextTick();
 
       expect(IndexPipelinesConfigurationsLogic.values.selectedPipelineId).toEqual(
-        'ent-search-generic-ingest'
+        'search-default-ingest'
       );
     });
   });
@@ -84,7 +84,7 @@ describe('IndexPipelinesConfigurationsLogic', () => {
   describe('selectors', () => {
     it('pipelineNames returns names of pipelines', async () => {
       const pipelines = {
-        'ent-search-generic-ingest': {
+        'search-default-ingest': {
           version: 1,
         },
         [indexName]: {
@@ -96,13 +96,13 @@ describe('IndexPipelinesConfigurationsLogic', () => {
       await nextTick();
 
       expect(IndexPipelinesConfigurationsLogic.values.pipelineNames).toEqual([
-        'ent-search-generic-ingest',
+        'search-default-ingest',
         indexName,
       ]);
     });
     it('selectedPipeline returns full pipeline', async () => {
       const pipelines = {
-        'ent-search-generic-ingest': {
+        'search-default-ingest': {
           version: 1,
         },
         foo: {

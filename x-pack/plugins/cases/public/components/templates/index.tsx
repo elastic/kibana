@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { MAX_TEMPLATES_LENGTH } from '../../../common/constants';
 import type { CasesConfigurationUITemplate } from '../../../common/ui';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import * as i18n from './translations';
 import { TemplatesList } from './templates_list';
@@ -39,8 +38,6 @@ const TemplatesComponent: React.FC<Props> = ({
   onEditTemplate,
   onDeleteTemplate,
 }) => {
-  const { permissions } = useCasesContext();
-  const canAddTemplates = permissions.create && permissions.update;
   const [error, setError] = useState<boolean>(false);
 
   const handleAddTemplate = useCallback(() => {
@@ -103,31 +100,29 @@ const TemplatesComponent: React.FC<Props> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : null}
-        {canAddTemplates ? (
-          <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false}>
-              {templates.length < MAX_TEMPLATES_LENGTH ? (
-                <EuiButtonEmpty
-                  isLoading={isLoading}
-                  isDisabled={disabled || error}
-                  size="s"
-                  onClick={handleAddTemplate}
-                  iconType="plusInCircle"
-                  data-test-subj="add-template"
-                >
-                  {i18n.ADD_TEMPLATE}
-                </EuiButtonEmpty>
-              ) : (
-                <EuiFlexGroup justifyContent="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiText>{i18n.MAX_TEMPLATE_LIMIT(MAX_TEMPLATES_LENGTH)}</EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              )}
-              <EuiSpacer size="s" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : null}
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            {templates.length < MAX_TEMPLATES_LENGTH ? (
+              <EuiButtonEmpty
+                isLoading={isLoading}
+                isDisabled={disabled || error}
+                size="s"
+                onClick={handleAddTemplate}
+                iconType="plusInCircle"
+                data-test-subj="add-template"
+              >
+                {i18n.ADD_TEMPLATE}
+              </EuiButtonEmpty>
+            ) : (
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText>{i18n.MAX_TEMPLATE_LIMIT(MAX_TEMPLATES_LENGTH)}</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+            <EuiSpacer size="s" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
     </EuiDescribedFormGroup>
   );

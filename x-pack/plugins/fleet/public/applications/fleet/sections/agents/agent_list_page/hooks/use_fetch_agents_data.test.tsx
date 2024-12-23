@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 
 import { useStartServices } from '../../../../hooks';
 
@@ -118,10 +118,8 @@ describe('useFetchAgentsData', () => {
 
   it('should fetch agents and agent policies data', async () => {
     const renderer = createFleetTestRendererMock();
-    const { result, waitForNextUpdate } = renderer.renderHook(() => useFetchAgentsData());
-    await act(async () => {
-      await waitForNextUpdate();
-    });
+    const { result } = renderer.renderHook(() => useFetchAgentsData());
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result?.current.selectedStatus).toEqual(['healthy', 'unhealthy', 'updating', 'offline']);
     expect(result?.current.allAgentPolicies).toEqual([
@@ -155,27 +153,22 @@ describe('useFetchAgentsData', () => {
 
   it('sync querystring kuery with current search', async () => {
     const renderer = createFleetTestRendererMock();
-    const { result, waitForNextUpdate } = renderer.renderHook(() => useFetchAgentsData());
-    await act(async () => {
-      await waitForNextUpdate();
-    });
+    const { result } = renderer.renderHook(() => useFetchAgentsData());
 
-    expect(renderer.history.location.search).toEqual('');
+    await waitFor(() => expect(renderer.history.location.search).toEqual(''));
 
     // Set search
     await act(async () => {
       result.current.setSearch('active:true');
-      await waitForNextUpdate();
     });
 
-    expect(renderer.history.location.search).toEqual('?kuery=active%3Atrue');
+    await waitFor(() => expect(renderer.history.location.search).toEqual('?kuery=active%3Atrue'));
 
     // Clear search
     await act(async () => {
       result.current.setSearch('');
-      await waitForNextUpdate();
     });
 
-    expect(renderer.history.location.search).toEqual('');
+    await waitFor(() => expect(renderer.history.location.search).toEqual(''));
   });
 });

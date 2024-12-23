@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useQuery } from '@tanstack/react-query';
-import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config';
+import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/response-ops-rule-form';
 import { useKibana } from '../../common/lib/kibana';
 
 export const useLoadConfigQuery = () => {

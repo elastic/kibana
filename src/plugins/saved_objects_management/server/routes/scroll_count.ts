@@ -17,6 +17,12 @@ export const registerScrollForCountRoute = (router: IRouter) => {
   router.post(
     {
       path: '/api/kibana/management/saved_objects/scroll/counts',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           typesToInclude: schema.arrayOf(schema.string()),

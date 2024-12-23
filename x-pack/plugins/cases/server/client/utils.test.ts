@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { v1 as uuidv1 } from 'uuid';
-
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { KueryNode } from '@kbn/es-query';
 import { toElasticsearchQuery, toKqlExpression } from '@kbn/es-query';
@@ -14,7 +12,9 @@ import { toElasticsearchQuery, toKqlExpression } from '@kbn/es-query';
 import { createSavedObjectsSerializerMock } from './mocks';
 import {
   arraysDifference,
+  buildAttachmentRequestFromFileJSON,
   buildFilter,
+  buildObservablesFieldsFilter,
   buildRangeFilter,
   constructQueryOptions,
   constructSearch,
@@ -24,6 +24,7 @@ import {
 import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
 import type { CustomFieldsConfiguration } from '../../common/types/domain';
 import { CaseSeverity, CaseStatuses, CustomFieldTypes } from '../../common/types/domain';
+import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 describe('utils', () => {
   describe('buildFilter', () => {
@@ -495,24 +496,14 @@ describe('utils', () => {
       [CaseStatuses['in-progress'], CasePersistedStatus.IN_PROGRESS],
       [CaseStatuses.closed, CasePersistedStatus.CLOSED],
     ])('creates a filter for status "%s"', (status, expectedStatus) => {
-      expect(constructQueryOptions({ status }).filter).toMatchInlineSnapshot(`
-        Object {
-          "arguments": Array [
-            Object {
-              "isQuoted": false,
-              "type": "literal",
-              "value": "cases.attributes.status",
-            },
-            Object {
-              "isQuoted": false,
-              "type": "literal",
-              "value": "${expectedStatus}",
-            },
-          ],
-          "function": "is",
-          "type": "function",
-        }
-      `);
+      expect(constructQueryOptions({ status }).filter).toMatchObject({
+        arguments: [
+          { isQuoted: false, type: 'literal', value: 'cases.attributes.status' },
+          { isQuoted: false, type: 'literal', value: `${expectedStatus}` },
+        ],
+        function: 'is',
+        type: 'function',
+      });
     });
 
     it('should create a filter for multiple status values', () => {
@@ -565,24 +556,14 @@ describe('utils', () => {
       [CaseSeverity.HIGH, CasePersistedSeverity.HIGH],
       [CaseSeverity.CRITICAL, CasePersistedSeverity.CRITICAL],
     ])('creates a filter for severity "%s"', (severity, expectedSeverity) => {
-      expect(constructQueryOptions({ severity }).filter).toMatchInlineSnapshot(`
-        Object {
-          "arguments": Array [
-            Object {
-              "isQuoted": false,
-              "type": "literal",
-              "value": "cases.attributes.severity",
-            },
-            Object {
-              "isQuoted": false,
-              "type": "literal",
-              "value": "${expectedSeverity}",
-            },
-          ],
-          "function": "is",
-          "type": "function",
-        }
-        `);
+      expect(constructQueryOptions({ severity }).filter).toMatchObject({
+        arguments: [
+          { isQuoted: false, type: 'literal', value: 'cases.attributes.severity' },
+          { isQuoted: false, type: 'literal', value: `${expectedSeverity}` },
+        ],
+        function: 'is',
+        type: 'function',
+      });
     });
 
     it('should create a filter for multiple severity values', () => {
@@ -1104,7 +1085,7 @@ describe('utils', () => {
     const savedObjectsSerializer = createSavedObjectsSerializerMock();
 
     it('returns the rootSearchFields and search with correct values when given a uuid', () => {
-      const uuid = uuidv1(); // the specific version is irrelevant
+      const uuid = 'b52e293e-4a37-4e67-9aa6-716bb6e69b42'; // the specific version is irrelevant
 
       expect(constructSearch(uuid, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer))
         .toMatchInlineSnapshot(`
@@ -1112,7 +1093,7 @@ describe('utils', () => {
           "rootSearchFields": Array [
             "_id",
           ],
-          "search": "\\"${uuid}\\" \\"cases:${uuid}\\"",
+          "search": "\\"b52e293e-4a37-4e67-9aa6-716bb6e69b42\\" \\"cases:b52e293e-4a37-4e67-9aa6-716bb6e69b42\\"",
         }
       `);
     });
@@ -1574,6 +1555,98 @@ describe('utils', () => {
       });
 
       expect(res).toEqual([]);
+    });
+  });
+
+  describe('buildObservablesFieldsFilter', () => {
+    it('builds the filter escaping quotes in the value', () => {
+      expect(buildObservablesFieldsFilter({ type: ['{"json":"value"}'] })).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "cases.attributes.observables",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "value",
+                    },
+                    Object {
+                      "isQuoted": true,
+                      "type": "literal",
+                      "value": "{\\"json\\":\\"value\\"}",
+                    },
+                  ],
+                  "function": "is",
+                  "type": "function",
+                },
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "typeKey",
+                    },
+                    Object {
+                      "isQuoted": true,
+                      "type": "literal",
+                      "value": "type",
+                    },
+                  ],
+                  "function": "is",
+                  "type": "function",
+                },
+              ],
+              "function": "and",
+              "type": "function",
+            },
+          ],
+          "function": "nested",
+          "type": "function",
+        }
+      `);
+    });
+  });
+
+  describe('buildAttachmentRequestFromFileJSON', () => {
+    it('builds attachment request correctly', () => {
+      expect(
+        buildAttachmentRequestFromFileJSON({
+          owner: 'theOwner',
+          fileMetadata: {
+            id: 'file-id',
+            created: 'created',
+            extension: 'jpg',
+            mimeType: 'image/jpeg',
+            name: 'foobar',
+          } as FileJSON,
+        })
+      ).toStrictEqual({
+        externalReferenceAttachmentTypeId: '.files',
+        externalReferenceId: 'file-id',
+        externalReferenceMetadata: {
+          files: [
+            {
+              created: 'created',
+              extension: 'jpg',
+              mimeType: 'image/jpeg',
+              name: 'foobar',
+            },
+          ],
+        },
+        externalReferenceStorage: {
+          soType: 'file',
+          type: 'savedObject',
+        },
+        owner: 'theOwner',
+        type: 'externalReference',
+      });
     });
   });
 });

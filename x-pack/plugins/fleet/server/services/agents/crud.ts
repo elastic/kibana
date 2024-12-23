@@ -6,18 +6,19 @@
  */
 
 import { groupBy } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
 import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
+import { getSortConfig } from '../../../common';
 import { isAgentUpgradeAvailable } from '../../../common/services';
 import { AGENTS_INDEX } from '../../constants';
 import {
@@ -168,13 +169,13 @@ export async function getAgentTags(
   }
 
   const kueryNode = _joinFilters(filters);
-  const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
+  const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
   const runtimeFields = await buildAgentStatusRuntimeField(soClient);
   try {
     const result = await esClient.search<{}, { tags: { buckets: Array<{ key: string }> } }>({
       index: AGENTS_INDEX,
       size: 0,
-      body,
+      ...query,
       fields: Object.keys(runtimeFields),
       runtime_mappings: runtimeFields,
       aggs: {
@@ -254,11 +255,7 @@ export async function getAgentsByKuery(
 
   const runtimeFields = await buildAgentStatusRuntimeField(soClient);
 
-  const isDefaultSort = sortField === 'enrolled_at' && sortOrder === 'desc';
-  // if using default sorting (enrolled_at), adding a secondary sort on hostname, so that the results are not changing randomly in case many agents were enrolled at the same time
-  const secondarySort: estypes.Sort = isDefaultSort
-    ? [{ 'local_metadata.host.hostname.keyword': { order: 'asc' } }]
-    : [];
+  const sort = getSortConfig(sortField, sortOrder);
 
   const statusSummary: Record<AgentStatus, number> = {
     online: 0,
@@ -302,7 +299,7 @@ export async function getAgentsByKuery(
       rest_total_hits_as_int: true,
       runtime_mappings: runtimeFields,
       fields: Object.keys(runtimeFields),
-      sort: [{ [sortField]: { order: sortOrder } }, ...secondarySort],
+      sort,
       query: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
       ...(pitId
         ? {
@@ -549,17 +546,15 @@ export async function getAgentVersionsForAgentPolicyIds(
       FleetServerAgent,
       Record<'agent_versions', { buckets: Array<{ key: string; doc_count: number }> }>
     >({
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  policy_id: agentPolicyIds,
-                },
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                policy_id: agentPolicyIds,
               },
-            ],
-          },
+            },
+          ],
         },
       },
       index: AGENTS_INDEX,
@@ -631,7 +626,7 @@ export async function updateAgent(
   await esClient.update({
     id: agentId,
     index: AGENTS_INDEX,
-    body: { doc: agentSOAttributesToFleetServerAgentDoc(data) },
+    doc: agentSOAttributesToFleetServerAgentDoc(data),
     refresh: 'wait_for',
   });
 }
@@ -648,7 +643,7 @@ export async function bulkUpdateAgents(
     return;
   }
 
-  const body = updateData.flatMap(({ agentId, data }) => [
+  const operations = updateData.flatMap(({ agentId, data }) => [
     {
       update: {
         _id: agentId,
@@ -661,7 +656,7 @@ export async function bulkUpdateAgents(
   ]);
 
   const res = await esClient.bulk({
-    body,
+    operations,
     index: AGENTS_INDEX,
     refresh: 'wait_for',
   });
@@ -679,9 +674,7 @@ export async function deleteAgent(esClient: ElasticsearchClient, agentId: string
     await esClient.update({
       id: agentId,
       index: AGENTS_INDEX,
-      body: {
-        doc: { active: false },
-      },
+      doc: { active: false },
     });
   } catch (err) {
     if (isESClientError(err) && err.meta.statusCode === 404) {

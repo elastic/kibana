@@ -8,7 +8,7 @@
 import { chain, find } from 'lodash';
 import { Globals } from '../../static_globals';
 import { Bucket, Cluster, LegacyRequest } from '../../types';
-import { getIndexPatterns, getKibanaDataset } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getKibanaDataset } from '../../../common/get_index_patterns';
 import { createQuery } from '../create_query';
 import { KibanaClusterMetric } from '../metrics';
 import { isKibanaStatusStale } from './is_kibana_status_stale';

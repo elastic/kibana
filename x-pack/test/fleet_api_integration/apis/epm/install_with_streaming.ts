@@ -49,7 +49,8 @@ export default function (providerContext: FtrProviderContext) {
         await uninstallPackage('security_detection_engine', '8.16.0');
       });
       it('should install security-rule assets from the package', async () => {
-        await installPackage('security_detection_engine', '8.16.0').expect(200);
+        // Force install to install an outdatded version
+        await installPackage('security_detection_engine', '8.16.0', { force: true }).expect(200);
         const installationSO = await getInstallationSavedObject('security_detection_engine');
         expect(installationSO?.installed_kibana).toEqual(
           expect.arrayContaining([

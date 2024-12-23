@@ -28,6 +28,7 @@ import { EditTagsFlyout } from '../actions/tags/edit_tags_flyout';
 import { useAssigneesAction } from '../actions/assignees/use_assignees_action';
 import { EditAssigneesFlyout } from '../actions/assignees/edit_assignees_flyout';
 import { useCopyIDAction } from '../actions/copy_id/use_copy_id_action';
+import { useShouldDisableStatus } from '../actions/status/use_should_disable_status';
 
 const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean }> = ({
   theCase,
@@ -37,6 +38,12 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
   const tooglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const refreshCases = useRefreshCases();
+
+  const shouldDisable = useShouldDisableStatus();
+
+  const shouldDisableStatus = useMemo(() => {
+    return shouldDisable([theCase]);
+  }, [theCase, shouldDisable]);
 
   const deleteAction = useDeleteAction({
     isDisabled: false,
@@ -83,7 +90,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
       { id: 0, items: mainPanelItems, title: i18n.ACTIONS },
     ];
 
-    if (canUpdate) {
+    if (!shouldDisableStatus) {
       mainPanelItems.push({
         name: (
           <FormattedMessage
@@ -97,7 +104,8 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
         key: `case-action-status-panel-${theCase.id}`,
         'data-test-subj': `case-action-status-panel-${theCase.id}`,
       });
-
+    }
+    if (severityAction.canUpdateSeverity) {
       mainPanelItems.push({
         name: (
           <FormattedMessage
@@ -137,13 +145,14 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
       mainPanelItems.push(deleteAction.getAction([theCase]));
     }
 
-    if (canUpdate) {
+    if (statusAction.canUpdateStatus || !shouldDisableStatus) {
       panelsToBuild.push({
         id: 1,
         title: i18n.STATUS,
         items: statusAction.getActions([theCase]),
       });
-
+    }
+    if (severityAction.canUpdateSeverity) {
       panelsToBuild.push({
         id: 2,
         title: i18n.SEVERITY,
@@ -162,6 +171,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
     statusAction,
     tagsAction,
     theCase,
+    shouldDisableStatus,
   ]);
 
   return (
@@ -232,7 +242,7 @@ interface UseBulkActionsProps {
 
 export const useActions = ({ disableActions }: UseBulkActionsProps): UseBulkActionsReturnValue => {
   const { permissions } = useCasesContext();
-  const shouldShowActions = permissions.update || permissions.delete;
+  const shouldShowActions = permissions.update || permissions.delete || permissions.reopenCase;
 
   return {
     actions: shouldShowActions

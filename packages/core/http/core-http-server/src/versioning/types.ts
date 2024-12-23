@@ -19,6 +19,7 @@ import type {
   RequestHandlerContextBase,
   RouteValidationFunction,
   LazyValidator,
+  RouteSecurity,
 } from '../..';
 import type { RouteDeprecationInfo } from '../router/route';
 type RqCtx = RequestHandlerContextBase;
@@ -35,12 +36,12 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
 > & {
   options?: Omit<
     RouteConfigOptions<Method>,
-    'access' | 'description' | 'summary' | 'deprecated' | 'discontinued' | 'security'
+    'access' | 'description' | 'summary' | 'deprecated' | 'discontinued'
   >;
   /** See {@link RouteConfigOptions<RouteMethod>['access']} */
   access: Exclude<RouteConfigOptions<Method>['access'], undefined>;
   /** See {@link RouteConfigOptions<RouteMethod>['security']} */
-  security?: Exclude<RouteConfigOptions<Method>['security'], undefined>;
+  security?: RouteSecurity;
   /**
    * When enabled, the router will also check for the presence of an `apiVersion`
    * query parameter to determine the route version to resolve to:
@@ -337,7 +338,7 @@ export interface AddVersionOpts<P, Q, B> {
    */
   validate: false | VersionedRouteValidation<P, Q, B> | (() => VersionedRouteValidation<P, Q, B>); // Provide a way to lazily load validation schemas
 
-  security?: Exclude<RouteConfigOptions<RouteMethod>['security'], undefined>;
+  security?: RouteSecurity;
 
   options?: {
     deprecated?: RouteDeprecationInfo;

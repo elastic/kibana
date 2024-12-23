@@ -14,6 +14,8 @@ export const noCasesPermissions = () => ({
   push: false,
   connectors: false,
   settings: false,
+  createComment: false,
+  reopenCase: false,
 });
 
 export const allCasesPermissions = () => ({
@@ -25,4 +27,6 @@ export const allCasesPermissions = () => ({
   push: true,
   connectors: true,
   settings: true,
+  createComment: true,
+  reopenCase: true,
 });

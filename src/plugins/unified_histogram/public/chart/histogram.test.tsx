@@ -10,7 +10,7 @@
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Histogram } from './histogram';
 import React from 'react';
-import { of, Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { getLensVisMock } from '../__mocks__/lens_vis';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
@@ -101,7 +101,7 @@ describe('Histogram', () => {
       searchSessionId: props.request.searchSessionId,
       getTimeRange: props.getTimeRange,
       attributes: (await getMockLensAttributes())!.attributes,
-      onLoad: lensProps.onLoad,
+      onLoad: lensProps.onLoad!,
     });
     expect(lensProps).toMatchObject(expect.objectContaining(originalProps));
     component.setProps({ request: { ...props.request, searchSessionId: '321' } }).update();
@@ -120,7 +120,7 @@ describe('Histogram', () => {
   it('should execute onLoad correctly', async () => {
     const { component, props } = await mountComponent();
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
-    const onLoad = component.find(embeddable).props().onLoad;
+    const onLoad = component.find(embeddable).props().onLoad!;
     const adapters = createDefaultInspectorAdapters();
     adapters.tables.tables.unifiedHistogram = { meta: { statistics: { totalCount: 100 } } } as any;
     const rawResponse = {
@@ -172,25 +172,25 @@ describe('Histogram', () => {
     jest
       .spyOn(adapters.requests, 'getRequests')
       .mockReturnValue([{ response: { json: { rawResponse } } } as any]);
-    const embeddableOutput$ = jest.fn().mockReturnValue(of('output$'));
-    onLoad(true, undefined, embeddableOutput$);
+    const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
+    onLoad(true, undefined, dataLoading$);
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
       UnifiedHistogramFetchStatus.loading,
       undefined
     );
-    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters: {}, embeddableOutput$ });
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters: {}, dataLoading$ });
     expect(buildBucketInterval.buildBucketInterval).not.toHaveBeenCalled();
     expect(useTimeRange.useTimeRange).toHaveBeenLastCalledWith(
       expect.objectContaining({ bucketInterval: undefined })
     );
     act(() => {
-      onLoad(false, adapters, embeddableOutput$);
+      onLoad?.(false, adapters, dataLoading$);
     });
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
       UnifiedHistogramFetchStatus.complete,
       100
     );
-    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters, embeddableOutput$ });
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters, dataLoading$ });
     expect(buildBucketInterval.buildBucketInterval).toHaveBeenCalled();
     expect(useTimeRange.useTimeRange).toHaveBeenLastCalledWith(
       expect.objectContaining({ bucketInterval: mockBucketInterval })
@@ -200,12 +200,12 @@ describe('Histogram', () => {
   it('should execute onLoad correctly when the request has a failure status', async () => {
     const { component, props } = await mountComponent();
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
-    const onLoad = component.find(embeddable).props().onLoad;
+    const onLoad = component.find(embeddable).props().onLoad!;
     const adapters = createDefaultInspectorAdapters();
     jest
       .spyOn(adapters.requests, 'getRequests')
       .mockReturnValue([{ status: RequestStatus.ERROR } as any]);
-    onLoad(false, adapters);
+    onLoad?.(false, adapters);
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
       UnifiedHistogramFetchStatus.error,
       undefined
@@ -216,7 +216,7 @@ describe('Histogram', () => {
   it('should execute onLoad correctly when the response has shard failures', async () => {
     const { component, props } = await mountComponent();
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
-    const onLoad = component.find(embeddable).props().onLoad;
+    const onLoad = component.find(embeddable).props().onLoad!;
     const adapters = createDefaultInspectorAdapters();
     adapters.tables.tables.unifiedHistogram = { meta: { statistics: { totalCount: 100 } } } as any;
     const rawResponse = {
@@ -237,7 +237,7 @@ describe('Histogram', () => {
       .spyOn(adapters.requests, 'getRequests')
       .mockReturnValue([{ response: { json: { rawResponse } } } as any]);
     act(() => {
-      onLoad(false, adapters);
+      onLoad?.(false, adapters);
     });
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
       UnifiedHistogramFetchStatus.error,
@@ -249,7 +249,7 @@ describe('Histogram', () => {
   it('should execute onLoad correctly for textbased language and no Lens suggestions', async () => {
     const { component, props } = await mountComponent(true, false);
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
-    const onLoad = component.find(embeddable).props().onLoad;
+    const onLoad = component.find(embeddable).props().onLoad!;
     const adapters = createDefaultInspectorAdapters();
     adapters.tables.tables.layerId = {
       meta: { type: 'es_ql' },
@@ -273,7 +273,7 @@ describe('Histogram', () => {
       ],
     } as any;
     act(() => {
-      onLoad(false, adapters);
+      onLoad?.(false, adapters);
     });
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
       UnifiedHistogramFetchStatus.complete,
@@ -285,7 +285,7 @@ describe('Histogram', () => {
   it('should execute onLoad correctly for textbased language and Lens suggestions', async () => {
     const { component, props } = await mountComponent(true, true);
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
-    const onLoad = component.find(embeddable).props().onLoad;
+    const onLoad = component.find(embeddable).props().onLoad!;
     const adapters = createDefaultInspectorAdapters();
     adapters.tables.tables.layerId = {
       meta: { type: 'es_ql' },
@@ -309,7 +309,7 @@ describe('Histogram', () => {
       ],
     } as any;
     act(() => {
-      onLoad(false, adapters);
+      onLoad?.(false, adapters);
     });
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
       UnifiedHistogramFetchStatus.complete,

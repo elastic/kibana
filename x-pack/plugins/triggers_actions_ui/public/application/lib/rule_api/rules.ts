@@ -21,6 +21,8 @@ export async function loadRules({
   ruleStatusesFilter,
   tagsFilter,
   sort = { field: 'name', direction: 'asc' },
+  ruleTypeIds,
+  consumers,
 }: LoadRulesProps): Promise<{
   page: number;
   perPage: number;
@@ -51,6 +53,8 @@ export async function loadRules({
       default_search_operator: 'AND',
       sort_field: sort.field,
       sort_order: sort.direction,
+      ...(ruleTypeIds ? { rule_type_ids: ruleTypeIds } : {}),
+      ...(consumers ? { consumers } : {}),
     },
   });
   return {

@@ -3,7 +3,7 @@
 exports[`TransactionActionMenu  matches the snapshot 1`] = `
 <div>
   <div
-    class="euiPopover emotion-euiPopover-inline-block"
+    class="euiPopover euiPopover-isOpen emotion-euiPopover-inline-block"
     id="transactionActionMenu"
   >
     <button

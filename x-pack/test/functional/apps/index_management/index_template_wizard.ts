@@ -67,6 +67,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const stepTitle = await testSubjects.getVisibleText('stepTitle');
         expect(stepTitle).to.be('Index settings (optional)');
 
+        // Verify that index mode callout is displayed
+        const indexModeCalloutText = await testSubjects.getVisibleText('indexModeCallout');
+        expect(indexModeCalloutText).to.be(
+          'The index.mode setting has been set to Standard within the Logistics step. Any changes to index.mode set on this page will be overwritten by the Logistics selection.'
+        );
+
         // Click Next button
         await pageObjects.indexManagement.clickNextButton();
       });
@@ -105,6 +111,76 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Click Create template
         await pageObjects.indexManagement.clickNextButton();
       });
+    });
+
+    // https://github.com/elastic/kibana/pull/195174
+    it('can preview index template that matches a_fake_index_pattern_that_wont_match_any_indices', async () => {
+      // Click Create Template button
+      await testSubjects.click('createTemplateButton');
+      const pageTitleText = await testSubjects.getVisibleText('pageTitle');
+      expect(pageTitleText).to.be('Create template');
+
+      const stepTitle1 = await testSubjects.getVisibleText('stepTitle');
+      expect(stepTitle1).to.be('Logistics');
+
+      // Fill out required fields
+      await testSubjects.setValue('nameField', 'a-star');
+      await testSubjects.setValue('indexPatternsField', 'a*');
+      await testSubjects.setValue('priorityField', '1000');
+
+      // Click Next button
+      await pageObjects.indexManagement.clickNextButton();
+
+      // Verify empty prompt
+      const emptyPrompt = await testSubjects.exists('emptyPrompt');
+      expect(emptyPrompt).to.be(true);
+
+      // Click Next button
+      await pageObjects.indexManagement.clickNextButton();
+
+      // Verify step title
+      const stepTitle2 = await testSubjects.getVisibleText('stepTitle');
+      expect(stepTitle2).to.be('Index settings (optional)');
+
+      // Click Next button
+      await pageObjects.indexManagement.clickNextButton();
+
+      // Verify step title
+      const stepTitle3 = await testSubjects.getVisibleText('stepTitle');
+      expect(stepTitle3).to.be('Mappings (optional)');
+
+      // Click Next button
+      await pageObjects.indexManagement.clickNextButton();
+
+      // Verify step title
+      const stepTitle4 = await testSubjects.getVisibleText('stepTitle');
+      expect(stepTitle4).to.be('Aliases (optional)');
+
+      // Click Next button
+      await pageObjects.indexManagement.clickNextButton();
+
+      // Verify step title
+      const stepTitle = await testSubjects.getVisibleText('stepTitle');
+      expect(stepTitle).to.be("Review details for 'a-star'");
+
+      // Verify that summary exists
+      const summaryTabContent = await testSubjects.exists('summaryTabContent');
+      expect(summaryTabContent).to.be(true);
+
+      // Verify that index mode is set to "Standard"
+      expect(await testSubjects.exists('indexModeTitle')).to.be(true);
+      expect(await testSubjects.getVisibleText('indexModeValue')).to.be('Standard');
+
+      // Click Create template
+      await pageObjects.indexManagement.clickNextButton();
+
+      // Click preview tab, we know its the last one
+      const tabs = await testSubjects.findAll('tab');
+      await tabs[tabs.length - 1].click();
+      const templatePreview = await testSubjects.getVisibleText('simulateTemplatePreview');
+      expect(templatePreview).to.not.contain('error');
+
+      await testSubjects.click('closeDetailsButton');
     });
 
     describe('Mappings step', () => {

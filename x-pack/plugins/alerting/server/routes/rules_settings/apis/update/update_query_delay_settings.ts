@@ -27,9 +27,13 @@ export const updateQueryDelaySettingsRoute = (
       validate: {
         body: updateQueryDelaySettingsBodySchemaV1,
       },
+      security: {
+        authz: {
+          requiredPrivileges: [`${API_PRIVILEGES.WRITE_QUERY_DELAY_SETTINGS}`],
+        },
+      },
       options: {
         access: 'internal',
-        tags: [`access:${API_PRIVILEGES.WRITE_QUERY_DELAY_SETTINGS}`],
       },
     },
     router.handleLegacyErrors(

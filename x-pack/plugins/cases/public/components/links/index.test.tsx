@@ -11,13 +11,13 @@ import userEvent from '@testing-library/user-event';
 
 import type { ConfigureCaseButtonProps, CaseDetailsLinkProps } from '.';
 import { ConfigureCaseButton, CaseDetailsLink } from '.';
-import { TestProviders } from '../../common/mock';
 import { useCaseViewNavigation } from '../../common/navigation/hooks';
 
 jest.mock('../../common/navigation/hooks');
 
-// FLAKY: https://github.com/elastic/kibana/issues/196189
-describe.skip('Configuration button', () => {
+const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
+
+describe('Configuration button', () => {
   const props: ConfigureCaseButtonProps = {
     label: 'My label',
     msgTooltip: <></>,
@@ -26,11 +26,7 @@ describe.skip('Configuration button', () => {
   };
 
   it('renders without the tooltip', async () => {
-    render(
-      <TestProviders>
-        <ConfigureCaseButton {...props} />
-      </TestProviders>
-    );
+    render(<ConfigureCaseButton {...props} />);
 
     const configureButton = await screen.findByTestId('configure-case-button');
 
@@ -39,8 +35,7 @@ describe.skip('Configuration button', () => {
     expect(configureButton).toHaveAttribute('aria-label', 'My label');
   });
 
-  // Flaky: https://github.com/elastic/kibana/issues/193209
-  it.skip('renders the tooltip correctly when hovering the button', async () => {
+  it('renders the tooltip correctly when hovering the button', async () => {
     jest.useFakeTimers();
 
     const user = userEvent.setup({
@@ -49,14 +44,12 @@ describe.skip('Configuration button', () => {
     });
 
     render(
-      <TestProviders>
-        <ConfigureCaseButton
-          {...props}
-          showToolTip={true}
-          titleTooltip={'My title'}
-          msgTooltip={<>{'My message tooltip'}</>}
-        />
-      </TestProviders>
+      <ConfigureCaseButton
+        {...props}
+        showToolTip={true}
+        titleTooltip={'My title'}
+        msgTooltip={<>{'My message tooltip'}</>}
+      />
     );
 
     await user.hover(await screen.findByTestId('configure-case-button'));
@@ -70,7 +63,6 @@ describe.skip('Configuration button', () => {
 });
 
 describe('CaseDetailsLink', () => {
-  const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
   const getCaseViewUrl = jest.fn().mockReturnValue('/cases/test');
   const navigateToCaseView = jest.fn();
 

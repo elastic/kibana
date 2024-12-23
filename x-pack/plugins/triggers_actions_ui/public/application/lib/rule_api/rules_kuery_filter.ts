@@ -24,8 +24,9 @@ export async function loadRulesWithKueryFilter({
   tagsFilter,
   sort = { field: 'name', direction: 'asc' },
   kueryNode,
-  filterConsumers,
+  ruleTypeIds,
   hasReference,
+  consumers,
 }: LoadRulesProps): Promise<{
   page: number;
   perPage: number;
@@ -58,8 +59,9 @@ export async function loadRulesWithKueryFilter({
       ...(filtersKueryNode ? { filter: JSON.stringify(filtersKueryNode) } : {}),
       sort_field: sort.field,
       sort_order: sort.direction,
-      filter_consumers: filterConsumers,
       ...(hasReference ? { has_reference: hasReference } : {}),
+      ...(ruleTypeIds ? { rule_type_ids: ruleTypeIds } : {}),
+      ...(consumers ? { consumers } : {}),
     }),
   });
 

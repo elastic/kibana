@@ -13,12 +13,15 @@ import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
 import type { SettingsConfig } from '../../../../../common/settings/types';
 import { useAgentPolicyFormContext } from '../../sections/agent_policy/components/agent_policy_form';
 
-export const convertValue = (value: string, type: keyof typeof ZodFirstPartyTypeKind): any => {
+export const convertValue = (
+  value: string | boolean,
+  type: keyof typeof ZodFirstPartyTypeKind
+): any => {
   if (type === ZodFirstPartyTypeKind.ZodNumber) {
     if (value === '') {
       return 0;
     }
-    return parseInt(value, 10);
+    return parseInt(value as string, 10);
   }
   return value;
 };
@@ -48,7 +51,8 @@ export const SettingsFieldWrapper: React.FC<{
   const coercedSchema = settingsConfig.schema as z.ZodString;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = convertValue(e.target.value, typeName);
+    const value = typeName === ZodFirstPartyTypeKind.ZodBoolean ? e.target.checked : e.target.value;
+    const newValue = convertValue(value, typeName);
     const validationError = validateSchema(coercedSchema, newValue);
 
     if (validationError) {
@@ -97,9 +101,13 @@ export const SettingsFieldWrapper: React.FC<{
 };
 
 export const getInnerType = (schema: z.ZodType<any, any>) => {
-  return schema instanceof z.ZodDefault
-    ? schema._def.innerType._def.typeName === 'ZodEffects'
+  if (schema._def.innerType) {
+    return schema._def.innerType._def.typeName === 'ZodEffects'
       ? schema._def.innerType._def.schema._def.typeName
-      : schema._def.innerType._def.typeName
-    : schema._def.typeName;
+      : schema._def.innerType._def.typeName;
+  }
+  if (schema._def.typeName === 'ZodEffects') {
+    return schema._def.schema._def.typeName;
+  }
+  return schema._def.typeName;
 };

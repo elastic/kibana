@@ -39,9 +39,3 @@ export const indexEntry: IndexEntryCreateFields = {
   queryDescription: 'Use sample-field to search in sample-index',
   users: undefined,
 };
-
-export const globalIndexEntry: IndexEntryCreateFields = {
-  ...indexEntry,
-  name: 'Sample Global Index Entry',
-  users: [],
-};

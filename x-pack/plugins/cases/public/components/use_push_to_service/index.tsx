@@ -13,10 +13,8 @@ import {
   getKibanaConfigError,
   getConnectorMissingInfo,
   getDeletedConnectorError,
-  getCaseClosedInfo,
 } from './helpers';
 import type { CaseConnector } from '../../../common/types/domain';
-import { CaseStatuses } from '../../../common/types/domain';
 import type { ErrorMessage } from './callout/types';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
@@ -44,7 +42,6 @@ export interface ReturnUsePushToService {
 
 export const usePushToService = ({
   caseId,
-  caseStatus,
   caseConnectors,
   connector,
   isValidConnector,
@@ -108,14 +105,9 @@ export const usePushToService = ({
       return [getDeletedConnectorError()];
     }
 
-    if (caseStatus === CaseStatuses.closed) {
-      return [getCaseClosedInfo()];
-    }
-
     return errors;
   }, [
     actionLicense,
-    caseStatus,
     connector.id,
     hasLicenseError,
     isValidConnector,

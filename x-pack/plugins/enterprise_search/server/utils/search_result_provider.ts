@@ -62,9 +62,7 @@ export function toSearchResult({
     id: serviceType,
     score,
     title: name,
-    type: i18n.translate('xpack.enterpriseSearch.searchProvider.type.name', {
-      defaultMessage: 'Search',
-    }),
+    type: 'Elasticsearch',
     url: {
       path: url ?? newUrl,
       prependBasePath: true,
@@ -108,18 +106,15 @@ export function getSearchResultProvider(
                 ]
               : []),
             ...(config.hasConnectors ? connectorTypes : []),
-            ...(config.canDeployEntSearch
-              ? [
-                  {
-                    keywords: ['esre', 'search'],
-                    name: i18n.translate('xpack.enterpriseSearch.searchProvider.aiSearch.name', {
-                      defaultMessage: 'Search AI',
-                    }),
-                    serviceType: 'ai_search',
-                    url: AI_SEARCH_PLUGIN.URL,
-                  },
-                ]
-              : []),
+
+            {
+              keywords: ['esre', 'search'],
+              name: i18n.translate('xpack.enterpriseSearch.searchProvider.aiSearch.name', {
+                defaultMessage: 'Search AI',
+              }),
+              serviceType: 'ai_search',
+              url: AI_SEARCH_PLUGIN.URL,
+            },
           ];
           const result = services
             .map((service) => {

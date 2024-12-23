@@ -14,11 +14,12 @@ import {
   type RequestHandler,
   type RouteMethod,
 } from '@kbn/core/server';
-import type { VersionedRouteConfig } from '@kbn/core-http-server';
+import type { RouteSecurity, VersionedRouteConfig } from '@kbn/core-http-server';
 
 import { PUBLIC_API_ACCESS } from '../../../common/constants';
 import type { FleetRequestHandlerContext } from '../..';
 import { getRequestStore } from '../request_store';
+import { defaultFleetErrorHandler } from '../../errors';
 
 import type { FleetVersionedRouteConfig } from './types';
 
@@ -34,6 +35,14 @@ import {
   doesNotHaveRequiredFleetAuthz,
 } from './security';
 
+export const DEFAULT_FLEET_ROUTE_SECURITY: RouteSecurity = {
+  authz: {
+    enabled: false,
+    reason:
+      'This route is opted out from authorization because Fleet use his own authorization model.',
+  },
+};
+
 function withDefaultPublicAccess<Method extends RouteMethod>(
   options: FleetVersionedRouteConfig<Method>
 ): VersionedRouteConfig<Method> {
@@ -43,8 +52,29 @@ function withDefaultPublicAccess<Method extends RouteMethod>(
     return {
       ...options,
       access: PUBLIC_API_ACCESS,
+      security: DEFAULT_FLEET_ROUTE_SECURITY,
     };
   }
+}
+
+export function withDefaultErrorHandler<
+  TContext extends FleetRequestHandlerContext,
+  R extends RouteMethod
+>(
+  wrappedHandler: RequestHandler<any, any, any, TContext, R, KibanaResponseFactory>
+): RequestHandler<any, any, any, TContext, R, KibanaResponseFactory> {
+  return async function defaultErrorHandlerWrapper(context, request, response) {
+    try {
+      return await wrappedHandler(context, request, response);
+    } catch (error: any) {
+      return defaultFleetErrorHandler({
+        error,
+        response,
+        context,
+        request,
+      });
+    }
+  };
 }
 
 export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerContext>(
@@ -115,14 +145,15 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
       context,
       request,
       response,
-      handler: (handlerContext, handlerRequest, handlerResponse) =>
+      handler: withDefaultErrorHandler((handlerContext, handlerRequest, handlerResponse) =>
         routerAuthzWrapper({
           context: handlerContext,
           request: handlerRequest,
           response: handlerResponse,
           handler,
           hasRequiredAuthz,
-        }),
+        })
+      ),
     });
   };
 

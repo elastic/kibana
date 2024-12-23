@@ -162,8 +162,8 @@ describe('useSearchBreadcrumbs', () => {
 
     expect(useSearchBreadcrumbs(breadcrumbs)).toEqual([
       {
-        text: 'Search',
-        href: '/app/enterprise_search/overview',
+        text: 'Elasticsearch',
+        href: '/app/elasticsearch/overview',
         onClick: expect.any(Function),
       },
       {
@@ -180,7 +180,7 @@ describe('useSearchBreadcrumbs', () => {
   it('shows just the root if breadcrumbs is empty', () => {
     expect(useSearchBreadcrumbs()).toEqual([
       {
-        text: 'Search',
+        text: 'Elasticsearch',
       },
     ]);
   });
@@ -206,7 +206,7 @@ describe('useEnterpriseSearchBreadcrumbs', () => {
     expect(useEnterpriseSearchBreadcrumbs(breadcrumbs)).toEqual([
       {
         text: 'Enterprise Search',
-        href: '/app/enterprise_search/overview',
+        href: '/app/elasticsearch/overview',
         onClick: expect.any(Function),
       },
       {
@@ -252,7 +252,7 @@ describe('useAppSearchBreadcrumbs', () => {
     expect(useAppSearchBreadcrumbs(breadcrumbs)).toEqual([
       {
         text: 'Enterprise Search',
-        href: '/app/enterprise_search/overview',
+        href: '/app/elasticsearch/overview',
         onClick: expect.any(Function),
       },
       {
@@ -275,7 +275,7 @@ describe('useAppSearchBreadcrumbs', () => {
     expect(useAppSearchBreadcrumbs()).toEqual([
       {
         text: 'Enterprise Search',
-        href: '/app/enterprise_search/overview',
+        href: '/app/elasticsearch/overview',
         onClick: expect.any(Function),
       },
       {
@@ -308,7 +308,7 @@ describe('useWorkplaceSearchBreadcrumbs', () => {
     expect(useWorkplaceSearchBreadcrumbs(breadcrumbs)).toEqual([
       {
         text: 'Enterprise Search',
-        href: '/app/enterprise_search/overview',
+        href: '/app/elasticsearch/overview',
         onClick: expect.any(Function),
       },
       {
@@ -331,7 +331,7 @@ describe('useWorkplaceSearchBreadcrumbs', () => {
     expect(useWorkplaceSearchBreadcrumbs()).toEqual([
       {
         text: 'Enterprise Search',
-        href: '/app/enterprise_search/overview',
+        href: '/app/elasticsearch/overview',
         onClick: expect.any(Function),
       },
       {

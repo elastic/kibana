@@ -10,7 +10,6 @@ import type {
   CasesFindResponseUI,
   CaseUI,
   CasesUI,
-  CasesStatus,
   FetchCasesProps,
   FindCaseUserActions,
   CaseUICustomField,
@@ -24,7 +23,6 @@ import {
   basicCaseCommentPatch,
   basicCasePost,
   basicResolvedCase,
-  casesStatus,
   pushedCase,
   tags,
   categories,
@@ -32,6 +30,7 @@ import {
   getCaseUserActionsStatsResponse,
   getCaseUsersMockResponse,
   customFieldsMock,
+  allCasesSnake,
 } from '../mock';
 import type {
   CaseConnectors,
@@ -68,9 +67,6 @@ export const getSingleCaseMetrics = async (
   caseId: string,
   signal: AbortSignal
 ): Promise<SingleCaseMetricsResponse> => Promise.resolve(basicCaseMetrics);
-
-export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> =>
-  Promise.resolve(casesStatus);
 
 export const getTags = async (signal: AbortSignal): Promise<string[]> => Promise.resolve(tags);
 
@@ -192,3 +188,9 @@ export const replaceCustomField = async ({
   customFieldValue: string | boolean | null;
   caseVersion: string;
 }): Promise<CaseUICustomField> => Promise.resolve(customFieldsMock[0]);
+
+export const getSimilarCases = async () => allCasesSnake;
+
+export const postObservable = jest.fn();
+export const patchObservable = jest.fn();
+export const deleteObservable = jest.fn();

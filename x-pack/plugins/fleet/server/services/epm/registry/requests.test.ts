@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+
+import type { Logger } from '@kbn/core/server';
+
 import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
 import { appContextService } from '../../app_context';
 
 import { fetchUrl, getResponse } from './requests';
 jest.mock('node-fetch');
+jest.mock('../../app_context');
 
 let mockRegistryProxyUrl: string | undefined;
 jest.mock('./proxy', () => ({
@@ -17,11 +23,9 @@ jest.mock('./proxy', () => ({
   getRegistryProxyUrl: () => mockRegistryProxyUrl,
 }));
 
-jest.mock('../../app_context', () => ({
-  appContextService: {
-    getKibanaVersion: jest.fn(),
-    getLogger: jest.fn().mockReturnValue({ debug: jest.fn() }),
-  },
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
+  ...securityMock.createSetup(),
 }));
 
 const { Response, FetchError } = jest.requireActual('node-fetch');
@@ -29,18 +33,23 @@ const { Response, FetchError } = jest.requireActual('node-fetch');
 const fetchMock = require('node-fetch') as jest.Mock;
 
 jest.setTimeout(120 * 1000);
-describe('Registry request', () => {
+
+describe('Registry requests', () => {
   beforeEach(async () => {});
 
   afterEach(async () => {
     jest.clearAllMocks();
   });
+  let mockedLogger: jest.Mocked<Logger>;
 
   describe('fetch options', () => {
     beforeEach(() => {
       fetchMock.mockImplementationOnce(() => Promise.resolve(new Response('')));
-      (appContextService.getKibanaVersion as jest.Mock).mockReturnValue('8.0.0');
+      mockedAppContextService.getKibanaVersion.mockReturnValue('8.0.0');
+      mockedLogger = loggerMock.create();
+      mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
     });
+
     it('should set User-Agent header including kibana version', async () => {
       await getResponse('');
 
@@ -217,6 +226,33 @@ describe('Registry request', () => {
           `'404 Not Found' error response from package registry at https://example.com/?requested=true`
         );
         expect(fetchMock).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('with config.isAirGapped == true', () => {
+      beforeEach(() => {
+        mockedLogger = loggerMock.create();
+        mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+        mockedAppContextService.getConfig.mockReturnValue({
+          isAirGapped: true,
+          enabled: true,
+          agents: { enabled: true, elasticsearch: {} },
+        });
+      });
+
+      it('should not call fetch', async () => {
+        await getResponse('');
+
+        expect(fetchMock).toHaveBeenCalledTimes(0);
+      });
+
+      it('fetchUrl throws error', async () => {
+        fetchMock.mockImplementationOnce(() => {
+          throw new Error('mocked');
+        });
+        const promise = fetchUrl('');
+        await expect(promise).rejects.toThrow(RegistryResponseError);
+        expect(fetchMock).toHaveBeenCalledTimes(0);
       });
     });
   });

@@ -9,8 +9,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import yargs from 'yargs';
 import { chunk } from 'lodash';
 
-import { LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 import { packagePolicyFixture } from './fixtures';
 
@@ -30,20 +29,18 @@ const printUsage = () =>
 
 const INDEX_BULK_OP = '{ "index":{ "_id": "{{id}}" } }\n';
 
+const space = 'default';
 function getPolicyId(idx: number | string) {
-  return `test-policy-${idx}`;
+  return `test-policy-${space}-${idx}`;
 }
 
 async function createAgentPoliciesDocsBulk(range: number[]) {
   const auth = 'Basic ' + Buffer.from(ES_SUPERUSER + ':' + ES_PASSWORD).toString('base64');
   const body = range
     .flatMap((idx) => [
-      INDEX_BULK_OP.replace(
-        /{{id}}/,
-        `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}:${getPolicyId(idx)}`
-      ),
+      INDEX_BULK_OP.replace(/{{id}}/, `${AGENT_POLICY_SAVED_OBJECT_TYPE}:${getPolicyId(idx)}`),
       JSON.stringify({
-        [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]: {
+        [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
           namespace: 'default',
           monitoring_enabled: ['logs', 'metrics', 'traces'],
           name: `Test Policy ${idx}`,
@@ -60,11 +57,11 @@ async function createAgentPoliciesDocsBulk(range: number[]) {
           schema_version: '1.1.1',
           is_protected: false,
         },
-        type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+        namespaces: [space],
+        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
         references: [],
         managed: false,
         coreMigrationVersion: '8.8.0',
-        typeMigrationVersion: '10.3.0',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }) + '\n',
@@ -81,7 +78,7 @@ async function createAgentPoliciesDocsBulk(range: number[]) {
   const data = await res.json();
 
   if (!data.items) {
-    logger.error('Error creating agent policies docs: ' + JSON.stringify(data));
+    logger.error('Error creating agent policy docs: ' + JSON.stringify(data));
     process.exit(1);
   }
   return data;
@@ -91,14 +88,14 @@ async function createEnrollmentToken(range: number[]) {
   const auth = 'Basic ' + Buffer.from(ES_SUPERUSER + ':' + ES_PASSWORD).toString('base64');
   const body = range
     .flatMap((idx) => [
-      INDEX_BULK_OP.replace(/{{id}}/, `test-enrollment-token-${idx}`),
+      INDEX_BULK_OP.replace(/{{id}}/, `test-enrollment-token-${space}-${idx}`),
       JSON.stringify({
         active: true,
         api_key_id: 'faketest123',
         api_key: 'test==',
         name: `Test Policy ${idx}`,
         policy_id: `${getPolicyId(idx)}`,
-        namespaces: [],
+        namespaces: [space],
         created_at: new Date().toISOString(),
       }) + '\n',
     ])
@@ -115,7 +112,7 @@ async function createEnrollmentToken(range: number[]) {
   const data = await res.json();
 
   if (!data.items) {
-    logger.error('Error creating agent policies docs: ' + JSON.stringify(data));
+    logger.error('Error creating enrollment key docs: ' + JSON.stringify(data));
     process.exit(1);
   }
   return data;
@@ -125,14 +122,12 @@ async function createPackagePolicies(range: number[]) {
   const auth = 'Basic ' + Buffer.from(ES_SUPERUSER + ':' + ES_PASSWORD).toString('base64');
   const body = range
     .flatMap((idx) => [
-      INDEX_BULK_OP.replace(
-        /{{id}}/,
-        `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}:test-policy-${idx}`
-      ),
+      INDEX_BULK_OP.replace(/{{id}}/, `fleet-package-policies:test-policy-${space}-${idx}`),
       JSON.stringify(
         packagePolicyFixture({
           idx,
           agentPolicyId: getPolicyId(idx),
+          space,
         })
       ) + '\n',
     ])
@@ -150,7 +145,7 @@ async function createPackagePolicies(range: number[]) {
   const data = await res.json();
 
   if (!data.items) {
-    logger.error('Error creating agent policies docs: ' + JSON.stringify(data));
+    logger.error('Error creating package policy docs: ' + JSON.stringify(data));
     process.exit(1);
   }
   return data;

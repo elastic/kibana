@@ -7,13 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import type {
-  DataTableRecord,
-  DataTableColumnsMeta,
-  IgnoredReason,
-} from '@kbn/discover-utils/types';
+import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import { DocViewsRegistry } from './doc_views_registry';
 
 export interface FieldMapping {
@@ -77,23 +73,3 @@ interface ComponentDocViewInput extends BaseDocViewInput {
 export type DocView = ComponentDocViewInput | RenderDocViewInput;
 
 export type DocViewFactory = () => DocView;
-
-export interface FieldRecordLegacy {
-  action: {
-    isActive: boolean;
-    onFilter?: DocViewFilterFn;
-    onToggleColumn: ((field: string) => void) | undefined;
-    flattenedField: unknown;
-  };
-  field: {
-    displayName: string;
-    field: string;
-    scripted: boolean;
-    fieldType?: string;
-    fieldMapping?: DataViewField;
-  };
-  value: {
-    formattedValue: string;
-    ignored?: IgnoredReason;
-  };
-}

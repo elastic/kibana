@@ -29,7 +29,7 @@ import type {
   PostLogstashApiKeyResponse,
 } from '../../../common/types';
 import { outputService } from '../../services/output';
-import { defaultFleetErrorHandler, FleetUnauthorizedError } from '../../errors';
+import { FleetUnauthorizedError } from '../../errors';
 import { agentPolicyService, appContextService } from '../../services';
 import { generateLogstashApiKey, canCreateLogstashApiKey } from '../../services/api_keys';
 
@@ -55,20 +55,16 @@ function ensureNoDuplicateSecrets(output: Partial<Output>) {
 
 export const getOutputsHandler: RequestHandler = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
-  try {
-    const outputs = await outputService.list(soClient);
+  const outputs = await outputService.list(soClient);
 
-    const body: GetOutputsResponse = {
-      items: outputs.items,
-      page: outputs.page,
-      perPage: outputs.perPage,
-      total: outputs.total,
-    };
+  const body: GetOutputsResponse = {
+    items: outputs.items,
+    page: outputs.page,
+    perPage: outputs.perPage,
+    total: outputs.total,
+  };
 
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+  return response.ok({ body });
 };
 
 export const getOneOuputHandler: RequestHandler<
@@ -90,7 +86,7 @@ export const getOneOuputHandler: RequestHandler<
       });
     }
 
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
@@ -126,7 +122,7 @@ export const putOutputHandler: RequestHandler<
       });
     }
 
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
@@ -138,23 +134,19 @@ export const postOutputHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  try {
-    const { id, ...newOutput } = request.body;
-    await validateOutputServerless(newOutput, soClient);
-    ensureNoDuplicateSecrets(newOutput);
-    const output = await outputService.create(soClient, esClient, newOutput, { id });
-    if (output.is_default || output.is_default_monitoring) {
-      await agentPolicyService.bumpAllAgentPolicies(esClient);
-    }
-
-    const body: GetOneOutputResponse = {
-      item: output,
-    };
-
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
+  const { id, ...newOutput } = request.body;
+  await validateOutputServerless(newOutput, soClient);
+  ensureNoDuplicateSecrets(newOutput);
+  const output = await outputService.create(soClient, esClient, newOutput, { id });
+  if (output.is_default || output.is_default_monitoring) {
+    await agentPolicyService.bumpAllAgentPolicies(esClient);
   }
+
+  const body: GetOneOutputResponse = {
+    item: output,
+  };
+
+  return response.ok({ body });
 };
 
 async function validateOutputServerless(
@@ -206,42 +198,31 @@ export const deleteOutputHandler: RequestHandler<
       });
     }
 
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
 export const postLogstashApiKeyHandler: RequestHandler = async (context, request, response) => {
   const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-  try {
-    const hasCreatePrivileges = await canCreateLogstashApiKey(esClient);
-    if (!hasCreatePrivileges) {
-      throw new FleetUnauthorizedError('Missing permissions to create logstash API key');
-    }
-
-    const apiKey = await generateLogstashApiKey(esClient);
-
-    const body: PostLogstashApiKeyResponse = {
-      // Logstash expect the key to be formatted like this id:key
-      api_key: `${apiKey.id}:${apiKey.api_key}`,
-    };
-
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
+  const hasCreatePrivileges = await canCreateLogstashApiKey(esClient);
+  if (!hasCreatePrivileges) {
+    throw new FleetUnauthorizedError('Missing permissions to create logstash API key');
   }
+
+  const apiKey = await generateLogstashApiKey(esClient);
+
+  const body: PostLogstashApiKeyResponse = {
+    // Logstash expect the key to be formatted like this id:key
+    api_key: `${apiKey.id}:${apiKey.api_key}`,
+  };
+
+  return response.ok({ body });
 };
 
 export const getLatestOutputHealth: RequestHandler<
   TypeOf<typeof GetLatestOutputHealthRequestSchema.params>
 > = async (context, request, response) => {
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
-  try {
-    const outputHealth = await outputService.getLatestOutputHealth(
-      esClient,
-      request.params.outputId
-    );
-    return response.ok({ body: outputHealth });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+  const outputHealth = await outputService.getLatestOutputHealth(esClient, request.params.outputId);
+  return response.ok({ body: outputHealth });
 };

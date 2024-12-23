@@ -24,6 +24,8 @@ import { listEnrollmentApiKeys, deleteEnrollmentApiKey } from '../api_keys';
 import type { AgentPolicy } from '../../types';
 import { AgentPolicyInvalidError } from '../../errors';
 
+import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 } from '../../constants';
+
 export async function resetPreconfiguredAgentPolicies(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
@@ -83,7 +85,7 @@ async function _deleteGhostPackagePolicies(
       }
     },
     {
-      concurrency: 20,
+      concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
     }
   );
 }
@@ -116,7 +118,7 @@ async function _deletePreconfigurationDeleteRecord(
           }),
 
       {
-        concurrency: 20,
+        concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
       }
     );
   }
@@ -167,7 +169,7 @@ async function _deleteExistingData(
   if (agents.length > 0) {
     logger.info(`Force unenrolling ${agents.length} agents`);
     await pMap(agents, (agent) => forceUnenrollAgent(esClient, soClient, agent.id), {
-      concurrency: 20,
+      concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
     });
   }
 
@@ -183,7 +185,7 @@ async function _deleteExistingData(
       enrollmentApiKeys,
       (enrollmentKey) => deleteEnrollmentApiKey(esClient, enrollmentKey.id, true),
       {
-        concurrency: 20,
+        concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
       }
     );
   }
@@ -195,7 +197,7 @@ async function _deleteExistingData(
         force: true,
       }),
     {
-      concurrency: 20,
+      concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
     }
   );
 }

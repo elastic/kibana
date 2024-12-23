@@ -91,7 +91,8 @@ describe('AllCases', () => {
     jest.clearAllMocks();
   });
 
-  describe('empty table', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/162852
+  describe.skip('empty table', () => {
     beforeEach(() => {
       useGetCasesMock.mockReturnValue({
         ...defaultGetCases,

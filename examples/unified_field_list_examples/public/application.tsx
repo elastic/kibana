@@ -10,7 +10,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { AppPluginStartDependencies } from './types';
 import { UnifiedFieldListExampleApp } from './example_app';
@@ -18,18 +18,18 @@ import { UnifiedFieldListExampleApp } from './example_app';
 export const renderApp = (
   core: CoreStart,
   deps: AppPluginStartDependencies,
-  { element, theme$ }: AppMountParameters
+  { element }: AppMountParameters
 ) => {
   ReactDOM.render(
     <I18nProvider>
-      <CoreThemeProvider theme$={theme$}>
+      <KibanaThemeProvider {...core}>
         <UnifiedFieldListExampleApp
           services={{
             core,
             ...deps,
           }}
         />
-      </CoreThemeProvider>
+      </KibanaThemeProvider>
     </I18nProvider>,
     element
   );

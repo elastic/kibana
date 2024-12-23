@@ -13,10 +13,10 @@ import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FetchContext, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-
 import { FieldStatisticsTable } from '../../application/main/components/field_stats_table';
 import { isEsqlMode } from '../initialize_fetch';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi & {
@@ -37,8 +37,13 @@ export function SearchEmbeddablFieldStatsTableComponent({
     api.fetchContext$,
     api.savedSearch$
   );
-
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
+  const services = useDiscoverServices();
+
+  // Quit early if we know it's in ES|QL mode
+  if (isEsql && services.dataVisualizer?.FieldStatsUnavailableMessage) {
+    return <services.dataVisualizer.FieldStatsUnavailableMessage />;
+  }
 
   return (
     <FieldStatisticsTable

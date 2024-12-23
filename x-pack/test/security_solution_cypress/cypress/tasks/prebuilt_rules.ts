@@ -21,6 +21,7 @@ import {
   RULE_UPGRADE_TABLE_MODIFICATION_FILTER_BUTTON,
   RULE_UPGRADE_TABLE_MODIFICATION_FILTER_PANEL,
 } from '../screens/rule_updates';
+import { RULE_UPGRADE_CONFLICTS_MODAL } from '../screens/rule_updates';
 
 export const clickAddElasticRulesButton = () => {
   cy.get(ADD_ELASTIC_RULES_BTN).click();
@@ -159,4 +160,12 @@ export const filterPrebuiltRulesUpdateTableByRuleCustomization = (text: string) 
   cy.get(RULE_UPGRADE_TABLE_MODIFICATION_FILTER_BUTTON).click();
   cy.get(RULE_UPGRADE_TABLE_MODIFICATION_FILTER_PANEL).contains(text).click();
   cy.get(RULE_UPGRADE_TABLE_MODIFICATION_FILTER_BUTTON).click();
+};
+
+export const assertRuleUpgradeConflictsModalShown = () => {
+  cy.get(RULE_UPGRADE_CONFLICTS_MODAL).should('be.visible');
+};
+
+export const clickUpgradeRuleWithoutConflicts = () => {
+  cy.get(RULE_UPGRADE_CONFLICTS_MODAL).contains('button', 'Update').click();
 };

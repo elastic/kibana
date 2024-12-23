@@ -22,6 +22,7 @@ target
 *.iml
 *.log
 types.eslint.config.js
+types.eslint.config.cjs
 __tmp__
 
 # Ignore example plugin builds
@@ -97,14 +98,14 @@ npm-debug.log*
 # transpiled cypress config
 x-pack/plugins/fleet/cypress.config.d.ts
 x-pack/plugins/fleet/cypress.config.js
-x-pack/plugins/osquery/cypress.config.d.ts
-x-pack/plugins/osquery/cypress.config.js
+x-pack/platform/plugins/shared/osquery/cypress.config.d.ts
+x-pack/platform/plugins/shared/osquery/cypress.config.js
 x-pack/plugins/enterprise_search/cypress.config.d.ts
 x-pack/plugins/enterprise_search/cypress.config.js
-x-pack/plugins/security_solution/public/management/cypress.config.d.ts
-x-pack/plugins/security_solution/public/management/cypress.config.js
-x-pack/plugins/security_solution/public/management/cypress_endpoint.config.d.ts
-x-pack/plugins/security_solution/public/management/cypress_endpoint.config.js
+x-pack/solutions/security/plugins/security_solution/public/management/cypress.config.d.ts
+x-pack/solutions/security/plugins/security_solution/public/management/cypress.config.js
+x-pack/solutions/security/plugins/security_solution/public/management/cypress_endpoint.config.d.ts
+x-pack/solutions/security/plugins/security_solution/public/management/cypress_endpoint.config.js
 
 # release notes script output
 report.csv
@@ -142,6 +143,8 @@ x-pack/test/security_api_integration/plugins/audit_log/audit.log
 .ftr
 role_users.json
 
+# ignore Scout temp directory
+.scout
 
 .devcontainer/.env
 
@@ -159,3 +162,4 @@ x-pack/test/security_solution_playwright/playwright/.cache/
 x-pack/test/security_solution_playwright/.auth/
 x-pack/test/security_solution_playwright/.env
 .codeql
+.dependency-graph-log.json

@@ -15,29 +15,23 @@ import {
   ALERT_STATUS,
   getEsQueryConfig,
   getSafeSortIds,
-  isValidFeatureId,
   STATUS_VALUES,
-  ValidFeatureId,
   ALERT_STATUS_RECOVERED,
   ALERT_END,
   ALERT_STATUS_ACTIVE,
   ALERT_CASE_IDS,
   MAX_CASES_PER_ALERT,
-  AlertConsumers,
+  isSiemRuleType,
 } from '@kbn/rule-data-utils';
 
 import {
   AggregateName,
   AggregationsAggregate,
-  AggregationsMultiBucketAggregateBase,
   MappingRuntimeFields,
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
-import type {
-  RuleTypeParams,
-  PluginStartContract as AlertingStart,
-} from '@kbn/alerting-plugin/server';
+import type { RuleTypeParams, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import {
   ReadOperations,
   AlertingAuthorization,
@@ -68,6 +62,8 @@ import {
   MAX_ALERTS_PAGES,
   MAX_PAGINATED_ALERTS,
 } from './constants';
+import { getRuleTypeIdsFilter } from '../lib/get_rule_type_ids_filter';
+import { getConsumersFilter } from '../lib/get_consumers_filter';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
@@ -97,7 +93,7 @@ export interface ConstructorOptions {
   ruleDataService: IRuleDataService;
   getRuleType: RuleTypeRegistry['get'];
   getRuleList: RuleTypeRegistry['list'];
-  getAlertIndicesAlias: AlertingStart['getAlertIndicesAlias'];
+  getAlertIndicesAlias: AlertingServerStart['getAlertIndicesAlias'];
 }
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
@@ -138,7 +134,8 @@ interface GetAlertSummaryParams {
   id?: string;
   gte: string;
   lte: string;
-  featureIds: string[];
+  ruleTypeIds: string[];
+  consumers?: string[];
   filter?: estypes.QueryDslQueryContainer[];
   fixedInterval?: string;
 }
@@ -154,7 +151,8 @@ interface SearchAlertsParams {
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
   sort?: estypes.SortOptions[];
   lastSortIds?: Array<string | number>;
-  featureIds?: string[];
+  ruleTypeIds?: string[];
+  consumers?: string[];
   runtimeMappings?: MappingRuntimeFields;
 }
 
@@ -172,7 +170,7 @@ export class AlertsClient {
   private readonly ruleDataService: IRuleDataService;
   private readonly getRuleType: RuleTypeRegistry['get'];
   private readonly getRuleList: RuleTypeRegistry['list'];
-  private getAlertIndicesAlias!: AlertingStart['getAlertIndicesAlias'];
+  private getAlertIndicesAlias!: AlertingServerStart['getAlertIndicesAlias'];
 
   constructor(options: ConstructorOptions) {
     this.logger = options.logger;
@@ -295,7 +293,8 @@ export class AlertsClient {
     operation,
     sort,
     lastSortIds = [],
-    featureIds,
+    ruleTypeIds,
+    consumers,
     runtimeMappings,
   }: SearchAlertsParams) {
     try {
@@ -316,7 +315,8 @@ export class AlertsClient {
           alertSpaceId,
           operation,
           config,
-          featureIds ? new Set(featureIds) : undefined
+          ruleTypeIds,
+          consumers
         ),
         aggs,
         _source,
@@ -372,7 +372,9 @@ export class AlertsClient {
 
       return result;
     } catch (error) {
-      const errorMessage = `Unable to retrieve alert details for alert with id of "${id}" or with query "${query}" and operation ${operation} \nError: ${error}`;
+      const errorMessage = `Unable to retrieve alert details for alert with id of "${id}" or with query "${JSON.stringify(
+        query
+      )}" and operation ${operation} \nError: ${error}`;
       this.logger.error(errorMessage);
       throw Boom.notFound(errorMessage);
     }
@@ -457,16 +459,17 @@ export class AlertsClient {
     alertSpaceId: string,
     operation: WriteOperations.Update | ReadOperations.Get | ReadOperations.Find,
     config: EsQueryConfig,
-    featuresIds?: Set<string>
+    ruleTypeIds?: string[],
+    consumers?: string[]
   ) {
     try {
-      const authzFilter = (await getAuthzFilter(
-        this.authorization,
-        operation,
-        featuresIds
-      )) as Filter;
+      const authzFilter = (await getAuthzFilter(this.authorization, operation)) as Filter;
       const spacesFilter = getSpacesFilter(alertSpaceId) as unknown as Filter;
+      const ruleTypeIdsFilter = getRuleTypeIdsFilter(ruleTypeIds) as unknown as Filter;
+      const consumersFilter = getConsumersFilter(consumers) as unknown as Filter;
+
       let esQuery;
+
       if (id != null) {
         esQuery = { query: `_id:${id}`, language: 'kuery' };
       } else if (typeof query === 'string') {
@@ -474,12 +477,14 @@ export class AlertsClient {
       } else if (query != null && typeof query === 'object') {
         esQuery = [];
       }
+
       const builtQuery = buildEsQuery(
         undefined,
         esQuery == null ? { query: ``, language: 'kuery' } : esQuery,
-        [authzFilter, spacesFilter],
+        [authzFilter, spacesFilter, ruleTypeIdsFilter, consumersFilter],
         config
       );
+
       if (query != null && typeof query === 'object') {
         return {
           ...builtQuery,
@@ -639,15 +644,16 @@ export class AlertsClient {
   public async getAlertSummary({
     gte,
     lte,
-    featureIds,
+    ruleTypeIds,
+    consumers,
     filter,
     fixedInterval = '1m',
   }: GetAlertSummaryParams) {
     try {
-      const indexToUse = await this.getAuthorizedAlertsIndices(featureIds);
+      const indexToUse = await this.getAuthorizedAlertsIndices(ruleTypeIds);
 
       if (isEmpty(indexToUse)) {
-        throw Boom.badRequest('no featureIds were provided for getting alert summary');
+        throw Boom.badRequest('no ruleTypeIds were provided for getting alert summary');
       }
 
       // first search for the alert by id, then use the alert info to check if user has access to it
@@ -710,7 +716,8 @@ export class AlertsClient {
           },
         },
         size: 0,
-        featureIds,
+        ruleTypeIds,
+        consumers,
       });
 
       let activeAlertCount = 0;
@@ -981,7 +988,8 @@ export class AlertsClient {
     TAggregations = Record<AggregateName, AggregationsAggregate>
   >({
     aggs,
-    featureIds,
+    ruleTypeIds,
+    consumers,
     index,
     query,
     search_after: searchAfter,
@@ -992,7 +1000,8 @@ export class AlertsClient {
     runtimeMappings,
   }: {
     aggs?: object;
-    featureIds?: string[];
+    ruleTypeIds?: string[];
+    consumers?: string[];
     index?: string;
     query?: object;
     search_after?: Array<string | number>;
@@ -1004,15 +1013,16 @@ export class AlertsClient {
   }) {
     try {
       let indexToUse = index;
-      if (featureIds && !isEmpty(featureIds)) {
-        const tempIndexToUse = await this.getAuthorizedAlertsIndices(featureIds);
+      if (ruleTypeIds && !isEmpty(ruleTypeIds)) {
+        const tempIndexToUse = await this.getAuthorizedAlertsIndices(ruleTypeIds);
         if (!isEmpty(tempIndexToUse)) {
           indexToUse = (tempIndexToUse ?? []).join();
         }
       }
 
       const alertsSearchResponse = await this.searchAlerts<TAggregations>({
-        featureIds,
+        ruleTypeIds,
+        consumers,
         query,
         aggs,
         _source,
@@ -1042,7 +1052,8 @@ export class AlertsClient {
    * Performs a `find` query to extract aggregations on alert groups
    */
   public async getGroupAggregations({
-    featureIds,
+    ruleTypeIds,
+    consumers,
     groupByField,
     aggregations,
     filters,
@@ -1051,9 +1062,15 @@ export class AlertsClient {
     sort = [{ unitsCount: { order: 'desc' } }],
   }: {
     /**
-     * The feature ids the alerts belong to, used for authorization
+     * The rule type IDs the alerts belong to.
+     * Used for filtering.
      */
-    featureIds: string[];
+    ruleTypeIds: string[];
+    /**
+     * The consumers the alerts belong to.
+     * Used for filtering.
+     */
+    consumers?: string[];
     /**
      * The field to group by
      * @example "kibana.alert.rule.name"
@@ -1093,9 +1110,10 @@ export class AlertsClient {
     }
     const searchResult = await this.find<
       never,
-      { groupByFields: AggregationsMultiBucketAggregateBase<{ key: string }> }
+      { groupByFields: estypes.AggregationsMultiBucketAggregateBase<{ key: string }> }
     >({
-      featureIds,
+      ruleTypeIds,
+      consumers,
       aggs: {
         groupByFields: {
           terms: {
@@ -1163,14 +1181,15 @@ export class AlertsClient {
     return searchResult;
   }
 
-  public async getAuthorizedAlertsIndices(featureIds: string[]): Promise<string[] | undefined> {
+  public async getAuthorizedAlertsIndices(ruleTypeIds?: string[]): Promise<string[] | undefined> {
     try {
-      const authorizedRuleTypes = await this.authorization.getAuthorizedRuleTypes(
-        AlertingAuthorizationEntity.Alert,
-        new Set(featureIds)
-      );
+      const authorizedRuleTypes = await this.authorization.getAllAuthorizedRuleTypesFindOperation({
+        authorizationEntity: AlertingAuthorizationEntity.Alert,
+        ruleTypeIds,
+      });
+
       const indices = this.getAlertIndicesAlias(
-        authorizedRuleTypes.map((art: { id: any }) => art.id),
+        Array.from(authorizedRuleTypes.keys()).map((id) => id),
         this.spaceId
       );
 
@@ -1182,48 +1201,13 @@ export class AlertsClient {
     }
   }
 
-  public async getFeatureIdsByRegistrationContexts(
-    RegistrationContexts: string[]
-  ): Promise<string[]> {
-    try {
-      const featureIds =
-        this.ruleDataService.findFeatureIdsByRegistrationContexts(RegistrationContexts);
-      if (featureIds.length > 0) {
-        // ATTENTION FUTURE DEVELOPER when you are a super user the augmentedRuleTypes.authorizedRuleTypes will
-        // return all of the features that you can access and does not care about your featureIds
-        const augmentedRuleTypes = await this.authorization.getAugmentedRuleTypesWithAuthorization(
-          featureIds,
-          [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
-          AlertingAuthorizationEntity.Alert
-        );
-        // As long as the user can read a minimum of one type of rule type produced by the provided feature,
-        // the user should be provided that features' alerts index.
-        // Limiting which alerts that user can read on that index will be done via the findAuthorizationFilter
-        const authorizedFeatures = new Set<string>();
-        for (const ruleType of augmentedRuleTypes.authorizedRuleTypes) {
-          authorizedFeatures.add(ruleType.producer);
-        }
-        const validAuthorizedFeatures = Array.from(authorizedFeatures).filter(
-          (feature): feature is ValidFeatureId =>
-            featureIds.includes(feature) && isValidFeatureId(feature)
-        );
-        return validAuthorizedFeatures;
-      }
-      return featureIds;
-    } catch (exc) {
-      const errMessage = `getFeatureIdsByRegistrationContexts failed to get feature ids: ${exc}`;
-      this.logger.error(errMessage);
-      throw Boom.failedDependency(errMessage);
-    }
-  }
-
   public async getBrowserFields({
-    featureIds,
+    ruleTypeIds,
     indices,
     metaFields,
     allowNoIndex,
   }: {
-    featureIds: string[];
+    ruleTypeIds: string[];
     indices: string[];
     metaFields: string[];
     allowNoIndex: boolean;
@@ -1231,13 +1215,15 @@ export class AlertsClient {
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
     const ruleTypeList = this.getRuleList();
     const fieldsForAAD = new Set<string>();
-    for (const rule of ruleTypeList) {
-      if (featureIds.includes(rule.producer) && rule.hasFieldsForAAD) {
+
+    for (const rule of ruleTypeList.values()) {
+      if (ruleTypeIds.includes(rule.id) && rule.hasFieldsForAAD) {
         (rule.fieldsForAAD ?? []).forEach((f) => {
           fieldsForAAD.add(f);
         });
       }
     }
+
     const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
       pattern: indices,
       metaFields,
@@ -1252,11 +1238,12 @@ export class AlertsClient {
   }
 
   public async getAADFields({ ruleTypeId }: { ruleTypeId: string }) {
-    const { producer, fieldsForAAD = [] } = this.getRuleType(ruleTypeId);
-    if (producer === AlertConsumers.SIEM) {
+    const { fieldsForAAD = [] } = this.getRuleType(ruleTypeId);
+    if (isSiemRuleType(ruleTypeId)) {
       throw Boom.badRequest(`Security solution rule type is not supported`);
     }
-    const indices = await this.getAuthorizedAlertsIndices([producer]);
+
+    const indices = await this.getAuthorizedAlertsIndices([ruleTypeId]);
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
     const { fields = [] } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
       pattern: indices ?? [],

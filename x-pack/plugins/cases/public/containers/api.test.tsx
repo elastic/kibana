@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '@kbn/core/public/mocks';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { KibanaServices } from '../common/lib/kibana';
 
@@ -41,6 +40,10 @@ import {
   deleteFileAttachments,
   getCategories,
   replaceCustomField,
+  postObservable,
+  getSimilarCases,
+  patchObservable,
+  deleteObservable,
 } from './api';
 
 import {
@@ -51,13 +54,11 @@ import {
   basicCaseSnake,
   pushedCaseSnake,
   categories,
-  casesStatus,
   casesSnake,
   cases,
   pushedCase,
   tags,
   findCaseUserActionsResponse,
-  casesStatusSnake,
   basicCaseId,
   caseWithRegisteredAttachmentsSnake,
   caseWithRegisteredAttachments,
@@ -66,10 +67,12 @@ import {
   getCaseUserActionsStatsResponse,
   basicFileMock,
   customFieldsMock,
+  mockCase,
+  similarCases,
+  similarCasesSnake,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
-import { getCasesStatus } from '../api';
 import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, omit } from 'lodash';
@@ -528,38 +531,6 @@ describe('Cases API', () => {
         }),
         signal: abortCtrl.signal,
       });
-    });
-  });
-
-  describe('getCasesStatus', () => {
-    const http = httpServiceMock.createStartContract({ basePath: '' });
-    http.get.mockResolvedValue(casesStatusSnake);
-
-    beforeEach(() => {
-      fetchMock.mockClear();
-    });
-
-    it('should be called with correct check url, method, signal', async () => {
-      await getCasesStatus({
-        http,
-        signal: abortCtrl.signal,
-        query: { owner: [SECURITY_SOLUTION_OWNER] },
-      });
-
-      expect(http.get).toHaveBeenCalledWith(`${CASES_URL}/status`, {
-        signal: abortCtrl.signal,
-        query: { owner: [SECURITY_SOLUTION_OWNER] },
-      });
-    });
-
-    it('should return correct response', async () => {
-      const resp = await getCasesStatus({
-        http,
-        signal: abortCtrl.signal,
-        query: { owner: SECURITY_SOLUTION_OWNER },
-      });
-
-      expect(resp).toEqual(casesStatus);
     });
   });
 
@@ -1188,6 +1159,166 @@ describe('Cases API', () => {
     it('should return correct response', async () => {
       const resp = await replaceCustomField({ ...data, signal: abortCtrl.signal });
       expect(resp).toEqual(customFieldsMock[0]);
+    });
+  });
+
+  describe('getSimilarCases', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(similarCasesSnake);
+    });
+
+    it('should be called with correct url, method, signal', async () => {
+      await getSimilarCases({
+        caseId: mockCase.id,
+        signal: abortCtrl.signal,
+        page: 0,
+        perPage: 10,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/${mockCase.id}/_similar`, {
+        method: 'POST',
+        body: JSON.stringify({
+          page: 0,
+          perPage: 10,
+        }),
+        signal: abortCtrl.signal,
+      });
+    });
+
+    it('should return correct response', async () => {
+      const resp = await getSimilarCases({
+        caseId: mockCase.id,
+        signal: abortCtrl.signal,
+        page: 1,
+        perPage: 10,
+      });
+      expect(resp).toEqual(similarCases);
+    });
+  });
+
+  describe('postObservable', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(basicCaseSnake);
+    });
+
+    it('should be called with correct check url, method, signal', async () => {
+      await postObservable(
+        {
+          observable: {
+            typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
+            value: 'test value',
+            description: '',
+          },
+        },
+        mockCase.id,
+        abortCtrl.signal
+      );
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/${mockCase.id}/observables`, {
+        method: 'POST',
+        body: JSON.stringify({
+          observable: {
+            typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
+            value: 'test value',
+            description: '',
+          },
+        }),
+        signal: abortCtrl.signal,
+      });
+    });
+
+    it('should return correct response', async () => {
+      const resp = await postObservable(
+        {
+          observable: {
+            typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
+            value: 'test value',
+            description: '',
+          },
+        },
+        mockCase.id,
+        abortCtrl.signal
+      );
+      expect(resp).toEqual(basicCase);
+    });
+  });
+
+  describe('patchObservable', () => {
+    const observableId = 'afa44220-862c-4a21-b574-351ab4d0a732';
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(basicCaseSnake);
+    });
+
+    it('should be called with correct check url, method, signal', async () => {
+      await patchObservable(
+        {
+          observable: {
+            value: 'test value',
+            description: '',
+          },
+        },
+        mockCase.id,
+        observableId,
+        abortCtrl.signal
+      );
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${mockCase.id}/observables/${observableId}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({
+            observable: {
+              value: 'test value',
+              description: '',
+            },
+          }),
+          signal: abortCtrl.signal,
+        }
+      );
+    });
+
+    it('should return correct response', async () => {
+      const resp = await patchObservable(
+        {
+          observable: {
+            value: 'test value',
+            description: '',
+          },
+        },
+        mockCase.id,
+        observableId,
+        abortCtrl.signal
+      );
+      expect(resp).toEqual(basicCase);
+    });
+  });
+
+  describe('deleteObservable', () => {
+    const observableId = 'afa44220-862c-4a21-b574-351ab4d0a732';
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(basicCaseSnake);
+    });
+
+    it('should be called with correct check url, method, signal', async () => {
+      await deleteObservable(mockCase.id, observableId, abortCtrl.signal);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${mockCase.id}/observables/${observableId}`,
+        {
+          method: 'DELETE',
+          signal: abortCtrl.signal,
+        }
+      );
+    });
+
+    it('should return correct response', async () => {
+      const resp = await deleteObservable(mockCase.id, observableId, abortCtrl.signal);
+      expect(resp).toEqual(undefined);
     });
   });
 });

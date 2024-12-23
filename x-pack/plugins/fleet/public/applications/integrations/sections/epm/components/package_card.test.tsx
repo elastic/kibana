@@ -68,7 +68,8 @@ function renderPackageCard(props: PackageCardProps) {
   return { utils };
 }
 
-describe('package card', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/200848
+describe.skip('package card', () => {
   let mockNavigateToApp: jest.Mock;
   let mockNavigateToUrl: jest.Mock;
   const mockGetLineClamp = getLineClampStyles as jest.Mock;

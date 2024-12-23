@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
+
+import { renderHook, RenderHookResult } from '@testing-library/react';
 import { useTimeRange } from './use_time_range';
 
 describe('useTimeRange', () => {
-  let hook: RenderHookResult<Parameters<typeof useTimeRange>[0], ReturnType<typeof useTimeRange>>;
+  let hook: RenderHookResult<ReturnType<typeof useTimeRange>, Parameters<typeof useTimeRange>[0]>;
 
   beforeEach(() => {
     Date.now = jest.fn(() => new Date(Date.UTC(2021, 0, 1, 12)).valueOf());

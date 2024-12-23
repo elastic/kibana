@@ -16,6 +16,7 @@ import {
   EuiFilePicker,
   EuiText,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import {
@@ -71,6 +72,7 @@ export const BrandingSection: React.FC<Props> = ({
   const isLogo = imageType === 'logo';
   const imageText = isLogo ? LOGO_TEXT : ICON_TEXT;
   const defaultImage = isLogo ? defaultLogo : defaultIcon;
+  const confirmationTitleId = useGeneratedHtmlId();
 
   const handleUpload = async (files: FileList | null) => {
     if (!files || files.length < 1) {
@@ -84,6 +86,7 @@ export const BrandingSection: React.FC<Props> = ({
   const resetConfirmModal = (
     <EuiConfirmModal
       title={RESET_IMAGE_TITLE}
+      titleProps={{ id: confirmationTitleId }}
       onCancel={closeDeleteModal}
       onConfirm={() => {
         resetImage();
@@ -93,6 +96,7 @@ export const BrandingSection: React.FC<Props> = ({
       confirmButtonText={RESET_DEFAULT_BUTTON_LABEL}
       buttonColor="danger"
       defaultFocusedButton="confirm"
+      aria-labelledby={confirmationTitleId}
     >
       <>
         <p>{isLogo ? RESET_LOGO_DESCRIPTION : RESET_ICON_DESCRIPTION}</p>
@@ -137,6 +141,7 @@ export const BrandingSection: React.FC<Props> = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="enterpriseSearchBrandingSectionButton"
               isLoading={buttonLoading}
               disabled={!stagedImage}
               color="primary"

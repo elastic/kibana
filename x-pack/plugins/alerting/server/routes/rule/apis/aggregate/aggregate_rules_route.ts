@@ -21,6 +21,7 @@ import {
 import { formatDefaultAggregationResult } from './transforms';
 import { transformAggregateQueryRequestV1, transformAggregateBodyResponseV1 } from './transforms';
 import { DefaultRuleAggregationResult } from './types';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const aggregateRulesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -30,6 +31,7 @@ export const aggregateRulesRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
         body: aggregateRulesRequestBodySchemaV1,
@@ -37,7 +39,8 @@ export const aggregateRulesRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const body: AggregateRulesRequestBodyV1 = req.body;
         const options = transformAggregateQueryRequestV1({
           ...body,

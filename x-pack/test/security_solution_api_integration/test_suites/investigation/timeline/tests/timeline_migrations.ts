@@ -68,9 +68,9 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             .get(resolveWithSpaceApi)
             .query({ id: '1e2e9850-25f8-11ec-a981-b77847c6ef30' });
 
-          expect(resp.body.data.outcome).to.be('aliasMatch');
-          expect(resp.body.data.alias_target_id).to.not.be(undefined);
-          expect(resp.body.data.timeline.title).to.be('An awesome timeline');
+          expect(resp.body.outcome).to.be('aliasMatch');
+          expect(resp.body.alias_target_id).to.not.be(undefined);
+          expect(resp.body.timeline.title).to.be('An awesome timeline');
         });
 
         describe('notes', () => {
@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
               .get(resolveWithSpaceApi)
               .query({ id: '1e2e9850-25f8-11ec-a981-b77847c6ef30' });
 
-            expect(resp.body.data.timeline.notes[0].eventId).to.be('StU_UXwBAowmaxx6YdiS');
+            expect(resp.body.timeline.notes[0].eventId).to.be('StU_UXwBAowmaxx6YdiS');
           });
 
           it('should return notes with the timelineId matching the resolved timeline id', async () => {
@@ -87,12 +87,8 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
               .get(resolveWithSpaceApi)
               .query({ id: '1e2e9850-25f8-11ec-a981-b77847c6ef30' });
 
-            expect(resp.body.data.timeline.notes[0].timelineId).to.be(
-              resp.body.data.timeline.savedObjectId
-            );
-            expect(resp.body.data.timeline.notes[1].timelineId).to.be(
-              resp.body.data.timeline.savedObjectId
-            );
+            expect(resp.body.timeline.notes[0].timelineId).to.be(resp.body.timeline.savedObjectId);
+            expect(resp.body.timeline.notes[1].timelineId).to.be(resp.body.timeline.savedObjectId);
           });
         });
 
@@ -102,7 +98,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
               .get(resolveWithSpaceApi)
               .query({ id: '1e2e9850-25f8-11ec-a981-b77847c6ef30' });
 
-            expect(resp.body.data.timeline.pinnedEventsSaveObject[0].eventId).to.be(
+            expect(resp.body.timeline.pinnedEventsSaveObject[0].eventId).to.be(
               'StU_UXwBAowmaxx6YdiS'
             );
           });
@@ -112,8 +108,8 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
               .get(resolveWithSpaceApi)
               .query({ id: '1e2e9850-25f8-11ec-a981-b77847c6ef30' });
 
-            expect(resp.body.data.timeline.pinnedEventsSaveObject[0].timelineId).to.be(
-              resp.body.data.timeline.savedObjectId
+            expect(resp.body.timeline.pinnedEventsSaveObject[0].timelineId).to.be(
+              resp.body.timeline.savedObjectId
             );
           });
         });
@@ -161,7 +157,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             .get(TIMELINE_URL)
             .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
 
-          expect(resp.body.data.getOneTimeline.notes[0].eventId).to.be('Edo00XsBEVtyvU-8LGNe');
+          expect(resp.body.notes[0].eventId).to.be('Edo00XsBEVtyvU-8LGNe');
         });
 
         it('returns the timelineId in the response', async () => {
@@ -169,12 +165,8 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             .get(TIMELINE_URL)
             .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
 
-          expect(resp.body.data.getOneTimeline.notes[0].timelineId).to.be(
-            '6484cc90-126e-11ec-83d2-db1096c73738'
-          );
-          expect(resp.body.data.getOneTimeline.notes[1].timelineId).to.be(
-            '6484cc90-126e-11ec-83d2-db1096c73738'
-          );
+          expect(resp.body.notes[0].timelineId).to.be('6484cc90-126e-11ec-83d2-db1096c73738');
+          expect(resp.body.notes[1].timelineId).to.be('6484cc90-126e-11ec-83d2-db1096c73738');
         });
       });
 
@@ -198,7 +190,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             .get(TIMELINE_URL)
             .query({ id: '8dc70950-1012-11ec-9ad3-2d7c6600c0f7' });
 
-          expect(resp.body.data.getOneTimeline.title).to.be('Awesome Timeline');
+          expect(resp.body.title).to.be('Awesome Timeline');
         });
 
         it('returns the savedQueryId in the response', async () => {
@@ -206,7 +198,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             .get(TIMELINE_URL)
             .query({ id: '8dc70950-1012-11ec-9ad3-2d7c6600c0f7' });
 
-          expect(resp.body.data.getOneTimeline.savedQueryId).to.be("It's me");
+          expect(resp.body.savedQueryId).to.be("It's me");
         });
       });
       describe('pinned events timelineId', () => {
@@ -238,12 +230,8 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             .get(TIMELINE_URL)
             .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
 
-          expect(resp.body.data.getOneTimeline.pinnedEventsSaveObject[0].eventId).to.be(
-            'DNo00XsBEVtyvU-8LGNe'
-          );
-          expect(resp.body.data.getOneTimeline.pinnedEventsSaveObject[1].eventId).to.be(
-            'Edo00XsBEVtyvU-8LGNe'
-          );
+          expect(resp.body.pinnedEventsSaveObject[0].eventId).to.be('DNo00XsBEVtyvU-8LGNe');
+          expect(resp.body.pinnedEventsSaveObject[1].eventId).to.be('Edo00XsBEVtyvU-8LGNe');
         });
 
         it('returns the timelineId in the response', async () => {
@@ -251,10 +239,10 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             .get(TIMELINE_URL)
             .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
 
-          expect(resp.body.data.getOneTimeline.pinnedEventsSaveObject[0].timelineId).to.be(
+          expect(resp.body.pinnedEventsSaveObject[0].timelineId).to.be(
             '6484cc90-126e-11ec-83d2-db1096c73738'
           );
-          expect(resp.body.data.getOneTimeline.pinnedEventsSaveObject[1].timelineId).to.be(
+          expect(resp.body.pinnedEventsSaveObject[1].timelineId).to.be(
             '6484cc90-126e-11ec-83d2-db1096c73738'
           );
         });

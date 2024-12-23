@@ -6,15 +6,9 @@
  */
 
 import type { HTTPService } from '..';
-import { casesMetrics, casesStatus } from '../../containers/mock';
-import type { CasesMetrics, CasesStatus } from '../../containers/types';
-import type { CasesFindRequest, CasesMetricsRequest } from '../../../common/types/api';
-
-export const getCasesStatus = async ({
-  http,
-  signal,
-  query,
-}: HTTPService & { query: CasesFindRequest }): Promise<CasesStatus> => Promise.resolve(casesStatus);
+import { casesMetrics } from '../../containers/mock';
+import type { CasesMetrics } from '../../containers/types';
+import type { CasesMetricsRequest } from '../../../common/types/api';
 
 export const getCasesMetrics = async ({
   http,

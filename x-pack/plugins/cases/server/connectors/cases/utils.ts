@@ -109,7 +109,7 @@ export const buildCustomFieldsForRequest = (
 export const constructRequiredKibanaPrivileges = (owner: string): string[] => {
   /**
    * Kibana features privileges are defined in
-   * x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
+   * x-pack/packages/security/authorization_core/src/privileges/feature_privilege_builder/cases.ts
    */
   return [
     `cases:${owner}/createCase`,
@@ -120,5 +120,6 @@ export const constructRequiredKibanaPrivileges = (owner: string): string[] => {
     `cases:${owner}/updateComment`,
     `cases:${owner}/deleteComment`,
     `cases:${owner}/findConfigurations`,
+    `cases:${owner}/reopenCase`,
   ];
 };

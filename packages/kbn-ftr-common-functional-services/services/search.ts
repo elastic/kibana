@@ -73,7 +73,7 @@ export class SearchService extends FtrService {
         .post(`${spaceUrl}/internal/search/${strategy}/${body.id}`)
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send()
+        .send(options)
         .expect(200);
       expect(resp.body.isRunning).equal(false);
       return resp.body as T;

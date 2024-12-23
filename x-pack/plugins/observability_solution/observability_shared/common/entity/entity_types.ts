@@ -6,24 +6,26 @@
  */
 
 const createKubernetesEntity = <T extends string>(base: T) => ({
-  ecs: `kubernetes_${base}_ecs` as const,
-  semconv: `kubernetes_${base}_semconv` as const,
+  ecs: `k8s.${base}.ecs` as const,
+  semconv: `k8s.${base}.semconv` as const,
 });
 
-export const ENTITY_TYPES = {
+export const BUILT_IN_ENTITY_TYPES = {
   HOST: 'host',
   CONTAINER: 'container',
   SERVICE: 'service',
+  SERVICE_V2: 'built_in_services_from_ecs_data',
   KUBERNETES: {
     CLUSTER: createKubernetesEntity('cluster'),
     CONTAINER: createKubernetesEntity('container'),
     CRONJOB: createKubernetesEntity('cron_job'),
-    DAEMONSET: createKubernetesEntity('daemon_set'),
+    DAEMONSET: createKubernetesEntity('daemonset'),
     DEPLOYMENT: createKubernetesEntity('deployment'),
     JOB: createKubernetesEntity('job'),
     NAMESPACE: createKubernetesEntity('namespace'),
     NODE: createKubernetesEntity('node'),
     POD: createKubernetesEntity('pod'),
-    STATEFULSET: createKubernetesEntity('stateful_set'),
+    SERVICE: createKubernetesEntity('service'),
+    STATEFULSET: createKubernetesEntity('statefulset'),
   },
 } as const;

@@ -40,7 +40,7 @@ describe('owner utils', () => {
       validRuleConsumers: item.validRuleConsumers,
     }));
 
-    it.each(owners)('returns owner %s correctly for consumer', (owner) => {
+    it.each(owners)('returns owner %j correctly for consumer', (owner) => {
       for (const consumer of owner.validRuleConsumers ?? []) {
         const result = getOwnerFromRuleConsumerProducer({ consumer });
 
@@ -48,7 +48,7 @@ describe('owner utils', () => {
       }
     });
 
-    it.each(owners)('returns owner %s correctly for producer', (owner) => {
+    it.each(owners)('returns owner %j correctly for producer', (owner) => {
       for (const producer of owner.validRuleConsumers ?? []) {
         const result = getOwnerFromRuleConsumerProducer({ producer });
 
@@ -79,6 +79,15 @@ describe('owner utils', () => {
       });
 
       expect(owner).toBe(OWNER_INFO.securitySolution.id);
+    });
+
+    it('fallbacks to producer when the consumer is alerts', () => {
+      const owner = getOwnerFromRuleConsumerProducer({
+        consumer: AlertConsumers.ALERTS,
+        producer: AlertConsumers.OBSERVABILITY,
+      });
+
+      expect(owner).toBe(OWNER_INFO.observability.id);
     });
   });
 });

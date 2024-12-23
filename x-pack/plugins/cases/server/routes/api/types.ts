@@ -14,6 +14,7 @@ import type {
   RouteValidatorConfig,
   RouteConfigOptions,
   RouteMethod,
+  RouteSecurity,
 } from '@kbn/core/server';
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -55,4 +56,9 @@ export interface CaseRoute<P = unknown, Q = unknown, B = unknown> {
    */
   routerOptions?: RouteConfigOptions<RouteMethod>;
   handler: (args: CaseRouteHandlerArguments<P, Q, B>) => Promise<IKibanaResponse>;
+  /**
+   * Defines the security requirements for a route, including authorization and authentication.
+   * By default cases does not use this.
+   */
+  security?: RouteSecurity;
 }

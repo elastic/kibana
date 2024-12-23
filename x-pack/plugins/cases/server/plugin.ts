@@ -30,7 +30,7 @@ import type {
   CasesServerStartDependencies,
 } from './types';
 import { CasesClientFactory } from './client/factory';
-import { getCasesKibanaFeature } from './features';
+import { getCasesKibanaFeatures } from './features';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
 import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
@@ -38,7 +38,10 @@ import { getInternalRoutes } from './routes/api/get_internal_routes';
 import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
 import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
 import { UserProfileService } from './services';
-import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
+import {
+  LICENSING_CASE_ASSIGNMENT_FEATURE,
+  LICENSING_CASE_OBSERVABLES_FEATURE,
+} from './common/constants';
 import { registerInternalAttachments } from './internal_attachments';
 import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
@@ -92,7 +95,11 @@ export class CasePlugin
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
 
     if (this.caseConfig.stack.enabled) {
-      plugins.features.registerKibanaFeature(getCasesKibanaFeature());
+      // V1 is deprecated, but has to be maintained for the time being
+      // https://github.com/elastic/kibana/pull/186800#issue-2369812818
+      const casesFeatures = getCasesKibanaFeatures();
+      plugins.features.registerKibanaFeature(casesFeatures.v1);
+      plugins.features.registerKibanaFeature(casesFeatures.v2);
     }
 
     registerSavedObjects({
@@ -127,7 +134,7 @@ export class CasePlugin
     registerRoutes({
       router,
       routes: [
-        ...getExternalRoutes({ isServerless }),
+        ...getExternalRoutes({ isServerless, docLinks: core.docLinks }),
         ...getInternalRoutes(this.userProfileService),
       ],
       logger: this.logger,
@@ -136,6 +143,7 @@ export class CasePlugin
     });
 
     plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');
+    plugins.licensing.featureUsage.register(LICENSING_CASE_OBSERVABLES_FEATURE, 'platinum');
 
     const getCasesClient = async (request: KibanaRequest): Promise<CasesClient> => {
       const [coreStart] = await core.getStartServices();

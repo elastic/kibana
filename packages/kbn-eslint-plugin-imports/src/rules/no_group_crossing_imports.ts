@@ -52,7 +52,7 @@ export const NoGroupCrossingImportsRule: Rule.RuleModule = {
 
       const imported = classifier.classify(result.absolute);
 
-      if (!isImportableFrom(self.group, imported.group, imported.visibility)) {
+      if (!isImportableFrom(self, imported.group, imported.visibility)) {
         context.report({
           node: node as Node,
           messageId: 'ILLEGAL_IMPORT',

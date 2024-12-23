@@ -10,7 +10,7 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { getSavedSearch } from '@kbn/saved-search-plugin/server';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
+import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import { LocatorServicesDeps } from '.';
 import { DiscoverAppLocatorParams } from '../../common';
 
@@ -26,10 +26,7 @@ export const getColumns = async (
   index: DataView,
   savedSearch: SavedSearch
 ) => {
-  const [hideTimeColumn, useFieldsFromSource] = await Promise.all([
-    services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING),
-    services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
-  ]);
+  const hideTimeColumn = await services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING);
 
   // Add/adjust columns from the saved search attributes and UI Settings
   let columns: string[] | undefined;
@@ -54,7 +51,7 @@ export const getColumns = async (
      * Otherwise, the requests will ask for all fields, even if only a few are really needed.
      * Discover does not set fields, since having all fields is needed for the UI.
      */
-    if (!useFieldsFromSource && columns.length) {
+    if (columns.length) {
       columnsNext = columns;
     }
   }
