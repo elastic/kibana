@@ -41,7 +41,7 @@ export function registerConnectorTypes({
      * The actions framework ensures that the user executing the case action
      * will have permissions to use cases for the corresponding owner and space.
      * The required Kibana privileges needed to execute the case action are defined
-     * in x-pack/plugins/cases/server/connectors/cases/index.ts.
+     * in x-pack/platform/plugins/shared/cases/server/connectors/cases/index.ts.
      *
      * We can safely disable security checks performed by the saved object client
      * as we implement our custom authorization.
