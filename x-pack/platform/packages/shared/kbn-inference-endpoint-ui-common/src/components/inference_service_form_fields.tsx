@@ -356,8 +356,8 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({ p
             taskTypeOptions={taskTypeOptions}
             selectedTaskType={selectedTaskType}
           />
-          <EuiSpacer size="l" />
-          <EuiHorizontalRule />
+          <EuiSpacer size="m" />
+          <EuiHorizontalRule margin="xs" />
           <ProviderSecretHiddenField
             providerSchema={providerSchema}
             setRequiredProviderFormFields={setRequiredProviderFormFields}

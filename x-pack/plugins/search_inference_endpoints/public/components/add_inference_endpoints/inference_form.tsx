@@ -48,7 +48,7 @@ export const InferenceForm: React.FC<InferenceFormProps> = ({ onSubmitSuccess })
   return providers ? (
     <Form form={form}>
       <InferenceServiceFormFields providers={providers} />
-      <EuiSpacer />
+      <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="flexStart">
         <EuiFlexItem grow={false}>
           <EuiButton
