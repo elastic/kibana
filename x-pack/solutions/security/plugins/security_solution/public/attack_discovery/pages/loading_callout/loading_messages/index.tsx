@@ -11,7 +11,7 @@ import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS, useAssistantContext } from '@kbn/e
 
 import React from 'react';
 
-import { useDateFormat, useKibana, useTimeZone } from '../../../../common/lib/kibana';
+import { useDateFormat, useKibana } from '../../../../common/lib/kibana';
 import { getFormattedDate } from './get_formatted_time';
 import { getLoadingCalloutAlertsCount } from './get_loading_callout_alerts_count';
 import { getLoadingMessage } from './get_loading_message';
@@ -38,18 +38,15 @@ const LoadingMessagesComponent: React.FC<Props> = ({
 
   const { theme } = useKibana().services;
   const dateFormat = useDateFormat();
-  const timeZone = useTimeZone();
 
   const formattedStart = getFormattedDate({
     date: start,
     dateFormat,
-    timeZone,
   });
 
   const formattedEnd = getFormattedDate({
     date: end,
     dateFormat,
-    timeZone,
   });
 
   const alertsCount = getLoadingCalloutAlertsCount({

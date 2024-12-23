@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import moment from 'moment-timezone';
+import moment from 'moment';
 
 export const getFormattedDate = ({
   date,
   dateFormat,
-  timeZone,
 }: {
   date: string | null | undefined;
   dateFormat: string;
-  timeZone: string;
 }): string | null => {
   if (date == null) {
     return null;
@@ -28,5 +26,5 @@ export const getFormattedDate = ({
   }
 
   // return the formatted date per the time zone:
-  return moment.tz(date, timeZone).format(dateFormat);
+  return moment(date).format(dateFormat);
 };
