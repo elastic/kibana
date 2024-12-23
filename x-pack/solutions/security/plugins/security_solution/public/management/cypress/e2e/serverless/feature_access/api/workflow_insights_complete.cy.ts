@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fetchWorkflowInsights, updateWorkflowInsights } from '../../../../tasks/insights';
+import { fetchRunningDefendInsights, fetchWorkflowInsights } from '../../../../tasks/insights';
 import { login, ROLE } from '../../../../tasks/login';
 
 describe(
@@ -34,9 +34,11 @@ describe(
           expect(response.status).to.equal(200);
         });
       });
-      it('UPDATE should allow access to workflow insights api endpoint', () => {
-        updateWorkflowInsights().then((response) => {
-          expect(response.status).to.equal(403); // 400 is expected because the request is missing the required body, but the request should still be allowed
+    });
+    describe('/defend_insights', () => {
+      it('GET should allow access to defend insights api endpoint', () => {
+        fetchRunningDefendInsights().then((response) => {
+          expect(response.status).to.equal(200);
         });
       });
     });

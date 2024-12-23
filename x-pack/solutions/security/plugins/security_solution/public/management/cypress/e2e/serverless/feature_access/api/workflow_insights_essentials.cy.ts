@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { fetchWorkflowInsights, updateWorkflowInsights } from '../../../../tasks/insights';
+import {
+  fetchRunningDefendInsights,
+  fetchWorkflowInsights,
+  triggerRunningDefendInsights,
+  updateWorkflowInsights,
+} from '../../../../tasks/insights';
 import { login, ROLE } from '../../../../tasks/login';
 
 describe(
@@ -29,14 +34,26 @@ describe(
       login(ROLE.system_indices_superuser);
     });
     describe('/workflow_insights', () => {
-      it('GET should allow access to workflow insights api endpoint', () => {
+      it('GET should NOT allow access to workflow insights api endpoint', () => {
         fetchWorkflowInsights({ failOnStatusCode: false }).then((response) => {
           expect(response.status).to.equal(403);
         });
       });
-      it('UPDATE should allow access to workflow insights api endpoint', () => {
+      it('UPDATE should NOT allow access to workflow insights api endpoint', () => {
         updateWorkflowInsights().then((response) => {
           expect(response.status).to.equal(403);
+        });
+      });
+    });
+    describe('/defend_insights', () => {
+      it('GET should NOT allow access to defend insights api endpoint', () => {
+        fetchRunningDefendInsights().then((response) => {
+          expect(response.status).to.equal(404);
+        });
+      });
+      it('POST should NOT allow access to defend insights api endpoint', () => {
+        triggerRunningDefendInsights().then((response) => {
+          expect(response.status).to.equal(404);
         });
       });
     });
