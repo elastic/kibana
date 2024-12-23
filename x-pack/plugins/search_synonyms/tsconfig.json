@@ -20,7 +20,6 @@
     "@kbn/console-plugin",
     "@kbn/features-plugin",
     "@kbn/search-navigation",
-    "@kbn/licensing-plugin"
   ],
   "exclude": [
     "target/**/*",
