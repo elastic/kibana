@@ -78,12 +78,11 @@ export const DiscoverHistogramLayout = ({
   if (hideChart) {
     return (
       <>
-        {renderCustomChartToggleActions()}
         <DiscoverMainContent
           {...mainContentProps}
           stateContainer={stateContainer}
           dataView={dataView}
-          panelsToggle={panelsToggle}
+          panelsToggle={renderCustomChartToggleActions()}
         />
       </>
     );
