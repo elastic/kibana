@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { defaultConfig } from '@kbn/storybook';
+
 module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/presentation_util'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/presentation_util',
-  coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/src/plugins/presentation_util/{common,public,server}/**/*.{ts,tsx}',
-  ],
+  ...defaultConfig,
+  define: {
+    global: 'window',
+  },
+  stories: ['../../../../**/*.stories.+(tsx|mdx)'],
 };

@@ -100,7 +100,7 @@
     "navigation": ["src/plugins/navigation", "packages/solution-nav"],
     "links": "src/platform/plugins/private/links",
     "newsfeed": "src/plugins/newsfeed",
-    "presentationUtil": "src/plugins/presentation_util",
+    "presentationUtil": "src/platform/plugins/shared/presentation_util",
     "randomSampling": "x-pack/packages/kbn-random-sampling",
     "reactPackages": "packages/react",
     "esqlEditor": "src/platform/packages/private/kbn-esql-editor",
