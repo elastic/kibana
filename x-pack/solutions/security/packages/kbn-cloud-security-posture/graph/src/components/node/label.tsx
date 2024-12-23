@@ -62,7 +62,7 @@ export interface LabelProps {
   text?: string;
 }
 
-const LabelComponent: React.FC<LabelProps> = ({ text = '' }: LabelProps) => {
+const LabelComponent = ({ text = '' }: LabelProps) => {
   const [isTruncated, setIsTruncated] = React.useState(false);
 
   return (

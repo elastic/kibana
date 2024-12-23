@@ -55,15 +55,15 @@ const StyleEuiIcon = styled(EuiIcon)`
 
 type RoundedEuiIconProps = EuiIconProps & EuiColorProps;
 
-const RoundedEuiIcon: React.FC<RoundedEuiIconProps> = ({ color, background, ...rest }) => (
+const RoundedEuiIcon = ({ color, background, ...rest }: RoundedEuiIconProps) => (
   <IconContainer color={color} background={background}>
     <StyleEuiIcon color={color} {...rest} />
   </IconContainer>
 );
 
-export const ExpandPopoverListItem: React.FC<
-  CommonProps & Pick<EuiListGroupItemProps, 'iconType' | 'label' | 'onClick'>
-> = (props) => {
+export const ExpandPopoverListItem = (
+  props: CommonProps & Pick<EuiListGroupItemProps, 'iconType' | 'label' | 'onClick'>
+) => {
   const { iconType, label, onClick, ...rest } = props;
   const { euiTheme } = useEuiTheme();
   return (

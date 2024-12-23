@@ -26,7 +26,7 @@ interface GraphNodeExpandPopoverProps {
   onShowActionsOnEntityClick: () => void;
 }
 
-export const GraphNodeExpandPopover: React.FC<GraphNodeExpandPopoverProps> = memo(
+export const GraphNodeExpandPopover = memo<GraphNodeExpandPopoverProps>(
   ({
     isOpen,
     anchorElement,

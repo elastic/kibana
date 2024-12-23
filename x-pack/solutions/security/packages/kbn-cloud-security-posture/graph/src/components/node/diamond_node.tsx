@@ -25,8 +25,7 @@ import { Label } from './label';
 const NODE_WIDTH = 99;
 const NODE_HEIGHT = 98;
 
-// eslint-disable-next-line react/display-name
-export const DiamondNode: React.FC<NodeProps> = memo((props: NodeProps) => {
+export const DiamondNode = memo<NodeProps>((props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
     props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
@@ -87,3 +86,5 @@ export const DiamondNode: React.FC<NodeProps> = memo((props: NodeProps) => {
     </>
   );
 });
+
+DiamondNode.displayName = 'DiamondNode';

@@ -25,8 +25,7 @@ import { Label } from './label';
 const NODE_WIDTH = 87;
 const NODE_HEIGHT = 96;
 
-// eslint-disable-next-line react/display-name
-export const HexagonNode: React.FC<NodeProps> = memo((props: NodeProps) => {
+export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
     props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
@@ -87,3 +86,5 @@ export const HexagonNode: React.FC<NodeProps> = memo((props: NodeProps) => {
     </>
   );
 });
+
+HexagonNode.displayName = 'HexagonNode';
