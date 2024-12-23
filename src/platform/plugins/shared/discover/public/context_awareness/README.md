@@ -115,8 +115,8 @@ import React from 'react';
 import { getFieldValue } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
-import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import { DataSourceType, isDataSourceType } from '../../../../../../../common/data_sources';
+import { DataSourceCategory, DataSourceProfileProvider } from '../../../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
 
 // Export profile provider factory function, optionally accepting ProfileProviderServices,
