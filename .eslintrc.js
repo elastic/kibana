@@ -2038,9 +2038,11 @@ module.exports = {
       files: [
         '**/*.stories.tsx',
         '**/*.stories.ts',
-        '.storybook/**/*',
+        '**/.storybook/**/*',
+        '**/storybook/**/*',
         '**/kbn-storybook/**/*',
-        '**/__stories__/**',
+        '**/__stories__/*',
+        '**/mocks/*',
       ],
       rules: {
         // @storybook/addon-essentials contains many packages which are not defined in package.json
