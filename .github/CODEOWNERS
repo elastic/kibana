@@ -611,7 +611,7 @@ test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
 packages/kbn-manifest @elastic/kibana-core
 packages/kbn-mapbox-gl @elastic/kibana-gis
 x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
-src/plugins/maps_ems @elastic/kibana-presentation
+src/platform/plugins/private/maps_ems @elastic/kibana-presentation
 x-pack/plugins/maps @elastic/kibana-presentation
 x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
 x-pack/plugins/observability_solution/metrics_data_access @elastic/obs-ux-infra_services-team
