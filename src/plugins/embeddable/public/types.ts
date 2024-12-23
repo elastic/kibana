@@ -7,36 +7,65 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
-import { SavedObjectAttributes } from '@kbn/core/public';
-import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
-import { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
-import {
-  EmbeddableFactory,
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-  EmbeddableFactoryDefinition,
-} from './lib/embeddables';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import type { registerAddFromLibraryType } from './add_from_library/registry';
+import type { registerReactEmbeddableFactory } from './react_embeddable_system';
+import type { EmbeddableStateTransfer } from './lib';
+import type { EmbeddableStateWithType } from '../common';
+import { EnhancementRegistryDefinition } from './enhancements/types';
 
-export type EmbeddableFactoryRegistry = Map<string, EmbeddableFactory>;
-export type EnhancementsRegistry = Map<string, EnhancementRegistryItem>;
-
-export interface EnhancementRegistryDefinition<P extends SerializableRecord = SerializableRecord>
-  extends PersistableStateDefinition<P> {
-  id: string;
+export interface EmbeddableSetupDependencies {
+  uiActions: UiActionsSetup;
 }
 
-export interface EnhancementRegistryItem<P extends SerializableRecord = SerializableRecord>
-  extends PersistableState<P> {
-  id: string;
+export interface EmbeddableStartDependencies {
+  uiActions: UiActionsStart;
+  inspector: InspectorStart;
+  usageCollection: UsageCollectionStart;
+  contentManagement: ContentManagementPublicStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
-export type EmbeddableFactoryProvider = <
-  I extends EmbeddableInput = EmbeddableInput,
-  O extends EmbeddableOutput = EmbeddableOutput,
-  E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
-  T extends FinderAttributes = SavedObjectAttributes
->(
-  def: EmbeddableFactoryDefinition<I, O, E, T>
-) => EmbeddableFactory<I, O, E, T>;
+export interface EmbeddableSetup {
+  /**
+   * Register a saved object type with the "Add from library" flyout.
+   *
+   * @example
+   *  registerAddFromLibraryType({
+   *    onAdd: (container, savedObject) => {
+   *      container.addNewPanel({
+   *        panelType: CONTENT_ID,
+   *        initialState: savedObject.attributes,
+   *      });
+   *    },
+   *    savedObjectType: MAP_SAVED_OBJECT_TYPE,
+   *    savedObjectName: i18n.translate('xpack.maps.mapSavedObjectLabel', {
+   *      defaultMessage: 'Map',
+   *    }),
+   *    getIconForSavedObject: () => APP_ICON,
+   *  });
+   */
+  registerAddFromLibraryType: typeof registerAddFromLibraryType;
+
+  /**
+   * Registers an async {@link ReactEmbeddableFactory} getter.
+   */
+  registerReactEmbeddableFactory: typeof registerReactEmbeddableFactory;
+
+  /**
+   * @deprecated
+   */
+  registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
+}
+
+export interface EmbeddableStart extends PersistableStateService<EmbeddableStateWithType> {
+  getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
+}
