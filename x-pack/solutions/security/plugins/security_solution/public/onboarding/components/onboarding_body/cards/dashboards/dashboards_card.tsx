@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
-import { OnboardingCardContentImagePanel } from '../common/card_content_image_panel';
+import { OnboardingCardContentAssetPanel } from '../common/card_content_asset_panel';
 import { CardCallOut } from '../common/card_callout';
 import { CardLinkButton } from '../common/card_link_button';
 import { CardSubduedText } from '../common/card_subdued_text';
-import dashboardsImageSrc from './images/dashboards.png';
 import * as i18n from './translations';
+import type { CardSelectorListItem } from '../common/card_selector_list';
+import { CardSelectorList } from '../common/card_selector_list';
+import { DASHBOARDS_CARD_ITEMS_BY_ID, DASHBOARDS_CARD_ITEMS } from './dashboards_card_config';
+import { useOnboardingContext } from '../../../onboarding_context';
+import { DEFAULT_DASHBOARDS_CARD_ITEM_SELECTED } from './constants';
+import { useStoredSelectedCardItemId } from '../../../hooks/use_stored_state';
 
 export const DashboardsCard: OnboardingCardComponent = ({
   isCardComplete,
@@ -23,6 +28,15 @@ export const DashboardsCard: OnboardingCardComponent = ({
   setExpandedCardId,
   isCardAvailable,
 }) => {
+  const { spaceId } = useOnboardingContext();
+  const [toggleIdSelected, setStoredSelectedDashboardsCardItemId] = useStoredSelectedCardItemId(
+    'dashboards',
+    spaceId,
+    DEFAULT_DASHBOARDS_CARD_ITEM_SELECTED.id
+  );
+  const [selectedCardItem, setSelectedCardItem] = useState(
+    DASHBOARDS_CARD_ITEMS_BY_ID[toggleIdSelected]
+  );
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
     [isCardComplete]
@@ -37,11 +51,16 @@ export const DashboardsCard: OnboardingCardComponent = ({
     setExpandedCardId(OnboardingCardId.integrations, { scroll: true });
   }, [setExpandedCardId]);
 
+  const onSelectCard = useCallback(
+    (item: CardSelectorListItem) => {
+      setSelectedCardItem(DASHBOARDS_CARD_ITEMS_BY_ID[item.id]);
+      setStoredSelectedDashboardsCardItemId(item.id);
+    },
+    [setStoredSelectedDashboardsCardItemId]
+  );
+
   return (
-    <OnboardingCardContentImagePanel
-      imageSrc={dashboardsImageSrc}
-      imageAlt={i18n.DASHBOARDS_CARD_TITLE}
-    >
+    <OnboardingCardContentAssetPanel asset={selectedCardItem.asset}>
       <EuiFlexGroup
         direction="column"
         gutterSize="xl"
@@ -52,6 +71,13 @@ export const DashboardsCard: OnboardingCardComponent = ({
           <CardSubduedText data-test-subj="dashboardsDescription" size="s">
             {i18n.DASHBOARDS_CARD_DESCRIPTION}
           </CardSubduedText>
+          <EuiSpacer />
+          <CardSelectorList
+            title={i18n.DASHBOARDS_CARD_STEP_SELECTOR_TITLE}
+            items={DASHBOARDS_CARD_ITEMS}
+            onSelect={onSelectCard}
+            selectedItem={selectedCardItem}
+          />
           {isIntegrationsCardAvailable && !isIntegrationsCardComplete && (
             <>
               <EuiSpacer size="m" />
@@ -89,7 +115,7 @@ export const DashboardsCard: OnboardingCardComponent = ({
           </CardLinkButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </OnboardingCardContentImagePanel>
+    </OnboardingCardContentAssetPanel>
   );
 };
 
