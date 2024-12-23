@@ -4533,7 +4533,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-fatal-errors-browser-internal@link:packages/core/fatal-errors/core-fatal-errors-browser-internal":
+"@kbn/core-fatal-errors-browser-internal@link:src/core/packages/fatal-errors/browser-internal":
   version "0.0.0"
   uid ""
 
