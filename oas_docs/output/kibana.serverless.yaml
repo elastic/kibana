@@ -34366,11 +34366,8 @@ paths:
                   additionalProperties: false
                   type: object
                   properties:
-                    showReserved:
+                    showReservedRoles:
                       type: boolean
-                    spaceId:
-                      minLength: 1
-                      type: string
                 from:
                   type: number
                 query:
