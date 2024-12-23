@@ -69,7 +69,13 @@ const getRegisterRouteDependencies = () => {
 
 const initApi = (
   routes: Array<
-    ServerRoute<any, t.Any | undefined, APMRouteHandlerResources, any, APMRouteCreateOptions>
+    ServerRoute<
+      any,
+      t.Any | undefined,
+      APMRouteHandlerResources,
+      any,
+      APMRouteCreateOptions | undefined
+    >
   >
 ) => {
   const { mocks, dependencies } = getRegisterRouteDependencies();
@@ -134,7 +140,7 @@ describe('createApi', () => {
     } = initApi([
       {
         endpoint: 'GET /foo',
-        options: { tags: ['access:apm'] },
+        security: { authz: { requiredPrivileges: ['apm'] } },
         handler: async () => ({}),
       },
       {
@@ -142,28 +148,22 @@ describe('createApi', () => {
         params: t.type({
           body: t.string,
         }),
-        options: { tags: ['access:apm'] },
+        security: { authz: { requiredPrivileges: ['apm'] } },
         handler: async () => ({}),
       },
       {
         endpoint: 'PUT /baz',
-        options: {
-          tags: ['access:apm', 'access:apm_write'],
-        },
+        security: { authz: { requiredPrivileges: ['apm', 'apm_write'] } },
         handler: async () => ({}),
       },
       {
         endpoint: 'GET /qux',
-        options: {
-          tags: ['access:apm', 'access:apm_write'],
-        },
+        security: { authz: { requiredPrivileges: ['apm', 'apm_write'] } },
         handler: async () => ({}),
       },
       {
         endpoint: 'GET /fez',
-        options: {
-          tags: ['access:apm', 'access:apm_settings_write'],
-        },
+        security: { authz: { requiredPrivileges: ['apm', 'apm_settings_write'] } },
         handler: async () => ({}),
       },
     ]);
@@ -175,41 +175,36 @@ describe('createApi', () => {
     expect(put).toHaveBeenCalledTimes(1);
 
     expect(get.mock.calls[0][0]).toEqual({
-      options: {
-        tags: ['access:apm'],
-      },
+      options: {},
+      security: { authz: { requiredPrivileges: ['apm'] } },
       path: '/foo',
       validate: expect.anything(),
     });
 
     expect(get.mock.calls[1][0]).toEqual({
-      options: {
-        tags: ['access:apm', 'access:apm_write'],
-      },
+      options: {},
+      security: { authz: { requiredPrivileges: ['apm', 'apm_write'] } },
       path: '/qux',
       validate: expect.anything(),
     });
 
     expect(get.mock.calls[2][0]).toEqual({
-      options: {
-        tags: ['access:apm', 'access:apm_settings_write'],
-      },
+      options: {},
+      security: { authz: { requiredPrivileges: ['apm', 'apm_settings_write'] } },
       path: '/fez',
       validate: expect.anything(),
     });
 
     expect(post.mock.calls[0][0]).toEqual({
-      options: {
-        tags: ['access:apm'],
-      },
+      options: {},
+      security: { authz: { requiredPrivileges: ['apm'] } },
       path: '/bar',
       validate: expect.anything(),
     });
 
     expect(put.mock.calls[0][0]).toEqual({
-      options: {
-        tags: ['access:apm', 'access:apm_write'],
-      },
+      options: {},
+      security: { authz: { requiredPrivileges: ['apm', 'apm_write'] } },
       path: '/baz',
       validate: expect.anything(),
     });

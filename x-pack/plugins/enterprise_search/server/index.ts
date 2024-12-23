@@ -16,7 +16,6 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
 export const configSchema = schema.object({
   accessCheckTimeout: schema.number({ defaultValue: 5000 }),
   accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
-  canDeployEntSearch: schema.boolean({ defaultValue: true }),
   customHeaders: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   enabled: schema.boolean({ defaultValue: true }),
   hasConnectors: schema.boolean({ defaultValue: true }),
@@ -44,8 +43,8 @@ export const configSchema = schema.object({
 export type ConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ConfigType> = {
+  deprecations: ({ unused }) => [unused('canDeployEntSearch', { level: 'warning' })],
   exposeToBrowser: {
-    canDeployEntSearch: true,
     host: true,
     ui: true,
   },

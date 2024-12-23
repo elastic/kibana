@@ -19,6 +19,7 @@ import { DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID } from '../dashboard_constants';
 import {
   coreServices,
   savedObjectsTaggingService,
+  serverlessService,
   usageCollectionService,
 } from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
@@ -65,6 +66,7 @@ export const DashboardListing = ({
           FormattedRelative,
           favorites: dashboardFavoritesClient,
           contentInsightsClient,
+          isKibanaVersioningEnabled: !serverlessService,
         }}
       >
         <TableListView<DashboardSavedObjectUserContent> {...tableListViewTableProps}>

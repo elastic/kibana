@@ -12,6 +12,7 @@ import {
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const deleteBackfillRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -20,6 +21,7 @@ export const deleteBackfillRoute = (
   router.delete(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/backfill/{id}`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'internal',
       },

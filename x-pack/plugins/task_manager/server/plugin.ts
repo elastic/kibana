@@ -35,8 +35,7 @@ import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
 import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
-import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
-import { EphemeralTask, ConcreteTaskInstance } from './task';
+import { ConcreteTaskInstance } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
@@ -67,7 +66,6 @@ export type TaskManagerStartContract = Pick<
   TaskScheduling,
   | 'schedule'
   | 'runSoon'
-  | 'ephemeralRunNow'
   | 'ensureScheduled'
   | 'bulkUpdateSchedules'
   | 'bulkEnable'
@@ -78,7 +76,6 @@ export type TaskManagerStartContract = Pick<
   Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'remove' | 'bulkRemove'> & {
     removeIfExists: TaskStore['remove'];
   } & {
-    supportsEphemeralTasks: () => boolean;
     getRegisteredTypes: () => string[];
   };
 
@@ -92,7 +89,6 @@ export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract>
 {
   private taskPollingLifecycle?: TaskPollingLifecycle;
-  private ephemeralTaskLifecycle?: EphemeralTaskLifecycle;
   private taskManagerId?: string;
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
@@ -218,8 +214,6 @@ export class TaskManagerPlugin
         usageCollection,
         monitoredHealth$,
         monitoredUtilization$,
-        this.config.ephemeral_tasks.enabled,
-        this.config.ephemeral_tasks.request_capacity,
         this.config.unsafe.exclude_task_types
       );
     }
@@ -350,17 +344,6 @@ export class TaskManagerPlugin
         ...managedConfiguration,
         taskPartitioner,
       });
-
-      this.ephemeralTaskLifecycle = new EphemeralTaskLifecycle({
-        config: this.config!,
-        definitions: this.definitions,
-        logger: this.logger,
-        executionContext,
-        middleware: this.middleware,
-        elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
-        pool: this.taskPollingLifecycle.pool,
-        lifecycleEvent: this.taskPollingLifecycle.events,
-      });
     }
 
     createMonitoringStats({
@@ -372,7 +355,6 @@ export class TaskManagerPlugin
       adHocTaskCounter: this.adHocTaskCounter,
       taskDefinitions: this.definitions,
       taskPollingLifecycle: this.taskPollingLifecycle,
-      ephemeralTaskLifecycle: this.ephemeralTaskLifecycle,
     }).subscribe((stat) => this.monitoringStats$.next(stat));
 
     metricsStream({
@@ -387,7 +369,6 @@ export class TaskManagerPlugin
       logger: this.logger,
       taskStore,
       middleware: this.middleware,
-      ephemeralTaskLifecycle: this.ephemeralTaskLifecycle,
       taskManagerId: taskStore.taskManagerId,
     });
 
@@ -409,9 +390,6 @@ export class TaskManagerPlugin
       bulkEnable: (...args) => taskScheduling.bulkEnable(...args),
       bulkDisable: (...args) => taskScheduling.bulkDisable(...args),
       bulkUpdateSchedules: (...args) => taskScheduling.bulkUpdateSchedules(...args),
-      ephemeralRunNow: (task: EphemeralTask) => taskScheduling.ephemeralRunNow(task),
-      supportsEphemeralTasks: () =>
-        this.config.ephemeral_tasks.enabled && this.shouldRunBackgroundTasks,
       getRegisteredTypes: () => this.definitions.getAllTypes(),
       bulkUpdateState: (...args) => taskScheduling.bulkUpdateState(...args),
     };

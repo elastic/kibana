@@ -27,7 +27,7 @@ export const OptionsListPopoverSuggestionBadge = ({ documentCount }: { documentC
           size="xs"
           aria-hidden={true}
           className="eui-textNumber"
-          color={euiTheme.colors.subduedText}
+          color={euiTheme.colors.textSubdued}
           data-test-subj="optionsList-document-count-badge"
           css={css`
             font-weight: ${euiTheme.font.weight.medium} !important;

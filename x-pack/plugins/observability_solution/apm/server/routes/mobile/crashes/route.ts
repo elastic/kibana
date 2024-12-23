@@ -36,7 +36,7 @@ const mobileCrashDistributionRoute = createApmServerRoute({
       offsetRt,
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<CrashDistributionResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -71,7 +71,7 @@ const mobileCrashMainStatisticsRoute = createApmServerRoute({
       rangeRt,
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ errorGroups: MobileCrashGroupMainStatisticsResponse }> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
@@ -110,7 +110,7 @@ const mobileCrashDetailedStatisticsRoute = createApmServerRoute({
     ]),
     body: t.type({ groupIds: jsonRt.pipe(t.array(t.string)) }),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<MobileCrashesGroupPeriodsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;

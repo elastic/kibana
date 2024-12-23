@@ -26,11 +26,7 @@ import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
 import { type DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
-import {
-  SEARCH_FIELDS_FROM_SOURCE,
-  SHOW_FIELD_STATISTICS,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '@kbn/discover-utils';
+import { SHOW_FIELD_STATISTICS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { UseColumnsProps, popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
@@ -126,8 +122,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     return dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
   }, [dataView]);
 
-  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
-
   const resultState = useMemo(
     () => getResultState(dataState.fetchStatus, dataState.foundDocuments ?? false),
     [dataState.fetchStatus, dataState.foundDocuments]
@@ -150,7 +144,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     dataView,
     dataViews,
     setAppState,
-    useNewFieldsApi,
     columns,
     sort,
     settings: grid,

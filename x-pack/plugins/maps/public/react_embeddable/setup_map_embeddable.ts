@@ -22,14 +22,13 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
     return mapEmbeddableFactory;
   });
 
-  embeddableSetup.registerReactEmbeddableSavedObject<MapAttributes>({
+  embeddableSetup.registerAddFromLibraryType<MapAttributes>({
     onAdd: (container, savedObject) => {
       container.addNewPanel({
         panelType: MAP_SAVED_OBJECT_TYPE,
         initialState: { savedObjectId: savedObject.id },
       });
     },
-    embeddableType: MAP_SAVED_OBJECT_TYPE,
     savedObjectType: MAP_SAVED_OBJECT_TYPE,
     savedObjectName: i18n.translate('xpack.maps.mapSavedObjectLabel', {
       defaultMessage: 'Map',

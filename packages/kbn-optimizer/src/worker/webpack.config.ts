@@ -96,7 +96,7 @@ export function getWebpackConfig(
         context: worker.repoRoot,
         manifest: DLL_MANIFEST,
       }),
-      ...(worker.profileWebpack
+      ...((worker.profileWebpack
         ? [
             new EmitStatsPlugin(bundle),
             new BundleAnalyzerPlugin({
@@ -111,7 +111,7 @@ export function getWebpackConfig(
               statsOptions: STATS_OPTIONS_DEFAULT_USEFUL_FILTER,
             }),
           ]
-        : []),
+        : []) as any),
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
     ],
 
@@ -309,6 +309,10 @@ export function getWebpackConfig(
           'src/core/public/styles/core_app/images'
         ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
+        'react-dom$':
+          worker.reactVersion === '18' ? 'react-dom-18/profiling' : 'react-dom/profiling',
+        'scheduler/tracing': 'scheduler/tracing-profiling',
+        react: worker.reactVersion === '18' ? 'react-18' : 'react',
       },
     },
 

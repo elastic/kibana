@@ -21,7 +21,7 @@ import {
 import { getMockTheme } from '../../common/lib/kibana/kibana_react.mock';
 
 describe('EmptyValue', () => {
-  const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
+  const mockTheme = getMockTheme({ euiTheme: { colors: { mediumShade: '#ece' } } });
 
   test('it renders against snapshot', () => {
     const wrapper = shallow(<p>{getEmptyString()}</p>);

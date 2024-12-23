@@ -11,7 +11,6 @@ import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-p
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import { Observable } from 'rxjs';
 import { GetAlertIndicesAlias, ILicenseState } from '../lib';
-import { defineLegacyRoutes } from './legacy';
 import { AlertingRequestHandlerContext } from '../types';
 import { createRuleRoute } from './rule/apis/create';
 import { getRuleRoute, getInternalRuleRoute } from './rule/apis/get/get_rule_route';
@@ -94,7 +93,6 @@ export function defineRoutes(opts: RouteOptions) {
     getAlertIndicesAlias,
   } = opts;
 
-  defineLegacyRoutes(opts);
   createRuleRoute(opts);
   getRuleRoute(router, licenseState);
   getInternalRuleRoute(router, licenseState);
@@ -108,17 +106,11 @@ export function defineRoutes(opts: RouteOptions) {
   findInternalRulesRoute(router, licenseState, usageCounter);
   getRuleAlertSummaryRoute(router, licenseState);
   getRuleExecutionLogRoute(router, licenseState);
-  getGlobalExecutionLogRoute(router, licenseState);
-  getActionErrorLogRoute(router, licenseState);
   getRuleExecutionKPIRoute(router, licenseState);
-  getGlobalExecutionKPIRoute(router, licenseState);
   getRuleStateRoute(router, licenseState);
-  healthRoute(router, licenseState, encryptedSavedObjects);
   ruleTypesRoute(router, licenseState);
   muteAllRuleRoute(router, licenseState, usageCounter);
-  muteAlertRoute(router, licenseState);
   unmuteAllRuleRoute(router, licenseState);
-  unmuteAlertRoute(router, licenseState);
   updateRuleApiKeyRoute(router, licenseState);
   bulkEditInternalRulesRoute(router, licenseState);
   bulkDeleteRulesRoute({ router, licenseState });
@@ -126,11 +118,18 @@ export function defineRoutes(opts: RouteOptions) {
   bulkDisableRulesRoute({ router, licenseState });
   snoozeRuleRoute(router, licenseState);
   unsnoozeRuleRoute(router, licenseState);
-  runSoonRoute(router, licenseState);
   cloneRuleRoute(router, licenseState);
-  getFlappingSettingsRoute(router, licenseState);
-  updateFlappingSettingsRoute(router, licenseState);
   getRuleTagsRoute(router, licenseState);
+  registerRulesValueSuggestionsRoute(router, licenseState, config$!);
+
+  // Alert APIs
+  registerAlertsValueSuggestionsRoute(router, licenseState, config$!, getAlertIndicesAlias);
+  bulkUntrackAlertsRoute(router, licenseState);
+  bulkUntrackAlertsByQueryRoute(router, licenseState);
+  muteAlertRoute(router, licenseState);
+  unmuteAlertRoute(router, licenseState);
+
+  // Maintenance Window APIs
   createMaintenanceWindowRoute(router, licenseState);
   getMaintenanceWindowRoute(router, licenseState);
   updateMaintenanceWindowRoute(router, licenseState);
@@ -139,19 +138,24 @@ export function defineRoutes(opts: RouteOptions) {
   archiveMaintenanceWindowRoute(router, licenseState);
   finishMaintenanceWindowRoute(router, licenseState);
   getActiveMaintenanceWindowsRoute(router, licenseState);
-  registerAlertsValueSuggestionsRoute(router, licenseState, config$!, getAlertIndicesAlias);
-  registerRulesValueSuggestionsRoute(router, licenseState, config$!);
-  registerFieldsRoute(router, licenseState);
   bulkGetMaintenanceWindowRoute(router, licenseState);
-  getScheduleFrequencyRoute(router, licenseState);
-  bulkUntrackAlertsRoute(router, licenseState);
-  bulkUntrackAlertsByQueryRoute(router, licenseState);
-  getQueryDelaySettingsRoute(router, licenseState);
-  updateQueryDelaySettingsRoute(router, licenseState);
 
   // backfill APIs
   scheduleBackfillRoute(router, licenseState);
   getBackfillRoute(router, licenseState);
   findBackfillRoute(router, licenseState);
   deleteBackfillRoute(router, licenseState);
+
+  // Other APIs
+  registerFieldsRoute(router, licenseState);
+  getScheduleFrequencyRoute(router, licenseState);
+  getQueryDelaySettingsRoute(router, licenseState);
+  updateQueryDelaySettingsRoute(router, licenseState);
+  getGlobalExecutionLogRoute(router, licenseState);
+  getActionErrorLogRoute(router, licenseState);
+  getFlappingSettingsRoute(router, licenseState);
+  updateFlappingSettingsRoute(router, licenseState);
+  runSoonRoute(router, licenseState);
+  healthRoute(router, licenseState, encryptedSavedObjects);
+  getGlobalExecutionKPIRoute(router, licenseState);
 }

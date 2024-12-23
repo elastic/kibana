@@ -10,7 +10,6 @@
 import React, { useEffect, useState } from 'react';
 
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import { DashboardRedirect } from '../../dashboard_container/types';
@@ -108,7 +107,7 @@ export const DashboardListingPage = ({
           useSessionStorageIntegration={true}
           initialFilter={initialFilter ?? titleFilter}
           goToDashboard={(id, viewMode) => {
-            redirectTo({ destination: 'dashboard', id, editMode: viewMode === ViewMode.EDIT });
+            redirectTo({ destination: 'dashboard', id, editMode: viewMode === 'edit' });
           }}
           getDashboardUrl={(id, timeRestore) => {
             return getDashboardListItemLink(kbnUrlStateStorage, id, timeRestore);

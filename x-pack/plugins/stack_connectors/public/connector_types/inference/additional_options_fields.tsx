@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 
 import {
@@ -18,7 +18,6 @@ import {
   EuiTextColor,
   EuiButtonGroup,
   EuiPanel,
-  EuiHorizontalRule,
   EuiButtonEmpty,
   EuiCopy,
   EuiButton,
@@ -55,7 +54,6 @@ interface AdditionalOptionsConnectorFieldsProps {
   onTaskTypeOptionsSelect: (taskType: string, provider?: string) => void;
   selectedTaskType?: string;
   taskTypeFormFields: ConfigEntryView[];
-  taskTypeSchema: ConfigEntryView[];
   taskTypeOptions: TaskTypeOption[];
 }
 
@@ -65,35 +63,13 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
   isEdit,
   taskTypeOptions,
   optionalProviderFormFields,
-  taskTypeFormFields,
-  taskTypeSchema,
   selectedTaskType,
   onSetProviderConfigEntry,
   onTaskTypeOptionsSelect,
 }) => {
   const xsFontSize = useEuiFontSize('xs').fontSize;
   const { euiTheme } = useEuiTheme();
-  const { setFieldValue, validateFields } = useFormContext();
-
-  const onSetTaskTypeConfigEntry = useCallback(
-    async (key: string, value: unknown) => {
-      if (taskTypeSchema) {
-        const entry: ConfigEntryView | undefined = taskTypeSchema.find(
-          (p: ConfigEntryView) => p.key === key
-        );
-        if (entry) {
-          if (!config.taskTypeConfig) {
-            config.taskTypeConfig = {};
-          }
-          const newConfig = { ...config.taskTypeConfig };
-          newConfig[key] = value;
-          setFieldValue('config.taskTypeConfig', newConfig);
-          await validateFields(['config.taskTypeConfig']);
-        }
-      }
-    },
-    [config, setFieldValue, taskTypeSchema, validateFields]
-  );
+  const { setFieldValue } = useFormContext();
 
   const taskTypeSettings = useMemo(
     () =>
@@ -103,7 +79,7 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
             <h4>
               <FormattedMessage
                 id="xpack.stackConnectors.components.inference.taskTypeDetailsLabel"
-                defaultMessage="Task settings"
+                defaultMessage="Task type"
               />
             </h4>
           </EuiTitle>
@@ -116,7 +92,7 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
           >
             <FormattedMessage
               id="xpack.stackConnectors.components.inference.taskTypeHelpLabel"
-              defaultMessage="Configure the inference task. These settings are specific to the service and model selected."
+              defaultMessage="Configure the inference task. Task types are specific to the service and model selected."
             />
           </div>
           <EuiSpacer size="m" />
@@ -135,18 +111,7 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
               const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
               return (
-                <EuiFormRow
-                  id="taskType"
-                  fullWidth
-                  label={
-                    <FormattedMessage
-                      id="xpack.stackConnectors.components.inference.taskTypeLabel"
-                      defaultMessage="Task type"
-                    />
-                  }
-                  isInvalid={isInvalid}
-                  error={errorMessage}
-                >
+                <EuiFormRow id="taskType" fullWidth isInvalid={isInvalid} error={errorMessage}>
                   {isEdit || readOnly ? (
                     <EuiButton
                       css={{
@@ -186,23 +151,13 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
               );
             }}
           </UseField>
-          <EuiSpacer size="s" />
-          <ConnectorConfigurationFormItems
-            itemsGrow={false}
-            isLoading={false}
-            direction="column"
-            items={taskTypeFormFields}
-            setConfigEntry={onSetTaskTypeConfigEntry}
-          />
         </>
       ) : null,
     [
       selectedTaskType,
-      config?.taskType,
+      config.taskType,
       xsFontSize,
       euiTheme.colors,
-      taskTypeFormFields,
-      onSetTaskTypeConfigEntry,
       isEdit,
       readOnly,
       taskTypeOptions,
@@ -276,7 +231,7 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
         ) : null}
 
         {taskTypeSettings}
-        <EuiHorizontalRule />
+        <EuiSpacer size="m" />
         <EuiTitle size="xxs" data-test-subj="task-type-details-label">
           <h4>
             <FormattedMessage

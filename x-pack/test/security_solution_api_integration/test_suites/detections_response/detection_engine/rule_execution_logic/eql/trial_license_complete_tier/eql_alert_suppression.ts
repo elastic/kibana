@@ -1965,7 +1965,7 @@ export default ({ getService }: FtrProviderContext) => {
         // the second sequence alert will have null as the value for
         // suppression field host.name because of logic defined in the
         // objectPairIntersection function defined in
-        // x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/eql/build_alert_group_from_sequence.ts
+        // x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/eql/build_alert_group_from_sequence.ts
 
         await indexListOfSourceDocuments([
           doc1,
@@ -2064,7 +2064,7 @@ export default ({ getService }: FtrProviderContext) => {
         // sequence alert 2 will be doc1WithLaterTimestamp and doc2WithNoHost
         // sequence alert 3 will be doc2WithNoHost and doc3WithNoHost
         // This logic is defined in objectPairIntersection
-        // x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/eql/build_alert_group_from_sequence.ts
+        // x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/eql/build_alert_group_from_sequence.ts
         // Any sequence comprised of events where one field contains a value, followed by any number of
         // events in the sequence where the value is null or undefined will have that field
         // stripped from the sequence alert. So given that, we expect three alerts here
@@ -2275,7 +2275,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('does not suppress alerts when "doNotSuppress" is set and suppression field value is undefined for a sequence alert in a given rule execution', async () => {
         // This logic should be understood within the confines of the
         // objectPairIntersection function defined in
-        // x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/eql/build_alert_group_from_sequence.ts
+        // x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/eql/build_alert_group_from_sequence.ts
         // Any sequence comprised of events where one field contains a value, followed by any number of
         // events in the sequence where the value is null or undefined will have that field
         // stripped from the sequence alert. So given that, we expect three alerts here
@@ -2875,7 +2875,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('@skipInServerless sequence queries with suppression duration', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/202940
+    // FLAKY: https://github.com/elastic/kibana/issues/202945
+    describe.skip('@skipInServerless sequence queries with suppression duration', () => {
       it('suppresses alerts across two rule executions when the suppression duration exceeds the rule interval', async () => {
         const id = uuidv4();
         const firstTimestamp = new Date(Date.now() - 1000).toISOString();
@@ -2982,7 +2984,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(suppressionEnd).toBeGreaterThan(new Date(secondTimestamp).getDate());
       });
 
-      it('does not suppress alerts outside of duration', async () => {
+      // Skipped here: https://github.com/elastic/kibana/issues/202945
+      it.skip('does not suppress alerts outside of duration', async () => {
         const id = uuidv4();
         // this timestamp is 1 minute in the past
         const firstTimestamp = new Date(Date.now() - 5000).toISOString();
@@ -3170,7 +3173,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('does not suppress alerts outside of duration when query with 3 sequences', async () => {
+      // Skipped here: https://github.com/elastic/kibana/issues/202945
+      it.skip('does not suppress alerts outside of duration when query with 3 sequences', async () => {
         const id = uuidv4();
         const dateNow = Date.now();
         const timestampSequenceEvent1 = new Date(dateNow - 5000).toISOString();

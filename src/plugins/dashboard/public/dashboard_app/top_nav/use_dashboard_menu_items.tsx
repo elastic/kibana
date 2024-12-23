@@ -8,9 +8,7 @@
  */
 
 import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
-import { batch } from 'react-redux';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
 
@@ -42,28 +40,16 @@ export const useDashboardMenuItems = ({
 
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
-  /**
-   * Unpack dashboard state from redux
-   */
   const dashboardApi = useDashboardApi();
 
-  const [
-    dashboardTitle,
-    hasOverlays,
-    hasRunMigrations,
-    hasUnsavedChanges,
-    lastSavedId,
-    managed,
-    viewMode,
-  ] = useBatchedPublishingSubjects(
-    dashboardApi.panelTitle,
-    dashboardApi.hasOverlays$,
-    dashboardApi.hasRunMigrations$,
-    dashboardApi.hasUnsavedChanges$,
-    dashboardApi.savedObjectId,
-    dashboardApi.managed$,
-    dashboardApi.viewMode
-  );
+  const [dashboardTitle, hasOverlays, hasUnsavedChanges, lastSavedId, viewMode] =
+    useBatchedPublishingSubjects(
+      dashboardApi.panelTitle,
+      dashboardApi.hasOverlays$,
+      dashboardApi.hasUnsavedChanges$,
+      dashboardApi.savedObjectId,
+      dashboardApi.viewMode
+    );
   const disableTopNav = isSaveInProgress || hasOverlays;
 
   /**
@@ -96,8 +82,8 @@ export const useDashboardMenuItems = ({
    * initiate interactive dashboard copy action
    */
   const dashboardInteractiveSave = useCallback(() => {
-    dashboardApi.runInteractiveSave(viewMode).then((result) => maybeRedirect(result));
-  }, [maybeRedirect, dashboardApi, viewMode]);
+    dashboardApi.runInteractiveSave().then((result) => maybeRedirect(result));
+  }, [maybeRedirect, dashboardApi]);
 
   /**
    * Show the dashboard's "Confirm reset changes" modal. If confirmed:
@@ -110,24 +96,22 @@ export const useDashboardMenuItems = ({
       dashboardApi.clearOverlays();
       const switchModes = switchToViewMode
         ? () => {
-            dashboardApi.setViewMode(ViewMode.VIEW);
-            getDashboardBackupService().storeViewMode(ViewMode.VIEW);
+            dashboardApi.setViewMode('view');
+            getDashboardBackupService().storeViewMode('view');
           }
         : undefined;
       if (!hasUnsavedChanges) {
         switchModes?.();
         return;
       }
-      confirmDiscardUnsavedChanges(() => {
-        batch(async () => {
-          setIsResetting(true);
-          await dashboardApi.asyncResetToLastSavedState();
-          if (isMounted()) {
-            setIsResetting(false);
-            switchModes?.();
-          }
-        });
-      }, viewMode as ViewMode);
+      confirmDiscardUnsavedChanges(async () => {
+        setIsResetting(true);
+        await dashboardApi.asyncResetToLastSavedState();
+        if (isMounted()) {
+          setIsResetting(false);
+          switchModes?.();
+        }
+      }, viewMode);
     },
     [dashboardApi, hasUnsavedChanges, viewMode, isMounted]
   );
@@ -161,8 +145,8 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardEditMode',
         className: 'eui-hideFor--s eui-hideFor--xs', // hide for small screens - editing doesn't work in mobile mode.
         run: () => {
-          getDashboardBackupService().storeViewMode(ViewMode.EDIT);
-          dashboardApi.setViewMode(ViewMode.EDIT);
+          getDashboardBackupService().storeViewMode('edit');
+          dashboardApi.setViewMode('edit');
           dashboardApi.clearOverlays();
         },
         disableButton: disableTopNav,
@@ -175,7 +159,7 @@ export const useDashboardMenuItems = ({
         emphasize: true,
         isLoading: isSaveInProgress,
         testId: 'dashboardQuickSaveMenuItem',
-        disableButton: disableTopNav || !(hasRunMigrations || hasUnsavedChanges),
+        disableButton: disableTopNav || !hasUnsavedChanges,
         run: () => quickSaveDashboard(),
       } as TopNavMenuData,
 
@@ -186,13 +170,13 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardInteractiveSaveMenuItem',
         run: dashboardInteractiveSave,
         label:
-          viewMode === ViewMode.VIEW
+          viewMode === 'view'
             ? topNavStrings.viewModeInteractiveSave.label
             : Boolean(lastSavedId)
             ? topNavStrings.editModeInteractiveSave.label
             : topNavStrings.quickSave.label,
         description:
-          viewMode === ViewMode.VIEW
+          viewMode === 'view'
             ? topNavStrings.viewModeInteractiveSave.description
             : topNavStrings.editModeInteractiveSave.description,
       } as TopNavMenuData,
@@ -225,7 +209,6 @@ export const useDashboardMenuItems = ({
   }, [
     disableTopNav,
     isSaveInProgress,
-    hasRunMigrations,
     hasUnsavedChanges,
     lastSavedId,
     dashboardInteractiveSave,
@@ -248,7 +231,7 @@ export const useDashboardMenuItems = ({
         isResetting ||
         !hasUnsavedChanges ||
         hasOverlays ||
-        (viewMode === ViewMode.EDIT && (isSaveInProgress || !lastSavedId)),
+        (viewMode === 'edit' && (isSaveInProgress || !lastSavedId)),
       isLoading: isResetting,
       run: () => resetChanges(),
     };
@@ -273,7 +256,7 @@ export const useDashboardMenuItems = ({
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
     const shareMenuItem = shareService ? [menuItems.share] : [];
     const duplicateMenuItem = showWriteControls ? [menuItems.interactiveSave] : [];
-    const editMenuItem = showWriteControls && !managed ? [menuItems.edit] : [];
+    const editMenuItem = showWriteControls && !dashboardApi.isManaged ? [menuItems.edit] : [];
     const mayberesetChangesMenuItem = showResetChange ? [resetChangesMenuItem] : [];
 
     return [
@@ -284,7 +267,7 @@ export const useDashboardMenuItems = ({
       ...mayberesetChangesMenuItem,
       ...editMenuItem,
     ];
-  }, [isLabsEnabled, menuItems, managed, showResetChange, resetChangesMenuItem]);
+  }, [isLabsEnabled, menuItems, dashboardApi.isManaged, showResetChange, resetChangesMenuItem]);
 
   const editModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];

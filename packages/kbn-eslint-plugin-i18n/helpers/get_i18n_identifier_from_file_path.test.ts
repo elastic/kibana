@@ -13,7 +13,7 @@ const SYSTEMPATH = 'systemPath';
 
 const testMap = [
   [
-    'x-pack/plugins/observability_solution/observability/public/header_actions.tsx',
+    'x-pack/solutions/observability/plugins/observability/public/header_actions.tsx',
     'xpack.observability',
   ],
   [
@@ -22,7 +22,7 @@ const testMap = [
   ],
   ['x-pack/plugins/cases/server/components/foo.tsx', 'xpack.cases'],
   [
-    'x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/alerts/toggle_alert_flyout_button.tsx',
+    'x-pack/solutions/observability/plugins/synthetics/public/apps/synthetics/components/alerts/toggle_alert_flyout_button.tsx',
     'xpack.synthetics',
   ],
   ['src/plugins/vis_types/gauge/public/editor/collections.ts', 'visTypeGauge'],

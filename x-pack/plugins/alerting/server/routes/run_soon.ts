@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from './constants';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -22,6 +23,7 @@ export const runSoonRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_run_soon`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'internal',
       },

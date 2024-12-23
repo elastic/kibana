@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/css';
 import { filter, firstValueFrom } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
@@ -40,6 +41,8 @@ import { PluginsService } from '@kbn/core-plugins-browser-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-browser-internal';
 import { SecurityService } from '@kbn/core-security-browser-internal';
 import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
+import { version as REACT_VERSION } from 'react';
+import { muteLegacyRootWarning } from '@kbn/react-mute-legacy-root-warning';
 import { KBN_LOAD_MARKS } from './events';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import {
@@ -51,8 +54,6 @@ import {
   LOAD_BOOTSTRAP_START,
   LOAD_START,
 } from './events';
-
-import './core_system.scss';
 
 /**
  * @internal
@@ -127,6 +128,15 @@ export class CoreSystem {
       env: injectedMetadata.env,
       logger: this.loggingSystem.asLoggerFactory(),
     };
+
+    if (this.coreContext.env.mode.dev && REACT_VERSION.startsWith('18.')) {
+      muteLegacyRootWarning();
+      this.coreContext.logger
+        .get('core-system')
+        .info(
+          `Kibana is built with and running React@${REACT_VERSION}, muting legacy root warning.`
+        );
+    }
 
     this.i18n = new I18nService();
     this.analytics = new AnalyticsService(this.coreContext);
@@ -319,6 +329,7 @@ export class CoreSystem {
         analytics,
         theme,
         uiSettings,
+        userProfile,
         targetDomElement: overlayTargetDomElement,
       });
       const notifications = this.notifications.start({
@@ -326,6 +337,7 @@ export class CoreSystem {
         i18n,
         overlays,
         theme,
+        userProfile,
         targetDomElement: notificationsTargetDomElement,
       });
       const customBranding = this.customBranding.start();
@@ -360,6 +372,7 @@ export class CoreSystem {
         analytics,
         i18n,
         theme,
+        userProfile,
       });
 
       const featureFlags = await this.featureFlags.start();
@@ -391,10 +404,16 @@ export class CoreSystem {
 
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';
-      this.rootDomElement.classList.add('coreSystemRootDomElement');
       this.rootDomElement.appendChild(coreUiTargetDomElement);
       this.rootDomElement.appendChild(notificationsTargetDomElement);
       this.rootDomElement.appendChild(overlayTargetDomElement);
+
+      const coreSystemRootDomElement = css`
+        overflow-x: hidden;
+        min-width: 100%;
+        min-height: 100%;
+      `;
+      this.rootDomElement.classList.add(coreSystemRootDomElement);
 
       this.rendering.start({
         application,
@@ -404,6 +423,7 @@ export class CoreSystem {
         overlays,
         theme,
         targetDomElement: coreUiTargetDomElement,
+        userProfile,
       });
 
       performance.mark(KBN_LOAD_MARKS, {

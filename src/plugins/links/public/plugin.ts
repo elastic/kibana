@@ -61,7 +61,7 @@ export class LinksPlugin
         name: APP_NAME,
       });
 
-      plugins.embeddable.registerReactEmbeddableSavedObject({
+      plugins.embeddable.registerAddFromLibraryType({
         onAdd: async (container, savedObject) => {
           const initialState = await deserializeLinksSavedObject(savedObject);
           container.addNewPanel<LinksRuntimeState>({
@@ -69,7 +69,6 @@ export class LinksPlugin
             initialState,
           });
         },
-        embeddableType: CONTENT_ID,
         savedObjectType: CONTENT_ID,
         savedObjectName: APP_NAME,
         getIconForSavedObject: () => APP_ICON,

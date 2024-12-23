@@ -23,7 +23,7 @@ export const Default = {
       error: thrownError,
     };
     return (
-      <Render renderer={getErrorRenderer(coreMock.createStart().theme.theme$)} config={config} />
+      <Render renderer={getErrorRenderer(coreMock.createStart())} config={config} />
     );
   },
 

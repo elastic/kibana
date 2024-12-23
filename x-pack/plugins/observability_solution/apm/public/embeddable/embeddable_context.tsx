@@ -9,7 +9,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ApmPluginContext, ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
-import { ApmThemeProvider } from '../components/routing/app_root';
 import { ChartPointerEventContextProvider } from '../context/chart_pointer_event/chart_pointer_event_context';
 import { EmbeddableDeps } from './types';
 import { TimeRangeMetadataContextProvider } from '../context/time_range_metadata/time_range_metadata_context';
@@ -54,19 +53,17 @@ export function ApmEmbeddableContext({
     <I18nContext>
       <ApmPluginContext.Provider value={services}>
         <KibanaThemeProvider theme={deps.coreStart.theme}>
-          <ApmThemeProvider>
-            <KibanaContextProvider services={deps.coreStart}>
-              <TimeRangeMetadataContextProvider
-                uiSettings={deps.coreStart.uiSettings}
-                start={rangeFrom}
-                end={rangeTo}
-                kuery={kuery}
-                useSpanName={false}
-              >
-                <ChartPointerEventContextProvider>{children}</ChartPointerEventContextProvider>
-              </TimeRangeMetadataContextProvider>
-            </KibanaContextProvider>
-          </ApmThemeProvider>
+          <KibanaContextProvider services={deps.coreStart}>
+            <TimeRangeMetadataContextProvider
+              uiSettings={deps.coreStart.uiSettings}
+              start={rangeFrom}
+              end={rangeTo}
+              kuery={kuery}
+              useSpanName={false}
+            >
+              <ChartPointerEventContextProvider>{children}</ChartPointerEventContextProvider>
+            </TimeRangeMetadataContextProvider>
+          </KibanaContextProvider>
         </KibanaThemeProvider>
       </ApmPluginContext.Provider>
     </I18nContext>

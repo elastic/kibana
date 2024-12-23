@@ -59,7 +59,7 @@ const DEFAULT_INGEST_PIPELINE_VALUE = 'default';
 const DEFAULT_INGEST_PIPELINE_FILE_NAME_YML = 'default.yml';
 const DEFAULT_INGEST_PIPELINE_FILE_NAME_JSON = 'default.json';
 
-// Borrowed from https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/utils/expand_dotted.ts
+// Borrowed from https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/common/utils/expand_dotted.ts
 // with some alterations around non-object values. The package registry service expands some dotted fields from manifest files,
 // so we need to do the same here.
 const expandDottedField = (dottedFieldName: string, val: unknown): object => {

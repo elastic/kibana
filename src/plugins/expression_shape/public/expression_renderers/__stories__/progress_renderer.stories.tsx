@@ -36,7 +36,7 @@ export const Default = {
     };
 
     return (
-      <Render renderer={getProgressRenderer(coreMock.createStart().theme.theme$)} config={config} />
+      <Render renderer={getProgressRenderer(coreMock.createStart())} config={config} />
     );
   },
 

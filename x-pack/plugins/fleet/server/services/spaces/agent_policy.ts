@@ -6,26 +6,28 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import {
   AGENTS_INDEX,
+  AGENT_ACTIONS_INDEX,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../../../common/constants';
-
 import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { packagePolicyService } from '../package_policy';
 import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
-
 import type { UninstallTokenSOAttributes } from '../security/uninstall_token_service';
+import { closePointInTime, getAgentsByKuery, openPointInTime } from '../agents';
 
 import { isSpaceAwarenessEnabled } from './helpers';
+
+const UPDATE_AGENT_BATCH_SIZE = 1000;
 
 export async function updateAgentPolicySpaces({
   agentPolicyId,
@@ -49,6 +51,7 @@ export async function updateAgentPolicySpaces({
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
   const currentSpaceSoClient = appContextService.getInternalUserSOClientForSpaceId(currentSpaceId);
+  const newSpaceSoClient = appContextService.getInternalUserSOClientForSpaceId(newSpaceIds[0]);
   const existingPolicy = await agentPolicyService.get(currentSpaceSoClient, agentPolicyId);
 
   const existingPackagePolicies = await packagePolicyService.findAllForAgentPolicy(
@@ -166,4 +169,55 @@ export async function updateAgentPolicySpaces({
     ignore_unavailable: true,
     refresh: true,
   });
+
+  const agentIndexExists = await esClient.indices.exists({
+    index: AGENTS_INDEX,
+  });
+
+  // Update agent actions
+  if (agentIndexExists) {
+    const pitId = await openPointInTime(esClient);
+
+    try {
+      let hasMore = true;
+      let searchAfter: SortResults | undefined;
+      while (hasMore) {
+        const { agents } = await getAgentsByKuery(esClient, newSpaceSoClient, {
+          kuery: `policy_id:"${agentPolicyId}"`,
+          showInactive: true,
+          perPage: UPDATE_AGENT_BATCH_SIZE,
+          pitId,
+          searchAfter,
+        });
+
+        if (agents.length === 0) {
+          hasMore = false;
+          break;
+        }
+
+        const lastAgent = agents[agents.length - 1];
+        searchAfter = lastAgent.sort;
+
+        await esClient.updateByQuery({
+          index: AGENT_ACTIONS_INDEX,
+          query: {
+            bool: {
+              must: {
+                terms: {
+                  agents: agents.map(({ id }) => id),
+                },
+              },
+            },
+          },
+          script: `ctx._source.namespaces = [${newSpaceIds
+            .map((spaceId) => `"${spaceId}"`)
+            .join(',')}]`,
+          ignore_unavailable: true,
+          refresh: true,
+        });
+      }
+    } finally {
+      await closePointInTime(esClient, pitId);
+    }
+  }
 }

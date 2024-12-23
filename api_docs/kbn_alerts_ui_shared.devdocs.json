@@ -5537,7 +5537,13 @@
             "text": "HasSaveNotification"
           },
           " & ",
-          "PublishesReload",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesReload",
+            "text": "PublishesReload"
+          },
           "> & { allowExpensiveQueries$: ",
           {
             "pluginId": "@kbn/presentation-publishing",

@@ -167,7 +167,7 @@ export async function saveSavedWorkspace(
   }: SavedObjectSaveOpts = {},
   services: {
     contentClient: ContentClient;
-  } & Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'>
+  } & Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'>
 ) {
   let attributes: SavedObjectAttributes = {};
 

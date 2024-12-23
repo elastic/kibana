@@ -31,7 +31,6 @@ import { useAuthz, useStartServices, sendCreateAgentPolicy } from '../../../../h
 import { AgentPolicyForm, agentPolicyFormValidation } from '../../components';
 import { DevtoolsRequestFlyoutButton } from '../../../../components';
 import { generateCreateAgentPolicyDevToolsRequest } from '../../services';
-import { ExperimentalFeaturesService } from '../../../../services';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
 
 const FlyoutWithHigherZIndex = styled(EuiFlyout)`
@@ -109,7 +108,6 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
       />
     </EuiFlyoutBody>
   );
-  const { showDevtoolsRequest } = ExperimentalFeaturesService.get();
   const agentPolicyContent = useMemo(
     () => generateCreateAgentPolicyDevToolsRequest(agentPolicy, withSysMonitoring),
     [agentPolicy, withSysMonitoring]
@@ -128,25 +126,23 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="none">
-            {showDevtoolsRequest ? (
-              <EuiFlexItem grow={false}>
-                <DevtoolsRequestFlyoutButton
-                  isDisabled={
-                    isLoading ||
-                    Object.keys(validation).length > 0 ||
-                    hasAdvancedSettingsErrors ||
-                    hasInvalidSpaceError
+            <EuiFlexItem grow={false}>
+              <DevtoolsRequestFlyoutButton
+                isDisabled={
+                  isLoading ||
+                  Object.keys(validation).length > 0 ||
+                  hasAdvancedSettingsErrors ||
+                  hasInvalidSpaceError
+                }
+                description={i18n.translate(
+                  'xpack.fleet.createAgentPolicy.devtoolsRequestDescription',
+                  {
+                    defaultMessage: 'This Kibana request creates a new agent policy.',
                   }
-                  description={i18n.translate(
-                    'xpack.fleet.createAgentPolicy.devtoolsRequestDescription',
-                    {
-                      defaultMessage: 'This Kibana request creates a new agent policy.',
-                    }
-                  )}
-                  request={agentPolicyContent}
-                />
-              </EuiFlexItem>
-            ) : null}
+                )}
+                request={agentPolicyContent}
+              />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill

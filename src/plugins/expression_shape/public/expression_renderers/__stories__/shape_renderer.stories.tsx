@@ -29,7 +29,7 @@ export const Default = {
     };
 
     return (
-      <Render renderer={getShapeRenderer(coreMock.createStart().theme.theme$)} config={config} />
+      <Render renderer={getShapeRenderer(coreMock.createStart())} config={config} />
     );
   },
 

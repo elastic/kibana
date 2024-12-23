@@ -25,7 +25,6 @@ import type {
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
 import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
-import { InfraPluginSetup, InfraRequestHandlerContext } from '@kbn/infra-plugin/server';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -51,14 +50,12 @@ export interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
   features: FeaturesPluginSetup;
   alerting?: AlertingServerSetup;
-  infra: InfraPluginSetup;
   cloud?: CloudSetup;
 }
 
 export type RequestHandlerContextMonitoringPlugin = CustomRequestHandlerContext<{
   actions?: ActionsApiRequestHandlerContext;
   alerting?: AlertingApiRequestHandlerContext;
-  infra: InfraRequestHandlerContext;
   ruleRegistry?: RacApiRequestHandlerContext;
 }>;
 

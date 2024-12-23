@@ -41,7 +41,7 @@ export default {
   title: 'renderers/Metric',
 };
 
-const theme$ = coreMock.createStart().theme.theme$;
+const core = coreMock.createStart();
 
 export const WithNullMetric = {
   render: () => {
@@ -52,7 +52,7 @@ export const WithNullMetric = {
       label: '',
       metricFormat: '',
     };
-    return <Render renderer={getMetricRenderer(theme$)} config={config} />;
+    return <Render renderer={getMetricRenderer(core)} config={config} />;
   },
 
   name: 'with null metric',
@@ -67,7 +67,7 @@ export const WithNumberMetric = {
       label: '',
       metricFormat: '',
     };
-    return <Render renderer={getMetricRenderer(theme$)} config={config} />;
+    return <Render renderer={getMetricRenderer(core)} config={config} />;
   },
 
   name: 'with number metric',
@@ -82,7 +82,7 @@ export const WithStringMetric = {
       label: '',
       metricFormat: '',
     };
-    return <Render renderer={getMetricRenderer(theme$)} config={config} />;
+    return <Render renderer={getMetricRenderer(core)} config={config} />;
   },
 
   name: 'with string metric',
@@ -97,7 +97,7 @@ export const WithLabel = {
       label: 'Average price',
       metricFormat: '',
     };
-    return <Render renderer={getMetricRenderer(theme$)} config={config} />;
+    return <Render renderer={getMetricRenderer(core)} config={config} />;
   },
 
   name: 'with label',
@@ -112,7 +112,7 @@ export const WithNumberMetricAndASpecifiedFormat = {
       label: 'Average price',
       metricFormat: '0.00%',
     };
-    return <Render renderer={getMetricRenderer(theme$)} config={config} />;
+    return <Render renderer={getMetricRenderer(core)} config={config} />;
   },
 
   name: 'with number metric and a specified format',
@@ -127,7 +127,7 @@ export const WithFormattedStringMetricAndASpecifiedFormat = {
       label: 'Total Revenue',
       metricFormat: '$0a',
     };
-    return <Render renderer={getMetricRenderer(theme$)} config={config} />;
+    return <Render renderer={getMetricRenderer(core)} config={config} />;
   },
 
   name: 'with formatted string metric and a specified format',
@@ -142,7 +142,7 @@ export const WithInvalidMetricFont = {
       label: 'Total Revenue',
       metricFormat: '$0a',
     };
-    return <Render renderer={getMetricRenderer(theme$)} config={config} />;
+    return <Render renderer={getMetricRenderer(core)} config={config} />;
   },
 
   name: 'with invalid metricFont',

@@ -23,7 +23,7 @@ import {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { DeepPartial } from '@kbn/utility-types';
-import { HasVisualizeConfig } from '../legacy/embeddable';
+import type { HasVisualizeConfig } from './interfaces/has_visualize_config';
 import type { Vis, VisParams, VisSavedObject } from '../types';
 import type { SerializedVis } from '../vis';
 

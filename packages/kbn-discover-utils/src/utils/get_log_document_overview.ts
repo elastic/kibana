@@ -30,8 +30,7 @@ export function getLogDocumentOverview(
   };
 
   const levelArray = doc.flattened[fieldConstants.LOG_LEVEL_FIELD];
-  const level =
-    Array.isArray(levelArray) && levelArray.length ? levelArray[0].toLowerCase() : levelArray;
+  const level = Array.isArray(levelArray) && levelArray.length > 0 ? levelArray[0] : levelArray;
   const message = formatField(fieldConstants.MESSAGE_FIELD);
   const errorMessage = formatField(fieldConstants.ERROR_MESSAGE_FIELD);
   const eventOriginal = formatField(fieldConstants.EVENT_ORIGINAL_FIELD);

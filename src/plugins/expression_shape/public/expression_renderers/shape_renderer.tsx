@@ -9,9 +9,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
 
-import { CoreSetup, CoreTheme } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
@@ -34,7 +33,7 @@ const strings = {
 };
 
 export const getShapeRenderer =
-  (theme$: Observable<CoreTheme>) => (): ExpressionRenderDefinition<ShapeRendererConfig> => ({
+  (core: CoreStart) => (): ExpressionRenderDefinition<ShapeRendererConfig> => ({
     name: 'shape',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
@@ -52,7 +51,7 @@ export const getShapeRenderer =
       render(
         <KibanaErrorBoundaryProvider analytics={undefined}>
           <KibanaErrorBoundary>
-            <KibanaThemeProvider theme={{ theme$ }}>
+            <KibanaThemeProvider {...core}>
               <I18nProvider>
                 <ShapeComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
               </I18nProvider>
@@ -65,4 +64,4 @@ export const getShapeRenderer =
     },
   });
 
-export const shapeRendererFactory = (core: CoreSetup) => getShapeRenderer(core.theme.theme$);
+export const shapeRendererFactory = (core: CoreStart) => getShapeRenderer(core);

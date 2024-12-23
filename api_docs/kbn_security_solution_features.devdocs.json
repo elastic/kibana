@@ -37,7 +37,7 @@
           },
           "<T>"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -87,7 +87,7 @@
               "ReservedKibanaPrivilege",
               "[]; } | undefined; }"
             ],
-            "path": "x-pack/packages/security-solution/features/src/types.ts",
+            "path": "x-pack/solutions/security/packages/features/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -101,7 +101,7 @@
             "signature": [
               "T[]"
             ],
-            "path": "x-pack/packages/security-solution/features/src/types.ts",
+            "path": "x-pack/solutions/security/packages/features/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -123,7 +123,7 @@
               },
               ">"
             ],
-            "path": "x-pack/packages/security-solution/features/src/types.ts",
+            "path": "x-pack/solutions/security/packages/features/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -151,7 +151,7 @@
           },
           ">"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -202,7 +202,7 @@
           "ReservedKibanaPrivilege",
           "[]; } | undefined; }"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -224,7 +224,7 @@
           },
           "[]"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -245,7 +245,7 @@
           " | ",
           "ProductFeatureAttackDiscoveryKey"
         ],
-        "path": "x-pack/packages/security-solution/features/src/product_features_keys.ts",
+        "path": "x-pack/solutions/security/packages/features/src/product_features_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -291,7 +291,7 @@
           },
           ">[] | undefined; }"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -318,7 +318,7 @@
           "AssistantSubFeatureId",
           ">>"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -343,7 +343,7 @@
           },
           "<string>>"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -370,7 +370,7 @@
           "CasesSubFeatureId",
           ">>"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -401,7 +401,7 @@
           },
           "<T>>"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -428,7 +428,7 @@
           "SecuritySubFeatureId",
           ">>"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -547,7 +547,7 @@
           },
           "<{ all: readonly string[]; read: readonly string[]; }> | undefined; }"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

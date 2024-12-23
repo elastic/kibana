@@ -31,7 +31,7 @@ const Renderer = ({
 
   return (
     <Render
-      renderer={getRepeatImageRenderer(coreMock.createStart().theme.theme$)}
+      renderer={getRepeatImageRenderer(coreMock.createStart())}
       config={config}
       width="400px"
     />

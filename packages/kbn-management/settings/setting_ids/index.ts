@@ -80,7 +80,6 @@ export const DISCOVER_MODIFY_COLUMNS_ON_SWITCH_ID = 'discover:modifyColumnsOnSwi
 export const DISCOVER_ROW_HEIGHT_OPTION_ID = 'discover:rowHeightOption';
 export const DISCOVER_SAMPLE_ROWS_PER_PAGE_ID = 'discover:sampleRowsPerPage';
 export const DISCOVER_SAMPLE_SIZE_ID = 'discover:sampleSize';
-export const DISCOVER_SEARCH_FIELDS_FROM_SOURCE_ID = 'discover:searchFieldsFromSource';
 export const DISCOVER_SEARCH_ON_PAGE_LOAD_ID = 'discover:searchOnPageLoad';
 export const DISCOVER_SHOW_FIELD_STATISTICS_ID = 'discover:showFieldStatistics';
 export const DISCOVER_SHOW_MULTI_FIELDS_ID = 'discover:showMultiFields';
@@ -138,7 +137,6 @@ export const OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID =
 export const OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID = 'observability:newLogsOverview';
 export const OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE = 'observability:entityCentricExperience';
 export const OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID = 'observability:logSources';
-export const OBSERVABILITY_ENABLE_LOGS_STREAM = 'observability:enableLogsStream';
 export const OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING =
   'observability:aiAssistantSimulatedFunctionCalling';
 export const OBSERVABILITY_AI_ASSISTANT_SEARCH_CONNECTOR_INDEX_PATTERN =
