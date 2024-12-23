@@ -24,7 +24,8 @@ import { differsOnlyInPatch } from '../../../common/services';
 import { appContextService } from '..';
 
 const MINIMUM_SUPPORTED_VERSION = '7.17.0';
-const AGENT_VERSION_BUILD_FILE = 'x-pack/platform/plugins/shared/fleet/target/agent_versions_list.json';
+const AGENT_VERSION_BUILD_FILE =
+  'x-pack/platform/plugins/shared/fleet/target/agent_versions_list.json';
 
 // Endpoint maintained by the web-team and hosted on the elastic website
 const PRODUCT_VERSIONS_URL = 'https://www.elastic.co/api/product_versions';
