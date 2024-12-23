@@ -7,7 +7,7 @@
 
 import type { Agent as SuperTestAgent } from 'supertest';
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import { getSupertest, maybeDestroySupertest } from './common';
 import type {
@@ -91,9 +91,11 @@ export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContex
           'inventory',
           'logs',
           'observabilityCases',
+          'observabilityCasesV2',
           'securitySolutionAssistant',
           'securitySolutionAttackDiscovery',
           'securitySolutionCases',
+          'securitySolutionCasesV2',
           'siem',
           'slo',
           'uptime',

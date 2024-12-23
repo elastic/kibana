@@ -65,6 +65,13 @@ export function createTestConfig({
           // `--plugin-path=${path.resolve(__dirname, '../common/plugins/spaces_test_plugin')}`,
         ],
       },
+      esTestCluster: {
+        ...testConfig.esTestCluster,
+        serverArgs: [
+          ...testConfig.esTestCluster.serverArgs,
+          `xpack.license.self_generated.type=${license}`,
+        ],
+      },
     };
   };
 }
