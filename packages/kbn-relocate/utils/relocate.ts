@@ -156,7 +156,7 @@ const replaceReferencesInternal = async (
 
     let d = dst;
     // For .bazel references, we need to keep the original name reference if we are renaming the path
-    // For example, in the move "packages/core/base/core-base-common" to "src/core/packages/base/common",
+    // For example, in the move "src/core/packages/base/common" to "src/core/packages/base/common",
     // we need to keep the reference name to core-base-common by replacing it with "src/core/packages/base/common:core-base-common"
     if (
       file.endsWith('.bazel') &&
