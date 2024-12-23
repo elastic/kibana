@@ -51,7 +51,7 @@ const createMicrosoftDefenderConnectorMock = (): CreateMicrosoftDefenderConnecto
   };
   const instanceMock = createConnectorInstanceMock(MicrosoftDefenderEndpointConnector, options);
 
-  // Default MS API response mocks. These (or additinoal ones) can always be defined directly in test
+  // Default MS API response mocks. These (or additional ones) can always be defined directly in test
   const apiMock: CreateMicrosoftDefenderConnectorMockResponse['apiMock'] = {
     [`${options.config.oAuthServerUrl}/${options.config.tenantId}/oauth2/v2.0/token`]: () => {
       return createAxiosResponseMock({
@@ -71,6 +71,15 @@ const createMicrosoftDefenderConnectorMock = (): CreateMicrosoftDefenderConnecto
     // Release
     [`${apiUrl}/api/machines/1-2-3/unisolate`]: () =>
       createAxiosResponseMock(createMicrosoftMachineAction()),
+
+    // Machine Actions
+    [`${apiUrl}/api/machineactions`]: () =>
+      createAxiosResponseMock({
+        '@odata.context':
+          'https://api-us3.securitycenter.microsoft.com/api/$metadata#MachineActions',
+        '@odata.count': 1,
+        value: [createMicrosoftMachineAction()],
+      }),
   };
 
   instanceMock.request.mockImplementation(
@@ -120,7 +129,9 @@ const createMicrosoftMachineMock = (
     aadDeviceId: '80fe8ff8-2624-418e-9591-41f0491218f9',
     machineTags: ['test tag 1', 'test tag 2'],
     onboardingstatus: 'foo',
-    ipAddresses: ['1.1.1.1'],
+    ipAddresses: [
+      { ipAddress: '1.1.1.1', macAddress: '23:a2:5t', type: '', operationalStatus: '' },
+    ],
     osArchitecture: '',
 
     ...overrides,

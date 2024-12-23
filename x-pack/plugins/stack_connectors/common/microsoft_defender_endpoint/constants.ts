@@ -13,4 +13,5 @@ export enum MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION {
   GET_AGENT_DETAILS = 'getAgentDetails',
   ISOLATE_HOST = 'isolateHost',
   RELEASE_HOST = 'releaseHost',
+  GET_ACTIONS = 'getActions',
 }

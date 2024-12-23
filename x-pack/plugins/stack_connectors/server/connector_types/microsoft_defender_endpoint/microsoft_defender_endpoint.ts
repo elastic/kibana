@@ -16,6 +16,8 @@ import {
   ReleaseHostParamsSchema,
   TestConnectorParamsSchema,
   MicrosoftDefenderEndpointDoNotValidateResponseSchema,
+  GetActionsParamsSchema,
+  AgentDetailsParamsSchema,
 } from '../../../common/microsoft_defender_endpoint/schema';
 import {
   MicrosoftDefenderEndpointAgentDetailsParams,
@@ -28,9 +30,9 @@ import {
   MicrosoftDefenderEndpointMachine,
   MicrosoftDefenderEndpointMachineAction,
   MicrosoftDefenderEndpointTestConnector,
+  MicrosoftDefenderEndpointGetActionsParams,
+  MicrosoftDefenderEndpointGetActionsResponse,
 } from '../../../common/microsoft_defender_endpoint/types';
-
-export const API_MAX_RESULTS = 1000;
 
 export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   MicrosoftDefenderEndpointConfig,
@@ -40,6 +42,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
 
   private readonly urls: {
     machines: string;
+    machineActions: string;
   };
 
   constructor(
@@ -54,6 +57,8 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
 
     this.urls = {
       machines: `${this.config.apiUrl}/api/machines`,
+      // API docs: https://learn.microsoft.com/en-us/defender-endpoint/api/get-machineactions-collection
+      machineActions: `${this.config.apiUrl}/api/machineactions`,
     };
 
     this.registerSubActions();
@@ -61,9 +66,9 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
 
   private registerSubActions() {
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.TEST_CONNECTOR,
+      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_AGENT_DETAILS,
       method: 'getAgentDetails',
-      schema: TestConnectorParamsSchema,
+      schema: AgentDetailsParamsSchema,
     });
 
     this.registerSubAction({
@@ -82,6 +87,12 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.TEST_CONNECTOR,
       method: 'testConnector',
       schema: TestConnectorParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS,
+      method: 'getActions',
+      schema: GetActionsParamsSchema,
     });
   }
 
@@ -128,6 +139,50 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     return appendResponseBody(`API Error: [${error.response?.statusText}] ${error.message}`);
   }
 
+  private buildODataUrlParams({
+    filter = {},
+    page = 1,
+    pageSize = 20,
+  }: {
+    filter: Record<string, string | string[]>;
+    page: number;
+    pageSize: number;
+  }): Partial<BuildODataUrlParamsResponse> {
+    const oDataQueryOptions: Partial<BuildODataUrlParamsResponse> = {
+      $count: true,
+    };
+
+    if (pageSize) {
+      oDataQueryOptions.$top = pageSize;
+    }
+
+    if (page > 1) {
+      oDataQueryOptions.$skip = page * pageSize - pageSize;
+    }
+
+    const filterEntries = Object.entries(filter);
+
+    if (filterEntries.length > 0) {
+      oDataQueryOptions.$filter = '';
+
+      for (const [key, value] of filterEntries) {
+        const isArrayValue = Array.isArray(value);
+
+        if (oDataQueryOptions.$filter) {
+          oDataQueryOptions.$filter += ' AND ';
+        }
+
+        oDataQueryOptions.$filter += `${key} ${isArrayValue ? 'in' : 'eq'} ${
+          isArrayValue
+            ? '(' + value.map((valueString) => `'${valueString}'`).join(',') + ')'
+            : value
+        }`;
+      }
+    }
+
+    return oDataQueryOptions;
+  }
+
   public async testConnector(
     _: MicrosoftDefenderEndpointTestConnectorParams,
     connectorUsageCollector: ConnectorUsageCollector
@@ -163,6 +218,12 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       .catch(catchErrorAndIgnoreExpectedErrors)
       .then(() => {
         results.push('API call to Machine Release was successful');
+      });
+
+    await this.getActions({ pageSize: 1 }, connectorUsageCollector)
+      .catch(catchErrorAndIgnoreExpectedErrors)
+      .then(() => {
+        results.push('API call to Machine Actions was successful');
       });
 
     return { results };
@@ -216,4 +277,35 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       connectorUsageCollector
     );
   }
+
+  public async getActions(
+    { page = 1, pageSize = 20, ...filter }: MicrosoftDefenderEndpointGetActionsParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<MicrosoftDefenderEndpointGetActionsResponse> {
+    // API Reference: https://learn.microsoft.com/en-us/defender-endpoint/api/get-machineactions-collection
+    // OData usage reference: https://learn.microsoft.com/en-us/defender-endpoint/api/exposed-apis-odata-samples
+
+    const response = await this.fetchFromMicrosoft<MicrosoftDefenderEndpointGetActionsResponse>(
+      {
+        url: `${this.urls.machineActions}`,
+        method: 'GET',
+        params: this.buildODataUrlParams({ filter, page, pageSize }),
+      },
+      connectorUsageCollector
+    );
+
+    return {
+      ...response,
+      page,
+      pageSize,
+      total: response['@odata.count'] ?? -1,
+    };
+  }
+}
+
+interface BuildODataUrlParamsResponse {
+  $filter: string;
+  $top: number;
+  $skip: number;
+  $count: boolean;
 }
