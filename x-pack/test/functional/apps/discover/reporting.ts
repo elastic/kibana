@@ -31,11 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
 
-  const setFieldsFromSource = async (setValue: boolean) => {
-    await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': setValue });
-    await browser.refresh();
-  };
-
   const getReport = async ({ timeout } = { timeout: 60 * 1000 }) => {
     // close any open notification toasts
     await toasts.dismissAll();
@@ -326,21 +321,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const { text: csvFile } = await getReport();
         expectSnapshot(csvFile).toMatch();
-      });
-
-      it('generates a report with discover:searchFieldsFromSource = true', async () => {
-        await discover.loadSavedSearch('Ecommerce Data');
-
-        await retry.try(async () => {
-          expect(await discover.getHitCount()).to.equal('740');
-        });
-
-        await setFieldsFromSource(true);
-
-        const { text: csvFile } = await getReport();
-        expectSnapshot(csvFile).toMatch();
-
-        await setFieldsFromSource(false);
       });
     });
   });

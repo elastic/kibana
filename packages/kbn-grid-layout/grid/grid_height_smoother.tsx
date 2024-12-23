@@ -19,13 +19,17 @@ export const GridHeightSmoother = ({
   // set the parent div size directly to smooth out height changes.
   const smoothHeightRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    const subscription = combineLatest([
+    const interactionStyleSubscription = combineLatest([
       gridLayoutStateManager.gridDimensions$,
       gridLayoutStateManager.interactionEvent$,
     ]).subscribe(([dimensions, interactionEvent]) => {
       if (!smoothHeightRef.current) return;
+      if (gridLayoutStateManager.expandedPanelId$.getValue()) {
+        return;
+      }
       if (!interactionEvent) {
         smoothHeightRef.current.style.height = `${dimensions.height}px`;
+        smoothHeightRef.current.style.userSelect = 'auto';
         return;
       }
 
@@ -38,8 +42,26 @@ export const GridHeightSmoother = ({
         dimensions.height ?? 0,
         smoothHeightRef.current.getBoundingClientRect().height
       )}px`;
+      smoothHeightRef.current.style.userSelect = 'none';
     });
-    return () => subscription.unsubscribe();
+
+    const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
+      (expandedPanelId) => {
+        if (!smoothHeightRef.current) return;
+
+        if (expandedPanelId) {
+          smoothHeightRef.current.style.height = `100%`;
+          smoothHeightRef.current.style.transition = 'none';
+        } else {
+          smoothHeightRef.current.style.height = '';
+          smoothHeightRef.current.style.transition = '';
+        }
+      }
+    );
+    return () => {
+      interactionStyleSubscription.unsubscribe();
+      expandedPanelSubscription.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -47,6 +69,8 @@ export const GridHeightSmoother = ({
     <div
       ref={smoothHeightRef}
       css={css`
+        // the guttersize cannot currently change, so it's safe to set it just once
+        padding: ${gridLayoutStateManager.runtimeSettings$.getValue().gutterSize};
         overflow-anchor: none;
         transition: height 500ms linear;
       `}

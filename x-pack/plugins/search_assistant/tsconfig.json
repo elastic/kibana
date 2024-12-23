@@ -28,7 +28,8 @@
     "@kbn/licensing-plugin",
     "@kbn/ml-plugin",
     "@kbn/share-plugin",
-    "@kbn/triggers-actions-ui-plugin"
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/ai-assistant-icon"
   ],
   "exclude": [
     "target/**/*",

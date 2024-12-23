@@ -280,7 +280,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
               <EuiFlexGroup
                 direction="rowReverse"
                 alignItems="center"
-                style={{ isolation: 'isolate' }}
+                css={{ isolation: 'isolate' }}
                 responsive={false}
               >
                 <EuiFlexItem grow={false}>

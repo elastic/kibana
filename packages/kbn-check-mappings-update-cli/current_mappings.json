@@ -585,6 +585,17 @@
           }
         }
       },
+      "observables": {
+        "properties": {
+          "typeKey": {
+            "type": "keyword"
+          },
+          "value": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      },
       "owner": {
         "type": "keyword"
       },
@@ -1593,6 +1604,7 @@
     }
   },
   "fleet-agent-policies": {
+    "dynamic": false,
     "properties": {
       "advanced_settings": {
         "index": false,
@@ -1962,6 +1974,7 @@
     "properties": {}
   },
   "ingest-agent-policies": {
+    "dynamic": false,
     "properties": {
       "advanced_settings": {
         "index": false,
@@ -2519,6 +2532,20 @@
       "events": {
         "format": "epoch_millis||strict_date_optional_time",
         "type": "date_range"
+      },
+      "expirationDate": {
+        "type": "date"
+      },
+      "title": {
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "updatedAt": {
+        "type": "date"
       }
     }
   },

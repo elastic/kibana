@@ -9,7 +9,7 @@
 
 import { ActionVariables, RuleType } from '@kbn/triggers-actions-ui-types';
 import { transformActionVariables } from './transforms';
-import { ALERTING_FEATURE_ID } from '../rule_form';
+import { ALERTING_FEATURE_ID } from '../common/constants';
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -289,5 +289,6 @@ function getAlertType(actionVariables: ActionVariables): RuleType {
     producer: ALERTING_FEATURE_ID,
     minimumLicenseRequired: 'basic',
     enabledInLicense: true,
+    category: 'my-category',
   };
 }

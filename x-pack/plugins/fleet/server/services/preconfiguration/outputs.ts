@@ -11,6 +11,7 @@ import utils from 'node:util';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 import { dump } from 'js-yaml';
+import pMap from 'p-map';
 
 const pbkdf2Async = utils.promisify(crypto.pbkdf2);
 
@@ -31,6 +32,8 @@ import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
 
 import { isDifferent } from './utils';
+
+export const MAX_CONCURRENT_OUTPUTS_OPERATIONS = 50;
 
 export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
   const { outputs: outputsOrUndefined } = config;
@@ -78,67 +81,69 @@ export async function createOrUpdatePreconfiguredOutputs(
     { ignoreNotFound: true }
   );
 
-  await Promise.all(
-    outputs.map(async (output) => {
-      const existingOutput = existingOutputs.find((o) => o.id === output.id);
+  const updateOrConfigureOutput = async (output: PreconfiguredOutput) => {
+    const existingOutput = existingOutputs.find((o) => o.id === output.id);
 
-      const { id, config, ...outputData } = output;
+    const { id, config, ...outputData } = output;
 
-      const configYaml = config ? dump(config) : undefined;
+    const configYaml = config ? dump(config) : undefined;
 
-      const data: NewOutput = {
-        ...outputData,
-        is_preconfigured: true,
-        config_yaml: configYaml ?? null,
-        // Set value to null to update these fields on update
-        ca_sha256: outputData.ca_sha256 ?? null,
-        ca_trusted_fingerprint: outputData.ca_trusted_fingerprint ?? null,
-        ssl: outputData.ssl ?? null,
-      } as NewOutput;
+    const data: NewOutput = {
+      ...outputData,
+      is_preconfigured: true,
+      config_yaml: configYaml ?? null,
+      // Set value to null to update these fields on update
+      ca_sha256: outputData.ca_sha256 ?? null,
+      ca_trusted_fingerprint: outputData.ca_trusted_fingerprint ?? null,
+      ssl: outputData.ssl ?? null,
+    } as NewOutput;
 
-      if (!data.hosts || data.hosts.length === 0) {
-        data.hosts = outputService.getDefaultESHosts();
+    if (!data.hosts || data.hosts.length === 0) {
+      data.hosts = outputService.getDefaultESHosts();
+    }
+
+    const isCreate = !existingOutput;
+
+    // field in allow edit are not updated through preconfiguration
+    if (!isCreate && output.allow_edit) {
+      for (const key of output.allow_edit) {
+        // @ts-expect-error
+        data[key] = existingOutput[key];
       }
+    }
 
-      const isCreate = !existingOutput;
+    const isUpdateWithNewData =
+      existingOutput && (await isPreconfiguredOutputDifferentFromCurrent(existingOutput, data));
 
-      // field in allow edit are not updated through preconfiguration
-      if (!isCreate && output.allow_edit) {
-        for (const key of output.allow_edit) {
-          // @ts-expect-error
-          data[key] = existingOutput[key];
+    if (isCreate || isUpdateWithNewData) {
+      const secretHashes = await hashSecrets(output);
+
+      if (isCreate) {
+        logger.debug(`Creating preconfigured output ${output.id}`);
+        await outputService.create(soClient, esClient, data, {
+          id,
+          fromPreconfiguration: true,
+          secretHashes,
+        });
+      } else if (isUpdateWithNewData) {
+        logger.debug(`Updating preconfigured output ${output.id}`);
+        await outputService.update(soClient, esClient, id, data, {
+          fromPreconfiguration: true,
+          secretHashes,
+        });
+        // Bump revision of all policies using that output
+        if (outputData.is_default || outputData.is_default_monitoring) {
+          await agentPolicyService.bumpAllAgentPolicies(esClient);
+        } else {
+          await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, id);
         }
       }
+    }
+  };
 
-      const isUpdateWithNewData =
-        existingOutput && (await isPreconfiguredOutputDifferentFromCurrent(existingOutput, data));
-
-      if (isCreate || isUpdateWithNewData) {
-        const secretHashes = await hashSecrets(output);
-
-        if (isCreate) {
-          logger.debug(`Creating preconfigured output ${output.id}`);
-          await outputService.create(soClient, esClient, data, {
-            id,
-            fromPreconfiguration: true,
-            secretHashes,
-          });
-        } else if (isUpdateWithNewData) {
-          logger.debug(`Updating preconfigured output ${output.id}`);
-          await outputService.update(soClient, esClient, id, data, {
-            fromPreconfiguration: true,
-            secretHashes,
-          });
-          // Bump revision of all policies using that output
-          if (outputData.is_default || outputData.is_default_monitoring) {
-            await agentPolicyService.bumpAllAgentPolicies(esClient);
-          } else {
-            await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, id);
-          }
-        }
-      }
-    })
-  );
+  await pMap(outputs, (output) => updateOrConfigureOutput(output), {
+    concurrency: MAX_CONCURRENT_OUTPUTS_OPERATIONS,
+  });
 }
 
 // Values recommended by NodeJS documentation

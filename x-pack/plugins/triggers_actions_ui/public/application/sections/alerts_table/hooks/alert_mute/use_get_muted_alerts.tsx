@@ -25,7 +25,7 @@ export const useGetMutedAlerts = (ruleIds: string[], enabled = true) => {
   return useQuery(
     triggersActionsUiQueriesKeys.mutedAlerts(),
     ({ signal }) =>
-      getMutedAlerts(http, { ids: ruleIds }, signal).then(({ data: rules }) =>
+      getMutedAlerts(http, { ruleIds }, signal).then(({ data: rules }) =>
         rules?.reduce((mutedAlerts, rule) => {
           mutedAlerts[rule.id] = rule.muted_alert_ids;
           return mutedAlerts;

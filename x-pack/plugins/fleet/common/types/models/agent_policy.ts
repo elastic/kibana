@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
 
 import type { agentPolicyStatuses } from '../../constants';
 import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
@@ -46,7 +46,7 @@ export interface NewAgentPolicy {
   global_data_tags?: GlobalDataTag[];
   monitoring_pprof_enabled?: boolean;
   monitoring_http?: {
-    enabled: boolean;
+    enabled?: boolean;
     host?: string;
     port?: number;
     buffer?: {

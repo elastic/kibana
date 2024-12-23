@@ -74,7 +74,7 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
   const { router, routes, logger, kibanaVersion, telemetryUsageCounter } = deps;
 
   routes.forEach((route) => {
-    const { method, path, params, options, routerOptions, handler } = route;
+    const { method, path, params, options, routerOptions, handler, security } = route;
 
     (router[method] as RouteRegistrar<typeof method, CasesRequestHandlerContext>)(
       {
@@ -85,6 +85,7 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
           query: params?.query ?? escapeHatch,
           body: params?.body ?? schema.nullable(escapeHatch),
         },
+        security,
       },
       async (context, request, response) => {
         let responseHeaders = {};

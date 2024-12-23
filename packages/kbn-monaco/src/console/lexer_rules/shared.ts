@@ -8,6 +8,11 @@
  */
 
 import { buildSqlRules, buildSqlStartRule, sqlLanguageAttributes } from './nested_sql';
+import {
+  buildPainlessRules,
+  buildPainlessStartRule,
+  painlessLanguageAttributes,
+} from './nested_painless';
 import { monaco } from '../../..';
 import { globals } from '../../common/lexer_rules';
 import { buildXjsonRules } from '../../xjson/lexer_rules/xjson';
@@ -16,11 +21,13 @@ export const consoleSharedLanguageConfiguration: monaco.languages.LanguageConfig
   brackets: [
     ['{', '}'],
     ['[', ']'],
+    ['(', ')'],
     ['"""', '"""\n'],
   ],
   autoClosingPairs: [
     { open: '{', close: '}' },
     { open: '[', close: ']' },
+    { open: '(', close: ')' },
     { open: '"', close: '"' },
     { open: '"""', close: '"""' },
   ],
@@ -100,10 +107,13 @@ xjsonRules.json_root = [
   matchToken('variable.template', /("\${\w+}")/),
   // @ts-expect-error include a rule to start sql highlighting
   buildSqlStartRule(),
+  // @ts-expect-error include a rule to start painless highlighting
+  buildPainlessStartRule(),
   ...xjsonRules.json_root,
 ];
 
 const sqlRules = buildSqlRules();
+const painlessRules = buildPainlessRules();
 /*
  Lexer rules that are shared between the Console editor and the Console output panel.
  */
@@ -111,6 +121,8 @@ export const consoleSharedLexerRules: monaco.languages.IMonarchLanguage = {
   ...(globals as any),
   defaultToken: 'invalid',
   ...sqlLanguageAttributes,
+  ...painlessLanguageAttributes,
+  keywords: [...sqlLanguageAttributes.keywords, ...painlessLanguageAttributes.keywords],
   tokenizer: {
     root: [
       // warning comment
@@ -138,5 +150,7 @@ export const consoleSharedLexerRules: monaco.languages.IMonarchLanguage = {
     ...xjsonRules,
     // include sql rules
     ...sqlRules,
+    // include painless rules
+    ...painlessRules,
   },
 };

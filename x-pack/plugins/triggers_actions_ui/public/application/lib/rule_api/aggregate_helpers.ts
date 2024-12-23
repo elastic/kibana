@@ -61,13 +61,13 @@ export const rewriteTagsBodyRes: RewriteRequestCase<GetRuleTagsResponse> = ({
 export interface LoadRuleAggregationsProps {
   http: HttpSetup;
   searchText?: string;
-  typesFilter?: string[];
   actionTypesFilter?: string[];
   ruleExecutionStatusesFilter?: string[];
   ruleLastRunOutcomesFilter?: string[];
   ruleStatusesFilter?: RuleStatus[];
   tagsFilter?: string[];
-  filterConsumers?: string[];
+  ruleTypeIds?: string[];
+  consumers?: string[];
 }
 
 export interface LoadRuleTagsProps {

@@ -10,6 +10,7 @@ import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '
 import { RewriteRequestCase, verifyAccessAndContext } from './lib';
 import { GetRuleExecutionKPIParams } from '../rules_client';
 import { ILicenseState } from '../lib';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from './constants';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -38,6 +39,7 @@ export const getRuleExecutionKPIRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_execution_kpi`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'internal',
       },
@@ -48,7 +50,8 @@ export const getRuleExecutionKPIRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const { id } = req.params;
         return res.ok({
           body: await rulesClient.getRuleExecutionKPI(rewriteReq({ id, ...req.query })),

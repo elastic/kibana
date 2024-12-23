@@ -138,22 +138,25 @@ export const AgentResponseSchema = schema.object({
   upgraded_at: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   upgrade_started_at: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   upgrade_details: schema.maybe(
-    schema.object({
-      target_version: schema.string(),
-      action_id: schema.string(),
-      state: AgentUpgradeStateTypeSchema,
-      metadata: schema.maybe(
-        schema.object({
-          scheduled_at: schema.maybe(schema.string()),
-          download_percent: schema.maybe(schema.number()),
-          download_rate: schema.maybe(schema.number()),
-          failed_state: schema.maybe(AgentUpgradeStateTypeSchema),
-          error_msg: schema.maybe(schema.string()),
-          retry_error_msg: schema.maybe(schema.string()),
-          retry_until: schema.maybe(schema.string()),
-        })
-      ),
-    })
+    schema.oneOf([
+      schema.literal(null),
+      schema.object({
+        target_version: schema.string(),
+        action_id: schema.string(),
+        state: AgentUpgradeStateTypeSchema,
+        metadata: schema.maybe(
+          schema.object({
+            scheduled_at: schema.maybe(schema.string()),
+            download_percent: schema.maybe(schema.number()),
+            download_rate: schema.maybe(schema.number()),
+            failed_state: schema.maybe(AgentUpgradeStateTypeSchema),
+            error_msg: schema.maybe(schema.string()),
+            retry_error_msg: schema.maybe(schema.string()),
+            retry_until: schema.maybe(schema.string()),
+          })
+        ),
+      }),
+    ])
   ),
   access_api_key_id: schema.maybe(schema.string()),
   default_api_key: schema.maybe(schema.string()),

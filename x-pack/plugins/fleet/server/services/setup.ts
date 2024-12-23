@@ -21,6 +21,8 @@ import { AUTO_UPDATE_PACKAGES, FLEET_SETUP_LOCK_TYPE } from '../../common/consta
 import type { PreconfigurationError } from '../../common/constants';
 import type { DefaultPackagesInstallationError, FleetSetupLock } from '../../common/types';
 
+import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS } from '../constants';
+
 import { appContextService } from './app_context';
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
 import {
@@ -60,6 +62,7 @@ import {
   ensureDeleteUnenrolledAgentsSetting,
   getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig,
 } from './preconfiguration/delete_unenrolled_agent_setting';
+import { backfillPackagePolicySupportsAgentless } from './backfill_agentless';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -303,6 +306,9 @@ async function createSetupSideEffects(
   await ensureAgentPoliciesFleetServerKeysAndPolicies({ soClient, esClient, logger });
   stepSpan?.end();
 
+  logger.debug('Backfilling package policy supports_agentless field');
+  await backfillPackagePolicySupportsAgentless(esClient);
+
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
     ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
@@ -359,7 +365,7 @@ export async function ensureFleetGlobalEsAssets(
           );
         });
       },
-      { concurrency: 10 }
+      { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
     );
   }
 }

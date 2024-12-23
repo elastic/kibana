@@ -450,10 +450,6 @@
                 "path": "src/plugins/visualizations/public/wizard/search_selection/search_selection.tsx"
               },
               {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/components/source_picker.tsx"
               }
@@ -526,6 +522,20 @@
             "type": "string",
             "tags": [],
             "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects_finder/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsFinder",
+            "id": "def-common.FinderAttributes.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
             "description": [],
             "signature": [
               "string | undefined"

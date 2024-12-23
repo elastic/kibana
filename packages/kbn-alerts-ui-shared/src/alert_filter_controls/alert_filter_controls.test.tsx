@@ -10,7 +10,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AlertFilterControls, AlertFilterControlsProps } from './alert_filter_controls';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { DEFAULT_CONTROLS } from './constants';
 import { useAlertsDataView } from '../common/hooks/use_alerts_data_view';
 import { FilterGroup } from './filter_group';
@@ -56,7 +55,7 @@ const ControlGroupRenderer = (() => (
 
 describe('AlertFilterControls', () => {
   const props: AlertFilterControlsProps = {
-    featureIds: [AlertConsumers.STACK_ALERTS],
+    ruleTypeIds: ['.es-query'],
     defaultControls: DEFAULT_CONTROLS,
     dataViewSpec: {
       id: 'alerts-filters-dv',

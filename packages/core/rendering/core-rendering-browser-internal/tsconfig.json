@@ -27,7 +27,9 @@
     "@kbn/core-analytics-browser",
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
-    "@kbn/core-rendering-browser"
+    "@kbn/core-rendering-browser",
+    "@kbn/core-user-profile-browser",
+    "@kbn/core-user-profile-browser-mocks"
   ],
   "exclude": [
     "target/**/*",

@@ -10,10 +10,12 @@ import { INTERNAL_BULK_GET_CASES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { escapeHatch } from '../utils';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const bulkGetCasesRoute = createCasesRoute({
   method: 'post',
   path: INTERNAL_BULK_GET_CASES_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     body: escapeHatch,
   },

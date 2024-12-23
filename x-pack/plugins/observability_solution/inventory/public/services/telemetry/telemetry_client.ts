@@ -14,6 +14,7 @@ import {
   type EntityInventoryViewedParams,
   type EntityInventorySearchQuerySubmittedParams,
   type EntityViewClickedParams,
+  type EntityInventoryEntityTypeFilteredParams,
 } from './types';
 
 export class TelemetryClient implements ITelemetryClient {
@@ -35,5 +36,11 @@ export class TelemetryClient implements ITelemetryClient {
 
   public reportEntityViewClicked = (params: EntityViewClickedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.ENTITY_VIEW_CLICKED, params);
+  };
+
+  public reportEntityInventoryEntityTypeFiltered = (
+    params: EntityInventoryEntityTypeFilteredParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.ENTITY_INVENTORY_ENTITY_TYPE_FILTERED, params);
   };
 }

@@ -11,6 +11,7 @@ import { ILicenseState } from '../lib';
 import { GetGlobalExecutionLogParams } from '../rules_client';
 import { RewriteRequestCase, verifyAccessAndContext, rewriteNamespaces } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from './constants';
 
 const sortOrderSchema = schema.oneOf([schema.literal('asc'), schema.literal('desc')]);
 
@@ -62,6 +63,7 @@ export const getGlobalExecutionLogRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/_global_execution_logs`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'internal',
       },
@@ -71,7 +73,8 @@ export const getGlobalExecutionLogRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         return res.ok({
           body: await rulesClient.getGlobalExecutionLogWithAuth(rewriteReq(req.query)),
         });

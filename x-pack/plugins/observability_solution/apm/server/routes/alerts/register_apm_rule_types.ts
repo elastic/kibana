@@ -8,10 +8,7 @@
 import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { IBasePath, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import {
-  PluginSetupContract as AlertingPluginSetupContract,
-  type IRuleTypeAlerts,
-} from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup, IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -100,7 +97,7 @@ export const ApmRuleTypeAlertDefinition: IRuleTypeAlerts<ObservabilityApmAlert> 
 };
 
 export interface RegisterRuleDependencies {
-  alerting: AlertingPluginSetupContract;
+  alerting: AlertingServerSetup;
   basePath: IBasePath;
   getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMIndices>;
   apmConfig: APMConfig;

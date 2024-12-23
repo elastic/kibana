@@ -13,6 +13,7 @@ import {
   DeleteRuleRequestParamsV1,
 } from '../../../../../common/routes/rule/apis/delete';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const deleteRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -21,6 +22,7 @@ export const deleteRuleRoute = (
   router.delete(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'public',
         summary: `Delete a rule`,
@@ -48,7 +50,8 @@ export const deleteRuleRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
 
         const params: DeleteRuleRequestParamsV1 = req.params;
 

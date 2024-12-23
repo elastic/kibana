@@ -81,7 +81,7 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
                 title={drilldown.error}
                 aria-label={drilldown.error}
                 data-test-subj={`drilldownError-${drilldown.id}`}
-                style={{ marginLeft: '4px' }} /* a bit of spacing from text */
+                css={{ marginLeft: '4px' }} /* a bit of spacing from text */
               />
             </EuiToolTip>
           )}

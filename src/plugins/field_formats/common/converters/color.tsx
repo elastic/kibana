@@ -23,7 +23,7 @@ export class ColorFormat extends FieldFormat {
   static title = i18n.translate('fieldFormats.color.title', {
     defaultMessage: 'Color',
   });
-  static fieldType = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];
+  static fieldType = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING, KBN_FIELD_TYPES.BOOLEAN];
 
   getParamDefaults() {
     return {
@@ -32,7 +32,7 @@ export class ColorFormat extends FieldFormat {
     };
   }
 
-  findColorRuleForVal(val: string | number) {
+  findColorRuleForVal(val: string | number | boolean) {
     switch (this.param('fieldType')) {
       case 'string':
         return findLast(this.param('colors'), (colorParam: typeof DEFAULT_CONVERTER_COLOR) => {
@@ -49,6 +49,10 @@ export class ColorFormat extends FieldFormat {
           const [start, end] = range.split(':');
           // @ts-expect-error upgrade typescript v5.1.6
           return val >= Number(start) && val <= Number(end);
+        });
+      case 'boolean':
+        return findLast(this.param('colors'), ({ boolean }) => {
+          return boolean === val.toString();
         });
 
       default:

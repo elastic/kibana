@@ -95,9 +95,9 @@
     "@kbn/presentation-containers",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/fields-metadata-plugin",
+    "@kbn/discover-contextual-components",
     "@kbn/logs-data-access-plugin",
     "@kbn/core-lifecycle-browser",
-    "@kbn/discover-contextual-components",
     "@kbn/esql-ast",
     "@kbn/discover-shared-plugin"
   ],

@@ -57,6 +57,12 @@ const getDataViewRouteFactory =
     router.versioned.get({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'Authorization provided by saved objects client',
+          },
+        },
         validate: {
           request: {
             params: schema.object(

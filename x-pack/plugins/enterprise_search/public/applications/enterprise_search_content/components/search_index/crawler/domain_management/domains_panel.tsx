@@ -47,7 +47,7 @@ export const DomainsPanel: React.FC = () => {
             data-telemetry-id="entSearchContent-crawler-domainManagement-addDomain-addDomain"
             onClick={openFlyout}
             size="s"
-            color="success"
+            color="primary"
             iconType="plusInCircle"
           >
             {i18n.translate('xpack.enterpriseSearch.crawler.addDomainFlyout.openButtonLabel', {

@@ -24,7 +24,8 @@ export const aggregateRulesRequestBodySchema = schema.object({
     )
   ),
   filter: schema.maybe(schema.string()),
-  filter_consumers: schema.maybe(schema.arrayOf(schema.string())),
+  rule_type_ids: schema.maybe(schema.arrayOf(schema.string())),
+  consumers: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 export const aggregateRulesResponseBodySchema = schema.object({

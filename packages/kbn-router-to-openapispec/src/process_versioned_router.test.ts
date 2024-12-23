@@ -12,9 +12,9 @@ import type { CoreVersionedRouter } from '@kbn/core-http-router-server-internal'
 import { get } from 'lodash';
 import { OasConverter } from './oas_converter';
 import {
-  processVersionedRouter,
-  extractVersionedResponses,
   extractVersionedRequestBodies,
+  extractVersionedResponses,
+  processVersionedRouter,
 } from './process_versioned_router';
 import { VersionedRouterRoute } from '@kbn/core-http-server';
 import { createOpIdGenerator } from './util';
@@ -27,9 +27,9 @@ beforeEach(() => {
 describe('extractVersionedRequestBodies', () => {
   test('handles full request config as expected', () => {
     expect(
-      extractVersionedRequestBodies(createTestRoute(), oasConverter, ['application/json'])
+      extractVersionedRequestBodies(createInternalTestRoute(), oasConverter, ['application/json'])
     ).toEqual({
-      'application/json; Elastic-Api-Version=2023-10-31': {
+      'application/json; Elastic-Api-Version=1': {
         schema: {
           additionalProperties: false,
           properties: {
@@ -41,7 +41,7 @@ describe('extractVersionedRequestBodies', () => {
           type: 'object',
         },
       },
-      'application/json; Elastic-Api-Version=2024-12-31': {
+      'application/json; Elastic-Api-Version=2': {
         schema: {
           additionalProperties: false,
           properties: {
@@ -60,12 +60,12 @@ describe('extractVersionedRequestBodies', () => {
 describe('extractVersionedResponses', () => {
   test('handles full response config as expected', () => {
     expect(
-      extractVersionedResponses(createTestRoute(), oasConverter, ['application/test+json'])
+      extractVersionedResponses(createInternalTestRoute(), oasConverter, ['application/test+json'])
     ).toEqual({
       200: {
-        description: 'OK response 2023-10-31\nOK response 2024-12-31', // merge multiple version descriptions
+        description: 'OK response 1\nOK response 2', // merge multiple version descriptions
         content: {
-          'application/test+json; Elastic-Api-Version=2023-10-31': {
+          'application/test+json; Elastic-Api-Version=1': {
             schema: {
               type: 'object',
               additionalProperties: false,
@@ -75,7 +75,7 @@ describe('extractVersionedResponses', () => {
               required: ['bar'],
             },
           },
-          'application/test+json; Elastic-Api-Version=2024-12-31': {
+          'application/test+json; Elastic-Api-Version=2': {
             schema: {
               type: 'object',
               additionalProperties: false,
@@ -88,9 +88,9 @@ describe('extractVersionedResponses', () => {
         },
       },
       404: {
-        description: 'Not Found response 2023-10-31',
+        description: 'Not Found response 1',
         content: {
-          'application/test2+json; Elastic-Api-Version=2023-10-31': {
+          'application/test2+json; Elastic-Api-Version=1': {
             schema: {
               type: 'object',
               additionalProperties: false,
@@ -104,7 +104,7 @@ describe('extractVersionedResponses', () => {
       },
       500: {
         content: {
-          'application/test2+json; Elastic-Api-Version=2024-12-31': {
+          'application/test2+json; Elastic-Api-Version=2': {
             schema: {
               type: 'object',
               additionalProperties: false,
@@ -126,22 +126,21 @@ describe('processVersionedRouter', () => {
       { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
       new OasConverter(),
       createOpIdGenerator(),
-      {}
+      { access: 'public', version: '2023-10-31' }
     );
 
     expect(Object.keys(get(baseCase, 'paths["/foo"].get.responses.200.content')!)).toEqual([
-      'application/test+json; Elastic-Api-Version=2023-10-31',
-      'application/test+json; Elastic-Api-Version=2024-12-31',
+      'application/test+json',
     ]);
 
     const filteredCase = processVersionedRouter(
       { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
       new OasConverter(),
       createOpIdGenerator(),
-      { version: '2023-10-31' }
+      { version: '2024-12-31', access: 'public' }
     );
     expect(Object.keys(get(filteredCase, 'paths["/foo"].get.responses.200.content')!)).toEqual([
-      'application/test+json; Elastic-Api-Version=2023-10-31',
+      'application/test+json',
     ]);
   });
 
@@ -150,7 +149,7 @@ describe('processVersionedRouter', () => {
       { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
       new OasConverter(),
       createOpIdGenerator(),
-      {}
+      { version: '2023-10-31', access: 'public' }
     );
     expect(results.paths['/foo']).toBeDefined();
 
@@ -214,6 +213,73 @@ const createTestRoute: () => VersionedRouterRoute = () => ({
           response: {
             200: {
               description: 'OK response 2024-12-31',
+              bodyContentType: 'application/test+json',
+              body: () => schema.object({ bar2: schema.number({ min: 1, max: 99 }) }),
+            },
+            500: {
+              bodyContentType: 'application/test2+json',
+              body: () => schema.object({ ok: schema.literal(false) }),
+            },
+            unsafe: { body: false },
+          },
+        }),
+      },
+    },
+  ],
+});
+
+const createInternalTestRoute: () => VersionedRouterRoute = () => ({
+  path: '/foo',
+  method: 'get',
+  isVersioned: true,
+  options: {
+    access: 'internal',
+    deprecated: true,
+    discontinued: 'discontinued versioned router',
+    options: { body: { access: ['application/test+json'] } as any },
+    security: {
+      authz: {
+        requiredPrivileges: ['manage_spaces'],
+      },
+    },
+    description: 'This is a test route description.',
+  },
+  handlers: [
+    {
+      fn: jest.fn(),
+      options: {
+        version: '1',
+        validate: () => ({
+          request: {
+            body: schema.object({ foo: schema.string() }),
+          },
+          response: {
+            200: {
+              description: 'OK response 1',
+              bodyContentType: 'application/test+json',
+              body: () => schema.object({ bar: schema.number({ min: 1, max: 99 }) }),
+            },
+            404: {
+              description: 'Not Found response 1',
+              bodyContentType: 'application/test2+json',
+              body: () => schema.object({ ok: schema.literal(false) }),
+            },
+            unsafe: { body: false },
+          },
+        }),
+      },
+    },
+    {
+      fn: jest.fn(),
+      options: {
+        version: '2',
+        validate: () => ({
+          request: {
+            body: schema.object({ foo2: schema.string() }),
+          },
+          response: {
+            200: {
+              description: 'OK response 2',
               bodyContentType: 'application/test+json',
               body: () => schema.object({ bar2: schema.number({ min: 1, max: 99 }) }),
             },

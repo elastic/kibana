@@ -69,7 +69,7 @@ export const SavedSearchEmbeddableBase: FC<PropsWithChildren<SavedSearchEmbeddab
         </EuiFlexItem>
       )}
 
-      <EuiFlexItem style={{ minHeight: 0 }}>{children}</EuiFlexItem>
+      <EuiFlexItem css={{ minHeight: 0 }}>{children}</EuiFlexItem>
 
       {Boolean(append) && <EuiFlexItem grow={false}>{append}</EuiFlexItem>}
 

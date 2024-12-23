@@ -31,7 +31,8 @@ const mockSendGetAgents = sendGetAgents as jest.Mock;
 const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock;
 const mockUsePollingIncomingData = usePollingIncomingData as jest.Mock;
 
-describe('AgentlessEnrollmentFlyout', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/201738
+describe.skip('AgentlessEnrollmentFlyout', () => {
   const onClose = jest.fn();
   const packagePolicy: PackagePolicy = {
     id: 'test-package-policy-id',

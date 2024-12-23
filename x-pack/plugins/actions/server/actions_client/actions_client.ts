@@ -18,7 +18,6 @@ import {
   Logger,
 } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
-import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { KueryNode } from '@kbn/es-query';
 import { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
@@ -46,7 +45,6 @@ import {
 } from '../types';
 import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
 import {
-  ExecutionEnqueuer,
   ExecuteOptions as EnqueueExecutionOptions,
   BulkExecutionEnqueuer,
   ExecutionResponse,
@@ -92,7 +90,6 @@ export interface ConstructorOptions {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
-  ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
@@ -112,7 +109,6 @@ export interface ActionsClientContext {
   actionExecutor: ActionExecutorContract;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
-  ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
@@ -131,7 +127,6 @@ export class ActionsClient {
     unsecuredSavedObjectsClient,
     inMemoryConnectors,
     actionExecutor,
-    ephemeralExecutionEnqueuer,
     bulkExecutionEnqueuer,
     request,
     authorization,
@@ -148,7 +143,6 @@ export class ActionsClient {
       kibanaIndices,
       inMemoryConnectors,
       actionExecutor,
-      ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
       authorization,
@@ -502,18 +496,6 @@ export class ActionsClient {
       )
     );
     return this.context.bulkExecutionEnqueuer(this.context.unsecuredSavedObjectsClient, options);
-  }
-
-  public async ephemeralEnqueuedExecution(options: EnqueueExecutionOptions): Promise<RunNowResult> {
-    await this.context.authorization.ensureAuthorized({
-      operation: 'execute',
-      actionTypeId: options.actionTypeId,
-    });
-
-    return this.context.ephemeralExecutionEnqueuer(
-      this.context.unsecuredSavedObjectsClient,
-      options
-    );
   }
 
   public async listTypes({

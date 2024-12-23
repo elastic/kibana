@@ -15,6 +15,12 @@ export function registerResolveIndexRoute(router: IRouter): void {
   router.get(
     {
       path: '/internal/index-pattern-management/resolve_index/{query}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Authorization provided by Elasticsearch',
+        },
+      },
       validate: {
         params: schema.object({
           query: schema.string(),
@@ -41,7 +47,9 @@ export function registerResolveIndexRoute(router: IRouter): void {
         });
         return res.ok({ body });
       } catch (e) {
-        if (e?.meta.statusCode === 404) {
+        // 403: no_such_remote_cluster_exception
+        // 404: index_not_found_exception
+        if ([403, 404].includes(e?.meta.statusCode)) {
           return res.notFound({ body: { message: e.meta?.body?.error?.reason } });
         } else {
           throw getKbnServerError(e);

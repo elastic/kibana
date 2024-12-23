@@ -59,11 +59,11 @@ describe('AlertsBadge', () => {
         provider: null,
       },
     };
-    mockAsKqlFilter.mockReturnValue('host.name: foo');
+    mockAsKqlFilter.mockReturnValue('host.name: "foo"');
 
     render(<AlertsBadge entity={entity} />);
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.getAttribute('href')).toEqual(
-      "/app/observability/alerts?_a=(kuery:'host.name: foo',status:active)"
+      `/app/observability/alerts?_a=(kuery:'host.name: "foo"',status:active)`
     );
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.textContent).toEqual('1');
   });
@@ -86,11 +86,11 @@ describe('AlertsBadge', () => {
 
       alertsCount: 5,
     };
-    mockAsKqlFilter.mockReturnValue('service.name: bar');
+    mockAsKqlFilter.mockReturnValue('service.name: "bar"');
 
     render(<AlertsBadge entity={entity} />);
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.getAttribute('href')).toEqual(
-      "/app/observability/alerts?_a=(kuery:'service.name: bar',status:active)"
+      `/app/observability/alerts?_a=(kuery:'service.name: "bar"',status:active)`
     );
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.textContent).toEqual('5');
   });
@@ -114,11 +114,11 @@ describe('AlertsBadge', () => {
       alertsCount: 2,
     };
 
-    mockAsKqlFilter.mockReturnValue('service.name: bar AND service.environment: prod');
+    mockAsKqlFilter.mockReturnValue('service.name: "bar" AND service.environment: "prod"');
 
     render(<AlertsBadge entity={entity} />);
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.getAttribute('href')).toEqual(
-      "/app/observability/alerts?_a=(kuery:'service.name: bar AND service.environment: prod',status:active)"
+      `/app/observability/alerts?_a=(kuery:'service.name: "bar" AND service.environment: "prod"',status:active)`
     );
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.textContent).toEqual('2');
   });

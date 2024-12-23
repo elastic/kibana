@@ -7,7 +7,7 @@
 
 import React, { lazy, memo } from 'react';
 import { Route } from '@kbn/shared-ux-router';
-import { act, cleanup } from '@testing-library/react';
+import { act } from '@testing-library/react';
 
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
 import type {
@@ -63,10 +63,6 @@ describe('When on integration detail', () => {
     testRenderer = createIntegrationsTestRendererMock();
     mockedApi = mockApiCalls(testRenderer.startServices.http);
     act(() => testRenderer.mountHistory.push(detailPageUrlPath));
-  });
-
-  afterEach(() => {
-    cleanup();
   });
 
   describe('and the package is installed', () => {

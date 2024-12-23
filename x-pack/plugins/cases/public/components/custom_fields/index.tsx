@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 
 import * as i18n from './translations';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 import { CustomFieldsList } from './custom_fields_list';
@@ -38,8 +37,6 @@ const CustomFieldsComponent: React.FC<Props> = ({
   handleEditCustomField,
   customFields,
 }) => {
-  const { permissions } = useCasesContext();
-  const canAddCustomFields = permissions.create && permissions.update;
   const [error, setError] = useState<boolean>(false);
 
   const onAddCustomField = useCallback(() => {
@@ -64,7 +61,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
     setError(false);
   }
 
-  return canAddCustomFields ? (
+  return (
     <EuiDescribedFormGroup
       fullWidth
       title={<h3>{i18n.TITLE}</h3>}
@@ -113,10 +110,11 @@ const CustomFieldsComponent: React.FC<Props> = ({
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
+
         <EuiSpacer size="s" />
       </EuiPanel>
     </EuiDescribedFormGroup>
-  ) : null;
+  );
 };
 CustomFieldsComponent.displayName = 'CustomFields';
 

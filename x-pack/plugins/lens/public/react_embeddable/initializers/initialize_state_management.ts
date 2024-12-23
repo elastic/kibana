@@ -11,6 +11,7 @@ import {
   type PublishesDataViews,
   type PublishesSavedObjectId,
   type StateComparators,
+  type PublishesRendered,
 } from '@kbn/presentation-publishing';
 import { noop } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -24,6 +25,7 @@ export interface StateManagementConfig {
     PublishesSavedObjectId &
     PublishesDataViews &
     PublishesDataLoading &
+    PublishesRendered &
     PublishesBlockingError;
   serialize: () => Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>;
   comparators: StateComparators<
@@ -53,6 +55,7 @@ export function initializeStateManagement(
 
   const [dataViews$] = buildObservableVariable<DataView[] | undefined>(internalApi.dataViews);
   const [dataLoading$] = buildObservableVariable<boolean | undefined>(internalApi.dataLoading$);
+  const [rendered$] = buildObservableVariable<boolean>(internalApi.hasRenderCompleted$);
   const [abortController$, abortControllerComparator] = buildObservableVariable<
     AbortController | undefined
   >(internalApi.expressionAbortController$);
@@ -70,6 +73,7 @@ export function initializeStateManagement(
       dataViews: dataViews$,
       dataLoading: dataLoading$,
       blockingError: blockingError$,
+      rendered$,
     },
     serialize: () => {
       return {

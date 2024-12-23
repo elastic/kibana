@@ -40,7 +40,7 @@ jest.mock('../../../lib/rule_api/bulk_disable', () => ({
 jest.mock('../../../lib/rule_api/get_rule', () => ({
   loadRule: jest.fn(),
 }));
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/resolve_rule', () => ({
+jest.mock('@kbn/response-ops-rule-form/src/common/apis/resolve_rule', () => ({
   resolveRule: jest.fn(),
 }));
 jest.mock('../../../lib/rule_api/rule_types', () => ({
@@ -59,7 +59,9 @@ const { bulkDeleteRules } = jest.requireMock('../../../lib/rule_api/bulk_delete'
 const { bulkEnableRules } = jest.requireMock('../../../lib/rule_api/bulk_enable');
 const { bulkDisableRules } = jest.requireMock('../../../lib/rule_api/bulk_disable');
 const { loadRule } = jest.requireMock('../../../lib/rule_api/get_rule');
-const { resolveRule } = jest.requireMock('@kbn/alerts-ui-shared/src/common/apis/resolve_rule');
+const { resolveRule } = jest.requireMock(
+  '@kbn/response-ops-rule-form/src/common/apis/resolve_rule'
+);
 const { loadRuleTypes } = jest.requireMock('../../../lib/rule_api/rule_types');
 const { loadActionErrorLog } = jest.requireMock('../../../lib/rule_api/load_action_error_log');
 

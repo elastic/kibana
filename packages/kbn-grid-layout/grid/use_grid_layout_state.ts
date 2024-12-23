@@ -8,25 +8,32 @@
  */
 
 import { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, debounceTime } from 'rxjs';
-
+import { BehaviorSubject, combineLatest, debounceTime } from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
+import { cloneDeep } from 'lodash';
 
 import {
   ActivePanel,
+  GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
   GridSettings,
   PanelInteractionEvent,
   RuntimeGridSettings,
 } from './types';
+import { shouldShowMobileView } from './utils/mobile_view';
+import { resolveGridRow } from './utils/resolve_grid_row';
 
 export const useGridLayoutState = ({
   layout,
   gridSettings,
+  expandedPanelId,
+  accessMode,
 }: {
   layout: GridLayoutData;
   gridSettings: GridSettings;
+  expandedPanelId?: string;
+  accessMode: GridAccessMode;
 }): {
   gridLayoutStateManager: GridLayoutStateManager;
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
@@ -34,8 +41,32 @@ export const useGridLayoutState = ({
   const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
   const panelRefs = useRef<Array<{ [id: string]: HTMLDivElement | null }>>([]);
 
+  const expandedPanelId$ = useMemo(
+    () => new BehaviorSubject<string | undefined>(expandedPanelId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+  useEffect(() => {
+    expandedPanelId$.next(expandedPanelId);
+  }, [expandedPanelId, expandedPanelId$]);
+
+  const accessMode$ = useMemo(
+    () => new BehaviorSubject<GridAccessMode>(accessMode),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  useEffect(() => {
+    accessMode$.next(accessMode);
+  }, [accessMode, accessMode$]);
+
   const gridLayoutStateManager = useMemo(() => {
-    const gridLayout$ = new BehaviorSubject<GridLayoutData>(layout);
+    const resolvedLayout = cloneDeep(layout);
+    resolvedLayout.forEach((row, rowIndex) => {
+      resolvedLayout[rowIndex] = resolveGridRow(row);
+    });
+
+    const gridLayout$ = new BehaviorSubject<GridLayoutData>(resolvedLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
     const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
@@ -53,9 +84,12 @@ export const useGridLayoutState = ({
       panelIds$,
       gridLayout$,
       activePanel$,
+      accessMode$,
       gridDimensions$,
       runtimeSettings$,
       interactionEvent$,
+      expandedPanelId$,
+      isMobileView$: new BehaviorSubject<boolean>(shouldShowMobileView(accessMode)),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -64,15 +98,16 @@ export const useGridLayoutState = ({
     /**
      * debounce width changes to avoid unnecessary column width recalculation.
      */
-    const resizeSubscription = gridLayoutStateManager.gridDimensions$
+    const resizeSubscription = combineLatest([gridLayoutStateManager.gridDimensions$, accessMode$])
       .pipe(debounceTime(250))
-      .subscribe((dimensions) => {
+      .subscribe(([dimensions, currentAccessMode]) => {
         const elementWidth = dimensions.width ?? 0;
         const columnPixelWidth =
           (elementWidth - gridSettings.gutterSize * (gridSettings.columnCount - 1)) /
           gridSettings.columnCount;
 
         gridLayoutStateManager.runtimeSettings$.next({ ...gridSettings, columnPixelWidth });
+        gridLayoutStateManager.isMobileView$.next(shouldShowMobileView(currentAccessMode));
       });
 
     return () => {

@@ -15,6 +15,7 @@ Some features of the UA are only needed when upgrading to a new major version. T
 * ML Snapshots (`featureSet.mlSnapshots`): Machine learning Upgrade mode can be toggled from outside Kibana, the purpose of this feature guard is to hide all ML related deprecations from the end user until the next major upgrade.
 When we want to enable ML model snapshot deprecation warnings again we need to change the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION` to something higher than 7.0.0 in the Elasticsearch code.
 * Migrating system indices (`featureSet.migrateSystemIndices`): Migrating system indices should only be enabled for major version upgrades. This config hides the second step from the UA UI for migrating system indices.
+* Reindex Data Streams (`featureSet.migrateDataStreams`): Migrating deprecated Data streams should only be enabled for major version upgrades. The purpose of this feature guard is to hide all data streams related deprecations from the end user until the next major upgrade.
 * Reindex corrective actions (`featureSet.reindexCorrectiveActions`): Deprecations with reindexing corrective actions are only enabled for major version upgrades. Currently, the reindex actions include some logic that is specific to the [8.0 upgrade](https://github.com/elastic/kibana/blob/main/x-pack/plugins/upgrade_assistant/server/lib/reindexing/index_settings.ts). End users could get into a bad situation if this is enabled before this logic is fixed.
 
 ## Deprecations
@@ -28,7 +29,7 @@ These surface runtime deprecations, e.g. a Painless script that uses a deprecate
 request to a deprecated API. These are also generally surfaced as deprecation headers within the
 response. Even if the cluster state is good, app maintainers need to watch the logs in case
 deprecations are discovered as data is migrated. Starting in 7.x, deprecation logs can be written to a file or a data stream ([#58924](https://github.com/elastic/elasticsearch/pull/58924)). When the data stream exists, the Upgrade Assistant provides a way to analyze the logs through Observability or Discover ([#106521](https://github.com/elastic/kibana/pull/106521)).
-* [**Kibana deprecations API.**](https://github.com/elastic/kibana/blob/main/src/core/server/deprecations/README.mdx) This is information about deprecated features and configs in Kibana. These deprecations are only communicated to the user if the deployment is using these features. Kibana engineers are responsible for adding deprecations to the deprecations API for their respective team.
+* [**Kibana deprecations API.**](https://github.com/elastic/kibana/blob/main/src/core/server/docs/kib_core_deprecations_service.mdx) This is information about deprecated features and configs in Kibana. These deprecations are only communicated to the user if the deployment is using these features. Kibana engineers are responsible for adding deprecations to the deprecations API for their respective team.
 
 ### Fixing problems
 

@@ -10,8 +10,6 @@ import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react'
 
 import type { ActionStatus } from '../../../../../types';
 
-export const inProgressTitleColor = '#0077CC';
-
 const actionNames: {
   [key: string]: { inProgressText: string; completedText: string; cancelledText: string };
 } = {

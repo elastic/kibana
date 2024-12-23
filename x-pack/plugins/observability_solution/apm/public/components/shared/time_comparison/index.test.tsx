@@ -8,7 +8,6 @@
 import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { expectTextsInDocument, expectTextsNotInDocument } from '../../../utils/test_helpers';
 import { TimeComparison } from '.';
 import * as urlHelpers from '../links/url_helpers';
@@ -24,6 +23,7 @@ import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plug
 import { merge } from 'lodash';
 import type { ApmMlJob } from '../../../../common/anomaly_detection/apm_ml_job';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { EuiThemeProvider } from '@elastic/eui';
 
 const ML_AD_JOBS = {
   jobs: [

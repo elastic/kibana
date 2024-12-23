@@ -549,7 +549,7 @@
             "section": "def-common.RequestAdapter",
             "text": "RequestAdapter"
           },
-          " | undefined; isChartLoading?: boolean | undefined; onVisContextChanged?: ((nextVisContext: ",
+          " | undefined; isChartLoading?: boolean | undefined; breakdownField?: string | undefined; onBreakdownFieldChange?: ((breakdownField: string | undefined) => void) | undefined; onVisContextChanged?: ((nextVisContext: ",
           {
             "pluginId": "unifiedHistogram",
             "scope": "public",
@@ -1071,22 +1071,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramState.breakdownField",
-            "type": "string",
-            "tags": [],
-            "label": "breakdownField",
-            "description": [
-              "\nThe current field used for the breakdown"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
           {
             "parentPluginId": "unifiedHistogram",
             "id": "def-public.UnifiedHistogramState.currentSuggestionContext",
@@ -1990,7 +1974,7 @@
         "signature": [
           "{ refetch: () => void; } & Pick<",
           "UnifiedHistogramStateService",
-          ", \"state$\" | \"setChartHidden\" | \"setTopPanelHeight\" | \"setBreakdownField\" | \"setTimeInterval\" | \"setTotalHits\">"
+          ", \"state$\" | \"setChartHidden\" | \"setTopPanelHeight\" | \"setTimeInterval\" | \"setTotalHits\">"
         ],
         "path": "src/plugins/unified_histogram/public/container/container.tsx",
         "deprecated": false,
@@ -2031,7 +2015,7 @@
             "section": "def-common.RequestAdapter",
             "text": "RequestAdapter"
           },
-          " | undefined; isChartLoading?: boolean | undefined; onVisContextChanged?: ((nextVisContext: ",
+          " | undefined; isChartLoading?: boolean | undefined; breakdownField?: string | undefined; onBreakdownFieldChange?: ((breakdownField: string | undefined) => void) | undefined; onVisContextChanged?: ((nextVisContext: ",
           {
             "pluginId": "unifiedHistogram",
             "scope": "public",

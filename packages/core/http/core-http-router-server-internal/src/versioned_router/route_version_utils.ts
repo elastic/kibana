@@ -25,11 +25,11 @@ const INTERNAL_VERSION_REGEX = /^[1-9][0-9]*$/;
  * release date we only allow one public version temporarily.
  * @internal
  */
-export const ALLOWED_PUBLIC_VERSION = '2023-10-31';
+export const BASE_PUBLIC_VERSION = '2023-10-31';
 
 export function isAllowedPublicVersion(version: string): undefined | string {
-  if (ALLOWED_PUBLIC_VERSION !== version) {
-    return `Invalid public version, for now please use "${ALLOWED_PUBLIC_VERSION}" as the version for all public routes. Received "${version}".}"`;
+  if (BASE_PUBLIC_VERSION !== version) {
+    return `Invalid public version, for now please use "${BASE_PUBLIC_VERSION}" as the version for all public routes. Received "${version}".}"`;
   }
 }
 

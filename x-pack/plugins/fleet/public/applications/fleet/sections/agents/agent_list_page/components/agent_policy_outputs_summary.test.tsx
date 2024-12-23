@@ -15,7 +15,8 @@ import type { OutputsForAgentPolicy } from '../../../../../../../common/types';
 
 import { AgentPolicyOutputsSummary } from './agent_policy_outputs_summary';
 
-describe('MultipleAgentPolicySummaryLine', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/200819
+describe.skip('MultipleAgentPolicySummaryLine', () => {
   let testRenderer: TestRenderer;
   const outputsForPolicy: OutputsForAgentPolicy = {
     agentPolicyId: 'policy-1',

@@ -10,6 +10,7 @@ import { HttpLogic } from '../../../shared/http';
 export interface GenerateConnectorNamesApiArgs {
   connectorName?: string;
   connectorType?: string;
+  isManagedConnector?: boolean;
 }
 
 export interface GenerateConnectorNamesApiResponse {
@@ -19,14 +20,16 @@ export interface GenerateConnectorNamesApiResponse {
 }
 
 export const generateConnectorNames = async (
-  { connectorType, connectorName }: GenerateConnectorNamesApiArgs = { connectorType: 'custom' }
+  { connectorType, connectorName, isManagedConnector }: GenerateConnectorNamesApiArgs = {
+    connectorType: 'custom',
+  }
 ) => {
   if (connectorType === '') {
     connectorType = 'custom';
   }
   const route = `/internal/enterprise_search/connectors/generate_connector_name`;
   return await HttpLogic.values.http.post(route, {
-    body: JSON.stringify({ connectorName, connectorType }),
+    body: JSON.stringify({ connectorName, connectorType, isManagedConnector }),
   });
 };
 

@@ -57,6 +57,7 @@ const docLinks = {
     indexPatterns: {},
     scriptedFields: {},
     runtimeFields: {},
+    query: {},
   } as any,
 };
 

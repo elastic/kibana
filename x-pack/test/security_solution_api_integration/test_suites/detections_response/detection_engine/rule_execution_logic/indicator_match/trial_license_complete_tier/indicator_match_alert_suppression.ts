@@ -1250,7 +1250,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           await indexGeneratedSourceDocuments({
             docsCount: 60000,
-            interval: [firstTimestamp, '2020-10-28T05:35:50.000Z'],
+            interval: [firstTimestamp, '2020-10-28T05:45:50.000Z'],
             seed: (index, _, timestamp) => ({
               id,
               '@timestamp': timestamp,

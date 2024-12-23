@@ -51,7 +51,7 @@ const errorsMainStatisticsRoute = createApmServerRoute({
       rangeRt,
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ErrorGroupMainStatisticsResponse> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
@@ -90,7 +90,7 @@ const errorsMainStatisticsByTransactionNameRoute = createApmServerRoute({
       rangeRt,
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ErrorGroupMainStatisticsResponse> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
@@ -136,7 +136,7 @@ const errorsDetailedStatisticsRoute = createApmServerRoute({
     ]),
     body: t.type({ groupIds: jsonRt.pipe(t.array(t.string)) }),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ErrorGroupPeriodsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -170,7 +170,7 @@ const errorGroupsSamplesRoute = createApmServerRoute({
     }),
     query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ErrorGroupSampleIdsResponse> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
@@ -199,7 +199,7 @@ const errorGroupSampleDetailsRoute = createApmServerRoute({
     }),
     query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ErrorSampleDetailsResponse> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
@@ -240,7 +240,7 @@ const errorDistributionRoute = createApmServerRoute({
       offsetRt,
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ErrorDistributionResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -276,7 +276,7 @@ const topErroneousTransactionsRoute = createApmServerRoute({
       }),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<TopErroneousTransactionsResponse> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);

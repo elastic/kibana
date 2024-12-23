@@ -14,7 +14,7 @@ import {
   getIndexPatterns,
   getLogstashDataset,
   getBeatDataset,
-} from '../cluster/get_index_patterns';
+} from '../../../common/get_index_patterns';
 
 export async function hasStandaloneClusters(req: LegacyRequest, ccs: string) {
   const lsIndexPatterns = getIndexPatterns({

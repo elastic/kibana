@@ -27,7 +27,7 @@ describe('BadgeFilterWithPopover', () => {
   });
 
   it('opens the popover when the badge is clicked', () => {
-    render(<BadgeFilterWithPopover field={field} value={value} />);
+    render(<BadgeFilterWithPopover field={field} value={value} onFilter={jest.fn()} />);
     expect(screen.queryByTestId(popoverContentDataTestId)).not.toBeInTheDocument();
     fireEvent.click(screen.getByText(value));
     expect(screen.queryByTestId(popoverContentDataTestId)).toBeInTheDocument();
@@ -35,9 +35,25 @@ describe('BadgeFilterWithPopover', () => {
   });
 
   it('copies value to clipboard when the "Copy value" button is clicked', () => {
-    render(<BadgeFilterWithPopover field={field} value={value} />);
+    render(<BadgeFilterWithPopover field={field} value={value} onFilter={jest.fn()} />);
     fireEvent.click(screen.getByText(value));
     fireEvent.click(screen.getByTestId('inventoryBadgeFilterWithPopoverCopyValueButton'));
     expect(copyToClipboard).toHaveBeenCalledWith(value);
+  });
+
+  it('Filter for an entity', () => {
+    const handleFilter = jest.fn();
+    render(<BadgeFilterWithPopover field={field} value={value} onFilter={handleFilter} />);
+    fireEvent.click(screen.getByText(value));
+    fireEvent.click(screen.getByTestId('inventoryBadgeFilterWithPopoverFilterForButton'));
+    expect(handleFilter).toHaveBeenCalledWith(value, 'on');
+  });
+
+  it('Filter out an entity', () => {
+    const handleFilter = jest.fn();
+    render(<BadgeFilterWithPopover field={field} value={value} onFilter={handleFilter} />);
+    fireEvent.click(screen.getByText(value));
+    fireEvent.click(screen.getByTestId('inventoryBadgeFilterWithPopoverFilterOutButton'));
+    expect(handleFilter).toHaveBeenCalledWith(value, 'off');
   });
 });
