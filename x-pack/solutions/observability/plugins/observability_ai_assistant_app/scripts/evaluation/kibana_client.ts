@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isSupportedConnectorType } from '@kbn/inference-common';
 import {
   BufferFlushEvent,
   ChatCompletionChunkEvent,
@@ -21,11 +22,7 @@ import {
 import type { ObservabilityAIAssistantScreenContext } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { throwSerializedChatCompletionErrors } from '@kbn/observability-ai-assistant-plugin/common/utils/throw_serialized_chat_completion_errors';
-import {
-  isSupportedConnectorType,
-  Message,
-  MessageRole,
-} from '@kbn/observability-ai-assistant-plugin/common';
+import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosInstance, AxiosResponse, isAxiosError } from 'axios';
