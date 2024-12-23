@@ -357,7 +357,7 @@
     "@kbn/core-plugins-browser-internal": "link:src/core/packages/plugins/browser-internal",
     "@kbn/core-plugins-contracts-browser": "link:src/core/packages/plugins/contracts-browser",
     "@kbn/core-plugins-contracts-server": "link:src/core/packages/plugins/contracts-server",
-    "@kbn/core-plugins-server": "link:packages/core/plugins/core-plugins-server",
+    "@kbn/core-plugins-server": "link:src/core/packages/plugins/server",
     "@kbn/core-plugins-server-internal": "link:packages/core/plugins/core-plugins-server-internal",
     "@kbn/core-preboot-server": "link:packages/core/preboot/core-preboot-server",
     "@kbn/core-preboot-server-internal": "link:packages/core/preboot/core-preboot-server-internal",
