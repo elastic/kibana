@@ -5037,7 +5037,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-status-server-internal@link:packages/core/status/core-status-server-internal":
+"@kbn/core-status-server-internal@link:src/core/packages/status/server-internal":
   version "0.0.0"
   uid ""
 
