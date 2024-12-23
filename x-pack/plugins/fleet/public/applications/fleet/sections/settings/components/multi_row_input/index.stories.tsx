@@ -6,21 +6,18 @@
  */
 
 import { useState } from '@storybook/preview-api';
-import { addParameters } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import React from 'react';
 
 import { MultiRowInput as Component } from '.';
 
-addParameters({
-  options: {
-    enableShortcuts: false,
-  },
-});
-
 export default {
   component: Component,
   title: 'Sections/Fleet/Settings/MultiRowInput',
-};
+  options: {
+    enableShortcuts: false,
+  },
+} as StoryObj;
 
 interface Args {
   width: number;
