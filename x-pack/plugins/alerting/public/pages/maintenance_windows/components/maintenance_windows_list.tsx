@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   formatDate,
-  EuiInMemoryTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
   useEuiTheme,
   EuiButton,
-  EuiSearchBarProps,
+  EuiBasicTable,
+  EuiFieldSearch,
+  EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { SortDirection } from '../types';
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
 import { STATUS_DISPLAY, STATUS_SORT } from '../constants';
@@ -39,6 +39,13 @@ interface MaintenanceWindowsListProps {
   items: MaintenanceWindow[];
   readOnly: boolean;
   refreshData: () => void;
+  page: number;
+  perPage: number;
+  total: number;
+  onPageChange: ({ page: { index, size } }: { page: { index: number; size: number } }) => void;
+  onStatusChange: (status: MaintenanceWindowStatus[]) => void;
+  selectedStatus: MaintenanceWindowStatus[];
+  onSearchChange: (value: string) => void;
 }
 
 const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindow>> = [
@@ -86,21 +93,27 @@ const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindow>> = [
   },
 ];
 
-const sorting = {
-  sort: {
-    field: 'status',
-    direction: SortDirection.asc,
-  },
-};
-
 const rowProps = (item: MaintenanceWindow) => ({
   className: item.status,
   'data-test-subj': 'list-item',
 });
 
 export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
-  ({ isLoading, items, readOnly, refreshData }) => {
+  ({
+    isLoading,
+    items,
+    readOnly,
+    refreshData,
+    page,
+    perPage,
+    total,
+    onPageChange,
+    selectedStatus,
+    onStatusChange,
+    onSearchChange,
+  }) => {
     const { euiTheme } = useEuiTheme();
+    const [search, setSearch] = useState<string>('');
 
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
     const onEdit = useCallback<TableActionsPopoverProps['onEdit']>(
@@ -173,44 +186,73 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       [actions, readOnly]
     );
 
-    const search: EuiSearchBarProps = useMemo(
-      () => ({
-        filters: [
-          {
-            type: 'custom_component',
-            component: StatusFilter,
-          },
-        ],
-        toolsRight: (
-          <EuiButton
-            data-test-subj="refresh-button"
-            iconType="refresh"
-            onClick={refreshData}
-            isLoading={isMutatingOrLoading}
-            isDisabled={isMutatingOrLoading}
-          >
-            {i18n.REFRESH}
-          </EuiButton>
-        ),
-      }),
-      [isMutatingOrLoading, refreshData]
+    const onInputChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value);
+        if (e.target.value === '') {
+          onSearchChange(e.target.value);
+        }
+      },
+      [onSearchChange]
     );
 
     return (
-      <EuiInMemoryTable
-        data-test-subj="maintenance-windows-table"
-        css={tableCss}
-        itemId="id"
-        loading={isMutatingOrLoading}
-        tableCaption="Maintenance Windows List"
-        items={items}
-        columns={columns}
-        pagination={true}
-        sorting={sorting}
-        rowProps={rowProps}
-        search={search}
-      />
+      <>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFieldSearch
+                data-test-subj="maintenance-window-search"
+                fullWidth
+                isClearable
+                incremental={false}
+                placeholder={i18n.SEARCH_PLACEHOLDER}
+                value={search}
+                onChange={onInputChange}
+                onSearch={onSearchChange}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <StatusFilter selectedStatus={selectedStatus} onChange={onStatusChange} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="refresh-button"
+                iconType="refresh"
+                onClick={refreshData}
+                isLoading={isMutatingOrLoading}
+                isDisabled={isMutatingOrLoading}
+              >
+                {i18n.REFRESH}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiBasicTable
+                data-test-subj="maintenance-windows-table"
+                css={tableCss}
+                itemId="id"
+                loading={isMutatingOrLoading}
+                tableCaption="Maintenance Windows List"
+                items={items}
+                columns={columns}
+                pagination={{
+                  pageIndex: page - 1,
+                  pageSize: perPage,
+                  pageSizeOptions: [10, 25, 50],
+                  totalItemCount: total,
+                }}
+                rowProps={rowProps}
+                onChange={onPageChange}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </>
     );
   }
 );
+
 MaintenanceWindowsList.displayName = 'MaintenanceWindowsList';

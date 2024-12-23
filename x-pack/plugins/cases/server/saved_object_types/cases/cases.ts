@@ -17,7 +17,7 @@ import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { handleExport } from '../import_export/export';
 import { caseMigrations } from '../migrations';
-import { modelVersion1 } from './model_versions';
+import { modelVersion1, modelVersion2 } from './model_versions';
 
 export const createCaseSavedObjectType = (
   coreSetup: CoreSetup,
@@ -229,11 +229,23 @@ export const createCaseSavedObjectType = (
           },
         },
       },
+      observables: {
+        type: 'nested',
+        properties: {
+          typeKey: {
+            type: 'keyword',
+          },
+          value: {
+            type: 'keyword',
+          },
+        },
+      },
     },
   },
   migrations: caseMigrations,
   modelVersions: {
     1: modelVersion1,
+    2: modelVersion2,
   },
   management: {
     importableAndExportable: true,

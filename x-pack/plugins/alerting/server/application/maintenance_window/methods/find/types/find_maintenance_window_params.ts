@@ -6,6 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { findMaintenanceWindowsParamsSchema } from '../schemas';
+import { findMaintenanceWindowsParamsSchema, maintenanceWindowsStatusSchema } from '../schemas';
 
+export type MaintenanceWindowsStatus = TypeOf<typeof maintenanceWindowsStatusSchema>;
 export type FindMaintenanceWindowsParams = TypeOf<typeof findMaintenanceWindowsParamsSchema>;

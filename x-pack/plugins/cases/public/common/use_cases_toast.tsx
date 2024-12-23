@@ -6,7 +6,14 @@
  */
 
 import type { ErrorToastOptions } from '@kbn/core/public';
-import { EuiButtonEmpty, EuiText, logicalCSS, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  logicalCSS,
+  useEuiTheme,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -203,14 +210,17 @@ export const CaseToastSuccessContent = ({
         </EuiText>
       ) : null}
       {onViewCaseClick !== undefined ? (
-        <EuiButtonEmpty
-          size="xs"
-          flush="left"
-          onClick={onViewCaseClick}
-          data-test-subj="toaster-content-case-view-link"
-        >
-          {VIEW_CASE}
-        </EuiButtonEmpty>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              onClick={onViewCaseClick}
+              data-test-subj="toaster-content-case-view-link"
+            >
+              {VIEW_CASE}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : null}
     </>
   );

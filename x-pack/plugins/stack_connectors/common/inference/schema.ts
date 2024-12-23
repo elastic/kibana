@@ -26,7 +26,7 @@ export const ChatCompleteParamsSchema = schema.object({
 // subset of OpenAI.ChatCompletionMessageParam https://github.com/openai/openai-node/blob/master/src/resources/chat/completions.ts
 const AIMessage = schema.object({
   role: schema.string(),
-  content: schema.maybe(schema.string()),
+  content: schema.maybe(schema.nullable(schema.string())),
   name: schema.maybe(schema.string()),
   tool_calls: schema.maybe(
     schema.arrayOf(
