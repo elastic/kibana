@@ -9,12 +9,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-search-api-keys-components'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/search/packages/kbn-search-api-keys-components'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/packages/kbn-search-api-keys-components',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/search/packages/kbn-search-api-keys-components',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/packages/kbn-search-api-keys-components/public/{components,hooks}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/solutions/search/packages/kbn-search-api-keys-components/public/{components,hooks}/**/*.{ts,tsx}',
   ],
 };
