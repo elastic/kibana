@@ -380,7 +380,7 @@
     "@kbn/core-saved-objects-server-internal": "link:src/core/packages/saved-objects/server-internal",
     "@kbn/core-saved-objects-utils-server": "link:src/core/packages/saved-objects/utils-server",
     "@kbn/core-security-browser": "link:src/core/packages/security/browser",
-    "@kbn/core-security-browser-internal": "link:packages/core/security/core-security-browser-internal",
+    "@kbn/core-security-browser-internal": "link:src/core/packages/security/browser-internal",
     "@kbn/core-security-browser-mocks": "link:packages/core/security/core-security-browser-mocks",
     "@kbn/core-security-common": "link:packages/core/security/core-security-common",
     "@kbn/core-security-server": "link:packages/core/security/core-security-server",
