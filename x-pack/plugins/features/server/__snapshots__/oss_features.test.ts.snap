@@ -840,7 +840,7 @@ Array [
                     "reporting",
                   ],
                 },
-                "name": "Generate CSV reports from Saved Search panels",
+                "name": "Generate CSV reports from Discover session panels",
                 "replacedBy": Array [
                   Object {
                     "feature": "dashboard_v2",
