@@ -81,16 +81,15 @@ const AttackDiscoveryPageComponent: React.FC = () => {
   );
 
   // search bar query:
-  const [query, setQuery] = // useState<Query>(getDefaultQuery());
-    useLocalStorage<Query>(
-      `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${spaceId}.${QUERY_LOCAL_STORAGE_KEY}`,
-      getDefaultQuery(),
-      {
-        raw: false,
-        serializer: (value: Query) => JSON.stringify(value),
-        deserializer: deserializeQuery,
-      }
-    );
+  const [query, setQuery] = useLocalStorage<Query>(
+    `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${spaceId}.${QUERY_LOCAL_STORAGE_KEY}`,
+    getDefaultQuery(),
+    {
+      raw: false,
+      serializer: (value: Query) => JSON.stringify(value),
+      deserializer: deserializeQuery,
+    }
+  );
 
   // search bar filters:
   const [filters, setFilters] = useLocalStorage<Filter[]>(

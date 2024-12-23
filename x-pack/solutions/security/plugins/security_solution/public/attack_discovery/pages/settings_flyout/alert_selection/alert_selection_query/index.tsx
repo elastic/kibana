@@ -88,7 +88,7 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
   );
 
   /**
-   * ``
+   * `debouncedOnQueryChange` is called by the `SearchBar` as the user types in the input
    */
   const debouncedOnQueryChange = useCallback((inputQuery: Query['query'] | undefined) => {
     const debouncedFunction = debounce(100, (debouncedQuery: Query['query'] | undefined) => {
@@ -135,7 +135,7 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
   );
 
   /**
-   * onQuerySubmit is called by the `SearchBar` when the user presses `Enter`
+   * `onQuerySubmit` is called by the `SearchBar` when the user presses `Enter`
    */
   const onQuerySubmit = useCallback(
     ({ query: newQuery }: { query?: Query | undefined }) => {
