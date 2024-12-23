@@ -5285,7 +5285,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-fleet@link:packages/deeplinks/fleet":
+"@kbn/deeplinks-fleet@link:src/platform/packages/shared/deeplinks/fleet":
   version "0.0.0"
   uid ""
 
