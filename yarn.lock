@@ -4753,7 +4753,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-metrics-server@link:packages/core/metrics/core-metrics-server":
+"@kbn/core-metrics-server@link:src/core/packages/metrics/server":
   version "0.0.0"
   uid ""
 
