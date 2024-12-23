@@ -81,6 +81,7 @@ export const getPrebuiltThreatMatchRuleSpecificFieldsMock = (): ThreatMatchRuleC
       ],
     },
   ],
+  threat_indicator_path: 'threat.indicator.mock',
   concurrent_searches: 2,
   items_per_search: 10,
 });
@@ -109,7 +110,7 @@ export const getPrebuiltNewTermsRuleSpecificFieldsMock = (): NewTermsRuleCreateF
   query: 'user.name: *',
   language: 'kuery',
   new_terms_fields: ['user.name'],
-  history_window_start: '1h',
+  history_window_start: 'now-1h',
 });
 
 export const getPrebuiltEsqlRuleSpecificFieldsMock = (): EsqlRuleCreateFields => ({
