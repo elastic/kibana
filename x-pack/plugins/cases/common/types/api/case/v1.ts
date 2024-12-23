@@ -41,6 +41,7 @@ import {
   CasesRt,
   CaseStatusRt,
   RelatedCaseRt,
+  SimilarCaseRt,
 } from '../../domain/case/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseUserProfileRt, UserRt } from '../../domain/user/v1';
@@ -394,6 +395,13 @@ export const CasesFindResponseRt = rt.intersection([
   CasesStatusResponseRt,
 ]);
 
+export const CasesSimilarResponseRt = rt.strict({
+  cases: rt.array(SimilarCaseRt),
+  page: rt.number,
+  per_page: rt.number,
+  total: rt.number,
+});
+
 /**
  * Delete cases
  */
@@ -452,7 +460,10 @@ export const CasePatchRequestRt = rt.intersection([
   /**
    * The saved object ID and version
    */
-  rt.strict({ id: rt.string, version: rt.string }),
+  rt.strict({
+    id: rt.string,
+    version: rt.string,
+  }),
 ]);
 
 export const CasesPatchRequestRt = rt.strict({
@@ -519,6 +530,8 @@ export const CasesByAlertIDRequestRt = rt.exact(
 
 export const GetRelatedCasesByAlertResponseRt = rt.array(RelatedCaseRt);
 
+export const SimilarCasesSearchRequestRt = paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE });
+
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
 export type CasesDeleteRequest = rt.TypeOf<typeof CasesDeleteRequestRt>;
@@ -542,3 +555,5 @@ export type CaseRequestCustomFields = rt.TypeOf<typeof CaseRequestCustomFieldsRt
 export type CaseRequestCustomField = rt.TypeOf<typeof CustomFieldRt>;
 export type BulkCreateCasesRequest = rt.TypeOf<typeof BulkCreateCasesRequestRt>;
 export type BulkCreateCasesResponse = rt.TypeOf<typeof BulkCreateCasesResponseRt>;
+export type SimilarCasesSearchRequest = rt.TypeOf<typeof SimilarCasesSearchRequestRt>;
+export type CasesSimilarResponse = rt.TypeOf<typeof CasesSimilarResponseRt>;

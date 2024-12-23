@@ -46,6 +46,7 @@ describe('Use get all case configurations hook', () => {
         mappings: [],
         version: '',
         owner: '',
+        observableTypes: [],
       },
     ]);
 
@@ -77,6 +78,7 @@ describe('Use get all case configurations hook', () => {
           mappings: [],
           version: '',
           owner: '',
+          observableTypes: [],
         },
       ])
     );

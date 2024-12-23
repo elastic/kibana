@@ -11,7 +11,11 @@ import { ConnectorTypes } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import type { CaseConnectorMapping } from './types';
 import type { CasesConfigurationUI } from '../types';
-import { customFieldsConfigurationMock, templatesConfigurationMock } from '../mock';
+import {
+  customFieldsConfigurationMock,
+  observableTypesMock,
+  templatesConfigurationMock,
+} from '../mock';
 
 export const mappings: CaseConnectorMapping[] = [
   {
@@ -50,6 +54,7 @@ export const caseConfigurationResponseMock: Configuration = {
   version: 'WzHJ12',
   customFields: customFieldsConfigurationMock,
   templates: templatesConfigurationMock,
+  observableTypes: observableTypesMock,
 };
 
 export const caseConfigurationRequest: ConfigurationRequest = {
@@ -77,4 +82,5 @@ export const casesConfigurationsMock: CasesConfigurationUI = {
   customFields: customFieldsConfigurationMock,
   templates: templatesConfigurationMock,
   owner: 'securitySolution',
+  observableTypes: observableTypesMock,
 };

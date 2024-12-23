@@ -25,4 +25,6 @@ export enum CASE_VIEW_PAGE_TABS {
   ALERTS = 'alerts',
   ACTIVITY = 'activity',
   FILES = 'files',
+  OBSERVABLES = 'observables',
+  SIMILAR_CASES = 'similar_cases',
 }

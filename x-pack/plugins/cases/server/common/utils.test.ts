@@ -150,6 +150,7 @@ describe('common utils', () => {
           "description": "A description",
           "duration": null,
           "external_service": null,
+          "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
@@ -205,6 +206,7 @@ describe('common utils', () => {
           "description": "A description",
           "duration": null,
           "external_service": null,
+          "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
@@ -264,6 +266,7 @@ describe('common utils', () => {
           "description": "A description",
           "duration": null,
           "external_service": null,
+          "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
@@ -329,6 +332,7 @@ describe('common utils', () => {
           "description": "A description",
           "duration": null,
           "external_service": null,
+          "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
@@ -389,6 +393,7 @@ describe('common utils', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-1",
+              "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
                 "syncAlerts": true,
@@ -432,6 +437,7 @@ describe('common utils', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-2",
+              "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
                 "syncAlerts": true,
@@ -479,6 +485,7 @@ describe('common utils', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-3",
+              "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
                 "syncAlerts": true,
@@ -530,6 +537,7 @@ describe('common utils', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-4",
+              "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
                 "syncAlerts": true,
@@ -610,6 +618,7 @@ describe('common utils', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-1",
+              "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
                 "syncAlerts": true,
@@ -678,6 +687,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "id": "mock-id-3",
+          "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
@@ -737,6 +747,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "id": "mock-id-3",
+          "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
@@ -819,6 +830,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "id": "mock-id-3",
+          "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
@@ -876,6 +888,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "id": "mock-id-1",
+          "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
@@ -938,6 +951,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "id": "mock-id-1",
+          "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,

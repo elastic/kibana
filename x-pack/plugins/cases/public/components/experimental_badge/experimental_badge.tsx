@@ -15,12 +15,14 @@ interface Props {
   icon?: boolean;
   size?: EuiBetaBadgeProps['size'];
   compact?: boolean;
+  'data-test-subj'?: string;
 }
 
 const ExperimentalBadgeComponent: React.FC<Props> = ({
   icon = false,
   size = 's',
   compact = false,
+  'data-test-subj': testSubj = 'case-experimental-badge',
 }) => {
   const props: EuiBetaBadgeProps = {
     label: compact ? null : EXPERIMENTAL_LABEL,
@@ -28,7 +30,7 @@ const ExperimentalBadgeComponent: React.FC<Props> = ({
     ...((icon || compact) && { iconType: 'beaker' }),
     tooltipContent: EXPERIMENTAL_DESC,
     tooltipPosition: 'bottom' as const,
-    'data-test-subj': 'case-experimental-badge',
+    'data-test-subj': testSubj,
   };
   const { euiTheme } = useEuiTheme();
 

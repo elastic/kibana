@@ -43,6 +43,7 @@ describe('form fields', () => {
       version: '',
       id: '',
       owner: mockedTestProvidersOwner[0],
+      observableTypes: [],
     },
   };
 

@@ -85,7 +85,14 @@ export const INTERNAL_DELETE_FILE_ATTACHMENTS_URL =
 export const INTERNAL_GET_CASE_CATEGORIES_URL = `${CASES_INTERNAL_URL}/categories` as const;
 export const INTERNAL_CASE_METRICS_URL = `${CASES_INTERNAL_URL}/metrics` as const;
 export const INTERNAL_CASE_METRICS_DETAILS_URL = `${CASES_INTERNAL_URL}/metrics/{case_id}` as const;
+export const INTERNAL_CASE_SIMILAR_CASES_URL = `${CASES_INTERNAL_URL}/{case_id}/_similar` as const;
 export const INTERNAL_PUT_CUSTOM_FIELDS_URL = `${CASES_INTERNAL_URL}/{case_id}/custom_fields/{custom_field_id}`;
+export const INTERNAL_CASE_OBSERVABLES_URL = `${CASES_INTERNAL_URL}/{case_id}/observables` as const;
+export const INTERNAL_CASE_OBSERVABLES_PATCH_URL =
+  `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
+export const INTERNAL_CASE_OBSERVABLES_DELETE_URL =
+  `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
+
 /**
  * Action routes
  */
@@ -142,6 +149,7 @@ export const MAX_TEMPLATES_LENGTH = 10 as const;
 export const MAX_TEMPLATE_TAG_LENGTH = 50 as const;
 export const MAX_TAGS_PER_TEMPLATE = 10 as const;
 export const MAX_FILENAME_LENGTH = 160 as const;
+export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
 
 /**
  * Cases features
@@ -204,6 +212,7 @@ export const DEFAULT_USER_SIZE = 10;
 export const MAX_ASSIGNEES_PER_CASE = 10;
 export const NO_ASSIGNEES_FILTERING_KEYWORD = 'none';
 export const KIBANA_SYSTEM_USERNAME = 'elastic/kibana';
+export const MAX_OBSERVABLES_PER_CASE = 50;
 
 /**
  * Delays
@@ -262,3 +271,63 @@ export const CASES_CONNECTOR_TIME_WINDOW_REGEX = '^[1-9][0-9]*[d,w]$';
  * operation continues, otherwise we throw a 403.
  */
 export const OWNER_FIELD = 'owner';
+
+export const MAX_OBSERVABLE_TYPE_KEY_LENGTH = 36;
+
+export const MAX_OBSERVABLE_TYPE_LABEL_LENGTH = 50;
+
+export const MAX_CUSTOM_OBSERVABLE_TYPES = 10;
+
+export const OBSERVABLE_TYPE_EMAIL = {
+  label: 'Email',
+  key: 'observable-type-email',
+} as const;
+
+export const OBSERVABLE_TYPE_DOMAIN = {
+  label: 'Domain',
+  key: 'observable-type-domain',
+} as const;
+
+export const OBSERVABLE_TYPE_IPV4 = {
+  label: 'IPv4',
+  key: 'observable-type-ipv4',
+} as const;
+
+export const OBSERVABLE_TYPE_IPV6 = {
+  label: 'IPv6',
+  key: 'observable-type-ipv6',
+} as const;
+
+export const OBSERVABLE_TYPE_URL = {
+  label: 'URL',
+  key: 'observable-type-url',
+} as const;
+
+/**
+ * Exporting an array of built-in observable types for use in the application
+ */
+export const OBSERVABLE_TYPES_BUILTIN = [
+  OBSERVABLE_TYPE_IPV4,
+  OBSERVABLE_TYPE_IPV6,
+  OBSERVABLE_TYPE_URL,
+  {
+    label: 'Hostname',
+    key: 'observable-type-hostname',
+  },
+  {
+    label: 'File hash',
+    key: 'observable-type-file-hash',
+  },
+  {
+    label: 'File path',
+    key: 'observable-type-file-path',
+  },
+  {
+    ...OBSERVABLE_TYPE_EMAIL,
+  },
+  {
+    ...OBSERVABLE_TYPE_DOMAIN,
+  },
+];
+
+export const OBSERVABLE_TYPES_BUILTIN_KEYS = OBSERVABLE_TYPES_BUILTIN.map(({ key }) => key);

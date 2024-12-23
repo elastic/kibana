@@ -40,6 +40,10 @@ import {
   deleteFileAttachments,
   getCategories,
   replaceCustomField,
+  postObservable,
+  getSimilarCases,
+  patchObservable,
+  deleteObservable,
 } from './api';
 
 import {
@@ -63,6 +67,9 @@ import {
   getCaseUserActionsStatsResponse,
   basicFileMock,
   customFieldsMock,
+  mockCase,
+  similarCases,
+  similarCasesSnake,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
@@ -1152,6 +1159,166 @@ describe('Cases API', () => {
     it('should return correct response', async () => {
       const resp = await replaceCustomField({ ...data, signal: abortCtrl.signal });
       expect(resp).toEqual(customFieldsMock[0]);
+    });
+  });
+
+  describe('getSimilarCases', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(similarCasesSnake);
+    });
+
+    it('should be called with correct url, method, signal', async () => {
+      await getSimilarCases({
+        caseId: mockCase.id,
+        signal: abortCtrl.signal,
+        page: 0,
+        perPage: 10,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/${mockCase.id}/_similar`, {
+        method: 'POST',
+        body: JSON.stringify({
+          page: 0,
+          perPage: 10,
+        }),
+        signal: abortCtrl.signal,
+      });
+    });
+
+    it('should return correct response', async () => {
+      const resp = await getSimilarCases({
+        caseId: mockCase.id,
+        signal: abortCtrl.signal,
+        page: 1,
+        perPage: 10,
+      });
+      expect(resp).toEqual(similarCases);
+    });
+  });
+
+  describe('postObservable', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(basicCaseSnake);
+    });
+
+    it('should be called with correct check url, method, signal', async () => {
+      await postObservable(
+        {
+          observable: {
+            typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
+            value: 'test value',
+            description: '',
+          },
+        },
+        mockCase.id,
+        abortCtrl.signal
+      );
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/${mockCase.id}/observables`, {
+        method: 'POST',
+        body: JSON.stringify({
+          observable: {
+            typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
+            value: 'test value',
+            description: '',
+          },
+        }),
+        signal: abortCtrl.signal,
+      });
+    });
+
+    it('should return correct response', async () => {
+      const resp = await postObservable(
+        {
+          observable: {
+            typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
+            value: 'test value',
+            description: '',
+          },
+        },
+        mockCase.id,
+        abortCtrl.signal
+      );
+      expect(resp).toEqual(basicCase);
+    });
+  });
+
+  describe('patchObservable', () => {
+    const observableId = 'afa44220-862c-4a21-b574-351ab4d0a732';
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(basicCaseSnake);
+    });
+
+    it('should be called with correct check url, method, signal', async () => {
+      await patchObservable(
+        {
+          observable: {
+            value: 'test value',
+            description: '',
+          },
+        },
+        mockCase.id,
+        observableId,
+        abortCtrl.signal
+      );
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${mockCase.id}/observables/${observableId}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({
+            observable: {
+              value: 'test value',
+              description: '',
+            },
+          }),
+          signal: abortCtrl.signal,
+        }
+      );
+    });
+
+    it('should return correct response', async () => {
+      const resp = await patchObservable(
+        {
+          observable: {
+            value: 'test value',
+            description: '',
+          },
+        },
+        mockCase.id,
+        observableId,
+        abortCtrl.signal
+      );
+      expect(resp).toEqual(basicCase);
+    });
+  });
+
+  describe('deleteObservable', () => {
+    const observableId = 'afa44220-862c-4a21-b574-351ab4d0a732';
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(basicCaseSnake);
+    });
+
+    it('should be called with correct check url, method, signal', async () => {
+      await deleteObservable(mockCase.id, observableId, abortCtrl.signal);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${mockCase.id}/observables/${observableId}`,
+        {
+          method: 'DELETE',
+          signal: abortCtrl.signal,
+        }
+      );
+    });
+
+    it('should return correct response', async () => {
+      const resp = await deleteObservable(mockCase.id, observableId, abortCtrl.signal);
+      expect(resp).toEqual(undefined);
     });
   });
 });

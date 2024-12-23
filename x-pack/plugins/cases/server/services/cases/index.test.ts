@@ -238,6 +238,7 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
                     "syncAlerts": true,
@@ -314,6 +315,7 @@ describe('CasesService', () => {
             "customFields": Array [],
             "description": "This is a brand new case of a bad meanie defacing data",
             "duration": null,
+            "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
               "syncAlerts": true,
@@ -838,6 +840,7 @@ describe('CasesService', () => {
                 "username": "elastic",
               },
             },
+            "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
               "syncAlerts": true,
@@ -1058,6 +1061,7 @@ describe('CasesService', () => {
                   "description": "This is a brand new case of a bad meanie defacing data",
                   "duration": null,
                   "external_service": null,
+                  "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
                     "syncAlerts": true,
@@ -1690,6 +1694,7 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
                     "syncAlerts": true,
@@ -2202,7 +2207,8 @@ describe('CasesService', () => {
       'connector',
       'external_service',
       'category',
-      'customFields'
+      'customFields',
+      'observables'
     );
 
     describe('getCaseIdsByAlertId', () => {
@@ -2302,6 +2308,7 @@ describe('CasesService', () => {
               "description": "This is a brand new case of a bad meanie defacing data",
               "duration": null,
               "external_service": null,
+              "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
                 "syncAlerts": true,
@@ -2404,6 +2411,7 @@ describe('CasesService', () => {
                     "username": "elastic",
                   },
                 },
+                "observables": Array [],
                 "owner": "securitySolution",
                 "settings": Object {
                   "syncAlerts": true,
@@ -2497,6 +2505,7 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
                     "syncAlerts": true,
@@ -2590,6 +2599,7 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
                     "syncAlerts": true,
@@ -2696,6 +2706,7 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
                     "syncAlerts": true,
@@ -2752,6 +2763,7 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
                     "syncAlerts": true,
@@ -2854,6 +2866,7 @@ describe('CasesService', () => {
                   "username": "elastic",
                 },
               },
+              "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
                 "syncAlerts": true,
@@ -2972,6 +2985,7 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
                     "syncAlerts": true,

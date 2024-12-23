@@ -32,7 +32,13 @@ export interface ConfigurationPersistedAttributes {
   updated_by: User | null;
   customFields?: PersistedCustomFieldsConfiguration;
   templates?: PersistedTemplatesConfiguration;
+  observableTypes?: PersistedObservableTypesConfiguration;
 }
+
+type PersistedObservableTypesConfiguration = Array<{
+  key: string;
+  label: string;
+}>;
 
 type PersistedCustomFieldsConfiguration = Array<{
   key: string;

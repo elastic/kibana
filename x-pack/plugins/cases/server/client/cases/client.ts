@@ -20,6 +20,10 @@ import type {
   BulkCreateCasesRequest,
   BulkCreateCasesResponse,
   CasesSearchRequest,
+  SimilarCasesSearchRequest,
+  CasesSimilarResponse,
+  AddObservableRequest,
+  UpdateObservableRequest,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
@@ -36,6 +40,8 @@ import { bulkUpdate } from './bulk_update';
 import { bulkCreate } from './bulk_create';
 import type { ReplaceCustomFieldArgs } from './replace_custom_field';
 import { replaceCustomField } from './replace_custom_field';
+import { similar } from './similar';
+import { addObservable, deleteObservable, updateObservable } from './observables';
 
 /**
  * API for interacting with the cases entities.
@@ -102,6 +108,26 @@ export interface CasesSubClient {
    * Replace custom field with specific customFieldId and CaseId
    */
   replaceCustomField(params: ReplaceCustomFieldArgs): Promise<CaseCustomField>;
+  /**
+   * Returns cases that are similar to given case (by observables)
+   */
+  similar(caseId: string, params: SimilarCasesSearchRequest): Promise<CasesSimilarResponse>;
+  /**
+   * Adds observable to the case
+   */
+  addObservable(caseId: string, params: AddObservableRequest): Promise<Case>;
+  /**
+   * Updates observable
+   */
+  updateObservable(
+    caseId: string,
+    observableId: string,
+    params: UpdateObservableRequest
+  ): Promise<Case>;
+  /**
+   * Removes observable
+   */
+  deleteObservable(caseId: string, observableId: string): Promise<void>;
 }
 
 /**
@@ -130,6 +156,14 @@ export const createCasesSubClient = (
     getCasesByAlertID: (params: CasesByAlertIDParams) => getCasesByAlertID(params, clientArgs),
     replaceCustomField: (params: ReplaceCustomFieldArgs) =>
       replaceCustomField(params, clientArgs, casesClient),
+    similar: (caseId: string, params: SimilarCasesSearchRequest) =>
+      similar(caseId, params, clientArgs, casesClient),
+    addObservable: (caseId: string, params: AddObservableRequest) =>
+      addObservable(caseId, params, clientArgs, casesClient),
+    updateObservable: (caseId: string, observableId: string, params: UpdateObservableRequest) =>
+      updateObservable(caseId, observableId, params, clientArgs, casesClient),
+    deleteObservable: (caseId: string, observableId: string) =>
+      deleteObservable(caseId, observableId, clientArgs, casesClient),
   };
 
   return Object.freeze(casesSubClient);
