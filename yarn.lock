@@ -4873,7 +4873,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-contracts-server@link:packages/core/plugins/core-plugins-contracts-server":
+"@kbn/core-plugins-contracts-server@link:src/core/packages/plugins/contracts-server":
   version "0.0.0"
   uid ""
 
