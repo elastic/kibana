@@ -38,23 +38,27 @@ export default {
   ],
 };
 
+const CreatingInApmServiceOverviewComponent = ({ ruleParams, metadata }: Args) => {
+  const [params, setParams] = useState<ErrorRateRuleParams>(ruleParams);
+
+  function setRuleParams(property: string, value: any) {
+    setParams({ ...params, [property]: value });
+  }
+
+  return (
+    <TransactionErrorRateRuleType
+      ruleParams={params}
+      metadata={metadata}
+      setRuleParams={setRuleParams}
+      setRuleProperty={() => {}}
+    />
+  );
+};
+
 export const CreatingInApmServiceOverview: StoryObj<Args> = {
-  render: ({ ruleParams, metadata }) => {
-    const [params, setParams] = useState<ErrorRateRuleParams>(ruleParams);
-
-    function setRuleParams(property: string, value: any) {
-      setParams({ ...params, [property]: value });
-    }
-
-    return (
-      <TransactionErrorRateRuleType
-        ruleParams={params}
-        metadata={metadata}
-        setRuleParams={setRuleParams}
-        setRuleProperty={() => {}}
-      />
-    );
-  },
+  render: ({ ruleParams, metadata }) => (
+    <CreatingInApmServiceOverviewComponent ruleParams={ruleParams} metadata={metadata} />
+  ),
 
   args: {
     ruleParams: {
@@ -73,23 +77,27 @@ export const CreatingInApmServiceOverview: StoryObj<Args> = {
   },
 };
 
+const CreatingInStackManagementComponent = ({ ruleParams, metadata }: Args) => {
+  const [params, setParams] = useState<ErrorRateRuleParams>(ruleParams);
+
+  function setRuleParams(property: string, value: any) {
+    setParams({ ...params, [property]: value });
+  }
+
+  return (
+    <TransactionErrorRateRuleType
+      ruleParams={params}
+      metadata={metadata}
+      setRuleParams={setRuleParams}
+      setRuleProperty={() => {}}
+    />
+  );
+};
+
 export const CreatingInStackManagement: StoryObj<Args> = {
-  render: ({ ruleParams, metadata }) => {
-    const [params, setParams] = useState<ErrorRateRuleParams>(ruleParams);
-
-    function setRuleParams(property: string, value: any) {
-      setParams({ ...params, [property]: value });
-    }
-
-    return (
-      <TransactionErrorRateRuleType
-        ruleParams={params}
-        metadata={metadata}
-        setRuleParams={setRuleParams}
-        setRuleProperty={() => {}}
-      />
-    );
-  },
+  render: ({ ruleParams, metadata }) => (
+    <CreatingInStackManagementComponent ruleParams={ruleParams} metadata={metadata} />
+  ),
 
   args: {
     ruleParams: {
