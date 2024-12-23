@@ -18,7 +18,7 @@ import {
   UnifiedHistogramState,
   UnifiedHistogramVisContext,
 } from '@kbn/unified-histogram-plugin/public';
-import {differenceWith, isEqual, isObject } from 'lodash';
+import { isEqual, isObject } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   debounceTime,
@@ -142,7 +142,6 @@ export const useDiscoverHistogram = ({
 
         if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
           unifiedHistogram?.setChartHidden(changes.chartHidden);
-
         }
       }
     );
@@ -269,7 +268,7 @@ export const useDiscoverHistogram = ({
    * Data fetching
    */
 
-  const skipRefetch = useRef<number|undefined>();
+  const skipRefetch = useRef<number | undefined>();
 
   // Skip refetching when showing the chart since Lens will
   // automatically fetch when the chart is shown
@@ -542,8 +541,6 @@ const getDifferences = (prev, curr, path = '') => {
   return differences;
 };
 
-
-
 const createCurrentSuggestionObservable = (state$: Observable<UnifiedHistogramState>) => {
   return state$.pipe(
     // Emit the previous and current state as a pair
@@ -555,15 +552,16 @@ const createCurrentSuggestionObservable = (state$: Observable<UnifiedHistogramSt
         console.log('Filtered out transition from chartHidden: false to true');
         return false;
       }
-      const differences = getDifferences(prev.currentSuggestionContext.suggestion, curr.currentSuggestionContext.suggestion);
+      const differences = getDifferences(
+        prev.currentSuggestionContext.suggestion,
+        curr.currentSuggestionContext.suggestion
+      );
       console.log('Differences in currentSuggestionContext:', differences);
-
 
       return !isEqual(prev.currentSuggestionContext, curr.currentSuggestionContext);
     }),
     // Log each state for debugging purposes
-    tap((state) => console.log('createCurrentSuggestionObservable', state)),
-
+    tap((state) => console.log('createCurrentSuggestionObservable', state))
   );
 };
 
