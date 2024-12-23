@@ -4433,7 +4433,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-browser@link:packages/core/deprecations/core-deprecations-browser":
+"@kbn/core-deprecations-browser@link:src/core/packages/deprecations/browser":
   version "0.0.0"
   uid ""
 
