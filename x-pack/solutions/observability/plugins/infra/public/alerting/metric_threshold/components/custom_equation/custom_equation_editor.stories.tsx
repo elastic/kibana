@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Meta, StoryFn } from '@storybook/react/types-6-0';
+import { Meta, StoryFn } from '@storybook/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';

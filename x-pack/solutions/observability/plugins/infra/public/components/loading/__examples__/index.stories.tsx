@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StoryFn, Meta } from '@storybook/react/types-6-0';
+import { StoryFn, Meta } from '@storybook/react';
 import React from 'react';
 import { InfraLoadingPanel } from '..';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';

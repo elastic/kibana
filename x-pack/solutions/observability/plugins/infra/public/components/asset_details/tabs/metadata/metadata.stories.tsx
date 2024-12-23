@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Meta, StoryFn } from '@storybook/react/types-6-0';
+import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 import { Metadata } from './metadata';

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Meta, StoryFn } from '@storybook/react/types-6-0';
+import type { Meta, StoryFn } from '@storybook/react';
 import {
   DecorateWithKibanaContext,
   DecorateWithAssetDetailsStateContext,

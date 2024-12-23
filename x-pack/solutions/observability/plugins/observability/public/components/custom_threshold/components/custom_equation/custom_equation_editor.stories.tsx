@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Meta, StoryFn } from '@storybook/react/types-6-0';
+import { Meta, StoryFn } from '@storybook/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';

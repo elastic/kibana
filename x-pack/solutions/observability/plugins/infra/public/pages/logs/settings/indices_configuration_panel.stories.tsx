@@ -7,7 +7,7 @@
 
 import { EuiCodeBlock, EuiPage, EuiPageBody, EuiPanel, PropsOf } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { Meta, StoryFn } from '@storybook/react/types-6-0';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import {
