@@ -4945,7 +4945,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-api-server@link:packages/core/saved-objects/core-saved-objects-api-server":
+"@kbn/core-saved-objects-api-server@link:src/core/packages/saved-objects/api-server":
   version "0.0.0"
   uid ""
 
