@@ -392,7 +392,7 @@
     "@kbn/core-test-helpers-deprecations-getters": "link:src/core/packages/test-helpers/deprecations-getters",
     "@kbn/core-test-helpers-http-setup-browser": "link:src/core/packages/test-helpers/http-setup-browser",
     "@kbn/core-test-helpers-so-type-serializer": "link:src/core/packages/test-helpers/so-type-serializer",
-    "@kbn/core-test-helpers-test-utils": "link:packages/core/test-helpers/core-test-helpers-test-utils",
+    "@kbn/core-test-helpers-test-utils": "link:src/core/packages/test-helpers/test-utils",
     "@kbn/core-theme-browser": "link:packages/core/theme/core-theme-browser",
     "@kbn/core-theme-browser-internal": "link:packages/core/theme/core-theme-browser-internal",
     "@kbn/core-ui-settings-browser": "link:packages/core/ui-settings/core-ui-settings-browser",
