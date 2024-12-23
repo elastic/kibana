@@ -9,7 +9,7 @@ if [[ "$BUILDKITE_BRANCH" == "main" ]]; then
   docker buildx imagetools create -t "$PACKAGE_REGISTRY_TARGET_IMAGE" "$PACKAGE_REGISTRY_BASE_IMAGE"
   cat << EOF | buildkite-agent pipeline upload
 steps:
-  - label: "Builds Kibana VM images for cache update"
+  - label: "Update cache for package registry image"
     trigger: kibana-vm-images
     async: true
     build:
