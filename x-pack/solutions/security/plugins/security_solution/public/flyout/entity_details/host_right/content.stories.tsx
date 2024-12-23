@@ -37,6 +37,7 @@ storiesOf('Components/HostPanelContent', module)
       hostName={'test-host-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
+      isLinkEnabled={true}
     />
   ))
   .add('no observed data', () => (
@@ -62,6 +63,7 @@ storiesOf('Components/HostPanelContent', module)
       hostName={'test-host-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
+      isLinkEnabled={true}
     />
   ))
   .add('loading', () => (
@@ -87,5 +89,6 @@ storiesOf('Components/HostPanelContent', module)
       hostName={'test-host-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
+      isLinkEnabled={true}
     />
   ));
