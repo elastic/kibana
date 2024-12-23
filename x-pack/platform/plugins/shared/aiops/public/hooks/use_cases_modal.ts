@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { stringHash } from '@kbn/ml-string-hash';
 import { AttachmentType } from '@kbn/cases-plugin/common';
+import { i18n } from '@kbn/i18n';
 import type { ChangePointEmbeddableRuntimeState } from '../embeddables/change_point_chart/types';
 import type { EmbeddableChangePointChartType } from '../embeddables/change_point_chart/embeddable_change_point_chart_factory';
 import { useAiopsAppContext } from './use_aiops_app_context';
@@ -34,11 +35,23 @@ type EmbeddableRuntimeState<T extends SupportedEmbeddableTypes> =
  * Returns a callback for opening the cases modal with provided attachment state.
  */
 export const useCasesModal = <EmbeddableType extends SupportedEmbeddableTypes>(
-  embeddableType: EmbeddableType
+  embeddableType: EmbeddableType,
+  title: string
 ) => {
   const { cases } = useAiopsAppContext();
 
-  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal();
+  const successMessage = useMemo(() => {
+    return i18n.translate('xpack.aiops.useCasesModal.successMessage', {
+      defaultMessage: '{title} added to case.',
+      values: { title },
+    });
+  }, [title]);
+
+  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal({
+    successToaster: {
+      content: successMessage,
+    },
+  });
 
   return useCallback(
     (persistableState: Partial<Omit<EmbeddableRuntimeState<EmbeddableType>, 'id'>>) => {
@@ -64,7 +77,6 @@ export const useCasesModal = <EmbeddableType extends SupportedEmbeddableTypes>(
         ],
       });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [embeddableType]
+    [embeddableType, selectCaseModal]
   );
 };
