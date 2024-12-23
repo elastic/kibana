@@ -18,7 +18,7 @@ import {
   UnifiedHistogramState,
   UnifiedHistogramVisContext,
 } from '@kbn/unified-histogram-plugin/public';
-import { isEqual } from 'lodash';
+import {differenceWith, isEqual, isObject } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   debounceTime,
@@ -29,6 +29,7 @@ import {
   Observable,
   pairwise,
   startWith,
+  tap,
 } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -141,6 +142,7 @@ export const useDiscoverHistogram = ({
 
         if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
           unifiedHistogram?.setChartHidden(changes.chartHidden);
+
         }
       }
     );
@@ -267,15 +269,15 @@ export const useDiscoverHistogram = ({
    * Data fetching
    */
 
-  const skipRefetch = useRef<boolean>();
+  const skipRefetch = useRef<number|undefined>();
 
   // Skip refetching when showing the chart since Lens will
   // automatically fetch when the chart is shown
   useEffect(() => {
     if (skipRefetch.current === undefined) {
-      skipRefetch.current = false;
-    } else {
-      skipRefetch.current = !hideChart;
+      skipRefetch.current = 0;
+    } else if (!hideChart) {
+      skipRefetch.current = 3;
     }
   }, [hideChart]);
 
@@ -304,13 +306,14 @@ export const useDiscoverHistogram = ({
     }
 
     const subscription = fetchChart$.subscribe((source) => {
-      if (!skipRefetch.current) {
+      if (skipRefetch.current === 0) {
         if (source === 'discover') addLog('Unified Histogram - Discover refetch');
         if (source === 'lens') addLog('Unified Histogram - Lens suggestion refetch');
         unifiedHistogram.refetch();
+      } else {
+        addLog('Unified Histogram - Skip refetch');
+        skipRefetch.current = skipRefetch.current! - 1;
       }
-
-      skipRefetch.current = false;
     });
 
     // triggering the initial request for total hits hook
@@ -492,10 +495,75 @@ const createTotalHitsObservable = (state$?: Observable<UnifiedHistogramState>) =
   );
 };
 
+/**
+ * Recursively finds differences between two objects or arrays.
+ * Returns an array of differences with breadcrumb paths.
+ *
+ * @param {Object|Array} prev - The previous state.
+ * @param {Object|Array} curr - The current state.
+ * @param {String} [path] - The current breadcrumb path.
+ * @returns {Array} - Array of difference objects.
+ */
+const getDifferences = (prev, curr, path = '') => {
+  const differences = [];
+
+  const traverse = (prevNode, currNode, currentPath) => {
+    if (isEqual(prevNode, currNode)) {
+      return;
+    }
+
+    // If both nodes are objects, recurse into their properties
+    if (isObject(prevNode) && isObject(currNode)) {
+      const keys = new Set([...Object.keys(prevNode), ...Object.keys(currNode)]);
+      keys.forEach((key) => {
+        const newPath = currentPath ? `${currentPath}.${key}` : key;
+        traverse(prevNode[key], currNode[key], newPath);
+      });
+    }
+    // If both nodes are arrays, compare each index
+    else if (Array.isArray(prevNode) && Array.isArray(currNode)) {
+      const maxLength = Math.max(prevNode.length, currNode.length);
+      for (let i = 0; i < maxLength; i++) {
+        const newPath = `${currentPath}[${i}]`;
+        traverse(prevNode[i], currNode[i], newPath);
+      }
+    }
+    // If types are different or primitive values are different, record the difference
+    else {
+      differences.push({
+        path: currentPath,
+        previousValue: prevNode,
+        currentValue: currNode,
+      });
+    }
+  };
+
+  traverse(prev, curr, path);
+  return differences;
+};
+
+
+
 const createCurrentSuggestionObservable = (state$: Observable<UnifiedHistogramState>) => {
   return state$.pipe(
-    map((state) => state.currentSuggestionContext),
-    distinctUntilChanged(isEqual)
+    // Emit the previous and current state as a pair
+    pairwise(),
+    // Filter out the transition where chartHidden changes from false to true
+    filter(([prev, curr]) => {
+      const isTransition = prev.chartHidden && !curr.chartHidden;
+      if (isTransition) {
+        console.log('Filtered out transition from chartHidden: false to true');
+        return false;
+      }
+      const differences = getDifferences(prev.currentSuggestionContext.suggestion, curr.currentSuggestionContext.suggestion);
+      console.log('Differences in currentSuggestionContext:', differences);
+
+
+      return !isEqual(prev.currentSuggestionContext, curr.currentSuggestionContext);
+    }),
+    // Log each state for debugging purposes
+    tap((state) => console.log('createCurrentSuggestionObservable', state)),
+
   );
 };
 
