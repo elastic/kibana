@@ -4493,7 +4493,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-elasticsearch-server@link:packages/core/elasticsearch/core-elasticsearch-server":
+"@kbn/core-elasticsearch-server@link:src/core/packages/elasticsearch/server":
   version "0.0.0"
   uid ""
 
