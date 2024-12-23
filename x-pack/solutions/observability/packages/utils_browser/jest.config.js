@@ -8,7 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: [
-    '<rootDir>/x-pack/solutions/observability/packages/utils_browser',
-  ],
+  roots: ['<rootDir>/x-pack/solutions/observability/packages/utils_browser'],
 };
