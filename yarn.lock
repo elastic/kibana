@@ -4877,7 +4877,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-server-internal@link:packages/core/plugins/core-plugins-server-internal":
+"@kbn/core-plugins-server-internal@link:src/core/packages/plugins/server-internal":
   version "0.0.0"
   uid ""
 
