@@ -142,7 +142,9 @@ export function healthRoute(params: HealthRouteParams): {
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          // https://github.com/elastic/kibana/issues/136157
+          reason:
+            'This route is opted out from authorization. Authorization is planned but not implemented yet(breaking change).',
         },
       },
       // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
