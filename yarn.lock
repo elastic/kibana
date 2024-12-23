@@ -4549,7 +4549,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-feature-flags-browser-mocks@link:packages/core/feature-flags/core-feature-flags-browser-mocks":
+"@kbn/core-feature-flags-browser-mocks@link:src/core/packages/feature-flags/browser-mocks":
   version "0.0.0"
   uid ""
 
