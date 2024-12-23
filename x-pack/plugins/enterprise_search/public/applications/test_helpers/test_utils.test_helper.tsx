@@ -71,17 +71,12 @@ export const mockKibanaProps: KibanaLogicProps = {
   } as unknown as LensPublicStart,
   ml: mlPluginMock.createStartContract(),
   navigateToUrl: jest.fn(),
-  productAccess: {
-    hasAppSearchAccess: true,
-    hasWorkplaceSearchAccess: true,
-  },
   productFeatures: {
     hasConnectors: true,
     hasDefaultIngestPipeline: true,
     hasDocumentLevelSecurityEnabled: true,
     hasIncrementalSyncEnabled: true,
     hasNativeConnectors: true,
-    hasWebCrawler: true,
   },
   renderHeaderActions: jest.fn(),
   security: securityMock.createStart(),

@@ -18,37 +18,30 @@ import { i18n } from '@kbn/i18n';
 import {
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_ELASTICSEARCH_URL,
-  CRAWLER,
 } from '../../../../../common/constants';
 
 import apiLogo from '../../../../assets/images/api_image.png';
 import fileUploadLogo from '../../../../assets/images/file_upload_logo.svg';
 import sampleDataLogo from '../../../../assets/images/sample_data_logo.svg';
 import connectorLogo from '../../../../assets/images/search_connector.svg';
-import crawlerLogo from '../../../../assets/images/search_crawler.svg';
 import languageClientsLogo from '../../../../assets/images/search_language_clients.svg';
 
 import { IngestionCard } from '../../../enterprise_search_content/components/shared/ingestion_card/ingestion_card';
 import {
   NEW_API_PATH,
-  NEW_CRAWLER_PATH,
   NEW_INDEX_SELECT_CONNECTOR_PATH,
 } from '../../../enterprise_search_content/routes';
-import { HttpLogic } from '../../../shared/http/http_logic';
 
 import { ConnectorIcon } from '../../../shared/icons/connector';
-import { CrawlerIcon } from '../../../shared/icons/crawler';
-import { GithubIcon } from '../../../shared/icons/github_icon';
+
 import { KibanaLogic } from '../../../shared/kibana';
 
 export const IngestionSelector: React.FC = () => {
   const {
     application: { navigateToApp },
-    config,
     productFeatures,
   } = useValues(KibanaLogic);
-  const { errorConnectingMessage } = useValues(HttpLogic);
-  const crawlerDisabled = Boolean(errorConnectingMessage || !config.host);
+
   return (
     <>
       <EuiFlexGroup>
@@ -75,45 +68,6 @@ export const IngestionSelector: React.FC = () => {
             )}
           />
         </EuiFlexItem>
-        {productFeatures.hasWebCrawler && (
-          <EuiFlexItem>
-            <IngestionCard
-              buttonLabel={
-                crawlerDisabled
-                  ? i18n.translate(
-                      'xpack.enterpriseSearch.ingestSelector.method.sourceCodeButtonLabel',
-                      {
-                        defaultMessage: 'Source code',
-                      }
-                    )
-                  : i18n.translate(
-                      'xpack.enterpriseSearch.ingestSelector.method.crawler.description',
-                      {
-                        defaultMessage: 'Crawl URL',
-                      }
-                    )
-              }
-              buttonIcon={crawlerDisabled ? GithubIcon : CrawlerIcon}
-              description={i18n.translate(
-                'xpack.enterpriseSearch.ingestSelector.method.crawler.description',
-                {
-                  defaultMessage:
-                    'Discover, extract, and index searchable content from websites and knowledge bases.',
-                }
-              )}
-              href={
-                crawlerDisabled
-                  ? CRAWLER.github_repo
-                  : generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_CRAWLER_PATH)
-              }
-              isBeta={crawlerDisabled}
-              logo={crawlerLogo}
-              title={i18n.translate('xpack.enterpriseSearch.ingestSelector.method.crawler', {
-                defaultMessage: 'Web Crawler',
-              })}
-            />
-          </EuiFlexItem>
-        )}
         {productFeatures.hasConnectors && (
           <EuiFlexItem>
             <IngestionCard

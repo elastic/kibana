@@ -25,7 +25,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { handlePageChange } from '../../../shared/table_pagination';
 import {
@@ -64,11 +63,11 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
   const { fetchConnectors, onPaginate, setIsFirstRequest, openDeleteModal } =
     useActions(ConnectorsLogic);
   const { data, isLoading, searchParams, isEmpty, connectors } = useValues(ConnectorsLogic);
-  const { errorConnectingMessage } = useValues(HttpLogic);
   const [searchQuery, setSearchValue] = useState('');
   const [showMoreOptionsPopover, setShowMoreOptionsPopover] = useState<boolean>(false);
   const [showDefaultSettingsFlyout, setShowDefaultSettingsFlyout] = useState<boolean>(false);
   const { productFeatures } = useValues(KibanaLogic);
+  const hasElasticCrawler = false; // temp variable replacing checking error connecting to entSearch node
 
   useEffect(() => {
     setIsFirstRequest();
@@ -203,7 +202,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
                 <EuiButton
                   data-test-subj="entSearchContent-crawlers-newCrawlerButton"
                   data-telemetry-id="entSearchContent-crawlers-newCrawlerButton"
-                  disabled={Boolean(errorConnectingMessage)}
+                  disabled={!hasElasticCrawler}
                   key="newCrawler"
                   color="primary"
                   iconType="plusInCircle"
