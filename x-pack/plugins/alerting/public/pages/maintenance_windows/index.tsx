@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -23,11 +23,16 @@ import * as i18n from './translations';
 import { useCreateMaintenanceWindowNavigation } from '../../hooks/use_navigation';
 import { MaintenanceWindowsList } from './components/maintenance_windows_list';
 import { useFindMaintenanceWindows } from '../../hooks/use_find_maintenance_windows';
-import { CenterJustifiedSpinner } from './components/center_justified_spinner';
 import { ExperimentalBadge } from './components/page_header';
 import { useLicense } from '../../hooks/use_license';
 import { LicensePrompt } from './components/license_prompt';
-import { MAINTENANCE_WINDOW_FEATURE_ID, MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '../../../common';
+import {
+  MAINTENANCE_WINDOW_FEATURE_ID,
+  MAINTENANCE_WINDOW_DEEP_LINK_IDS,
+  MAINTENANCE_WINDOW_DEFAULT_PER_PAGE,
+  MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE,
+  MaintenanceWindowStatus,
+} from '../../../common';
 
 export const MaintenanceWindowsPage = React.memo(() => {
   const {
@@ -38,11 +43,23 @@ export const MaintenanceWindowsPage = React.memo(() => {
   const { isAtLeastPlatinum } = useLicense();
   const hasLicense = isAtLeastPlatinum();
 
+  const [page, setPage] = useState<number>(MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE);
+  const [perPage, setPerPage] = useState<number>(MAINTENANCE_WINDOW_DEFAULT_PER_PAGE);
+
+  const [selectedStatus, setSelectedStatus] = useState<MaintenanceWindowStatus[]>([]);
+  const [search, setSearch] = useState<string>('');
+
   const { navigateToCreateMaintenanceWindow } = useCreateMaintenanceWindowNavigation();
 
-  const { isLoading, isInitialLoading, maintenanceWindows, refetch } = useFindMaintenanceWindows({
+  const { isLoading, isInitialLoading, data, refetch } = useFindMaintenanceWindows({
     enabled: hasLicense,
+    page,
+    perPage,
+    search,
+    selectedStatus,
   });
+
+  const { maintenanceWindows, total } = data || { maintenanceWindows: [], total: 0 };
 
   useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows);
 
@@ -53,9 +70,12 @@ export const MaintenanceWindowsPage = React.memo(() => {
   const refreshData = useCallback(() => refetch(), [refetch]);
   const showWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID].show;
   const writeWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID].save;
+  const isNotFiltered = search === '' && selectedStatus.length === 0;
+
   const showEmptyPrompt =
     !isLoading &&
     maintenanceWindows.length === 0 &&
+    isNotFiltered &&
     showWindowMaintenance &&
     writeWindowMaintenance;
 
@@ -81,9 +101,21 @@ export const MaintenanceWindowsPage = React.memo(() => {
     };
   }, [setBadge, chrome]);
 
-  if (isInitialLoading) {
-    return <CenterJustifiedSpinner />;
-  }
+  const onPageChange = useCallback(
+    ({ page: { index, size } }: { page: { index: number; size: number } }) => {
+      setPage(index + 1);
+      setPerPage(size);
+    },
+    []
+  );
+
+  const onSelectedStatusChange = useCallback((status: MaintenanceWindowStatus[]) => {
+    setSelectedStatus(status);
+  }, []);
+
+  const onSearchChange = useCallback((value: string) => {
+    setSearch(value);
+  }, []);
 
   return (
     <>
@@ -127,14 +159,22 @@ export const MaintenanceWindowsPage = React.memo(() => {
           <MaintenanceWindowsList
             readOnly={readOnly}
             refreshData={refreshData}
-            isLoading={isLoading}
+            isLoading={isLoading || isInitialLoading}
             items={maintenanceWindows}
+            page={page}
+            perPage={perPage}
+            total={total}
+            onPageChange={onPageChange}
+            selectedStatus={selectedStatus}
+            onStatusChange={onSelectedStatusChange}
+            onSearchChange={onSearchChange}
           />
         </>
       )}
     </>
   );
 });
+
 MaintenanceWindowsPage.displayName = 'MaintenanceWindowsPage';
 // eslint-disable-next-line import/no-default-export
 export { MaintenanceWindowsPage as default };
