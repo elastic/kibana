@@ -35,9 +35,7 @@ export const Default = {
       valueWeight: 15,
     };
 
-    return (
-      <Render renderer={getProgressRenderer(coreMock.createStart())} config={config} />
-    );
+    return <Render renderer={getProgressRenderer(coreMock.createStart())} config={config} />;
   },
 
   name: 'default',

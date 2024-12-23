@@ -28,9 +28,7 @@ export const Default = {
       maintainAspect: true,
     };
 
-    return (
-      <Render renderer={getShapeRenderer(coreMock.createStart())} config={config} />
-    );
+    return <Render renderer={getShapeRenderer(coreMock.createStart())} config={config} />;
   },
 
   name: 'default',
