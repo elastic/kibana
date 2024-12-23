@@ -703,7 +703,7 @@ examples/portable_dashboards_example @elastic/kibana-presentation
 examples/preboot_example @elastic/kibana-security @elastic/kibana-core
 src/platform/packages/shared/presentation/presentation_containers @elastic/kibana-presentation
 src/platform/plugins/private/presentation_panel @elastic/kibana-presentation
-packages/presentation/presentation_publishing @elastic/kibana-presentation
+src/platform/packages/shared/presentation/presentation_publishing @elastic/kibana-presentation
 src/plugins/presentation_util @elastic/kibana-presentation
 x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
