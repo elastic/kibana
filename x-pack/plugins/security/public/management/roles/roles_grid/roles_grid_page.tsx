@@ -76,6 +76,8 @@ const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
   return `/${action}${roleName ? `/${encodeURIComponent(roleName)}` : ''}`;
 };
 
+const MAX_PAGINATED_ITEMS = 10000;
+
 const DEFAULT_TABLE_STATE = {
   query: EuiSearchBar.Query.MATCH_ALL,
   sort: {
@@ -390,12 +392,15 @@ export const RolesGridPage: FC<Props> = ({
   const tableItems = rolesResponse.roles ?? [];
   const totalItemCount = rolesResponse.total ?? 0;
 
+  const displayedItemCount = Math.min(totalItemCount, MAX_PAGINATED_ITEMS);
+
   const pagination = {
     pageIndex: tableState.from / tableState.size,
     pageSize: tableState.size,
-    totalItemCount,
+    totalItemCount: displayedItemCount,
     pageSizeOptions: [25, 50, 100],
   };
+  const exceededResultCount = totalItemCount > MAX_PAGINATED_ITEMS;
 
   return permissionDenied ? (
     <PermissionDenied />
@@ -487,6 +492,18 @@ export const RolesGridPage: FC<Props> = ({
           toolsRight={renderToolsRight()}
         />
         <EuiSpacer size="s" />
+        {exceededResultCount && (
+          <>
+            <EuiText color="subdued" size="s" data-test-subj="rolesTableTooManyResultsLabel">
+              <FormattedMessage
+                id="xpack.security.management.roles.table.tooManyResultsLabel"
+                defaultMessage="Showing {limit} of {totalItemCount, plural, one {# role} other {# roles}}"
+                values={{ totalItemCount, limit: MAX_PAGINATED_ITEMS }}
+              />
+            </EuiText>
+            <EuiSpacer size="s" />
+          </>
+        )}
         <EuiBasicTable
           data-test-subj="rolesTable"
           itemId="name"
