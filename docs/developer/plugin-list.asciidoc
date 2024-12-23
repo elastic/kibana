@@ -732,7 +732,7 @@ Elastic.
 |This plugin provides the Stack Monitoring kibana application.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/monitoring_collection/README.md[monitoringCollection]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/monitoring_collection/README.md[monitoringCollection]
 |This plugin allows for other plugins to add data to Kibana stack monitoring documents.
 
 
