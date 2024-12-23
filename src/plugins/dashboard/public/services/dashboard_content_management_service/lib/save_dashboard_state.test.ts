@@ -8,7 +8,7 @@
  */
 
 import { DashboardContainerInput } from '../../../../common';
-import { getSampleDashboardInput } from '../../../mocks';
+import { getSampleDashboardState } from '../../../mocks';
 import {
   contentManagementService,
   coreServices,
@@ -47,8 +47,8 @@ describe('Save dashboard state', () => {
 
   it('should save the dashboard using the same ID', async () => {
     const result = await saveDashboardState({
-      currentState: {
-        ...getSampleDashboardInput(),
+      dashboardState: {
+        ...getSampleDashboardState(),
         title: 'BOO',
       } as unknown as DashboardContainerInput,
       lastSavedId: 'Boogaloo',
@@ -68,8 +68,8 @@ describe('Save dashboard state', () => {
 
   it('should save the dashboard using a new id, and return redirect required', async () => {
     const result = await saveDashboardState({
-      currentState: {
-        ...getSampleDashboardInput(),
+      dashboardState: {
+        ...getSampleDashboardState(),
         title: 'BooToo',
       } as unknown as DashboardContainerInput,
       lastSavedId: 'Boogaloonie',
@@ -92,8 +92,8 @@ describe('Save dashboard state', () => {
 
   it('should generate new panel IDs for dashboard panels when save as copy is true', async () => {
     const result = await saveDashboardState({
-      currentState: {
-        ...getSampleDashboardInput(),
+      dashboardState: {
+        ...getSampleDashboardState(),
         title: 'BooThree',
         panels: { aVerySpecialVeryUniqueId: { type: 'boop' } },
       } as unknown as DashboardContainerInput,
@@ -118,8 +118,8 @@ describe('Save dashboard state', () => {
 
   it('should update prefixes on references when save as copy is true', async () => {
     const result = await saveDashboardState({
-      currentState: {
-        ...getSampleDashboardInput(),
+      dashboardState: {
+        ...getSampleDashboardState(),
         title: 'BooFour',
         panels: { idOne: { type: 'boop' } },
       } as unknown as DashboardContainerInput,
@@ -146,8 +146,8 @@ describe('Save dashboard state', () => {
   it('should return an error when the save fails.', async () => {
     contentManagementService.client.create = jest.fn().mockRejectedValue('Whoops');
     const result = await saveDashboardState({
-      currentState: {
-        ...getSampleDashboardInput(),
+      dashboardState: {
+        ...getSampleDashboardState(),
         title: 'BooThree',
         panels: { idOne: { type: 'boop' } },
       } as unknown as DashboardContainerInput,

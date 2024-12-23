@@ -84,6 +84,7 @@ describe('splitPkgKey', () => {
 describe('fetch package', () => {
   afterEach(() => {
     mockFetchUrl.mockReset();
+    mockGetConfig.mockReset();
     mockGetBundledPackageByName.mockReset();
   });
 
@@ -98,6 +99,22 @@ describe('fetch package', () => {
       mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
       const result = await fetchMethodToTest('testpkg');
       expect(result).toEqual(registryPackage);
+    });
+
+    it('Should return bundled package when isAirGapped = true', async () => {
+      mockGetConfig.mockReturnValue({
+        isAirGapped: true,
+        enabled: true,
+        agents: { enabled: true, elasticsearch: {} },
+      });
+      const bundledPackage = { name: 'testpkg', version: '1.0.0' };
+      const registryPackage = { name: 'testpkg', version: '1.0.1' };
+
+      mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
+
+      mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
+      const result = await fetchMethodToTest('testpkg');
+      expect(result).toEqual(bundledPackage);
     });
 
     it('Should return bundled package if bundled package is newer version', async () => {
@@ -220,6 +237,15 @@ describe('fetchInfo', () => {
       expect(e).toBeInstanceOf(PackageNotFoundError);
     }
   });
+
+  it('falls back to bundled package when isAirGapped config == true', async () => {
+    mockGetConfig.mockReturnValue({
+      isAirGapped: true,
+    });
+
+    const fetchedInfo = await fetchInfo('test-package', '1.0.0');
+    expect(fetchedInfo).toBeTruthy();
+  });
 });
 
 describe('fetchCategories', () => {
@@ -315,6 +341,13 @@ describe('fetchList', () => {
     expect(mockFetchUrl).toBeCalledTimes(1);
     const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
     expect(callUrl.searchParams.get('capabilities')).toBeNull();
+  });
+
+  it('does not call registry if isAirGapped == true', async () => {
+    mockGetConfig.mockReturnValue({ isAirGapped: true });
+    mockFetchUrl.mockResolvedValue(JSON.stringify([]));
+    await fetchList();
+    expect(mockFetchUrl).toBeCalledTimes(0);
   });
 
   it('does call registry with kibana.version if not explictly disabled', async () => {

@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ScoutLoaderConfig } from '../../types';
+import { ScoutServerConfig } from '../../types';
 import { defaultConfig } from './serverless.base.config';
 
-export const servers: ScoutLoaderConfig = {
+export const servers: ScoutServerConfig = {
   ...defaultConfig,
   esTestCluster: {
     ...defaultConfig.esTestCluster,
     serverArgs: [...defaultConfig.esTestCluster.serverArgs],
   },
   kbnTestServer: {
+    ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--serverless=es',

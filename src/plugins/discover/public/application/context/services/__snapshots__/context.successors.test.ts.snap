@@ -3,6 +3,15 @@
 exports[`context successors function fetchSuccessors should perform multiple queries until the expected hit count is returned 1`] = `
 Array [
   Array [
+    "fields",
+    Array [
+      Object {
+        "field": "*",
+        "include_unmapped": true,
+      },
+    ],
+  ],
+  Array [
     "index",
     Object {
       "fields": Object {

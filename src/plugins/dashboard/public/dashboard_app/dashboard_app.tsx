@@ -9,16 +9,15 @@
 
 import { History } from 'history';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import useMount from 'react-use/lib/useMount';
 import useObservable from 'react-use/lib/useObservable';
 import { debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
+import { ViewMode } from '@kbn/presentation-publishing';
 import { DashboardApi, DashboardCreationOptions, DashboardRenderer } from '..';
 import { SharedDashboardState } from '../../common';
 import {
@@ -70,10 +69,33 @@ export function DashboardApp({
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const [regenerateId, setRegenerateId] = useState(uuidv4());
+  const incomingEmbeddable = useMemo(() => {
+    return embeddableService
+      .getStateTransfer()
+      .getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true);
+  }, []);
 
-  useMount(() => {
-    (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
-  });
+  useEffect(() => {
+    let canceled = false;
+    // show dashboard when there is an incoming embeddable
+    if (incomingEmbeddable) {
+      return;
+    }
+
+    isDashboardAppInNoDataState()
+      .then((isInNotDataState) => {
+        if (!canceled && isInNotDataState) {
+          setShowNoDataPage(true);
+        }
+      })
+      .catch((error) => {
+        // show dashboard application if inNoDataState can not be determined
+      });
+
+    return () => {
+      canceled = true;
+    };
+  }, [incomingEmbeddable]);
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>(undefined);
 
   const showPlainSpinner = useObservable(coreServices.customBranding.hasCustomBranding$, false);
@@ -132,14 +154,13 @@ export function DashboardApp({
         // if print mode is active, force viewMode.PRINT
         ...(screenshotModeService.isScreenshotMode() &&
         screenshotModeService.getScreenshotContext('layout') === 'print'
-          ? { viewMode: ViewMode.PRINT }
+          ? { viewMode: 'print' as ViewMode }
           : {}),
       };
     };
 
     return Promise.resolve<DashboardCreationOptions>({
-      getIncomingEmbeddable: () =>
-        embeddableService.getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true),
+      getIncomingEmbeddable: () => incomingEmbeddable,
 
       // integrations
       useSessionStorageIntegration: true,
@@ -166,7 +187,14 @@ export function DashboardApp({
         getCurrentPath: () => `#${createDashboardEditUrl(dashboardId)}`,
       }),
     });
-  }, [history, embedSettings, validateOutcome, getScopedHistory, kbnUrlStateStorage]);
+  }, [
+    history,
+    embedSettings,
+    validateOutcome,
+    getScopedHistory,
+    kbnUrlStateStorage,
+    incomingEmbeddable,
+  ]);
 
   useEffect(() => {
     if (!dashboardApi) return;

@@ -367,13 +367,14 @@ export class LensPlugin {
         coreStart,
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
-        documentToExpression: (doc: LensDocument) =>
+        documentToExpression: (doc: LensDocument, forceDSL?: boolean) =>
           this.editorFrameService!.documentToExpression(doc, {
             dataViews: plugins.dataViews,
             storage: new Storage(localStorage),
             uiSettings: core.uiSettings,
             timefilter: plugins.data.query.timefilter.timefilter,
             nowProvider: plugins.data.nowProvider,
+            forceDSL,
             eventAnnotationService,
           }),
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
@@ -395,7 +396,7 @@ export class LensPlugin {
       });
 
       // Let Dashboard know about the Lens panel type
-      embeddable.registerReactEmbeddableSavedObject<LensSavedObjectAttributes>({
+      embeddable.registerAddFromLibraryType<LensSavedObjectAttributes>({
         onAdd: async (container, savedObject) => {
           const { attributeService } = await getStartServicesForEmbeddable();
           // deserialize the saved object from visualize library
@@ -411,7 +412,6 @@ export class LensPlugin {
             initialState: state,
           });
         },
-        embeddableType: LENS_EMBEDDABLE_TYPE,
         savedObjectType: LENS_EMBEDDABLE_TYPE,
         savedObjectName: i18n.translate('xpack.lens.mapSavedObjectLabel', {
           defaultMessage: 'Lens',

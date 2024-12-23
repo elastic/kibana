@@ -19,7 +19,6 @@ import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   isNestedFieldParent,
-  SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import {
@@ -113,25 +112,22 @@ export async function getSharingData(
        * Otherwise, the requests will ask for all fields, even if only a few are really needed.
        * Discover does not set fields, since having all fields is needed for the UI.
        */
-      const useFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
-      if (useFieldsApi) {
-        searchSourceUpdated.removeField('fieldsFromSource');
-        const fields = columns.length
-          ? columns.map((column) => {
-              let field = column;
+      searchSourceUpdated.removeField('fieldsFromSource');
+      const fields = columns.length
+        ? columns.map((column) => {
+            let field = column;
 
-              // If this column is a nested field, add a wildcard to the field name in order to fetch
-              // all leaf fields for the report, since the fields API doesn't support nested field roots
-              if (isNestedFieldParent(column, index)) {
-                field = `${column}.*`;
-              }
+            // If this column is a nested field, add a wildcard to the field name in order to fetch
+            // all leaf fields for the report, since the fields API doesn't support nested field roots
+            if (isNestedFieldParent(column, index)) {
+              field = `${column}.*`;
+            }
 
-              return { field, include_unmapped: true };
-            })
-          : [{ field: '*', include_unmapped: true }];
+            return { field, include_unmapped: true };
+          })
+        : [{ field: '*', include_unmapped: true }];
+      searchSourceUpdated.setField('fields', fields);
 
-        searchSourceUpdated.setField('fields', fields);
-      }
       return searchSourceUpdated.getSerializedFields(true);
     },
     columns,

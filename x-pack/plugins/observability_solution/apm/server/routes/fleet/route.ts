@@ -65,7 +65,11 @@ const fleetAgentsRoute = createApmServerRoute({
 
 const saveApmServerSchemaRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/fleet/apm_server_schema 2023-10-31',
-  options: { tags: ['access:apm', 'access:apm_write'] },
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'apm_write'],
+    },
+  },
   params: t.type({
     body: t.type({
       schema: t.record(t.string, t.unknown),
@@ -88,7 +92,7 @@ const saveApmServerSchemaRoute = createApmServerRoute({
 
 const getUnsupportedApmServerSchemaRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/apm_server_schema/unsupported',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ unsupported: UnsupportedApmServerSchema }> => {
     throwNotFoundIfFleetMigrationNotAvailable(resources.featureFlags);
     const { context } = resources;
@@ -101,7 +105,7 @@ const getUnsupportedApmServerSchemaRoute = createApmServerRoute({
 
 const getMigrationCheckRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/migration_check',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<RunMigrationCheckResponse> => {
     const { core, plugins, context, config, request } = resources;
     throwNotFoundIfFleetMigrationNotAvailable(resources.featureFlags);
@@ -128,7 +132,11 @@ const getMigrationCheckRoute = createApmServerRoute({
 
 const createCloudApmPackagePolicyRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/fleet/cloud_apm_package_policy',
-  options: { tags: ['access:apm', 'access:apm_write'] },
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'apm_write'],
+    },
+  },
   handler: async (
     resources
   ): Promise<{
@@ -141,19 +149,17 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       throw Boom.internal(FLEET_SECURITY_REQUIRED_MESSAGE);
     }
 
-    const [savedObjectsClient, coreStart, fleetPluginStart, securityPluginStart, apmIndices] =
-      await Promise.all([
-        (await context.core).savedObjects.client,
-        resources.core.start(),
-        plugins.fleet.start(),
-        plugins.security.start(),
-        resources.getApmIndices(),
-      ]);
+    const [savedObjectsClient, coreStart, fleetPluginStart, apmIndices] = await Promise.all([
+      (await context.core).savedObjects.client,
+      resources.core.start(),
+      plugins.fleet.start(),
+      resources.getApmIndices(),
+    ]);
 
     const esClient = coreStart.elasticsearch.client.asScoped(resources.request).asCurrentUser;
     const cloudPluginSetup = plugins.cloud?.setup;
 
-    const hasRequiredRole = isSuperuser({ securityPluginStart, request });
+    const hasRequiredRole = isSuperuser({ coreStart, request });
     if (!hasRequiredRole || !cloudApmMigrationEnabled) {
       throw Boom.forbidden(CLOUD_SUPERUSER_REQUIRED_MESSAGE);
     }
