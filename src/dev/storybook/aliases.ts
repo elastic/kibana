@@ -44,7 +44,7 @@ export const storybookAliases = {
   expression_shape: 'src/plugins/expression_shape/.storybook',
   expression_tagcloud: 'src/plugins/chart_expressions/expression_tagcloud/.storybook',
   fleet: 'x-pack/plugins/fleet/.storybook',
-  grouping: 'packages/kbn-grouping/.storybook',
+  grouping: 'src/platform/packages/shared/kbn-grouping/.storybook',
   home: 'src/plugins/home/.storybook',
   infra: 'x-pack/solutions/observability/plugins/infra/.storybook',
   inventory: 'x-pack/plugins/observability_solution/inventory/.storybook',
