@@ -4857,7 +4857,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-browser-internal@link:packages/core/plugins/core-plugins-browser-internal":
+"@kbn/core-plugins-browser-internal@link:src/core/packages/plugins/browser-internal":
   version "0.0.0"
   uid ""
 
