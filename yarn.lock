@@ -4581,7 +4581,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-browser@link:packages/core/http/core-http-browser":
+"@kbn/core-http-browser@link:src/core/packages/http/browser":
   version "0.0.0"
   uid ""
 
