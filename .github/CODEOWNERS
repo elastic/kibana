@@ -352,7 +352,7 @@ packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 src/plugins/custom_integrations @elastic/fleet
 packages/kbn-cypress-config @elastic/kibana-operations
 x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
-src/plugins/dashboard @elastic/kibana-presentation
+src/platform/plugins/shared/dashboard @elastic/kibana-presentation
 x-pack/platform/packages/shared/kbn-data-forge @elastic/obs-ux-management-team
 src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
 x-pack/plugins/data_quality @elastic/obs-ux-logs-team
