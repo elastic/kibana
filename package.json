@@ -247,7 +247,7 @@
     "@kbn/core": "link:src/core/packages/core",
     "@kbn/core-analytics-browser": "link:src/core/packages/analytics/browser",
     "@kbn/core-analytics-browser-internal": "link:src/core/packages/analytics/browser-internal",
-    "@kbn/core-analytics-server": "link:packages/core/analytics/core-analytics-server",
+    "@kbn/core-analytics-server": "link:src/core/packages/analytics/server",
     "@kbn/core-analytics-server-internal": "link:packages/core/analytics/core-analytics-server-internal",
     "@kbn/core-app-status-plugin": "link:test/plugin_functional/plugins/core_app_status",
     "@kbn/core-application-browser": "link:packages/core/application/core-application-browser",
