@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme'; // TODO: replace with euiTheme
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { DistributionBar as DistributionBarComponent } from '..';
 

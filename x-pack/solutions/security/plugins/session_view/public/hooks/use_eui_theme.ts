@@ -33,10 +33,10 @@ export const useEuiTheme = (...props: EuiThemeProps): EuiThemeReturn => {
 
     const extraEuiVars: ExtraEuiVars = {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      euiColorVis6_asText: shade(themeVars.euiColorVis6, 0.335), // TODO: check in Borealis
-      buttonsBackgroundNormalDefaultPrimary: '#006DE4',
+      euiColorVis6_asText: shade(themeVars.euiColorVis6, 0.335), // TODO: check in Borealis. Replce with proper color token and remove shade
+      buttonsBackgroundNormalDefaultPrimary: '#006DE4', // TODO: replace with proper color token
       // Terminal Output Colors don't change with the theme
-      terminalOutputBackground: '#1d1e23',
+      terminalOutputBackground: '#1d1e23', // TODO: replace with proper color token
       terminalOutputMarkerAccent: euiLightVars.euiColorAccent,
       terminalOutputMarkerWarning: euiDarkVars.euiColorWarning,
       terminalOutputSliderBackground: euiLightVars.euiColorDarkestShade,

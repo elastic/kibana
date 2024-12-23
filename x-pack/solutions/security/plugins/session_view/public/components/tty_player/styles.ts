@@ -37,7 +37,7 @@ export const useStyles = (tty?: Teletype, show?: boolean) => {
       padding: `${size.m} ${size.base}`,
     };
 
-    const windowBoundsColor = transparentize(colors.ghost, 0.6);
+    const windowBoundsColor = transparentize(colors.ghost, 0.6); // TODO: replace transparentize with color token
 
     const terminal: CSSObject = {
       minHeight: '100%',

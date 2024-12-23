@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiThemeVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme'; // TODO: replace with euiTheme
 import React from 'react';
 
 export const NvdLogo = () => (
