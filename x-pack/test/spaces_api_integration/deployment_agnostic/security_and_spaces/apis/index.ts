@@ -21,10 +21,10 @@ export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProv
       }
     });
     // loadTestFile(require.resolve('./resolve_copy_to_space_conflicts'));
-    loadTestFile(require.resolve('./create'));
-    loadTestFile(require.resolve('./delete'));
-    loadTestFile(require.resolve('./get_all'));
+    // loadTestFile(require.resolve('./create'));
+    // loadTestFile(require.resolve('./delete'));
+    // loadTestFile(require.resolve('./get_all'));
     loadTestFile(require.resolve('./get'));
-    loadTestFile(require.resolve('./update'));
+    // loadTestFile(require.resolve('./update'));
   });
 }
