@@ -19,7 +19,8 @@ import {
 import { Query } from '@kbn/es-query';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
-import { EmbeddablePublicPlugin, EmbeddableSetup, EmbeddableStart } from '../plugin';
+import { EmbeddablePublicPlugin } from '../plugin';
+import type { EmbeddableSetup, EmbeddableStart } from '../types';
 export interface TestPluginReturn {
   plugin: EmbeddablePublicPlugin;
   coreSetup: CoreSetup;

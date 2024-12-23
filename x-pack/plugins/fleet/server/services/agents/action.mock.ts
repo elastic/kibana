@@ -152,7 +152,7 @@ export function createClientMock() {
 
   esClientMock.mget.mockResponseImplementation((params) => {
     // @ts-expect-error
-    const docs = params?.body.docs.map(({ _id }) => {
+    const docs = params?.docs.map(({ _id }) => {
       let result;
       switch (_id) {
         case agentInHostedDoc._id:

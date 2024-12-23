@@ -14,14 +14,18 @@ exports[`<Settings /> can navigate Autoplay Settings 1`] = `
       class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-light-hasTransform"
       data-popover-panel="true"
       role="dialog"
-      style="top: -16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
+      style="top: -16px; left: -18px; will-change: transform, opacity; z-index: 2000;"
       tabindex="0"
     >
       <div
-        class="euiPopover__arrow emotion-euiPopoverArrow-top"
-        data-popover-arrow="top"
-        style="left: 10px; top: 0px;"
-      />
+        class="euiPopover__arrowWrapper emotion-euiPopoverArrowWrapper"
+        style="left: 9px; top: 100%;"
+      >
+        <div
+          class="euiPopover__arrow emotion-euiPopoverArrow-top"
+          data-popover-arrow="top"
+        />
+      </div>
       <p
         class="emotion-euiScreenReaderOnly"
         id="generated-id"
@@ -110,14 +114,18 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
       data-popover-open="true"
       data-popover-panel="true"
       role="dialog"
-      style="top: -16px; left: -22px; z-index: 2000;"
+      style="top: -16px; left: -18px; z-index: 2000;"
       tabindex="0"
     >
       <div
-        class="euiPopover__arrow emotion-euiPopoverArrow-top"
-        data-popover-arrow="top"
-        style="left: 10px; top: 0px;"
-      />
+        class="euiPopover__arrowWrapper emotion-euiPopoverArrowWrapper"
+        style="left: 9px; top: 100%;"
+      >
+        <div
+          class="euiPopover__arrow emotion-euiPopoverArrow-top"
+          data-popover-arrow="top"
+        />
+      </div>
       <p
         class="emotion-euiScreenReaderOnly"
         id="generated-id"
@@ -355,14 +363,18 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 1`] =
       class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-light-hasTransform"
       data-popover-panel="true"
       role="dialog"
-      style="top: -16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
+      style="top: -16px; left: -18px; will-change: transform, opacity; z-index: 2000;"
       tabindex="0"
     >
       <div
-        class="euiPopover__arrow emotion-euiPopoverArrow-top"
-        data-popover-arrow="top"
-        style="left: 10px; top: 0px;"
-      />
+        class="euiPopover__arrowWrapper emotion-euiPopoverArrowWrapper"
+        style="left: 9px; top: 100%;"
+      >
+        <div
+          class="euiPopover__arrow emotion-euiPopoverArrow-top"
+          data-popover-arrow="top"
+        />
+      </div>
       <p
         class="emotion-euiScreenReaderOnly"
         id="generated-id"
@@ -451,14 +463,18 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
       data-popover-open="true"
       data-popover-panel="true"
       role="dialog"
-      style="top: -16px; left: -22px; z-index: 2000;"
+      style="top: -16px; left: -18px; z-index: 2000;"
       tabindex="0"
     >
       <div
-        class="euiPopover__arrow emotion-euiPopoverArrow-top"
-        data-popover-arrow="top"
-        style="left: 10px; top: 0px;"
-      />
+        class="euiPopover__arrowWrapper emotion-euiPopoverArrowWrapper"
+        style="left: 9px; top: 100%;"
+      >
+        <div
+          class="euiPopover__arrow emotion-euiPopoverArrow-top"
+          data-popover-arrow="top"
+        />
+      </div>
       <p
         class="emotion-euiScreenReaderOnly"
         id="generated-id"
@@ -627,14 +643,18 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] =
       class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-light-hasTransform"
       data-popover-panel="true"
       role="dialog"
-      style="top: -16px; left: -22px; z-index: 2000;"
+      style="top: -16px; left: -18px; z-index: 2000;"
       tabindex="0"
     >
       <div
-        class="euiPopover__arrow emotion-euiPopoverArrow-top"
-        data-popover-arrow="top"
-        style="left: 10px; top: 0px;"
-      />
+        class="euiPopover__arrowWrapper emotion-euiPopoverArrowWrapper"
+        style="left: 9px; top: 100%;"
+      >
+        <div
+          class="euiPopover__arrow emotion-euiPopoverArrow-top"
+          data-popover-arrow="top"
+        />
+      </div>
       <p
         class="emotion-euiScreenReaderOnly"
         id="generated-id"
