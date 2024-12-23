@@ -4517,7 +4517,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-common@link:packages/core/execution-context/core-execution-context-common":
+"@kbn/core-execution-context-common@link:src/core/packages/execution-context/common":
   version "0.0.0"
   uid ""
 

@@ -288,7 +288,7 @@
     "@kbn/core-environment-server-internal": "link:src/core/packages/environment/server-internal",
     "@kbn/core-execution-context-browser": "link:src/core/packages/execution-context/browser",
     "@kbn/core-execution-context-browser-internal": "link:src/core/packages/execution-context/browser-internal",
-    "@kbn/core-execution-context-common": "link:packages/core/execution-context/core-execution-context-common",
+    "@kbn/core-execution-context-common": "link:src/core/packages/execution-context/common",
     "@kbn/core-execution-context-server": "link:packages/core/execution-context/core-execution-context-server",
     "@kbn/core-execution-context-server-internal": "link:packages/core/execution-context/core-execution-context-server-internal",
     "@kbn/core-fatal-errors-browser": "link:packages/core/fatal-errors/core-fatal-errors-browser",
