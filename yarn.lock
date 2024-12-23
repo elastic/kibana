@@ -5097,7 +5097,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-common@link:packages/core/ui-settings/core-ui-settings-common":
+"@kbn/core-ui-settings-common@link:src/core/packages/ui-settings/common":
   version "0.0.0"
   uid ""
 
