@@ -189,6 +189,7 @@
     "@kbn/sse-utils-server",
     "@kbn/gen-ai-functional-testing",
     "@kbn/integration-assistant-plugin",
-    "@kbn/core-elasticsearch-server"
+    "@kbn/core-elasticsearch-server",
+    "@kbn/streams-schema"
   ]
 }

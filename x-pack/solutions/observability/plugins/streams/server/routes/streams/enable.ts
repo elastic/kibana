@@ -28,7 +28,6 @@ export const enableStreamsRoute = createServerRoute({
   },
   handler: async ({
     request,
-    response,
     logger,
     getScopedClients,
   }): Promise<{ acknowledged: true; message: string }> => {

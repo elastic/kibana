@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
+import { ReadStreamDefinition } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
@@ -35,18 +35,18 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
   } = useDateRange({ data });
 
   const indexPatterns = useMemo(() => {
-    if (!definition?.id) {
+    if (!definition?.name) {
       return undefined;
     }
 
-    const isRoot = definition.id.indexOf('.') === -1;
+    const isRoot = definition.name.indexOf('.') === -1;
 
-    const dataStreamOfDefinition = definition.id;
+    const dataStreamOfDefinition = definition.name;
 
     return isRoot
       ? [dataStreamOfDefinition, `${dataStreamOfDefinition}.*`]
       : [`${dataStreamOfDefinition}*`];
-  }, [definition?.id]);
+  }, [definition?.name]);
 
   const discoverLocator = useMemo(
     () => share.url.locators.get('DISCOVER_APP_LOCATOR'),

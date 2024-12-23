@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { notFound, internal } from '@hapi/boom';
-import { conditionSchema } from '../../../common/types';
+import { conditionSchema } from '@kbn/streams-schema';
 import { createServerRoute } from '../create_server_route';
 import { DefinitionNotFound } from '../../lib/streams/errors';
 import { checkReadAccess } from '../../lib/streams/stream_crud';
@@ -35,13 +35,7 @@ export const sampleStreamRoute = createServerRoute({
       number: z.optional(z.number()),
     }),
   }),
-  handler: async ({
-    response,
-    params,
-    request,
-    logger,
-    getScopedClients,
-  }): Promise<{ documents: unknown[] }> => {
+  handler: async ({ params, request, getScopedClients }): Promise<{ documents: unknown[] }> => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
 

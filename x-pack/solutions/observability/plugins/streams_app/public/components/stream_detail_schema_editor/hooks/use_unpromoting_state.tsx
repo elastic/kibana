@@ -11,7 +11,8 @@ import useToggle from 'react-use/lib/useToggle';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
-import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
+import { WiredReadStreamDefinition } from '@kbn/streams-schema';
+import { omit } from 'lodash';
 
 export type SchemaEditorUnpromotingState = ReturnType<typeof useUnpromotingState>;
 
@@ -23,7 +24,7 @@ export const useUnpromotingState = ({
   toastsService,
 }: {
   streamsRepositoryClient: StreamsRepositoryClient;
-  definition: ReadStreamDefinition;
+  definition: WiredReadStreamDefinition;
   refreshDefinition: () => void;
   refreshUnmappedFields: () => void;
   toastsService: ToastsStart;
@@ -46,12 +47,15 @@ export const useUnpromotingState = ({
         signal: abortController.signal,
         params: {
           path: {
-            id: definition.id,
+            id: definition.name,
           },
           body: {
-            processing: definition.processing,
-            children: definition.children,
-            fields: definition.fields.filter((field) => field.name !== selectedField),
+            ingest: {
+              ...definition.stream.ingest,
+              wired: {
+                fields: omit(definition.stream.ingest.wired.fields, selectedField),
+              },
+            },
           },
         },
       });
@@ -77,10 +81,8 @@ export const useUnpromotingState = ({
     }
   }, [
     abortController.signal,
-    definition.children,
-    definition.fields,
-    definition.id,
-    definition.processing,
+    definition.name,
+    definition.stream.ingest,
     refreshDefinition,
     refreshUnmappedFields,
     selectedField,
