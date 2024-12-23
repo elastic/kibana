@@ -17,7 +17,7 @@ function createInMemorySubject<T extends AllowedValue>(key: string, defaultValue
   const subject$ = new BehaviorSubject(currentValue);
 
   function onStorageUpdate(event: StorageEvent) {
-    if (event.key === key) {
+    if (event.storageArea === window.localStorage && event.key === key) {
       subject$.next(event.newValue ? JSON.parse(event.newValue) : defaultValue);
     }
   }
@@ -39,6 +39,10 @@ const createInMemorySubjectMemoized = memoize(
   createInMemorySubject,
   (key: string, defaultValue?: unknown) => key
 );
+
+export function clearUseLocalStorageCache() {
+  return createInMemorySubjectMemoized.cache.clear?.();
+}
 
 type SetValue<T extends AllowedValue> = (next: T | ((prev: T) => T)) => void;
 
