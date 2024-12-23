@@ -22,7 +22,7 @@ const detectorsSchema = schema.oneOf([
   schema.literal(AnomalyDetectorType.txFailureRate),
 ]);
 
-export const apmAnomalyParamsSchema = schema.object({
+export const anomalyParamsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
   transactionType: schema.maybe(schema.string()),
   windowSize: schema.number(),
@@ -37,4 +37,4 @@ export const apmAnomalyParamsSchema = schema.object({
   anomalyDetectorTypes: schema.maybe(schema.arrayOf(detectorsSchema, { minSize: 1 })),
 });
 
-export type ApmAnomalyRuleTypeParams = TypeOf<typeof apmAnomalyParamsSchema>;
+export type AnomalyRuleParams = TypeOf<typeof anomalyParamsSchema>;

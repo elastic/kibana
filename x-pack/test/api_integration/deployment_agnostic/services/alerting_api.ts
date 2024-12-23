@@ -14,10 +14,7 @@ import { ThresholdParams } from '@kbn/observability-plugin/common/custom_thresho
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { errors, type Client } from '@elastic/elasticsearch';
 import type { TryWithRetriesOptions } from '@kbn/ftr-common-functional-services';
-import { ApmAnomalyRuleTypeParams } from '@kbn/response-ops-rule-params/apm_anomaly';
-import { ErrorCountRuleTypeParams } from '@kbn/response-ops-rule-params/error_count';
-import { TransactionDurationRuleTypeParams } from '@kbn/response-ops-rule-params/transaction_duration';
-import { TransactionErrorRateRuleTypeParams } from '@kbn/response-ops-rule-params/transaction_error_rate';
+import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
@@ -1079,10 +1076,10 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         | MetricThresholdParams
         | ThresholdParams
         | SloBurnRateRuleParams
-        | ApmAnomalyRuleTypeParams
-        | ErrorCountRuleTypeParams
-        | TransactionDurationRuleTypeParams
-        | TransactionErrorRateRuleTypeParams;
+        | ApmRuleParamsType['apm.anomaly']
+        | ApmRuleParamsType['apm.error_rate']
+        | ApmRuleParamsType['apm.transaction_duration']
+        | ApmRuleParamsType['apm.transaction_error_rate'];
       actions?: any[];
       tags?: any[];
       schedule?: { interval: string };

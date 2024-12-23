@@ -22,4 +22,4 @@ export const errorCountParamsSchema = schema.object({
   searchConfiguration: schema.maybe(searchConfigurationSchema),
 });
 
-export type ErrorCountRuleTypeParams = TypeOf<typeof errorCountParamsSchema>;
+export type ErrorCountRuleParams = TypeOf<typeof errorCountParamsSchema>;

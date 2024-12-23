@@ -34,4 +34,4 @@ export const transactionDurationParamsSchema = schema.object({
   searchConfiguration: schema.maybe(searchConfigurationSchema),
 });
 
-export type TransactionDurationRuleTypeParams = TypeOf<typeof transactionDurationParamsSchema>;
+export type TransactionDurationRuleParams = TypeOf<typeof transactionDurationParamsSchema>;

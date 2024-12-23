@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { apmAnomalyParamsSchema } from './latest';
-export { apmAnomalyParamsSchema as apmAnomalyParamsSchemaV1 } from './v1';
+export { anomalyParamsSchema } from './latest';
+export { anomalyParamsSchema as anomalyParamsSchemaV1 } from './v1';
 
-export type { ApmAnomalyRuleTypeParams } from './latest';
-export type { ApmAnomalyRuleTypeParams as ApmAnomalyRuleTypeParamsV1 } from './v1';
+export type { AnomalyRuleParams } from './latest';
+export type { AnomalyRuleParams as AnomalyRuleParamsV1 } from './v1';

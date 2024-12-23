@@ -32,10 +32,7 @@ import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
-import {
-  errorCountParamsSchema,
-  ErrorCountRuleTypeParams,
-} from '@kbn/response-ops-rule-params/error_count';
+import { errorCountParamsSchema } from '@kbn/response-ops-rule-params/error_count';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
   ERROR_GROUP_ID,
@@ -45,6 +42,7 @@ import {
 } from '../../../../../common/es_fields/apm';
 import {
   APM_SERVER_FEATURE_ID,
+  ApmRuleParamsType,
   formatErrorCountReason,
   RULE_TYPES_CONFIG,
   THRESHOLD_MET_GROUP,
@@ -81,6 +79,7 @@ export const errorCountActionVariables = [
   apmActionVariables.viewInAppUrl,
 ];
 
+type ErrorCountRuleTypeParams = ApmRuleParamsType[ApmRuleType.ErrorCount];
 type ErrorCountActionGroups = ActionGroupIdsOf<typeof THRESHOLD_MET_GROUP>;
 type ErrorCountRuleTypeState = RuleTypeState;
 type ErrorCountAlertState = AlertState;

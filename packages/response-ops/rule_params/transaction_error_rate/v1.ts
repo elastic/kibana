@@ -23,4 +23,4 @@ export const transactionErrorRateParamsSchema = schema.object({
   searchConfiguration: schema.maybe(searchConfigurationSchema),
 });
 
-export type TransactionErrorRateRuleTypeParams = TypeOf<typeof transactionErrorRateParamsSchema>;
+export type TransactionErrorRateRuleParams = TypeOf<typeof transactionErrorRateParamsSchema>;
