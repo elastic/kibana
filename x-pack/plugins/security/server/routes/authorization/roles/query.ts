@@ -124,7 +124,7 @@ export function defineQueryRolesRoutes({
           sort: transformedSort,
         });
 
-        const transformedRoles = queryRoles.roles?.map((role) =>
+        const transformedRoles = (queryRoles.roles || []).map((role) =>
           transformElasticsearchRoleToRole({
             features,
             elasticsearchRole: role, // TODO: address why the `remote_cluster` field is throwing type errors
