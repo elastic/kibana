@@ -11,6 +11,7 @@ import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { GetScheduleFrequencyResponseV1 } from '../../../../../common/routes/rule/apis/get_schedule_frequency';
 import { transformGetScheduleFrequencyResultV1 } from './transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const getScheduleFrequencyRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -19,6 +20,7 @@ export const getScheduleFrequencyRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_schedule_frequency`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {},
     },

@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiEmptyPrompt, EuiImage, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiEmptyPrompt,
+  EuiImage,
+  EuiLink,
+  EuiLoadingSpinner,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -18,7 +25,6 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useEntityCentricExperienceSetting } from '../../../../hooks/use_entity_centric_experience_setting';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
-import { useTheme } from '../../../../hooks/use_theme';
 import { ApmPluginStartDeps } from '../../../../plugin';
 
 const pageHeader = {
@@ -27,7 +33,7 @@ const pageHeader = {
 
 export function EntityLink() {
   const router = useApmRouter({ prependBasePath: false });
-  const theme = useTheme();
+  const { colorMode } = useEuiTheme();
   const { services } = useKibana<ApmPluginStartDeps>();
   const { observabilityShared, data } = services;
   const timeRange = data.query.timefilter.timefilter.getTime();
@@ -65,7 +71,7 @@ export function EntityLink() {
           icon={
             <EuiImage
               size="fullWidth"
-              src={theme.darkMode ? dashboardsDark : dashboardsLight}
+              src={colorMode === 'DARK' ? dashboardsDark : dashboardsLight}
               alt=""
             />
           }

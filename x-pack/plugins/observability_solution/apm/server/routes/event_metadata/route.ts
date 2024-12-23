@@ -14,7 +14,7 @@ import { rangeRt } from '../default_api_types';
 
 const eventMetadataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({
     path: t.type({
       processorEvent: processorEventRt,

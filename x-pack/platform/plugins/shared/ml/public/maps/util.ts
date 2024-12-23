@@ -7,7 +7,7 @@
 
 import type { FeatureCollection, Feature, Geometry } from 'geojson';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { htmlIdGenerator } from '@elastic/eui';
+import { htmlIdGenerator, type EuiThemeComputed } from '@elastic/eui';
 import type { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { FIELD_ORIGIN, STYLE_TYPE } from '@kbn/maps-plugin/common';
 import type {
@@ -24,9 +24,9 @@ import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { MlApi } from '../application/services/ml_api_service';
 import { tabColor } from '../../common/util/group_color_utils';
-import { getIndexPattern } from '../application/explorer/reducers/explorer_reducer/get_index_pattern';
 import { AnomalySource } from './anomaly_source';
-import type { SourceIndexGeoFields } from '../application/explorer/explorer_utils';
+import type { ExplorerJob } from '../application/explorer/explorer_utils';
+import { getIndexPattern, type SourceIndexGeoFields } from '../application/explorer/explorer_utils';
 
 export const ML_ANOMALY_LAYERS = {
   TYPICAL: 'typical',
@@ -116,14 +116,17 @@ export function getInitialAnomaliesLayers(jobId: string) {
   return initialLayers;
 }
 
-export function getInitialSourceIndexFieldLayers(sourceIndexWithGeoFields: SourceIndexGeoFields) {
+export function getInitialSourceIndexFieldLayers(
+  sourceIndexWithGeoFields: SourceIndexGeoFields,
+  euiTheme: EuiThemeComputed
+) {
   const initialLayers = [] as unknown as LayerDescriptor[] & SerializableRecord;
   for (const index in sourceIndexWithGeoFields) {
     if (Object.hasOwn(sourceIndexWithGeoFields, index)) {
       const { dataViewId, geoFields } = sourceIndexWithGeoFields[index];
 
       geoFields.forEach((geoField) => {
-        const color = tabColor(geoField);
+        const color = tabColor(geoField, euiTheme);
 
         initialLayers.push({
           id: htmlIdGenerator()(),
@@ -170,8 +173,8 @@ export async function getResultsForJobId(
   const { query, timeFilters } = searchFilters;
   const hasQuery = query && query.query !== '';
   let queryFilter;
-  // @ts-ignore missing properties from ExplorerJob - those fields aren't required for this
-  const indexPattern = getIndexPattern([{ id: jobId }]);
+
+  const indexPattern = getIndexPattern([{ id: jobId }] as ExplorerJob[]);
 
   if (hasQuery && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
     queryFilter = toElasticsearchQuery(fromKueryExpression(query.query), indexPattern);

@@ -17,11 +17,7 @@
   },
   "action_task_params": {
     "dynamic": false,
-    "properties": {
-      "apiKeyId": {
-        "type": "keyword"
-      }
-    }
+    "properties": {}
   },
   "ad_hoc_run_params": {
     "dynamic": false,
@@ -2525,6 +2521,20 @@
       "events": {
         "format": "epoch_millis||strict_date_optional_time",
         "type": "date_range"
+      },
+      "expirationDate": {
+        "type": "date"
+      },
+      "title": {
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "updatedAt": {
+        "type": "date"
       }
     }
   },
@@ -3632,9 +3642,6 @@
         "type": "keyword"
       },
       "partition": {
-        "type": "integer"
-      },
-      "priority": {
         "type": "integer"
       },
       "retryAt": {
