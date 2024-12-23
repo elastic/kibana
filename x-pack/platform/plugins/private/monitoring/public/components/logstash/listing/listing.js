@@ -200,6 +200,7 @@ export class Listing extends PureComponent {
           {setupModeCallOut}
           <EuiPanel>
             <EuiMonitoringTable
+              data-test-subj="logstashNodesTable"
               rows={flattenedData}
               setupMode={setupMode}
               productName={LOGSTASH_SYSTEM_ID}

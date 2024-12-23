@@ -139,6 +139,7 @@ export const ShardActivity = (props) => {
       />
       <EuiSpacer />
       <EuiMonitoringTable
+        data-test-subj="esShardActivityTable"
         rows={rows}
         columns={columns}
         message={getNoDataMessage()}

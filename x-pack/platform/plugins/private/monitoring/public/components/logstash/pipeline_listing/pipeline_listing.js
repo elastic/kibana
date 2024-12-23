@@ -159,6 +159,7 @@ export class PipelineListing extends Component {
           <EuiSpacer size="m" />
           <EuiPanel>
             <EuiMonitoringSSPTable
+              data-test-subj={this.props['data-test-subj'] || 'logstashNodesTable'}
               rows={data}
               columns={columns}
               sorting={sortingOptions}

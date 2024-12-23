@@ -159,6 +159,7 @@ export class Listing extends PureComponent {
           <EuiPanel>
             {setupModeCallOut}
             <EuiMonitoringTable
+              data-test-subj="beatsTable"
               rows={data}
               setupMode={setupMode}
               productName={BEATS_SYSTEM_ID}

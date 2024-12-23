@@ -87,6 +87,7 @@ export const LogStashPipelinesPage: React.FC<ComponentProps> = ({ clusters }) =>
     const upgradeMessage = pageData ? makeUpgradeMessage(clusterStatus.versions) : null;
     return (
       <PipelineListing
+        data-test-subj="monitoringLogstashPipelinesTable"
         onBrush={(xaxis: any) => onBrush({ xaxis })}
         stats={clusterStatus}
         data={pipelines}
