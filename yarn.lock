@@ -4573,7 +4573,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-browser-internal@link:packages/core/http/core-http-browser-internal":
+"@kbn/core-http-browser-internal@link:src/core/packages/http/browser-internal":
   version "0.0.0"
   uid ""
 

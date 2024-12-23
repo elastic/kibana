@@ -129,7 +129,7 @@ describe('External Url Service', () => {
 
             it('allows relative URLs that attempt to bypass the server base path', () => {
               const { setup } = setupService({ location, serverBasePath, policy });
-              const urlCandidate = `/some/../../path?foo=bar`;
+              const urlCandidate = `/some/../../../path?foo=bar`;
               const result = setup.validateUrl(`${serverBasePath}${urlCandidate}`);
 
               expect(result).toBeInstanceOf(URL);
@@ -155,7 +155,7 @@ describe('External Url Service', () => {
 
             it('disallows relative URLs that attempt to bypass the server base path', () => {
               const { setup } = setupService({ location, serverBasePath, policy });
-              const urlCandidate = `/some/../../path?foo=bar`;
+              const urlCandidate = `/some/../../../path?foo=bar`;
               const result = setup.validateUrl(`${serverBasePath}${urlCandidate}`);
 
               expect(result).toBeNull();
@@ -196,7 +196,7 @@ describe('External Url Service', () => {
             describe('handles bypass of base path via relative URL', () => {
               it('does not allow relative URLs that escape base path', () => {
                 const { setup } = setupService({ location, serverBasePath, policy: [] });
-                const urlCandidate = `../../base_path_escape`;
+                const urlCandidate = `../../../base_path_escape`;
                 const result = setup.validateUrl(urlCandidate);
 
                 expect(result).toBeNull();
