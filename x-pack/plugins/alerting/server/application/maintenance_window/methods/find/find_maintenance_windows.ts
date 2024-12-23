@@ -6,11 +6,38 @@
  */
 
 import Boom from '@hapi/boom';
-import { MaintenanceWindowClientContext } from '../../../../../common';
+import { fromKueryExpression, KueryNode } from '@kbn/es-query';
+import { MaintenanceWindowClientContext, MaintenanceWindowStatus } from '../../../../../common';
 import { transformMaintenanceWindowAttributesToMaintenanceWindow } from '../../transforms';
 import { findMaintenanceWindowSo } from '../../../../data/maintenance_window';
-import type { FindMaintenanceWindowsResult, FindMaintenanceWindowsParams } from './types';
+import type {
+  FindMaintenanceWindowsResult,
+  FindMaintenanceWindowsParams,
+  MaintenanceWindowsStatus,
+} from './types';
 import { findMaintenanceWindowsParamsSchema } from './schemas';
+
+export const getStatusFilter = (
+  status?: MaintenanceWindowsStatus[]
+): KueryNode | string | undefined => {
+  if (!status || status.length === 0) return undefined;
+
+  const statusToQueryMapping = {
+    [MaintenanceWindowStatus.Running]: '(maintenance-window.attributes.events: "now")',
+    [MaintenanceWindowStatus.Upcoming]:
+      '(not maintenance-window.attributes.events: "now" and maintenance-window.attributes.events > "now")',
+    [MaintenanceWindowStatus.Finished]:
+      '(not maintenance-window.attributes.events >= "now" and maintenance-window.attributes.expirationDate >"now")',
+    [MaintenanceWindowStatus.Archived]: '(maintenance-window.attributes.expirationDate < "now")',
+  };
+
+  const fullQuery = status
+    .map((value) => statusToQueryMapping[value])
+    .filter(Boolean)
+    .join(' or ');
+
+  return fullQuery ? fromKueryExpression(fullQuery) : undefined;
+};
 
 export async function findMaintenanceWindows(
   context: MaintenanceWindowClientContext,
@@ -26,11 +53,20 @@ export async function findMaintenanceWindows(
     throw Boom.badRequest(`Error validating find maintenance windows data - ${error.message}`);
   }
 
+  const filter = getStatusFilter(params?.status);
+
   try {
     const result = await findMaintenanceWindowSo({
       savedObjectsClient,
       ...(params
-        ? { savedObjectsFindOptions: { page: params.page, perPage: params.perPage } }
+        ? {
+            savedObjectsFindOptions: {
+              ...(params.page ? { page: params.page } : {}),
+              ...(params.perPage ? { perPage: params.perPage } : {}),
+              ...(params.search ? { search: params.search } : {}),
+              ...(filter ? { filter } : {}),
+            },
+          }
         : {}),
     });
 
