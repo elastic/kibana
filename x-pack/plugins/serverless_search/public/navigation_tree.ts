@@ -166,10 +166,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             }),
           },
           {
-            id: 'cloudLinkUserAndRoles',
-            cloudLink: 'userAndRoles',
-          },
-          {
             id: 'cloudLinkDeployment',
             cloudLink: 'deployment',
             title: i18n.translate('xpack.serverlessSearch.nav.performance', {
