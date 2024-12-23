@@ -30,6 +30,18 @@ export interface PendingMessage {
   error?: any;
 }
 
+interface MessageImageAttachment {
+  type: 'image';
+  title: string;
+  description?: string;
+  source: {
+    data: string;
+    mimeType: string;
+  };
+}
+
+export type MessageAttachment = MessageImageAttachment;
+
 export interface Message {
   '@timestamp': string;
   message: {
@@ -42,6 +54,7 @@ export interface Message {
       trigger: MessageRole.Assistant | MessageRole.User | MessageRole.Elastic;
     };
     data?: string;
+    attachments?: MessageAttachment[];
   };
 }
 
@@ -117,6 +130,7 @@ export enum KnowledgeBaseType {
 }
 
 export interface ObservabilityAIAssistantScreenContextRequest {
+  instructions?: string;
   starterPrompts?: StarterPrompt[];
   screenDescription?: string;
   data?: Array<{
@@ -150,6 +164,7 @@ export interface StarterPrompt {
 }
 
 export interface ObservabilityAIAssistantScreenContext {
+  instructions?: string;
   screenDescription?: string;
   data?: Array<{
     name: string;

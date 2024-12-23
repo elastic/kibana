@@ -5,10 +5,12 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import type { LogsRateTimeseriesReturnType } from '@kbn/logs-data-access-plugin/server/services/get_logs_rate_timeseries/get_logs_rate_timeseries';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../../default_api_types';
 import { getServiceEntitySummary } from './get_service_entity_summary';
+import type { MergedServiceEntity } from '../utils/merge_entities';
 
 const serviceEntitiesSummaryRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/entities/services/{serviceName}/summary',
@@ -17,7 +19,7 @@ const serviceEntitiesSummaryRoute = createApmServerRoute({
     query: environmentRt,
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
-  async handler(resources) {
+  async handler(resources): Promise<MergedServiceEntity> {
     const { params, request, plugins } = resources;
     const entityManagerStart = await plugins.entityManager.start();
 
@@ -44,7 +46,9 @@ const serviceLogRateTimeseriesRoute = createApmServerRoute({
     query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
-  async handler(resources) {
+  async handler(resources): Promise<{
+    currentPeriod: LogsRateTimeseriesReturnType;
+  }> {
     const { context, params, plugins } = resources;
     const [coreContext, logsDataAccessStart] = await Promise.all([
       context.core,

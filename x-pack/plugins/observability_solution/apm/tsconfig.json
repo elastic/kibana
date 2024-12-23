@@ -131,6 +131,7 @@
     "@kbn/saved-search-plugin",
     "@kbn/charts-theme",
     "@kbn/entityManager-plugin",
+    "@kbn/data-definition-registry-plugin",
   ],
   "exclude": ["target/**/*"]
 }

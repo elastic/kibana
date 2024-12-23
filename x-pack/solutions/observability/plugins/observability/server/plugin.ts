@@ -78,7 +78,9 @@ const alertingFeatures = OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_T
   })
 );
 
-export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
+export class ObservabilityPlugin
+  implements Plugin<ObservabilityPluginSetup, void, PluginSetup, PluginStart>
+{
   private logger: Logger;
 
   constructor(private readonly initContext: PluginInitializerContext) {

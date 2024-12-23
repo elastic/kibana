@@ -94,6 +94,21 @@ export const conversationComponentTemplate: ClusterComponentTemplate['component_
                     trigger: keyword,
                   },
                 },
+                attachments: {
+                  type: 'object',
+                  properties: {
+                    type: keyword,
+                    title: text,
+                    description: text,
+                    source: {
+                      type: 'object',
+                      properties: {
+                        data: keyword,
+                        mimeType: keyword,
+                      },
+                    },
+                  },
+                },
               },
             },
           },

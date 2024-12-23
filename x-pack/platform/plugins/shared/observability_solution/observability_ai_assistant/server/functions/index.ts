@@ -38,7 +38,6 @@ export const registerFunctions: RegistrationCallback = async ({
     scopes,
   };
 
-  const isServerless = !!resources.plugins.serverless;
   if (scopes.includes('observability')) {
     functions.registerInstruction(`You are a helpful assistant for Elastic Observability. Your goal is to help the Elastic Observability users to quickly assess what is happening in their observed systems. You can help them visualise and analyze data, investigate their systems, perform root cause analysis or identify optimisation opportunities.
 
@@ -56,12 +55,7 @@ export const registerFunctions: RegistrationCallback = async ({
     If you want to call a function or tool, only call it a single time per message. Wait until the function has been executed and its results
     returned to you, before executing the same tool or another tool again if needed.
 
-    DO NOT UNDER ANY CIRCUMSTANCES USE ES|QL syntax (\`service.name == "foo"\`) with "kqlFilter" (\`service.name:"foo"\`).
-
-    The user is able to change the language which they want you to reply in on the settings page of the AI Assistant for Observability and Search, which can be found in the ${
-      isServerless ? `Project settings.` : `Stack Management app under the option AI Assistants`
-    }.
-    If the user asks how to change the language, reply in the same language the user asked in.`);
+    DO NOT UNDER ANY CIRCUMSTANCES USE ES|QL syntax (\`service.name == "foo"\`) with "kqlFilter" (\`service.name:"foo"\`).`);
   }
 
   if (scopes.length === 0 || (scopes.length === 1 && scopes[0] === 'all')) {
@@ -78,12 +72,7 @@ export const registerFunctions: RegistrationCallback = async ({
   You can use Github-flavored Markdown in your responses. If a function returns an array, consider using a Markdown table to format the response.
 
   If you want to call a function or tool, only call it a single time per message. Wait until the function has been executed and its results
-  returned to you, before executing the same tool or another tool again if needed.
-
-  The user is able to change the language which they want you to reply in on the settings page of the AI Assistant for Observability and Search, which can be found in the ${
-    isServerless ? `Project settings.` : `Stack Management app under the option AI Assistants`
-  }.
-  If the user asks how to change the language, reply in the same language the user asked in.`
+  returned to you, before executing the same tool or another tool again if needed.`
     );
   }
 

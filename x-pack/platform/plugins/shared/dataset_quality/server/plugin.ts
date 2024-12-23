@@ -17,7 +17,15 @@ import {
   DatasetQualityPluginStartDependencies,
 } from './types';
 
-export class DatasetQualityServerPlugin implements Plugin {
+export class DatasetQualityServerPlugin
+  implements
+    Plugin<
+      void,
+      DatasetQualityPluginStart,
+      DatasetQualityPluginSetupDependencies,
+      DatasetQualityPluginStartDependencies
+    >
+{
   private readonly logger: Logger;
   private readonly dataTelemetryService: DataTelemetryService;
 
