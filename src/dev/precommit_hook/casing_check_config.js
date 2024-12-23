@@ -70,7 +70,7 @@ export const IGNORE_FILE_GLOBS = [
 
   'x-pack/plugins/maps/server/fonts/**/*',
 
-  'x-pack/plugins/observability_solution/profiling/Makefile',
+  'x-pack/solutions/observability/plugins/profiling/Makefile',
 
   // Bazel default files
   '**/WORKSPACE.bazel',
