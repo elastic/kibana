@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           log.warning('Request count differs:', result);
         }
         expect(count).to.be(searchCount);
-      }, 5);
+      });
     };
 
     const waitForLoadingToFinish = async () => {
@@ -281,7 +281,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectedRequests: 2,
       });
 
-      it(`should send 2 requests (documents + chart) when toggling the chart visibility`, async () => {
+      it(`should send requests (documents + chart) when toggling the chart visibility`, async () => {
         await expectSearches(type, 1, async () => {
           await discover.toggleChartVisibility();
         });
