@@ -132,7 +132,7 @@ export const noCasesCapabilities = () =>
     cases_settings: false,
     create_comment: false,
     case_reopen: false,
-    case_assign: false,
+    cases_assign: false,
   });
 export const readCasesCapabilities = () =>
   buildCasesCapabilities({
@@ -143,7 +143,7 @@ export const readCasesCapabilities = () =>
     cases_settings: false,
     create_comment: false,
     case_reopen: false,
-    case_assign: false,
+    cases_assign: false,
   });
 export const writeCasesCapabilities = () => {
   return buildCasesCapabilities({
@@ -162,6 +162,6 @@ export const buildCasesCapabilities = (overrides?: Partial<CasesCapabilities>) =
     cases_settings: overrides?.cases_settings ?? true,
     create_comment: overrides?.create_comment ?? true,
     case_reopen: overrides?.case_reopen ?? true,
-    case_assign: overrides?.case_assign ?? true,
+    cases_assign: overrides?.cases_assign ?? true,
   };
 };

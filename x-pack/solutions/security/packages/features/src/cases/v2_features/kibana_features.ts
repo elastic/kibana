@@ -29,10 +29,10 @@ export const getCasesBaseKibanaFeatureV2 = ({
         'securitySolutionPackages.features.featureRegistry.casesFeature.deprecationMessage',
         {
           defaultMessage:
-            'The {currentId} permissions are deprecated, please see {casesFeatureIdV2}.',
+            'The {currentId} permissions are deprecated, please see {casesFeatureIdV3}.',
           values: {
             currentId: CASES_FEATURE_ID_V2,
-            casesFeatureIdV2: CASES_FEATURE_ID_V3,
+            casesFeatureIdV3: CASES_FEATURE_ID_V3,
           },
         }
       ),
@@ -72,7 +72,7 @@ export const getCasesBaseKibanaFeatureV2 = ({
           minimal: [
             {
               feature: CASES_FEATURE_ID_V3,
-              privileges: ['minimal_all', 'create_comment', 'case_reopen', 'case_assign'],
+              privileges: ['minimal_all', 'create_comment', 'case_reopen', 'cases_assign'],
             },
           ],
         },

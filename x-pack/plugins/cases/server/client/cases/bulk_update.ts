@@ -193,7 +193,7 @@ async function getAlertComments({
   });
 }
 
-function haveSameElements(arr1?: Array<{ uid: string }>, arr2?: Array<{ uid: string }>): boolean {
+function haveSameElements(arr1?: string[], arr2?: string[]): boolean {
   if (!arr1 || !arr2 || arr1.length !== arr2.length) return false;
   const set1 = new Set(arr1);
   return arr2.every((item) => set1.has(item));
@@ -308,7 +308,13 @@ function partitionPatchRequest(
       casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
     }
     if (reqCase.assignees) {
-      if (!haveSameElements(reqCase.assignees, foundCase?.attributes.assignees) && foundCase) {
+      if (
+        !haveSameElements(
+          reqCase.assignees.map(({ uid }) => uid),
+          foundCase?.attributes.assignees.map(({ uid }) => uid)
+        ) &&
+        foundCase
+      ) {
         changedAssignees.push(reqCase);
       }
     }

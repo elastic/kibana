@@ -23,10 +23,10 @@ export const getCasesFeatureV2 = (
 ): KibanaFeatureConfig => ({
   deprecated: {
     notice: i18n.translate('xpack.observability.featureRegistry.casesFeature.deprecationMessage', {
-      defaultMessage: 'The {currentId} permissions are deprecated, please see {casesFeatureIdV2}.',
+      defaultMessage: 'The {currentId} permissions are deprecated, please see {casesFeatureIdV3}.',
       values: {
         currentId: casesFeatureIdV2,
-        casesFeatureIdV2: casesFeatureIdV3,
+        casesFeatureIdV3,
       },
     }),
   },
@@ -62,7 +62,7 @@ export const getCasesFeatureV2 = (
         minimal: [
           {
             feature: casesFeatureIdV3,
-            privileges: ['minimal_all', 'create_comment', 'case_reopen', 'case_assign'],
+            privileges: ['minimal_all', 'create_comment', 'case_reopen', 'cases_assign'],
           },
         ],
       },

@@ -193,7 +193,7 @@ const CaseOperations = {
   [WriteOperations.AssignCase]: {
     ecsType: EVENT_TYPES.change,
     name: WriteOperations.AssignCase as const,
-    action: 'case_assign',
+    action: 'cases_assign',
     verbs: updateVerbs,
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,

@@ -98,8 +98,6 @@ export const getCasesSubFeaturesMapV3 = ({
     ],
   };
 
-  /* The below sub features were newly added in v2 (8.17) */
-
   const casesAddCommentsCasesSubFeature: SubFeatureConfig = {
     name: i18n.translate(
       'securitySolutionPackages.features.featureRegistry.addCommentsSubFeatureName',
@@ -177,7 +175,7 @@ export const getCasesSubFeaturesMapV3 = ({
         groupType: 'independent',
         privileges: [
           {
-            id: 'case_assign',
+            id: 'cases_assign',
             name: i18n.translate('securitySolutionPackages.features.assignUsersSubFeatureName', {
               defaultMessage: 'Assign users to cases',
             }),

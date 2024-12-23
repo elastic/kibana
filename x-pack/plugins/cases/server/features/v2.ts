@@ -37,10 +37,10 @@ export const getV2 = (): KibanaFeatureConfig => {
     deprecated: {
       notice: i18n.translate('xpack.cases.features.casesFeature.deprecationMessage', {
         defaultMessage:
-          'The {currentId} permissions are deprecated, please see {casesFeatureIdV2}.',
+          'The {currentId} permissions are deprecated, please see {casesFeatureIdV3}.',
         values: {
           currentId: FEATURE_ID_V2,
-          casesFeatureIdV2: FEATURE_ID_V3,
+          casesFeatureIdV3: FEATURE_ID_V3,
         },
       }),
     },
@@ -78,7 +78,7 @@ export const getV2 = (): KibanaFeatureConfig => {
           minimal: [
             {
               feature: FEATURE_ID_V3,
-              privileges: ['minimal_all', 'create_comment', 'case_reopen', 'case_assign'],
+              privileges: ['minimal_all', 'create_comment', 'case_reopen', 'cases_assign'],
             },
           ],
         },

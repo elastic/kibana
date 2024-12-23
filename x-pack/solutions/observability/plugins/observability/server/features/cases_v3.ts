@@ -187,7 +187,7 @@ export const getCasesFeatureV3 = (
           groupType: 'independent',
           privileges: [
             {
-              id: 'case_assign',
+              id: 'cases_assign',
               name: i18n.translate('xpack.observability.features.assignUsersSubFeatureName', {
                 defaultMessage: 'Assign users to cases',
               }),

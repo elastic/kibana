@@ -7,7 +7,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "case_assign",
+    "action": "cases_assign",
     "category": Array [
       "database",
     ],
@@ -33,7 +33,7 @@ Object {
     "message": "an error",
   },
   "event": Object {
-    "action": "case_assign",
+    "action": "cases_assign",
     "category": Array [
       "database",
     ],
@@ -49,7 +49,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "assignCase" without an error but with an entity 1`] = `
 Object {
   "event": Object {
-    "action": "case_assign",
+    "action": "cases_assign",
     "category": Array [
       "database",
     ],
@@ -71,7 +71,7 @@ Object {
 exports[`audit_logger log function event structure creates the correct audit event for operation: "assignCase" without an error or entity 1`] = `
 Object {
   "event": Object {
-    "action": "case_assign",
+    "action": "cases_assign",
     "category": Array [
       "database",
     ],
