@@ -4389,7 +4389,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-browser@link:packages/core/chrome/core-chrome-browser":
+"@kbn/core-chrome-browser@link:src/core/packages/chrome/browser":
   version "0.0.0"
   uid ""
 
