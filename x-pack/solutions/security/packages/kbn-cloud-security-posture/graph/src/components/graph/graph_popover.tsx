@@ -22,13 +22,13 @@ export interface GraphPopoverProps
   closePopover: () => void;
 }
 
-export const GraphPopover: React.FC<GraphPopoverProps> = ({
+export const GraphPopover = ({
   isOpen,
   anchorElement,
   closePopover,
   children,
   ...rest
-}) => {
+}: GraphPopoverProps) => {
   const { euiTheme } = useEuiTheme();
 
   if (!anchorElement) {

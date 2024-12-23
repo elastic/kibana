@@ -24,8 +24,7 @@ import { EllipseHoverShape, EllipseShape } from './shapes/ellipse_shape';
 import { NodeExpandButton } from './node_expand_button';
 import { Label } from './label';
 
-// eslint-disable-next-line react/display-name
-export const EllipseNode: React.FC<NodeProps> = memo((props: NodeProps) => {
+export const EllipseNode = memo<NodeProps>((props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
     props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
@@ -86,3 +85,5 @@ export const EllipseNode: React.FC<NodeProps> = memo((props: NodeProps) => {
     </>
   );
 });
+
+EllipseNode.displayName = 'EllipseNode';

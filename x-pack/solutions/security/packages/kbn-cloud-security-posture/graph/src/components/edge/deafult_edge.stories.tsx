@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { memo, useEffect, useMemo, useRef } from 'react';
 import { ThemeProvider } from '@emotion/react';
 import {
   ReactFlow,
@@ -47,7 +47,7 @@ export default {
 
 const nodeTypes = {
   // eslint-disable-next-line react/display-name
-  default: React.memo((props: NodeProps<BuiltInNode>) => {
+  default: memo<NodeProps<BuiltInNode>>((props: NodeProps<BuiltInNode>) => {
     return (
       <div>
         <Handle
@@ -67,7 +67,7 @@ const nodeTypes = {
         {props.data.label}
       </div>
     );
-  }) as React.FC<NodeProps<BuiltInNode>>,
+  }),
   label: LabelNode,
 };
 

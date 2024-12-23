@@ -82,13 +82,7 @@ const edgeTypes = {
  *
  * @returns {JSX.Element} The rendered Graph component.
  */
-export const Graph: React.FC<GraphProps> = ({
-  nodes,
-  edges,
-  interactive,
-  isLocked = false,
-  ...rest
-}) => {
+export const Graph = ({ nodes, edges, interactive, isLocked = false, ...rest }: GraphProps) => {
   const backgroundId = useGeneratedHtmlId();
   const fitViewRef = useRef<
     ((fitViewOptions?: FitViewOptions<Node> | undefined) => Promise<boolean>) | null

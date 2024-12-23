@@ -116,7 +116,7 @@ export interface NodeButtonProps extends CommonProps {
   onClick?: (e: React.MouseEvent<HTMLElement>) => void;
 }
 
-export const NodeButton: React.FC<NodeButtonProps> = ({ onClick, width, height, ...props }) => (
+export const NodeButton = ({ onClick, width, height, ...props }: NodeButtonProps) => (
   <StyledNodeContainer width={width} height={height} {...props}>
     <StyledNodeButton width={width} height={height} onClick={onClick} />
   </StyledNodeContainer>

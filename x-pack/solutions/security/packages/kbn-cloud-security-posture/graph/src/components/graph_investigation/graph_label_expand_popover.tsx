@@ -22,7 +22,7 @@ interface GraphLabelExpandPopoverProps {
   onShowEventsWithThisActionClick: () => void;
 }
 
-export const GraphLabelExpandPopover: React.FC<GraphLabelExpandPopoverProps> = memo(
+export const GraphLabelExpandPopover = memo<GraphLabelExpandPopoverProps>(
   ({ isOpen, anchorElement, closePopover, onShowEventsWithThisActionClick }) => {
     return (
       <GraphPopover

@@ -172,7 +172,7 @@ interface GraphInvestigationProps {
 /**
  * Graph investigation view allows the user to expand nodes and view related entities.
  */
-export const GraphInvestigation: React.FC<GraphInvestigationProps> = memo(
+export const GraphInvestigation = memo<GraphInvestigationProps>(
   ({
     initialState: { dataView, originEventIds, timeRange: initialTimeRange },
   }: GraphInvestigationProps) => {

@@ -24,8 +24,7 @@ import { getTextWidth } from '../graph/utils';
 
 const LABEL_MIN_WIDTH = 100;
 
-// eslint-disable-next-line react/display-name
-export const LabelNode: React.FC<NodeProps> = memo((props: NodeProps) => {
+export const LabelNode = memo<NodeProps>((props: NodeProps) => {
   const { id, color, label, interactive, nodeClick, expandButtonClick } =
     props.data as LabelNodeViewModel;
   const text = label ? label : id;
@@ -75,3 +74,5 @@ export const LabelNode: React.FC<NodeProps> = memo((props: NodeProps) => {
     </LabelNodeContainer>
   );
 });
+
+LabelNode.displayName = 'LabelNode';
