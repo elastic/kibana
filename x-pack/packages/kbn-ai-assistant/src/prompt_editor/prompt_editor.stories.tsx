@@ -8,7 +8,7 @@
 import React from 'react';
 import { StoryFn, StoryObj } from '@storybook/react';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
-import { KibanaReactStorybookDecorator } from '../utils/storybook_decorator.stories';
+import { KibanaReactStorybookDecorator } from '../../.storybook/decorator';
 import { PromptEditor as Component, PromptEditorProps } from './prompt_editor';
 
 /*
