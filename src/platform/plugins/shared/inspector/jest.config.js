@@ -13,5 +13,7 @@ module.exports = {
   roots: ['<rootDir>/src/platform/plugins/shared/inspector'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/inspector',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/platform/plugins/shared/inspector/{common,public}/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/src/platform/plugins/shared/inspector/{common,public}/**/*.{ts,tsx}',
+  ],
 };
