@@ -5713,7 +5713,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/field-types@link:packages/kbn-field-types":
+"@kbn/field-types@link:src/platform/packages/shared/kbn-field-types":
   version "0.0.0"
   uid ""
 
