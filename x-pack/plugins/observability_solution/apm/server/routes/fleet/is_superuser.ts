@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
-import { APMPluginStartDependencies } from '../../types';
+import { CoreStart, KibanaRequest } from '@kbn/core/server';
 
 export function isSuperuser({
-  securityPluginStart,
+  coreStart,
   request,
 }: {
-  securityPluginStart: NonNullable<APMPluginStartDependencies['security']>;
+  coreStart: CoreStart;
   request: KibanaRequest;
 }) {
-  const user = securityPluginStart.authc.getCurrentUser(request);
+  const user = coreStart.security.authc.getCurrentUser(request);
   return user?.roles.includes('superuser');
 }

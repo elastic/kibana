@@ -21,15 +21,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { isEqual, map } from 'lodash';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { FieldValueSelectionProps, ListItem } from './types';
-
-const Counter = euiStyled.div`
-  border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-  background: ${({ theme }) => theme.eui.euiColorLightShade};
-  padding: 0 ${({ theme }) => theme.eui.euiSizeXS};
+const Counter = styled.div`
+  border-radius: ${({ theme }) => theme.euiTheme.border.radius.medium};
+  background: ${({ theme }) => theme.euiTheme.colors.lightShade};
+  padding: 0 ${({ theme }) => theme.euiTheme.size.xs};
 `;
 
 const formatOptions = (
@@ -221,7 +219,7 @@ export function FieldValueSelection({
                         css={{
                           flexDirection: 'row-reverse',
                           gap: euiTheme.size.s,
-                          color: euiTheme.colors.subduedText,
+                          color: euiTheme.colors.textSubdued,
                         }}
                         label={i18n.translate(
                           'xpack.observabilityShared.fieldValueSelection.logicalAnd',

@@ -230,7 +230,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                 >
                   <FormattedMessage
                     id="xpack.ml.newJob.wizard.jsonFlyout.indicesChange.calloutText"
-                    defaultMessage="You cannot alter the indices being used by the datafeed here. To select a different data view or saved search, go to step 1 of the wizard and select the Change data view option."
+                    defaultMessage="You cannot alter the indices being used by the datafeed here. To select a different data view or saved Discover session, go to step 1 of the wizard and select the Change data view option."
                   />
                 </EuiCallOut>
               </>

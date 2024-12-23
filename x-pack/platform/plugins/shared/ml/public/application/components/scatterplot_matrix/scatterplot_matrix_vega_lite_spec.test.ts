@@ -10,7 +10,7 @@ import 'jest-canvas-mock';
 // @ts-ignore
 import { compile } from 'vega-lite/build/vega-lite';
 
-import { euiLightVars as euiThemeLight } from '@kbn/ui-theme';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 import { LEGEND_TYPES } from '../vega_chart/common';
 
@@ -25,9 +25,17 @@ import {
   SINGLE_POINT_CLICK,
 } from './scatterplot_matrix_vega_lite_spec';
 
+const euiThemeMock = {
+  colors: {
+    lighestShade: '#f0f0f0',
+    lightShade: '#d3dae6',
+    textSubdued: '#6a7170',
+  },
+} as unknown as EuiThemeComputed;
+
 describe('getColorSpec()', () => {
   it('should return only user selection conditions and the default color for non-outlier specs', () => {
-    const colorSpec = getColorSpec(false, euiThemeLight);
+    const colorSpec = getColorSpec(false);
 
     expect(colorSpec).toEqual({
       condition: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }],
@@ -36,7 +44,7 @@ describe('getColorSpec()', () => {
   });
 
   it('should return user selection condition and conditional spec for outliers', () => {
-    const colorSpec = getColorSpec(false, euiThemeLight, 'outlier_score');
+    const colorSpec = getColorSpec(false, 'outlier_score');
 
     expect(colorSpec).toEqual({
       condition: {
@@ -54,13 +62,7 @@ describe('getColorSpec()', () => {
   it('should return user selection condition and a field based spec for non-outlier specs with legendType supplied', () => {
     const colorName = 'the-color-field';
 
-    const colorSpec = getColorSpec(
-      false,
-      euiThemeLight,
-      undefined,
-      colorName,
-      LEGEND_TYPES.NOMINAL
-    );
+    const colorSpec = getColorSpec(false, undefined, colorName, LEGEND_TYPES.NOMINAL);
 
     expect(colorSpec).toEqual({
       condition: {
@@ -137,7 +139,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       data,
       [],
       ['x', 'y'],
-      euiThemeLight
+      euiThemeMock
     );
     const specForegroundLayer = vegaLiteSpec.spec.layer[0];
 
@@ -172,7 +174,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       data,
       [],
       ['x', 'y'],
-      euiThemeLight,
+      euiThemeMock,
       'ml'
     );
     const specForegroundLayer = vegaLiteSpec.spec.layer[0];
@@ -221,7 +223,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       data,
       [],
       ['x', 'y'],
-      euiThemeLight,
+      euiThemeMock,
       undefined,
       'the-color-field',
       LEGEND_TYPES.NOMINAL
@@ -267,7 +269,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       data,
       [],
       ['x.a', 'y[a]'],
-      euiThemeLight,
+      euiThemeMock,
       undefined,
       'the-color-field',
       LEGEND_TYPES.NOMINAL

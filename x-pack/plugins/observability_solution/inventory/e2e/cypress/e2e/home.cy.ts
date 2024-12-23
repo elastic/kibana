@@ -15,6 +15,25 @@ const end = '2024-10-16T00:15:00.000Z';
 describe.skip('Home page', () => {
   beforeEach(() => {
     cy.loginAsSuperUser();
+    cy.updateAdvancedSettings({
+      'observability:entityCentricExperience': true,
+    });
+  });
+
+  afterEach(() => {
+    cy.updateAdvancedSettings({
+      'observability:entityCentricExperience': false,
+    });
+  });
+
+  describe('When the entityCentricExperience FF is disabled', () => {
+    it('Shows 404', () => {
+      cy.updateAdvancedSettings({
+        'observability:entityCentricExperience': false,
+      });
+      cy.visitKibana('/app/inventory');
+      cy.contains('Application Not Found');
+    });
   });
 
   describe('When EEM is disabled', () => {

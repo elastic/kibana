@@ -9,7 +9,7 @@ import { EuiCheckbox, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
@@ -21,12 +21,12 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import * as urlHelpers from '../links/url_helpers';
 import { getComparisonOptions, TimeRangeComparisonEnum } from './get_comparison_options';
 
-const PrependContainer = euiStyled.div`
+const PrependContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: ${({ theme }) => theme.eui.euiFormInputGroupLabelBackground};
-  padding: 0 ${({ theme }) => theme.eui.euiSizeM};
+  background-color: ${({ theme }) => theme.euiTheme.colors.backgroundBaseFormsPrepend};
+  padding: 0 ${({ theme }) => theme.euiTheme.size.m};
 `;
 
 export function TimeComparison() {

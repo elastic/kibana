@@ -19,6 +19,7 @@ import { InferenceActionParams, InferenceConnector } from './types';
 interface ValidationErrors {
   subAction: string[];
   input: string[];
+  body: string[];
   // rerank only
   query: string[];
   // text_embedding only
@@ -40,14 +41,28 @@ export function getConnectorType(): InferenceConnector {
       const translations = await import('./translations');
       const errors: ValidationErrors = {
         input: [],
+        body: [],
         subAction: [],
         inputType: [],
         query: [],
       };
 
       if (
-        subAction === SUB_ACTION.RERANK ||
+        subAction === SUB_ACTION.UNIFIED_COMPLETION ||
+        subAction === SUB_ACTION.UNIFIED_COMPLETION_STREAM ||
+        subAction === SUB_ACTION.UNIFIED_COMPLETION_ASYNC_ITERATOR
+      ) {
+        if (
+          !Array.isArray(subActionParams.body.messages) ||
+          !subActionParams.body.messages.length
+        ) {
+          errors.body.push(translations.getRequiredMessage('Messages'));
+        }
+      }
+
+      if (
         subAction === SUB_ACTION.COMPLETION ||
+        subAction === SUB_ACTION.RERANK ||
         subAction === SUB_ACTION.TEXT_EMBEDDING ||
         subAction === SUB_ACTION.SPARSE_EMBEDDING
       ) {
@@ -76,10 +91,13 @@ export function getConnectorType(): InferenceConnector {
         errors.subAction.push(translations.getRequiredMessage('Action'));
       } else if (
         ![
-          SUB_ACTION.COMPLETION,
+          SUB_ACTION.UNIFIED_COMPLETION,
+          SUB_ACTION.UNIFIED_COMPLETION_STREAM,
+          SUB_ACTION.UNIFIED_COMPLETION_ASYNC_ITERATOR,
           SUB_ACTION.SPARSE_EMBEDDING,
           SUB_ACTION.RERANK,
           SUB_ACTION.TEXT_EMBEDDING,
+          SUB_ACTION.COMPLETION,
         ].includes(subAction)
       ) {
         errors.subAction.push(translations.INVALID_ACTION);

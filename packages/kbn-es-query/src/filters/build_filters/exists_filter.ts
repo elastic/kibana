@@ -57,3 +57,16 @@ export const buildExistsFilter = (field: DataViewFieldBase, indexPattern: DataVi
     },
   } as ExistsFilter;
 };
+
+export const buildSimpleExistFilter = (fieldName: string, dataViewId: string) => {
+  return {
+    meta: {
+      index: dataViewId,
+    },
+    query: {
+      exists: {
+        field: fieldName,
+      },
+    },
+  } as ExistsFilter;
+};

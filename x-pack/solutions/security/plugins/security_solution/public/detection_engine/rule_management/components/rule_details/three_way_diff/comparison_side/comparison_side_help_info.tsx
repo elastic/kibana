@@ -57,7 +57,7 @@ export function ComparisonSideHelpInfo({ options }: ComparisonSideHelpInfoProps)
                 <ul>
                   {optionsWithDescriptions.map(
                     ({ title: displayName, description: explanation }) => (
-                      <li>
+                      <li key={displayName}>
                         <strong>{displayName}</strong> {'-'} {explanation}
                       </li>
                     )

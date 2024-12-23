@@ -11,7 +11,6 @@ import { ComponentType, mount } from 'enzyme';
 import React from 'react';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { waitFor } from '@testing-library/react';
 
@@ -72,7 +71,7 @@ describe('Unsaved listing', () => {
       expect(getEditButton().length).toEqual(1);
     });
     getEditButton().simulate('click');
-    expect(props.goToDashboard).toHaveBeenCalledWith('dashboardUnsavedOne', ViewMode.EDIT);
+    expect(props.goToDashboard).toHaveBeenCalledWith('dashboardUnsavedOne', 'edit');
   });
 
   it('Redirects to new dashboard when continue editing clicked', async () => {
@@ -85,7 +84,7 @@ describe('Unsaved listing', () => {
       expect(getEditButton().length).toBe(1);
     });
     getEditButton().simulate('click');
-    expect(props.goToDashboard).toHaveBeenCalledWith(undefined, ViewMode.EDIT);
+    expect(props.goToDashboard).toHaveBeenCalledWith(undefined, 'edit');
   });
 
   it('Shows a warning then clears changes when delete unsaved changes is pressed', async () => {

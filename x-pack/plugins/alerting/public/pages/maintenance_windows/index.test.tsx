@@ -35,7 +35,7 @@ describe('Maintenance windows page', () => {
     jest.clearAllMocks();
     (useFindMaintenanceWindows as jest.Mock).mockReturnValue({
       isLoading: false,
-      maintenanceWindows: [],
+      data: { maintenanceWindows: [], total: 0 },
       refetch: jest.fn(),
     });
     license = licensingMock.createLicense({

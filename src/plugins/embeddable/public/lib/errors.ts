@@ -33,18 +33,3 @@ export class PanelIncompatibleError extends Error {
     );
   }
 }
-
-export class EmbeddableFactoryNotFoundError extends Error {
-  code = 'EMBEDDABLE_FACTORY_NOT_FOUND';
-
-  constructor(type: string) {
-    super(
-      i18n.translate('embeddableApi.errors.embeddableFactoryNotFound', {
-        defaultMessage: `{type} can't be loaded. Please upgrade to the default distribution of Elasticsearch and Kibana with the appropriate license.`,
-        values: {
-          type,
-        },
-      })
-    );
-  }
-}

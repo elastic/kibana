@@ -10601,6 +10601,36 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.MAINTENANCE_WINDOW_DEFAULT_PER_PAGE",
+        "type": "number",
+        "tags": [],
+        "label": "MAINTENANCE_WINDOW_DEFAULT_PER_PAGE",
+        "description": [],
+        "signature": [
+          "10"
+        ],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE",
+        "type": "number",
+        "tags": [],
+        "label": "MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE",
+        "description": [],
+        "signature": [
+          "1"
+        ],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.MAINTENANCE_WINDOW_FEATURE_ID",
         "type": "string",
         "tags": [],

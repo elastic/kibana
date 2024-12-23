@@ -41,7 +41,7 @@ const BulkEditRuleErrorItem = ({
         <li key={message}>
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.machineLearningRulesIndexEditDescription"
-            defaultMessage="{rulesCount, plural, =1 {# custom machine learning rule} other {# custom machine learning rules}} (these rules don't have index patterns)"
+            defaultMessage="{rulesCount, plural, =1 {# machine learning rule} other {# machine learning rules}} (these rules don't have index patterns)"
             values={{ rulesCount }}
           />
         </li>
@@ -61,7 +61,7 @@ const BulkEditRuleErrorItem = ({
         <li key={message}>
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.esqlRulesIndexEditDescription"
-            defaultMessage="{rulesCount, plural, =1 {# custom ES|QL rule} other {# custom ES|QL rules}} (these rules don't have index patterns)"
+            defaultMessage="{rulesCount, plural, =1 {# ES|QL rule} other {# ES|QL rules}} (these rules don't have index patterns)"
             values={{ rulesCount }}
           />
         </li>

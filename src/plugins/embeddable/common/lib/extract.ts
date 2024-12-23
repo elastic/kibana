@@ -14,7 +14,7 @@ import { extractBaseEmbeddableInput } from './migrate_base_input';
 export const getExtractFunction = (embeddables: CommonEmbeddableStartContract) => {
   return (state: EmbeddableStateWithType) => {
     const enhancements = state.enhancements || {};
-    const factory = embeddables.getEmbeddableFactory(state.type);
+    const factory = embeddables.getEmbeddableFactory?.(state.type);
 
     const baseResponse = extractBaseEmbeddableInput(state);
     let updatedInput = baseResponse.state;

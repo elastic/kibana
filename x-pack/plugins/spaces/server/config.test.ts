@@ -23,9 +23,6 @@ describe('config schema', () => {
         "allowFeatureVisibility": true,
         "allowSolutionVisibility": true,
         "enabled": true,
-        "experimental": Object {
-          "forceSolutionVisibility": false,
-        },
         "maxSpaces": 1000,
       }
     `);
@@ -35,9 +32,6 @@ describe('config schema', () => {
         "allowFeatureVisibility": true,
         "allowSolutionVisibility": true,
         "enabled": true,
-        "experimental": Object {
-          "forceSolutionVisibility": false,
-        },
         "maxSpaces": 1000,
       }
     `);
@@ -47,9 +41,6 @@ describe('config schema', () => {
         "allowFeatureVisibility": true,
         "allowSolutionVisibility": true,
         "enabled": true,
-        "experimental": Object {
-          "forceSolutionVisibility": false,
-        },
         "maxSpaces": 1000,
       }
     `);

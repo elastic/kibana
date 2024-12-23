@@ -29,11 +29,19 @@ export const GraphVisualization: React.FC = memo(() => {
   const dataView = useGetScopedSourcererDataView({
     sourcererScope: SourcererScopeName.default,
   });
-  const { getFieldsData, dataAsNestedObject } = useDocumentDetailsContext();
-  const { eventIds, timestamp } = useGraphPreview({
+  const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser } =
+    useDocumentDetailsContext();
+  const {
+    eventIds,
+    timestamp = new Date().toISOString(),
+    isAlert,
+  } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
+    dataFormattedForFieldBrowser,
   });
+
+  const originEventIds = eventIds.map((id) => ({ id, isAlert }));
 
   return (
     <div
@@ -46,7 +54,16 @@ export const GraphVisualization: React.FC = memo(() => {
     >
       {dataView && (
         <React.Suspense fallback={<EuiLoadingSpinner />}>
-          <GraphInvestigationLazy dataView={dataView} eventIds={eventIds} timestamp={timestamp} />
+          <GraphInvestigationLazy
+            initialState={{
+              dataView,
+              originEventIds,
+              timeRange: {
+                from: `${timestamp}||-30m`,
+                to: `${timestamp}||+30m`,
+              },
+            }}
+          />
         </React.Suspense>
       )}
     </div>

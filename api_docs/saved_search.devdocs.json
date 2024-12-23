@@ -1252,6 +1252,21 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedSearch",
+        "id": "def-common.SavedSearchTypeDisplayName",
+        "type": "string",
+        "tags": [],
+        "label": "SavedSearchTypeDisplayName",
+        "description": [],
+        "signature": [
+          "\"discover session\""
+        ],
+        "path": "src/plugins/saved_search/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": []
