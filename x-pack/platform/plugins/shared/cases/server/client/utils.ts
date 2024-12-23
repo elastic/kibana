@@ -549,10 +549,10 @@ export const getCaseToUpdate = (
 
 /**
  * TODO: Backend is not connected with the
- * frontend in x-pack/plugins/cases/common/ui/types.ts.
+ * frontend in x-pack/platform/plugins/shared/cases/common/ui/types.ts.
  * It is easy to forget to update a sort field.
  * We should fix it and make it common.
- * Also the sortField in x-pack/plugins/cases/common/api/cases/case.ts
+ * Also the sortField in x-pack/platform/plugins/shared/cases/common/api/cases/case.ts
  * is set to string. We should narrow it to the
  * acceptable values
  */

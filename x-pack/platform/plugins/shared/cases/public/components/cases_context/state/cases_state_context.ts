@@ -14,7 +14,7 @@ export const useCasesStateContext = () => {
   const casesStateContext = useContext(CasesStateContext);
   if (!casesStateContext) {
     throw new Error(
-      'useCasesStateContext must be used within a CasesProvider and have a defined value. See https://github.com/elastic/kibana/blob/main/x-pack/plugins/cases/README.md#cases-ui'
+      'useCasesStateContext must be used within a CasesProvider and have a defined value. See https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/cases/README.md#cases-ui'
     );
   }
   return casesStateContext;
