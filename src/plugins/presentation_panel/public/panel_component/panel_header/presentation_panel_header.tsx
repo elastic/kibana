@@ -21,8 +21,8 @@ export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPane
   headerId: string;
   viewMode?: ViewMode;
   hideTitle?: boolean;
-  panelTitle?: string;
-  panelDescription?: string;
+  title?: string;
+  description?: string;
   setDragHandle: (id: string, ref: HTMLDivElement | null) => void;
 } & Pick<PresentationPanelInternalProps, 'showBadges' | 'getActions' | 'showNotifications'>;
 
@@ -34,8 +34,8 @@ export const PresentationPanelHeader = <
   headerId,
   getActions,
   hideTitle,
-  panelTitle,
-  panelDescription,
+  title,
+  description,
   setDragHandle,
   showBadges = true,
   showNotifications = true,
@@ -56,11 +56,11 @@ export const PresentationPanelHeader = <
   );
 
   const showPanelBar =
-    (!hideTitle && panelTitle) || badgeElements.length > 0 || notificationElements.length > 0;
+    (!hideTitle && title) || badgeElements.length > 0 || notificationElements.length > 0;
 
   if (!showPanelBar) return null;
 
-  const ariaLabel = getAriaLabelForTitle(showPanelBar ? panelTitle : undefined);
+  const ariaLabel = getAriaLabelForTitle(showPanelBar ? title : undefined);
   const ariaLabelElement = (
     <EuiScreenReaderOnly>
       <span id={headerId}>{ariaLabel}</span>
@@ -79,7 +79,7 @@ export const PresentationPanelHeader = <
   return (
     <figcaption
       className={headerClasses}
-      data-test-subj={`embeddablePanelHeading-${(panelTitle || '').replace(/\s/g, '')}`}
+      data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
     >
       <h2 ref={memoizedSetDragHandle} data-test-subj="dashboardPanelTitle" className={titleClasses}>
         {ariaLabelElement}
@@ -87,8 +87,8 @@ export const PresentationPanelHeader = <
           api={api}
           viewMode={viewMode}
           hideTitle={hideTitle}
-          panelTitle={panelTitle}
-          panelDescription={panelDescription}
+          title={title}
+          description={description}
         />
         {showBadges && badgeElements}
       </h2>
