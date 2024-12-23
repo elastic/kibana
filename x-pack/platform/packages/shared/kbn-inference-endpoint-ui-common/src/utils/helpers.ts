@@ -8,7 +8,7 @@
 import { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isEmpty } from 'lodash/fp';
 import { Config, ConfigEntryView } from '../types/types';
-import * as i18n from '../translations';
+import * as LABELS from '../translations';
 
 export interface TaskTypeOption {
   id: string;
@@ -55,7 +55,7 @@ export const getNonEmptyValidator = (
                 !configData[field.key] ||
                 (typeof configData[field.key] === 'string' && isEmpty(configData[field.key]))
               ) {
-                field.validationErrors = [i18n.getRequiredMessage(field.label)];
+                field.validationErrors = [LABELS.getRequiredMessage(field.label)];
                 field.isValid = false;
                 hasErrors = true;
               } else {
@@ -72,7 +72,7 @@ export const getNonEmptyValidator = (
         return {
           code: 'ERR_FIELD_MISSING',
           path,
-          message: i18n.getRequiredMessage('Action'),
+          message: LABELS.getRequiredMessage('Action'),
         };
       }
     }

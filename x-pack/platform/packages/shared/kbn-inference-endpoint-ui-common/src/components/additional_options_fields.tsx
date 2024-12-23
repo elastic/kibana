@@ -33,7 +33,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { ConfigurationFormItems } from './configuration/configuration_form_items';
-import * as i18n from '../translations';
+import * as LABELS from '../translations';
 import { DEFAULT_TASK_TYPE } from '../constants';
 import { Config, ConfigEntryView } from '../types/types';
 import { TaskTypeOption } from '../utils/helpers';
@@ -95,7 +95,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
             config={{
               validations: [
                 {
-                  validator: fieldValidators.emptyField(i18n.getRequiredMessage('Task type')),
+                  validator: fieldValidators.emptyField(LABELS.getRequiredMessage('Task type')),
                   isBlocking: true,
                 },
               ],
@@ -259,8 +259,8 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                   prepend={inferenceUri}
                   append={
                     <EuiCopy
-                      beforeMessage={i18n.COPY_TOOLTIP}
-                      afterMessage={i18n.COPIED_TOOLTIP}
+                      beforeMessage={LABELS.COPY_TOOLTIP}
+                      afterMessage={LABELS.COPIED_TOOLTIP}
                       textToCopy={`${inferenceUri}${config.inferenceId}`}
                     >
                       {(copy) => (

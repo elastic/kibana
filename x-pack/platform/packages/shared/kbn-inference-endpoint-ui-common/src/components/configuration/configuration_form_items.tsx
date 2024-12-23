@@ -18,7 +18,7 @@ import {
 
 import { ConfigEntryView } from '../../types/types';
 import { ConfigurationField } from './configuration_field';
-import * as i18n from '../../translations';
+import * as LABELS from '../../translations';
 
 interface ConfigurationFormItemsProps {
   isLoading: boolean;
@@ -53,7 +53,7 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
 
         const optionalLabel = !required ? (
           <EuiText color="subdued" size="xs">
-            {i18n.OPTIONALTEXT}
+            {LABELS.OPTIONALTEXT}
           </EuiText>
         ) : undefined;
 
@@ -79,7 +79,7 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
             {sensitive ? (
               <>
                 <EuiSpacer size="s" />
-                <EuiCallOut size="s" color="warning" title={i18n.RE_ENTER_SECRETS(label)} />
+                <EuiCallOut size="s" color="warning" title={LABELS.RE_ENTER_SECRETS(label)} />
               </>
             ) : null}
           </EuiFlexItem>

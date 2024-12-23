@@ -26,7 +26,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 
-import * as i18n from '../translations';
+import * as LABELS from '../translations';
 import { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
 import { SERVICE_PROVIDERS } from './providers/render_service_provider/service_provider';
 import { DEFAULT_TASK_TYPE, ServiceProviderKeys } from '../constants';
@@ -215,7 +215,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({ p
           onKeyDown={handleProviderKeyboardOpen}
           value={config?.provider ? providerName : ''}
           fullWidth
-          placeholder={i18n.SELECT_PROVIDER}
+          placeholder={LABELS.SELECT_PROVIDER}
           icon={{ type: 'arrowDown', side: 'right' }}
           aria-expanded={isProviderPopoverOpen}
           role="combobox"
@@ -237,15 +237,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({ p
       providerName,
     ]
   );
-
-  // useEffect(() => {
-  //   if (config?.provider) {
-  //     console.log('generating inference id');
-  //     generateInferenceEndpointId(config, setFieldValue);
-  //   } else {
-  //     console.log('config.inference not generated');
-  //   }
-  // }, [config, config?.provider, setFieldValue]);
 
   useEffect(() => {
     if (isSubmitting) {
@@ -280,7 +271,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({ p
         config={{
           validations: [
             {
-              validator: fieldValidators.emptyField(i18n.PROVIDER_REQUIRED),
+              validator: fieldValidators.emptyField(LABELS.PROVIDER_REQUIRED),
               isBlocking: true,
             },
           ],
