@@ -22,9 +22,7 @@ export const Default = {
     const config = {
       error: thrownError,
     };
-    return (
-      <Render renderer={getErrorRenderer(coreMock.createStart())} config={config} />
-    );
+    return <Render renderer={getErrorRenderer(coreMock.createStart())} config={config} />;
   },
 
   name: 'default',
