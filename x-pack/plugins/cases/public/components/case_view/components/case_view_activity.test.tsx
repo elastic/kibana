@@ -67,7 +67,7 @@ jest.mock('../../../containers/user_profiles/use_get_current_user_profile');
 
 (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
 (useGetCategories as jest.Mock).mockReturnValue({ data: ['foo', 'bar'], refetch: jest.fn() });
-(useGetCaseConfiguration as jest.Mock).mockReturnValue({ data: {} });
+(useGetCaseConfiguration as jest.Mock).mockReturnValue({ data: { observableTypes: [] } });
 (useGetCurrentUserProfile as jest.Mock).mockReturnValue({ data: {}, isFetching: false });
 
 const caseData: CaseUI = {
@@ -364,6 +364,7 @@ describe('Case View Page activity tab', () => {
     (useGetCaseConfiguration as jest.Mock).mockReturnValue({
       data: {
         customFields: [customFieldsConfigurationMock[1]],
+        observableTypes: [],
       },
     });
     appMockRender.render(
