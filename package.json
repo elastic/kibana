@@ -314,7 +314,7 @@
     "@kbn/core-http-server-internal": "link:src/core/packages/http/server-internal",
     "@kbn/core-http-server-utils": "link:src/core/packages/http/server-utils",
     "@kbn/core-i18n-browser": "link:src/core/packages/i18n/browser",
-    "@kbn/core-i18n-browser-internal": "link:packages/core/i18n/core-i18n-browser-internal",
+    "@kbn/core-i18n-browser-internal": "link:src/core/packages/i18n/browser-internal",
     "@kbn/core-i18n-server": "link:packages/core/i18n/core-i18n-server",
     "@kbn/core-i18n-server-internal": "link:packages/core/i18n/core-i18n-server-internal",
     "@kbn/core-injected-metadata-browser-internal": "link:packages/core/injected-metadata/core-injected-metadata-browser-internal",
