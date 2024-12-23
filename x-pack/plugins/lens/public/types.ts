@@ -73,6 +73,7 @@ export type StartServices = Pick<
   | 'analytics'
   | 'i18n'
   | 'theme'
+  | 'userProfile'
 >;
 
 export interface IndexPatternRef {
@@ -82,6 +83,9 @@ export interface IndexPatternRef {
 }
 
 export interface IndexPattern {
+  getFormatterForField( // used extensively in lens
+    sourceField: string
+  ): unknown;
   id: string;
   fields: IndexPatternField[];
   getFieldByName(name: string): IndexPatternField | undefined;
@@ -431,7 +435,8 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
     indexPatterns: IndexPatternMap,
     dateRange: DateRange,
     nowInstant: Date,
-    searchSessionId?: string
+    searchSessionId?: string,
+    forceDSL?: boolean
   ) => ExpressionAstExpression | string | null;
 
   getDatasourceSuggestionsForField: (
@@ -662,6 +667,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
     | 'analytics'
     | 'i18n'
     | 'theme'
+    | 'userProfile'
     | 'docLinks'
   >;
   dateRange: DateRange;
@@ -960,6 +966,7 @@ export interface FramePublicAPI {
    */
   activeData?: Record<string, Datatable>;
   dataViews: DataViewsState;
+  forceDSL?: boolean;
 }
 
 /**

@@ -69,11 +69,26 @@ describe('findMaintenanceWindows', () => {
       },
     ];
 
-    const result = await findMaintenanceWindows({ http });
-    expect(result).toEqual(maintenanceWindow);
+    const result = await findMaintenanceWindows({
+      http,
+      page: 1,
+      perPage: 10,
+      search: '',
+      selectedStatus: [],
+    });
+
+    expect(result).toEqual({ maintenanceWindows: maintenanceWindow, total: 1 });
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/internal/alerting/rules/maintenance_window/_find",
+        Object {
+          "query": Object {
+            "page": 1,
+            "per_page": 10,
+            "search": "",
+            "status": Array [],
+          },
+        },
       ]
     `);
   });

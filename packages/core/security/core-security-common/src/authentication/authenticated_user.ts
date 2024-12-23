@@ -26,6 +26,21 @@ export interface UserRealm {
 }
 
 /**
+ * Represents the metadata of an API key.
+ */
+export interface ApiKeyDescriptor {
+  /**
+   *  Name of the API key.
+   */
+  name: string;
+
+  /**
+   * The ID of the API key.
+   */
+  id: string;
+}
+
+/**
  * Represents the currently authenticated user.
  */
 export interface AuthenticatedUser extends User {
@@ -60,4 +75,14 @@ export interface AuthenticatedUser extends User {
    * User profile ID of this user.
    */
   profile_uid?: string;
+
+  /**
+   * Indicates whether user is an operator.
+   */
+  operator?: boolean;
+
+  /**
+   * Metadata of the API key that was used to authenticate the user.
+   */
+  api_key?: ApiKeyDescriptor;
 }

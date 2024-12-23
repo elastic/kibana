@@ -6,7 +6,14 @@
  */
 
 import type { ErrorToastOptions } from '@kbn/core/public';
-import { EuiButtonEmpty, EuiText, logicalCSS, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  logicalCSS,
+  useEuiTheme,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -106,7 +113,7 @@ const getErrorMessage = (error: Error | ServerError): string => {
 
 export const useCasesToast = () => {
   const { appId } = useApplication();
-  const { application, i18n, theme } = useKibana().services;
+  const { application, i18n, theme, userProfile } = useKibana().services;
   const { getUrlForApp, navigateToUrl } = application;
 
   const toasts = useToasts();
@@ -148,13 +155,13 @@ export const useCasesToast = () => {
         return toasts.addSuccess({
           color: 'success',
           iconType: 'check',
-          title: toMountPoint(<TruncatedText text={renderTitle} />, { i18n, theme }),
+          title: toMountPoint(<TruncatedText text={renderTitle} />, { i18n, theme, userProfile }),
           text: toMountPoint(
             <CaseToastSuccessContent
               content={renderContent}
               onViewCaseClick={url != null ? onViewCaseClick : undefined}
             />,
-            { i18n, theme }
+            { i18n, theme, userProfile }
           ),
         });
       },
@@ -177,7 +184,7 @@ export const useCasesToast = () => {
         });
       },
     }),
-    [i18n, theme, appId, getUrlForApp, navigateToUrl, toasts]
+    [i18n, theme, userProfile, appId, getUrlForApp, navigateToUrl, toasts]
   );
 };
 
@@ -203,14 +210,17 @@ export const CaseToastSuccessContent = ({
         </EuiText>
       ) : null}
       {onViewCaseClick !== undefined ? (
-        <EuiButtonEmpty
-          size="xs"
-          flush="left"
-          onClick={onViewCaseClick}
-          data-test-subj="toaster-content-case-view-link"
-        >
-          {VIEW_CASE}
-        </EuiButtonEmpty>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              onClick={onViewCaseClick}
+              data-test-subj="toaster-content-case-view-link"
+            >
+              {VIEW_CASE}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : null}
     </>
   );

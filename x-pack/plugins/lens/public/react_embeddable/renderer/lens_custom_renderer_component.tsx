@@ -59,7 +59,10 @@ export function LensRenderer({
   filters,
   timeRange,
   disabledActions,
+  searchSessionId,
+  forceDSL,
   hidePanelTitles,
+  lastReloadRequestTime,
   ...props
 }: LensRendererProps) {
   // Use the settings interface to store panel settings
@@ -72,6 +75,7 @@ export function LensRenderer({
   }, []);
   const disabledActionIds$ = useObservableVariable(disabledActions);
   const viewMode$ = useObservableVariable(viewMode);
+  const searchSessionId$ = useObservableVariable(searchSessionId);
   const hidePanelTitles$ = useObservableVariable(hidePanelTitles);
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
@@ -83,6 +87,11 @@ export function LensRenderer({
   const searchApi = useSearchApi({ query, filters, timeRange });
 
   const showPanelChrome = Boolean(withDefaultActions) || (extraActions?.length || 0) > 0;
+
+  const reload$ = useMemo(() => new BehaviorSubject<void>(undefined), []);
+  useEffect(() => {
+    reload$.next();
+  }, [reload$, lastReloadRequestTime]);
 
   // Re-render on changes
   // internally the embeddable will evaluate whether it is worth to actual render or not
@@ -136,6 +145,7 @@ export function LensRenderer({
         ...props,
         // forward the unified search context
         ...searchApi,
+        searchSessionId$,
         disabledActionIds: disabledActionIds$,
         setDisabledActionIds: (ids: string[] | undefined) => disabledActionIds$.next(ids),
         viewMode: viewMode$,
@@ -148,7 +158,9 @@ export function LensRenderer({
           ...initialStateRef.current,
           attributes: props.attributes,
         }),
+        forceDSL,
         hidePanelTitle: hidePanelTitles$,
+        reload$, // trigger a reload (replacement for deprepcated searchSessionId)
       })}
       onApiAvailable={setLensApi}
       hidePanelChrome={!showPanelChrome}

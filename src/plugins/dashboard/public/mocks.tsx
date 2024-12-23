@@ -9,7 +9,6 @@
 
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { DashboardStart } from './plugin';
 import { DashboardState } from './dashboard_api/types';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
@@ -97,7 +96,6 @@ export function buildMockDashboardApi({
       dashboardInput: {
         ...initialState,
         executionContext: { type: 'dashboard' },
-        viewMode: initialState.viewMode as ViewMode,
         id: savedObjectId ?? '123',
       } as SavedDashboardInput,
       references: [],

@@ -41,6 +41,7 @@ import { initializeSearchSessionManager } from './search_session_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import { UnsavedPanelState } from '../dashboard_container/types';
 import { initializeTrackContentfulRender } from './track_contentful_render';
+import { getSerializedState } from './get_serialized_state';
 
 export function getDashboardApi({
   creationOptions,
@@ -87,18 +88,15 @@ export function getDashboardApi({
     controlGroupApi$,
     panelsManager.api.children$
   );
+  const settingsManager = initializeSettingsManager(initialState);
   const unifiedSearchManager = initializeUnifiedSearchManager(
     initialState,
     controlGroupApi$,
+    settingsManager.api.timeRestore$,
     dataLoadingManager.internalApi.waitForPanelsToLoad$,
     () => unsavedChangesManager.internalApi.getLastSavedState(),
     creationOptions
   );
-  const settingsManager = initializeSettingsManager({
-    initialState,
-    setTimeRestore: unifiedSearchManager.internalApi.setTimeRestore,
-    timeRestore$: unifiedSearchManager.internalApi.timeRestore$,
-  });
   const unsavedChangesManager = initializeUnsavedChangesManager({
     creationOptions,
     controlGroupApi$,
@@ -111,11 +109,13 @@ export function getDashboardApi({
     viewModeManager,
     unifiedSearchManager,
   });
-  async function getState() {
-    const { panels, references: panelReferences } = await panelsManager.internalApi.getState();
+  function getState() {
+    const { panels, references: panelReferences } = panelsManager.internalApi.getState();
+    const { state: unifiedSearchState, references: searchSourceReferences } =
+      unifiedSearchManager.internalApi.getState();
     const dashboardState: DashboardState = {
       ...settingsManager.internalApi.getState(),
-      ...unifiedSearchManager.internalApi.getState(),
+      ...unifiedSearchState,
       panels,
       viewMode: viewModeManager.api.viewMode.value,
     };
@@ -124,7 +124,7 @@ export function getDashboardApi({
     let controlGroupReferences: Reference[] | undefined;
     if (controlGroupApi) {
       const { rawState: controlGroupSerializedState, references: extractedReferences } =
-        await controlGroupApi.serializeState();
+        controlGroupApi.serializeState();
       controlGroupReferences = extractedReferences;
       dashboardState.controlGroupInput = controlGroupSerializedState;
     }
@@ -133,6 +133,7 @@ export function getDashboardApi({
       dashboardState,
       controlGroupReferences,
       panelReferences,
+      searchSourceReferences,
     };
   }
 
@@ -171,13 +172,14 @@ export function getDashboardApi({
       unifiedSearchManager.internalApi.controlGroupReload$,
       unifiedSearchManager.internalApi.panelsReload$
     ).pipe(debounceTime(0)),
+    getSerializedState: () => getSerializedState(getState()),
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
       const saveResult = await openSaveModal({
         isManaged,
         lastSavedId: savedObjectId$.value,
         viewMode: viewModeManager.api.viewMode.value,
-        ...(await getState()),
+        ...getState(),
       });
 
       if (saveResult) {
@@ -200,11 +202,13 @@ export function getDashboardApi({
     },
     runQuickSave: async () => {
       if (isManaged) return;
-      const { controlGroupReferences, dashboardState, panelReferences } = await getState();
+      const { controlGroupReferences, dashboardState, panelReferences, searchSourceReferences } =
+        getState();
       const saveResult = await getDashboardContentManagementService().saveDashboardState({
         controlGroupReferences,
-        currentState: dashboardState,
+        dashboardState,
         panelReferences,
+        searchSourceReferences,
         saveOptions: {},
         lastSavedId: savedObjectId$.value,
       });

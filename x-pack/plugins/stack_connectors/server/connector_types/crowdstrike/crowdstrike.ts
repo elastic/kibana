@@ -22,17 +22,18 @@ import type {
   CrowdstrikeGetTokenResponse,
   CrowdstrikeGetAgentOnlineStatusResponse,
   RelaxedCrowdstrikeBaseApiResponse,
+  CrowdStrikeExecuteRTRResponse,
 } from '../../../common/crowdstrike/types';
 import {
   CrowdstrikeHostActionsParamsSchema,
   CrowdstrikeGetAgentsParamsSchema,
-  CrowdstrikeGetTokenResponseSchema,
   CrowdstrikeHostActionsResponseSchema,
   RelaxedCrowdstrikeBaseApiResponseSchema,
   CrowdstrikeRTRCommandParamsSchema,
   CrowdstrikeExecuteRTRResponseSchema,
   CrowdstrikeGetScriptsParamsSchema,
-  CrowdStrikeExecuteRTRResponse,
+  CrowdstrikeApiDoNotValidateResponsesSchema,
+  CrowdstrikeGetTokenResponseSchema,
 } from '../../../common/crowdstrike/schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 import { CrowdstrikeError } from './error';
@@ -229,7 +230,8 @@ export class CrowdstrikeConnector extends SubActionConnector<
           'Content-Type': 'application/x-www-form-urlencoded',
           authorization: 'Basic ' + CrowdstrikeConnector.base64encodedToken,
         },
-        responseSchema: CrowdstrikeGetTokenResponseSchema,
+        responseSchema:
+          CrowdstrikeApiDoNotValidateResponsesSchema as unknown as typeof CrowdstrikeGetTokenResponseSchema,
       },
       connectorUsageCollector
     );
@@ -265,7 +267,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
           // where the external system might add/remove/change values in the response that we have no
           // control over.
           responseSchema:
-            RelaxedCrowdstrikeBaseApiResponseSchema as unknown as SubActionRequestParams<R>['responseSchema'],
+            CrowdstrikeApiDoNotValidateResponsesSchema as unknown as SubActionRequestParams<R>['responseSchema'],
           headers: {
             ...req.headers,
             Authorization: `Bearer ${CrowdstrikeConnector.token}`,
@@ -290,15 +292,9 @@ export class CrowdstrikeConnector extends SubActionConnector<
     payload: {
       command: string;
       endpoint_ids: string[];
-      overwriteUrl?: 'batchExecuteRTR' | 'batchActiveResponderExecuteRTR' | 'batchAdminExecuteRTR';
     },
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<CrowdStrikeExecuteRTRResponse> => {
-    // Some commands are only available in specific API endpoints, however there's an additional requirement check for the command's argument
-    // Eg. runscript command is available with the batchExecuteRTR endpoint, but if it goes with --Raw parameter, it should go to batchAdminExecuteRTR endpoint
-    // This overwrite value will be coming from kibana response actions api
-    const csUrl = payload.overwriteUrl ? this.urls[payload.overwriteUrl] : url;
-
     const batchId = await this.crowdStrikeSessionManager.initializeSession(
       { endpoint_ids: payload.endpoint_ids },
       connectorUsageCollector
@@ -311,7 +307,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
     }
     return await this.crowdstrikeApiRequest<CrowdStrikeExecuteRTRResponse>(
       {
-        url: csUrl,
+        url,
         method: 'post',
         data: {
           base_command: baseCommand,
@@ -333,7 +329,6 @@ export class CrowdstrikeConnector extends SubActionConnector<
     payload: {
       command: string;
       endpoint_ids: string[];
-      overwriteUrl?: 'batchActiveResponderExecuteRTR' | 'batchAdminExecuteRTR';
     },
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<CrowdStrikeExecuteRTRResponse> {
@@ -349,7 +344,6 @@ export class CrowdstrikeConnector extends SubActionConnector<
     payload: {
       command: string;
       endpoint_ids: string[];
-      overwriteUrl?: 'batchAdminExecuteRTR';
     },
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<CrowdStrikeExecuteRTRResponse> {
