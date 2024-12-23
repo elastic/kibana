@@ -24,6 +24,7 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { useCreateTimeline } from '../../../timelines/hooks/use_create_timeline';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../detections/components/alerts_table/translations';
+import { useUserPrivileges } from '../user_privileges';
 
 export interface InvestigateInTimelineButtonProps {
   asEmptyButton: boolean;
@@ -48,12 +49,16 @@ export const InvestigateInTimelineButton: FC<
   keepDataView,
   iconType,
   flush,
+  isDisabled,
   ...rest
 }) => {
   const dispatch = useDispatch();
 
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
   const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
+  const {
+    timelinePrivileges: { read: canUseTimeline },
+  } = useUserPrivileges();
 
   const hasTemplateProviders =
     dataProviders && dataProviders.find((provider) => provider.type === 'template');
@@ -116,6 +121,8 @@ export const InvestigateInTimelineButton: FC<
     keepDataView,
   ]);
 
+  const disabled = !canUseTimeline || isDisabled;
+
   return asEmptyButton ? (
     <EuiButtonEmpty
       aria-label={ACTION_INVESTIGATE_IN_TIMELINE}
@@ -123,6 +130,7 @@ export const InvestigateInTimelineButton: FC<
       flush={flush ?? 'right'}
       size="xs"
       iconType={iconType}
+      disabled={disabled}
     >
       {children}
     </EuiButtonEmpty>
@@ -130,6 +138,7 @@ export const InvestigateInTimelineButton: FC<
     <EuiButton
       aria-label={ACTION_INVESTIGATE_IN_TIMELINE}
       onClick={configureAndOpenTimeline}
+      disabled={disabled}
       {...rest}
     >
       {children}

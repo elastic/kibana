@@ -22,6 +22,7 @@ import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/m
 
 import { uiPlugins, parsingPlugins, processingPlugins } from './plugins';
 import { useUpsellingMessage } from '../../hooks/use_upselling';
+import { useUserPrivileges } from '../user_privileges';
 
 interface MarkdownEditorProps {
   onChange: (content: string) => void;
@@ -76,14 +77,17 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
 
     const insightsUpsellingMessage = useUpsellingMessage('investigation_guide');
     const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
+    const { timelinePrivileges } = useUserPrivileges();
+    const canSeeTimeline = timelinePrivileges.read || timelinePrivileges.crud;
     const uiPluginsWithState = useMemo(() => {
       return includePlugins
         ? uiPlugins({
             insightsUpsellingMessage,
             interactionsUpsellingMessage,
+            canSeeTimeline,
           })
         : undefined;
-    }, [includePlugins, insightsUpsellingMessage, interactionsUpsellingMessage]);
+    }, [includePlugins, canSeeTimeline, insightsUpsellingMessage, interactionsUpsellingMessage]);
 
     // @ts-expect-error update types
     useImperativeHandle(ref, () => {

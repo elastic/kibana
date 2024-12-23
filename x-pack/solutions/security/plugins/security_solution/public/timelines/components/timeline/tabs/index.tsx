@@ -44,6 +44,7 @@ import { initializeTimelineSettings } from '../../../store/actions';
 import { selectTimelineById, selectTimelineESQLSavedSearchId } from '../../../store/selectors';
 import { fetchNotesBySavedObjectIds, selectSortedNotesBySavedObjectId } from '../../../../notes';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -309,6 +310,13 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     [timelineSavedObjectId]
   );
 
+  const {
+    notesPrivileges: { crud, read },
+    timelinePrivileges: { crud: timelineCrud, read: timelineRead },
+  } = useUserPrivileges();
+  const canSeeNotes = crud || read;
+  const canSeePinnedTab = timelineRead || timelineCrud;
+
   // new note system
   const fetchNotes = useCallback(
     () => dispatch(fetchNotesBySavedObjectIds({ savedObjectIds: [timelineSavedObjectId] })),
@@ -445,7 +453,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             data-test-subj={`timelineTabs-${TimelineTabs.notes}`}
             onClick={setNotesAsActiveTab}
             isSelected={activeTab === TimelineTabs.notes}
-            disabled={timelineType === TimelineTypeEnum.template}
+            disabled={!canSeeNotes || timelineType === TimelineTypeEnum.template}
             key={TimelineTabs.notes}
           >
             <span>{i18n.NOTES_TAB}</span>
@@ -456,7 +464,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
             onClick={setPinnedAsActiveTab}
-            disabled={timelineType === TimelineTypeEnum.template}
+            disabled={!canSeePinnedTab || timelineType === TimelineTypeEnum.template}
             isSelected={activeTab === TimelineTabs.pinned}
             key={TimelineTabs.pinned}
           >
