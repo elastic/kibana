@@ -1020,7 +1020,7 @@ packages/kbn-validate-next-docs-cli @elastic/kibana-operations
 src/plugins/vis_default_editor @elastic/kibana-visualizations
 src/plugins/vis_types/gauge @elastic/kibana-visualizations
 src/plugins/vis_types/heatmap @elastic/kibana-visualizations
-src/plugins/vis_type_markdown @elastic/kibana-presentation
+src/platform/plugins/private/vis_type_markdown @elastic/kibana-presentation
 src/plugins/vis_types/metric @elastic/kibana-visualizations
 src/plugins/vis_types/pie @elastic/kibana-visualizations
 src/plugins/vis_types/table @elastic/kibana-visualizations
