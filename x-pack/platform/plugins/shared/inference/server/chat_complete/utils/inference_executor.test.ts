@@ -6,7 +6,7 @@
  */
 
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { InferenceConnector, InferenceConnectorType } from '../../../common/connectors';
+import { InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
 import { createInferenceExecutor, type InferenceExecutor } from './inference_executor';
 
 describe('createInferenceExecutor', () => {

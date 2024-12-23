@@ -204,7 +204,7 @@ function SummaryMetric({
           css={css`
             ${xlFontSize}
             font-weight: ${euiTheme.font.weight.bold};
-            color: ${euiTheme.colors.text};
+            color: ${euiTheme.colors.textParagraph};
           `}
         >
           {value}
