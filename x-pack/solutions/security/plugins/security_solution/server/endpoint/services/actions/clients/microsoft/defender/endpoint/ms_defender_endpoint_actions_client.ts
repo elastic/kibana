@@ -12,8 +12,14 @@ import {
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
 import type {
   MicrosoftDefenderEndpointAgentDetailsParams,
+  MicrosoftDefenderEndpointIsolateHostParams,
   MicrosoftDefenderEndpointMachine,
+  MicrosoftDefenderEndpointReleaseHostParams,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
+import type {
+  IsolationRouteRequestBody,
+  UnisolationRouteRequestBody,
+} from '../../../../../../../../common/api/endpoint';
 import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
@@ -23,13 +29,17 @@ import type {
 } from '../../../../../../../../common/endpoint/types';
 import type { ResponseActionAgentType } from '../../../../../../../../common/endpoint/service/response_actions/constants';
 import type { NormalizedExternalConnectorClient } from '../../../lib/normalized_external_connector_client';
-import type { ResponseActionsClientWriteActionRequestToEndpointIndexOptions } from '../../../lib/base_response_actions_client';
+import type {
+  ResponseActionsClientValidateRequestResponse,
+  ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
+} from '../../../lib/base_response_actions_client';
 import {
   ResponseActionsClientImpl,
   type ResponseActionsClientOptions,
 } from '../../../lib/base_response_actions_client';
 import { stringify } from '../../../../../../utils/stringify';
 import { ResponseActionsClientError } from '../../../errors';
+import type { CommonResponseActionMethodOptions } from '../../../lib/types';
 
 export type MicrosoftDefenderActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -211,5 +221,140 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     this.cache.set(agentId, msDefenderEndpointGetMachineDetailsApiResponse);
 
     return msDefenderEndpointGetMachineDetailsApiResponse;
+  }
+
+  protected async validateRequest(
+    payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+  ): Promise<ResponseActionsClientValidateRequestResponse> {
+    // TODO:PT support multiple agents
+    if (payload.endpoint_ids.length > 1) {
+      return {
+        isValid: false,
+        error: new ResponseActionsClientError(
+          `[body.endpoint_ids]: Multiple agents IDs not currently supported for Microsoft Defender for Endpoint`,
+          400
+        ),
+      };
+    }
+
+    return super.validateRequest(payload);
+  }
+
+  async isolate(
+    actionRequest: IsolationRouteRequestBody,
+    options: CommonResponseActionMethodOptions = {}
+  ): Promise<ActionDetails> {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      undefined,
+      {},
+      MicrosoftDefenderEndpointActionRequestCommonMeta
+    > = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'isolate',
+    };
+
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+
+      if (!error) {
+        try {
+          await this.sendAction<unknown, MicrosoftDefenderEndpointIsolateHostParams>(
+            MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.ISOLATE_HOST,
+            {
+              id: actionRequest.endpoint_ids[0],
+              comment: actionRequest.comment ?? '',
+            }
+          );
+        } catch (err) {
+          error = err;
+        }
+      }
+
+      reqIndexOptions.error = error?.message;
+
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+    }
+
+    const { actionDetails, actionEsDoc: actionRequestDoc } =
+      await this.handleResponseActionCreation(reqIndexOptions);
+
+    if (
+      !actionRequestDoc.error &&
+      !this.options.endpointService.experimentalFeatures.responseActionsMSDefenderEndpointEnabled
+    ) {
+      await this.writeActionResponseToEndpointIndex({
+        actionId: actionRequestDoc.EndpointActions.action_id,
+        agentId: actionRequestDoc.agent.id,
+        data: {
+          command: actionRequestDoc.EndpointActions.data.command,
+        },
+      });
+
+      return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+    }
+
+    return actionDetails;
+  }
+
+  async release(
+    actionRequest: UnisolationRouteRequestBody,
+    options: CommonResponseActionMethodOptions = {}
+  ): Promise<ActionDetails> {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      undefined,
+      {},
+      MicrosoftDefenderEndpointActionRequestCommonMeta
+    > = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'unisolate',
+    };
+
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+
+      if (!error) {
+        try {
+          await this.sendAction<unknown, MicrosoftDefenderEndpointReleaseHostParams>(
+            MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RELEASE_HOST,
+            {
+              id: actionRequest.endpoint_ids[0],
+              comment: actionRequest.comment ?? '',
+            }
+          );
+        } catch (err) {
+          error = err;
+        }
+      }
+
+      reqIndexOptions.error = error?.message;
+
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+    }
+
+    const { actionDetails, actionEsDoc: actionRequestDoc } =
+      await this.handleResponseActionCreation(reqIndexOptions);
+
+    if (
+      !actionRequestDoc.error &&
+      !this.options.endpointService.experimentalFeatures.responseActionsMSDefenderEndpointEnabled
+    ) {
+      await this.writeActionResponseToEndpointIndex({
+        actionId: actionRequestDoc.EndpointActions.action_id,
+        agentId: actionRequestDoc.agent.id,
+        data: {
+          command: actionRequestDoc.EndpointActions.data.command,
+        },
+      });
+
+      return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+    }
+
+    return actionDetails;
   }
 }
