@@ -296,7 +296,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/canvas/**/*.{js,mjs,ts,tsx}'],
+      files: ['x-pack/platform/plugins/private/canvas/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'jsx-a11y/click-events-have-key-events': 'off',
       },
@@ -1692,7 +1692,7 @@ module.exports = {
      * Canvas overrides
      */
     {
-      files: ['x-pack/plugins/canvas/**/*.js'],
+      files: ['x-pack/platform/plugins/private/canvas/**/*.js'],
       rules: {
         radix: 'error',
 
@@ -1736,12 +1736,12 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/plugins/canvas/gulpfile.js',
-        'x-pack/plugins/canvas/scripts/*.js',
-        'x-pack/plugins/canvas/tasks/*.js',
-        'x-pack/plugins/canvas/tasks/**/*.js',
-        'x-pack/plugins/canvas/__tests__/**/*.js',
-        'x-pack/plugins/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
+        'x-pack/platform/plugins/private/canvas/gulpfile.js',
+        'x-pack/platform/plugins/private/canvas/scripts/*.js',
+        'x-pack/platform/plugins/private/canvas/tasks/*.js',
+        'x-pack/platform/plugins/private/canvas/tasks/**/*.js',
+        'x-pack/platform/plugins/private/canvas/__tests__/**/*.js',
+        'x-pack/platform/plugins/private/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
       ],
       rules: {
         'import/no-extraneous-dependencies': [
@@ -1755,17 +1755,17 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/canvas/canvas_plugin_src/**/*.js'],
+      files: ['x-pack/platform/plugins/private/canvas/canvas_plugin_src/**/*.js'],
       globals: { canvas: true, $: true },
     },
     {
-      files: ['x-pack/plugins/canvas/public/**/*.js'],
+      files: ['x-pack/platform/plugins/private/canvas/public/**/*.js'],
       env: {
         browser: true,
       },
     },
     {
-      files: ['packages/kbn-flot-charts/lib/**/*.js'],
+      files: ['src/platform/packages/shared/kbn-flot-charts/lib/**/*.js'],
       env: {
         jquery: true,
       },

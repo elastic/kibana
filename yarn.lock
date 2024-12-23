@@ -4057,7 +4057,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/canvas-plugin@link:x-pack/plugins/canvas":
+"@kbn/canvas-plugin@link:x-pack/platform/plugins/private/canvas":
   version "0.0.0"
   uid ""
 
@@ -4273,7 +4273,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/controls-plugin@link:src/plugins/controls":
+"@kbn/controls-plugin@link:src/platform/plugins/shared/controls":
   version "0.0.0"
   uid ""
 
@@ -5205,11 +5205,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dashboard-enhanced-plugin@link:x-pack/plugins/dashboard_enhanced":
+"@kbn/dashboard-enhanced-plugin@link:x-pack/platform/plugins/shared/dashboard_enhanced":
   version "0.0.0"
   uid ""
 
-"@kbn/dashboard-plugin@link:src/plugins/dashboard":
+"@kbn/dashboard-plugin@link:src/platform/plugins/shared/dashboard":
   version "0.0.0"
   uid ""
 
@@ -5433,7 +5433,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/embeddable-enhanced-plugin@link:x-pack/plugins/embeddable_enhanced":
+"@kbn/embeddable-enhanced-plugin@link:x-pack/platform/plugins/shared/embeddable_enhanced":
   version "0.0.0"
   uid ""
 
@@ -5441,7 +5441,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/embeddable-plugin@link:src/plugins/embeddable":
+"@kbn/embeddable-plugin@link:src/platform/plugins/shared/embeddable":
   version "0.0.0"
   uid ""
 
@@ -5617,7 +5617,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-error-plugin@link:src/plugins/expression_error":
+"@kbn/expression-error-plugin@link:src/platform/plugins/shared/expression_error":
   version "0.0.0"
   uid ""
 
@@ -5629,7 +5629,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-image-plugin@link:src/plugins/expression_image":
+"@kbn/expression-image-plugin@link:src/platform/plugins/shared/expression_image":
   version "0.0.0"
   uid ""
 
@@ -5637,7 +5637,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-metric-plugin@link:src/plugins/expression_metric":
+"@kbn/expression-metric-plugin@link:src/platform/plugins/shared/expression_metric":
   version "0.0.0"
   uid ""
 
@@ -5649,15 +5649,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-repeat-image-plugin@link:src/plugins/expression_repeat_image":
+"@kbn/expression-repeat-image-plugin@link:src/platform/plugins/shared/expression_repeat_image":
   version "0.0.0"
   uid ""
 
-"@kbn/expression-reveal-image-plugin@link:src/plugins/expression_reveal_image":
+"@kbn/expression-reveal-image-plugin@link:src/platform/plugins/shared/expression_reveal_image":
   version "0.0.0"
   uid ""
 
-"@kbn/expression-shape-plugin@link:src/plugins/expression_shape":
+"@kbn/expression-shape-plugin@link:src/platform/plugins/shared/expression_shape":
   version "0.0.0"
   uid ""
 
@@ -5725,7 +5725,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/file-upload-plugin@link:x-pack/plugins/file_upload":
+"@kbn/file-upload-plugin@link:x-pack/platform/plugins/private/file_upload":
   version "0.0.0"
   uid ""
 
@@ -5749,7 +5749,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/flot-charts@link:packages/kbn-flot-charts":
+"@kbn/flot-charts@link:src/platform/packages/shared/kbn-flot-charts":
   version "0.0.0"
   uid ""
 
@@ -5961,11 +5961,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/input-control-vis-plugin@link:src/plugins/input_control_vis":
+"@kbn/input-control-vis-plugin@link:src/platform/plugins/private/input_control_vis":
   version "0.0.0"
   uid ""
 
-"@kbn/inspector-plugin@link:src/plugins/inspector":
+"@kbn/inspector-plugin@link:src/platform/plugins/shared/inspector":
   version "0.0.0"
   uid ""
 
@@ -6121,7 +6121,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/links-plugin@link:src/plugins/links":
+"@kbn/links-plugin@link:src/platform/plugins/private/links":
   version "0.0.0"
   uid ""
 
@@ -6245,7 +6245,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/mapbox-gl@link:packages/kbn-mapbox-gl":
+"@kbn/mapbox-gl@link:src/platform/packages/private/kbn-mapbox-gl":
   version "0.0.0"
   uid ""
 
@@ -6253,15 +6253,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/maps-ems-plugin@link:src/plugins/maps_ems":
+"@kbn/maps-ems-plugin@link:src/platform/plugins/private/maps_ems":
   version "0.0.0"
   uid ""
 
-"@kbn/maps-plugin@link:x-pack/plugins/maps":
+"@kbn/maps-plugin@link:x-pack/platform/plugins/shared/maps":
   version "0.0.0"
   uid ""
 
-"@kbn/maps-vector-tile-utils@link:x-pack/packages/maps/vector_tile_utils":
+"@kbn/maps-vector-tile-utils@link:x-pack/platform/packages/private/maps/vector_tile_utils":
   version "0.0.0"
   uid ""
 
@@ -6577,7 +6577,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/panel-loader@link:packages/kbn-panel-loader":
+"@kbn/panel-loader@link:src/platform/packages/private/kbn-panel-loader":
   version "0.0.0"
   uid ""
 
@@ -6617,19 +6617,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/presentation-containers@link:packages/presentation/presentation_containers":
+"@kbn/presentation-containers@link:src/platform/packages/shared/presentation/presentation_containers":
   version "0.0.0"
   uid ""
 
-"@kbn/presentation-panel-plugin@link:src/plugins/presentation_panel":
+"@kbn/presentation-panel-plugin@link:src/platform/plugins/private/presentation_panel":
   version "0.0.0"
   uid ""
 
-"@kbn/presentation-publishing@link:packages/presentation/presentation_publishing":
+"@kbn/presentation-publishing@link:src/platform/packages/shared/presentation/presentation_publishing":
   version "0.0.0"
   uid ""
 
-"@kbn/presentation-util-plugin@link:src/plugins/presentation_util":
+"@kbn/presentation-util-plugin@link:src/platform/plugins/shared/presentation_util":
   version "0.0.0"
   uid ""
 
@@ -7893,7 +7893,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/vis-type-markdown-plugin@link:src/plugins/vis_type_markdown":
+"@kbn/vis-type-markdown-plugin@link:src/platform/plugins/private/vis_type_markdown":
   version "0.0.0"
   uid ""
 

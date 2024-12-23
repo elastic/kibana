@@ -17,7 +17,7 @@
     "xpack.apm": "plugins/observability_solution/apm",
     "xpack.apmDataAccess": "plugins/observability_solution/apm_data_access",
     "xpack.banners": "plugins/banners",
-    "xpack.canvas": "plugins/canvas",
+    "xpack.canvas": "platform/plugins/private/canvas",
     "xpack.cases": "plugins/cases",
     "xpack.cloud": "plugins/cloud",
     "xpack.cloudDefend": "solutions/security/plugins/cloud_defend",
@@ -29,7 +29,7 @@
       "packages/kbn-cloud-security-posture"
     ],
     "xpack.customBranding": "plugins/custom_branding",
-    "xpack.dashboard": "plugins/dashboard_enhanced",
+    "xpack.dashboard": "platform/plugins/shared/dashboard_enhanced",
     "xpack.dataQuality": "platform/plugins/shared/data_quality",
     "xpack.datasetQuality": "platform/plugins/shared/dataset_quality",
     "xpack.dataUsage": "platform/plugins/private/data_usage",
@@ -39,13 +39,13 @@
     "xpack.elasticAssistantCommon": "platform/packages/shared/kbn-elastic-assistant-common",
     "xpack.elasticAssistantPlugin": "solutions/security/plugins/elastic_assistant",
     "xpack.ecsDataQualityDashboard": "solutions/security/plugins/ecs_data_quality_dashboard",
-    "xpack.embeddableEnhanced": "plugins/embeddable_enhanced",
+    "xpack.embeddableEnhanced": "platform/plugins/shared/embeddable_enhanced",
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "plugins/enterprise_search",
     "xpack.features": "plugins/features",
     "xpack.dataVisualizer": "platform/plugins/private/data_visualizer",
     "xpack.exploratoryView": "solutions/observability/plugins/exploratory_view",
-    "xpack.fileUpload": "plugins/file_upload",
+    "xpack.fileUpload": "platform/plugins/private/file_upload",
     "xpack.globalSearch": [
       "plugins/global_search"
     ],
@@ -81,7 +81,7 @@
     ],
     "xpack.main": "legacy/plugins/xpack_main",
     "xpack.maps": [
-      "plugins/maps"
+      "platform/plugins/shared/maps"
     ],
     "xpack.metricsData": "plugins/observability_solution/metrics_data_access",
     "xpack.ml": [
