@@ -1542,21 +1542,6 @@ paths:
                                     description: Total time spent performing Elasticsearch searches as measured by Kibana; includes network latency and time spent serializing or deserializing the request and response.
                                     nullable: true
                                     type: number
-                                  unfilled_gaps_ms:
-                                    additionalProperties: false
-                                    nullable: true
-                                    type: object
-                                    properties:
-                                      last_1d:
-                                        type: number
-                                      last_3d:
-                                        type: number
-                                      last_7d:
-                                        type: number
-                                    required:
-                                      - last_1d
-                                      - last_3d
-                                      - last_7d
                               timestamp:
                                 description: Time of the most recent rule run.
                                 type: string
@@ -2475,21 +2460,6 @@ paths:
                                     description: Total time spent performing Elasticsearch searches as measured by Kibana; includes network latency and time spent serializing or deserializing the request and response.
                                     nullable: true
                                     type: number
-                                  unfilled_gaps_ms:
-                                    additionalProperties: false
-                                    nullable: true
-                                    type: object
-                                    properties:
-                                      last_1d:
-                                        type: number
-                                      last_3d:
-                                        type: number
-                                      last_7d:
-                                        type: number
-                                    required:
-                                      - last_1d
-                                      - last_3d
-                                      - last_7d
                               timestamp:
                                 description: Time of the most recent rule run.
                                 type: string
@@ -3383,21 +3353,6 @@ paths:
                                     description: Total time spent performing Elasticsearch searches as measured by Kibana; includes network latency and time spent serializing or deserializing the request and response.
                                     nullable: true
                                     type: number
-                                  unfilled_gaps_ms:
-                                    additionalProperties: false
-                                    nullable: true
-                                    type: object
-                                    properties:
-                                      last_1d:
-                                        type: number
-                                      last_3d:
-                                        type: number
-                                      last_7d:
-                                        type: number
-                                    required:
-                                      - last_1d
-                                      - last_3d
-                                      - last_7d
                               timestamp:
                                 description: Time of the most recent rule run.
                                 type: string
@@ -4388,21 +4343,6 @@ paths:
                                     description: Total time spent performing Elasticsearch searches as measured by Kibana; includes network latency and time spent serializing or deserializing the request and response.
                                     nullable: true
                                     type: number
-                                  unfilled_gaps_ms:
-                                    additionalProperties: false
-                                    nullable: true
-                                    type: object
-                                    properties:
-                                      last_1d:
-                                        type: number
-                                      last_3d:
-                                        type: number
-                                      last_7d:
-                                        type: number
-                                    required:
-                                      - last_1d
-                                      - last_3d
-                                      - last_7d
                               timestamp:
                                 description: Time of the most recent rule run.
                                 type: string
