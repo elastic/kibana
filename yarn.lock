@@ -2206,10 +2206,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@68.0.3":
-  version "68.0.3"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-68.0.3.tgz#dc4aaeb4cdc8751d5759b58dc9958efb3c2639da"
-  integrity sha512-U+NCTo2LCDDSVkV5kGinhzbiAvfEcVAZ4D2YM/0RZQFRvJfJBvelbG+jDkt6N2mEauJ4ECDDcb33995fbs71TA==
+"@elastic/charts@68.0.4":
+  version "68.0.4"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-68.0.4.tgz#b35a4734e4e36ef894432a3ff882a0e4329ffe4c"
+  integrity sha512-kn9FEm2osJBitbbqCRcuZ3ygrLHelUm9i9bCAcY/t3vXfT7tDjhvgueAjm5gQas7/NcASN8LWEykLktGo3mrxQ==
   dependencies:
     "@popperjs/core" "^2.11.8"
     bezier-easing "^2.1.0"
@@ -2305,25 +2305,25 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-theme-borealis@0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.4.tgz#5a1e8d5cd02f25634928106c9845389f6b8568bb"
-  integrity sha512-6RV49J0saf2zjcf1uXYpoU9AgRlWs+ot+GszZz6iCBavPl7MdMlR13x5WdT7ewtx7cju9taEWhS1YDVfGVCFSA==
+"@elastic/eui-theme-borealis@0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.7.tgz#a6c4600d61a29a96078afbc8003a14f792842d32"
+  integrity sha512-N1bo++X+aI4k4CiykdqKiV9ihfSifS3AScQXeeD5I9FunljsNVTk5f+502VIJKx/1knLidplsXmBv4n6iXf1tQ==
 
-"@elastic/eui-theme-common@0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.4.tgz#83db50a46251c75e6a3c07df0dee3eedb5d49e17"
-  integrity sha512-IDQ15ytDwlB5OO2UlPKccUR37QnRp1xZE8zPy8LoCPQAX8hgDYjikk8gjA2eixCuTm9+t6Suz+Xuha69VcMMZg==
+"@elastic/eui-theme-common@0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.7.tgz#0e57b5325d52fd5813832a77f47f294204f3dc72"
+  integrity sha512-U9ii4Bl+S5zdbIH3WP01vebJboalhZ/ULlyZxc7zHmyA9Z2pONGOauUZUKE7v3nSmN6f53toNoa2pvn4ZqB+Yw==
   dependencies:
     "@types/lodash" "^4.14.202"
     lodash "^4.17.21"
 
-"@elastic/eui@98.1.0-borealis.0":
-  version "98.1.0-borealis.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-98.1.0-borealis.0.tgz#b0db1416d81863816939ae4dc067cc089a9f9789"
-  integrity sha512-DMu+H0j5WrByhJr3Xc3strmsIiwKHLYCOKsTWOqv9CS8tcRFaYa2zHhwhgVhRuBE7XdX++uCsV4vVGrd8qJMVw==
+"@elastic/eui@98.2.1-borealis.2":
+  version "98.2.1-borealis.2"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-98.2.1-borealis.2.tgz#f45308483f343e2b19dfa4bcfa4090bae226395f"
+  integrity sha512-ogTsvGqi4f2eiwzm/z7vLAEAQlw8ZiBpLTLFusFt9sawha7nmaLLitleKvJHZqBA117x71nhlM3CrWYczNmG0A==
   dependencies:
-    "@elastic/eui-theme-common" "0.0.4"
+    "@elastic/eui-theme-common" "0.0.7"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
     "@types/numeral" "^2.0.5"
@@ -4049,14 +4049,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/bfetch-error@link:packages/kbn-bfetch-error":
-  version "0.0.0"
-  uid ""
-
-"@kbn/bfetch-plugin@link:src/plugins/bfetch":
-  version "0.0.0"
-  uid ""
-
 "@kbn/calculate-auto@link:packages/kbn-calculate-auto":
   version "0.0.0"
   uid ""
@@ -4102,6 +4094,10 @@
   uid ""
 
 "@kbn/charts-plugin@link:src/plugins/charts":
+  version "0.0.0"
+  uid ""
+
+"@kbn/charts-theme@link:packages/kbn-charts-theme":
   version "0.0.0"
   uid ""
 
@@ -5193,7 +5189,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/custom-icons@link:packages/kbn-custom-icons":
+"@kbn/custom-icons@link:src/platform/packages/shared/kbn-custom-icons":
   version "0.0.0"
   uid ""
 
@@ -5201,7 +5197,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/custom-integrations@link:packages/kbn-custom-integrations":
+"@kbn/custom-integrations@link:x-pack/solutions/observability/packages/kbn-custom-integrations":
   version "0.0.0"
   uid ""
 
@@ -5225,7 +5221,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-quality-plugin@link:x-pack/plugins/data_quality":
+"@kbn/data-quality-plugin@link:x-pack/platform/plugins/shared/data_quality":
   version "0.0.0"
   uid ""
 
@@ -5273,7 +5269,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dataset-quality-plugin@link:x-pack/plugins/observability_solution/dataset_quality":
+"@kbn/dataset-quality-plugin@link:x-pack/platform/plugins/shared/dataset_quality":
   version "0.0.0"
   uid ""
 
@@ -5365,7 +5361,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/discover-contextual-components@link:packages/kbn-discover-contextual-components":
+"@kbn/discover-contextual-components@link:src/platform/packages/shared/kbn-discover-contextual-components":
   version "0.0.0"
   uid ""
 
@@ -5413,7 +5409,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/elastic-agent-utils@link:packages/kbn-elastic-agent-utils":
+"@kbn/elastic-agent-utils@link:src/platform/packages/shared/kbn-elastic-agent-utils":
   version "0.0.0"
   uid ""
 
@@ -5725,7 +5721,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/fields-metadata-plugin@link:x-pack/plugins/fields_metadata":
+"@kbn/fields-metadata-plugin@link:x-pack/platform/plugins/shared/fields_metadata":
   version "0.0.0"
   uid ""
 
@@ -5929,7 +5925,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/index-management-plugin@link:x-pack/plugins/index_management":
+"@kbn/index-management-plugin@link:x-pack/platform/plugins/shared/index_management":
   version "0.0.0"
   uid ""
 
@@ -5957,7 +5953,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/infra-plugin@link:x-pack/plugins/observability_solution/infra":
+"@kbn/infra-plugin@link:x-pack/solutions/observability/plugins/infra":
   version "0.0.0"
   uid ""
 
@@ -6161,15 +6157,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logs-data-access-plugin@link:x-pack/plugins/observability_solution/logs_data_access":
+"@kbn/logs-data-access-plugin@link:x-pack/platform/plugins/shared/logs_data_access":
   version "0.0.0"
   uid ""
 
-"@kbn/logs-explorer-plugin@link:x-pack/plugins/observability_solution/logs_explorer":
+"@kbn/logs-explorer-plugin@link:x-pack/solutions/observability/plugins/logs_explorer":
   version "0.0.0"
   uid ""
 
-"@kbn/logs-shared-plugin@link:x-pack/plugins/observability_solution/logs_shared":
+"@kbn/logs-shared-plugin@link:x-pack/platform/plugins/shared/logs_shared":
   version "0.0.0"
   uid ""
 
@@ -6493,19 +6489,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-logs-explorer-plugin@link:x-pack/plugins/observability_solution/observability_logs_explorer":
+"@kbn/observability-logs-explorer-plugin@link:x-pack/solutions/observability/plugins/observability_logs_explorer":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-logs-overview@link:x-pack/packages/observability/logs_overview":
+"@kbn/observability-logs-overview@link:x-pack/platform/packages/shared/observability/logs_overview":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-onboarding-e2e@link:x-pack/plugins/observability_solution/observability_onboarding/e2e":
+"@kbn/observability-onboarding-e2e@link:x-pack/solutions/observability/plugins/observability_onboarding/e2e":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-onboarding-plugin@link:x-pack/plugins/observability_solution/observability_onboarding":
+"@kbn/observability-onboarding-plugin@link:x-pack/solutions/observability/plugins/observability_onboarding":
   version "0.0.0"
   uid ""
 
@@ -6545,7 +6541,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/openapi-common@link:packages/kbn-openapi-common":
+"@kbn/openapi-common@link:src/platform/packages/shared/kbn-openapi-common":
   version "0.0.0"
   uid ""
 
@@ -6669,7 +6665,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/react-hooks@link:packages/kbn-react-hooks":
+"@kbn/react-hooks@link:src/platform/packages/shared/kbn-react-hooks":
   version "0.0.0"
   uid ""
 
@@ -6837,7 +6833,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/router-utils@link:packages/kbn-router-utils":
+"@kbn/router-utils@link:src/platform/packages/shared/kbn-router-utils":
   version "0.0.0"
   uid ""
 
@@ -6849,7 +6845,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rule-data-utils@link:packages/kbn-rule-data-utils":
+"@kbn/rule-data-utils@link:src/platform/packages/shared/kbn-rule-data-utils":
   version "0.0.0"
   uid ""
 
@@ -7685,7 +7681,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/timerange@link:packages/kbn-timerange":
+"@kbn/timerange@link:src/platform/packages/shared/kbn-timerange":
   version "0.0.0"
   uid ""
 
@@ -7957,7 +7953,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/xstate-utils@link:packages/kbn-xstate-utils":
+"@kbn/xstate-utils@link:src/platform/packages/shared/kbn-xstate-utils":
   version "0.0.0"
   uid ""
 
@@ -7965,7 +7961,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/zod-helpers@link:packages/kbn-zod-helpers":
+"@kbn/zod-helpers@link:src/platform/packages/shared/kbn-zod-helpers":
   version "0.0.0"
   uid ""
 

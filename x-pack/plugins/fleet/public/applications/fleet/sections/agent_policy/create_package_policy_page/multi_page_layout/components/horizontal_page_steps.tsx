@@ -7,31 +7,7 @@
 import React from 'react';
 import { EuiStepsHorizontal } from '@elastic/eui';
 import type { EuiStepsHorizontalProps } from '@elastic/eui';
-import styled from 'styled-components';
 
-// polyfill until https://github.com/elastic/eui/discussions/5836 implemented
-const NumberlessHorizontalSteps = styled(EuiStepsHorizontal)`
-  .euiStepNumber {
-    color: transparent;
-    width: 16px;
-    height: 16px;
-    outline-color: #07c;
-  }
-  .euiStepHorizontal::before {
-    width: calc(50% - 8px);
-    top: 32px;
-  }
-  .euiStepHorizontal::after {
-    width: calc(50% - 8px);
-    top: 32px;
-  }
-  .euiStepHorizontal {
-    padding: 25px 16px 16px;
-  }
-  .euiStepHorizontal[data-step-status='incomplete'] .euiStepHorizontal__title {
-    color: #69707d;
-  }
-`;
 const getStepStatus = (currentStep: number, stepIndex: number, currentStepComplete: boolean) => {
   if (currentStep === stepIndex) {
     if (currentStepComplete) return 'complete';
@@ -58,5 +34,5 @@ export const PageSteps: React.FC<{
     };
   }) as EuiStepsHorizontalProps['steps'];
 
-  return <NumberlessHorizontalSteps steps={steps} />;
+  return <EuiStepsHorizontal size="xs" steps={steps} />;
 };

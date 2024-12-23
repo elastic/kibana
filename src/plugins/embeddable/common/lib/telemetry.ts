@@ -17,7 +17,7 @@ export const getTelemetryFunction = (embeddables: CommonEmbeddableStartContract)
     telemetryData: Record<string, string | number | boolean> = {}
   ) => {
     const enhancements = state.enhancements || {};
-    const factory = embeddables.getEmbeddableFactory(state.type);
+    const factory = embeddables.getEmbeddableFactory?.(state.type);
 
     let outputTelemetryData = telemetryBaseEmbeddableInput(state, telemetryData);
     if (factory) {

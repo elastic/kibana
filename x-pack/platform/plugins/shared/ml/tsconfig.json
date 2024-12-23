@@ -128,7 +128,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/ui-theme",
     "@kbn/unified-field-list",
     "@kbn/unified-search-plugin",
     "@kbn/usage-collection-plugin",
@@ -137,5 +136,6 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-ui-settings-server",
     "@kbn/core-security-server",
+    "@kbn/charts-theme",
   ]
 }

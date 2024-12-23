@@ -9,7 +9,8 @@
 
 import { ViewMode } from '..';
 import { KibanaExecutionContext } from '@kbn/core/types';
-import { EmbeddableInput, omitGenericEmbeddableInput, genericEmbeddableInputIsEqual } from '.';
+import { EmbeddableInput } from '.';
+import { omitGenericEmbeddableInput, genericEmbeddableInputIsEqual } from './diff_embeddable_input';
 
 const getGenericEmbeddableState = (state?: Partial<EmbeddableInput>): EmbeddableInput => {
   const defaultState: EmbeddableInput = {

@@ -8,7 +8,7 @@
  */
 
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from './errors';
+import { PanelNotFoundError } from './errors';
 
 describe('IncompatibleActionError', () => {
   test('is instance of error', () => {
@@ -31,17 +31,5 @@ describe('PanelNotFoundError', () => {
   test('has PANEL_NOT_FOUND code', () => {
     const error = new PanelNotFoundError();
     expect(error.code).toBe('PANEL_NOT_FOUND');
-  });
-});
-
-describe('EmbeddableFactoryNotFoundError', () => {
-  test('is instance of error', () => {
-    const error = new EmbeddableFactoryNotFoundError('type1');
-    expect(error).toBeInstanceOf(Error);
-  });
-
-  test('has EMBEDDABLE_FACTORY_NOT_FOUND code', () => {
-    const error = new EmbeddableFactoryNotFoundError('type1');
-    expect(error.code).toBe('EMBEDDABLE_FACTORY_NOT_FOUND');
   });
 });

@@ -8,7 +8,6 @@
  */
 
 import {
-  ViewMode,
   PanelState,
   EmbeddableInput,
   SavedObjectEmbeddableInput,
@@ -17,6 +16,7 @@ import { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Reference } from '@kbn/content-management-utils';
 import { RefreshInterval } from '@kbn/data-plugin/common';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type { ViewMode } from '@kbn/presentation-publishing';
 
 import type { DashboardOptions, GridData } from '../../server/content_management';
 
@@ -44,7 +44,7 @@ export interface DashboardPanelState<
 
 export type DashboardContainerByReferenceInput = SavedObjectEmbeddableInput;
 
-export interface DashboardContainerInput extends EmbeddableInput {
+export interface DashboardContainerInput extends Omit<EmbeddableInput, 'viewMode'> {
   // filter context to be passed to children
   query: Query;
   filters: Filter[];
