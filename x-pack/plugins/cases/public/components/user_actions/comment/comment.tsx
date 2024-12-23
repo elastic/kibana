@@ -10,7 +10,7 @@ import type { EuiCommentProps } from '@elastic/eui';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import type { CommentUserAction } from '../../../../common/types/domain';
 import { UserActionActions, AttachmentType } from '../../../../common/types/domain';
-import type { AttachmentTypeRegistry } from '../../../../common/registry';
+import { type AttachmentTypeRegistry } from '../../../../common/registry';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { createCommonUpdateUserActionBuilder } from '../common';
 import type { AttachmentUI } from '../../../containers/types';
@@ -242,6 +242,7 @@ const getCreateCommentUserAction = ({
       });
 
       return persistableBuilder.build();
+
     default:
       return [];
   }

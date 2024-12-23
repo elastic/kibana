@@ -17,20 +17,23 @@ export const maintenanceWindowMappings: SavedObjectsTypeMappingDefinition = {
       type: 'date_range',
       format: 'epoch_millis||strict_date_optional_time',
     },
+    title: {
+      type: 'text',
+      fields: {
+        keyword: {
+          type: 'keyword',
+        },
+      },
+    },
+    expirationDate: {
+      type: 'date',
+    },
+    updatedAt: {
+      type: 'date',
+    },
     // NO NEED TO BE INDEXED
-    // title: {
-    //   type: 'text',
-    //   fields: {
-    //     keyword: {
-    //       type: 'keyword',
-    //     },
-    //   },
-    // },
     // duration: {
     //   type: 'long',
-    // },
-    // expirationDate: {
-    //   type: 'date',
     // },
     // rRule: rRuleMappingsField,
     // createdBy: {
@@ -42,10 +45,6 @@ export const maintenanceWindowMappings: SavedObjectsTypeMappingDefinition = {
     //   type: 'keyword',
     // },
     // createdAt: {
-    //   index: false,
-    //   type: 'date',
-    // },
-    // updatedAt: {
     //   index: false,
     //   type: 'date',
     // },
