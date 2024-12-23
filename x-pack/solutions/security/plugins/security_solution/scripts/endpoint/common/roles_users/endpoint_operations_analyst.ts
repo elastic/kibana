@@ -72,6 +72,7 @@ export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
             'file_operations_all',
             'execute_operations_all',
             'scan_operations_all',
+            'workflow_insights_all',
           ],
         },
         spaces: ['*'],

@@ -28,6 +28,8 @@ export const getPlatformEngineer: () => Omit<Role, 'name'> = () => {
             'blocklist_all',
 
             'actions_log_management_read',
+
+            'workflow_insights_all',
           ],
         },
       },

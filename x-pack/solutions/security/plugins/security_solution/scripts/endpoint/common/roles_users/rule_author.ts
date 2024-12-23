@@ -28,6 +28,7 @@ export const getRuleAuthor: () => Omit<Role, 'name'> = () => {
             'host_isolation_exceptions_read',
             'blocklist_all',
             'actions_log_management_read',
+            'workflow_insights_all',
           ],
         },
       },

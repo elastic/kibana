@@ -34,6 +34,12 @@ export const WORKFLOW_INSIGHTS = {
         defaultMessage: 'Loading...',
       }
     ),
+    noPermissions: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.scan.noPermissions',
+      {
+        defaultMessage: 'You do not have the privileges required to perform this operation.',
+      }
+    ),
   },
   issues: {
     title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.issues.title', {
@@ -45,12 +51,26 @@ export const WORKFLOW_INSIGHTS = {
         defaultMessage: 'No issues had been found',
       }
     ),
-    insightRemediationButtonAriaLabel: i18n.translate(
-      'xpack.securitySolution.endpointDetails.workflowInsights.issues.insightRemediationButtonAriaLabel',
-      {
-        defaultMessage: 'Create trusted app',
-      }
-    ),
+    remediationButton: {
+      ariaLabel: i18n.translate(
+        'xpack.securitySolution.endpointDetails.workflowInsights.issues.insightRemediationButtonAriaLabel',
+        {
+          defaultMessage: 'Create trusted app',
+        }
+      ),
+      tooltipContent: i18n.translate(
+        'xpack.securitySolution.endpointDetails.workflowInsights.issues.insightRemediationButtonTooltipContent',
+        {
+          defaultMessage: 'Create trusted app',
+        }
+      ),
+      tooltipNoPermissions: i18n.translate(
+        'xpack.securitySolution.endpointDetails.workflowInsights.issues.insighRemediationButtonTooltipNoPermissions',
+        {
+          defaultMessage: 'You do not have the privileges required to perform this operation.',
+        }
+      ),
+    },
   },
   toasts: {
     scanError: i18n.translate(

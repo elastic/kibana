@@ -32,6 +32,7 @@ export const getT3Analyst: () => Omit<Role, 'name'> = () => {
             'actions_log_management_all',
             'file_operations_all',
             'scan_operations_all',
+            'workflow_insights_all',
           ],
         },
       },
