@@ -25,7 +25,7 @@ import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import { getImplicitEntityFields } from './helpers';
 import {
   getIngestPipelineName,
-  createIngestTimestampPipeline,
+  createEventIngestedFromTimestamp,
 } from '../utils/create_ingest_pipeline';
 
 interface AssetCriticalityClientOpts {
@@ -63,7 +63,7 @@ export class AssetCriticalityDataClient {
    * Initialize asset criticality resources.
    */
   public async init() {
-    await createIngestTimestampPipeline(this.options.esClient, this.options.namespace);
+    await createEventIngestedFromTimestamp(this.options.esClient, this.options.namespace);
     await this.createOrUpdateIndex();
 
     this.options.auditLogger?.log({

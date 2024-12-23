@@ -33,7 +33,7 @@ export const assetCrticalityCopyTimestampToEventIngested = async ({
     },
   });
 
-  const [coreStart, depsStart] = await getStartServices();
+  const [_, depsStart] = await getStartServices();
   const taskManagerStart = depsStart.taskManager;
 
   if (taskManagerStart) {
