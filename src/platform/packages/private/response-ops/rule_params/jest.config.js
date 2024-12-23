@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../../..',
-  roots: ['<rootDir>/packages/response-ops/rule_params'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/response-ops/rule_params'],
 };
