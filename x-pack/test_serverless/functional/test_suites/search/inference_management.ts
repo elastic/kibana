@@ -61,7 +61,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('delete action', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/204507
+    describe.skip('delete action', () => {
       const usageIndex = 'elser_index';
       beforeEach(async () => {
         await ml.api.createInferenceEndpoint(endpoint, taskType, modelConfig);
