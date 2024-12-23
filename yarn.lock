@@ -4513,7 +4513,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-browser@link:packages/core/execution-context/core-execution-context-browser":
+"@kbn/core-execution-context-browser@link:src/core/packages/execution-context/browser":
   version "0.0.0"
   uid ""
 
