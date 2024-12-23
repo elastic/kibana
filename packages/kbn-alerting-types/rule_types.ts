@@ -148,11 +148,6 @@ export interface RuleMonitoringLastRunMetrics extends SavedObjectAttributes {
     gte: string;
     lte: string;
   } | null;
-  unfilled_gaps_ms?: {
-    last_1d: number;
-    last_3d: number;
-    last_7d: number;
-  } | null;
 }
 
 export interface RuleMonitoringLastRun extends SavedObjectAttributes {
