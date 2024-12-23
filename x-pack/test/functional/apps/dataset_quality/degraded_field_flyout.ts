@@ -52,7 +52,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const apmAppDatasetName = 'apm.app.tug';
   const apmAppDataStreamName = `${type}-${apmAppDatasetName}-${defaultNamespace}`;
 
-  describe('Degraded fields flyout', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/203956
+  describe.skip('Degraded fields flyout', () => {
     describe('degraded field flyout open-close', () => {
       before(async () => {
         await synthtrace.index([
