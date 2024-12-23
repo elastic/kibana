@@ -4541,7 +4541,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-fatal-errors-browser@link:packages/core/fatal-errors/core-fatal-errors-browser":
+"@kbn/core-fatal-errors-browser@link:src/core/packages/fatal-errors/browser":
   version "0.0.0"
   uid ""
 
