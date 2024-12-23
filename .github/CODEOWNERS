@@ -407,7 +407,7 @@ x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-g
 x-pack/solutions/security/plugins/elastic_assistant @elastic/security-generative-ai
 test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
 x-pack/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
-x-pack/plugins/embeddable_enhanced @elastic/kibana-presentation
+x-pack/platform/plugins/shared/embeddable_enhanced @elastic/kibana-presentation
 examples/embeddable_examples @elastic/kibana-presentation
 src/plugins/embeddable @elastic/kibana-presentation
 x-pack/examples/embedded_lens_example @elastic/kibana-visualizations
