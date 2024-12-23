@@ -12,6 +12,7 @@ export declare interface TestFailure {
   suite: string;
   title: string;
   target: string;
+  command: string;
   location: string;
   owner: string[];
   plugin?: {

@@ -8,4 +8,5 @@
  */
 
 export { getPluginManifestData } from './get_plugin_matifest_data';
-export { saveTestFailuresReport } from './save_test_failures';
+export { saveTestFailuresReport, saveTestFailureHtml } from './save_test_failures';
+export { stripfilePath, stripRunCommand } from './strip_path';

@@ -27,9 +27,16 @@ import {
   getOwningTeamsForPath,
 } from '@kbn/code-owners';
 import { generateTestRunId, getTestIDForTitle } from '.';
-import { getPluginManifestData, saveTestFailuresReport } from './utils';
+import {
+  getPluginManifestData,
+  saveTestFailuresReport,
+  saveTestFailureHtml,
+  stripRunCommand,
+  stripfilePath,
+} from './utils';
 import type { TestFailure } from './test_failure';
 import type { ScoutPlaywrightReporterOptions } from './scout_playwright_reporter';
+import { buildFailureHtml } from './utils/build_test_failure_html';
 
 /**
  * Scout Failed Test reporter
@@ -41,6 +48,7 @@ export class ScoutFailedTestReporter implements Reporter {
   private target: string;
   private testFailures: TestFailure[];
   private plugin: TestFailure['plugin'];
+  private command: string;
 
   constructor(private reporterOptions: ScoutPlaywrightReporterOptions = {}) {
     this.log = new ToolingLog({
@@ -52,6 +60,7 @@ export class ScoutFailedTestReporter implements Reporter {
     this.codeOwnersEntries = getCodeOwnersEntries();
     this.testFailures = [];
     this.target = 'undefined'; // when '--grep' is not provided in the command line
+    this.command = stripRunCommand(process.argv);
   }
 
   private getFileOwners(filePath: string): string[] {
@@ -92,13 +101,14 @@ export class ScoutFailedTestReporter implements Reporter {
       suite: test.parent.title,
       title: test.title,
       target: this.target,
+      command: this.command,
       location: test.location.file.replace(`${REPO_ROOT}/`, ''),
       owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
       plugin: this.plugin,
       duration: result.duration,
       error: {
-        message: result.error?.message ? stripANSI(result.error.message) : undefined,
-        stack_trace: result.error?.stack ? stripANSI(result.error.stack) : undefined,
+        message: result.error?.message ? stripfilePath(stripANSI(result.error.message)) : undefined,
+        stack_trace: result.error?.stack ? stripfilePath(stripANSI(result.error.stack)) : undefined,
       },
       attachments: result.attachments.map((attachment) => ({
         name: attachment.name,
@@ -115,6 +125,13 @@ export class ScoutFailedTestReporter implements Reporter {
 
     const filename = `failed-tests-${this.plugin?.id}.json`;
     saveTestFailuresReport(this.testFailures, this.reportRootPath, filename, this.log);
+
+    // Generate HTML report for each failed test with embedded screenshots
+    for (const testFailure of this.testFailures) {
+      const failureHtml = buildFailureHtml(testFailure);
+      const htmlFilename = `${testFailure.id}.html`;
+      saveTestFailureHtml(this.reportRootPath, htmlFilename, failureHtml, this.log);
+    }
   }
 }
 
