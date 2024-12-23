@@ -21,6 +21,12 @@ export function registerGetRoute({
   router.get(
     {
       path: addInternalBasePath('/indices/{indexName}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
