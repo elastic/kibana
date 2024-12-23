@@ -5093,7 +5093,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-browser@link:packages/core/ui-settings/core-ui-settings-browser":
+"@kbn/core-ui-settings-browser@link:src/core/packages/ui-settings/browser":
   version "0.0.0"
   uid ""
 

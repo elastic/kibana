@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/ui-settings/core-ui-settings-browser'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/ui-settings/browser'],
 };
