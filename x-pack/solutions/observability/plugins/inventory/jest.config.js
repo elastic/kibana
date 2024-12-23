@@ -7,15 +7,15 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
+  rootDir: '../../../../..',
   roots: [
-    '<rootDir>/x-pack/plugins/observability_solution/inventory/public',
-    '<rootDir>/x-pack/plugins/observability_solution/inventory/common',
-    '<rootDir>/x-pack/plugins/observability_solution/inventory/server',
+    '<rootDir>/x-pack/solutions/observability/plugins/inventory/public',
+    '<rootDir>/x-pack/solutions/observability/plugins/inventory/common',
+    '<rootDir>/x-pack/solutions/observability/plugins/inventory/server',
   ],
   collectCoverage: true,
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/observability_solution/inventory/{public,common,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/solutions/observability/plugins/inventory/{public,common,server}/**/*.{js,ts,tsx}',
   ],
 
   coverageReporters: ['html'],
