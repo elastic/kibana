@@ -124,19 +124,6 @@ export function defineQueryRolesRoutes({
           sort: transformedSort,
         });
 
-        console.log(
-          JSON.stringify(
-            {
-              query: queryPayload,
-              from,
-              size,
-              sort: transformedSort,
-            },
-            null,
-            2
-          )
-        );
-
         const transformedRoles = queryRoles.roles?.map((role) =>
           transformElasticsearchRoleToRole({
             features,
