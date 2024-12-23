@@ -75,7 +75,7 @@ interface PolicyTemplateVarsFormProps {
   input: NewPackagePolicyPostureInput;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
   packageInfo: PackageInfo;
-  onChange: PackagePolicyReplaceDefineStepExtensionComponentProps['onChange'];
+  // onChange: PackagePolicyReplaceDefineStepExtensionComponentProps['onChange'];
   setIsValid: (isValid: boolean) => void;
   disabled: boolean;
   setupTechnology: SetupTechnology;

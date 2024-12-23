@@ -739,9 +739,13 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy) => {
-        onChange({ isValid, updatedPolicy });
+        if (setupTechnology === SetupTechnology.AGENTLESS) {
+          onChange({ isValid: false, updatedPolicy });
+        } else {
+          onChange({ isValid: true, updatedPolicy });
+        }
       },
-      [onChange, isValid]
+      [onChange, setupTechnology]
     );
 
     /**
@@ -997,7 +1001,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           newPolicy={newPolicy}
           updatePolicy={updatePolicy}
           packageInfo={packageInfo}
-          onChange={onChange}
+          // onChange={onChange}
           setIsValid={setIsValid}
           disabled={isEditPage}
           setupTechnology={setupTechnology}

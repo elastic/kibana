@@ -170,10 +170,12 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     savedPackagePolicy,
     formState,
     setFormState,
+    setCustomValid,
     navigateAddAgent,
     navigateAddAgentHelp,
     setHasAgentPolicyError,
     validationResults,
+    isInvalid,
     hasAgentPolicyError,
     isInitialized,
   } = useOnSubmit({
@@ -260,14 +262,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   >(
     ({ isValid, updatedPolicy }) => {
       updatePackagePolicy(updatedPolicy);
-      setFormState((prevState) => {
-        if (prevState === 'VALID' && !isValid) {
-          return 'INVALID';
-        }
-        return prevState;
-      });
+      console.log('customValid', isValid);
+      setCustomValid(isValid);
     },
-    [updatePackagePolicy, setFormState]
+    [updatePackagePolicy, setCustomValid]
   );
 
   const { devtoolRequest, devtoolRequestDescription, showDevtoolsRequest } = useDevToolsRequest({
@@ -644,9 +642,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                       <EuiButton
                         onClick={() => onSubmit()}
                         isLoading={formState === 'LOADING'}
-                        disabled={
-                          formState !== 'VALID' || hasAgentPolicyError || !validationResults
-                        }
+                        disabled={isInvalid}
                         iconType="save"
                         color="primary"
                         fill

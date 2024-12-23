@@ -161,6 +161,7 @@ export function useOnSubmit({
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
   // Form state
   const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
+  const [customValid, setCustomValid] = useState(true);
 
   // Used to render extension components only when package policy is initialized
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
@@ -179,6 +180,27 @@ export function useOnSubmit({
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   const { isAgentlessIntegration, isAgentlessAgentPolicy } = useAgentless();
+
+  const setFormStateAndErrors = useCallback(
+    (state: PackagePolicyFormState) => {
+      setFormState((prevState) => {
+        // console.log('setFormState', state);
+        // if (state === 'INVALID') {
+        //   console.log('setFormState INVALID');
+        // }
+        // const adjustedState =
+        //   state === 'VALID' && !customValid
+        //     ? 'INVALID'
+        //     : state === 'INVALID' && customValid
+        //     ? 'VALID'
+        //     : state;
+        const newState = prevState !== state ? state : prevState;
+        console.log('setFormState', prevState, newState);
+        return newState;
+      });
+    },
+    [setFormState]
+  );
 
   // Update agent policy method
   const updateAgentPolicies = useCallback(
@@ -237,13 +259,29 @@ export function useOnSubmit({
         selectedPolicyTab === SelectedPolicyTab.NEW;
       const isOrphaningPolicy =
         canUseMultipleAgentPolicies && newPackagePolicy.policy_ids.length === 0;
-      if (hasPackage && (hasAgentPolicy || isOrphaningPolicy) && !hasValidationErrors) {
-        setFormState('VALID');
+      if (
+        formState !== 'VALID' &&
+        hasPackage &&
+        (hasAgentPolicy || isOrphaningPolicy) &&
+        !hasValidationErrors &&
+        customValid
+      ) {
+        setFormStateAndErrors('VALID');
       } else {
-        setFormState('INVALID');
+        if (formState !== 'INVALID') {
+          setFormStateAndErrors('INVALID');
+        }
       }
     },
-    [packagePolicy, updatePackagePolicyValidation, selectedPolicyTab, canUseMultipleAgentPolicies]
+    [
+      packagePolicy,
+      updatePackagePolicyValidation,
+      selectedPolicyTab,
+      canUseMultipleAgentPolicies,
+      customValid,
+      formState,
+      setFormStateAndErrors,
+    ]
   );
 
   // Initial loading of package info
@@ -308,7 +346,7 @@ export function useOnSubmit({
       overrideCreatedAgentPolicy,
     }: { overrideCreatedAgentPolicy?: AgentPolicy; force?: boolean } = {}) => {
       if (formState === 'VALID' && hasErrors) {
-        setFormState('INVALID');
+        setFormStateAndErrors('INVALID');
         return;
       }
       if (
@@ -319,13 +357,13 @@ export function useOnSubmit({
         ) &&
         formState !== 'CONFIRM'
       ) {
-        setFormState('CONFIRM');
+        setFormStateAndErrors('CONFIRM');
         return;
       }
       let createdPolicy = overrideCreatedAgentPolicy;
       if (!overrideCreatedAgentPolicy) {
         try {
-          setFormState('LOADING');
+          setFormStateAndErrors('LOADING');
           const newPolicy = await createAgentPolicyIfNeeded({
             newAgentPolicy,
             packagePolicy,
@@ -339,7 +377,7 @@ export function useOnSubmit({
             updatePackagePolicy({ policy_ids: [createdPolicy.id] });
           }
         } catch (e) {
-          setFormState('VALID');
+          setFormStateAndErrors('VALID');
           const agentlessPolicy = agentPolicies.find(
             (policy) => policy?.supports_agentless === true
           );
@@ -366,7 +404,7 @@ export function useOnSubmit({
 
       const forceInstall = force || shouldForceInstallOnAgentless;
 
-      setFormState('LOADING');
+      setFormStateAndErrors('LOADING');
       // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
       const { error, data } = await savePackagePolicy({
         ...packagePolicy,
@@ -390,15 +428,15 @@ export function useOnSubmit({
       // Removing this code will disabled the Save and Continue button. We need code below update form state and trigger correct modal depending on agent count
       if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured) {
         if (agentCount) {
-          setFormState('SUBMITTED');
+          setFormStateAndErrors('SUBMITTED');
         } else if (hasAzureArmTemplate) {
-          setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
+          setFormStateAndErrors('SUBMITTED_AZURE_ARM_TEMPLATE');
         } else if (hasCloudFormation) {
-          setFormState('SUBMITTED_CLOUD_FORMATION');
+          setFormStateAndErrors('SUBMITTED_CLOUD_FORMATION');
         } else if (hasGoogleCloudShell) {
-          setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
+          setFormStateAndErrors('SUBMITTED_GOOGLE_CLOUD_SHELL');
         } else {
-          setFormState('SUBMITTED_NO_AGENTS');
+          setFormStateAndErrors('SUBMITTED_NO_AGENTS');
         }
       }
 
@@ -411,19 +449,19 @@ export function useOnSubmit({
           hasFleetAddAgentsPrivileges;
 
         if (promptForAgentEnrollment && hasAzureArmTemplate) {
-          setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
+          setFormStateAndErrors('SUBMITTED_AZURE_ARM_TEMPLATE');
           return;
         }
         if (promptForAgentEnrollment && hasCloudFormation) {
-          setFormState('SUBMITTED_CLOUD_FORMATION');
+          setFormStateAndErrors('SUBMITTED_CLOUD_FORMATION');
           return;
         }
         if (promptForAgentEnrollment && hasGoogleCloudShell) {
-          setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
+          setFormStateAndErrors('SUBMITTED_GOOGLE_CLOUD_SHELL');
           return;
         }
         if (promptForAgentEnrollment) {
-          setFormState('SUBMITTED_NO_AGENTS');
+          setFormStateAndErrors('SUBMITTED_NO_AGENTS');
           return;
         }
         onSaveNavigate(data!.item);
@@ -447,7 +485,7 @@ export function useOnSubmit({
         });
       } else {
         if (isVerificationError(error)) {
-          setFormState('VALID'); // don't show the add agent modal
+          setFormStateAndErrors('VALID'); // don't show the add agent modal
           const forceInstallUnverifiedIntegration = await confirmForceInstall(
             packagePolicy.package!
           );
@@ -461,11 +499,12 @@ export function useOnSubmit({
         notifications.toasts.addError(error, {
           title: 'Error',
         });
-        setFormState('VALID');
+        setFormStateAndErrors('VALID');
       }
     },
     [
       formState,
+      setFormStateAndErrors,
       hasErrors,
       agentCount,
       isAgentlessIntegration,
@@ -492,12 +531,14 @@ export function useOnSubmit({
     savedPackagePolicy,
     onSubmit,
     formState,
-    setFormState,
+    setFormState: setFormStateAndErrors,
+    setCustomValid,
     hasErrors,
     validationResults,
     setValidationResults,
     hasAgentPolicyError,
     setHasAgentPolicyError,
+    isInvalid: formState === 'INVALID' || hasAgentPolicyError || !validationResults,
     isInitialized,
     // TODO check
     navigateAddAgent,

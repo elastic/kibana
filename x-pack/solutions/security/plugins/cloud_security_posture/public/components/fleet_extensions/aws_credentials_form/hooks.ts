@@ -47,7 +47,7 @@ export const useAwsCredentialsForm = ({
   newPolicy,
   input,
   packageInfo,
-  onChange,
+  // onChange,
   setIsValid,
   updatePolicy,
 }: {
@@ -80,7 +80,7 @@ export const useAwsCredentialsForm = ({
 
     setIsValid(!isInvalid);
 
-    onChange({
+    updatePolicy({
       isValid: !isInvalid,
       updatedPolicy: newPolicy,
     });
