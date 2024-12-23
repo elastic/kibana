@@ -91,7 +91,7 @@ function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
         });
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [
       environment,
       kuery,
@@ -166,7 +166,7 @@ function useServicesDetailedStatisticsFetcher({
       }
     },
     // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [mainStatisticsData.requestId, renderedItems, offset, comparisonEnabled],
     { preservePreviousData: false }
   );
