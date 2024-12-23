@@ -12,205 +12,63 @@ import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { useKibana } from './use_kibana';
 import * as i18n from './translations';
 
-/* FIX ME: Currently we are adding hard coded values which will be removed once
-  we have the endpoint ready to use.
-*/
-// const getProviders = async (http: HttpSetup): Promise<InferenceProvider[]> => {
-//   return await http.get(APIRoutes.GET_INFERENCE_SERVICES);
-// };
-
-const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
-  const providers: InferenceProvider[] = [
+const getProviders = (http: HttpSetup): InferenceProvider[] => {
+  return [
     {
-      service: 'cohere',
-      name: 'Cohere',
-      task_types: ['text_embedding', 'rerank', 'completion'],
+      service: 'alibabacloud-ai-search',
+      name: 'AlibabaCloud AI Search',
+      task_types: ['text_embedding', 'sparse_embedding', 'rerank', 'completion'],
       configurations: {
+        workspace: {
+          default_value: null,
+          description: 'The name of the workspace used for the {infer} task.',
+          label: 'Workspace',
+          required: true,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.STRING,
+        },
         api_key: {
           default_value: null,
-          description: `API Key for the provider you're connecting to.`,
+          description: `A valid API key for the AlibabaCloud AI Search API.`,
           label: 'API Key',
           required: true,
           sensitive: true,
           updatable: true,
           type: FieldType.STRING,
         },
-        'rate_limit.requests_per_minute': {
+        service_id: {
           default_value: null,
-          description: 'Minimize the number of rate limit errors.',
-          label: 'Rate Limit',
-          required: false,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.INTEGER,
-        },
-      },
-    },
-    {
-      service: 'elastic',
-      name: 'Elastic',
-      task_types: ['sparse_embedding'],
-      configurations: {
-        'rate_limit.requests_per_minute': {
-          default_value: null,
-          description: 'Minimize the number of rate limit errors.',
-          label: 'Rate Limit',
-          required: false,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.INTEGER,
-        },
-        model_id: {
-          default_value: null,
-          description: 'The name of the model to use for the inference task.',
-          label: 'Model ID',
-          required: true,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.STRING,
-        },
-        max_input_tokens: {
-          default_value: null,
-          description: 'Allows you to specify the maximum number of tokens per input.',
-          label: 'Maximum Input Tokens',
-          required: false,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.INTEGER,
-        },
-      },
-    },
-    {
-      service: 'watsonxai',
-      name: 'IBM Watsonx',
-      task_types: ['text_embedding'],
-      configurations: {
-        project_id: {
-          default_value: null,
-          description: '',
+          description: 'The name of the model service to use for the {infer} task.',
           label: 'Project ID',
           required: true,
           sensitive: false,
           updatable: true,
           type: FieldType.STRING,
         },
-        model_id: {
+        host: {
           default_value: null,
-          description: 'The name of the model to use for the inference task.',
-          label: 'Model ID',
+          description:
+            'The name of the host address used for the {infer} task. You can find the host address at https://opensearch.console.aliyun.com/cn-shanghai/rag/api-key[ the API keys section] of the documentation.',
+          label: 'Host',
           required: true,
           sensitive: false,
           updatable: true,
           type: FieldType.STRING,
         },
-        api_version: {
+        'rate_limit.requests_per_minute': {
           default_value: null,
-          description: 'The IBM Watsonx API version ID to use.',
-          label: 'API Version',
-          required: true,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.STRING,
-        },
-        max_input_tokens: {
-          default_value: null,
-          description: 'Allows you to specify the maximum number of tokens per input.',
-          label: 'Maximum Input Tokens',
+          description: 'Minimize the number of rate limit errors.',
+          label: 'Rate Limit',
           required: false,
           sensitive: false,
           updatable: true,
           type: FieldType.INTEGER,
         },
-        url: {
+        http_schema: {
           default_value: null,
           description: '',
-          label: 'URL',
-          required: true,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.STRING,
-        },
-      },
-    },
-    {
-      service: 'azureaistudio',
-      name: 'Azure AI Studio',
-      task_types: ['text_embedding', 'completion'],
-      configurations: {
-        endpoint_type: {
-          default_value: null,
-          description: 'Specifies the type of endpoint that is used in your model deployment.',
-          label: 'Endpoint Type',
-          required: true,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.STRING,
-        },
-        provider: {
-          default_value: null,
-          description: 'The model provider for your deployment.',
-          label: 'Provider',
-          required: true,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.STRING,
-        },
-        api_key: {
-          default_value: null,
-          description: `API Key for the provider you're connecting to.`,
-          label: 'API Key',
-          required: true,
-          sensitive: true,
-          updatable: true,
-          type: FieldType.STRING,
-        },
-        'rate_limit.requests_per_minute': {
-          default_value: null,
-          description: 'Minimize the number of rate limit errors.',
-          label: 'Rate Limit',
-          required: false,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.INTEGER,
-        },
-        target: {
-          default_value: null,
-          description: 'The target URL of your Azure AI Studio model deployment.',
-          label: 'Target',
-          required: true,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.STRING,
-        },
-      },
-    },
-    {
-      service: 'hugging_face',
-      name: 'Hugging Face',
-      task_types: ['text_embedding', 'sparse_embedding'],
-      configurations: {
-        api_key: {
-          default_value: null,
-          description: `API Key for the provider you're connecting to.`,
-          label: 'API Key',
-          required: true,
-          sensitive: true,
-          updatable: true,
-          type: FieldType.STRING,
-        },
-        'rate_limit.requests_per_minute': {
-          default_value: null,
-          description: 'Minimize the number of rate limit errors.',
-          label: 'Rate Limit',
-          required: false,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.INTEGER,
-        },
-        url: {
-          default_value: 'https://api.openai.com/v1/embeddings',
-          description: 'The URL endpoint to use for the requests.',
-          label: 'URL',
+          label: 'HTTP Schema',
           required: true,
           sensitive: false,
           updatable: true,
@@ -317,10 +175,28 @@ const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
       },
     },
     {
-      service: 'googleaistudio',
-      name: 'Google AI Studio',
+      service: 'azureaistudio',
+      name: 'Azure AI Studio',
       task_types: ['text_embedding', 'completion'],
       configurations: {
+        endpoint_type: {
+          default_value: null,
+          description: 'Specifies the type of endpoint that is used in your model deployment.',
+          label: 'Endpoint Type',
+          required: true,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.STRING,
+        },
+        provider: {
+          default_value: null,
+          description: 'The model provider for your deployment.',
+          label: 'Provider',
+          required: true,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.STRING,
+        },
         api_key: {
           default_value: null,
           description: `API Key for the provider you're connecting to.`,
@@ -339,100 +215,10 @@ const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           updatable: true,
           type: FieldType.INTEGER,
         },
-        model_id: {
+        target: {
           default_value: null,
-          description: "ID of the LLM you're using.",
-          label: 'Model ID',
-          required: true,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.STRING,
-        },
-      },
-    },
-    {
-      service: 'elasticsearch',
-      name: 'Elasticsearch',
-      task_types: ['text_embedding', 'sparse_embedding', 'rerank'],
-      configurations: {
-        num_allocations: {
-          default_value: 1,
-          description:
-            'The total number of allocations this model is assigned across machine learning nodes.',
-          label: 'Number Allocations',
-          required: true,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.INTEGER,
-        },
-        num_threads: {
-          default_value: 2,
-          description: 'Sets the number of threads used by each model allocation during inference.',
-          label: 'Number Threads',
-          required: true,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.INTEGER,
-        },
-        model_id: {
-          default_value: '.multilingual-e5-small',
-          description: 'The name of the model to use for the inference task.',
-          label: 'Model ID',
-          required: true,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.STRING,
-        },
-      },
-    },
-    {
-      service: 'openai',
-      name: 'OpenAI',
-      task_types: ['text_embedding', 'completion'],
-      configurations: {
-        api_key: {
-          default_value: null,
-          description:
-            'The OpenAI API authentication key. For more details about generating OpenAI API keys, refer to the https://platform.openai.com/account/api-keys.',
-          label: 'API Key',
-          required: true,
-          sensitive: true,
-          updatable: true,
-          type: FieldType.STRING,
-        },
-        organization_id: {
-          default_value: null,
-          description: 'The unique identifier of your organization.',
-          label: 'Organization ID',
-          required: false,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.STRING,
-        },
-        'rate_limit.requests_per_minute': {
-          default_value: null,
-          description:
-            'Default number of requests allowed per minute. For text_embedding is 3000. For completion is 500.',
-          label: 'Rate Limit',
-          required: false,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.INTEGER,
-        },
-        model_id: {
-          default_value: null,
-          description: 'The name of the model to use for the inference task.',
-          label: 'Model ID',
-          required: true,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.STRING,
-        },
-        url: {
-          default_value: 'https://api.openai.com/v1/chat/completions',
-          description:
-            'The OpenAI API endpoint URL. For more information on the URL, refer to the https://platform.openai.com/docs/api-reference.',
-          label: 'URL',
+          description: 'The target URL of your Azure AI Studio model deployment.',
+          label: 'Target',
           required: true,
           sensitive: false,
           updatable: true,
@@ -503,9 +289,9 @@ const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
       },
     },
     {
-      service: 'mistral',
-      name: 'Mistral',
-      task_types: ['text_embedding'],
+      service: 'cohere',
+      name: 'Cohere',
+      task_types: ['text_embedding', 'rerank', 'completion'],
       configurations: {
         api_key: {
           default_value: null,
@@ -513,16 +299,6 @@ const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           label: 'API Key',
           required: true,
           sensitive: true,
-          updatable: true,
-          type: FieldType.STRING,
-        },
-        model: {
-          default_value: null,
-          description:
-            'Refer to the Mistral models documentation for the list of available text embedding models.',
-          label: 'Model',
-          required: true,
-          sensitive: false,
           updatable: true,
           type: FieldType.STRING,
         },
@@ -535,14 +311,74 @@ const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           updatable: true,
           type: FieldType.INTEGER,
         },
-        max_input_tokens: {
+      },
+    },
+    {
+      service: 'elasticsearch',
+      name: 'Elasticsearch',
+      task_types: ['text_embedding', 'sparse_embedding', 'rerank'],
+      configurations: {
+        num_allocations: {
+          default_value: 1,
+          description:
+            'The total number of allocations this model is assigned across machine learning nodes.',
+          label: 'Number Allocations',
+          required: true,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.INTEGER,
+        },
+        num_threads: {
+          default_value: 2,
+          description: 'Sets the number of threads used by each model allocation during inference.',
+          label: 'Number Threads',
+          required: true,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.INTEGER,
+        },
+        model_id: {
+          default_value: '.multilingual-e5-small',
+          description: 'The name of the model to use for the inference task.',
+          label: 'Model ID',
+          required: true,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.STRING,
+        },
+      },
+    },
+    {
+      service: 'googleaistudio',
+      name: 'Google AI Studio',
+      task_types: ['text_embedding', 'completion'],
+      configurations: {
+        api_key: {
           default_value: null,
-          description: 'Allows you to specify the maximum number of tokens per input.',
-          label: 'Maximum Input Tokens',
+          description: `API Key for the provider you're connecting to.`,
+          label: 'API Key',
+          required: true,
+          sensitive: true,
+          updatable: true,
+          type: FieldType.STRING,
+        },
+        'rate_limit.requests_per_minute': {
+          default_value: null,
+          description: 'Minimize the number of rate limit errors.',
+          label: 'Rate Limit',
           required: false,
           sensitive: false,
           updatable: true,
           type: FieldType.INTEGER,
+        },
+        model_id: {
+          default_value: null,
+          description: "ID of the LLM you're using.",
+          label: 'Model ID',
+          required: true,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.STRING,
         },
       },
     },
@@ -601,42 +437,58 @@ const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
       },
     },
     {
-      service: 'alibabacloud-ai-search',
-      name: 'AlibabaCloud AI Search',
-      task_types: ['text_embedding', 'sparse_embedding', 'rerank', 'completion'],
+      service: 'hugging_face',
+      name: 'Hugging Face',
+      task_types: ['text_embedding', 'sparse_embedding'],
       configurations: {
-        workspace: {
-          default_value: null,
-          description: 'The name of the workspace used for the {infer} task.',
-          label: 'Workspace',
-          required: true,
-          sensitive: false,
-          updatable: true,
-          type: FieldType.STRING,
-        },
         api_key: {
           default_value: null,
-          description: `A valid API key for the AlibabaCloud AI Search API.`,
+          description: `API Key for the provider you're connecting to.`,
           label: 'API Key',
           required: true,
           sensitive: true,
           updatable: true,
           type: FieldType.STRING,
         },
-        service_id: {
+        'rate_limit.requests_per_minute': {
           default_value: null,
-          description: 'The name of the model service to use for the {infer} task.',
-          label: 'Project ID',
+          description: 'Minimize the number of rate limit errors.',
+          label: 'Rate Limit',
+          required: false,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.INTEGER,
+        },
+        url: {
+          default_value: 'https://api.openai.com/v1/embeddings',
+          description: 'The URL endpoint to use for the requests.',
+          label: 'URL',
           required: true,
           sensitive: false,
           updatable: true,
           type: FieldType.STRING,
         },
-        host: {
+      },
+    },
+    {
+      service: 'mistral',
+      name: 'Mistral',
+      task_types: ['text_embedding'],
+      configurations: {
+        api_key: {
+          default_value: null,
+          description: `API Key for the provider you're connecting to.`,
+          label: 'API Key',
+          required: true,
+          sensitive: true,
+          updatable: true,
+          type: FieldType.STRING,
+        },
+        model: {
           default_value: null,
           description:
-            'The name of the host address used for the {infer} task. You can find the host address at https://opensearch.console.aliyun.com/cn-shanghai/rag/api-key[ the API keys section] of the documentation.',
-          label: 'Host',
+            'Refer to the Mistral models documentation for the list of available text embedding models.',
+          label: 'Model',
           required: true,
           sensitive: false,
           updatable: true,
@@ -651,10 +503,117 @@ const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           updatable: true,
           type: FieldType.INTEGER,
         },
-        http_schema: {
+        max_input_tokens: {
+          default_value: null,
+          description: 'Allows you to specify the maximum number of tokens per input.',
+          label: 'Maximum Input Tokens',
+          required: false,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.INTEGER,
+        },
+      },
+    },
+    {
+      service: 'openai',
+      name: 'OpenAI',
+      task_types: ['text_embedding', 'completion'],
+      configurations: {
+        api_key: {
+          default_value: null,
+          description:
+            'The OpenAI API authentication key. For more details about generating OpenAI API keys, refer to the https://platform.openai.com/account/api-keys.',
+          label: 'API Key',
+          required: true,
+          sensitive: true,
+          updatable: true,
+          type: FieldType.STRING,
+        },
+        organization_id: {
+          default_value: null,
+          description: 'The unique identifier of your organization.',
+          label: 'Organization ID',
+          required: false,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.STRING,
+        },
+        'rate_limit.requests_per_minute': {
+          default_value: null,
+          description:
+            'Default number of requests allowed per minute. For text_embedding is 3000. For completion is 500.',
+          label: 'Rate Limit',
+          required: false,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.INTEGER,
+        },
+        model_id: {
+          default_value: null,
+          description: 'The name of the model to use for the inference task.',
+          label: 'Model ID',
+          required: true,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.STRING,
+        },
+        url: {
+          default_value: 'https://api.openai.com/v1/chat/completions',
+          description:
+            'The OpenAI API endpoint URL. For more information on the URL, refer to the https://platform.openai.com/docs/api-reference.',
+          label: 'URL',
+          required: true,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.STRING,
+        },
+      },
+    },
+    {
+      service: 'watsonxai',
+      name: 'IBM Watsonx',
+      task_types: ['text_embedding'],
+      configurations: {
+        project_id: {
           default_value: null,
           description: '',
-          label: 'HTTP Schema',
+          label: 'Project ID',
+          required: true,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.STRING,
+        },
+        model_id: {
+          default_value: null,
+          description: 'The name of the model to use for the inference task.',
+          label: 'Model ID',
+          required: true,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.STRING,
+        },
+        api_version: {
+          default_value: null,
+          description: 'The IBM Watsonx API version ID to use.',
+          label: 'API Version',
+          required: true,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.STRING,
+        },
+        max_input_tokens: {
+          default_value: null,
+          description: 'Allows you to specify the maximum number of tokens per input.',
+          label: 'Maximum Input Tokens',
+          required: false,
+          sensitive: false,
+          updatable: true,
+          type: FieldType.INTEGER,
+        },
+        url: {
+          default_value: null,
+          description: '',
+          label: 'URL',
           required: true,
           sensitive: false,
           updatable: true,
@@ -663,9 +622,6 @@ const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
       },
     },
   ];
-  return Promise.resolve(
-    providers.sort((a, b) => (a.service > b.service ? 1 : b.service > a.service ? -1 : 0))
-  );
 };
 
 export const useProviders = () => {

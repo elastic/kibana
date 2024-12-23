@@ -12,7 +12,6 @@ import { fetchInferenceEndpoints } from './lib/fetch_inference_endpoints';
 import { APIRoutes, InferenceEndpoint } from './types';
 import { errorHandler } from './utils/error_handler';
 import { deleteInferenceEndpoint } from './lib/delete_inference_endpoint';
-// import { fetchInferenceServices } from './lib/fetch_inference_services';
 import { addInferenceEndpoint } from './lib/add_inference_endpoint';
 
 export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
@@ -36,31 +35,6 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       });
     })
   );
-
-  /* FIX ME: Currently we are adding hard coded values which will be removed once
-    we have the endpoint ready to use.
-  */
-
-  // router.get(
-  //   {
-  //     path: APIRoutes.GET_INFERENCE_SERVICES,
-  //     validate: {},
-  //   },
-  //   errorHandler(logger)(async (context, request, response) => {
-  //     const {
-  //       client: { asCurrentUser },
-  //     } = (await context.core).elasticsearch;
-
-  //     const services = await fetchInferenceServices(asCurrentUser);
-
-  //     return response.ok({
-  //       body: {
-  //         inference_services: services,
-  //       },
-  //       headers: { 'content-type': 'application/json' },
-  //     });
-  //   })
-  // );
 
   router.put(
     {

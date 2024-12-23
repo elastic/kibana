@@ -36,7 +36,7 @@ export const AddInferenceFlyoutWrapper: React.FC<AddInferenceFlyoutWrapperProps>
   return (
     <EuiFlyout
       ownFocus
-      onClose={() => onClose(false)}
+      onClose={closeFlyout}
       aria-labelledby={inferenceCreationFlyoutId}
       data-test-subj="create-inference-flyout"
     >

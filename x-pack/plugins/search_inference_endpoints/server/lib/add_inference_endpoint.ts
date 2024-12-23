@@ -29,11 +29,11 @@ export const addInferenceEndpoint = async (
       ...unflattenObject(secrets?.providerSecrets ?? {}),
     };
 
-    return await esClient?.inference.put({
+    return await esClient.inference.put({
       inference_id: config?.inferenceId ?? '',
       task_type: config?.taskType as InferenceTaskType,
       inference_config: {
-        service: config!.provider,
+        service: config?.provider,
         service_settings: serviceSettings,
         task_settings: taskSettings,
       },
