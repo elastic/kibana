@@ -475,7 +475,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Allow to add a header banner that will be displayed on every page of the Kibana application
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/canvas/README.md[canvas]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/canvas/README.md[canvas]
 |"Never look back. The past is done. The future is a blank canvas." ― Suzy Kassem, Rise Up and Salute the Sun
 
 

@@ -14,7 +14,7 @@ const allPosition = process.argv.indexOf('--all');
 console.log(`
 A helper proxying to the following command:
 
-  yarn jest --config x-pack/plugins/canvas/jest.config.js
+  yarn jest --config x-pack/platform/plugins/private/canvas/jest.config.js
 
 Provides the following additional options:
   --all              Runs all tests and snapshots.  Slower.
