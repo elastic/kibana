@@ -5073,7 +5073,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-theme-browser-internal@link:packages/core/theme/core-theme-browser-internal":
+"@kbn/core-theme-browser-internal@link:src/core/packages/theme/browser-internal":
   version "0.0.0"
   uid ""
 
