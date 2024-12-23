@@ -70,10 +70,9 @@ const AndOrBadgeTemplate: StoryFn<AndOrBadgeProps> = (args) => (
 );
 
 export const Default = {
-  render: AndOrBadgeTemplate,
-
   args: {
     includeAntennas: false,
     type: 'and',
   },
+  render: AndOrBadgeTemplate,
 };
