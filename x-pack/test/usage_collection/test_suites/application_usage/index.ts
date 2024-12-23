@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         expect(enabledAppIds.sort()).to.eql(appIds.sort());
       } catch (err) {
-        err.message = `Application Usage's schema is not up-to-date with the actual registered apps. Please update it at src/plugins/kibana_usage_collection/server/collectors/application_usage/schema.ts.\n${err.message}`;
+        err.message = `Application Usage's schema is not up-to-date with the actual registered apps. Please update it at src/platform/plugins/private/kibana_usage_collection/server/collectors/application_usage/schema.ts.\n${err.message}`;
         throw err;
       }
     });
