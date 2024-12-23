@@ -54,6 +54,7 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
 
     try {
       entries = elements.map((el) => JSON.parse(el));
+      mutateAsync({ entries }).then(onClose);
     } catch (_) {
       toasts.addError(
         new Error(
@@ -73,9 +74,8 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
           ),
         }
       );
+      onClose();
     }
-
-    mutateAsync({ entries }).then(onClose);
   };
 
   return (
