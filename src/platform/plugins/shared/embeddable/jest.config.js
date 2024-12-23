@@ -9,10 +9,10 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/embeddable'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/embeddable',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/shared/embeddable'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/embeddable',
   coverageReporters: ['text', 'html'],
-  setupFiles: ['<rootDir>/src/plugins/embeddable/jest_setup.ts'],
-  collectCoverageFrom: ['<rootDir>/src/plugins/embeddable/{common,public,server}/**/*.{ts,tsx}'],
+  setupFiles: ['<rootDir>/src/platform/plugins/shared/embeddable/jest_setup.ts'],
+  collectCoverageFrom: ['<rootDir>/src/platform/plugins/shared/embeddable/{common,public,server}/**/*.{ts,tsx}'],
 };
