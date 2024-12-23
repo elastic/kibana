@@ -763,7 +763,6 @@ x-pack/packages/maps/vector_tile_utils @elastic/kibana-presentation
 x-pack/packages/observability/observability_utils/observability_utils_browser @elastic/observability-ui
 x-pack/packages/observability/observability_utils/observability_utils_common @elastic/observability-ui
 x-pack/packages/observability/observability_utils/observability_utils_server @elastic/observability-ui
-x-pack/packages/search/shared_ui @elastic/search-kibana
 x-pack/packages/security/api_key_management @elastic/kibana-security
 x-pack/packages/security/authorization_core @elastic/kibana-security
 x-pack/packages/security/authorization_core_common @elastic/kibana-security
@@ -952,6 +951,7 @@ x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-components @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-server @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-index-documents @elastic/search-kibana
+x-pack/solutions/search/packages/search/shared_ui @elastic/search-kibana
 x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
 x-pack/solutions/search/plugins/search_assistant @elastic/search-kibana
 x-pack/solutions/search/plugins/search_connectors @elastic/search-kibana
@@ -3338,7 +3338,7 @@ x-pack/solutions/search/x-pack/solutions/search/packages/kbn-ipynb @elastic/sear
 x-pack/solutions/search/x-pack/solutions/search/packages/kbn-search-api-keys-components @elastic/search-kibana
 x-pack/solutions/search/x-pack/solutions/search/packages/kbn-search-api-keys-server @elastic/search-kibana
 x-pack/solutions/search/x-pack/solutions/search/packages/kbn-search-index-documents @elastic/search-kibana
-x-pack/solutions/search/packages/search/shared_ui @elastic/search-kibana
+x-pack/solutions/search/solutions/search/packages/search/shared_ui @elastic/search-kibana
 x-pack/solutions/search/solutions/search/plugins/enterprise_search @elastic/search-kibana
 x-pack/solutions/search/solutions/search/plugins/search_assistant @elastic/search-kibana
 x-pack/solutions/search/solutions/search/plugins/search_connectors @elastic/search-kibana
