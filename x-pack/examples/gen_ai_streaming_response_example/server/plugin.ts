@@ -12,7 +12,7 @@ import { Plugin, CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 
-interface GenAiStreamingResponseExamplePluginStart {
+export interface GenAiStreamingResponseExamplePluginStart {
   actions: ActionsPluginStart;
 }
 
@@ -26,7 +26,9 @@ interface MessageBody {
   messages: Message[];
 }
 
-export class GenAiStreamingResponseExamplePlugin implements Plugin<void, void> {
+export class GenAiStreamingResponseExamplePlugin
+  implements Plugin<void, void, {}, GenAiStreamingResponseExamplePluginStart>
+{
   public setup({ http, getStartServices }: CoreSetup<GenAiStreamingResponseExamplePluginStart>) {
     const router = http.createRouter();
 

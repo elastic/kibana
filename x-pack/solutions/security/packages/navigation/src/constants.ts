@@ -97,7 +97,7 @@ export enum ExternalPageName {
   // Cloud UI
   // These are links to Cloud UI outside Kibana
   // Special Format: <cloud>:<cloudUrlKey>
-  // cloudUrlKey Ref: x-pack/plugins/security_solution_serverless/public/navigation/links/util.ts
+  // cloudUrlKey Ref: x-pack/solutions/security/plugins/security_solution_serverless/public/navigation/links/util.ts
   cloudUsersAndRoles = 'cloud:usersAndRoles',
   cloudBilling = 'cloud:billing',
   cloudPerformance = 'cloud:performance',

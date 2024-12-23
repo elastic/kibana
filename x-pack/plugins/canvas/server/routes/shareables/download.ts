@@ -18,16 +18,29 @@ export function initializeDownloadShareableWorkpadRoute(deps: RouteInitializerDe
       path: API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD,
       access: 'internal',
     })
-    .addVersion({ version: '1', validate: false }, async (_context, _request, response) => {
-      // TODO: check if this is still an issue on cloud after migrating to NP
-      //
-      // The option setting is not for typical use.  We're using it here to avoid
-      // problems in Cloud environments.  See elastic/kibana#47405.
-      // const file = handler.file(SHAREABLE_RUNTIME_FILE, { confine: false });
-      const file = readFileSync(SHAREABLE_RUNTIME_FILE);
-      return response.ok({
-        headers: { 'content-type': 'application/octet-stream' },
-        body: file,
-      });
-    });
+    .addVersion(
+      {
+        version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because it is only serving static files.',
+          },
+        },
+        validate: false,
+      },
+      async (_context, _request, response) => {
+        // TODO: check if this is still an issue on cloud after migrating to NP
+        //
+        // The option setting is not for typical use.  We're using it here to avoid
+        // problems in Cloud environments.  See elastic/kibana#47405.
+        // const file = handler.file(SHAREABLE_RUNTIME_FILE, { confine: false });
+        const file = readFileSync(SHAREABLE_RUNTIME_FILE);
+        return response.ok({
+          headers: { 'content-type': 'application/octet-stream' },
+          body: file,
+        });
+      }
+    );
 }

@@ -21,9 +21,9 @@ import {
   EuiOutsideClickDetector,
   EuiText,
 } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
+import { ViewMode } from '@kbn/presentation-publishing';
 import { coreServices } from '../services/kibana_services';
 import { createConfirmStrings, resetConfirmStrings } from './_dashboard_listing_strings';
 
@@ -31,12 +31,12 @@ export type DiscardOrKeepSelection = 'cancel' | 'discard' | 'keep';
 
 export const confirmDiscardUnsavedChanges = (
   discardCallback: () => void,
-  viewMode: ViewMode = ViewMode.EDIT // we want to show the danger modal on the listing page
+  viewMode: ViewMode = 'edit' // we want to show the danger modal on the listing page
 ) => {
   coreServices.overlays
     .openConfirm(resetConfirmStrings.getResetSubtitle(viewMode), {
       confirmButtonText: resetConfirmStrings.getResetConfirmButtonText(),
-      buttonColor: viewMode === ViewMode.EDIT ? 'danger' : 'primary',
+      buttonColor: viewMode === 'edit' ? 'danger' : 'primary',
       maxWidth: 500,
       defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
       title: resetConfirmStrings.getResetTitle(),

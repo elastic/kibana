@@ -4755,15 +4755,15 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/request_context_factory.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/plugin.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/plugin.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
               }
             ]
           },
@@ -4870,10 +4870,6 @@
                 "path": "x-pack/plugins/fleet/server/routes/setup/handlers.ts"
               },
               {
-                "plugin": "cloudSecurityPosture",
-                "path": "x-pack/plugins/cloud_security_posture/server/routes/setup_routes.ts"
-              },
-              {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
               },
@@ -4890,16 +4886,8 @@
                 "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/credential_store.ts"
               },
               {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/server/lib/helpers/get_random_sampler/index.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/server/routes/agent_keys/get_agent_keys_privileges.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/server/routes/fleet/is_superuser.ts"
+                "plugin": "entityManager",
+                "path": "x-pack/platform/plugins/shared/entity_manager/server/lib/auth/api_key/api_key.ts"
               },
               {
                 "plugin": "entityManager",
@@ -4911,7 +4899,7 @@
               },
               {
                 "plugin": "entityManager",
-                "path": "x-pack/platform/plugins/shared/entity_manager/server/lib/auth/api_key/api_key.ts"
+                "path": "x-pack/platform/plugins/shared/entity_manager/server/lib/entities/uninstall_entity_definition.ts"
               },
               {
                 "plugin": "entityManager",
@@ -4968,6 +4956,10 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/routes/synthetics_service/enablement.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/setup_routes.ts"
               }
             ]
           },
@@ -5039,11 +5031,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/users/suggest_user_profiles_route.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/users/suggest_user_profiles_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/notes/get_notes.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/timeline/routes/notes/get_notes.ts"
               }
             ]
           }

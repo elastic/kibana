@@ -20,9 +20,10 @@ import {
   EuiCode,
   EuiCodeBlock,
   EuiLink,
+  useEuiTheme,
 } from '@elastic/eui';
 
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import { WithoutHeaderLayout } from '../../../layouts';
 import type { GetFleetStatusResponse } from '../../../types';
@@ -50,20 +51,21 @@ export const RequirementItem: React.FunctionComponent<{
   );
 };
 
-const borderColor = '#d3dae6';
-
-const StyledPageBody = styled(EuiPageBody)`
-  border: 1px solid ${borderColor};
-  border-radius: 5px;
-`;
-
 export const MissingESRequirementsPage: React.FunctionComponent<{
   missingRequirements: GetFleetStatusResponse['missing_requirements'];
 }> = ({ missingRequirements }) => {
   const { docLinks } = useStartServices();
+  const theme = useEuiTheme();
+
   return (
     <WithoutHeaderLayout>
-      <StyledPageBody restrictWidth={820}>
+      <EuiPageBody
+        restrictWidth={820}
+        css={css`
+          border: ${theme.euiTheme.border.thin}};
+          border-radius: 5px;
+        `}
+      >
         <EuiPageSection color="transparent">
           <EuiCallOut
             title={i18n.translate('xpack.fleet.setupPage.missingRequirementsCalloutTitle', {
@@ -150,7 +152,7 @@ xpack.security.authc.api_key.enabled: true`}
             }}
           />
         </EuiPageSection>
-      </StyledPageBody>
+      </EuiPageBody>
     </WithoutHeaderLayout>
   );
 };

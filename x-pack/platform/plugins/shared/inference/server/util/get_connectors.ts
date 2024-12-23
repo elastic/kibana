@@ -11,7 +11,7 @@ import {
   isSupportedConnectorType,
   type InferenceConnector,
   InferenceConnectorType,
-} from '../../common/connectors';
+} from '@kbn/inference-common';
 
 /**
  * Retrieves a connector given the provided `connectorId` and asserts it's an inference connector

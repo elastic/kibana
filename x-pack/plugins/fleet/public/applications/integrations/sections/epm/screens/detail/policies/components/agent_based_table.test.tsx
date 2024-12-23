@@ -55,7 +55,8 @@ const mockPagination = {
   pageSizeOptions: [10, 20, 50],
 };
 
-describe('AgentBasedPackagePoliciesTable', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/201837
+describe.skip('AgentBasedPackagePoliciesTable', () => {
   it('renders the table with package policies', async () => {
     const renderer = createIntegrationsTestRendererMock();
     const result = renderer.render(

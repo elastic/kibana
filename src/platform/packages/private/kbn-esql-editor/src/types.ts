@@ -71,6 +71,9 @@ export interface ESQLEditorProps {
    * The time range to use for the query.
    */
   timeRange?: TimeRange;
+
+  /** The component by default focuses on the editor when it is mounted, this flag disables it**/
+  disableAutoFocus?: boolean;
 }
 
 export interface ESQLEditorDeps {

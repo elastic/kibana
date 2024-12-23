@@ -12,9 +12,12 @@ import {
   IndexPatternsTestPlugin,
   IndexPatternsTestPluginSetup,
   IndexPatternsTestPluginStart,
+  IndexPatternsTestStartDeps,
 } from './plugin';
 
 export const plugin: PluginInitializer<
   IndexPatternsTestPluginSetup,
-  IndexPatternsTestPluginStart
+  IndexPatternsTestPluginStart,
+  {},
+  IndexPatternsTestStartDeps
 > = async () => new IndexPatternsTestPlugin();

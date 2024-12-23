@@ -970,7 +970,7 @@
         "tags": [],
         "label": "SecurityPageName",
         "description": [],
-        "path": "packages/deeplinks/security/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/security/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

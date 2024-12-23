@@ -13,7 +13,6 @@ import type {
   Logger,
   CustomRequestHandlerContext,
 } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
 import { MINIMUM_LICENSE_TYPE } from '../common/constants';
 import { registerRoutes } from './routes';
 import type {
@@ -26,16 +25,20 @@ import { IntegrationAssistantConfigType } from './config';
 
 export type IntegrationAssistantRouteHandlerContext = CustomRequestHandlerContext<{
   integrationAssistant: {
-    getStartServices: CoreSetup<{
-      actions: ActionsPluginsStart;
-    }>['getStartServices'];
+    getStartServices: CoreSetup<IntegrationAssistantPluginStartDependencies>['getStartServices'];
     isAvailable: () => boolean;
     logger: Logger;
   };
 }>;
 
 export class IntegrationAssistantPlugin
-  implements Plugin<IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart>
+  implements
+    Plugin<
+      IntegrationAssistantPluginSetup,
+      IntegrationAssistantPluginStart,
+      {},
+      IntegrationAssistantPluginStartDependencies
+    >
 {
   private readonly logger: Logger;
   private readonly config: IntegrationAssistantConfigType;
@@ -50,9 +53,7 @@ export class IntegrationAssistantPlugin
   }
 
   public setup(
-    core: CoreSetup<{
-      actions: ActionsPluginsStart;
-    }>
+    core: CoreSetup<IntegrationAssistantPluginStartDependencies>
   ): IntegrationAssistantPluginSetup {
     core.http.registerRouteHandlerContext<
       IntegrationAssistantRouteHandlerContext,

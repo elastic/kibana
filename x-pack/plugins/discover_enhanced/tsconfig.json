@@ -13,7 +13,6 @@
     "@kbn/lens-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/embeddable-plugin",
-    "@kbn/visualizations-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/i18n",
     "@kbn/es-query",

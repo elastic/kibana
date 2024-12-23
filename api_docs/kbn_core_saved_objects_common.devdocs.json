@@ -1310,26 +1310,6 @@
             "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
           },
           {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
-          },
-          {
-            "plugin": "lists",
-            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
-          },
-          {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/public/utils.test.ts"
           },
@@ -1340,22 +1320,6 @@
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
           },
           {
             "plugin": "upgradeAssistant",
@@ -1376,6 +1340,42 @@
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/common/test_utils/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
           },
           {
             "plugin": "savedObjectsManagement",
@@ -1612,22 +1612,6 @@
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/embeddables/default_embeddable_factory_provider.ts"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/embeddables/default_embeddable_factory_provider.ts"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/types.ts"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/types.ts"
-          },
-          {
             "plugin": "savedObjects",
             "path": "src/plugins/saved_objects/public/types.ts"
           },
@@ -1662,14 +1646,6 @@
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
           },
           {
             "plugin": "canvas",
@@ -1853,14 +1829,6 @@
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable_factory.tsx"
           },
           {
             "plugin": "visualizations",

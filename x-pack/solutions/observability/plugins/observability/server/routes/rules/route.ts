@@ -11,10 +11,14 @@ import { createObservabilityServerRoute } from '../create_observability_server_r
 
 const alertsDynamicIndexPatternRoute = createObservabilityServerRoute({
   endpoint: 'GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31',
-  options: {
-    tags: [],
-    access: 'public',
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This endpoint returns alert index names for a set of registration contexts and has traditionally required no specific authorization',
+    },
   },
+  options: { access: 'public' },
   params: t.type({
     query: t.type({
       registrationContexts: t.array(t.string),
@@ -24,6 +28,7 @@ const alertsDynamicIndexPatternRoute = createObservabilityServerRoute({
   handler: async ({ dependencies, params }) => {
     const { namespace, registrationContexts } = params.query;
     const { ruleDataService } = dependencies;
+
     const indexNames = registrationContexts.flatMap((registrationContext) => {
       const indexName = ruleDataService
         .findIndexByName(registrationContext, Dataset.alerts)

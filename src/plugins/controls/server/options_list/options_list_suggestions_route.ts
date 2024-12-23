@@ -14,7 +14,7 @@ import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
 
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { OptionsListRequestBody, OptionsListResponse } from '../../common/options_list/types';
 import { getValidationAggregationBuilder } from './options_list_validation_queries';
 import { getSuggestionAggregationBuilder } from './suggestion_queries';
@@ -33,6 +33,13 @@ export const setupOptionsListSuggestionsRoute = (
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch.',
+          },
+        },
         validate: {
           request: {
             params: schema.object(
@@ -118,7 +125,7 @@ export const setupOptionsListSuggestionsRoute = (
       ? {}
       : validationBuilder.buildAggregation(request);
 
-    const body: SearchRequest['body'] = {
+    const body: SearchRequest = {
       size: 0,
       ...timeoutSettings,
       query: {

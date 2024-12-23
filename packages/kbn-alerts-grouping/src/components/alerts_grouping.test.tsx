@@ -8,7 +8,7 @@
  */
 
 /**
- * Adapted from x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.test.tsx
+ * Adapted from x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.test.tsx
  */
 import React from 'react';
 import { render, within, screen } from '@testing-library/react';
