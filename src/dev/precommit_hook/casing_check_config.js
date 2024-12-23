@@ -26,9 +26,9 @@ export const IGNORE_FILE_GLOBS = [
   '**/LICENSE',
   '**/*.txt',
   '**/{Dockerfile,docker-compose.yml}',
-  'x-pack/plugins/canvas/tasks/**/*',
-  'x-pack/plugins/canvas/canvas_plugin_src/**/*',
-  'x-pack/plugins/canvas/server/templates/assets/*.{png,jpg,svg}',
+  'x-pack/platform/plugins/private/canvas/tasks/**/*',
+  'x-pack/platform/plugins/private/canvas/canvas_plugin_src/**/*',
+  'x-pack/platform/plugins/private/canvas/server/templates/assets/*.{png,jpg,svg}',
   'x-pack/plugins/cases/docs/**/*',
   'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
   'x-pack/plugins/fleet/cypress/packages/*.zip',
@@ -68,7 +68,7 @@ export const IGNORE_FILE_GLOBS = [
   'packages/kbn-handlebars/src/upstream/**/*',
   'packages/kbn-handlebars/.patches/**/*',
 
-  'x-pack/plugins/maps/server/fonts/**/*',
+  'x-pack/platform/plugins/shared/maps/server/fonts/**/*',
 
   'x-pack/plugins/observability_solution/profiling/Makefile',
 
