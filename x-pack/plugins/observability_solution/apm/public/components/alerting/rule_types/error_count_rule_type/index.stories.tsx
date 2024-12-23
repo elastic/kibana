@@ -55,23 +55,27 @@ const stories: Meta<{}> = {
 };
 export default stories;
 
+const CreatingInApmFromInventoryComponent = ({ ruleParams, metadata }: Args) => {
+  const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
+
+  function setRuleParams(property: string, value: any) {
+    setParams({ ...params, [property]: value });
+  }
+
+  return (
+    <ErrorCountRuleType
+      ruleParams={params}
+      metadata={metadata}
+      setRuleParams={setRuleParams}
+      setRuleProperty={() => {}}
+    />
+  );
+};
+
 export const CreatingInApmFromInventory: StoryObj<Args> = {
-  render: ({ ruleParams, metadata }) => {
-    const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
-
-    function setRuleParams(property: string, value: any) {
-      setParams({ ...params, [property]: value });
-    }
-
-    return (
-      <ErrorCountRuleType
-        ruleParams={params}
-        metadata={metadata}
-        setRuleParams={setRuleParams}
-        setRuleProperty={() => {}}
-      />
-    );
-  },
+  render: ({ ruleParams, metadata }) => (
+    <CreatingInApmFromInventoryComponent ruleParams={ruleParams} metadata={metadata} />
+  ),
 
   args: {
     ruleParams: {},
@@ -84,23 +88,27 @@ export const CreatingInApmFromInventory: StoryObj<Args> = {
   },
 };
 
+const CreatingInApmFromServiceComponent = ({ ruleParams, metadata }: Args) => {
+  const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
+
+  function setRuleParams(property: string, value: any) {
+    setParams({ ...params, [property]: value });
+  }
+
+  return (
+    <ErrorCountRuleType
+      ruleParams={params}
+      metadata={metadata}
+      setRuleParams={setRuleParams}
+      setRuleProperty={() => {}}
+    />
+  );
+};
+
 export const CreatingInApmFromService: StoryObj<Args> = {
-  render: ({ ruleParams, metadata }) => {
-    const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
-
-    function setRuleParams(property: string, value: any) {
-      setParams({ ...params, [property]: value });
-    }
-
-    return (
-      <ErrorCountRuleType
-        ruleParams={params}
-        metadata={metadata}
-        setRuleParams={setRuleParams}
-        setRuleProperty={() => {}}
-      />
-    );
-  },
+  render: ({ ruleParams, metadata }) => (
+    <CreatingInApmFromServiceComponent ruleParams={ruleParams} metadata={metadata} />
+  ),
 
   args: {
     ruleParams: {},
@@ -113,23 +121,27 @@ export const CreatingInApmFromService: StoryObj<Args> = {
   },
 };
 
+const EditingInStackManagementComponent = ({ ruleParams, metadata }: Args) => {
+  const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
+
+  function setRuleParams(property: string, value: any) {
+    setParams({ ...params, [property]: value });
+  }
+
+  return (
+    <ErrorCountRuleType
+      ruleParams={params}
+      metadata={metadata}
+      setRuleParams={setRuleParams}
+      setRuleProperty={() => {}}
+    />
+  );
+};
+
 export const EditingInStackManagement: StoryObj<Args> = {
-  render: ({ ruleParams, metadata }) => {
-    const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
-
-    function setRuleParams(property: string, value: any) {
-      setParams({ ...params, [property]: value });
-    }
-
-    return (
-      <ErrorCountRuleType
-        ruleParams={params}
-        metadata={metadata}
-        setRuleParams={setRuleParams}
-        setRuleProperty={() => {}}
-      />
-    );
-  },
+  render: ({ ruleParams, metadata }) => (
+    <EditingInStackManagementComponent ruleParams={ruleParams} metadata={metadata} />
+  ),
 
   args: {
     ruleParams: {
@@ -143,23 +155,27 @@ export const EditingInStackManagement: StoryObj<Args> = {
   },
 };
 
+const CreatingInStackManagementComponent = ({ ruleParams, metadata }: Args) => {
+  const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
+
+  function setRuleParams(property: string, value: any) {
+    setParams({ ...params, [property]: value });
+  }
+
+  return (
+    <ErrorCountRuleType
+      ruleParams={params}
+      metadata={metadata}
+      setRuleParams={setRuleParams}
+      setRuleProperty={() => {}}
+    />
+  );
+};
+
 export const CreatingInStackManagement: StoryObj<Args> = {
-  render: ({ ruleParams, metadata }) => {
-    const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
-
-    function setRuleParams(property: string, value: any) {
-      setParams({ ...params, [property]: value });
-    }
-
-    return (
-      <ErrorCountRuleType
-        ruleParams={params}
-        metadata={metadata}
-        setRuleParams={setRuleParams}
-        setRuleProperty={() => {}}
-      />
-    );
-  },
+  render: ({ ruleParams, metadata }) => (
+    <CreatingInStackManagementComponent ruleParams={ruleParams} metadata={metadata} />
+  ),
 
   args: {
     ruleParams: {},
