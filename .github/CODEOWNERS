@@ -77,7 +77,6 @@ packages/core/http/core-http-browser-mocks @elastic/kibana-core
 packages/core/http/core-http-context-server-mocks @elastic/kibana-core
 packages/core/http/core-http-resources-server-mocks @elastic/kibana-core
 packages/core/http/core-http-router-server-mocks @elastic/kibana-core
-packages/core/http/core-http-server-internal @elastic/kibana-core
 packages/core/http/core-http-server-mocks @elastic/kibana-core
 packages/core/http/core-http-server-utils @elastic/kibana-core
 packages/core/i18n/core-i18n-browser @elastic/kibana-core
@@ -558,6 +557,7 @@ src/core/packages/http/resources-server @elastic/kibana-core
 src/core/packages/http/resources-server-internal @elastic/kibana-core
 src/core/packages/http/router-server-internal @elastic/kibana-core
 src/core/packages/http/server @elastic/kibana-core
+src/core/packages/http/server-internal @elastic/kibana-core
 src/platform/packages/private/default-nav/devtools @elastic/kibana-management
 src/platform/packages/private/default-nav/management @elastic/kibana-management
 src/platform/packages/private/default-nav/ml @elastic/ml-ui
@@ -1917,7 +1917,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test_serverless/**/test_suites/search/platform_security/ @elastic/kibana-security
 /x-pack/test_serverless/**/test_suites/security/platform_security/ @elastic/kibana-security
 /x-pack/test_serverless/**/test_suites/observability/platform_security/ @elastic/kibana-security
-/packages/core/http/core-http-server-internal/src/cdn_config/ @elastic/kibana-security @elastic/kibana-core
+/src/core/packages/http/server-internal/src/cdn_config/ @elastic/kibana-security @elastic/kibana-core
 #CC# /x-pack/plugins/security/ @elastic/kibana-security
 
 # Response Ops team
