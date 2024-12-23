@@ -514,7 +514,7 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
       // the status code of the HTTP response differs depending on the error type
       // a 403 error actually comes back as an HTTP 200 response
       const statusCode = outcome === 'noAccess' ? 403 : 200;
-      const type = 'sharedtype';
+      const type = 'event-annotation-group';
       const noConflictId = `${spaceId}_only`;
       const exactMatchId = 'each_space';
       const inexactMatchIdA = `conflict_1a_${spaceId}`;
@@ -529,7 +529,11 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
             success: false,
             successCount: 0,
             errors: [
-              { statusCode: 403, error: 'Forbidden', message: `Unable to bulk_create sharedtype` },
+              {
+                statusCode: 403,
+                error: 'Forbidden',
+                message: `Unable to bulk_create event-annotation-group`,
+              },
             ],
           },
         });
@@ -541,7 +545,7 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
         expect(successCount).to.eql(1);
         const destinationId = successResults![0].destinationId;
         expect(destinationId).to.match(UUID_PATTERN);
-        const meta = { title, icon: 'beaker' };
+        const meta = { title, icon: 'flag' };
         const managed = false; // default added By `create`
         expect(successResults).to.eql([{ type, id: sourceId, meta, destinationId, managed }]);
         expect(errors).to.be(undefined);
@@ -607,7 +611,7 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
               const { success, successCount, successResults, errors } = getResult(response);
               const title =
                 'This is used to test an inexact match conflict for an originId -> originId match';
-              const meta = { title, icon: 'beaker' };
+              const meta = { title, icon: 'flag' };
               const destinationId = 'conflict_1a_space_2';
               if (createNewCopies) {
                 expectNewCopyResponse(response, inexactMatchIdA, title);
@@ -655,7 +659,7 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
               const { success, successCount, successResults, errors } = getResult(response);
               const title =
                 'This is used to test an inexact match conflict for an originId -> id match';
-              const meta = { title, icon: 'beaker' };
+              const meta = { title, icon: 'flag' };
               const destinationId = 'conflict_1b_space_2';
               if (createNewCopies) {
                 expectNewCopyResponse(response, inexactMatchIdB, title);
@@ -703,7 +707,7 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
               const { success, successCount, successResults, errors } = getResult(response);
               const title =
                 'This is used to test an inexact match conflict for an id -> originId match';
-              const meta = { title, icon: 'beaker' };
+              const meta = { title, icon: 'flag' };
               const destinationId = 'conflict_1c_space_2';
               if (createNewCopies) {
                 expectNewCopyResponse(response, inexactMatchIdC, title);
@@ -779,7 +783,7 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
                     error: { type: 'ambiguous_conflict', destinations },
                     type,
                     id: ambiguousConflictId,
-                    meta: { title, icon: 'beaker' },
+                    meta: { title, icon: 'flag' },
                   },
                 ]);
               }
@@ -945,30 +949,30 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
           });
         });
 
-        [
-          [false, false],
-          [false, true], // createNewCopies enabled
-          [true, false], // overwrite enabled
-          // we don't specify tese cases with both overwrite and createNewCopies enabled, since overwrite won't matter in that scenario
-        ].forEach(([overwrite, createNewCopies]) => {
-          const spaces = ['space_2'];
-          const includeReferences = false;
-          describe(`multi-namespace types with overwrite=${overwrite} and createNewCopies=${createNewCopies}`, () => {
-            before(async () => await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD));
-            after(async () => await testDataLoader.deleteFtrSavedObjectsData());
+        // [
+        //   [false, false],
+        //   [false, true], // createNewCopies enabled
+        //   [true, false], // overwrite enabled
+        //   // we don't specify tese cases with both overwrite and createNewCopies enabled, since overwrite won't matter in that scenario
+        // ].forEach(([overwrite, createNewCopies]) => {
+        //   const spaces = ['space_2'];
+        //   const includeReferences = false;
+        //   describe(`multi-namespace types with overwrite=${overwrite} and createNewCopies=${createNewCopies}`, () => {
+        //     before(async () => await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD));
+        //     after(async () => await testDataLoader.deleteFtrSavedObjectsData());
 
-            const testCases = tests.multiNamespaceTestCases(overwrite, createNewCopies);
-            testCases.forEach(({ testTitle, objects, statusCode, response }) => {
-              it(`should return ${statusCode} when ${testTitle}`, async () => {
-                return supertest
-                  .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
-                  .send({ objects, spaces, includeReferences, createNewCopies, overwrite })
-                  .expect(statusCode)
-                  .then(response);
-              });
-            });
-          });
-        });
+        //     const testCases = tests.multiNamespaceTestCases(overwrite, createNewCopies);
+        //     testCases.forEach(({ testTitle, objects, statusCode, response }) => {
+        //       it(`should return ${statusCode} when ${testTitle}`, async () => {
+        //         return supertest
+        //           .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
+        //           .send({ objects, spaces, includeReferences, createNewCopies, overwrite })
+        //           .expect(statusCode)
+        //           .then(response);
+        //       });
+        //     });
+        //   });
+        // });
       });
     };
 

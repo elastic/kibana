@@ -7,7 +7,7 @@
 
 import type { Agent as SuperTestAgent } from 'supertest';
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import type {
   DeploymentAgnosticFtrProviderContext,
@@ -91,9 +91,11 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         'inventory',
         'logs',
         'observabilityCases',
+        'observabilityCasesV2',
         'securitySolutionAssistant',
         'securitySolutionAttackDiscovery',
         'securitySolutionCases',
+        'securitySolutionCasesV2',
         'siem',
         'slo',
         'uptime',
