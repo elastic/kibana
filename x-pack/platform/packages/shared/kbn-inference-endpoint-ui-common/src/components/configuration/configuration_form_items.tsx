@@ -39,7 +39,6 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
         const { key, isValid, label, sensitive, description, validationErrors, required } =
           configEntry;
 
-        const helpText = description;
         // toggle and sensitive textarea labels go next to the element, not in the row
         const rowLabel = description ? (
           <EuiFlexGroup gutterSize="xs">
@@ -62,7 +61,7 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
             <EuiFormRow
               label={rowLabel}
               fullWidth
-              helpText={helpText}
+              helpText={description}
               error={validationErrors}
               isInvalid={!isValid}
               labelAppend={optionalLabel}
