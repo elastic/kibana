@@ -26,6 +26,12 @@ export function registerLoadRoute({ router, license, lib: { handleEsError } }: R
   router.get(
     {
       path: '/api/watcher/watch/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },

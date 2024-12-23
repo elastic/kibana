@@ -39,6 +39,12 @@ export const registerGetRoutes = ({ router, lib: { handleEsError } }: RouteDepen
   router.get(
     {
       path: `${API_BASE_PATH}/{name}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },

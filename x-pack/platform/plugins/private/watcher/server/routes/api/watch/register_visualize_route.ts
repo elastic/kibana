@@ -42,6 +42,12 @@ export function registerVisualizeRoute({
   router.post(
     {
       path: '/api/watcher/watch/visualize',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },
