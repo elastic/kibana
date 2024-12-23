@@ -62,7 +62,6 @@ export {
 } from '../common/functions/visualize_esql';
 
 export {
-  isSupportedConnectorType,
   FunctionVisibility,
   MessageRole,
   KnowledgeBaseEntryRole,
