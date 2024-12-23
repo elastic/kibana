@@ -63,7 +63,6 @@ packages/core/base/core-base-server-mocks @elastic/kibana-core
 packages/core/capabilities/core-capabilities-browser-mocks @elastic/kibana-core
 packages/core/capabilities/core-capabilities-server-mocks @elastic/kibana-core
 packages/core/chrome/core-chrome-browser-mocks @elastic/appex-sharedux
-packages/core/custom-branding/core-custom-branding-browser-internal @elastic/appex-sharedux
 packages/core/custom-branding/core-custom-branding-browser-mocks @elastic/appex-sharedux
 packages/core/custom-branding/core-custom-branding-common @elastic/appex-sharedux
 packages/core/custom-branding/core-custom-branding-server @elastic/appex-sharedux
@@ -558,6 +557,7 @@ src/core/packages/chrome/browser @elastic/appex-sharedux
 src/core/packages/chrome/browser-internal @elastic/appex-sharedux
 src/core/packages/config/server-internal @elastic/kibana-core
 src/core/packages/custom-branding/browser @elastic/appex-sharedux
+src/core/packages/custom-branding/browser-internal @elastic/appex-sharedux
 src/platform/packages/private/default-nav/devtools @elastic/kibana-management
 src/platform/packages/private/default-nav/management @elastic/kibana-management
 src/platform/packages/private/default-nav/ml @elastic/ml-ui
