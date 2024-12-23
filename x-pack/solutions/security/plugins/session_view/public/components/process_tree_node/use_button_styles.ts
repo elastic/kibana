@@ -11,6 +11,7 @@ import { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../hooks';
 
 // TODO: check euiColorVis in Borialis
+// TODO: replace with euiTheme.colors.vis.* from useEuiTheme hook
 export const useButtonStyles = () => {
   const { euiTheme, euiVars } = useEuiTheme();
 

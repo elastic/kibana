@@ -25,6 +25,7 @@ const mockStatsFindings = [
 ];
 
 // TODO: replace with severity palette colors
+// TODO: replace with euiTheme.colors.vis.* from useEuiTheme hook
 const mockStatsAlerts = [
   {
     key: 'low',
