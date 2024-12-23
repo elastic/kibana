@@ -39140,12 +39140,8 @@
                   "filters": {
                     "additionalProperties": false,
                     "properties": {
-                      "showReserved": {
+                      "showReservedRoles": {
                         "type": "boolean"
-                      },
-                      "spaceId": {
-                        "minLength": 1,
-                        "type": "string"
                       }
                     },
                     "type": "object"
