@@ -3245,6 +3245,14 @@ describe('Task Runner', () => {
       };
     });
 
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
     await taskRunner.run();
 
     expect(alertingEventLogger.reportGap).toHaveBeenCalledWith({
