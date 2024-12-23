@@ -357,7 +357,7 @@ In general this plugin provides:
 |Registers commercially licensed generic actions like per panel time range and contains some code that supports drilldown work.
 
 
-|{kib-repo}blob/{branch}/src/plugins/unified_doc_viewer/README.md[unifiedDocViewer]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/unified_doc_viewer/README.md[unifiedDocViewer]
 |This plugin contains services reliant on the plugin lifecycle for the unified doc viewer component (see @kbn/unified-doc-viewer).
 
 
