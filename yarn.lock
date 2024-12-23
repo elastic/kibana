@@ -4449,7 +4449,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-server@link:packages/core/deprecations/core-deprecations-server":
+"@kbn/core-deprecations-server@link:src/core/packages/deprecations/server":
   version "0.0.0"
   uid ""
 
