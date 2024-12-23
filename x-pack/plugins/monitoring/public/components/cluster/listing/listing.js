@@ -434,6 +434,7 @@ export const Listing = ({ angular, clusters, sorting, pagination, onTableChange 
             <StandaloneClusterCallout changeCluster={_changeCluster} storage={storage} />
           ) : null}
           <EuiMonitoringTable
+            data-test-subj="clusterTable"
             rows={clusters}
             columns={getColumns(
               showLicenseExpiration,

@@ -190,6 +190,7 @@ export const ElasticsearchIndices = ({
           />
           <EuiSpacer size="m" />
           <EuiMonitoringTable
+            data-test-subj="elasticsearchIndicesTable"
             rows={indices}
             columns={getColumns(alerts)}
             sorting={sorting}

@@ -185,6 +185,7 @@ export function ApmServerInstances({ apms, setupMode, alerts }: Props) {
         <EuiPanel>
           {setupModeCallout}
           <EuiMonitoringTable
+            data-test-subj="apmInstancesTable"
             rows={data.apms}
             columns={getColumns(setupMode, data.cgroup)}
             sorting={sorting}

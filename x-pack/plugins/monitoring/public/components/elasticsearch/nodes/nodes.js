@@ -515,6 +515,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
         {setupModeCallout}
         <EuiPanel>
           <EuiMonitoringSSPTable
+            data-test-subj="elasticsearchNodesTable"
             rows={nodes}
             columns={columns}
             sorting={sorting}

@@ -324,6 +324,7 @@ export const KibanaInstances: React.FC<Props> = (props: Props) => {
         {setupModeCallOut}
         <EuiPanel>
           <EuiMonitoringTable
+            data-test-subj="kibanaInstancesTable"
             rows={dataFlattened}
             columns={getColumns(setupMode, alerts, dateFormat, staleStatusThresholdSeconds)}
             sorting={sorting}
