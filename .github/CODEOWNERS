@@ -623,6 +623,7 @@ src/platform/plugins/shared/esql @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
 src/platform/plugins/shared/field_formats @elastic/kibana-data-discovery
 src/platform/plugins/shared/management @elastic/kibana-management
+src/platform/plugins/shared/saved_objects_finder @elastic/kibana-data-discovery
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_gauge @elastic/kibana-visualizations
@@ -669,7 +670,6 @@ src/plugins/no_data_page @elastic/appex-sharedux
 src/plugins/presentation_panel @elastic/kibana-presentation
 src/plugins/presentation_util @elastic/kibana-presentation
 src/plugins/saved_objects @elastic/appex-sharedux
-src/plugins/saved_objects_finder @elastic/kibana-data-discovery
 src/plugins/saved_objects_management @elastic/kibana-core
 src/plugins/saved_objects_tagging_oss @elastic/appex-sharedux
 src/plugins/saved_search @elastic/kibana-data-discovery
