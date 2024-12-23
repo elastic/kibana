@@ -3909,7 +3909,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-plugin@link:x-pack/plugins/alerting":
+"@kbn/alerting-plugin@link:x-pack/platform/plugins/shared/alerting":
   version "0.0.0"
   uid ""
 
