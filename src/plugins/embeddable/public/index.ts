@@ -17,13 +17,10 @@ export {
   CELL_VALUE_TRIGGER,
   contextMenuTrigger,
   CONTEXT_MENU_TRIGGER,
-  defaultEmbeddableFactoryProvider,
   Embeddable,
-  EmbeddableFactoryNotFoundError,
   EmbeddableStateTransfer,
   ErrorEmbeddable,
   isContextMenuTriggerContext,
-  isExplicitInputWithAttributes,
   isMultiValueClickTriggerContext,
   isRangeSelectTriggerContext,
   isRowClickTriggerContext,
@@ -37,7 +34,6 @@ export {
   PANEL_BADGE_TRIGGER,
   PANEL_HOVER_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
-  runEmbeddableFactoryMigrations,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
   ViewMode,
@@ -47,26 +43,17 @@ export type {
   ChartActionContext,
   EmbeddableContext,
   EmbeddableEditorState,
-  EmbeddableFactory,
-  EmbeddableFactoryDefinition,
   EmbeddableInput,
-  EmbeddableInstanceConfiguration,
   EmbeddableOutput,
   EmbeddablePackageState,
   IEmbeddable,
   MultiValueClickContext,
-  OutputSpec,
   PropertySpec,
   RangeSelectContext,
   ValueClickContext,
 } from './lib';
-export type {
-  EmbeddableSetup,
-  EmbeddableSetupDependencies,
-  EmbeddableStart,
-  EmbeddableStartDependencies,
-} from './plugin';
-export type { EnhancementRegistryDefinition } from './types';
+export type { EmbeddableSetup, EmbeddableStart } from './types';
+export type { EnhancementRegistryDefinition } from './enhancements/types';
 
 export {
   ReactEmbeddableRenderer,

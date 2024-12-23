@@ -1504,7 +1504,7 @@
           "PlaywrightTestConfig",
           "<{}, {}>"
         ],
-        "path": "packages/kbn-scout/src/playwright/config/index.ts",
+        "path": "packages/kbn-scout/src/playwright/config/create_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1524,7 +1524,7 @@
                 "text": "ScoutPlaywrightOptions"
               }
             ],
-            "path": "packages/kbn-scout/src/playwright/config/index.ts",
+            "path": "packages/kbn-scout/src/playwright/config/create_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2003,7 +2003,7 @@
             "label": "config",
             "description": [],
             "signature": [
-              "ScoutServerConfig"
+              "ScoutTestConfig"
             ],
             "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
             "deprecated": false,
