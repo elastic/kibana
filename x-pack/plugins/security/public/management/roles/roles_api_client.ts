@@ -20,7 +20,7 @@ export interface QueryRoleParams {
   from: number;
   size: number;
   filters?: {
-    showReserved?: boolean;
+    showReservedRoles?: boolean;
   };
   sort: Criteria<Role>['sort'];
 }

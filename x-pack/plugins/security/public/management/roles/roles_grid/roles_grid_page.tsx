@@ -68,7 +68,7 @@ interface RolesTableState {
   from: number;
   size: number;
   filters: {
-    showReserved?: boolean;
+    showReservedRoles?: boolean;
   };
 }
 
@@ -87,7 +87,7 @@ const DEFAULT_TABLE_STATE = {
   from: 0,
   size: 25,
   filters: {
-    showReserved: true,
+    showReservedRoles: true,
   },
 };
 
@@ -146,7 +146,7 @@ export const RolesGridPage: FC<Props> = ({
     const newTableStateArgs = {
       ...tableState,
       filters: {
-        showReserved: e.target.checked,
+        showReservedRoles: e.target.checked,
       },
     };
     setTableState(newTableStateArgs);
@@ -239,7 +239,7 @@ export const RolesGridPage: FC<Props> = ({
               defaultMessage="Show reserved roles"
             />
           }
-          checked={tableState.filters.showReserved ?? true}
+          checked={tableState.filters.showReservedRoles ?? true}
           onChange={onIncludeReservedRolesChange}
         />
       );
