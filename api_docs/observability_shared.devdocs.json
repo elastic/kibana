@@ -1706,13 +1706,13 @@
         "label": "useChartThemes",
         "description": [],
         "signature": [
-          "() => { theme: ",
+          "() => { baseTheme: ",
+          "Theme",
+          "; theme: ",
           "RecursivePartial",
           "<",
           "Theme",
-          ">[]; baseTheme: ",
-          "Theme",
-          "; }"
+          ">[]; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_chart_theme.tsx",
         "deprecated": false,
