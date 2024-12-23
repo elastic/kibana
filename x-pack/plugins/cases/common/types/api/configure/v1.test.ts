@@ -14,8 +14,11 @@ import {
   MAX_CUSTOM_FIELD_KEY_LENGTH,
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+  MAX_CUSTOM_OBSERVABLE_TYPES,
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
+  MAX_OBSERVABLE_TYPE_KEY_LENGTH,
+  MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
   MAX_TAGS_PER_CASE,
   MAX_TAGS_PER_TEMPLATE,
   MAX_TEMPLATES_LENGTH,
@@ -38,6 +41,7 @@ import {
   ToggleCustomFieldConfigurationRt,
   NumberCustomFieldConfigurationRt,
   TemplateConfigurationRt,
+  ObservableTypesConfigurationRt,
 } from './v1';
 
 describe('configure', () => {
@@ -85,6 +89,24 @@ describe('configure', () => {
             label: 'Number custom field',
             type: CustomFieldTypes.NUMBER,
             required: false,
+          },
+        ],
+      };
+      const query = ConfigurationRequestRt.decode(request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: request,
+      });
+    });
+
+    it('has expected attributes in request with observableTypes', () => {
+      const request = {
+        ...defaultRequest,
+        observableTypes: [
+          {
+            key: '371357ae-77ce-44bd-88b7-fbba9c80501f',
+            label: 'Example Label',
           },
         ],
       };
@@ -268,6 +290,24 @@ describe('configure', () => {
       expect(
         PathReporter.report(ConfigurationPatchRequestRt.decode({ ...defaultRequest, templates }))[0]
       ).toContain(`The length of the field templates is too long. Array must be of length <= 10.`);
+    });
+
+    it('has expected attributes in request with observableTypes', () => {
+      const request = {
+        ...defaultRequest,
+        observableTypes: [
+          {
+            key: '371357ae-77ce-44bd-88b7-fbba9c80501f',
+            label: 'Example Label',
+          },
+        ],
+      };
+      const query = ConfigurationPatchRequestRt.decode(request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: request,
+      });
     });
 
     it('removes foo:bar attributes from request', () => {
@@ -923,6 +963,87 @@ describe('configure', () => {
         ).toContain(
           `The length of the value is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`
         );
+      });
+    });
+  });
+
+  describe('ObservableTypesConfigurationRt', () => {
+    it('should validate a correct observable types configuration', () => {
+      const validData = [
+        { key: 'observable_key_1', label: 'Observable Label 1' },
+        { key: 'observable_key_2', label: 'Observable Label 2' },
+      ];
+
+      const result = ObservableTypesConfigurationRt.decode(validData);
+      expect(PathReporter.report(result).join()).toContain('No errors!');
+    });
+
+    it('should invalidate an observable types configuration with an invalid key', () => {
+      const invalidData = [{ key: 'Invalid Key!', label: 'Observable Label 1' }];
+
+      const result = ObservableTypesConfigurationRt.decode(invalidData);
+      expect(PathReporter.report(result).join()).not.toContain('No errors!');
+    });
+
+    it('should invalidate an observable types configuration with a missing label', () => {
+      const invalidData = [{ key: 'observable_key_1' }];
+
+      const result = ObservableTypesConfigurationRt.decode(invalidData);
+      expect(PathReporter.report(result).join()).not.toContain('No errors!');
+    });
+
+    it('should accept an observable types configuration with an empty array', () => {
+      const invalidData: unknown[] = [];
+
+      const result = ObservableTypesConfigurationRt.decode(invalidData);
+      expect(PathReporter.report(result).join()).toContain('No errors!');
+    });
+
+    it('should invalidate an observable types configuration with a label exceeding max length', () => {
+      const invalidData = [
+        { key: 'observable_key_1', label: 'a'.repeat(MAX_OBSERVABLE_TYPE_LABEL_LENGTH + 1) },
+      ];
+
+      const result = ObservableTypesConfigurationRt.decode(invalidData);
+      expect(PathReporter.report(result).join()).not.toContain('No errors!');
+    });
+
+    it('should invalidate an observable types configuration with a key exceeding max length', () => {
+      const invalidData = [{ key: 'a'.repeat(MAX_OBSERVABLE_TYPE_KEY_LENGTH + 1), label: 'label' }];
+
+      const result = ObservableTypesConfigurationRt.decode(invalidData);
+      expect(PathReporter.report(result).join()).not.toContain('No errors!');
+    });
+
+    it('should invalidate an observable types configuration with observableTypes count exceeding max', () => {
+      const invalidData = new Array(MAX_CUSTOM_OBSERVABLE_TYPES + 1).fill({
+        key: 'foo',
+        label: 'label',
+      });
+
+      const result = ObservableTypesConfigurationRt.decode(invalidData);
+      expect(PathReporter.report(result).join()).not.toContain('No errors!');
+    });
+
+    it('accepts a uuid as an key', () => {
+      const key = uuidv4();
+
+      const query = ObservableTypesConfigurationRt.decode([{ key, label: 'Observable Label 1' }]);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: [{ key, label: 'Observable Label 1' }],
+      });
+    });
+
+    it('accepts a slug as an key', () => {
+      const key = 'abc_key-1';
+
+      const query = ObservableTypesConfigurationRt.decode([{ key, label: 'Observable Label 1' }]);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: [{ key, label: 'Observable Label 1' }],
       });
     });
   });

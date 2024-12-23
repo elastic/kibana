@@ -7,7 +7,16 @@
 
 import { schema } from '@kbn/config-schema';
 
+export const maintenanceWindowsStatusSchema = schema.oneOf([
+  schema.literal('running'),
+  schema.literal('finished'),
+  schema.literal('upcoming'),
+  schema.literal('archived'),
+]);
+
 export const findMaintenanceWindowsParamsSchema = schema.object({
   perPage: schema.maybe(schema.number()),
   page: schema.maybe(schema.number()),
+  search: schema.maybe(schema.string()),
+  status: schema.maybe(schema.arrayOf(maintenanceWindowsStatusSchema)),
 });

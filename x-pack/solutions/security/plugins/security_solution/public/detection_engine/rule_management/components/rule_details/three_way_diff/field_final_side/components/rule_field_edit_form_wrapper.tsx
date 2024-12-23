@@ -100,6 +100,7 @@ export function RuleFieldEditFormWrapper({
     onSubmit: handleSubmit,
     options: {
       warningValidationCodes: VALIDATION_WARNING_CODES,
+      stripEmptyFields: false,
     },
   });
 

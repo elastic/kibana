@@ -9038,7 +9038,7 @@
             "section": "def-common.MetricAggType",
             "text": "MetricAggType"
           },
-          "<any>[]; }; }; calculateAutoTimeExpression: (range: ",
+          "<any>[]; }; }; calculateAutoTimeExpression: { (range: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -9046,7 +9046,35 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          ") => string | undefined; createAggConfigs: (indexPattern: ",
+          "): string | undefined; (range: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          ", interval: string, asExpression?: true | undefined): string | undefined; (range: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          ", interval: string, asExpression: false): ",
+          "TimeBucketsInterval",
+          " | undefined; (range: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          ", interval?: string | undefined, asExpression?: boolean | undefined): string | ",
+          "TimeBucketsInterval",
+          " | undefined; }; createAggConfigs: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -12011,7 +12039,7 @@
                 "section": "def-server.DataPluginStart",
                 "text": "DataPluginStart"
               },
-              ">, { bfetch, expressions, usageCollection, fieldFormats }: ",
+              ">, { expressions, usageCollection, fieldFormats }: ",
               "DataPluginSetupDependencies",
               ") => { search: ",
               "ISearchSetup",
@@ -12068,7 +12096,7 @@
                 "id": "def-server.DataServerPlugin.setup.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ bfetch, expressions, usageCollection, fieldFormats }",
+                "label": "{ expressions, usageCollection, fieldFormats }",
                 "description": [],
                 "signature": [
                   "DataPluginSetupDependencies"
@@ -12665,16 +12693,16 @@
                 "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
               },
               {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+              },
+              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -19200,16 +19228,16 @@
                 "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
               },
               {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+              },
+              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
               },
               {
                 "plugin": "dataViewManagement",
