@@ -5169,7 +5169,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core@link:src/core":
+"@kbn/core@link:src/core/packages/core":
   version "0.0.0"
   uid ""
 
