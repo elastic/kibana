@@ -10,7 +10,7 @@ import { ASSET_ASSET_ID, ASSET_ENTITY_ID, ASSET_ENTITY_TYPE, ASSET_TYPE } from '
 import { ASSET_TYPES } from '../../../../common/assets';
 
 export const assetStorageSettings = {
-  name: '.kibana_stream_assets',
+  name: '.kibana_streams_assets',
   schema: {
     properties: {
       [ASSET_ASSET_ID]: types.keyword({ required: true }),

@@ -78,14 +78,14 @@ function getAssetDocument({
   };
 }
 
-interface AssetBulkCreateOperation {
-  create: { asset: AssetLink };
+interface AssetBulkIndexOperation {
+  index: { asset: AssetLink };
 }
 interface AssetBulkDeleteOperation {
   delete: { asset: AssetLink };
 }
 
-export type AssetBulkOperation = AssetBulkCreateOperation | AssetBulkDeleteOperation;
+export type AssetBulkOperation = AssetBulkIndexOperation | AssetBulkDeleteOperation;
 
 export class AssetClient {
   constructor(
@@ -215,9 +215,9 @@ export class AssetClient {
           entityType,
         });
 
-        if ('create' in operation) {
+        if ('index' in operation) {
           return {
-            create: {
+            index: {
               document,
               _id,
             },

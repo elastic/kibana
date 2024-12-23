@@ -200,7 +200,7 @@ const bulkDashboardsRoute = createServerRoute({
       operations: z.array(
         z.union([
           z.object({
-            create: dashboardSchema,
+            index: dashboardSchema,
           }),
           z.object({
             delete: dashboardSchema,
@@ -223,12 +223,12 @@ const bulkDashboardsRoute = createServerRoute({
         entityType: 'stream',
       },
       operations.map((operation) => {
-        if ('create' in operation) {
+        if ('index' in operation) {
           return {
-            create: {
+            index: {
               asset: {
                 assetType: 'dashboard',
-                assetId: operation.create.id,
+                assetId: operation.index.id,
               },
             },
           };

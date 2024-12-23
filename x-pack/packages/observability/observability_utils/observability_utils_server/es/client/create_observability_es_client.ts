@@ -24,7 +24,7 @@ import { esqlResultToPlainObjects } from '../esql_result_to_plain_objects';
 type SearchRequest = ESSearchRequest & {
   index: string | string[];
   track_total_hits: number | boolean;
-  size: number | boolean;
+  size: number;
 };
 
 export interface EsqlOptions {

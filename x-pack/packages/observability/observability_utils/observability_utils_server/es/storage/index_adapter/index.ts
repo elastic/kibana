@@ -5,19 +5,36 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import objectHash from 'object-hash';
-import stringify from 'json-stable-stringify';
 import {
+  BulkResponseItem,
+  IndexResponse,
   IndicesPutIndexTemplateIndexTemplateMapping,
   MappingProperty,
+  Refresh,
+  SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { last, mapValues, orderBy, padStart } from 'lodash';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
-import { IStorageAdapter, IndexStorageSettings, StorageSchema } from '..';
+import { InferSearchResponseOf } from '@kbn/es-types';
+import stringify from 'json-stable-stringify';
+import { last, mapValues, orderBy, padStart } from 'lodash';
+import objectHash from 'object-hash';
+import {
+  IStorageAdapter,
+  IndexStorageSettings,
+  StorageAdapterBulkRequest,
+  StorageAdapterBulkResponse,
+  StorageAdapterDeleteRequest,
+  StorageAdapterDeleteResponse,
+  StorageAdapterIndexRequest,
+  StorageAdapterIndexResponse,
+  StorageAdapterSearchRequest,
+  StorageAdapterSearchResponse,
+  StorageSchema,
+} from '..';
 import { StorageClient } from '../storage_client';
-import { IncompatibleSchemaUpdateError } from './errors';
 import { StorageMappingProperty } from '../types';
+import { IncompatibleSchemaUpdateError } from './errors';
 
 function getAliasName(name: string) {
   return name;
@@ -87,7 +104,7 @@ function toElasticsearchMappingProperty(property: StorageMappingProperty): Mappi
 }
 
 export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings>
-  implements IStorageAdapter
+  implements IStorageAdapter<TStorageSettings>
 {
   constructor(
     private readonly esClient: ElasticsearchClient,
@@ -95,11 +112,11 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings>
     private readonly storage: TStorageSettings
   ) {}
 
-  getSearchIndexPattern(): string {
-    return getAliasName(this.storage.name);
+  private getSearchIndexPattern(): string {
+    return `${getAliasName(this.storage.name)}*`;
   }
 
-  getWriteTarget(): string {
+  private getWriteTarget(): string {
     return getAliasName(this.storage.name);
   }
 
@@ -254,7 +271,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings>
     }
   }
 
-  async bootstrap() {
+  private async bootstrap() {
     const { name } = this.storage;
 
     this.logger.debug('Retrieving existing Elasticsearch components');
@@ -298,7 +315,153 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings>
     await this.rolloverIfNeeded();
   }
 
+  private async retryAfterBootstrap<T>(cb: () => Promise<T>): Promise<T> {
+    return cb().catch(async (error) => {
+      if (isResponseError(error) && error.statusCode === 404) {
+        this.logger.info(`Write target for ${this.storage.name} not found, bootstrapping`);
+        await this.bootstrap();
+        return cb();
+      }
+      throw error;
+    });
+  }
+
+  async search<TDocument, TSearchRequest extends Omit<SearchRequest, 'index'>>(
+    request: StorageAdapterSearchRequest
+  ): Promise<StorageAdapterSearchResponse<TDocument, TSearchRequest>> {
+    return this.esClient.search({
+      ...request,
+      index: this.getSearchIndexPattern(),
+      allow_no_indices: true,
+    }) as unknown as Promise<InferSearchResponseOf<TDocument, TSearchRequest>>;
+  }
+
+  private async removeDanglingItems({ ids, refresh }: { ids: string[]; refresh?: Refresh }) {
+    const writeIndex = await this.getCurrentWriteIndexName();
+
+    this.logger.debug(
+      () => `Removing dangling items for ${ids.join(', ')}, write index is ${writeIndex}`
+    );
+
+    if (writeIndex && ids.length) {
+      const danglingItemsResponse = await this.search({
+        query: {
+          bool: {
+            filter: [{ terms: { _id: ids } }],
+            must_not: [
+              {
+                term: {
+                  _index: writeIndex,
+                },
+              },
+            ],
+          },
+        },
+        size: 10_000,
+      });
+
+      const danglingItemsToDelete = danglingItemsResponse.hits.hits.map((hit) => ({
+        id: hit._id!,
+        index: hit._index,
+      }));
+
+      if (danglingItemsToDelete.length > 0) {
+        const shouldRefresh = refresh === true || refresh === 'true' || refresh === 'wait_for';
+
+        this.logger.debug(() => `Deleting ${danglingItemsToDelete.length} dangling items`);
+
+        await this.esClient.deleteByQuery({
+          index: this.getSearchIndexPattern(),
+          refresh: shouldRefresh,
+          wait_for_completion: shouldRefresh,
+          query: {
+            bool: {
+              should: danglingItemsToDelete.map((item) => {
+                return {
+                  bool: {
+                    filter: [
+                      {
+                        term: {
+                          _index: item.index,
+                        },
+                      },
+                      {
+                        term: {
+                          _id: item.id,
+                        },
+                      },
+                    ],
+                  },
+                };
+              }),
+              minimum_should_match: 1,
+            },
+          },
+        });
+      }
+    }
+  }
+
+  async index(request: StorageAdapterIndexRequest): Promise<StorageAdapterIndexResponse> {
+    const attemptIndex = (): Promise<IndexResponse> => {
+      return this.esClient.index({
+        ...request,
+        index: this.getWriteTarget(),
+        require_alias: true,
+      });
+    };
+
+    return this.retryAfterBootstrap(attemptIndex).then(async (response) => {
+      this.logger.debug(() => `Indexed document ${request.id} into ${response._index}`);
+      if (request.id) {
+        await this.removeDanglingItems({
+          ids: [request.id],
+          refresh: request.refresh,
+        });
+      }
+
+      return response;
+    });
+  }
+
+  async bulk(request: StorageAdapterBulkRequest): Promise<StorageAdapterBulkResponse> {
+    const attemptBulk = () => {
+      return this.esClient.bulk({
+        ...request,
+        index: this.getWriteTarget(),
+        require_alias: true,
+      });
+    };
+
+    return this.retryAfterBootstrap(attemptBulk).then(async (response) => {
+      const ids = response.items
+        .filter(
+          (item): item is { index: BulkResponseItem & { _id: string } } =>
+            !!item.index && !!item.index._id && !item.index.error
+        )
+        .map((item) => item.index._id);
+
+      if (ids.length) {
+        await this.removeDanglingItems({ ids, refresh: request.refresh });
+      }
+
+      return response;
+    });
+  }
+
+  async delete({
+    id,
+    index,
+    refresh,
+  }: StorageAdapterDeleteRequest): Promise<StorageAdapterDeleteResponse> {
+    return await this.esClient.delete({
+      index,
+      id,
+      refresh,
+    });
+  }
+
   getClient(): StorageClient<TStorageSettings> {
-    return new StorageClient<TStorageSettings>(this, this.esClient, this.logger);
+    return new StorageClient<TStorageSettings>(this, this.logger);
   }
 }

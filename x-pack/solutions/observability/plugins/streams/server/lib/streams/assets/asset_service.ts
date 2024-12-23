@@ -18,10 +18,10 @@ export class AssetService {
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
     private readonly logger: Logger
   ) {
-    this.adapter$ = defer(() => from(this.prepareIndex())).pipe(shareReplay(1));
+    this.adapter$ = defer(() => from(this.getAdapter())).pipe(shareReplay(1));
   }
 
-  async prepareIndex(): Promise<StorageIndexAdapter<typeof assetStorageSettings>> {
+  async getAdapter(): Promise<StorageIndexAdapter<typeof assetStorageSettings>> {
     const [coreStart] = await this.coreSetup.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
 
@@ -30,7 +30,7 @@ export class AssetService {
       this.logger.get('assets'),
       assetStorageSettings
     );
-    await adapter.bootstrap();
+
     return adapter;
   }
 

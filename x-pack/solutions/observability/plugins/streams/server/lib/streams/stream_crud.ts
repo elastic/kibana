@@ -310,21 +310,26 @@ async function getUnmanagedElasticsearchAssets({
   name,
   scopedClusterClient,
 }: ReadUnmanagedAssetsParams) {
-  let dataStream: IndicesDataStream;
+  let dataStream: IndicesDataStream | undefined;
   try {
-    const response = await scopedClusterClient.asInternalUser.indices.getDataStream({ name });
+    const response = await scopedClusterClient.asCurrentUser.indices.getDataStream({ name });
     dataStream = response.data_streams[0];
   } catch (e) {
     if (e.meta?.statusCode === 404) {
-      throw new DefinitionNotFound(`Stream definition for ${name} not found.`);
+      // fall through and throw not found
+    } else {
+      throw e;
     }
-    throw e;
+  }
+
+  if (!dataStream) {
+    throw new DefinitionNotFound(`Stream definition for ${name} not found.`);
   }
 
   // retrieve linked index template, component template and ingest pipeline
   const templateName = dataStream.template;
   const componentTemplates: string[] = [];
-  const template = await scopedClusterClient.asInternalUser.indices.getIndexTemplate({
+  const template = await scopedClusterClient.asCurrentUser.indices.getIndexTemplate({
     name: templateName,
   });
   if (template.index_templates.length) {
@@ -333,7 +338,7 @@ async function getUnmanagedElasticsearchAssets({
     });
   }
   const writeIndexName = dataStream.indices.at(-1)?.index_name!;
-  const currentIndex = await scopedClusterClient.asInternalUser.indices.get({
+  const currentIndex = await scopedClusterClient.asCurrentUser.indices.get({
     index: writeIndexName,
   });
   const ingestPipelineId = currentIndex[writeIndexName].settings?.index?.default_pipeline!;
