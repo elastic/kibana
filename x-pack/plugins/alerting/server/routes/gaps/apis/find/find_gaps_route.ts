@@ -22,11 +22,11 @@ export const findGapsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
-  router.get(
+  router.post(
     {
       path: `${INTERNAL_ALERTING_GAPS_FIND_API_PATH}`,
       validate: {
-        query: findQuerySchemaV1,
+        body: findQuerySchemaV1,
       },
       options: {
         access: 'internal',
@@ -35,8 +35,8 @@ export const findGapsRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const query: FindGapsRequestQueryV1 = req.query;
-
+        const query: FindGapsRequestQueryV1 = req.body;
+        console.log('-----------------query', query);
         const result = await rulesClient.findGaps(transformRequestV1(query));
         const response: FindGapsResponseV1 = {
           body: transformResponseV1(result),

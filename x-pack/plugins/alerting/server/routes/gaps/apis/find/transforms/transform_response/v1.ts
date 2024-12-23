@@ -26,5 +26,6 @@ export const transformResponse = ({
   data: gapsData.map((gap) => ({
     _id: gap?.meta?._id,
     ...gap.getEsObject(),
+    '@timestamp': gap.timestamp,
   })),
 });

@@ -21,6 +21,7 @@ import {
 } from './interval_utils';
 
 interface GapConstructorParams {
+  timestamp: string;
   range: StringInterval;
   filledIntervals?: StringInterval[];
   inProgressIntervals?: StringInterval[];
@@ -32,8 +33,10 @@ export class Gap {
   private _filledIntervals: Interval[];
   private _inProgressIntervals: Interval[];
   private _meta?: DocMeta;
+  private _timestamp: string;
 
   constructor({
+    timestamp,
     range,
     filledIntervals = [],
     inProgressIntervals = [],
@@ -45,6 +48,7 @@ export class Gap {
     if (meta) {
       this._meta = meta;
     }
+    this._timestamp = timestamp;
   }
 
   public fillGap(interval: Interval): void {
@@ -81,6 +85,10 @@ export class Gap {
 
   public get inProgressIntervals() {
     return this._inProgressIntervals;
+  }
+
+  public get timestamp() {
+    return this._timestamp;
   }
 
   /**

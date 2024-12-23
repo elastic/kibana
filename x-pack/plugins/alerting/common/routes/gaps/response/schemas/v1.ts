@@ -23,6 +23,7 @@ export const rangeSchema = schema.object({
 export const rangeListSchema = schema.arrayOf(rangeSchema);
 
 export const gapsResponseSchema = schema.object({
+  '@timestamp': schema.string(),
   _id: schema.string(),
   status: gapStatusSchema,
   range: rangeSchema,

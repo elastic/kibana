@@ -14,7 +14,12 @@ import {
 import styled from 'styled-components';
 import React, { useCallback, useState } from 'react';
 import dateMath from '@kbn/datemath';
-import type { CriteriaWithPagination, EuiBasicTableColumn, OnTimeChangeProps } from '@elastic/eui';
+import type {
+  CriteriaWithPagination,
+  EuiBasicTableColumn,
+  OnRefreshChangeProps,
+  OnTimeChangeProps,
+} from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -49,9 +54,9 @@ import { FormattedDate } from '../../../../common/components/formatted_date';
 import { KibanaServices, useKibana } from '../../../../common/lib/kibana';
 import { getFormattedDuration } from '../../../rule_details_ui/pages/rule_details/execution_log_table/rule_duration_format';
 import * as i18n from './translations';
-
-export type Gap = FindGapsResponseBody['data']['0'];
-export type GapStatus = Gap['status'];
+import type { Gap, GapStatus } from '../../types';
+import { getStatusLabel } from './utils';
+import { GapStatusFilter } from './status_filter';
 
 const FIND_GAPS_FOR_RULE = 'FIND_GAP_FOR_RULE';
 
@@ -66,14 +71,18 @@ export const findGapsForRule = async ({
   page,
   perPage,
   signal,
-  sortField = 'createdAt',
+  sortField = '@timestamp',
   sortOrder = 'desc',
   start,
   end,
+  statuses,
 }: {
   ruleId: string;
   page: number;
   perPage: number;
+  start: string;
+  end: string;
+  statuses: GapStatus[];
   signal?: AbortSignal;
   sortField?: string;
   sortOrder?: string;
@@ -84,8 +93,8 @@ export const findGapsForRule = async ({
   return KibanaServices.get().http.fetch<FindGapsResponseBody>(
     INTERNAL_ALERTING_GAPS_FIND_API_PATH,
     {
-      method: 'GET',
-      query: {
+      method: 'POST',
+      body: JSON.stringify({
         rule_id: ruleId,
         page,
         per_page: perPage,
@@ -93,7 +102,8 @@ export const findGapsForRule = async ({
         sort_order: sortOrder,
         start: startDate?.utc().toISOString(),
         end: endDate?.utc().toISOString(),
-      },
+        statuses,
+      }),
       signal,
     }
   );
@@ -141,19 +151,35 @@ export const useFindGapsForRule = (
     perPage,
     start,
     end,
+    statuses,
+    sortField,
+    sortOrder,
   }: {
     ruleId: string;
     page: number;
     perPage: number;
     start: string;
     end: string;
+    statuses: GapStatus[];
+    sortField: keyof Gap;
+    sortOrder: string;
   },
   options?: UseQueryOptions<FindGapsResponseBody>
 ) => {
   return useQuery<FindGapsResponseBody>(
-    [FIND_GAPS_FOR_RULE, ruleId, page, perPage],
+    [FIND_GAPS_FOR_RULE, ruleId, page, perPage, statuses?.join(','), sortField, sortOrder],
     async ({ signal }) => {
-      const response = await findGapsForRule({ signal, ruleId, page, perPage, start, end });
+      const response = await findGapsForRule({
+        signal,
+        ruleId,
+        page,
+        perPage,
+        start,
+        end,
+        statuses,
+        sortField,
+        sortOrder,
+      });
 
       return response;
     },
@@ -232,18 +258,6 @@ const FillGap = ({ ruleId, gap }: { ruleId: string; gap: Gap }) => {
   );
 };
 
-const getStatusLabel = (status: string) => {
-  switch (status) {
-    case 'partially_filled':
-      return i18n.GAP_STATUS_PARTIALLY_FILLED;
-    case 'unfilled':
-      return i18n.GAP_STATUS_UNFILLED;
-    case 'filled':
-      return i18n.GAP_STATUS_FILLED;
-  }
-  return '';
-};
-
 const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string) => {
   const fillActions = {
     name: i18n.GAPS_TABLE_ACTIONS_LABEL,
@@ -255,9 +269,19 @@ const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string) => {
   const columns: Array<EuiBasicTableColumn<Gap>> = [
     {
       field: 'status',
+      sortable: true,
       name: <TableHeaderTooltipCell title={i18n.GAPS_TABLE_STATUS_LABEL} tooltipContent="" />,
-      render: (value: string) => getStatusLabel(value),
+      render: (value: GapStatus) => getStatusLabel(value),
       width: '10%',
+    },
+    {
+      field: '@timestamp',
+      sortable: true,
+      name: <TableHeaderTooltipCell title={i18n.GAPS_TABLE_EVENT_TIME_LABEL} tooltipContent="" />,
+      render: (value: Gap['@timestamp']) => (
+        <FormattedDate value={value} fieldName={'@timestamp'} />
+      ),
+      width: '15%',
     },
     {
       field: 'in_progress_intervals',
@@ -313,6 +337,7 @@ const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string) => {
     },
     {
       field: 'total_gap_duration_ms',
+      sortable: true,
       name: (
         <TableHeaderTooltipCell title={i18n.GAPS_TABLE_GAP_DURATION_TOOLTIP} tooltipContent={''} />
       ),
@@ -342,6 +367,11 @@ export const RuleGaps = ({ ruleId }: { ruleId: string }) => {
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const [refreshInterval, setRefreshInterval] = useState(1000);
   const [isPaused, setIsPaused] = useState(true);
+  const [selectedStatuses, setSelectedStatuses] = useState<GapStatus[]>([]);
+  const [sort, setSort] = useState<{ field: keyof Gap; direction: 'desc' | 'asc' }>({
+    field: '@timestamp',
+    direction: 'desc',
+  });
 
   const { data, isLoading, isError, isFetching, refetch, dataUpdatedAt } = useFindGapsForRule({
     ruleId,
@@ -349,6 +379,9 @@ export const RuleGaps = ({ ruleId }: { ruleId: string }) => {
     perPage: pageSize,
     start: dateRange.start,
     end: dateRange.end,
+    statuses: selectedStatuses,
+    sortField: sort.field,
+    sortOrder: sort.direction,
   });
 
   const pagination = {
@@ -363,16 +396,21 @@ export const RuleGaps = ({ ruleId }: { ruleId: string }) => {
     refetch();
   };
 
-  const handleTableChange: (params: CriteriaWithPagination<Gap>) => void = ({ page }) => {
+  const handleTableChange: (params: CriteriaWithPagination<Gap>) => void = ({
+    page,
+    sort: newSort,
+  }) => {
     if (page) {
       setPageIndex(page.index);
       setPageSize(page.size);
+    }
+    if (newSort) {
+      setSort(newSort);
     }
   };
 
   const onTimeChangeCallback = useCallback(
     (props: OnTimeChangeProps) => {
-      console.log('props', props);
       setDateRange({ start: props.start, end: props.end });
     },
     [setDateRange]
@@ -387,9 +425,21 @@ export const RuleGaps = ({ ruleId }: { ruleId: string }) => {
     [setIsPaused, setRefreshInterval]
   );
 
+  const handleStatusChange = useCallback(
+    (statuses: GapStatus[]) => {
+      setSelectedStatuses(statuses);
+    },
+    [setSelectedStatuses]
+  );
+
   return (
     <EuiPanel hasBorder>
-      <EuiFlexGroup alignItems="flexStart" gutterSize="s" data-test-subj="rule-backfills-info">
+      <EuiFlexGroup
+        alignItems="flexStart"
+        justifyContent="spaceBetween"
+        gutterSize="s"
+        data-test-subj="rule-backfills-info"
+      >
         <EuiFlexItem grow={true}>
           <EuiFlexGroup gutterSize="s" alignItems="baseline">
             <HeaderSection title={'Gaps'} subtitle={'Rule gaps'} />
@@ -398,19 +448,26 @@ export const RuleGaps = ({ ruleId }: { ruleId: string }) => {
         </EuiFlexItem>
 
         <EuiFlexItem grow={true}>
-          <DatePickerEuiFlexItem>
-            <EuiSuperDatePicker
-              start={dateRange.start}
-              end={dateRange.end}
-              onTimeChange={onTimeChangeCallback}
-              onRefresh={onRefreshCallback}
-              isPaused={isPaused}
-              isLoading={isFetching}
-              refreshInterval={refreshInterval}
-              onRefreshChange={onRefreshChangeCallback}
-              width="full"
-            />
-          </DatePickerEuiFlexItem>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <GapStatusFilter selectedItems={selectedStatuses} onChange={handleStatusChange} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <DatePickerEuiFlexItem>
+                <EuiSuperDatePicker
+                  start={dateRange.start}
+                  end={dateRange.end}
+                  onTimeChange={onTimeChangeCallback}
+                  onRefresh={onRefreshCallback}
+                  isPaused={isPaused}
+                  isLoading={isFetching}
+                  refreshInterval={refreshInterval}
+                  onRefreshChange={onRefreshChangeCallback}
+                  width="full"
+                />
+              </DatePickerEuiFlexItem>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup justifyContent="flexEnd">
@@ -429,6 +486,9 @@ export const RuleGaps = ({ ruleId }: { ruleId: string }) => {
         error={isError ? 'error' : undefined}
         loading={isLoading}
         onChange={handleTableChange}
+        sorting={{
+          sort,
+        }}
       />
     </EuiPanel>
   );

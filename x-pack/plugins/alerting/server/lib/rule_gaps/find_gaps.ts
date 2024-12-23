@@ -27,7 +27,8 @@ export const findGaps = async ({
   page: number;
   perPage: number;
 }> => {
-  const { ruleId, start, end, page, perPage, statuses } = params;
+  const { ruleId, start, end, page, perPage, statuses, sortField, sortOrder } = params;
+  console.log('-----------------statuses', statuses);
   try {
     const statusesFilter = statuses
       ?.map((status) => `kibana.alert.rule.gap.status : ${status}`)
@@ -36,6 +37,14 @@ export const findGaps = async ({
       end && start
         ? `AND (kibana.alert.rule.gap.range <= "${end}" AND kibana.alert.rule.gap.range >= "${start}")`
         : '';
+
+    const getField = (field?: string) => {
+      if (field === '@timestamp' || !field) {
+        return '@timestamp';
+      }
+      return `kibana.alert.rule.gap.${field}`;
+    };
+
     const gapsResponse = await eventLogClient.findEventsBySavedObjectIds(
       RULE_SAVED_OBJECT_TYPE,
       [ruleId],
@@ -43,7 +52,12 @@ export const findGaps = async ({
         filter: `event.action: gap AND event.provider: alerting ${rangeFilter} ${
           statusesFilter ? `AND (${statusesFilter})` : ''
         }`,
-        sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
+        sort: [
+          {
+            sort_field: getField(sortField),
+            sort_order: sortOrder ?? 'desc',
+          },
+        ],
         page,
         per_page: perPage,
       }
@@ -56,7 +70,7 @@ export const findGaps = async ({
       perPage: gapsResponse.per_page,
     };
   } catch (err) {
-    logger.error(`Failed to find gaps for rule ${ruleId.toString()}: ${err.message}`);
+    logger.error(`Failed to find gaps for rule ${ruleId}: ${err.message}`);
     throw err;
   }
 };

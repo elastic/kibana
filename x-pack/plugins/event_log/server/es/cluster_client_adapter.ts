@@ -448,6 +448,8 @@ export class ClusterClientAdapter<
         : {}),
     };
 
+    console.log('-----------------body', JSON.stringify(body, null, 2));
+
     try {
       const {
         hits: { hits, total },

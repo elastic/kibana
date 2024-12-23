@@ -110,3 +110,17 @@ export const GAP_FILL_REQUEST_ERROR_MESSAGE = i18n.translate(
     defaultMessage: 'Failed to request manual run',
   }
 );
+
+export const GAP_STATUS_FILTER_TITLE = i18n.translate(
+  'xpack.securitySolution.gapsTable.gapStatusFilterTitle',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
+export const GAPS_TABLE_EVENT_TIME_LABEL = i18n.translate(
+  'xpack.securitySolution.gapsTable.eventTimeLabel',
+  {
+    defaultMessage: 'Detected at',
+  }
+);

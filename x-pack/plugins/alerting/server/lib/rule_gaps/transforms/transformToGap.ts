@@ -36,6 +36,7 @@ export const transformToGap = (events: QueryEventsBySavedObjectResult): Gap[] =>
       const inProgressIntervals = validateIntervals(gap?.in_progress_intervals);
 
       return new Gap({
+        timestamp: doc['@timestamp'],
         range,
         filledIntervals,
         inProgressIntervals,

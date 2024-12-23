@@ -10,18 +10,20 @@ import { FindGapsRequestQueryV1 } from '../../../../../../../common/routes/gaps/
 import { FindGapsParams } from '../../../../../../lib/rule_gaps/types';
 
 export const transformRequest = ({
-  end,
   page,
   per_page,
   rule_id,
   start,
+  end,
   sort_field,
   sort_order,
+  statuses,
 }: FindGapsRequestQueryV1): FindGapsParams => ({
+  ruleId: rule_id,
   end,
   page,
   perPage: per_page,
-  ruleId: rule_id,
+  statuses,
   start,
   sortField: sort_field,
   sortOrder: sort_order,

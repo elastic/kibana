@@ -14,8 +14,23 @@ export const findQuerySchema = schema.object(
     per_page: schema.number({ defaultValue: 10, min: 0 }),
     rule_id: schema.maybe(schema.string()),
     start: schema.maybe(schema.string()),
-    sort_field: schema.maybe(schema.oneOf([schema.literal('createdAt'), schema.literal('start')])),
+    sort_field: schema.maybe(
+      schema.oneOf([
+        schema.literal('@timestamp'),
+        schema.literal('status'),
+        schema.literal('total_gap_duration_ms'),
+      ])
+    ),
     sort_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+    statuses: schema.maybe(
+      schema.arrayOf(
+        schema.oneOf([
+          schema.literal('partially_filled'),
+          schema.literal('unfilled'),
+          schema.literal('filled'),
+        ])
+      )
+    ),
   },
   {
     validate({ start, end }) {
