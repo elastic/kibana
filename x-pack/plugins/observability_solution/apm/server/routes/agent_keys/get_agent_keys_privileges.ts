@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { CoreStart } from '@kbn/core/server';
 import { ApmPluginRequestHandlerContext } from '../typings';
-import { APMPluginStartDependencies } from '../../types';
 
 export interface AgentKeysPrivilegesResponse {
   areApiKeysEnabled: boolean;
@@ -16,10 +16,10 @@ export interface AgentKeysPrivilegesResponse {
 
 export async function getAgentKeysPrivileges({
   context,
-  securityPluginStart,
+  coreStart,
 }: {
   context: ApmPluginRequestHandlerContext;
-  securityPluginStart: NonNullable<APMPluginStartDependencies['security']>;
+  coreStart: CoreStart;
 }): Promise<AgentKeysPrivilegesResponse> {
   const esClient = (await context.core).elasticsearch.client;
   const [securityHasPrivilegesResponse, areApiKeysEnabled] = await Promise.all([
@@ -28,7 +28,7 @@ export async function getAgentKeysPrivileges({
         cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'],
       },
     }),
-    securityPluginStart.authc.apiKeys.areAPIKeysEnabled(),
+    coreStart.security.authc.apiKeys.areAPIKeysEnabled(),
   ]);
 
   const {

@@ -229,6 +229,18 @@ const getBaseExecuteEventLogDoc = (
 };
 
 const mockGetRequestBodyByte = jest.spyOn(ConnectorUsageCollector.prototype, 'getRequestBodyByte');
+const mockRealm = { name: 'default_native', type: 'native' };
+const mockUser = {
+  authentication_realm: mockRealm,
+  authentication_provider: mockRealm,
+  authentication_type: 'realm',
+  lookup_realm: mockRealm,
+  elastic_cloud_user: true,
+  enabled: true,
+  profile_uid: '123',
+  roles: ['superuser'],
+  username: 'coolguy',
+};
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -236,18 +248,7 @@ beforeEach(() => {
   mockGetRequestBodyByte.mockReturnValue(0);
   spacesMock.getSpaceId.mockReturnValue('some-namespace');
   loggerMock.get.mockImplementation(() => loggerMock);
-  const mockRealm = { name: 'default_native', type: 'native' };
-  securityMockStart.authc.getCurrentUser.mockImplementation(() => ({
-    authentication_realm: mockRealm,
-    authentication_provider: mockRealm,
-    authentication_type: 'realm',
-    lookup_realm: mockRealm,
-    elastic_cloud_user: true,
-    enabled: true,
-    profile_uid: '123',
-    roles: ['superuser'],
-    username: 'coolguy',
-  }));
+  securityMockStart.authc.getCurrentUser.mockImplementation(() => mockUser);
 
   getActionsAuthorizationWithRequest.mockReturnValue(authorizationMock);
 });
@@ -1563,6 +1564,72 @@ describe('Event log', () => {
       message: 'action started: test:1: action-1',
     });
   });
+
+  test('writes to the api key to the event log', async () => {
+    securityMockStart.authc.getCurrentUser.mockImplementationOnce(() => ({
+      ...mockUser,
+      authentication_type: 'api_key',
+      api_key: {
+        id: '456',
+        name: 'test api key',
+      },
+    }));
+
+    const executorMock = setupActionExecutorMock();
+    executorMock.mockResolvedValue({
+      actionId: '1',
+      status: 'ok',
+    });
+    await actionExecutor.execute(executeParams);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
+      event: {
+        action: 'execute',
+        kind: 'action',
+        outcome: 'success',
+      },
+      kibana: {
+        action: {
+          execution: {
+            usage: {
+              request_body_bytes: 0,
+            },
+            uuid: '2',
+          },
+          id: '1',
+          name: 'action-1',
+          type_id: 'test',
+        },
+        alert: {
+          rule: {
+            execution: {
+              uuid: '123abc',
+            },
+          },
+        },
+        user_api_key: {
+          id: '456',
+          name: 'test api key',
+        },
+        saved_objects: [
+          {
+            id: '1',
+            namespace: 'some-namespace',
+            rel: 'primary',
+            type: 'action',
+            type_id: 'test',
+          },
+        ],
+        space_ids: ['some-namespace'],
+      },
+      message: 'action executed: test:1: action-1',
+      user: {
+        id: '123',
+        name: 'coolguy',
+      },
+    });
+  });
+
   const mockGenAi = {
     id: 'chatcmpl-7LztF5xsJl2z5jcNpJKvaPm4uWt8x',
     object: 'chat.completion',
