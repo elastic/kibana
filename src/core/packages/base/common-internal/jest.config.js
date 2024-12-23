@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/base/core-base-common-internal'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/base/common-internal'],
 };
