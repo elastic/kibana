@@ -17,14 +17,10 @@ import {
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash/fp';
-import { ConfigEntryView, FieldType } from '../../../../common/dynamic_config/types';
-import {
-  ensureBooleanType,
-  ensureCorrectTyping,
-  ensureStringType,
-} from './connector_configuration_utils';
+import { ConfigEntryView, FieldType } from '../../types/types';
+import { ensureBooleanType, ensureCorrectTyping, ensureStringType } from './configuration_utils';
 
-interface ConnectorConfigurationFieldProps {
+interface ConfigurationFieldProps {
   configEntry: ConfigEntryView;
   isLoading: boolean;
   setConfigValue: (value: number | string | boolean | null) => void;
@@ -98,14 +94,13 @@ export const ConfigInputTextArea: React.FC<ConfigInputFieldProps> = ({
   const { isValid, value, default_value, key } = configEntry;
   const [innerValue, setInnerValue] = useState(value ?? default_value);
   useEffect(() => {
-    setInnerValue(value ?? default_value);
+    setInnerValue(value ?? '');
   }, [default_value, value]);
   return (
     <EuiTextArea
       disabled={isLoading}
       fullWidth
       data-test-subj={`${key}-textarea`}
-      // ensures placeholder shows up when value is empty string
       value={ensureStringType(innerValue)}
       isInvalid={!isValid}
       onChange={(event) => {
@@ -187,7 +182,7 @@ export const ConfigInputPassword: React.FC<ConfigInputFieldProps> = ({
   );
 };
 
-export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldProps> = ({
+export const ConfigurationField: React.FC<ConfigurationFieldProps> = ({
   configEntry,
   isLoading,
   setConfigValue,

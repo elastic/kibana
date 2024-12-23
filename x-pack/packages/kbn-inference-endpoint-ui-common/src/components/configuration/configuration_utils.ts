@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { ConfigProperties, FieldType } from '../../../../common/dynamic_config/types';
-
-export type ConnectorConfigEntry = ConfigProperties & { key: string };
+import { FieldType } from '../../types/types';
 
 export const validIntInput = (value: string | number | boolean | null): boolean => {
   // reject non integers (including x.0 floats), but don't validate if empty
