@@ -32,10 +32,6 @@ as uiSettings within the code.
 |The aiAssistantManagementSelection plugin manages the Ai Assistant management section.
 
 
-|{kib-repo}blob/{branch}/src/plugins/bfetch/README.md[bfetch]
-|bfetch allows to batch HTTP requests and streams responses back.
-
-
 |{kib-repo}blob/{branch}/src/plugins/charts/README.md[charts]
 |The Charts plugin is a way to create easier integration of shared colors, themes, types and other utilities across all Kibana charts and visualizations.
 
@@ -309,6 +305,7 @@ oss plugins.
 
 |{kib-repo}blob/{branch}/src/plugins/saved_search/README.md[savedSearch]
 |Contains the saved search saved object definition and helpers.
+This object is created when a user saves their current session in the Discover app.
 
 
 |{kib-repo}blob/{branch}/src/plugins/screenshot_mode/README.md[screenshotMode]
@@ -470,7 +467,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/asset_inventory/README.md[assetInventory]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/asset_inventory/README.md[assetInventory]
 |Centralized asset inventory experience within the Elastic Security solution. A central place for users to view and manage all their assets from different environments.
 
 
@@ -499,7 +496,7 @@ It was removed, but the plugin was left behind to register no longer used config
 |Static migration page where self-managed users can see text/copy about migrating to Elastic Cloud
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_defend/README.md[cloudDefend]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/cloud_defend/README.md[cloudDefend]
 |This plugin currently only exists to provide custom fleet policy UX for a set of new BPF LSM features. The first feature being container "drift prevention".
 
 
@@ -516,7 +513,7 @@ This plugin no-longer exposes any evaluation APIs. Refer to <DocLink id="kibFeat
 |Adds all the links to the Elastic Cloud console.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_security_posture/README.md[cloudSecurityPosture]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/cloud_security_posture/README.md[cloudSecurityPosture]
 |Cloud Posture automates the identification and remediation of risks across cloud infrastructures
 
 
@@ -533,11 +530,11 @@ Plugin server-side only. Plugin has three main functions:
 |Adds drilldown capabilities to dashboard.  Owned by the Kibana App team.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/data_quality/README.md[dataQuality]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/data_quality/README.md[dataQuality]
 |Page where users can see the quality of their log data sets.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/dataset_quality/README.md[datasetQuality]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/dataset_quality/README.md[datasetQuality]
 |In order to make ongoing maintenance of log collection easy we want to introduce the concept of data set quality, where users can easily get an overview on the data sets they have with information such as integration, size, last activity, among others.
 
 
@@ -600,7 +597,7 @@ activities.
 |The features plugin enhance Kibana with a per-feature privilege system.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/fields_metadata/README.md[fieldsMetadata]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/fields_metadata/README.md[fieldsMetadata]
 |The @kbn/fields-metadata-plugin is designed to provide a centralized and asynchronous way to consume field metadata across Kibana. This plugin addresses the need for on-demand retrieval of field metadata from static ECS/Metadata definitions and integration manifests, with the flexibility to extend to additional resolution sources in the future.
 
 
@@ -639,7 +636,7 @@ which are particularly useful for ingesting logs.
 Index Management by running this series of requests in Console:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/index_management/README.md[indexManagement]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/index_management/README.md[indexManagement]
 |This service is exposed from the Index Management setup contract and can be used to add content to the indices list and the index details page.
 
 
@@ -648,12 +645,12 @@ Index Management by running this series of requests in Console:
 external LLM APIs. Its goals are:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/infra/README.md[infra]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/infra/README.md[infra]
 |This is the home of the infra plugin, which aims to provide a solution for
 the infrastructure monitoring use-case within Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ingest_pipelines/README.md[ingestPipelines]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/ingest_pipelines/README.md[ingestPipelines]
 |The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines.
 
 
@@ -673,7 +670,7 @@ the infrastructure monitoring use-case within Kibana.
 |undefined
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/kubernetes_security/README.md[kubernetesSecurity]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/kubernetes_security/README.md[kubernetesSecurity]
 |This plugin provides interactive visualizations of your Kubernetes workload and session data.
 
 
@@ -693,7 +690,7 @@ the infrastructure monitoring use-case within Kibana.
 |The licensing plugin retrieves license data from Elasticsearch at regular configurable intervals.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/lists/README.md[lists]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/lists/README.md[lists]
 |README.md for developers working on the backend lists on how to get started
 using the CURL scripts in the scripts folder.
 
@@ -702,15 +699,15 @@ using the CURL scripts in the scripts folder.
 |This plugin contains various LLM tasks.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/logs_data_access/README.md[logsDataAccess]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/logs_data_access/README.md[logsDataAccess]
 |Exposes services to access logs data.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/logs_explorer/README.md[logsExplorer]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/logs_explorer/README.md[logsExplorer]
 |This plugin is home to the <LogsExplorer /> component and related types. It implements several of the underlying concepts that the Observability Logs Explorer app builds upon.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/logs_shared/README.md[logsShared]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/logs_shared/README.md[logsShared]
 |Exposes the shared components and APIs to access and visualize logs.
 
 
@@ -759,11 +756,11 @@ Elastic.
 |The observabilityAiAssistantManagement plugin manages the Ai Assistant for Observability and Search management section.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_logs_explorer/README.md[observabilityLogsExplorer]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_logs_explorer/README.md[observabilityLogsExplorer]
 |This plugin provides an app based on the LogsExplorer component from the logs_explorer plugin, but adds observability-specific affordances.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_onboarding/README.md[observabilityOnboarding]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_onboarding/README.md[observabilityOnboarding]
 |This plugin provides an onboarding framework for observability solutions: Logs and APM.
 
 
@@ -815,7 +812,7 @@ Elastic.
 |Add tagging capability to saved objects
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/screenshotting/README.md[screenshotting]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/screenshotting/README.md[screenshotting]
 |This plugin provides functionality to take screenshots of the Kibana pages.
 It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 
@@ -864,16 +861,16 @@ to understand why a search request might be slow.
 Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/security_solution/README.md[securitySolution]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/security_solution/README.md[securitySolution]
 |Welcome to the Kibana Security Solution plugin! This README will go over getting started with development and testing.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/security_solution_ess/README.md[securitySolutionEss]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/security_solution_ess/README.md[securitySolutionEss]
 |The security_solution_ess plugin is an internal plugin for Kibana's Security Solution, designed to encapsulate ESS-specific logic.
 This plugin is only enabled when the application is built for stateful deployments (ESS or on-prem), keeping the main security_solution plugin clean and agnostic of the offering model.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/security_solution_serverless/README.md[securitySolutionServerless]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/security_solution_serverless/README.md[securitySolutionServerless]
 |The security_solution_serverless plugin is an internal plugin for Kibana's Security Solution, designed to encapsulate serverless-specific logic.
 This plugin is only enabled when the application is built for serverless project, keeping the main security_solution plugin clean and agnostic of the offering model.
 
@@ -890,7 +887,7 @@ This plugin is only enabled when the application is built for serverless project
 |This plugin contains configuration and code used to create a Serverless Search project. It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/session_view/README.md[sessionView]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/session_view/README.md[sessionView]
 |Session View is meant to provide a visualization into what is going on in a particular Linux environment where the agent is running. It looks likes a terminal emulator; however, it is a tool for introspecting process activity and understanding user and service behaviour in your Linux servers and infrastructure. It is a time-ordered series of process executions displayed in a tree over time.
 
 
