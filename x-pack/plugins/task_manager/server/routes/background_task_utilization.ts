@@ -111,6 +111,13 @@ export function backgroundTaskUtilizationRoute(
     router.get(
       {
         path: `/${routeOption.basePath}/task_manager/_background_task_utilization`,
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization. It can be accessed with JWT credentials.',
+          },
+        },
         // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
         // options: { tags: ['access:taskManager'] },
         validate: false,
