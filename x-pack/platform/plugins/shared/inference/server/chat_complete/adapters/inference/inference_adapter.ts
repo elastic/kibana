@@ -15,10 +15,14 @@ import {
   parseInlineFunctionCalls,
   wrapWithSimulatedFunctionCalling,
 } from '../../simulated_function_calling';
-import { messagesToOpenAI, toolsToOpenAI, toolChoiceToOpenAI } from './to_openai';
-import { processOpenAIStream } from './process_openai_stream';
+import {
+  toolsToOpenAI,
+  toolChoiceToOpenAI,
+  messagesToOpenAI,
+  processOpenAIStream,
+} from '../openai';
 
-export const openAIAdapter: InferenceConnectorAdapter = {
+export const inferenceAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
     executor,
     system,
@@ -29,7 +33,6 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     logger,
     abortSignal,
   }) => {
-    const stream = true;
     const simulatedFunctionCalling = functionCalling === 'simulated';
 
     let request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string };
@@ -41,12 +44,10 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         tools,
       });
       request = {
-        stream,
         messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
       };
     } else {
       request = {
-        stream,
         messages: messagesToOpenAI({ system, messages }),
         tool_choice: toolChoiceToOpenAI(toolChoice),
         tools: toolsToOpenAI(tools),
@@ -55,15 +56,21 @@ export const openAIAdapter: InferenceConnectorAdapter = {
 
     return from(
       executor.invoke({
-        subAction: 'stream',
+        subAction: 'unified_completion_stream',
         subActionParams: {
-          body: JSON.stringify(request),
+          body: request,
           signal: abortSignal,
-          stream,
         },
       })
     ).pipe(
       switchMap((response) => {
+        if (response.status === 'error') {
+          return throwError(() =>
+            createInferenceInternalError('Error calling the inference API', {
+              rootError: response.serviceMessage,
+            })
+          );
+        }
         if (isReadable(response.data as any)) {
           return eventSourceStreamIntoObservable(response.data as Readable);
         }

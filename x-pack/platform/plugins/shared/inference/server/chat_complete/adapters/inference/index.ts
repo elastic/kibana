@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { openAIAdapter } from './openai_adapter';
-export { toolChoiceToOpenAI, messagesToOpenAI, toolsToOpenAI } from './to_openai';
-export { processOpenAIStream } from './process_openai_stream';
+export { inferenceAdapter } from './inference_adapter';
