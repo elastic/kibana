@@ -107,7 +107,6 @@ packages/core/test-helpers/core-test-helpers-kbn-server @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-model-versions @elastic/kibana-core
 packages/core/theme/core-theme-browser-mocks @elastic/kibana-core
 packages/core/ui-settings/core-ui-settings-browser-mocks @elastic/appex-sharedux
-packages/core/ui-settings/core-ui-settings-server @elastic/appex-sharedux
 packages/core/ui-settings/core-ui-settings-server-internal @elastic/appex-sharedux
 packages/core/ui-settings/core-ui-settings-server-mocks @elastic/appex-sharedux
 packages/core/usage-data/core-usage-data-base-server-internal @elastic/kibana-core
@@ -558,6 +557,7 @@ src/core/packages/theme/browser-internal @elastic/kibana-core
 src/core/packages/ui-settings/browser @elastic/appex-sharedux
 src/core/packages/ui-settings/browser-internal @elastic/appex-sharedux
 src/core/packages/ui-settings/common @elastic/appex-sharedux
+src/core/packages/ui-settings/server @elastic/appex-sharedux
 src/platform/packages/private/default-nav/devtools @elastic/kibana-management
 src/platform/packages/private/default-nav/management @elastic/kibana-management
 src/platform/packages/private/default-nav/ml @elastic/ml-ui
