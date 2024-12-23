@@ -333,7 +333,7 @@
     "@kbn/core-metrics-server-internal": "link:src/core/packages/metrics/server-internal",
     "@kbn/core-mount-utils-browser": "link:src/core/packages/mount-utils/browser",
     "@kbn/core-mount-utils-browser-internal": "link:src/core/packages/mount-utils/browser-internal",
-    "@kbn/core-node-server": "link:packages/core/node/core-node-server",
+    "@kbn/core-node-server": "link:src/core/packages/node/server",
     "@kbn/core-node-server-internal": "link:packages/core/node/core-node-server-internal",
     "@kbn/core-notifications-browser": "link:packages/core/notifications/core-notifications-browser",
     "@kbn/core-notifications-browser-internal": "link:packages/core/notifications/core-notifications-browser-internal",
