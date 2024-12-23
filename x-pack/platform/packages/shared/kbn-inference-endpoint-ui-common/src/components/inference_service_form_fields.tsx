@@ -27,7 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 
 import * as LABELS from '../translations';
-import { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
+import { Config, ConfigEntryView, FieldType, InferenceProvider, Secrets } from '../types/types';
 import { SERVICE_PROVIDERS } from './providers/render_service_provider/service_provider';
 import { DEFAULT_TASK_TYPE, ServiceProviderKeys } from '../constants';
 import { SelectableProvider } from './providers/selectable';
@@ -64,11 +64,11 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({ p
     ],
   });
 
-  const handleProviderPopover = useCallback(() => {
+  const toggleProviderPopover = useCallback(() => {
     setProviderPopoverOpen((isOpen) => !isOpen);
   }, []);
 
-  const handleProviderClosePopover = useCallback(() => {
+  const closeProviderPopover = useCallback(() => {
     setProviderPopoverOpen(false);
   }, []);
 
@@ -122,12 +122,23 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({ p
         onTaskTypeOptionsSelect(newProvider?.task_types[0]);
       }
 
-      // Update providerSchema
-      const newProviderSchema = Object.keys(newProvider?.configurations ?? {}).map((k) => ({
-        key: k,
-        isValid: true,
-        ...newProvider?.configurations[k],
-      })) as ConfigEntryView[];
+      const newProviderSchema: ConfigEntryView[] = Object.keys(
+        newProvider?.configurations ?? {}
+      ).map(
+        (k): ConfigEntryView => ({
+          key: k,
+          isValid: true,
+          validationErrors: [],
+          value: newProvider?.configurations[k].default_value ?? null,
+          default_value: newProvider?.configurations[k].default_value ?? null,
+          description: newProvider?.configurations[k].description ?? null,
+          label: newProvider?.configurations[k].label ?? '',
+          required: newProvider?.configurations[k].required ?? false,
+          sensitive: newProvider?.configurations[k].sensitive ?? false,
+          updatable: newProvider?.configurations[k].updatable ?? false,
+          type: newProvider?.configurations[k].type ?? FieldType.STRING,
+        })
+      );
 
       setProviderSchema(newProviderSchema);
 
@@ -209,7 +220,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({ p
         icon={!config?.provider ? { type: 'sparkles', side: 'left' } : providerIcon}
       >
         <EuiFieldText
-          onClick={handleProviderPopover}
+          onClick={toggleProviderPopover}
           data-test-subj="provider-select"
           isInvalid={isInvalid}
           onKeyDown={handleProviderKeyboardOpen}
@@ -230,7 +241,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({ p
     [
       config?.provider,
       handleProviderKeyboardOpen,
-      handleProviderPopover,
+      toggleProviderPopover,
       isProviderPopoverOpen,
       onClearProvider,
       providerIcon,
@@ -249,12 +260,28 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({ p
     // Set values from the provider secrets and config to the schema
     const existingConfiguration = providerSchema
       ? providerSchema.map((item: ConfigEntryView) => {
-          const itemValue = item;
+          const itemValue: ConfigEntryView = item;
           itemValue.isValid = true;
           if (item.sensitive && secrets?.providerSecrets) {
-            itemValue.value = secrets?.providerSecrets[item.key] as any;
+            const secretValue = secrets.providerSecrets[item.key];
+            if (
+              typeof secretValue === 'string' ||
+              typeof secretValue === 'number' ||
+              typeof secretValue === 'boolean' ||
+              secretValue === null
+            ) {
+              itemValue.value = secretValue;
+            }
           } else if (config?.providerConfig) {
-            itemValue.value = config?.providerConfig[item.key] as any;
+            const configValue = config.providerConfig[item.key];
+            if (
+              typeof configValue === 'string' ||
+              typeof configValue === 'number' ||
+              typeof configValue === 'boolean' ||
+              configValue === null
+            ) {
+              itemValue.value = configValue;
+            }
           }
           return itemValue;
         })
@@ -298,12 +325,12 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({ p
                 fullWidth
                 input={selectInput}
                 isOpen={isProviderPopoverOpen}
-                closePopover={handleProviderClosePopover}
+                closePopover={closeProviderPopover}
                 className="rightArrowIcon"
               >
                 <SelectableProvider
                   providers={providers}
-                  onClosePopover={handleProviderClosePopover}
+                  onClosePopover={closeProviderPopover}
                   onProviderChange={onProviderChange}
                 />
               </EuiInputPopover>
