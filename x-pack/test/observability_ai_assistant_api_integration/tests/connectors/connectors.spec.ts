@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { Agent as SuperTestAgent } from 'supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
