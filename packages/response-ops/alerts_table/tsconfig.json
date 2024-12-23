@@ -44,5 +44,6 @@
     "@kbn/core-application-browser",
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core-ui-settings-browser",
+    "@kbn/core-user-profile-browser-mocks",
   ]
 }
