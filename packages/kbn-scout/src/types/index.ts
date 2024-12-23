@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './config';
+export * from './server_config';
 export * from './cli';
-export * from './servers';
+export * from './test_config';
 export * from './services';
