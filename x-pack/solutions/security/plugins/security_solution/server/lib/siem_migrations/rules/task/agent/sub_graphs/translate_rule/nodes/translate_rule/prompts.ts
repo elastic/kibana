@@ -17,7 +17,7 @@ Here are some context for you to reference for your task, read it carefully as y
 {splunk_rule}
 </splunk_rule>
 <lookup_syntax>
-If in an SPL query you identify a looku list call, it should be translated the following way:
+If in an SPL query you identify a lookup call, it should be translated the following way:
 \`\`\`spl
 ... | lookup users uid OUTPUTNEW username, department
 \`\`\`
@@ -39,7 +39,6 @@ Go through each step and part of the splunk rule and query while following the b
 - Do NOT map any of the fields to the Elastic Common Schema (ECS), this will happen in a later step.
 - Always remember to translate any lookup list using the lookup_syntax above
 
-
 <guidelines>
 - Analyze the SPL query and identify the key components.
 - Do NOT translate the field names of the SPL query.
@@ -51,5 +50,7 @@ Go through each step and part of the splunk rule and query while following the b
 <expected_output>
 - First, the ES|QL query inside an \`\`\`esql code block.
 - At the end, the summary of the translation process followed in markdown, starting with "## Translation Summary".
+  - Inside SPL language code blocks, Please add a line break before each pipe (|) character in the query.
+  - Make sure the Markdown is formatted correctly and the values properly escaped.
 </expected_output>
 `);

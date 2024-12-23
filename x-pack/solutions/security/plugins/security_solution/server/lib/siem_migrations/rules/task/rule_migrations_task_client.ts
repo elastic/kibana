@@ -215,6 +215,7 @@ export class RuleMigrationsTaskClient {
     await this.data.rules.updateStatus(migrationId, undefined, SiemMigrationStatus.PENDING, {
       refresh: true,
     });
+    // await this.data.rules.updateRetry(migrationId);
     return { updated: true };
   }
 

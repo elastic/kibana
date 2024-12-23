@@ -11,6 +11,7 @@ import type { RuleMigrationsRetriever } from '../../../../../retrievers';
 import type { ChatModel } from '../../../../../util/actions_client_chat';
 import type { GraphNode } from '../../../../types';
 import { REPLACE_QUERY_RESOURCE_PROMPT, getResourcesContext } from './prompts';
+import { cleanMarkdown } from '../../../../../util/comments';
 
 interface GetInlineQueryNodeParams {
   model: ChatModel;
@@ -25,8 +26,9 @@ export const getInlineQueryNode = ({
     let query = state.original_rule.query;
 
     // Check before to avoid unnecessary LLM calls
-    if (!isSupported(query)) {
-      return {};
+    let unsupportedComment = getUnsupportedComment(query);
+    if (unsupportedComment) {
+      return { comments: [unsupportedComment] };
     }
 
     const resources = await ruleMigrationsRetriever.resources.getResources(state.original_rule);
@@ -40,23 +42,27 @@ export const getInlineQueryNode = ({
         macros: resourceContext.macros,
         lookups: resourceContext.lookups,
       });
-      const splQuery = response.match(/```spl\n([\s\S]*?)\n```/)?.[1] ?? '';
+      const splQuery = response.match(/```spl\n([\s\S]*?)\n```/)?.[1].trim() ?? '';
+      const inliningSummary = response.match(/## Inlining Summary[\s\S]*$/)?.[0] ?? '';
       if (splQuery) {
         query = splQuery;
       }
 
       // Check after replacing in case the replacements made it untranslatable
-      if (!isSupported(query)) {
-        return {};
+      unsupportedComment = getUnsupportedComment(query);
+      if (unsupportedComment) {
+        return { comments: [unsupportedComment] };
       }
+
+      return { inline_query: query, comments: [cleanMarkdown(inliningSummary)] };
     }
     return { inline_query: query };
   };
 };
 
-const isSupported = (query: string) => {
-  if (query.includes(' inputlookup ')) {
-    return false;
+const getUnsupportedComment = (query: string): string | undefined => {
+  const unsupportedText = '## Translation Summary\nCan not create custom translation.\n';
+  if (query.includes(' inputlookup')) {
+    return `${unsupportedText}Reason: \`inputlookup\` command is not supported.`;
   }
-  return true;
 };

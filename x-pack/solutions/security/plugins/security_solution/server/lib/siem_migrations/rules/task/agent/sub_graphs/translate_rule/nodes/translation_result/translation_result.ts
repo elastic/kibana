@@ -30,6 +30,8 @@ export const translationResultNode: GraphNode = async (state) => {
       translationResult = RuleTranslationResult.PARTIAL;
     } else if (query.match(/\[(macro|lookup):.*?\]/)) {
       translationResult = RuleTranslationResult.PARTIAL;
+    } else {
+      translationResult = RuleTranslationResult.FULL;
     }
   }
 

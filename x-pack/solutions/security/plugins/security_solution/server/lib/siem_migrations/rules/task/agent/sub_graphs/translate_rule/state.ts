@@ -13,7 +13,7 @@ import type {
   OriginalRule,
   RuleMigration,
 } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { Integration } from '../../../../types';
+import type { RuleMigrationIntegration } from '../../../../types';
 import type { TranslateRuleValidationErrors } from './types';
 
 export const translateRuleState = Annotation.Root({
@@ -22,9 +22,9 @@ export const translateRuleState = Annotation.Root({
     default: () => [],
   }),
   original_rule: Annotation<OriginalRule>(),
-  integration: Annotation<Integration>({
+  integration: Annotation<RuleMigrationIntegration>({
     reducer: (current, value) => value ?? current,
-    default: () => ({} as Integration),
+    default: () => ({} as RuleMigrationIntegration),
   }),
   translation_finalized: Annotation<boolean>({
     reducer: (current, value) => value ?? current,
