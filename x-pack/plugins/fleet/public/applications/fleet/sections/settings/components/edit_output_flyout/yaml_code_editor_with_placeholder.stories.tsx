@@ -24,21 +24,25 @@ const args: Args = {
   placeholder: '# Place holder example',
 };
 
+const YamlCodeEditorWithPlaceholderComponent = ({ width, placeholder }: Args) => {
+  const [value, setValue] = useState('');
+
+  // This component is not renderable in tests
+  if (typeof jest !== 'undefined') {
+    return null;
+  }
+
+  return (
+    <div style={{ width }}>
+      <Component placeholder={placeholder} value={value} onChange={setValue} />
+    </div>
+  );
+};
+
 export const YamlCodeEditorWithPlaceholder = {
-  render: ({ width, placeholder }: Args) => {
-    const [value, setValue] = useState('');
-
-    // This component is not renderable in tests
-    if (typeof jest !== 'undefined') {
-      return null;
-    }
-
-    return (
-      <div style={{ width }}>
-        <Component placeholder={placeholder} value={value} onChange={setValue} />
-      </div>
-    );
-  },
+  render: ({ width, placeholder }: Args) => (
+    <YamlCodeEditorWithPlaceholderComponent width={width} placeholder={placeholder} />
+  ),
 
   args,
 };
