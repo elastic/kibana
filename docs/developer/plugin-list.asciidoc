@@ -229,7 +229,7 @@ Images can be added either by URL or by uploading the image file via file servic
 |Contains the input control visualization allowing to place custom filter controls on a dashboard.
 
 
-|{kib-repo}blob/{branch}/src/plugins/inspector/README.md[inspector]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/inspector/README.md[inspector]
 |The inspector is a contextual tool to gain insights into different elements
 in Kibana, e.g. visualizations. It has the form of a flyout panel.
 
