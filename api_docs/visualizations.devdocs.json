@@ -1331,26 +1331,7 @@
           },
           ", ",
           "VisualizeOutput",
-          ", any> implements ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ReferenceOrValueEmbeddable",
-            "text": "ReferenceOrValueEmbeddable"
-          },
-          "<",
-          "VisualizeByValueInput",
-          ", ",
-          "VisualizeByReferenceInput",
-          ">,",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.FilterableEmbeddable",
-            "text": "FilterableEmbeddable"
-          }
+          ", any>"
         ],
         "path": "src/plugins/visualizations/public/legacy/embeddable/visualize_embeddable.tsx",
         "deprecated": true,
@@ -6798,15 +6779,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; getExplicitInput: () => Readonly<",
-          {
-            "pluginId": "visualizations",
-            "scope": "public",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.VisualizeInput",
-            "text": "VisualizeInput"
-          },
-          ">; getDescription: () => string; render: (domNode: HTMLElement) => Promise<void>; supportedTriggers: () => string[]; getInspectorAdapters: () => ",
+          "[]; render: (domNode: HTMLElement) => Promise<void>; supportedTriggers: () => string[]; getInspectorAdapters: () => ",
           {
             "pluginId": "inspector",
             "scope": "common",
@@ -6914,7 +6887,15 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          ">) => Promise<boolean>; getPersistableInput: () => Readonly<",
+          ">) => Promise<boolean>; getExplicitInput: () => Readonly<",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeInput",
+            "text": "VisualizeInput"
+          },
+          ">; getPersistableInput: () => Readonly<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -6930,7 +6911,7 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          ">; getTitle: () => string; untilInitializationFinished: () => Promise<void>; updateOutput: (outputChanges: Partial<",
+          ">; getTitle: () => string; getDescription: () => string; untilInitializationFinished: () => Promise<void>; updateOutput: (outputChanges: Partial<",
           "VisualizeOutput",
           ">) => void; }"
         ],
