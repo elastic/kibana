@@ -5301,7 +5301,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-search@link:packages/deeplinks/search":
+"@kbn/deeplinks-search@link:src/platform/packages/shared/deeplinks/search":
   version "0.0.0"
   uid ""
 
