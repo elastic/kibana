@@ -111,9 +111,19 @@ describe('Utils', () => {
     });
 
     it('calls other_openai_utils getRequestWithStreamOption when provider is Other OpenAi', () => {
-      getRequestWithStreamOption(OpenAiProviderType.Other, OPENAI_CHAT_URL, bodyString, true);
+      getRequestWithStreamOption(
+        OpenAiProviderType.Other,
+        OPENAI_CHAT_URL,
+        bodyString,
+        true,
+        'default-model'
+      );
 
-      expect(mockOtherOpenAiGetRequestWithStreamOption).toHaveBeenCalledWith(bodyString, true);
+      expect(mockOtherOpenAiGetRequestWithStreamOption).toHaveBeenCalledWith(
+        bodyString,
+        true,
+        'default-model'
+      );
       expect(mockOpenAiGetRequestWithStreamOption).not.toHaveBeenCalled();
       expect(mockAzureAiGetRequestWithStreamOption).not.toHaveBeenCalled();
     });
