@@ -4413,7 +4413,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-custom-branding-server-internal@link:packages/core/custom-branding/core-custom-branding-server-internal":
+"@kbn/core-custom-branding-server-internal@link:src/core/packages/custom-branding/server-internal":
   version "0.0.0"
   uid ""
 
