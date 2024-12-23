@@ -683,7 +683,7 @@
     "@kbn/ml-validators": "link:x-pack/platform/packages/private/ml/validators",
     "@kbn/monaco": "link:packages/kbn-monaco",
     "@kbn/monitoring-collection-plugin": "link:x-pack/platform/plugins/private/monitoring_collection",
-    "@kbn/monitoring-plugin": "link:x-pack/plugins/monitoring",
+    "@kbn/monitoring-plugin": "link:x-pack/platform/plugins/private/monitoring",
     "@kbn/navigation-plugin": "link:src/plugins/navigation",
     "@kbn/newsfeed-plugin": "link:src/plugins/newsfeed",
     "@kbn/newsfeed-test-plugin": "link:test/common/plugins/newsfeed",
