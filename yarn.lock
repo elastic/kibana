@@ -3997,7 +3997,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-types@link:packages/kbn-apm-types":
+"@kbn/apm-types@link:x-pack/solutions/observability/packages/kbn-apm-types":
   version "0.0.0"
   uid ""
 
