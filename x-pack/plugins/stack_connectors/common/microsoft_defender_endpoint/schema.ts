@@ -103,7 +103,7 @@ export const GetActionsParamsSchema = schema.object({
     ])
   ),
   page: schema.maybe(schema.number({ min: 1, defaultValue: 1 })),
-  pageSize: schema.maybe(schema.number({ min: 1, defaultValue: 20 })),
+  pageSize: schema.maybe(schema.number({ min: 1, max: 1000, defaultValue: 20 })),
 });
 
 // ----------------------------------
