@@ -5,6 +5,72 @@
     "functions": [
       {
         "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.ConnectorIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "ConnectorIcon",
+        "description": [],
+        "signature": [
+          "({ name, serviceType, iconPath, showTooltip, }: ConnectorIconProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/packages/search/shared_ui/src/connector_icon/connector_icon.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-shared-ui",
+            "id": "def-public.ConnectorIcon.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  name,\n  serviceType,\n  iconPath,\n  showTooltip = true,\n}",
+            "description": [],
+            "signature": [
+              "ConnectorIconProps"
+            ],
+            "path": "x-pack/packages/search/shared_ui/src/connector_icon/connector_icon.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.DecorativeHorizontalStepper",
+        "type": "Function",
+        "tags": [],
+        "label": "DecorativeHorizontalStepper",
+        "description": [],
+        "signature": [
+          "({ stepCount, }: DecorativeHorizontalStepperProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/packages/search/shared_ui/src/decorative_horizontal_stepper/decorative_horizontal_stepper.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-shared-ui",
+            "id": "def-public.DecorativeHorizontalStepper.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  stepCount = 2,\n}",
+            "description": [],
+            "signature": [
+              "DecorativeHorizontalStepperProps"
+            ],
+            "path": "x-pack/packages/search/shared_ui/src/decorative_horizontal_stepper/decorative_horizontal_stepper.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
         "id": "def-public.FormInfoField",
         "type": "Function",
         "tags": [],
@@ -28,6 +94,39 @@
               "FormInfoFieldProps"
             ],
             "path": "x-pack/packages/search/shared_ui/src/form_info_field/form_info_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.SearchEmptyPrompt",
+        "type": "Function",
+        "tags": [],
+        "label": "SearchEmptyPrompt",
+        "description": [],
+        "signature": [
+          "({ actions, backButton, body, description, icon, isComingSoon, comingSoonLabel, title, }: SearchEmptyPromptProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/packages/search/shared_ui/src/search_empty_prompt/search_empty_prompt.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-shared-ui",
+            "id": "def-public.SearchEmptyPrompt.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  actions,\n  backButton,\n  body,\n  description,\n  icon,\n  isComingSoon,\n  comingSoonLabel,\n  title,\n}",
+            "description": [],
+            "signature": [
+              "SearchEmptyPromptProps"
+            ],
+            "path": "x-pack/packages/search/shared_ui/src/search_empty_prompt/search_empty_prompt.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

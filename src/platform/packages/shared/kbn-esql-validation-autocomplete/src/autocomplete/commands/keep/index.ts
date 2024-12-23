@@ -41,12 +41,16 @@ export async function suggest(
     (fragment) => columnExists(fragment),
     (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
       // KEEP fie<suggest>
-      return fieldSuggestions.map((suggestion) => ({
-        ...suggestion,
-        text: suggestion.text,
-        command: TRIGGER_SUGGESTION_COMMAND,
-        rangeToReplace,
-      }));
+      return fieldSuggestions.map((suggestion) => {
+        // if there is already a command, we don't want to override it
+        if (suggestion.command) return suggestion;
+        return {
+          ...suggestion,
+          text: suggestion.text,
+          command: TRIGGER_SUGGESTION_COMMAND,
+          rangeToReplace,
+        };
+      });
     },
     (fragment: string, rangeToReplace: { start: number; end: number }) => {
       // KEEP field<suggest>
