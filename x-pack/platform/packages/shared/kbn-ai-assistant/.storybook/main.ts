@@ -11,7 +11,7 @@ module.exports = {
   ...defaultConfig,
   stories: [
     '../**/*.stories.tsx',
-    '../../../platform/packages/shared/ai-assistant/**/*.stories.tsx',
+    '../../../../../platform/packages/shared/ai-assistant/**/*.stories.tsx',
   ],
   reactOptions: {
     strictMode: true,

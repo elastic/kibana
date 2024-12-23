@@ -13,7 +13,7 @@ addons.setConfig({
   theme: create({
     base: 'light',
     brandTitle: 'AI Assistant Storybook',
-    brandUrl: 'https://github.com/elastic/kibana/tree/main/x-pack/packages/kbn-ai-assistant',
+    brandUrl: 'https://github.com/elastic/kibana/tree/main/x-pack/platform/packages/shared/kbn-ai-assistant',
   }),
   showPanel: true.valueOf,
   selectedPanel: PANEL_ID,

@@ -3857,7 +3857,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ai-assistant@link:x-pack/packages/kbn-ai-assistant":
+"@kbn/ai-assistant@link:x-pack/platform/packages/shared/kbn-ai-assistant":
   version "0.0.0"
   uid ""
 
