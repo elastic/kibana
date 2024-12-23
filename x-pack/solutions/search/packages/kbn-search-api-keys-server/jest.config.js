@@ -9,9 +9,9 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-search-api-keys-server'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/packages/kbn-search-api-keys-server',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/search/packages/kbn-search-api-keys-server'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/search/packages/kbn-search-api-keys-server',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/packages/kbn-search-api-keys-server/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/solutions/search/packages/kbn-search-api-keys-server/**/*.{ts,tsx}'],
 };
