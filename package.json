@@ -386,7 +386,7 @@
     "@kbn/core-security-server": "link:src/core/packages/security/server",
     "@kbn/core-security-server-internal": "link:src/core/packages/security/server-internal",
     "@kbn/core-security-server-mocks": "link:src/core/packages/security/server-mocks",
-    "@kbn/core-status-common": "link:packages/core/status/core-status-common",
+    "@kbn/core-status-common": "link:src/core/packages/status/common",
     "@kbn/core-status-server": "link:packages/core/status/core-status-server",
     "@kbn/core-status-server-internal": "link:packages/core/status/core-status-server-internal",
     "@kbn/core-test-helpers-deprecations-getters": "link:packages/core/test-helpers/core-test-helpers-deprecations-getters",
