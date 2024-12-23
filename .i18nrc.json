@@ -40,7 +40,7 @@
     "kbnGridLayout": "packages/kbn-grid-layout",
     "esUi": "src/platform/plugins/shared/es_ui_shared",
     "expandableFlyout": "packages/kbn-expandable-flyout",
-    "expressionError": "src/plugins/expression_error",
+    "expressionError": "src/platform/plugins/shared/expression_error",
     "expressionGauge": "src/plugins/chart_expressions/expression_gauge",
     "expressionHeatmap": "src/plugins/chart_expressions/expression_heatmap",
     "expressionImage": "src/plugins/expression_image",

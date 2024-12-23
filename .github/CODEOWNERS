@@ -453,7 +453,7 @@ x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hu
 packages/kbn-expect @elastic/kibana-operations @elastic/appex-qa
 x-pack/examples/exploratory_view_example @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/exploratory_view @elastic/obs-ux-management-team
-src/plugins/expression_error @elastic/kibana-presentation
+src/platform/plugins/shared/expression_error @elastic/kibana-presentation
 src/plugins/chart_expressions/expression_gauge @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_heatmap @elastic/kibana-visualizations
 src/plugins/expression_image @elastic/kibana-presentation
