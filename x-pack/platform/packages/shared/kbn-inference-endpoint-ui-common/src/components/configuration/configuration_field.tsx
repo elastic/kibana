@@ -36,15 +36,14 @@ export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
   isLoading,
   validateAndSetConfigValue,
 }) => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { isValid, value, default_value, key } = configEntry;
+  const { isValid, value, default_value: defaultValue, key } = configEntry;
   const [innerValue, setInnerValue] = useState(
-    !value || value.toString().length === 0 ? default_value : value
+    !value || value.toString().length === 0 ? defaultValue : value
   );
 
   useEffect(() => {
-    setInnerValue(!value || value.toString().length === 0 ? default_value : value);
-  }, [default_value, value]);
+    setInnerValue(!value || value.toString().length === 0 ? defaultValue : value);
+  }, [defaultValue, value]);
   return (
     <EuiFieldText
       disabled={isLoading}
@@ -65,12 +64,11 @@ export const ConfigSwitchField: React.FC<ConfigInputFieldProps> = ({
   isLoading,
   validateAndSetConfigValue,
 }) => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { label, value, default_value, key } = configEntry;
-  const [innerValue, setInnerValue] = useState(value ?? default_value);
+  const { label, value, default_value: defaultValue, key } = configEntry;
+  const [innerValue, setInnerValue] = useState(value ?? defaultValue);
   useEffect(() => {
-    setInnerValue(value ?? default_value);
-  }, [default_value, value]);
+    setInnerValue(value ?? defaultValue);
+  }, [defaultValue, value]);
   return (
     <EuiSwitch
       checked={ensureBooleanType(innerValue)}
@@ -90,12 +88,11 @@ export const ConfigInputTextArea: React.FC<ConfigInputFieldProps> = ({
   configEntry,
   validateAndSetConfigValue,
 }) => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { isValid, value, default_value, key } = configEntry;
-  const [innerValue, setInnerValue] = useState(value ?? default_value);
+  const { isValid, value, default_value: defaultValue, key } = configEntry;
+  const [innerValue, setInnerValue] = useState(value ?? defaultValue);
   useEffect(() => {
     setInnerValue(value ?? '');
-  }, [default_value, value]);
+  }, [defaultValue, value]);
   return (
     <EuiTextArea
       disabled={isLoading}
@@ -116,12 +113,11 @@ export const ConfigNumberField: React.FC<ConfigInputFieldProps> = ({
   isLoading,
   validateAndSetConfigValue,
 }) => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { isValid, value, default_value, key } = configEntry;
-  const [innerValue, setInnerValue] = useState(value ?? default_value);
+  const { isValid, value, default_value: defaultValue, key } = configEntry;
+  const [innerValue, setInnerValue] = useState(value ?? defaultValue);
   useEffect(() => {
-    setInnerValue(!value || value.toString().length === 0 ? default_value : value);
-  }, [default_value, value]);
+    setInnerValue(!value || value.toString().length === 0 ? defaultValue : value);
+  }, [defaultValue, value]);
   return (
     <EuiFieldNumber
       fullWidth
