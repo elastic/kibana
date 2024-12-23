@@ -35,7 +35,7 @@ export const getV2 = (): KibanaFeatureConfig => {
 
   return {
     deprecated: {
-      notice: i18n.translate('xpack.cases.features.casesFeature.deprecationMessage', {
+      notice: i18n.translate('xpack.cases.features.casesFeatureV2.deprecationMessage', {
         defaultMessage:
           'The {currentId} permissions are deprecated, please see {casesFeatureIdV3}.',
         values: {
