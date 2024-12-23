@@ -57,7 +57,7 @@ export function defineGetAllRolesBySpaceRoutes({
             },
           }),
         ]);
-        const elasticsearchRoles = queryRolesResponse.roles?.reduce<
+        const elasticsearchRoles = (queryRolesResponse.roles || [])?.reduce<
           Record<string, SecurityQueryRoleQueryRole>
         >((acc, role) => {
           return {
@@ -65,6 +65,7 @@ export function defineGetAllRolesBySpaceRoutes({
             [role.name]: role,
           };
         }, {});
+
         // Transform elasticsearch roles into Kibana roles and return in a list sorted by the role name.
         return response.ok({
           body: Object.entries(elasticsearchRoles)
@@ -75,7 +76,8 @@ export function defineGetAllRolesBySpaceRoutes({
 
               const role = transformElasticsearchRoleToRole({
                 features,
-                elasticsearchRole, // TODO: address why the `remote_cluster` field is throwing type errors
+                // @ts-expect-error `remote_cluster` is not known in `Role` type
+                elasticsearchRole,
                 name: roleName,
                 application: authz.applicationName,
                 logger,

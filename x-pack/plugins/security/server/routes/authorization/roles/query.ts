@@ -127,7 +127,8 @@ export function defineQueryRolesRoutes({
         const transformedRoles = (queryRoles.roles || []).map((role) =>
           transformElasticsearchRoleToRole({
             features,
-            elasticsearchRole: role, // TODO: address why the `remote_cluster` field is throwing type errors
+            // @ts-expect-error `remote_cluster` is not known in `Role` type
+            elasticsearchRole: role,
             name: role.name,
             application: authz.applicationName,
             logger,
