@@ -6,13 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  deleteStream,
-  enableStreams,
-  fetchDocument,
-  forkStream,
-  indexDocument,
-} from './helpers/requests';
+import { enableStreams, fetchDocument, forkStream, indexDocument } from './helpers/requests';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { waitForDocumentInIndex } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
 import { cleanUpRootStream } from './helpers/cleanup';
@@ -25,8 +19,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Basic functionality', () => {
     after(async () => {
-      await deleteStream(supertest, 'logs.nginx');
       await cleanUpRootStream(esClient);
+      await esClient.indices.deleteDataStream({
+        name: ['logs*'],
+      });
     });
 
     // Note: Each step is dependent on the previous
