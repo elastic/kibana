@@ -711,7 +711,7 @@ using the CURL scripts in the scripts folder.
 |Exposes the shared components and APIs to access and visualize logs.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/logstash[logstash]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/logstash[logstash]
 |WARNING: Missing README.
 
 
