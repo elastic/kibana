@@ -10,6 +10,7 @@ import { EuiSuperDatePicker, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter, Query } from '@kbn/es-query';
+import { debounce } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -68,19 +69,64 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
     [alertsDataView]
   );
 
+  // Users accumulate an "unsubmitted" query as they type in the search bar,
+  // but have not pressed the 'Enter' key to submit the query, (which would
+  // call `onQuerySubmit`).
+  //
+  // This unsubmitted query is stored in `unSubmittedQuery`.
+  //
+  // To match the behavior of Discover, `setQuery` must be called with the
+  // `unSubmittedQuery` query when:
+  //
+  // 1) The user selects a new time range
+  // 2) The user clicks the refresh button
+  //
+  // Also to match the behavior of Discover, we must NOT call `setQuery` with
+  // the `unSubmittedQuery` query when the user clicks the `Save` button button.
+  const [unSubmittedQuery, setUnSubmittedQuery] = React.useState<Query['query'] | undefined>(
+    undefined
+  );
+
+  /**
+   * ``
+   */
+  const debouncedOnQueryChange = useCallback((inputQuery: Query['query'] | undefined) => {
+    const debouncedFunction = debounce(100, (debouncedQuery: Query['query'] | undefined) => {
+      setUnSubmittedQuery(debouncedQuery);
+    });
+
+    return debouncedFunction(inputQuery);
+  }, []);
+
   // get the common time ranges for the date picker:
   const commonlyUsedRanges = useMemo(() => getCommonTimeRanges(), []);
 
-  // called when the date picker updates the time range:
+  /**
+   * `onTimeChange` is called by the `EuiSuperDatePicker` when the user:
+   * 1) selects a new time range
+   * 2) clicks the refresh button
+   */
   const onTimeChange = useCallback(
     ({ start: startDate, end: endDate }: OnTimeChangeProps) => {
+      if (unSubmittedQuery != null) {
+        const newUnSubmittedQuery: Query = {
+          query: unSubmittedQuery,
+          language: 'kuery',
+        };
+
+        setQuery(newUnSubmittedQuery); // <-- set the query to the unsubmitted query
+      }
+
       setStart(startDate);
       setEnd(endDate);
     },
-    [setEnd, setStart]
+    [setEnd, setQuery, setStart, unSubmittedQuery]
   );
 
-  // called when the search bar updates filters:
+  /**
+   * `onFiltersUpdated` is called by the `SearchBar` when the filters, (which
+   * appear belew the `SearchBar` input), are updated.
+   */
   const onFiltersUpdated = useCallback(
     (newFilters: Filter[]) => {
       setFilters(newFilters);
@@ -88,7 +134,9 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
     [setFilters]
   );
 
-  // called when the search bar updates the query:
+  /**
+   * onQuerySubmit is called by the `SearchBar` when the user presses `Enter`
+   */
   const onQuerySubmit = useCallback(
     ({ query: newQuery }: { query?: Query | undefined }) => {
       if (newQuery != null) {
@@ -120,6 +168,9 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
           showSubmitButton={false}
           isLoading={isLoadingIndexPattern}
           onFiltersUpdated={onFiltersUpdated}
+          onQueryChange={({ query: debouncedQuery }) => {
+            debouncedOnQueryChange(debouncedQuery?.query);
+          }}
           onQuerySubmit={onQuerySubmit}
           placeholder={i18n.FILTER_YOUR_DATA}
           query={query}
