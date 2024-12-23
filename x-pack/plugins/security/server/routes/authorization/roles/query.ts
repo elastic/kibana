@@ -142,7 +142,6 @@ export function defineQueryRolesRoutes({
           },
         });
       } catch (error) {
-        console.log(error);
         return response.customError(wrapIntoCustomErrorResponse(error));
       }
     })
