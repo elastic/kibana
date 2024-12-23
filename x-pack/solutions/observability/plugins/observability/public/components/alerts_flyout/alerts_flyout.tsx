@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutProps } from '@elastic/eui';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 
-import type { Alert, Alerts } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { Alert } from '@kbn/alerting-types';
 import { AlertsFlyoutHeader } from './alerts_flyout_header';
 import { AlertsFlyoutBody } from './alerts_flyout_body';
 import { AlertsFlyoutFooter } from './alerts_flyout_footer';
@@ -17,7 +17,7 @@ import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observabi
 
 type AlertsFlyoutProps = {
   alert?: Alert;
-  alerts?: Alerts;
+  alerts?: Alert[];
   selectedAlertId?: string;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 } & EuiFlyoutProps;
@@ -45,12 +45,10 @@ export function AlertsFlyout({
       </EuiFlyoutHeader>
       <AlertsFlyoutBody
         alert={selectedAlert}
-        tableId={''}
         observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
       />
       <AlertsFlyoutFooter
         alert={selectedAlert}
-        tableId={''}
         observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
       />
     </EuiFlyout>

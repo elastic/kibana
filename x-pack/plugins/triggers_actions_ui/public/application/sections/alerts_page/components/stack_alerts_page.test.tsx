@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { screen } from '@testing-library/react';
-
+import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields';
+import { alertsTableQueryClient } from '@kbn/response-ops-alerts-table/query_client';
 import { StackAlertsPage } from './stack_alerts_page';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { createAppMockRenderer } from '../../test_utils';
@@ -19,14 +20,19 @@ const mockLoadRuleTypes = jest
   .mocked(loadRuleTypes)
   .mockResolvedValue(Array.from(ruleTypesIndex.values()));
 
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields');
+jest.mocked(fetchAlertsFields).mockResolvedValue({ browserFields: {}, fields: [] });
+
 jest.mock('../../alerts_search_bar/url_synced_alerts_search_bar', () => ({
   UrlSyncedAlertsSearchBar: () => (
     <div data-test-subj="urlSyncedAlertsSearchBar">{'UrlSyncedAlertsSearchBar'}</div>
   ),
 }));
 
-jest.mock('../../alerts_table/alerts_data_grid', () => ({
-  AlertsDataGrid: jest.fn(() => <div data-test-subj="alertsTable">{'Alerts table'}</div>),
+// Not using `jest.mocked` here because the `AlertsTable` component is manually typed to ensure
+// correct type inference, but it's actually a `memo(forwardRef())` component, which is hard to mock
+jest.mock('@kbn/response-ops-alerts-table/components/alerts_table', () => ({
+  AlertsTable: () => <div data-test-subj="alertsTable">{'Alerts table'}</div>,
 }));
 
 jest.mock('../../../../common/get_experimental_features');
@@ -35,6 +41,11 @@ jest.mocked(getIsExperimentalFeatureEnabled).mockReturnValue(false);
 describe('StackAlertsPage', () => {
   const appMockRender = createAppMockRenderer({
     additionalServices: {},
+  });
+
+  afterEach(() => {
+    appMockRender.queryClient.clear();
+    alertsTableQueryClient.clear();
   });
 
   it('renders the stack alerts page with the correct permissions', async () => {

@@ -9,13 +9,13 @@ import React, { ComponentProps } from 'react';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { render } from '../../../utils/test_helper';
 import { AlertsTableCellValue } from './cell_value';
-import { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { Alert } from '@kbn/alerting-types';
 
 interface AlertsTableRow {
   alertStatus: typeof ALERT_STATUS_ACTIVE | typeof ALERT_STATUS_RECOVERED;
 }
 
-describe('getRenderCellValue', () => {
+describe('AlertsTableCellValue', () => {
   describe('when column is alert status', () => {
     it('should return an active indicator when alert status is active', async () => {
       const cell = render(

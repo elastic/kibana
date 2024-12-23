@@ -23,14 +23,14 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
-import { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { Alert } from '@kbn/alerting-types';
 import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSeverityBadge } from '../../alert_severity_badge';
 import { AlertStatusIndicator } from '../../alert_status_indicator';
 import { parseAlert } from '../../../pages/alerts/helpers/parse_alert';
 import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
-import { GetObservabilityAlertsTableProp } from '../types';
+import type { GetObservabilityAlertsTableProp } from '../types';
 
 const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   // can be updated when working on https://github.com/elastic/kibana/issues/140819
