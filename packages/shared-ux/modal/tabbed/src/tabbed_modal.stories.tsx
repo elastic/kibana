@@ -67,118 +67,120 @@ export const TrivialExample = {
   argTypes,
 };
 
-export const NonTrivialExample = {
-  render: (params: TabbedModalStorybookParams) => {
-    const checkboxGroupItemId1 = useGeneratedHtmlId({
-      prefix: 'checkboxGroupItem',
-      suffix: 'first',
-    });
-    const checkboxGroupItemId2 = useGeneratedHtmlId({
-      prefix: 'checkboxGroupItem',
-      suffix: 'second',
-    });
-    const checkboxGroupItemId3 = useGeneratedHtmlId({
-      prefix: 'checkboxGroupItem',
-      suffix: 'third',
-    });
+const NonTrivialExampleComponent = (params: TabbedModalStorybookParams) => {
+  const checkboxGroupItemId1 = useGeneratedHtmlId({
+    prefix: 'checkboxGroupItem',
+    suffix: 'first',
+  });
+  const checkboxGroupItemId2 = useGeneratedHtmlId({
+    prefix: 'checkboxGroupItem',
+    suffix: 'second',
+  });
+  const checkboxGroupItemId3 = useGeneratedHtmlId({
+    prefix: 'checkboxGroupItem',
+    suffix: 'third',
+  });
 
-    const checkboxes = [
-      {
-        id: checkboxGroupItemId1,
-        label: 'Margherita',
-        'data-test-sub': 'dts_test',
-      },
-      {
-        id: checkboxGroupItemId2,
-        label: 'Diavola',
-        className: 'classNameTest',
-      },
-      {
-        id: checkboxGroupItemId3,
-        label: 'Hawaiian Pizza',
-        disabled: true,
-      },
-    ];
+  const checkboxes = [
+    {
+      id: checkboxGroupItemId1,
+      label: 'Margherita',
+      'data-test-sub': 'dts_test',
+    },
+    {
+      id: checkboxGroupItemId2,
+      label: 'Diavola',
+      className: 'classNameTest',
+    },
+    {
+      id: checkboxGroupItemId3,
+      label: 'Hawaiian Pizza',
+      disabled: true,
+    },
+  ];
 
-    enum ACTION_TYPES {
-      SelectOption,
-    }
+  enum ACTION_TYPES {
+    SelectOption,
+  }
 
-    interface IPizzaSelectorTabState {
-      checkboxIdToSelectedMap: Record<string, boolean>;
-    }
+  interface IPizzaSelectorTabState {
+    checkboxIdToSelectedMap: Record<string, boolean>;
+  }
 
-    const pizzaSelector: IModalTabDeclaration<IPizzaSelectorTabState> = {
-      id: 'order',
-      name: 'order',
-      initialState: {
-        checkboxIdToSelectedMap: {
-          [checkboxGroupItemId2]: true,
-        },
+  const pizzaSelector: IModalTabDeclaration<IPizzaSelectorTabState> = {
+    id: 'order',
+    name: 'order',
+    initialState: {
+      checkboxIdToSelectedMap: {
+        [checkboxGroupItemId2]: true,
       },
-      reducer(state, action) {
-        switch (action.type) {
-          case String(ACTION_TYPES.SelectOption):
-            return {
-              ...state,
-              checkboxIdToSelectedMap: action.payload,
-            };
-          default:
-            return state;
-        }
-      },
-      content: ({ state, dispatch }) => {
-        const { checkboxIdToSelectedMap } = state;
-
-        const onChange = (optionId: string) => {
-          const newCheckboxIdToSelectedMap = {
-            ...checkboxIdToSelectedMap,
-            ...{
-              [optionId]: !checkboxIdToSelectedMap[optionId],
-            },
+    },
+    reducer(state, action) {
+      switch (action.type) {
+        case String(ACTION_TYPES.SelectOption):
+          return {
+            ...state,
+            checkboxIdToSelectedMap: action.payload,
           };
+        default:
+          return state;
+      }
+    },
+    content: ({ state, dispatch }) => {
+      const { checkboxIdToSelectedMap } = state;
 
-          dispatch({
-            type: String(ACTION_TYPES.SelectOption),
-            payload: newCheckboxIdToSelectedMap,
-          });
+      const onChange = (optionId: string) => {
+        const newCheckboxIdToSelectedMap = {
+          ...checkboxIdToSelectedMap,
+          ...{
+            [optionId]: !checkboxIdToSelectedMap[optionId],
+          },
         };
 
-        return (
-          <Fragment>
-            <EuiSpacer size="m" />
-            <EuiText>
-              <h3>Select a Pizza (or more)</h3>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiCheckboxGroup
-              options={checkboxes}
-              idToSelectedMap={checkboxIdToSelectedMap}
-              onChange={(id) => onChange(id)}
-            />
-          </Fragment>
-        );
-      },
-      modalActionBtn: {
-        id: 'pizza',
-        dataTestSubj: 'order-pizza',
-        label: 'Order 🍕',
-        handler: ({ state }) => {
-          alert(JSON.stringify(state));
-        },
-      },
-    };
+        dispatch({
+          type: String(ACTION_TYPES.SelectOption),
+          payload: newCheckboxIdToSelectedMap,
+        });
+      };
 
-    return (
-      <TabbedModal
-        {...params}
-        onClose={() => {}}
-        modalTitle="Non trivial example"
-        tabs={[pizzaSelector]}
-        defaultSelectedTabId="order"
-      />
-    );
-  },
+      return (
+        <Fragment>
+          <EuiSpacer size="m" />
+          <EuiText>
+            <h3>Select a Pizza (or more)</h3>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiCheckboxGroup
+            options={checkboxes}
+            idToSelectedMap={checkboxIdToSelectedMap}
+            onChange={(id) => onChange(id)}
+          />
+        </Fragment>
+      );
+    },
+    modalActionBtn: {
+      id: 'pizza',
+      dataTestSubj: 'order-pizza',
+      label: 'Order 🍕',
+      handler: ({ state }) => {
+        alert(JSON.stringify(state));
+      },
+    },
+  };
+
+  return (
+    <TabbedModal
+      {...params}
+      onClose={() => {}}
+      modalTitle="Non trivial example"
+      tabs={[pizzaSelector]}
+      defaultSelectedTabId="order"
+    />
+  );
+};
+
+export const NonTrivialExample = {
+  render: (params: TabbedModalStorybookParams) => <NonTrivialExampleComponent {...params} />,
 
   argTypes,
 };
