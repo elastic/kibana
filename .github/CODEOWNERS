@@ -458,7 +458,7 @@ src/plugins/chart_expressions/expression_gauge @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_heatmap @elastic/kibana-visualizations
 src/platform/plugins/shared/expression_image @elastic/kibana-presentation
 src/plugins/chart_expressions/expression_legacy_metric @elastic/kibana-visualizations
-src/plugins/expression_metric @elastic/kibana-presentation
+src/platform/plugins/shared/expression_metric @elastic/kibana-presentation
 src/plugins/chart_expressions/expression_metric @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_partition_vis @elastic/kibana-visualizations
 src/plugins/expression_repeat_image @elastic/kibana-presentation
