@@ -7,6 +7,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/packages/kbn-alerting-comparators'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-alerting-comparators'],
 };
