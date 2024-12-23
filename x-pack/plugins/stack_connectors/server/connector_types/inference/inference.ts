@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { text as streamToString } from 'node:stream/consumers';
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { Stream } from 'openai/streaming';
 import { Readable } from 'stream';
@@ -181,7 +182,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    * @signal abort signal
    */
   public async performApiUnifiedCompletionStream(params: UnifiedChatCompleteParams) {
-    return await this.esClient.transport.request<UnifiedChatCompleteResponse>(
+    const response = await this.esClient.transport.request<UnifiedChatCompleteResponse>(
       {
         method: 'POST',
         path: `_inference/completion/${this.inferenceId}/_unified`,
@@ -189,8 +190,18 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       },
       {
         asStream: true,
+        meta: true,
+        signal: params.signal,
       }
     );
+
+    // errors should be thrown as it will not be a stream response
+    if (response.statusCode >= 400) {
+      const error = await streamToString(response.body as unknown as Readable);
+      throw new Error(error);
+    }
+
+    return response.body;
   }
 
   /**
