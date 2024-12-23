@@ -17,6 +17,7 @@ import {
   TestConnectorParamsSchema,
   MicrosoftDefenderEndpointDoNotValidateResponseSchema,
   GetActionsParamsSchema,
+  AgentDetailsParamsSchema,
 } from '../../../common/microsoft_defender_endpoint/schema';
 import {
   MicrosoftDefenderEndpointAgentDetailsParams,
@@ -67,7 +68,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     this.registerSubAction({
       name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_AGENT_DETAILS,
       method: 'getAgentDetails',
-      schema: TestConnectorParamsSchema,
+      schema: AgentDetailsParamsSchema,
     });
 
     this.registerSubAction({
