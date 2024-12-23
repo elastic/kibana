@@ -8,3 +8,4 @@
 export { downloadToDisk } from './download';
 export { openZipArchive, type ZipArchive } from './zip_archive';
 export { loadManifestFile, loadMappingFile } from './archive_accessors';
+export { ensureDefaultElserDeployed } from './ensure_default_elser_deployed';
