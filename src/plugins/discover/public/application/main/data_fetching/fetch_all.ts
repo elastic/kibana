@@ -118,7 +118,7 @@ export function fetchAll(
           data,
           expressions,
           profilesManager,
-          inputTimeRange: getInternalState().dataRequestParams.timeRangeAbsolute,
+          timeRange: getInternalState().dataRequestParams.timeRangeAbsolute,
         })
       : fetchDocuments(searchSource, fetchDeps);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
