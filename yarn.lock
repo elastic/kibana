@@ -4329,7 +4329,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-apps-server-internal@link:packages/core/apps/core-apps-server-internal":
+"@kbn/core-apps-server-internal@link:src/core/packages/apps/server-internal":
   version "0.0.0"
   uid ""
 
