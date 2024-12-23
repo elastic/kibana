@@ -34,7 +34,7 @@
     ],
     "savedSearch": "src/plugins/saved_search",
     "embeddableApi": "src/platform/plugins/shared/embeddable",
-    "presentationPanel": "src/plugins/presentation_panel",
+    "presentationPanel": "src/platform/plugins/private/presentation_panel",
     "embeddableExamples": "examples/embeddable_examples",
     "esQuery": "packages/kbn-es-query/src",
     "kbnGridLayout": "packages/kbn-grid-layout",
