@@ -30,14 +30,7 @@ import {
 } from '@kbn/code-owners';
 import { generateTestRunId, getTestIDForTitle, ScoutReport, ScoutReportEventAction } from '.';
 import { environmentMetadata } from '../datasources';
-
-/**
- * Configuration options for the Scout Playwright reporter
- */
-export interface ScoutPlaywrightReporterOptions {
-  name?: string;
-  outputPath?: string;
-}
+import type { ScoutPlaywrightReporterOptions } from './scout_playwright_reporter';
 
 /**
  * Scout Playwright reporter
@@ -56,7 +49,7 @@ export class ScoutPlaywrightReporter implements Reporter {
     });
 
     this.name = this.reporterOptions.name || 'unknown';
-    this.runId = generateTestRunId();
+    this.runId = this.reporterOptions.runId || generateTestRunId();
     this.log.info(`Scout test run ID: ${this.runId}`);
 
     this.report = new ScoutReport(this.log);
