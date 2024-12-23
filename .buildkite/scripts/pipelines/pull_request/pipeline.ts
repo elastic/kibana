@@ -60,7 +60,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^src\/plugins\/data/,
         /^x-pack\/platform\/plugins\/shared\/actions/,
         /^x-pack\/platform\/plugins\/shared\/alerting/,
-        /^x-pack\/plugins\/event_log/,
+        /^x-pack\/platform\/plugins\/shared\/event_log/,
         /^x-pack\/plugins\/rule_registry/,
         /^x-pack\/plugins\/task_manager/,
       ])) ||
