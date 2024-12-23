@@ -8,10 +8,10 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 export const getIngestPipelineName = (namespace: string): string => {
-  return `entity_analytics_add_ingest_timestamp-pipeline-${namespace}`;
+  return `entity_analytics_create_eventIngest_from_timestamp-pipeline-${namespace}`;
 };
 
-export const createIngestTimestampPipeline = async (
+export const createEventIngestedFromTimestamp = async (
   esClient: ElasticsearchClient,
   namespace: string
 ) => {
@@ -25,11 +25,11 @@ export const createIngestTimestampPipeline = async (
           managed_by: 'entity_analytics',
           managed: true,
         },
-        description: 'Pipeline for adding event timestamp',
+        description: 'Pipeline for adding timestamp value to event.ingested',
         processors: [
           {
             set: {
-              field: '@timestamp',
+              field: 'event.ingested',
               value: '{{_ingest.timestamp}}',
             },
           },

@@ -340,4 +340,37 @@ export class RiskScoreDataClient {
       body: oldComponentTemplate.component_template,
     });
   }
+
+  public copyTimestampToEventIngested = (abortSignal?: AbortSignal) => {
+    return this.options.esClient.updateByQuery(
+      {
+        index: getRiskScoreLatestIndex(this.options.namespace),
+        conflicts: 'proceed',
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        scroll_size: 10000,
+        body: {
+          query: {
+            bool: {
+              must_not: {
+                exists: {
+                  field: 'event.ingested',
+                },
+              },
+            },
+          },
+          script: {
+            source: 'ctx._source.event.ingested = ctx._source.@timestamp',
+            lang: 'painless',
+          },
+        },
+      },
+      {
+        requestTimeout: '5m',
+        retryOnTimeout: true,
+        maxRetries: 2,
+        signal: abortSignal,
+      }
+    );
+  };
 }
