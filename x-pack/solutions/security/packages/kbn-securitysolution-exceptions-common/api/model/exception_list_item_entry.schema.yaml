@@ -17,9 +17,9 @@ components:
           type: string
           enum: [match]
         field:
-          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         value:
-          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         operator:
           $ref: '#/components/schemas/ExceptionListItemEntryOperator'
       required:
@@ -35,11 +35,11 @@ components:
           type: string
           enum: [match_any]
         field:
-          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         value:
           type: array
           items:
-            $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
           minItems: 1
         operator:
           $ref: '#/components/schemas/ExceptionListItemEntryOperator'
@@ -56,7 +56,7 @@ components:
           type: string
           enum: [list]
         field:
-          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         list:
           type: object
           properties:
@@ -80,7 +80,7 @@ components:
           type: string
           enum: [exists]
         field:
-          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         operator:
           $ref: '#/components/schemas/ExceptionListItemEntryOperator'
       required:
@@ -101,7 +101,7 @@ components:
           type: string
           enum: [nested]
         field:
-          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         entries:
           type: array
           items:
@@ -119,9 +119,9 @@ components:
           type: string
           enum: [wildcard]
         field:
-          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         value:
-          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         operator:
           $ref: '#/components/schemas/ExceptionListItemEntryOperator'
       required:

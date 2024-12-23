@@ -8,6 +8,7 @@
 import React, { type FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
+  useEuiTheme,
   EuiAccordion,
   EuiHorizontalRule,
   EuiIcon,
@@ -21,7 +22,6 @@ import {
 import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useCurrentThemeVars } from '../../../../contexts/kibana';
 import type { TextExpansionInference, FormattedTextExpansionResponse } from '.';
 
 const MAX_TOKENS = 5;
@@ -198,14 +198,12 @@ interface ResultStatFormatting {
 const useResultStatFormatting = (
   response: FormattedTextExpansionResponse
 ): ResultStatFormatting => {
-  const {
-    euiTheme: { euiColorMediumShade, euiTextSubduedColor, euiTextColor },
-  } = useCurrentThemeVars();
+  const { euiTheme } = useEuiTheme();
 
   if (response.score >= 5) {
     return {
       color: 'success',
-      textColor: euiTextColor,
+      textColor: euiTheme.colors.textParagraph,
       icon: 'check',
       text: i18n.translate(
         'xpack.ml.trainedModels.testModelsFlyout.textExpansion.output.goodMatch',
@@ -216,16 +214,16 @@ const useResultStatFormatting = (
 
   if (response.score > 0) {
     return {
-      color: euiTextSubduedColor,
-      textColor: euiTextColor,
+      color: euiTheme.colors.textSubdued,
+      textColor: euiTheme.colors.textParagraph,
       text: null,
       icon: null,
     };
   }
 
   return {
-    color: euiColorMediumShade,
-    textColor: euiColorMediumShade,
+    color: euiTheme.colors.mediumShade,
+    textColor: euiTheme.colors.mediumShade,
     text: null,
     icon: null,
   };

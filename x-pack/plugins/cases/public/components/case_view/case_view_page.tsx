@@ -17,10 +17,12 @@ import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 import { CaseViewActivity } from './components/case_view_activity';
 import { CaseViewAlerts } from './components/case_view_alerts';
 import { CaseViewFiles } from './components/case_view_files';
+import { CaseViewObservables } from './components/case_view_observables';
 import { CaseViewMetrics } from './metrics';
 import type { CaseViewPageProps } from './types';
 import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import { useOnUpdateField } from './use_on_update_field';
+import { CaseViewSimilarCases } from './components/case_view_similar_cases';
 
 const getActiveTabId = (tabId?: string) => {
   if (tabId && Object.values(CASE_VIEW_PAGE_TABS).includes(tabId as CASE_VIEW_PAGE_TABS)) {
@@ -122,6 +124,12 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             <CaseViewAlerts caseData={caseData} onAlertsTableLoaded={onAlertsTableLoaded} />
           )}
           {activeTabId === CASE_VIEW_PAGE_TABS.FILES && <CaseViewFiles caseData={caseData} />}
+          {activeTabId === CASE_VIEW_PAGE_TABS.OBSERVABLES && (
+            <CaseViewObservables isLoading={isLoading} caseData={caseData} />
+          )}
+          {activeTabId === CASE_VIEW_PAGE_TABS.SIMILAR_CASES && (
+            <CaseViewSimilarCases caseData={caseData} />
+          )}
         </EuiFlexGroup>
       </>
     );
