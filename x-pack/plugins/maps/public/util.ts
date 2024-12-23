@@ -69,7 +69,7 @@ export function getEMSClient(): EMSClient {
       tileApiUrl,
       fileApiUrl,
       landingPageUrl: emsSettings!.getEMSLandingPageUrl(),
-      fetchFunction(url: string) {
+      fetchFunction(url: RequestInfo) {
         return fetch(url);
       },
       proxyPath,
