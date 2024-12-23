@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { PassThrough } from 'stream';
 import { createLlmProxy, LlmProxy } from '../../common/create_llm_proxy';

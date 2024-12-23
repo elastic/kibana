@@ -8,7 +8,7 @@
 /// <reference types="@kbn/ambient-ftr-types"/>
 
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import moment from 'moment';
 import { chatClient, esClient, synthtraceEsClients } from '../../services';
 

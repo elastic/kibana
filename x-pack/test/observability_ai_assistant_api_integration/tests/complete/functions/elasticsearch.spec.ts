@@ -6,7 +6,7 @@
  */
 
 import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { ELASTICSEARCH_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/elasticsearch';
