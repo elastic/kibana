@@ -165,6 +165,7 @@ export const basicCaseFields: CaseAttributes = {
   assignees: [],
   category: null,
   customFields: [],
+  observables: [],
 };
 
 export const createCaseSavedObjectResponse = ({

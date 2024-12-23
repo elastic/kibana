@@ -16,6 +16,7 @@ import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_SUPPORTED_CONNECTORS_RETURNED,
   MAX_TEMPLATES_LENGTH,
+  OBSERVABLE_TYPE_IPV4,
 } from '../../../common/constants';
 import { ConnectorTypes } from '../../../common';
 import type { TemplatesConfiguration } from '../../../common/types/domain';
@@ -403,6 +404,7 @@ describe('client', () => {
               email: 'testemail@elastic.co',
               username: 'elastic',
             },
+            observableTypes: [],
           },
         });
 
@@ -463,6 +465,7 @@ describe('client', () => {
                 },
               },
             ],
+            observableTypes: [],
           },
           version: 'test-version',
         });
@@ -474,6 +477,7 @@ describe('client', () => {
           namespaces: ['default'],
           references: [],
           attributes: {
+            observableTypes: [],
             templates: [],
             created_at: '2019-11-25T21:54:48.952Z',
             created_by: {
@@ -1063,6 +1067,7 @@ describe('client', () => {
               ],
               closure_type: 'close-by-user',
               owner: 'cases',
+              observableTypes: [],
             },
             id: 'test-id',
             version: 'test-version',
@@ -1130,6 +1135,7 @@ describe('client', () => {
                     name: 'template 1',
                   },
                 ],
+                observableTypes: [],
               },
               id: 'test-id',
               version: 'test-version',
@@ -1194,6 +1200,31 @@ describe('client', () => {
             )
           ).rejects.toThrow(
             'Failed to get patch configure in route: Error: In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
+          );
+        });
+      });
+
+      describe('observableTypes', () => {
+        it('throws when trying to set duplicate observableTypes', async () => {
+          clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+
+          await expect(
+            update(
+              'test-id',
+              {
+                version: 'test-version',
+                observableTypes: [
+                  {
+                    key: 'e638af17-ebb6-4678-a937-b734bffee36a',
+                    label: OBSERVABLE_TYPE_IPV4.label,
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to get patch configure in route: Error: Invalid duplicated observable types in request: ipv4'
           );
         });
       });
@@ -1363,6 +1394,7 @@ describe('client', () => {
                   },
                   updated_at: null,
                   updated_by: null,
+                  observableTypes: [],
                 },
                 score: 0,
               },
@@ -1388,6 +1420,7 @@ describe('client', () => {
               },
               updated_at: null,
               updated_by: null,
+              observableTypes: [],
             },
           });
 
@@ -1573,6 +1606,30 @@ describe('client', () => {
             )
           ).rejects.toThrow(
             'Failed to create case configuration: Error: In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
+          );
+        });
+      });
+
+      describe('observableTypes', () => {
+        it('throws when trying to set duplicate observableTypes', async () => {
+          clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+
+          await expect(
+            create(
+              {
+                ...baseRequest,
+                observableTypes: [
+                  {
+                    key: 'e638af17-ebb6-4678-a937-b734bffee36a',
+                    label: OBSERVABLE_TYPE_IPV4.label,
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to create case configuration: Error: Invalid duplicated observable types in request: ipv4'
           );
         });
       });
