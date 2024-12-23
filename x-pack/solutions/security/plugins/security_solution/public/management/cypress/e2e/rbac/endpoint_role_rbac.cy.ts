@@ -15,7 +15,8 @@ import {
 import { closeAllToasts } from '../../tasks/toasts';
 import { login, ROLE } from '../../tasks/login';
 
-describe(
+// Unskip when defendInsights assistant feature is enabled by default
+describe.skip(
   'When defining a kibana role for Endpoint security access',
   {
     env: {
