@@ -6525,7 +6525,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-server@link:x-pack/packages/observability/observability_utils/observability_utils_server":
+"@kbn/observability-utils-server@link:x-pack/solutions/observability/packages/utils_server":
   version "0.0.0"
   uid ""
 
