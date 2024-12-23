@@ -49,7 +49,7 @@
     "expressionLegacyMetricVis": "src/plugins/chart_expressions/expression_legacy_metric",
     "expressionPartitionVis": "src/plugins/chart_expressions/expression_partition_vis",
     "expressionXY": "src/plugins/chart_expressions/expression_xy",
-    "expressionRepeatImage": "src/plugins/expression_repeat_image",
+    "expressionRepeatImage": "src/platform/plugins/shared/expression_repeat_image",
     "expressionRevealImage": "src/plugins/expression_reveal_image",
     "expressions": "src/plugins/expressions",
     "expressionShape": "src/plugins/expression_shape",
