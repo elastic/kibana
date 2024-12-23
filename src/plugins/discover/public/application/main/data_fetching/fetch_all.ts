@@ -368,10 +368,10 @@ const fetchTotalHitsSearchSource = async ({
   const inspector = adapter
     ? {
         adapter,
-        title: i18n.translate('unifiedHistogram.inspectorRequestDataTitleTotalHits', {
+        title: i18n.translate('discover.inspectorRequestDataTitleTotalHits', {
           defaultMessage: 'Total hits',
         }),
-        description: i18n.translate('unifiedHistogram.inspectorRequestDescriptionTotalHits', {
+        description: i18n.translate('discove.inspectorRequestDescriptionTotalHits', {
           defaultMessage: 'This request queries Elasticsearch to fetch the total hits.',
         }),
       }
