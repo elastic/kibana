@@ -605,7 +605,7 @@ activities.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[fleet]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/fleet/README.md[fleet]
 |Fleet provides a web-based UI in Kibana for centrally managing Elastic Agents and their policies.
 
 
