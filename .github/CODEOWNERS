@@ -480,7 +480,7 @@ src/plugins/field_formats @elastic/kibana-data-discovery
 packages/kbn-field-types @elastic/kibana-data-discovery
 packages/kbn-field-utils @elastic/kibana-data-discovery
 x-pack/plugins/fields_metadata @elastic/obs-ux-logs-team
-x-pack/plugins/file_upload @elastic/kibana-presentation @elastic/ml-ui
+x-pack/platform/plugins/private/file_upload @elastic/kibana-presentation @elastic/ml-ui
 examples/files_example @elastic/appex-sharedux
 src/plugins/files_management @elastic/appex-sharedux
 src/plugins/files @elastic/appex-sharedux
@@ -1340,7 +1340,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
 /x-pack/plugins/stack_alerts/server/rule_types/geo_containment @elastic/kibana-gis
 /x-pack/plugins/stack_alerts/public/rule_types/geo_containment @elastic/kibana-gis
-#CC# /x-pack/plugins/file_upload @elastic/kibana-gis
+#CC# /x-pack/platform/plugins/private/file_upload @elastic/kibana-gis
 
 # Operations
 /src/dev/license_checker/config.ts @elastic/kibana-operations
