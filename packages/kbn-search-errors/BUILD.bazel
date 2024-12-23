@@ -22,7 +22,6 @@ SRCS = glob(
 )
 
 BUNDLER_DEPS = [
-  "//packages/kbn-bfetch-error",
   "//packages/kbn-i18n",
   "@npm//@elastic/elasticsearch",
   "@npm//@elastic/eui",

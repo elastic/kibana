@@ -21,7 +21,7 @@
           },
           ") => string[] | undefined"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/public/utils/convert_discover_app_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,7 +41,7 @@
                 "text": "DisplayOptions"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/public/utils/convert_discover_app_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -68,7 +68,7 @@
           },
           ") => string[] | undefined"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/public/utils/convert_discover_app_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -88,7 +88,7 @@
                 "text": "DisplayOptions"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/public/utils/convert_discover_app_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -125,7 +125,7 @@
           },
           "[]"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/public/utils/convert_discover_app_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -139,7 +139,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/public/utils/convert_discover_app_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -161,7 +161,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/public/utils/convert_discover_app_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -177,7 +177,7 @@
               "ControlOptions",
               " | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/public/utils/convert_discover_app_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -212,7 +212,7 @@
           },
           " | undefined"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/public/utils/convert_discover_app_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -232,7 +232,7 @@
                 "text": "DisplayOptions"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/public/utils/convert_discover_app_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -250,7 +250,7 @@
         "tags": [],
         "label": "LogsExplorerController",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/public/controller/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -264,7 +264,7 @@
             "signature": [
               "{}"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/public/controller/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -284,7 +284,7 @@
                 "text": "LogsExplorerCustomizations"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/public/controller/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -298,7 +298,7 @@
             "signature": [
               "IDatasetsClient"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/public/controller/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -328,7 +328,7 @@
               },
               "; }"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/public/controller/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -345,7 +345,7 @@
               "LogsExplorerPublicEvent",
               ">"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/public/controller/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -474,7 +474,7 @@
               "ServiceMap",
               ">>"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/public/controller/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -497,7 +497,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/public/controller/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -630,7 +630,7 @@
               "ServiceMap",
               ">>"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/public/controller/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -644,7 +644,7 @@
         "tags": [],
         "label": "LogsExplorerCustomizationEvents",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/public/customizations/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -659,7 +659,7 @@
               "OnUknownDataViewSelectionHandler",
               " | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/public/customizations/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -673,7 +673,7 @@
         "tags": [],
         "label": "LogsExplorerCustomizations",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/public/customizations/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -694,7 +694,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/public/customizations/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -730,7 +730,7 @@
           },
           ">"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/create_controller.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/public/controller/create_controller.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -753,7 +753,7 @@
               },
               " | undefined; initialState?: InitialState | undefined; }"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/create_controller.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/public/controller/create_controller.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -870,7 +870,7 @@
           "WithDiscoverStateContainer",
           ")"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/public/state_machines/logs_explorer_controller/src/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/public/state_machines/logs_explorer_controller/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -910,7 +910,7 @@
           "IndexPatternBrand",
           ">; } & { title?: string | undefined; }; }; }; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/public/controller/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -950,7 +950,7 @@
           "IndexPatternBrand",
           ">; } & { title?: string | undefined; }; }; } | undefined; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/public/controller/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -973,7 +973,7 @@
             "text": "AllDatasetSelection"
           }
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/public/state_machines/logs_explorer_controller/src/default_all_selection.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/public/state_machines/logs_explorer_controller/src/default_all_selection.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -986,7 +986,7 @@
       "tags": [],
       "label": "LogsExplorerPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/logs_explorer/public/types.ts",
+      "path": "x-pack/solutions/observability/plugins/logs_explorer/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1000,7 +1000,7 @@
           "signature": [
             "LogsExplorerLocators"
           ],
-          "path": "x-pack/plugins/observability_solution/logs_explorer/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/logs_explorer/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1015,7 +1015,7 @@
       "tags": [],
       "label": "LogsExplorerPluginStart",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/logs_explorer/public/types.ts",
+      "path": "x-pack/solutions/observability/plugins/logs_explorer/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1033,7 +1033,7 @@
             "LogsExplorerProps",
             ">"
           ],
-          "path": "x-pack/plugins/observability_solution/logs_explorer/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/logs_explorer/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1063,7 +1063,7 @@
             },
             ">"
           ],
-          "path": "x-pack/plugins/observability_solution/logs_explorer/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/logs_explorer/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1086,7 +1086,7 @@
                 },
                 " | undefined; initialState?: InitialState | undefined; }"
               ],
-              "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/create_controller.ts",
+              "path": "x-pack/solutions/observability/plugins/logs_explorer/public/controller/create_controller.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1125,7 +1125,7 @@
           " implements ",
           "DataSourceSelectionStrategy"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1139,7 +1139,7 @@
             "signature": [
               "\"all\""
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1155,7 +1155,7 @@
               "Dataset",
               "; }"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1170,7 +1170,7 @@
               "() => ",
               "DataViewSpecWithId"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1186,7 +1186,7 @@
             "signature": [
               "() => { selectionType: \"all\"; }"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1202,7 +1202,7 @@
             "signature": [
               "() => { selectionType: \"all\"; }"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1225,7 +1225,7 @@
                 "text": "AllDatasetSelection"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1236,7 +1236,7 @@
                 "tags": [],
                 "label": "{ indices }",
                 "description": [],
-                "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
+                "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1247,7 +1247,7 @@
                     "tags": [],
                     "label": "indices",
                     "description": [],
-                    "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
+                    "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/all_dataset_selection.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1277,7 +1277,7 @@
           " implements ",
           "DataSourceSelectionStrategy"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/data_view_selection.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/data_view_selection.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1291,7 +1291,7 @@
             "signature": [
               "\"dataView\""
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/data_view_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/data_view_selection.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1307,7 +1307,7 @@
               "DataViewDescriptor",
               "; }"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/data_view_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/data_view_selection.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1322,7 +1322,7 @@
               "() => ",
               "DataViewSpecWithId"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/data_view_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/data_view_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1338,7 +1338,7 @@
             "signature": [
               "() => { selectionType: \"dataView\"; selection: { dataView: { id: string; dataType: \"unknown\" | \"logs\" | \"unresolved\" | undefined; name: string | undefined; title: string | undefined; }; }; }"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/data_view_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/data_view_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1361,7 +1361,7 @@
                 "text": "DataViewSelection"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/data_view_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/data_view_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1375,7 +1375,7 @@
                 "signature": [
                   "{ dataView: { id: string; } & { dataType?: \"unknown\" | \"logs\" | \"unresolved\" | undefined; kibanaSpaces?: string[] | undefined; name?: string | undefined; title?: string | undefined; type?: string | undefined; }; }"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/data_view_selection.ts",
+                "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/data_view_selection.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1402,7 +1402,7 @@
                 "text": "DataViewSelection"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/data_view_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/data_view_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1416,7 +1416,7 @@
                 "signature": [
                   "DataViewDescriptor"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/data_view_selection.ts",
+                "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/data_view_selection.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1445,7 +1445,7 @@
           " implements ",
           "DataSourceSelectionStrategy"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1459,7 +1459,7 @@
             "signature": [
               "\"unresolved\""
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1475,7 +1475,7 @@
               "Dataset",
               "; }"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1490,7 +1490,7 @@
               "() => ",
               "DataViewSpecWithId"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1510,7 +1510,7 @@
               "IndexPatternBrand",
               ">; title: string; }; }; }"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1537,7 +1537,7 @@
                 "text": "UnresolvedDatasetSelection"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1555,7 +1555,7 @@
                   "IndexPatternBrand",
                   ">; } & { title?: string | undefined; }; }"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
+                "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1582,7 +1582,7 @@
                 "text": "UnresolvedDatasetSelection"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1596,7 +1596,7 @@
                 "signature": [
                   "Dataset"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
+                "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/unresolved_dataset_selection.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1660,7 +1660,7 @@
             "text": "DataViewSelection"
           }
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/hydrate_data_source_selection.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/hydrate_data_source_selection.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1682,7 +1682,7 @@
               "IndexPatternBrand",
               ">; } & { title?: string | undefined; }; }; }"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/hydrate_data_source_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/hydrate_data_source_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1703,7 +1703,7 @@
                 "text": "AllDatasetSelection"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/hydrate_data_source_selection.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/hydrate_data_source_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1723,7 +1723,7 @@
           "(input: any) => input is ",
           "DatasetSelection"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/index.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1737,7 +1737,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/index.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1757,7 +1757,7 @@
           "(input: any) => input is ",
           "DataSourceSelection"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/index.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1771,7 +1771,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/index.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1797,7 +1797,7 @@
             "text": "DataViewSelection"
           }
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/index.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1811,7 +1811,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/index.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1837,7 +1837,7 @@
             "text": "UnresolvedDatasetSelection"
           }
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/index.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1851,7 +1851,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/index.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1869,7 +1869,7 @@
         "tags": [],
         "label": "ChartDisplayOptions",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1883,7 +1883,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1897,7 +1897,7 @@
         "tags": [],
         "label": "DisplayOptions",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1917,7 +1917,7 @@
                 "text": "GridDisplayOptions"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1937,7 +1937,7 @@
                 "text": "ChartDisplayOptions"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1951,7 +1951,7 @@
         "tags": [],
         "label": "GridDisplayOptions",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1972,7 +1972,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1992,7 +1992,7 @@
                 "text": "GridRowsDisplayOptions"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2006,7 +2006,7 @@
         "tags": [],
         "label": "GridRowsDisplayOptions",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2017,7 +2017,7 @@
             "tags": [],
             "label": "rowHeight",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2028,7 +2028,7 @@
             "tags": [],
             "label": "rowsPerPage",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2042,7 +2042,7 @@
         "tags": [],
         "label": "PartialDisplayOptions",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2072,7 +2072,7 @@
               },
               "> | undefined; }> | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2094,7 +2094,7 @@
               },
               "> | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2114,7 +2114,7 @@
         "signature": [
           "\"data_stream.namespace\"[]"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/control_panels/available_control_panels.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2129,7 +2129,7 @@
         "signature": [
           "{ readonly NAMESPACE: \"data_stream.namespace\"; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/control_panels/available_control_panels.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2144,7 +2144,7 @@
         "signature": [
           "\"content\""
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2159,7 +2159,7 @@
         "signature": [
           "{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; exclude?: boolean | undefined; existsSelected?: boolean | undefined; title?: string | undefined; selectedOptions?: string[] | undefined; }; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/control_panels/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2182,7 +2182,7 @@
           "IndexPatternBrand",
           ">; } & { title?: string | undefined; }; }; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2199,7 +2199,7 @@
           " | ",
           "SmartFieldGridColumnOptions"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2214,7 +2214,7 @@
         "signature": [
           "{ breakdownField?: string | null | undefined; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2245,7 +2245,7 @@
           },
           "> | undefined; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2260,7 +2260,7 @@
         "signature": [
           "{ rowHeight?: number | undefined; rowsPerPage?: number | undefined; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2277,7 +2277,7 @@
         "signature": [
           "{ readonly NAMESPACE: \"data_stream.namespace\"; }"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/control_panels/available_control_panels.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2289,7 +2289,7 @@
         "tags": [],
         "label": "CONTENT_FIELD_CONFIGURATION",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2303,7 +2303,7 @@
             "signature": [
               "\"smart-field\""
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2317,7 +2317,7 @@
             "signature": [
               "\"content\""
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2331,7 +2331,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2345,7 +2345,7 @@
         "tags": [],
         "label": "controlPanelConfigs",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/control_panels/available_control_panels.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2356,7 +2356,7 @@
             "tags": [],
             "label": "[availableControlsPanels.NAMESPACE]",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/control_panels/available_control_panels.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2367,7 +2367,7 @@
                 "tags": [],
                 "label": "order",
                 "description": [],
-                "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
+                "path": "x-pack/solutions/observability/plugins/logs_explorer/common/control_panels/available_control_panels.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2381,7 +2381,7 @@
                 "signature": [
                   "\"medium\""
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
+                "path": "x-pack/solutions/observability/plugins/logs_explorer/common/control_panels/available_control_panels.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2395,7 +2395,7 @@
                 "signature": [
                   "false"
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
+                "path": "x-pack/solutions/observability/plugins/logs_explorer/common/control_panels/available_control_panels.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2406,7 +2406,7 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
+                "path": "x-pack/solutions/observability/plugins/logs_explorer/common/control_panels/available_control_panels.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2420,7 +2420,7 @@
                 "signature": [
                   "\"data_stream.namespace\""
                 ],
-                "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
+                "path": "x-pack/solutions/observability/plugins/logs_explorer/common/control_panels/available_control_panels.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2431,7 +2431,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
+                "path": "x-pack/solutions/observability/plugins/logs_explorer/common/control_panels/available_control_panels.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2491,7 +2491,7 @@
           "StringC",
           ">; }>]>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/control_panels/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2603,7 +2603,7 @@
           "StringC",
           "; }>]>>; }>]>; }>]>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2615,7 +2615,7 @@
         "tags": [],
         "label": "RESOURCE_FIELD_CONFIGURATION",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2629,7 +2629,7 @@
             "signature": [
               "\"smart-field\""
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2643,7 +2643,7 @@
             "signature": [
               "\"resource\""
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2657,7 +2657,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2668,7 +2668,7 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2720,7 +2720,7 @@
           "StringC",
           "; }>]>>; }>]>; }>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/types.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/data_source_selection/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2732,7 +2732,7 @@
         "tags": [],
         "label": "SMART_FALLBACK_FIELDS",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+        "path": "x-pack/solutions/observability/plugins/logs_explorer/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2746,7 +2746,7 @@
             "signature": [
               "SmartFieldGridColumnOptions"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2760,7 +2760,7 @@
             "signature": [
               "SmartFieldGridColumnOptions"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+            "path": "x-pack/solutions/observability/plugins/logs_explorer/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           }
