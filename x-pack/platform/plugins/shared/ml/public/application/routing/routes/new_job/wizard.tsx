@@ -11,6 +11,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { JOB_TYPE } from '@kbn/ml-common-constants/new_job';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { DataSourceContextProvider } from '../../../contexts/ml/data_source_context';
 import type { NavigateToPath } from '../../../contexts/kibana';
 import { useMlKibana } from '../../../contexts/kibana';
@@ -18,7 +20,6 @@ import { basicResolvers } from '../../resolvers';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
-import { JOB_TYPE } from '../../../../../common/constants/new_job';
 import {
   loadNewJobCapabilities,
   ANOMALY_DETECTOR,
@@ -26,7 +27,6 @@ import {
 import { checkCreateJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
-import { ML_PAGES } from '../../../../../common/constants/locator';
 
 interface WizardPageProps extends PageProps {
   jobType: JOB_TYPE;

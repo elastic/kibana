@@ -7,14 +7,16 @@
 
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
-import type { MlCapabilities } from '../../common/types/capabilities';
+import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
+import { ML_ALERT_TYPES } from '@kbn/ml-common-types/alerts';
+import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-common-types/alerts';
+import { ML_APP_ROUTE, PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import type { MlCoreSetup } from '../plugin';
-import { ML_ALERT_TYPES } from '../../common/constants/alerts';
-import type { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
-import { ML_APP_ROUTE, PLUGIN_ID } from '../../common/constants/app';
 import { formatExplorerUrl } from '../locator/formatters/anomaly_detection';
+
 import { registerJobsHealthAlertingRule } from './jobs_health_rule';
 import { registerAnomalyDetectionRule } from './anomaly_detection_rule';
+import { registerAlertsTableConfiguration } from './anomaly_detection_alerts_table';
 
 export function registerMlAlerts(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
@@ -23,19 +25,15 @@ export function registerMlAlerts(
   alerting?: AlertingSetup
 ) {
   registerAnomalyDetectionRule(triggersActionsUi, getStartServices, mlCapabilities);
-
   registerJobsHealthAlertingRule(triggersActionsUi, alerting);
 
   if (alerting) {
     registerNavigation(alerting);
   }
 
-  // Async import to prevent a bundle size increase
-  Promise.all([getStartServices(), import('./anomaly_detection_alerts_table')]).then(
-    ([[_, mlStartDependencies], { registerAlertsTableConfiguration }]) => {
-      registerAlertsTableConfiguration(triggersActionsUi, mlStartDependencies.fieldFormats);
-    }
-  );
+  getStartServices().then(([_, mlStartDependencies]) => {
+    registerAlertsTableConfiguration(triggersActionsUi, mlStartDependencies.fieldFormats);
+  });
 }
 
 export function registerNavigation(alerting: AlertingSetup) {

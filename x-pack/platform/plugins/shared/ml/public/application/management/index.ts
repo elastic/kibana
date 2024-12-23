@@ -11,8 +11,10 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import type { MlFeatures } from '../../../common/constants/app';
+import type { MlFeatures } from '@kbn/ml-common-constants/app';
 import type { MlStartDependencies } from '../../plugin';
+
+import { mountApp } from './jobs_list/mount_app';
 
 export function registerManagementSection(
   management: ManagementSetup,
@@ -35,7 +37,6 @@ export function registerManagementSection(
 
       docTitle.change(appName);
 
-      const { mountApp } = await import('./jobs_list');
       const unmountAppCallback = await mountApp(core, params, deps, isServerless, mlFeatures);
 
       return () => {
