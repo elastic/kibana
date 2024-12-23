@@ -18,7 +18,7 @@ import {
   UnifiedHistogramState,
   UnifiedHistogramVisContext,
 } from '@kbn/unified-histogram-plugin/public';
-import { isEqual, isObject } from 'lodash';
+import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   debounceTime,
@@ -29,7 +29,6 @@ import {
   Observable,
   pairwise,
   startWith,
-  tap,
 } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -494,53 +493,6 @@ const createTotalHitsObservable = (state$?: Observable<UnifiedHistogramState>) =
   );
 };
 
-/**
- * Recursively finds differences between two objects or arrays.
- * Returns an array of differences with breadcrumb paths.
- *
- * @param {Object|Array} prev - The previous state.
- * @param {Object|Array} curr - The current state.
- * @param {String} [path] - The current breadcrumb path.
- * @returns {Array} - Array of difference objects.
- */
-const getDifferences = (prev, curr, path = '') => {
-  const differences = [];
-
-  const traverse = (prevNode, currNode, currentPath) => {
-    if (isEqual(prevNode, currNode)) {
-      return;
-    }
-
-    // If both nodes are objects, recurse into their properties
-    if (isObject(prevNode) && isObject(currNode)) {
-      const keys = new Set([...Object.keys(prevNode), ...Object.keys(currNode)]);
-      keys.forEach((key) => {
-        const newPath = currentPath ? `${currentPath}.${key}` : key;
-        traverse(prevNode[key], currNode[key], newPath);
-      });
-    }
-    // If both nodes are arrays, compare each index
-    else if (Array.isArray(prevNode) && Array.isArray(currNode)) {
-      const maxLength = Math.max(prevNode.length, currNode.length);
-      for (let i = 0; i < maxLength; i++) {
-        const newPath = `${currentPath}[${i}]`;
-        traverse(prevNode[i], currNode[i], newPath);
-      }
-    }
-    // If types are different or primitive values are different, record the difference
-    else {
-      differences.push({
-        path: currentPath,
-        previousValue: prevNode,
-        currentValue: currNode,
-      });
-    }
-  };
-
-  traverse(prev, curr, path);
-  return differences;
-};
-
 const createCurrentSuggestionObservable = (state$: Observable<UnifiedHistogramState>) => {
   return state$.pipe(
     // Emit the previous and current state as a pair
@@ -549,19 +501,19 @@ const createCurrentSuggestionObservable = (state$: Observable<UnifiedHistogramSt
     filter(([prev, curr]) => {
       const isTransition = prev.chartHidden && !curr.chartHidden;
       if (isTransition) {
-        console.log('Filtered out transition from chartHidden: false to true');
+        // console.log('Filtered out transition from chartHidden: false to true');
         return false;
       }
+      /**
       const differences = getDifferences(
         prev.currentSuggestionContext.suggestion,
         curr.currentSuggestionContext.suggestion
       );
       console.log('Differences in currentSuggestionContext:', differences);
+       **/
 
       return !isEqual(prev.currentSuggestionContext, curr.currentSuggestionContext);
-    }),
-    // Log each state for debugging purposes
-    tap((state) => console.log('createCurrentSuggestionObservable', state))
+    })
   );
 };
 
