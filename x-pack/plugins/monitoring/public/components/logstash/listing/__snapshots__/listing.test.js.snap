@@ -54,6 +54,7 @@ exports[`Listing should render with certain data pieces missing 1`] = `
       },
     ]
   }
+  data-test-subj="logstashNodesTable"
   executeQueryOptions={
     Object {
       "defaultFields": Array [
@@ -155,6 +156,7 @@ exports[`Listing should render with expected props 1`] = `
       },
     ]
   }
+  data-test-subj="logstashNodesTable"
   executeQueryOptions={
     Object {
       "defaultFields": Array [
