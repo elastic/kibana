@@ -546,7 +546,6 @@ packages/shared-ux/router/types @elastic/appex-sharedux
 packages/shared-ux/storybook/config @elastic/appex-sharedux
 packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/shared-ux/table_persist @elastic/appex-sharedux
-src/core @elastic/kibana-core
 src/core/packages/analytics/browser @elastic/kibana-core
 src/core/packages/analytics/browser-internal @elastic/kibana-core
 src/core/packages/analytics/server @elastic/kibana-core
