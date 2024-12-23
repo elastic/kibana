@@ -33,12 +33,14 @@ interface GraphEdge {
   action: string;
   targetIds: string[] | string;
   eventOutcome: string;
-  isAlert: boolean;
+  isOrigin: boolean;
+  isOriginAlert: boolean;
 }
 
 interface LabelEdges {
   source: string;
   target: string;
+  edgeType: EdgeDataModel['type'];
 }
 
 interface GraphContextServices {
@@ -46,10 +48,15 @@ interface GraphContextServices {
   esClient: IScopedClusterClient;
 }
 
+interface OriginEventId {
+  id: string;
+  isAlert: boolean;
+}
+
 interface GetGraphParams {
   services: GraphContextServices;
   query: {
-    eventIds: string[];
+    originEventIds: OriginEventId[];
     spaceId?: string;
     start: string | number;
     end: string | number;
@@ -61,11 +68,13 @@ interface GetGraphParams {
 
 export const getGraph = async ({
   services: { esClient, logger },
-  query: { eventIds, spaceId = 'default', start, end, esQuery },
+  query: { originEventIds, spaceId = 'default', start, end, esQuery },
   showUnknownTarget,
   nodesLimit,
 }: GetGraphParams): Promise<Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>> => {
-  logger.trace(`Fetching graph for [eventIds: ${eventIds.join(', ')}] in [spaceId: ${spaceId}]`);
+  logger.trace(
+    `Fetching graph for [originEventIds: ${originEventIds.join(', ')}] in [spaceId: ${spaceId}]`
+  );
 
   const results = await fetchGraph({
     esClient,
@@ -73,7 +82,7 @@ export const getGraph = async ({
     logger,
     start,
     end,
-    eventIds,
+    originEventIds,
     esQuery,
   });
 
@@ -132,7 +141,7 @@ const fetchGraph = async ({
   logger,
   start,
   end,
-  eventIds,
+  originEventIds,
   showUnknownTarget,
   esQuery,
 }: {
@@ -140,15 +149,21 @@ const fetchGraph = async ({
   logger: Logger;
   start: string | number;
   end: string | number;
-  eventIds: string[];
+  originEventIds: OriginEventId[];
   showUnknownTarget: boolean;
   esQuery?: EsQuery;
 }): Promise<EsqlToRecords<GraphEdge>> => {
+  const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
   const query = `from logs-*
 | WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
-| EVAL isAlert = ${
-    eventIds.length > 0
-      ? `event.id in (${eventIds.map((_id, idx) => `?al_id${idx}`).join(', ')})`
+| EVAL isOrigin = ${
+    originEventIds.length > 0
+      ? `event.id in (${originEventIds.map((_id, idx) => `?og_id${idx}`).join(', ')})`
+      : 'false'
+  }
+| EVAL isOriginAlert = isOrigin AND ${
+    originAlertIds.length > 0
+      ? `event.id in (${originAlertIds.map((_id, idx) => `?og_alrt_id${idx}`).join(', ')})`
       : 'false'
   }
 | STATS badge = COUNT(*),
@@ -159,19 +174,26 @@ const fetchGraph = async ({
       action = event.action,
       targetIds = target.entity.id,
       eventOutcome = event.outcome,
-      isAlert
+      isOrigin,
+      isOriginAlert
 | LIMIT 1000
-| SORT isAlert DESC`;
+| SORT isOrigin DESC`;
 
   logger.trace(`Executing query [${query}]`);
 
+  const eventIds = originEventIds.map((originEventId) => originEventId.id);
   return await esClient.asCurrentUser.helpers
     .esql({
       columnar: false,
       filter: buildDslFilter(eventIds, showUnknownTarget, start, end, esQuery),
       query,
       // @ts-ignore - types are not up to date
-      params: [...eventIds.map((id, idx) => ({ [`al_id${idx}`]: id }))],
+      params: [
+        ...originEventIds.map((originEventId, idx) => ({ [`og_id${idx}`]: originEventId.id })),
+        ...originEventIds
+          .filter((originEventId) => originEventId.isAlert)
+          .map((originEventId, idx) => ({ [`og_alrt_id${idx}`]: originEventId.id })),
+      ],
     })
     .toRecords<GraphEdge>();
 };
@@ -238,7 +260,17 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       break;
     }
 
-    const { ips, hosts, users, actorIds, action, targetIds, isAlert, eventOutcome } = record;
+    const {
+      ips,
+      hosts,
+      users,
+      actorIds,
+      action,
+      targetIds,
+      isOrigin,
+      isOriginAlert,
+      eventOutcome,
+    } = record;
     const actorIdsArray = castArray(actorIds);
     const targetIdsArray = castArray(targetIds);
     const unknownTargets: string[] = [];
@@ -257,7 +289,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
         nodesMap[id] = {
           id,
           label: unknownTargets.includes(id) ? 'Unknown' : undefined,
-          color: isAlert ? 'danger' : 'primary',
+          color: isOriginAlert ? 'danger' : 'primary',
           ...determineEntityNodeShape(
             id,
             castArray(ips ?? []),
@@ -280,13 +312,17 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
         const labelNode: LabelNodeDataModel = {
           id: edgeId + `label(${action})outcome(${eventOutcome})`,
           label: action,
-          color: isAlert ? 'danger' : eventOutcome === 'failed' ? 'warning' : 'primary',
+          color: isOriginAlert ? 'danger' : eventOutcome === 'failed' ? 'warning' : 'primary',
           shape: 'label',
         };
 
         nodesMap[labelNode.id] = labelNode;
         edgeLabelsNodes[edgeId].push(labelNode.id);
-        labelEdges[labelNode.id] = { source: actorId, target: targetId };
+        labelEdges[labelNode.id] = {
+          source: actorId,
+          target: targetId,
+          edgeType: isOrigin ? 'solid' : 'dashed',
+        };
       }
     }
   }
@@ -299,7 +335,7 @@ const determineEntityNodeShape = (
   users: string[]
 ): {
   shape: EntityNodeDataModel['shape'];
-  icon: string;
+  icon?: string;
 } => {
   // If actor is a user return ellipse
   if (users.includes(actorId)) {
@@ -316,7 +352,7 @@ const determineEntityNodeShape = (
     return { shape: 'diamond', icon: 'globe' };
   }
 
-  return { shape: 'hexagon', icon: 'questionInCircle' };
+  return { shape: 'hexagon' };
 };
 
 const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
@@ -347,7 +383,8 @@ const createEdgesAndGroups = (context: ParseContext) => {
         nodesMap,
         labelEdges[edgeLabelId].source,
         edgeLabelId,
-        labelEdges[edgeLabelId].target
+        labelEdges[edgeLabelId].target,
+        labelEdges[edgeLabelId].edgeType
       );
     } else {
       const groupNode: GroupNodeDataModel = {
@@ -356,10 +393,18 @@ const createEdgesAndGroups = (context: ParseContext) => {
       };
       nodesMap[groupNode.id] = groupNode;
       let groupEdgesColor: Color = 'primary';
+      let groupEdgesType: EdgeDataModel['type'] = 'dashed';
 
       edgeLabelsIds.forEach((edgeLabelId) => {
         (nodesMap[edgeLabelId] as Writable<LabelNodeDataModel>).parentId = groupNode.id;
-        connectEntitiesAndLabelNode(edgesMap, nodesMap, groupNode.id, edgeLabelId, groupNode.id);
+        connectEntitiesAndLabelNode(
+          edgesMap,
+          nodesMap,
+          groupNode.id,
+          edgeLabelId,
+          groupNode.id,
+          labelEdges[edgeLabelId].edgeType
+        );
 
         if ((nodesMap[edgeLabelId] as LabelNodeDataModel).color === 'danger') {
           groupEdgesColor = 'danger';
@@ -370,6 +415,10 @@ const createEdgesAndGroups = (context: ParseContext) => {
           // Use warning only if there's no danger color
           groupEdgesColor = 'warning';
         }
+
+        if (labelEdges[edgeLabelId].edgeType === 'solid') {
+          groupEdgesType = 'solid';
+        }
       });
 
       connectEntitiesAndLabelNode(
@@ -378,6 +427,7 @@ const createEdgesAndGroups = (context: ParseContext) => {
         labelEdges[edgeLabelsIds[0]].source,
         groupNode.id,
         labelEdges[edgeLabelsIds[0]].target,
+        groupEdgesType,
         groupEdgesColor
       );
     }
@@ -390,11 +440,12 @@ const connectEntitiesAndLabelNode = (
   sourceNodeId: string,
   labelNodeId: string,
   targetNodeId: string,
+  edgeType: EdgeDataModel['type'] = 'solid',
   colorOverride?: Color
 ) => {
   [
-    connectNodes(nodesMap, sourceNodeId, labelNodeId, colorOverride),
-    connectNodes(nodesMap, labelNodeId, targetNodeId, colorOverride),
+    connectNodes(nodesMap, sourceNodeId, labelNodeId, edgeType, colorOverride),
+    connectNodes(nodesMap, labelNodeId, targetNodeId, edgeType, colorOverride),
   ].forEach((edge) => {
     edgesMap[edge.id] = edge;
   });
@@ -404,6 +455,7 @@ const connectNodes = (
   nodesMap: Record<string, NodeDataModel>,
   sourceNodeId: string,
   targetNodeId: string,
+  edgeType: EdgeDataModel['type'] = 'solid',
   colorOverride?: Color
 ): EdgeDataModel => {
   const sourceNode = nodesMap[sourceNodeId];
@@ -420,5 +472,6 @@ const connectNodes = (
     source: sourceNodeId,
     target: targetNodeId,
     color: colorOverride ?? color,
+    type: edgeType,
   };
 };
