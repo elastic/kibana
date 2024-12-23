@@ -48,7 +48,7 @@ describe('getMutedAlertsInstancesByRule', () => {
   });
 
   test('should call find API with multiple ruleIds', async () => {
-    const result = await getMutedAlerts(http, { ruleIds: ['foo', 'bar'] });
+    const result = await getMutedAlertsInstancesByRule({ http, ruleIds: ['foo', 'bar'] });
 
     expect(result).toEqual({
       page: 1,
