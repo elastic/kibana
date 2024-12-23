@@ -245,7 +245,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
 }) => {
   const { discover, application } = useKibana().services;
   const locator = discover?.locator;
-  const discoverPermissions = application.capabilities.discover;
+  const discoverPermissions = application.capabilities.discover_v2;
   const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
 
   const [discoverUrl, setDiscoverUrl] = useState<string>('');

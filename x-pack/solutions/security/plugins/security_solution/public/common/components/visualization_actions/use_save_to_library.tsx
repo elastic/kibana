@@ -21,7 +21,7 @@ export const useSaveToLibrary = ({
   attributes: LensAttributes | undefined | null;
 }) => {
   const startServices = useKibana().services;
-  const canSaveVisualization = !!startServices.application.capabilities.visualize?.save;
+  const canSaveVisualization = !!startServices.application.capabilities.visualize_v2?.save;
   const { SaveModalComponent } = startServices.lens;
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const { redirectTo, getEditOrCreateDashboardPath } = useRedirectToDashboardFromLens({

@@ -233,7 +233,7 @@ describe('getLayerMetaInfo', () => {
         undefined,
         {
           navLinks: { discover: false },
-          discover: { show: true },
+          discover_v2: { show: true },
         }
       ).isVisible
     ).toBeFalsy();
@@ -250,7 +250,7 @@ describe('getLayerMetaInfo', () => {
         undefined,
         {
           navLinks: { discover: true },
-          discover: { show: false },
+          discover_v2: { show: false },
         }
       ).isVisible
     ).toBeFalsy();

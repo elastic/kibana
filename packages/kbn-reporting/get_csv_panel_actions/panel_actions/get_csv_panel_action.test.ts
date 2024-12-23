@@ -71,7 +71,7 @@ describe('GetCsvReportPanelAction', () => {
     mockStartServicesPayload = [
       {
         ...core,
-        application: { capabilities: { dashboard: { downloadCsv: true } } },
+        application: { capabilities: { dashboard_v2: { downloadCsv: true } } },
       } as unknown as CoreStart,
       {
         data: dataPluginMock.createStartContract(),

@@ -66,7 +66,7 @@ export const LogRateAnalysisAttachmentsMenu = ({
     CASES_TOAST_MESSAGES_TITLES.LOG_RATE_ANALYSIS
   );
 
-  const canEditDashboards = capabilities.dashboard.createNew;
+  const canEditDashboards = capabilities.dashboard_v2.createNew;
 
   const { create: canCreateCase, update: canUpdateCase } = cases?.helpers?.canUseCases() ?? {
     create: false,
