@@ -432,16 +432,16 @@
                 "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
               },
               {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+              },
+              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -8306,16 +8306,16 @@
                 "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
               },
               {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+              },
+              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -14059,10 +14059,6 @@
                 "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-              },
-              {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
               },
@@ -14147,6 +14143,10 @@
                 "path": "x-pack/platform/packages/private/ml/data_view_utils/actions/data_view_handler.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
               },
@@ -14195,18 +14195,6 @@
                 "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
               },
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
-              },
-              {
                 "plugin": "maps",
                 "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.test.ts"
               },
@@ -14245,6 +14233,18 @@
               {
                 "plugin": "transform",
                 "path": "x-pack/platform/plugins/private/transform/public/app/sections/create_transform/components/step_define/common/common.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
               },
               {
                 "plugin": "uptime",
@@ -16829,16 +16829,16 @@
                 "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
               },
               {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+              },
+              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
               },
               {
                 "plugin": "dataViewManagement",
