@@ -1,5 +1,12 @@
 {
   "properties": {
+    "discoverEnhanced": {
+      "properties": {
+        "exploreDataInChartActionEnabled": {
+          "type": "boolean"
+        }
+      }
+    },
     "logs_data": {
       "properties": {
         "data": {
