@@ -4969,7 +4969,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-common@link:packages/core/saved-objects/core-saved-objects-common":
+"@kbn/core-saved-objects-common@link:src/core/packages/saved-objects/common":
   version "0.0.0"
   uid ""
 
