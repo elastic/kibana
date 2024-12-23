@@ -12725,13 +12725,6 @@
         }
       }
     },
-    "discoverEnhanced": {
-      "properties": {
-        "exploreDataInChartActionEnabled": {
-          "type": "boolean"
-        }
-      }
-    },
     "enterprise_search": {
       "properties": {
         "ui_viewed": {
