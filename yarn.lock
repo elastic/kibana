@@ -4709,7 +4709,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-server@link:packages/core/lifecycle/core-lifecycle-server":
+"@kbn/core-lifecycle-server@link:src/core/packages/lifecycle/server":
   version "0.0.0"
   uid ""
 

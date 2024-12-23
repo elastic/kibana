@@ -322,7 +322,7 @@
     "@kbn/core-integrations-browser-internal": "link:src/core/packages/integrations/browser-internal",
     "@kbn/core-lifecycle-browser": "link:src/core/packages/lifecycle/browser",
     "@kbn/core-lifecycle-browser-internal": "link:src/core/packages/lifecycle/browser-internal",
-    "@kbn/core-lifecycle-server": "link:packages/core/lifecycle/core-lifecycle-server",
+    "@kbn/core-lifecycle-server": "link:src/core/packages/lifecycle/server",
     "@kbn/core-lifecycle-server-internal": "link:packages/core/lifecycle/core-lifecycle-server-internal",
     "@kbn/core-logging-browser-internal": "link:packages/core/logging/core-logging-browser-internal",
     "@kbn/core-logging-common-internal": "link:packages/core/logging/core-logging-common-internal",
