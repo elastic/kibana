@@ -36,7 +36,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/.*',
   '**/__mocks__/**/*',
   'x-pack/docs/**/*',
-  'packages/core/apps/core-apps-server-internal/assets/fonts/**/*',
+  'src/core/packages/apps/server-internal/assets/fonts/**/*',
   'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/**/*',
   'packages/kbn-utility-types/test-d/**/*',
   'Dockerfile*',
