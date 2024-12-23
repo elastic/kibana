@@ -126,7 +126,7 @@ const mockConnector: Connector = {
   name: 'test',
   pipeline: {
     extract_binary_content: true,
-    name: 'ent-search-generic-ingestion',
+    name: 'search-default-ingestion',
     reduce_whitespace: true,
     run_ml_inference: true,
   },
