@@ -20,7 +20,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
@@ -131,7 +130,7 @@ export function DashboardEmptyScreen() {
     }
     if (showWriteControls) {
       return (
-        <EuiButton iconType="pencil" onClick={() => dashboardApi.setViewMode(ViewMode.EDIT)}>
+        <EuiButton iconType="pencil" onClick={() => dashboardApi.setViewMode('edit')}>
           {emptyScreenStrings.getEditLinkTitle()}
         </EuiButton>
       );

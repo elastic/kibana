@@ -46,6 +46,7 @@ import type {
   CaseMetricsFeature,
   CasesMetricsResponse,
   SingleCaseMetricsResponse,
+  CasesSimilarResponse,
 } from '../types/api';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
@@ -101,6 +102,8 @@ export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>
 export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & {
   comments: AttachmentUI[];
 };
+export type ObservableUI = CaseUI['observables'][0];
+
 export type CasesUI = CaseUI[];
 export type CasesFindResponseUI = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & {
   cases: CasesUI;
@@ -110,6 +113,9 @@ export type CaseUpdateRequest = SnakeToCamelCase<CasePatchRequest>;
 export type CaseConnectors = SnakeToCamelCase<GetCaseConnectorsResponse>;
 export type CaseUsers = GetCaseUsersResponse;
 export type CaseUICustomField = CaseUI['customFields'][number];
+export type CasesSimilarResponseUI = SnakeToCamelCase<CasesSimilarResponse>;
+export type SimilarCaseUI = Omit<SnakeToCamelCase<CasesSimilarResponseUI['cases'][0]>, 'comments'>;
+export type SimilarCasesUI = SimilarCaseUI[];
 
 export interface ResolvedCase {
   case: CaseUI;
@@ -128,6 +134,7 @@ export type CasesConfigurationUI = Pick<
   | 'id'
   | 'version'
   | 'owner'
+  | 'observableTypes'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];
@@ -190,6 +197,12 @@ export type CaseUser = SnakeToCamelCase<User>;
 export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;
   filterOptions?: FilterOptions;
+}
+
+export interface SimilarCasesProps extends ApiProps {
+  caseId: string;
+  perPage: number;
+  page: number;
 }
 
 export interface ApiProps {

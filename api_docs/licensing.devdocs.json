@@ -823,10 +823,6 @@
               "path": "x-pack/plugins/logstash/public/plugin.ts"
             },
             {
-              "plugin": "slo",
-              "path": "x-pack/solutions/observability/plugins/slo/public/plugin.ts"
-            },
-            {
               "plugin": "crossClusterReplication",
               "path": "x-pack/platform/plugins/private/cross_cluster_replication/public/plugin.ts"
             },
@@ -853,6 +849,10 @@
             {
               "plugin": "searchprofiler",
               "path": "x-pack/platform/plugins/shared/searchprofiler/public/plugin.ts"
+            },
+            {
+              "plugin": "slo",
+              "path": "x-pack/solutions/observability/plugins/slo/public/plugin.ts"
             }
           ]
         },

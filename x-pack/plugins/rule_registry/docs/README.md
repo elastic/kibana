@@ -40,5 +40,5 @@ If you run into tsc errors that seem unrelated to the cases plugin try executing
 ```bash
 cd <kibana root dir>
 npx yarn kbn bootstrap
-node scripts/build_ts_refs.js --clean --no-cache
+node scripts/type_check.js --clean-cache
 ```

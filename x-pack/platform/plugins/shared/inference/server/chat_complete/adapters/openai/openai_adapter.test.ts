@@ -15,7 +15,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import { InferenceExecutor } from '../../utils/inference_executor';
-import { openAIAdapter } from '.';
+import { openAIAdapter } from './openai_adapter';
 
 function createOpenAIChunk({
   delta,
@@ -77,6 +77,7 @@ describe('openAIAdapter', () => {
         };
       });
     });
+
     it('correctly formats messages ', () => {
       openAIAdapter.chatComplete({
         ...defaultArgs,
@@ -253,6 +254,25 @@ describe('openAIAdapter', () => {
 
       expect(getRequest().stream).toBe(true);
       expect(getRequest().body.stream).toBe(true);
+    });
+
+    it('propagates the abort signal when provided', () => {
+      const abortController = new AbortController();
+
+      openAIAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        abortSignal: abortController.signal,
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'stream',
+        subActionParams: expect.objectContaining({
+          signal: abortController.signal,
+        }),
+      });
     });
   });
 

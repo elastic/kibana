@@ -172,5 +172,5 @@ To test out the functionality of large lists with rules, the user will need to i
 
 * First, set the appropriate env var in order to enable exceptions features`export ELASTIC_XPACK_SECURITY_SOLUTION_LISTS_FEATURE=true` and `export ELASTIC_XPACK_SECURITY_SOLUTION_EXCEPTIONS_LISTS=true` and start kibana
 * Second, import a list of ips from a file called `ci-badguys.txt`. The command should look like this:
-`cd $HOME/kibana/x-pack/plugins/lists/server/scripts && ./import_list_items_by_filename.sh ip ~/ci-badguys.txt`
+`cd $HOME/kibana/x-pack/solutions/security/plugins/lists/server/scripts && ./import_list_items_by_filename.sh ip ~/ci-badguys.txt`
 * Then, from the detection engine scripts folder (`cd kibana/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/scripts`) run `./post_rule.sh rules/queries/lists/query_with_list_plugin.json`

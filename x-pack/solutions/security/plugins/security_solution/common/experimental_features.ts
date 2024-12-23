@@ -110,11 +110,6 @@ export const allowedExperimentalValues = Object.freeze({
   securitySolutionNotesDisabled: false,
 
   /**
-   * Disables entity and alert previews
-   */
-  entityAlertPreviewDisabled: false,
-
-  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
@@ -266,8 +261,12 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables CrowdStrike's RunScript RTR command
    */
-
   crowdstrikeRunScriptEnabled: false,
+
+  /**
+   * Enables the Asset Inventory feature
+   */
+  assetInventoryStoreEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -9,7 +9,7 @@ import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import { useCreateFormattedExample } from './format_category';
 import { renderHook } from '@testing-library/react';
 
-jest.mock('../../hooks/use_eui_theme', () => ({
+jest.mock('../../hooks/use_is_dark_theme', () => ({
   useIsDarkTheme: () => false,
 }));
 

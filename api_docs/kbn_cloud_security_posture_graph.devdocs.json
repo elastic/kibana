@@ -230,7 +230,7 @@
             "section": "def-public.EdgeViewModel",
             "text": "EdgeViewModel"
           },
-          " extends Record<string, unknown>,Readonly<{} & { source: string; id: string; color: \"warning\" | \"primary\" | \"danger\"; target: string; }>"
+          " extends Record<string, unknown>,Readonly<{ type?: \"dashed\" | \"solid\" | undefined; } & { source: string; id: string; color: \"warning\" | \"primary\" | \"danger\"; target: string; }>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "deprecated": false,

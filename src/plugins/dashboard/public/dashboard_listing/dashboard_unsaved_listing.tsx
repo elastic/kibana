@@ -18,8 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-
+import { ViewMode } from '@kbn/presentation-publishing';
 import type { DashboardAttributes } from '../../server/content_management';
 import {
   DASHBOARD_PANELS_UNSAVED_ID,
@@ -124,7 +123,7 @@ export const DashboardUnsavedListing = ({
 
   const onOpen = useCallback(
     (id?: string) => {
-      goToDashboard(id, ViewMode.EDIT);
+      goToDashboard(id, 'edit');
     },
     [goToDashboard]
   );

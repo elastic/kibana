@@ -317,7 +317,7 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
-              "<any>[]; }; }; calculateAutoTimeExpression: (range: ",
+              "<any>[]; }; }; calculateAutoTimeExpression: { (range: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -325,7 +325,35 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              ") => string | undefined; createAggConfigs: (indexPattern: ",
+              "): string | undefined; (range: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              ", interval: string, asExpression?: true | undefined): string | undefined; (range: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              ", interval: string, asExpression: false): ",
+              "TimeBucketsInterval",
+              " | undefined; (range: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              ", interval?: string | undefined, asExpression?: boolean | undefined): string | ",
+              "TimeBucketsInterval",
+              " | undefined; }; createAggConfigs: (indexPattern: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -11293,7 +11321,8 @@
               "\nGet the interval for the buckets. If the\nnumber of buckets created by the interval set\nis larger than config:histogram:maxBars then the\ninterval will be scaled up. If the number of buckets\ncreated is less than one, the interval is scaled back.\n\nThe interval object returned is a moment.duration\nobject that has been decorated with the following\nproperties.\n\ninterval.description: a text description of the interval.\n  designed to be used list \"field per {{ desc }}\".\n    - \"minute\"\n    - \"10 days\"\n    - \"3 years\"\n\ninterval.expression: the elasticsearch expression that creates this\n  interval. If the interval does not properly form an elasticsearch\n  expression it will be forced into one.\n\ninterval.scaled: the interval was adjusted to\n  accommodate the maxBars setting.\n\ninterval.scale: the number that y-values should be\n  multiplied by"
             ],
             "signature": [
-              "(useNormalizedEsInterval?: boolean) => TimeBucketsInterval"
+              "(useNormalizedEsInterval?: boolean) => ",
+              "TimeBucketsInterval"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/time_buckets.ts",
             "deprecated": false,
@@ -13274,7 +13303,7 @@
         "label": "getCalculateAutoTimeExpression",
         "description": [],
         "signature": [
-          "(getConfig: (key: string) => any) => (range: ",
+          "(getConfig: (key: string) => any) => { (range: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -13282,7 +13311,35 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          ") => string | undefined"
+          "): string | undefined; (range: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          ", interval: string, asExpression?: true | undefined): string | undefined; (range: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          ", interval: string, asExpression: false): ",
+          "TimeBucketsInterval",
+          " | undefined; (range: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          ", interval?: string | undefined, asExpression?: boolean | undefined): string | ",
+          "TimeBucketsInterval",
+          " | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/utils/calculate_auto_time_expression.ts",
         "deprecated": false,
@@ -24348,7 +24405,7 @@
             "label": "calculateAutoTimeExpression",
             "description": [],
             "signature": [
-              "(range: ",
+              "{ (range: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -24356,28 +24413,39 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              ") => string | undefined"
+              "): string | undefined; (range: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              ", interval: string, asExpression?: true | undefined): string | undefined; (range: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              ", interval: string, asExpression: false): ",
+              "TimeBucketsInterval",
+              " | undefined; (range: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              ", interval?: string | undefined, asExpression?: boolean | undefined): string | ",
+              "TimeBucketsInterval",
+              " | undefined; }"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.AggsCommonStart.calculateAutoTimeExpression.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "range",
-                "description": [],
-                "signature": [
-                  "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
-                ],
-                "path": "src/plugins/data/common/search/aggs/utils/calculate_auto_time_expression.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "trackAdoption": false
           },
           {
             "parentPluginId": "data",
@@ -29340,7 +29408,7 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
-              "<any>[]; }; }; calculateAutoTimeExpression: (range: ",
+              "<any>[]; }; }; calculateAutoTimeExpression: { (range: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -29348,7 +29416,35 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              ") => string | undefined; createAggConfigs: (indexPattern: ",
+              "): string | undefined; (range: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              ", interval: string, asExpression?: true | undefined): string | undefined; (range: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              ", interval: string, asExpression: false): ",
+              "TimeBucketsInterval",
+              " | undefined; (range: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              ", interval?: string | undefined, asExpression?: boolean | undefined): string | ",
+              "TimeBucketsInterval",
+              " | undefined; }; createAggConfigs: (indexPattern: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -31206,7 +31302,7 @@
             "section": "def-common.MetricAggType",
             "text": "MetricAggType"
           },
-          "<any>[]; }; }; calculateAutoTimeExpression: (range: ",
+          "<any>[]; }; }; calculateAutoTimeExpression: { (range: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -31214,7 +31310,35 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          ") => string | undefined; createAggConfigs: (indexPattern: ",
+          "): string | undefined; (range: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          ", interval: string, asExpression?: true | undefined): string | undefined; (range: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          ", interval: string, asExpression: false): ",
+          "TimeBucketsInterval",
+          " | undefined; (range: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          ", interval?: string | undefined, asExpression?: boolean | undefined): string | ",
+          "TimeBucketsInterval",
+          " | undefined; }; createAggConfigs: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",

@@ -18,7 +18,6 @@ import {
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
-import type { ViewMode } from '@kbn/embeddable-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { SEARCH_SESSION_ID } from '../../dashboard_constants';
 import { DashboardLocatorParams } from '../../dashboard_container';
@@ -73,7 +72,7 @@ function getLocatorParams({
 }): DashboardLocatorParams {
   const savedObjectId = dashboardApi.savedObjectId.value;
   return {
-    viewMode: (dashboardApi.viewMode.value as ViewMode) ?? 'view',
+    viewMode: dashboardApi.viewMode.value ?? 'view',
     useHash: false,
     preserveSavedFilters: false,
     filters: dataService.query.filterManager.getFilters(),
