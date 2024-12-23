@@ -458,7 +458,7 @@
     "@kbn/discover-enhanced-plugin": "link:x-pack/platform/plugins/private/discover_enhanced",
     "@kbn/discover-plugin": "link:src/platform/plugins/shared/discover",
     "@kbn/discover-shared-plugin": "link:src/platform/plugins/shared/discover_shared",
-    "@kbn/discover-utils": "link:packages/kbn-discover-utils",
+    "@kbn/discover-utils": "link:src/platform/packages/shared/kbn-discover-utils",
     "@kbn/doc-links": "link:src/platform/packages/shared/kbn-doc-links",
     "@kbn/dom-drag-drop": "link:packages/kbn-dom-drag-drop",
     "@kbn/ebt-tools": "link:packages/kbn-ebt-tools",

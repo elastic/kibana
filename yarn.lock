@@ -5381,7 +5381,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/discover-utils@link:packages/kbn-discover-utils":
+"@kbn/discover-utils@link:src/platform/packages/shared/kbn-discover-utils":
   version "0.0.0"
   uid ""
 
