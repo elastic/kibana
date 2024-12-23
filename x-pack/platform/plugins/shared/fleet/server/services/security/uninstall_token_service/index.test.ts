@@ -217,7 +217,7 @@ describe('UninstallTokenService', () => {
     agentPolicyService.deployPolicies = jest.fn();
 
     getAgentPoliciesByIDsMock = jest.fn().mockResolvedValue([]);
-    agentPolicyService.getByIDs = getAgentPoliciesByIDsMock;
+    agentPolicyService.getByIds = getAgentPoliciesByIDsMock;
 
     if (scoppedInSpace) {
       soClientMock.getCurrentNamespace.mockReturnValue(scoppedInSpace);
