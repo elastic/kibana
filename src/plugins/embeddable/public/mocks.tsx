@@ -9,7 +9,7 @@
 
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
-import { type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
+import { type Query } from '@kbn/es-query';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import {
   SavedObjectManagementTypeInfo,
@@ -19,24 +19,17 @@ import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
+import { EmbeddableStateTransfer } from '.';
+import { setKibanaServices } from './kibana_services';
+import { EmbeddablePublicPlugin } from './plugin';
+import { registerReactEmbeddableFactory } from './react_embeddable_system';
+import { registerAddFromLibraryType } from './add_from_library/registry';
 import {
-  EmbeddableInput,
   EmbeddableSetup,
   EmbeddableSetupDependencies,
   EmbeddableStart,
   EmbeddableStartDependencies,
-  EmbeddableStateTransfer,
-  FilterableEmbeddable,
-  IEmbeddable,
-  ReferenceOrValueEmbeddable,
-  SavedObjectEmbeddableInput,
-  SelfStyledEmbeddable,
-} from '.';
-import { setKibanaServices } from './kibana_services';
-import { SelfStyledOptions } from './lib/self_styled_embeddable/types';
-import { EmbeddablePublicPlugin } from './plugin';
-import { registerReactEmbeddableFactory } from './react_embeddable_system';
-import { registerAddFromLibraryType } from './add_from_library/registry';
+} from './types';
 
 export type Setup = jest.Mocked<EmbeddableSetup>;
 export type Start = jest.Mocked<EmbeddableStart>;
@@ -51,53 +44,10 @@ export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTran
   };
 };
 
-export const mockRefOrValEmbeddable = <
-  OriginalEmbeddableType,
-  ValTypeInput extends EmbeddableInput = EmbeddableInput,
-  RefTypeInput extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
->(
-  embeddable: IEmbeddable,
-  options: {
-    mockedByReferenceInput: RefTypeInput;
-    mockedByValueInput: ValTypeInput;
-  }
-): OriginalEmbeddableType & ReferenceOrValueEmbeddable => {
-  const newEmbeddable: ReferenceOrValueEmbeddable =
-    embeddable as unknown as ReferenceOrValueEmbeddable;
-  newEmbeddable.inputIsRefType = (input: unknown): input is RefTypeInput =>
-    !!(input as RefTypeInput).savedObjectId;
-  newEmbeddable.getInputAsRefType = () => Promise.resolve(options.mockedByReferenceInput);
-  newEmbeddable.getInputAsValueType = () => Promise.resolve(options.mockedByValueInput);
-  return newEmbeddable as OriginalEmbeddableType & ReferenceOrValueEmbeddable;
-};
-
-export function mockSelfStyledEmbeddable<OriginalEmbeddableType>(
-  embeddable: OriginalEmbeddableType,
-  selfStyledOptions: SelfStyledOptions
-): OriginalEmbeddableType & SelfStyledEmbeddable {
-  const newEmbeddable: SelfStyledEmbeddable = embeddable as unknown as SelfStyledEmbeddable;
-  newEmbeddable.getSelfStyledOptions = () => selfStyledOptions;
-  return newEmbeddable as OriginalEmbeddableType & SelfStyledEmbeddable;
-}
-
-export function mockFilterableEmbeddable<OriginalEmbeddableType>(
-  embeddable: OriginalEmbeddableType,
-  options: {
-    getFilters: () => Filter[];
-    getQuery: () => Query | AggregateQuery | undefined;
-  }
-): OriginalEmbeddableType & FilterableEmbeddable {
-  const newEmbeddable: FilterableEmbeddable = embeddable as unknown as FilterableEmbeddable;
-  newEmbeddable.getFilters = () => options.getFilters();
-  newEmbeddable.getQuery = () => options.getQuery();
-  return newEmbeddable as OriginalEmbeddableType & FilterableEmbeddable;
-}
-
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerAddFromLibraryType: jest.fn().mockImplementation(registerAddFromLibraryType),
     registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
-    registerEmbeddableFactory: jest.fn(),
     registerEnhancement: jest.fn(),
   };
   return setupContract;
@@ -105,8 +55,6 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    getEmbeddableFactories: jest.fn(),
-    getEmbeddableFactory: jest.fn(),
     telemetry: jest.fn(),
     extract: jest.fn(),
     inject: jest.fn(),
@@ -158,9 +106,6 @@ export const embeddablePluginMock = {
   createSetupContract,
   createStartContract,
   createInstance,
-  mockRefOrValEmbeddable,
-  mockSelfStyledEmbeddable,
-  mockFilterableEmbeddable,
 };
 
 export const setStubKibanaServices = () => {
