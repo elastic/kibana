@@ -762,7 +762,10 @@
   ],
   "maintenance-window": [
     "enabled",
-    "events"
+    "events",
+    "expirationDate",
+    "title",
+    "updatedAt"
   ],
   "map": [
     "bounds",
