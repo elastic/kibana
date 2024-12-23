@@ -191,7 +191,7 @@ export const useAttackDiscovery = ({
         setApproximateFutureTime(null);
 
         // call the internal API to generate attack discoveries:
-        const rawResponse = await http.fetch('/internal/elastic_assistant/attack_discovery', {
+        const rawResponse = await http.post('/internal/elastic_assistant/attack_discovery', {
           body: JSON.stringify(bodyWithOverrides),
           method: 'POST',
           version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
