@@ -40,40 +40,42 @@ export default {
   },
 } as Meta<typeof Component>;
 
-export const Categories: StoryObj<Params> = {
-  render: (params) => {
-    const {
-      onClearQuery,
-      isSavingEnabled,
-      onFieldChange,
-      unsavedChanges,
-      categorizedFields,
-      categoryCounts,
-    } = useCategoryStory(params);
+const CategoriesComponent = (params: Params) => {
+  const {
+    onClearQuery,
+    isSavingEnabled,
+    onFieldChange,
+    unsavedChanges,
+    categorizedFields,
+    categoryCounts,
+  } = useCategoryStory(params);
 
-    return (
-      <FieldCategoryProvider
-        showDanger={action('showDanger')}
-        links={{ deprecationKey: 'link/to/deprecation/docs' }}
-        validateChange={async (key, value) => {
-          action(`validateChange`)({
-            key,
-            value,
-          });
-          return { successfulValidation: true, valid: true };
+  return (
+    <FieldCategoryProvider
+      showDanger={action('showDanger')}
+      links={{ deprecationKey: 'link/to/deprecation/docs' }}
+      validateChange={async (key, value) => {
+        action(`validateChange`)({
+          key,
+          value,
+        });
+        return { successfulValidation: true, valid: true };
+      }}
+    >
+      <Component
+        {...{
+          categorizedFields,
+          categoryCounts,
+          onFieldChange,
+          unsavedChanges,
+          onClearQuery,
+          isSavingEnabled,
         }}
-      >
-        <Component
-          {...{
-            categorizedFields,
-            categoryCounts,
-            onFieldChange,
-            unsavedChanges,
-            onClearQuery,
-            isSavingEnabled,
-          }}
-        />
-      </FieldCategoryProvider>
-    );
-  },
+      />
+    </FieldCategoryProvider>
+  );
+};
+
+export const Categories: StoryObj<Params> = {
+  render: (params) => <CategoriesComponent {...params} />,
 };
