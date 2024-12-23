@@ -4401,7 +4401,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-custom-branding-browser-mocks@link:packages/core/custom-branding/core-custom-branding-browser-mocks":
+"@kbn/core-custom-branding-browser-mocks@link:src/core/packages/custom-branding/browser-mocks":
   version "0.0.0"
   uid ""
 
