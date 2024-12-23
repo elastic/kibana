@@ -785,11 +785,11 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       enabled: canFetchIntegration,
     });
 
-    useEffect(() => {
-      if (!isServerless) {
-        setIsValid(isSubscriptionValid);
-      }
-    }, [isServerless, isSubscriptionValid]);
+    // useEffect(() => {
+    //   if (!isServerless) {
+    //     setIsValid(isSubscriptionValid);
+    //   }
+    // }, [isServerless, isSubscriptionValid]);
 
     useEffect(() => {
       if (isEditPage) return;
