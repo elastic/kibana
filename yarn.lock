@@ -4677,7 +4677,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-injected-metadata-common-internal@link:packages/core/injected-metadata/core-injected-metadata-common-internal":
+"@kbn/core-injected-metadata-common-internal@link:src/core/packages/injected-metadata/common-internal":
   version "0.0.0"
   uid ""
 
