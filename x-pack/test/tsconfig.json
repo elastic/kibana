@@ -190,6 +190,5 @@
     "@kbn/gen-ai-functional-testing",
     "@kbn/integration-assistant-plugin",
     "@kbn/core-elasticsearch-server",
-    "@kbn/response-ops-rule-params"
   ]
 }
