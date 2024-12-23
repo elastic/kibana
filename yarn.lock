@@ -5133,7 +5133,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-user-profile-browser-mocks@link:packages/core/user-profile/core-user-profile-browser-mocks":
+"@kbn/core-user-profile-browser-mocks@link:src/core/packages/user-profile/browser-mocks":
   version "0.0.0"
   uid ""
 
