@@ -463,7 +463,7 @@ src/plugins/chart_expressions/expression_metric @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_partition_vis @elastic/kibana-visualizations
 src/platform/plugins/shared/expression_repeat_image @elastic/kibana-presentation
 src/platform/plugins/shared/expression_reveal_image @elastic/kibana-presentation
-src/plugins/expression_shape @elastic/kibana-presentation
+src/platform/plugins/shared/expression_shape @elastic/kibana-presentation
 src/plugins/chart_expressions/expression_tagcloud @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_xy @elastic/kibana-visualizations
 examples/expressions_explorer @elastic/kibana-visualizations

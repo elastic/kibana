@@ -516,7 +516,7 @@
     "@kbn/expression-partition-vis-plugin": "link:src/plugins/chart_expressions/expression_partition_vis",
     "@kbn/expression-repeat-image-plugin": "link:src/platform/plugins/shared/expression_repeat_image",
     "@kbn/expression-reveal-image-plugin": "link:src/platform/plugins/shared/expression_reveal_image",
-    "@kbn/expression-shape-plugin": "link:src/plugins/expression_shape",
+    "@kbn/expression-shape-plugin": "link:src/platform/plugins/shared/expression_shape",
     "@kbn/expression-tagcloud-plugin": "link:src/plugins/chart_expressions/expression_tagcloud",
     "@kbn/expression-xy-plugin": "link:src/plugins/chart_expressions/expression_xy",
     "@kbn/expressions-explorer-plugin": "link:examples/expressions_explorer",

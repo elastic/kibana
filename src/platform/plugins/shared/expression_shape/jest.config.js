@@ -9,11 +9,11 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/expression_shape'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/expression_shape',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/shared/expression_shape'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/expression_shape',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/expression_shape/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/src/platform/plugins/shared/expression_shape/{common,public,server}/**/*.{ts,tsx}',
   ],
 };
