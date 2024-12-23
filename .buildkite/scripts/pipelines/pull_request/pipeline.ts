@@ -323,8 +323,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^src\/plugins\/discover/,
         /^src\/plugins\/field_formats/,
         /^src\/plugins\/inspector/,
-        /^src\/platform\/platform\/plugins\/shared\/shared\/kibana_react/,
-        /^src\/platform\/platform\/plugins\/shared\/shared\/kibana_utils/,
+        /^src\/platform\/plugins\/shared\/kibana_react/,
+        /^src\/platform\/plugins\/shared\/kibana_utils/,
         /^src\/plugins\/saved_search/,
         /^src\/platform\/plugins\/shared\/ui_actions/,
         /^src\/plugins\/unified_histogram/,
@@ -358,7 +358,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       ((await doAnyChangesMatch([
-        /^x-pack\/platform\/platform\/plugins\/shared\/shared\/osquery/,
+        /^x-pack\/platform\/plugins\/shared\/osquery/,
         /^x-pack\/test\/osquery_cypress/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
       ])) ||
