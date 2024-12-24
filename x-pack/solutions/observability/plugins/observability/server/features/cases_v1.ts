@@ -10,7 +10,7 @@ import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/s
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureConfig, KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { CasesUiCapabilities, CasesApiTags } from '@kbn/cases-plugin/common';
-import { casesFeatureId, casesFeatureIdV2, observabilityFeatureId } from '../../common';
+import { casesFeatureId, casesFeatureIdV3, observabilityFeatureId } from '../../common';
 
 export const getCasesFeature = (
   casesCapabilities: CasesUiCapabilities,
@@ -22,10 +22,10 @@ export const getCasesFeature = (
       'xpack.observability.featureRegistry.linkObservabilityTitle.deprecationMessage',
       {
         defaultMessage:
-          'The {currentId} permissions are deprecated, please see {casesFeatureIdV2}.',
+          'The {currentId} permissions are deprecated, please see {casesFeatureIdV3}.',
         values: {
           currentId: casesFeatureId,
-          casesFeatureIdV2,
+          casesFeatureIdV3,
         },
       }
     ),
@@ -52,6 +52,7 @@ export const getCasesFeature = (
         push: [observabilityFeatureId],
         createComment: [observabilityFeatureId],
         reopenCase: [observabilityFeatureId],
+        assignCase: [observabilityFeatureId],
       },
       savedObject: {
         all: [...filesSavedObjectTypes],
@@ -59,10 +60,10 @@ export const getCasesFeature = (
       },
       ui: casesCapabilities.all,
       replacedBy: {
-        default: [{ feature: casesFeatureIdV2, privileges: ['all'] }],
+        default: [{ feature: casesFeatureIdV3, privileges: ['all'] }],
         minimal: [
           {
-            feature: casesFeatureIdV2,
+            feature: casesFeatureIdV3,
             privileges: ['minimal_all', 'create_comment', 'case_reopen'],
           },
         ],
@@ -81,8 +82,8 @@ export const getCasesFeature = (
       },
       ui: casesCapabilities.read,
       replacedBy: {
-        default: [{ feature: casesFeatureIdV2, privileges: ['read'] }],
-        minimal: [{ feature: casesFeatureIdV2, privileges: ['minimal_read'] }],
+        default: [{ feature: casesFeatureIdV3, privileges: ['read'] }],
+        minimal: [{ feature: casesFeatureIdV3, privileges: ['minimal_read'] }],
       },
     },
   },
@@ -110,7 +111,7 @@ export const getCasesFeature = (
                 delete: [observabilityFeatureId],
               },
               ui: casesCapabilities.delete,
-              replacedBy: [{ feature: casesFeatureIdV2, privileges: ['cases_delete'] }],
+              replacedBy: [{ feature: casesFeatureIdV3, privileges: ['cases_delete'] }],
             },
           ],
         },
@@ -141,7 +142,7 @@ export const getCasesFeature = (
                 settings: [observabilityFeatureId],
               },
               ui: casesCapabilities.settings,
-              replacedBy: [{ feature: casesFeatureIdV2, privileges: ['cases_settings'] }],
+              replacedBy: [{ feature: casesFeatureIdV3, privileges: ['cases_settings'] }],
             },
           ],
         },

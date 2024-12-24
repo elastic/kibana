@@ -10,27 +10,13 @@ import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/s
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureConfig, KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { CasesUiCapabilities, CasesApiTags } from '@kbn/cases-plugin/common';
-import {
-  casesFeatureIdV2,
-  casesFeatureId,
-  observabilityFeatureId,
-  casesFeatureIdV3,
-} from '../../common';
+import { casesFeatureIdV3, casesFeatureId, observabilityFeatureId } from '../../common';
 
-export const getCasesFeatureV2 = (
+export const getCasesFeatureV3 = (
   casesCapabilities: CasesUiCapabilities,
   casesApiTags: CasesApiTags
 ): KibanaFeatureConfig => ({
-  deprecated: {
-    notice: i18n.translate('xpack.observability.featureRegistry.casesFeature.deprecationMessage', {
-      defaultMessage: 'The {currentId} permissions are deprecated, please see {casesFeatureIdV3}.',
-      values: {
-        currentId: casesFeatureIdV2,
-        casesFeatureIdV3,
-      },
-    }),
-  },
-  id: casesFeatureIdV2,
+  id: casesFeatureIdV3,
   name: i18n.translate('xpack.observability.featureRegistry.linkObservabilityTitle', {
     defaultMessage: 'Cases',
   }),
@@ -57,15 +43,6 @@ export const getCasesFeatureV2 = (
         read: [...filesSavedObjectTypes],
       },
       ui: casesCapabilities.all,
-      replacedBy: {
-        default: [{ feature: casesFeatureIdV3, privileges: ['all'] }],
-        minimal: [
-          {
-            feature: casesFeatureIdV3,
-            privileges: ['minimal_all', 'create_comment', 'case_reopen', 'cases_assign'],
-          },
-        ],
-      },
     },
     read: {
       api: casesApiTags.read,
@@ -79,10 +56,6 @@ export const getCasesFeatureV2 = (
         read: [...filesSavedObjectTypes],
       },
       ui: casesCapabilities.read,
-      replacedBy: {
-        default: [{ feature: casesFeatureIdV3, privileges: ['read'] }],
-        minimal: [{ feature: casesFeatureIdV3, privileges: ['minimal_read'] }],
-      },
     },
   },
   subFeatures: [
@@ -109,7 +82,6 @@ export const getCasesFeatureV2 = (
                 delete: [observabilityFeatureId],
               },
               ui: casesCapabilities.delete,
-              replacedBy: [{ feature: casesFeatureIdV3, privileges: ['cases_delete'] }],
             },
           ],
         },
@@ -140,7 +112,6 @@ export const getCasesFeatureV2 = (
                 settings: [observabilityFeatureId],
               },
               ui: casesCapabilities.settings,
-              replacedBy: [{ feature: casesFeatureIdV3, privileges: ['cases_settings'] }],
             },
           ],
         },
@@ -172,7 +143,6 @@ export const getCasesFeatureV2 = (
                 createComment: [observabilityFeatureId],
               },
               ui: casesCapabilities.createComment,
-              replacedBy: [{ feature: casesFeatureIdV3, privileges: ['create_comment'] }],
             },
           ],
         },
@@ -203,7 +173,33 @@ export const getCasesFeatureV2 = (
                 reopenCase: [observabilityFeatureId],
               },
               ui: casesCapabilities.reopenCase,
-              replacedBy: [{ feature: casesFeatureIdV3, privileges: ['case_reopen'] }],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: i18n.translate('xpack.observability.features.assignUsersSubFeatureName', {
+        defaultMessage: 'Assign users',
+      }),
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              id: 'cases_assign',
+              name: i18n.translate('xpack.observability.features.assignUsersSubFeatureName', {
+                defaultMessage: 'Assign users to cases',
+              }),
+              includeIn: 'all',
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              cases: {
+                assignCase: [observabilityFeatureId],
+              },
+              ui: casesCapabilities.assignCase,
             },
           ],
         },
