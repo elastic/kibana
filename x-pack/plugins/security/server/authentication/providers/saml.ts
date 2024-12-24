@@ -659,7 +659,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   private getACS() {
     return `${this.options.getServerBaseURL()}${
       this.options.basePath.serverBasePath
-    }/api/security/v1/saml`;
+    }/api/security/saml/callback`;
   }
 
   /**
