@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiSuperSelectProps, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import { EuiLink, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useController, useFormContext, useWatch } from 'react-hook-form';
 import { ProcessorType } from '../types';
 import { useKibana } from '../../../hooks/use_kibana';
 
@@ -20,27 +21,29 @@ interface TAvailableProcessor {
 
 type TAvailableProcessors = Record<ProcessorType, TAvailableProcessor>;
 
-interface ProcessorTypeSelectorProps {
-  value: ProcessorType;
-  onChange: EuiSuperSelectProps<ProcessorType>['onChange'];
-}
-
-export const ProcessorTypeSelector = ({ value, onChange }: ProcessorTypeSelectorProps) => {
+export const ProcessorTypeSelector = () => {
   const { core } = useKibana();
   const esDocUrl = core.docLinks.links.elasticsearch.docsBase;
 
+  const { control } = useFormContext();
+  const { field, fieldState } = useController({ name: 'type', control, rules: { required: true } });
+
+  const processorType = useWatch<{ type: ProcessorType }>({ name: 'type' });
+
   return (
     <EuiFormRow
+      fullWidth
       label={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.typeSelectorLabel',
         { defaultMessage: 'Processor' }
       )}
-      helpText={getProcessorDescription(esDocUrl)(value)}
+      helpText={getProcessorDescription(esDocUrl)(processorType)}
     >
       <EuiSuperSelect
         options={processorTypeSelectorOptions}
-        valueOfSelected={value}
-        onChange={onChange}
+        isInvalid={fieldState.invalid}
+        valueOfSelected={field.value}
+        onChange={field.onChange}
         fullWidth
         placeholder={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.typeSelectorPlaceholder',
