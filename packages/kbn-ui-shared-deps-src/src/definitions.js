@@ -75,8 +75,7 @@ const externals = {
   '@elastic/eui': '__kbnSharedDeps__.ElasticEui',
   '@elastic/eui/lib/components/provider/nested':
     '__kbnSharedDeps__.ElasticEuiLibComponentsUseIsNestedEuiProvider',
-  '@elastic/eui/lib/services': '__kbnSharedDeps__.ElasticEuiLibServices',
-  '@elastic/eui/lib/services/format': '__kbnSharedDeps__.ElasticEuiLibServicesFormat',
+  '@elastic/eui/lib/services/theme/warning': '__kbnSharedDeps__.ElasticEuiLibServicesThemeWarning',
   '@elastic/eui-theme-borealis': '__kbnSharedDeps__.ElasticEuiThemeBorealis',
 
   // transient dep of eui
