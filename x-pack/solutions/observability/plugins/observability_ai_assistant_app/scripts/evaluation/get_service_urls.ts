@@ -136,7 +136,7 @@ export async function getServiceUrls({
 
   const kibanaUrlWithAuth = format({
     ...parsedKibanaUrl,
-    auth: parsedKibanaUrl.auth || 'elastic:changeme',
+    auth: parsedKibanaUrl.auth || auth,
   });
 
   const validatedKibanaUrl = await getKibanaUrl({ kibana: kibanaUrlWithAuth, log });
