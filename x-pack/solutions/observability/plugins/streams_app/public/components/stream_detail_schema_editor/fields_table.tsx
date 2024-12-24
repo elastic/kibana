@@ -22,7 +22,7 @@ import type {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
-import { ReadStreamDefinition } from '@kbn/streams-plugin/common/types';
+import { isWiredStream, ReadStreamDefinition } from '@kbn/streams-schema';
 import { FieldType } from './field_type';
 import { FieldStatus } from './field_status';
 import { FieldEntry, SchemaEditorEditingState } from './hooks/use_editing_state';
@@ -71,14 +71,13 @@ export const EMPTY_CONTENT = '-----';
 export const FieldsTableContainer = ({
   definition,
   unmappedFieldsResult,
-  isLoadingUnmappedFields,
   query,
   editingState,
   unpromotingState,
 }: FieldsTableContainerProps) => {
   const inheritedFields = useMemo(() => {
-    return definition.inheritedFields.map((field) => ({
-      name: field.name,
+    return Object.entries(definition.inherited_fields).map(([name, field]) => ({
+      name,
       type: field.type,
       format: field.format,
       parent: field.from,
@@ -94,13 +93,16 @@ export const FieldsTableContainer = ({
   }, [inheritedFields, query]);
 
   const mappedFields = useMemo(() => {
-    return definition.fields.map((field) => ({
-      name: field.name,
-      type: field.type,
-      format: field.format,
-      parent: definition.id,
-      status: 'mapped' as const,
-    }));
+    if (isWiredStream(definition)) {
+      return Object.entries(definition.stream.ingest.wired.fields).map(([name, field]) => ({
+        name,
+        type: field.type,
+        format: field.format,
+        parent: definition.name,
+        status: 'mapped' as const,
+      }));
+    }
+    return [];
   }, [definition]);
 
   const filteredMappedFields = useMemo(() => {
@@ -114,11 +116,11 @@ export const FieldsTableContainer = ({
     return unmappedFieldsResult
       ? unmappedFieldsResult.map((field) => ({
           name: field,
-          parent: definition.id,
+          parent: definition.name,
           status: 'unmapped' as const,
         }))
       : [];
-  }, [definition.id, unmappedFieldsResult]);
+  }, [definition.name, unmappedFieldsResult]);
 
   const filteredUnmappedFields = useMemo(() => {
     if (!unmappedFieldsResult) return [];
@@ -285,7 +287,9 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
           if (!fieldType) return EMPTY_CONTENT;
           return <FieldType type={fieldType} />;
         } else if (columnId === 'parent') {
-          return <FieldParent parent={field.parent} linkEnabled={field.parent !== definition.id} />;
+          return (
+            <FieldParent parent={field.parent} linkEnabled={field.parent !== definition.name} />
+          );
         } else if (columnId === 'status') {
           return <FieldStatus status={field.status} />;
         } else {
