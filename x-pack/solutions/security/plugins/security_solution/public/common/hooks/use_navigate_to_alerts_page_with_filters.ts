@@ -16,14 +16,18 @@ import { URL_PARAM_KEY } from './use_url_state';
 export const useNavigateToAlertsPageWithFilters = () => {
   const { navigateTo } = useNavigation();
 
-  return (filterItems: FilterControlConfig | FilterControlConfig[], openInNewTab = false) => {
+  return (
+    filterItems: FilterControlConfig | FilterControlConfig[],
+    openInNewTab = false,
+    timerange?: string
+  ) => {
     const urlFilterParams = encode(
       formatPageFilterSearchParam(Array.isArray(filterItems) ? filterItems : [filterItems])
     );
-
+    const timerangePath = timerange ? `&timerange=${timerange}` : '';
     navigateTo({
       deepLinkId: SecurityPageName.alerts,
-      path: `?${URL_PARAM_KEY.pageFilter}=${urlFilterParams}`,
+      path: `?${URL_PARAM_KEY.pageFilter}=${urlFilterParams}${timerangePath}`,
       openInNewTab,
     });
   };
