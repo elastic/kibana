@@ -16,10 +16,13 @@ import type {
 } from '@kbn/security-role-management-model';
 
 import type { EffectiveFeaturePrivileges } from './privilege_summary_calculator';
+import { ALL_SPACES_ID } from '../../../../../../../common/constants';
+
+type EffectivePrivilegesTuple = [string[], EffectiveFeaturePrivileges['featureId']];
 
 interface Props {
   feature: SecuredFeature;
-  effectiveFeaturePrivileges: Array<EffectiveFeaturePrivileges['featureId']>;
+  effectiveFeaturePrivileges: EffectivePrivilegesTuple[];
 }
 
 export const PrivilegeSummaryExpandedRow = (props: Props) => {
@@ -34,13 +37,20 @@ export const PrivilegeSummaryExpandedRow = (props: Props) => {
                   {subFeature.name}
                 </EuiText>
               </EuiFlexItem>
-              {props.effectiveFeaturePrivileges.map((privs, index) => {
-                return (
-                  <EuiFlexItem key={index} data-test-subj={`entry-${index}`}>
-                    {subFeature.getPrivilegeGroups().map(renderPrivilegeGroup(privs.subFeature))}
-                  </EuiFlexItem>
-                );
-              })}
+              {props.effectiveFeaturePrivileges.map(
+                ([spaces, privs]: EffectivePrivilegesTuple, index) => {
+                  return (
+                    <EuiFlexItem key={index} data-test-subj={`entry-${index}`}>
+                      {subFeature.getPrivilegeGroups().map(
+                        renderPrivilegeGroup(privs.subFeature, {
+                          requireAllSpaces: subFeature.requireAllSpaces,
+                          spaces,
+                        })
+                      )}
+                    </EuiFlexItem>
+                  );
+                }
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         );
@@ -48,8 +58,13 @@ export const PrivilegeSummaryExpandedRow = (props: Props) => {
     </EuiFlexGroup>
   );
 
-  function renderPrivilegeGroup(effectiveSubFeaturePrivileges: string[]) {
+  function renderPrivilegeGroup(
+    effectiveSubFeaturePrivileges: string[],
+    { requireAllSpaces, spaces }: { requireAllSpaces: boolean; spaces: string[] }
+  ) {
     return (privilegeGroup: SubFeaturePrivilegeGroup, index: number) => {
+      const isDisabledDueToSpaceSelection = requireAllSpaces && !spaces.includes(ALL_SPACES_ID);
+
       switch (privilegeGroup.groupType) {
         case 'independent':
           return renderIndependentPrivilegeGroup(
@@ -61,7 +76,8 @@ export const PrivilegeSummaryExpandedRow = (props: Props) => {
           return renderMutuallyExclusivePrivilegeGroup(
             effectiveSubFeaturePrivileges,
             privilegeGroup,
-            index
+            index,
+            isDisabledDueToSpaceSelection
           );
         default:
           throw new Error(`Unsupported privilege group type: ${privilegeGroup.groupType}`);
@@ -112,11 +128,12 @@ export const PrivilegeSummaryExpandedRow = (props: Props) => {
   function renderMutuallyExclusivePrivilegeGroup(
     effectiveSubFeaturePrivileges: string[],
     privilegeGroup: SubFeaturePrivilegeGroup,
-    index: number
+    index: number,
+    isDisabledDueToSpaceSelection: boolean
   ) {
-    const firstSelectedPrivilege = privilegeGroup.privileges.find((p) =>
-      effectiveSubFeaturePrivileges.includes(p.id)
-    )?.name;
+    const firstSelectedPrivilege = !isDisabledDueToSpaceSelection
+      ? privilegeGroup.privileges.find((p) => effectiveSubFeaturePrivileges.includes(p.id))?.name
+      : null;
 
     return (
       <EuiFlexGroup gutterSize="s" key={index} data-test-subj="mutexPrivilege">
