@@ -17,6 +17,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Theme } from '@elastic/charts';
 
 import { UserProfileService } from '@kbn/core/public';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { of } from 'rxjs';
 import { DataQualityProvider, DataQualityProviderProps } from '../../data_quality_context';
 import { ResultsRollupContext } from '../../contexts/results_rollup_context';
 import { IndicesCheckContext } from '../../contexts/indices_check_context';
@@ -64,6 +66,8 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
       error: () => {},
     },
   });
+  const chrome = chromeServiceMock.createStartContract();
+  chrome.getChromeStyle$.mockReturnValue(of('classic'));
 
   return (
     <I18nProvider>
@@ -84,6 +88,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
             navigateToApp={mockNavigateToApp}
             currentAppId={'securitySolutionUI'}
             userProfileService={jest.fn() as unknown as UserProfileService}
+            chrome={chrome}
           >
             {children}
           </AssistantProvider>
