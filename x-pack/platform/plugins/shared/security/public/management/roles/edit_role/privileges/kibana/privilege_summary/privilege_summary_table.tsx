@@ -162,7 +162,7 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
             }`}
           >
             {showPrivilege(
-              props.spaces.some((space) => space.id === ALL_SPACES_ID),
+              entry.spaces.some((space) => space === ALL_SPACES_ID),
               primary
             )}{' '}
             {iconTip}
@@ -178,12 +178,14 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
   }
   columns.push(featureColumn, ...privilegeColumns);
 
-  const privileges = rawKibanaPrivileges.reduce((acc, entry) => {
+  const privileges = rawKibanaPrivileges.reduce<
+    Record<string, [string[], EffectiveFeaturePrivileges]>
+  >((acc, entry) => {
     return {
       ...acc,
-      [getColumnKey(entry)]: calculator.getEffectiveFeaturePrivileges(entry),
+      [getColumnKey(entry)]: [entry.spaces, calculator.getEffectiveFeaturePrivileges(entry)],
     };
-  }, {} as Record<string, EffectiveFeaturePrivileges>);
+  }, {});
 
   const accordions: any[] = [];
 
@@ -210,15 +212,22 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
       </EuiFlexGroup>
     );
 
+    const categoryPrivileges = Object.keys(privileges).reduce((acc, key) => {
+      const [, featurePrivileges] = privileges[key];
+
+      return {
+        ...acc,
+        [key]: featurePrivileges,
+      };
+    }, {});
+
     const categoryItems = featuresInCategory.map((feature) => {
       return {
         feature,
         featureId: feature.id,
-        ...privileges,
+        ...categoryPrivileges,
       };
     });
-
-    const isAllSpacesSelected = props.spaces.some((space) => space.id === ALL_SPACES_ID);
 
     accordions.push(
       <EuiAccordion
@@ -243,8 +252,10 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
               [featureId]: (
                 <PrivilegeSummaryExpandedRow
                   feature={props.kibanaPrivileges.getSecuredFeature(featureId)}
-                  effectiveFeaturePrivileges={Object.values(privileges).map((p) => p[featureId])}
-                  isAllSpacesSelected={isAllSpacesSelected}
+                  effectiveFeaturePrivileges={Object.values(privileges).map(([spaces, privs]) => [
+                    spaces,
+                    privs[featureId],
+                  ])}
                 />
               ),
             };
