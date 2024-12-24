@@ -42,7 +42,7 @@ const babelFileSuffix = `  ],
 export const updateFile = async (filePath: string, regexStringArray: string[]) => {
   const contents = `${babelFilePrefix}\n    ${regexStringArray.join(
     ',\n    '
-  )}\n${babelFileSuffix}`;
+  )},\n${babelFileSuffix}`;
 
   return fs.writeFile(filePath, contents);
 };
