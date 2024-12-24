@@ -18,6 +18,7 @@
       "connectors"
     ],
     "requiredPlugins": [
+      "licensing",
       "taskManager",
       "fleet"
     ],

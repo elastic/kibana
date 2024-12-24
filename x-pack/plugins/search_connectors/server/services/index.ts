@@ -163,11 +163,12 @@ export class AgentlessConnectorsInfraService {
       enabled: true,
       inputs: [
         {
-          type: `${connector.service_type}-connectors-py`,
+          type: 'connectors-py',
           enabled: true,
           vars: {
             connector_id: { type: 'string', value: connector.id },
             connector_name: { type: 'string', value: connector.name },
+            service_type: { type: 'string', value: connector.service_type },
           },
           streams: [],
         },
