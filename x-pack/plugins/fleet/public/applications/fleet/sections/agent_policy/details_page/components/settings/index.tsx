@@ -40,7 +40,6 @@ import {
   ConfirmDeployAgentPolicyModal,
 } from '../../../components';
 import { DevtoolsRequestFlyoutButton } from '../../../../../components';
-import { ExperimentalFeaturesService } from '../../../../../services';
 import { generateUpdateAgentPolicyDevToolsRequest } from '../../../services';
 import { UNKNOWN_SPACE } from '../../../../../../../../common/constants';
 
@@ -155,7 +154,6 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
       setIsLoading(false);
     };
 
-    const { showDevtoolsRequest } = ExperimentalFeaturesService.get();
     const devtoolRequest = useMemo(
       () =>
         generateUpdateAgentPolicyDevToolsRequest(
@@ -235,28 +233,26 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                         />
                       </EuiButtonEmpty>
                     </EuiFlexItem>
-                    {showDevtoolsRequest ? (
-                      <EuiFlexItem grow={false}>
-                        <DevtoolsRequestFlyoutButton
-                          isDisabled={
-                            isLoading ||
-                            Object.keys(validation).length > 0 ||
-                            hasAdvancedSettingsErrors ||
-                            hasInvalidSpaceError
+                    <EuiFlexItem grow={false}>
+                      <DevtoolsRequestFlyoutButton
+                        isDisabled={
+                          isLoading ||
+                          Object.keys(validation).length > 0 ||
+                          hasAdvancedSettingsErrors ||
+                          hasInvalidSpaceError
+                        }
+                        btnProps={{
+                          color: 'text',
+                        }}
+                        description={i18n.translate(
+                          'xpack.fleet.editAgentPolicy.devtoolsRequestDescription',
+                          {
+                            defaultMessage: 'This Kibana request updates an agent policy.',
                           }
-                          btnProps={{
-                            color: 'text',
-                          }}
-                          description={i18n.translate(
-                            'xpack.fleet.editAgentPolicy.devtoolsRequestDescription',
-                            {
-                              defaultMessage: 'This Kibana request updates an agent policy.',
-                            }
-                          )}
-                          request={devtoolRequest}
-                        />
-                      </EuiFlexItem>
-                    ) : null}
+                        )}
+                        request={devtoolRequest}
+                      />
+                    </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiButton
                         onClick={onSubmit}

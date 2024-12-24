@@ -11,8 +11,13 @@ import {
   CROWDSTRIKE_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { CrowdstrikeBaseApiResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
+import type {
+  CrowdstrikeBaseApiResponse,
+  CrowdStrikeExecuteRTRResponse,
+} from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import { v4 as uuidv4 } from 'uuid';
+
+import { mapParametersToCrowdStrikeArguments } from './utils';
 import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
 import type {
   CommonResponseActionMethodOptions,
@@ -305,15 +310,99 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   ): Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
-    // TODO: just a placeholder for now
-    return Promise.resolve({ output: 'runscript', code: 200 }) as never as ActionDetails<
-      ResponseActionRunScriptOutputContent,
-      ResponseActionRunScriptParameters
-    >;
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'runscript',
+    };
+
+    let actionResponse: ActionTypeExecutorResult<CrowdStrikeExecuteRTRResponse> | undefined;
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+      if (!error) {
+        if (!reqIndexOptions.actionId) {
+          reqIndexOptions.actionId = uuidv4();
+        }
+
+        try {
+          actionResponse = (await this.sendAction(SUB_ACTION.EXECUTE_ADMIN_RTR, {
+            actionParameters: { comment: this.buildExternalComment(reqIndexOptions) },
+            command: mapParametersToCrowdStrikeArguments('runscript', actionRequest.parameters),
+            endpoint_ids: actionRequest.endpoint_ids,
+          })) as ActionTypeExecutorResult<CrowdStrikeExecuteRTRResponse>;
+        } catch (err) {
+          error = err;
+        }
+      }
+
+      reqIndexOptions.error = error?.message;
+
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+    }
+
+    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
+
+    // Ensure actionResponse is assigned before using it
+    if (actionResponse) {
+      await this.completeCrowdstrikeBatchAction(actionResponse, actionRequestDoc);
+    }
+
+    await this.updateCases({
+      command: reqIndexOptions.command,
+      caseIds: reqIndexOptions.case_ids,
+      alertIds: reqIndexOptions.alert_ids,
+      actionId: actionRequestDoc.EndpointActions.action_id,
+      hosts: actionRequest.endpoint_ids.map((agentId) => {
+        return {
+          hostId: agentId,
+          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
+        };
+      }),
+      comment: reqIndexOptions.comment,
+    });
+
+    return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+  }
+
+  private async completeCrowdstrikeBatchAction(
+    actionResponse: ActionTypeExecutorResult<CrowdStrikeExecuteRTRResponse>,
+    doc: LogsEndpointAction
+  ): Promise<void> {
+    const agentId = doc.agent.id as string;
+    const stdout = actionResponse.data?.combined.resources[agentId].stdout || '';
+    const stderr = actionResponse.data?.combined.resources[agentId].stderr || '';
+    const error = actionResponse.data?.combined.resources[agentId].errors?.[0];
+    const options = {
+      actionId: doc.EndpointActions.action_id,
+      agentId,
+      data: {
+        ...doc.EndpointActions.data,
+        output: {
+          content: {
+            stdout,
+            stderr,
+            code: '200',
+          },
+          type: 'text' as const,
+        },
+      },
+      ...(error
+        ? {
+            error: {
+              code: error.code,
+              message: `Crowdstrike action failed: ${error.message}`,
+            },
+          }
+        : {}),
+    };
+
+    await this.writeActionResponseToEndpointIndex(options);
   }
 
   private async completeCrowdstrikeAction(
-    actionResponse: ActionTypeExecutorResult<CrowdstrikeBaseApiResponse> | undefined,
+    actionResponse: ActionTypeExecutorResult<CrowdstrikeBaseApiResponse>,
     doc: LogsEndpointAction
   ): Promise<void> {
     const options = {
