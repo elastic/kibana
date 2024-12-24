@@ -6,18 +6,12 @@
  */
 
 import React from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { UseArray, useFormData } from '../../../../shared_imports';
 import { RelatedIntegrationsHelpInfo } from './related_integrations_help_info';
 import { RelatedIntegrationFieldRow } from './related_integration_field_row';
 import * as i18n from './translations';
+import { OptionalFieldLabel } from '../optional_field_label';
 
 interface RelatedIntegrationsProps {
   path: string;
@@ -38,11 +32,7 @@ export function RelatedIntegrations({ path, dataTestSubj }: RelatedIntegrationsP
       {({ items, addItem, removeItem }) => (
         <EuiFormRow
           label={label}
-          labelAppend={
-            <EuiText color="subdued" size="xs">
-              {i18n.OPTIONAL}
-            </EuiText>
-          }
+          labelAppend={OptionalFieldLabel}
           labelType="legend"
           fullWidth
           data-test-subj={dataTestSubj}
