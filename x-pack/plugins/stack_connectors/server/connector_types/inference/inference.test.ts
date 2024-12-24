@@ -60,11 +60,13 @@ describe('InferenceConnector', () => {
     });
 
     it('uses the completion task_type is supplied', async () => {
-      const stream = Readable.from([
-        `data: {"id":"chatcmpl-AbLKRuRMZCAcMMQdl96KMTUgAfZNg","choices":[{"delta":{"content":" you"},"index":0}],"model":"gpt-4o-2024-08-06","object":"chat.completion.chunk"}\n\n`,
-        `data: [DONE]\n\n`,
-      ]);
-      mockEsClient.transport.request.mockResolvedValue(stream);
+      mockEsClient.transport.request.mockResolvedValue({
+        body: Readable.from([
+          `data: {"id":"chatcmpl-AbLKRuRMZCAcMMQdl96KMTUgAfZNg","choices":[{"delta":{"content":" you"},"index":0}],"model":"gpt-4o-2024-08-06","object":"chat.completion.chunk"}\n\n`,
+          `data: [DONE]\n\n`,
+        ]),
+        statusCode: 200,
+      });
 
       const response = await connector.performApiUnifiedCompletion({
         body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
@@ -84,7 +86,7 @@ describe('InferenceConnector', () => {
           method: 'POST',
           path: '_inference/completion/test/_unified',
         },
-        { asStream: true }
+        { asStream: true, meta: true }
       );
       expect(response.choices[0].message.content).toEqual(' you');
     });
@@ -264,6 +266,11 @@ describe('InferenceConnector', () => {
     });
 
     it('the API call is successful with correct request parameters', async () => {
+      mockEsClient.transport.request.mockResolvedValue({
+        body: Readable.from([`data: [DONE]\n\n`]),
+        statusCode: 200,
+      });
+
       await connector.performApiUnifiedCompletionStream({
         body: { messages: [{ content: 'Hello world', role: 'user' }] },
       });
@@ -282,11 +289,16 @@ describe('InferenceConnector', () => {
           method: 'POST',
           path: '_inference/completion/test/_unified',
         },
-        { asStream: true }
+        { asStream: true, meta: true }
       );
     });
 
     it('signal is properly passed to streamApi', async () => {
+      mockEsClient.transport.request.mockResolvedValue({
+        body: Readable.from([`data: [DONE]\n\n`]),
+        statusCode: 200,
+      });
+
       const signal = jest.fn() as unknown as AbortSignal;
       await connector.performApiUnifiedCompletionStream({
         body: { messages: [{ content: 'Hello world', role: 'user' }] },
@@ -299,7 +311,7 @@ describe('InferenceConnector', () => {
           method: 'POST',
           path: '_inference/completion/test/_unified',
         },
-        { asStream: true }
+        { asStream: true, meta: true, signal }
       );
     });
 
@@ -319,7 +331,10 @@ describe('InferenceConnector', () => {
         `data: {"id":"chatcmpl-AbLKRuRMZCAcMMQdl96KMTUgAfZNg","choices":[{"delta":{"content":" you"},"index":0}],"model":"gpt-4o-2024-08-06","object":"chat.completion.chunk"}\n\n`,
         `data: [DONE]\n\n`,
       ]);
-      mockEsClient.transport.request.mockResolvedValue(stream);
+      mockEsClient.transport.request.mockResolvedValue({
+        body: stream,
+        statusCode: 200,
+      });
       const response = await connector.performApiUnifiedCompletionStream({
         body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
       });

@@ -105,11 +105,11 @@ actions:
                     # Index threshold rule ()
                     - $ref: '../../x-pack/plugins/alerting/docs/openapi/components/schemas/params_index_threshold_rule.yaml'
                     # Infra inventory rule (metrics.alert.inventory.threshold)
-                    - $ref: '../../x-pack/plugins/observability_solution/infra/server/lib/alerting/docs/params_property_infra_inventory.yaml'
+                    - $ref: '../../x-pack/solutions/observability/plugins/infra/server/lib/alerting/docs/params_property_infra_inventory.yaml'
                     # Log threshold rule (logs.alert.document.count)
-                    - $ref: '../../x-pack/plugins/observability_solution/infra/server/lib/alerting/docs/params_property_log_threshold.yaml'
+                    - $ref: '../../x-pack/solutions/observability/plugins/infra/server/lib/alerting/docs/params_property_log_threshold.yaml'
                     # Infra metric threshold rule (metrics.alert.threshold)
-                    - $ref: '../../x-pack/plugins/observability_solution/infra/server/lib/alerting/docs/params_property_infra_metric_threshold.yaml'
+                    - $ref: '../../x-pack/solutions/observability/plugins/infra/server/lib/alerting/docs/params_property_infra_metric_threshold.yaml'
                     # SLO burn rate (slo.rules.burnRate)
                     - $ref:  '../../x-pack/solutions/observability/plugins/slo/server/lib/rules/slo_burn_rate/docs/params_property_slo_burn_rate.yaml'
                     # Synthetics uptime TLS rule (xpack.uptime.alerts.tls)

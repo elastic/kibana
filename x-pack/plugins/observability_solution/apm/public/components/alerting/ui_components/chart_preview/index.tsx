@@ -10,8 +10,6 @@ import {
   Axis,
   BarSeries,
   Chart,
-  LIGHT_THEME,
-  DARK_THEME,
   LineAnnotation,
   Position,
   RectAnnotation,
@@ -22,13 +20,14 @@ import {
   Tooltip,
   niceTimeFormatter,
 } from '@elastic/charts';
-import { COLOR_MODES_STANDARD, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
 import { TimeLabelForData, TIME_LABELS, getDomain } from './chart_preview_helper';
@@ -54,6 +53,7 @@ export function ChartPreview({
   totalGroups,
 }: ChartPreviewProps) {
   const theme = useEuiTheme();
+  const baseTheme = useElasticChartsTheme();
   const thresholdOpacity = 0.3;
   const DEFAULT_DATE_FORMAT = 'Y-MM-DD HH:mm:ss';
 
@@ -122,7 +122,7 @@ export function ChartPreview({
           legendPosition={'bottom'}
           legendSize={legendSize}
           locale={i18n.getLocale()}
-          theme={theme.colorMode === COLOR_MODES_STANDARD.dark ? DARK_THEME : LIGHT_THEME}
+          baseTheme={baseTheme}
         />
         <LineAnnotation
           dataValues={[{ dataValue: threshold }]}

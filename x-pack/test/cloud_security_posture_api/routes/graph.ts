@@ -75,7 +75,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       describe('Validation', () => {
-        it('should return 400 when missing `eventIds` field', async () => {
+        it('should return 400 when missing `originEventIds` field', async () => {
           await postGraph(supertest, {
             // @ts-expect-error ignore error for testing
             query: {
@@ -171,6 +171,7 @@ export default function (providerContext: FtrProviderContext) {
             'primary',
             `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
           );
+          expect(edge.type).equal('dashed');
         });
       });
 
@@ -201,6 +202,7 @@ export default function (providerContext: FtrProviderContext) {
             'danger',
             `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
           );
+          expect(edge.type).equal('solid');
         });
       });
 
@@ -231,6 +233,7 @@ export default function (providerContext: FtrProviderContext) {
             'primary',
             `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
           );
+          expect(edge.type).equal('solid');
         });
       });
 
@@ -261,6 +264,7 @@ export default function (providerContext: FtrProviderContext) {
             'danger',
             `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
           );
+          expect(edge.type).equal('solid');
         });
       });
 
@@ -303,6 +307,7 @@ export default function (providerContext: FtrProviderContext) {
             'warning',
             `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
           );
+          expect(edge.type).equal('dashed');
         });
       });
 
@@ -351,10 +356,11 @@ export default function (providerContext: FtrProviderContext) {
               : 'primary',
             `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
           );
+          expect(edge.type).equal('dashed');
         });
       });
 
-      it('should support more than 1 eventIds', async () => {
+      it('should support more than 1 originEventIds', async () => {
         const response = await postGraph(supertest, {
           query: {
             originEventIds: [
@@ -384,6 +390,7 @@ export default function (providerContext: FtrProviderContext) {
             'danger',
             `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
           );
+          expect(edge.type).equal('solid');
         });
       });
 
@@ -429,6 +436,7 @@ export default function (providerContext: FtrProviderContext) {
             idx <= 1 ? 'danger' : 'warning',
             `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
           );
+          expect(edge.type).equal(idx <= 1 ? 'solid' : 'dashed');
         });
       });
 
