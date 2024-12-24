@@ -109,6 +109,7 @@ export function registerChangesFunction({
                 field: log.field ?? 'message',
                 dateHistogram,
               });
+              // @ts-expect-error missing change_point aggregation
               return changes.map((change) => ({
                 name: log.name,
                 ...change,
@@ -141,6 +142,7 @@ export function registerChangesFunction({
             "indeterminate" means that the system could not detect any changes.`,
             changes: {
               metrics: allMetricChangesWithoutTimeseries,
+              // @ts-expect-error missing change_point aggregation
               logs: allLogChangesWithoutTimeseries,
             },
           },
