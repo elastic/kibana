@@ -21,7 +21,6 @@ import {
   installPrebuiltRules,
   createPrebuiltRuleAssetSavedObjects,
   reviewPrebuiltRulesToUpgrade,
-  patchRule,
   createHistoricalPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObjectOfType,
   fetchRule,
