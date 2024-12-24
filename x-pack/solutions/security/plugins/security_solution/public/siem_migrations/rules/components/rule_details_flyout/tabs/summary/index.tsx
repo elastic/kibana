@@ -7,9 +7,9 @@
 
 import React, { useMemo } from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
-import { EuiAvatar, EuiCommentList, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
+import { EuiCommentList, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import moment from 'moment';
-import { AssistantAvatar } from '@kbn/elastic-assistant';
+import { AssistantAvatar } from '@kbn/ai-assistant-icon';
 import {
   RuleMigrationStatusEnum,
   type RuleMigration,
@@ -31,9 +31,7 @@ export const SummaryTab: React.FC<SummaryTabProps> = React.memo(({ ruleMigration
       return {
         username: i18n.ASSISTANT_USERNAME,
         timelineAvatarAriaLabel: i18n.ASSISTANT_USERNAME,
-        timelineAvatar: (
-          <EuiAvatar name="machine" size="l" color="subdued" iconType={AssistantAvatar} />
-        ),
+        timelineAvatar: <AssistantAvatar name="machine" size="l" color="subdued" />,
         event:
           ruleMigration.status === RuleMigrationStatusEnum.failed
             ? i18n.COMMENT_EVENT_FAILED
