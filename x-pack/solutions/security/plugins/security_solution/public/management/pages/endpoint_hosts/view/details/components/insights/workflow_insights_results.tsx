@@ -99,7 +99,11 @@ export const WorkflowInsightsResults = ({
   const insights = useMemo(() => {
     if (showEmptyResultsCallout) {
       return (
-        <CustomEuiCallOut onDismiss={hideEmptyStateCallout} color={'success'}>
+        <CustomEuiCallOut
+          onDismiss={hideEmptyStateCallout}
+          color={'success'}
+          data-test-subj={'workflowInsightsEmptyResultsCallout'}
+        >
           {WORKFLOW_INSIGHTS.issues.emptyResults}
         </CustomEuiCallOut>
       );
@@ -107,7 +111,13 @@ export const WorkflowInsightsResults = ({
       return results.flatMap((insight, index) => {
         return (insight.remediation.exception_list_items ?? []).map((item) => {
           return (
-            <EuiPanel paddingSize="m" hasShadow={false} hasBorder key={index}>
+            <EuiPanel
+              paddingSize="m"
+              hasShadow={false}
+              hasBorder
+              key={index}
+              data-test-subj={`workflowInsightsResult-${index}`}
+            >
               <EuiFlexGroup alignItems={'center'} gutterSize={'m'}>
                 <EuiFlexItem grow={false}>
                   <EuiIcon type="warning" size="l" color="warning" />
@@ -129,6 +139,7 @@ export const WorkflowInsightsResults = ({
 
                 <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
                   <EuiButtonIcon
+                    data-test-subj={`workflowInsightsResult-${index}-remediation`}
                     aria-label={WORKFLOW_INSIGHTS.issues.insightRemediationButtonAriaLabel}
                     iconType="popout"
                     href={`${APP_PATH}${TRUSTED_APPS_PATH}?show=create`}
