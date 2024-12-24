@@ -248,7 +248,12 @@ export function initializeEditApi(
        * Check everything here: user/app permissions and the current inline editing state
        */
       isEditingEnabled: () => {
-        return apiHasAppContext(parentApi) && canEdit() && panelManagementApi.isEditingEnabled();
+        return Boolean(
+          parentApi &&
+            apiHasAppContext(parentApi) &&
+            canEdit() &&
+            panelManagementApi.isEditingEnabled()
+        );
       },
       getEditHref: async () => {
         if (!parentApi || !apiHasAppContext(parentApi)) {

@@ -93,14 +93,7 @@ export function loadEmbeddableData(
     updateWarnings,
     resetMessages,
     updateMessages,
-  } = buildUserMessagesHelpers(
-    api,
-    internalApi,
-    services,
-    onBeforeBadgesRender,
-    services.spaces,
-    metaInfo
-  );
+  } = buildUserMessagesHelpers(api, internalApi, services, onBeforeBadgesRender, metaInfo);
 
   const dispatchBlockingErrorIfAny = () => {
     const blockingErrors = getUserMessages(blockingMessageDisplayLocations, {
@@ -136,9 +129,7 @@ export function loadEmbeddableData(
     internalApi.updateDataLoading(true);
 
     // the component is ready to load
-    if (apiHasLensComponentCallbacks(parentApi)) {
-      parentApi.onLoad?.(true);
-    }
+    onLoad?.(true);
 
     const currentState = getState();
 
@@ -169,6 +160,7 @@ export function loadEmbeddableData(
       internalApi.updateVisualizationContext({
         activeData: adapters?.tables?.tables,
       });
+
       // data has loaded
       internalApi.updateDataLoading(false);
       // The third argument here is an observable to let the
