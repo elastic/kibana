@@ -20,8 +20,8 @@ const validateDocs = async (entrypointFile: string) => {
 
 describe('openApi', () => {
   it('Checks that entrypoint.yaml is valid', async () => {
-    expect(await validateDocs('x-pack/plugins/fleet/common/openapi/entrypoint.yaml')).toEqual(
-      'Entrypoint is valid'
-    );
+    expect(
+      await validateDocs('x-pack/platform/plugins/shared/fleet/common/openapi/entrypoint.yaml')
+    ).toEqual('Entrypoint is valid');
   });
 });
