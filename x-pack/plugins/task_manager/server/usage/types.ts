@@ -7,29 +7,6 @@
 
 export interface TaskManagerUsage {
   task_type_exclusion: string[];
-  ephemeral_tasks_enabled: boolean;
-  ephemeral_request_capacity: number;
-  ephemeral_stats: {
-    status: string;
-    queued_tasks: {
-      p50: number;
-      p90: number;
-      p95: number;
-      p99: number;
-    };
-    load: {
-      p50: number;
-      p90: number;
-      p95: number;
-      p99: number;
-    };
-    executions_per_cycle: {
-      p50: number;
-      p90: number;
-      p95: number;
-      p99: number;
-    };
-  };
   failed_tasks: number;
   recurring_tasks: {
     actual_service_time: number;

@@ -12,6 +12,7 @@ import {
 import { TaskCost, TaskDefinition } from '../task';
 import { setupTestServers } from './lib';
 import { TaskTypeDictionary } from '../task_type_dictionary';
+import { sortBy } from 'lodash';
 
 jest.mock('../task_type_dictionary', () => {
   const actual = jest.requireActual('../task_type_dictionary');
@@ -50,14 +51,17 @@ describe('Task cost checks', () => {
 
   it('detects tasks with cost definitions', async () => {
     const taskTypes = taskTypeDictionary.getAllDefinitions();
-    const taskTypesWithCost = taskTypes
-      .map((taskType: TaskDefinition) =>
-        !!taskType.cost ? { taskType: taskType.type, cost: taskType.cost } : null
-      )
-      .filter(
-        (tt: { taskType: string; cost: TaskCost } | null) =>
-          null != tt && tt.cost !== TaskCost.Normal
-      );
+    const taskTypesWithCost = sortBy(
+      taskTypes
+        .map((taskType: TaskDefinition) =>
+          !!taskType.cost ? { taskType: taskType.type, cost: taskType.cost } : null
+        )
+        .filter(
+          (tt: { taskType: string; cost: TaskCost } | null) =>
+            null != tt && tt.cost !== TaskCost.Normal
+        ),
+      'taskType'
+    );
     expect(taskTypesWithCost).toMatchSnapshot();
   });
 });

@@ -21,6 +21,7 @@ import {
 import { verifyAccessAndContext } from '../../../lib';
 import { trackLegacyTerminology } from '../../../lib/track_legacy_terminology';
 import { transformFindRulesInternalBodyV1, transformFindRulesResponseV1 } from './transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const findInternalRulesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -30,6 +31,7 @@ export const findInternalRulesRoute = (
   router.post(
     {
       path: INTERNAL_ALERTING_API_FIND_RULES_PATH,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
         body: findRulesInternalRequestBodySchemaV1,

@@ -28,6 +28,7 @@ import {
 } from '@kbn/field-formats-plugin/common';
 import { css } from '@emotion/react';
 import type { DocLinksStart } from '@kbn/core/public';
+import { TextBasedLayerColumn } from '../../text_based/types';
 import { LensAppServices } from '../../../app_plugin/types';
 import { GenericIndexPatternColumn } from '../form_based';
 import { isColumnFormatted } from '../operations/definitions/helpers';
@@ -127,7 +128,7 @@ type FormatParams = NonNullable<ValueFormatConfig['params']>;
 type FormatParamsKeys = keyof FormatParams;
 
 export interface FormatSelectorProps {
-  selectedColumn: GenericIndexPatternColumn;
+  selectedColumn: GenericIndexPatternColumn | TextBasedLayerColumn;
   onChange: (newFormat?: { id: string; params?: FormatParams }) => void;
   docLinks: DocLinksStart;
 }

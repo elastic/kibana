@@ -8,6 +8,7 @@
  */
 
 import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import React from 'react';
 
 import { KibanaThemeProvider } from './theme_provider';
@@ -17,6 +18,8 @@ import { KibanaThemeProvider } from './theme_provider';
  * @param node The node to wrap.
  * @param theme The `ThemeServiceStart` API.
  */
-export const wrapWithTheme = (node: React.ReactNode, theme: ThemeServiceStart) => (
-  <KibanaThemeProvider {...{ theme }}>{node}</KibanaThemeProvider>
-);
+export const wrapWithTheme = (
+  node: React.ReactNode,
+  theme: ThemeServiceStart,
+  userProfile?: UserProfileService
+) => <KibanaThemeProvider {...{ theme, userProfile }}>{node}</KibanaThemeProvider>;

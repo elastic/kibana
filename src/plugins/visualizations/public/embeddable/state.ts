@@ -22,6 +22,7 @@ import {
   getSearch,
   getSpaces,
   getTheme,
+  getUserProfile,
 } from '../services';
 import {
   deserializeReferences,
@@ -137,6 +138,7 @@ export const deserializeSavedObjectState = async ({
       overlays: getOverlays(),
       analytics: getAnalytics(),
       theme: getTheme(),
+      userProfile: getUserProfile(),
     },
     savedObjectId
   );

@@ -15,6 +15,7 @@ import {
   muteAllRuleRequestParamsSchemaV1,
   MuteAllRuleRequestParamsV1,
 } from '../../../../../common/routes/rule/apis/mute_all';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const muteAllRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -24,6 +25,7 @@ export const muteAllRuleRoute = (
   router.post(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id}/_mute_all`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'public',
         summary: `Mute all alerts`,

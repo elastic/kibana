@@ -41,7 +41,6 @@ const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS
  * @param {number} size - number of records to retrieve
  * @param {Filter[]} filters - to apply in the elastic query
  * @param {DataPublicPluginStart} data
- * @param {boolean} useNewFieldsApi
  * @param {DiscoverServices} services
  * @returns {Promise<object[]>}
  */
@@ -54,7 +53,6 @@ export async function fetchSurroundingDocs(
   size: number,
   filters: Filter[],
   data: DataPublicPluginStart,
-  useNewFieldsApi: boolean | undefined,
   services: DiscoverServices
 ): Promise<{
   rows: DataTableRecord[];
@@ -68,7 +66,7 @@ export async function fetchSurroundingDocs(
   }
   const timeField = dataView.timeFieldName!;
   const searchSource = data.search.searchSource.createEmpty();
-  updateSearchSource(searchSource, dataView, filters, Boolean(useNewFieldsApi));
+  updateSearchSource(searchSource, dataView, filters);
   const sortDirToApply = type === SurrDocType.SUCCESSORS ? sortDir : reverseSortDir(sortDir);
   const anchorRaw = anchor.raw!;
 
@@ -133,13 +131,11 @@ export async function fetchSurroundingDocs(
 export function updateSearchSource(
   searchSource: ISearchSource,
   dataView: DataView,
-  filters: Filter[],
-  useNewFieldsApi: boolean
+  filters: Filter[]
 ) {
-  if (useNewFieldsApi) {
-    searchSource.removeField('fieldsFromSource');
-    searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
-  }
+  searchSource.removeField('fieldsFromSource');
+  searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
+
   return searchSource
     .setParent(undefined)
     .setField('index', dataView)

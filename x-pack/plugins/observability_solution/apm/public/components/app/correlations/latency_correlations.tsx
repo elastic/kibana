@@ -17,6 +17,7 @@ import {
   EuiTitle,
   EuiBadge,
   EuiIconTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
@@ -47,7 +48,6 @@ import { CorrelationsProgressControls } from './progress_controls';
 import { OnAddFilter } from './context_popover/field_stats_popover';
 import { useLatencyCorrelations } from './use_latency_correlations';
 import { getTransactionDistributionChartData } from './get_transaction_distribution_chart_data';
-import { useTheme } from '../../../hooks/use_theme';
 import { ChartTitleToolTip } from './chart_title_tool_tip';
 import { getLatencyCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
@@ -68,7 +68,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     core: { notifications },
   } = useApmPluginContext();
 
-  const euiTheme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const { progress, response, startFetch, cancelFetch } = useLatencyCorrelations();
   const { overallHistogram, hasData, status } = getOverallHistogram(response, progress.isRunning);

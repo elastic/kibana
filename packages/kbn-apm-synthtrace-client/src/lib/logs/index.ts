@@ -83,6 +83,7 @@ export type LogDocument = Fields &
     'kubernetes.pod.name'?: string;
     'kubernetes.container.name'?: string;
     'orchestrator.resource.name'?: string;
+    tags?: string | string[];
   }>;
 
 class Log extends Serializable<LogDocument> {

@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import { SearchSource } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataTableRecord } from '@kbn/discover-utils';
@@ -58,6 +58,7 @@ export const getMockedSearchApi = ({
       rows: new BehaviorSubject<DataTableRecord[]>([]),
       totalHitCount: new BehaviorSubject<number | undefined>(0),
       columnsMeta: new BehaviorSubject<Record<string, DatatableColumnMeta> | undefined>(undefined),
+      inspectorAdapters: new BehaviorSubject<Adapters>({}),
     },
   };
 };

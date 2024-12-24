@@ -53,9 +53,9 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
       field: 'endpoint',
       name: i18n.ENDPOINT,
       'data-test-subj': 'endpointCell',
-      render: (endpoint: string) => {
+      render: (endpoint: string, additionalInfo: InferenceEndpointUI) => {
         if (endpoint) {
-          return <EndpointInfo inferenceId={endpoint} />;
+          return <EndpointInfo inferenceId={endpoint} provider={additionalInfo.provider} />;
         }
 
         return null;

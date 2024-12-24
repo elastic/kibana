@@ -14,4 +14,4 @@ echo "--- Synthetics plugin @elastic/synthetics Tests"
 
 cd "$XPACK_DIR"
 
-node plugins/observability_solution/synthetics/scripts/e2e.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" ${GREP:+--grep \"${GREP}\"}
+node solutions/observability/plugins/synthetics/scripts/e2e.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" ${GREP:+--grep \"${GREP}\"}

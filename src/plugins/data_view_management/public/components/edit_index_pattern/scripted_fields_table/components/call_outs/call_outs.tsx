@@ -24,11 +24,12 @@ export const CallOuts = ({ deprecatedLangsInUse, painlessDocLink }: CallOutsProp
 
   return (
     <>
+      <EuiSpacer size="m" />
       <EuiCallOut
         title={
           <FormattedMessage
-            id="indexPatternManagement.editIndexPattern.scripted.deprecationLangHeader"
-            defaultMessage="Deprecation languages in use"
+            id="indexPatternManagement.editIndexPattern.scripted.deprecatedLangHeader"
+            defaultMessage="Deprecated languages in use"
           />
         }
         color="danger"
@@ -38,7 +39,7 @@ export const CallOuts = ({ deprecatedLangsInUse, painlessDocLink }: CallOutsProp
           <FormattedMessage
             id="indexPatternManagement.editIndexPattern.scripted.deprecationLangLabel.deprecationLangDetail"
             defaultMessage="The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be
-            removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to {link} to avoid any problems."
+            removed in the next major version of Kibana and Elasticsearch. Convert your scripted fields to {link} to avoid any problems."
             values={{
               deprecatedLangsInUse: deprecatedLangsInUse.join(', '),
               link: (
@@ -53,7 +54,6 @@ export const CallOuts = ({ deprecatedLangsInUse, painlessDocLink }: CallOutsProp
           />
         </p>
       </EuiCallOut>
-      <EuiSpacer size="m" />
     </>
   );
 };

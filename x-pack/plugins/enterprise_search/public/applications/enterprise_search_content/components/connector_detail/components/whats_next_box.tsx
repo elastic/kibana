@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { useValues } from 'kea';
 
@@ -25,9 +25,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ConnectorStatus } from '@kbn/search-connectors';
 
-import { APPLICATIONS_PLUGIN } from '../../../../../../common/constants';
-
-import { PLAYGROUND_PATH } from '../../../../applications/routes';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
@@ -53,7 +50,14 @@ export const WhatsNextBox: React.FC<WhatsNextBoxProps> = ({
   isSyncing = false,
   isWaitingForConnector = false,
 }) => {
-  const { navigateToUrl } = useValues(KibanaLogic);
+  const { share } = useValues(KibanaLogic);
+  const onStartPlaygroundClick = useCallback(() => {
+    if (!share) return;
+    const playgroundLocator = share.url.locators.get('PLAYGROUND_LOCATOR_ID');
+    if (playgroundLocator) {
+      playgroundLocator.navigate({ 'default-index': connectorIndex });
+    }
+  }, [connectorIndex, share]);
   const isConfigured = !(
     connectorStatus === ConnectorStatus.NEEDS_CONFIGURATION ||
     connectorStatus === ConnectorStatus.CREATED
@@ -84,14 +88,7 @@ export const WhatsNextBox: React.FC<WhatsNextBoxProps> = ({
             data-test-subj="enterpriseSearchWhatsNextBoxSearchPlaygroundButton"
             iconType="sparkles"
             disabled={!connectorIndex || disabled}
-            onClick={() => {
-              navigateToUrl(
-                `${APPLICATIONS_PLUGIN.URL}${PLAYGROUND_PATH}?default-index=${connectorIndex}`,
-                {
-                  shouldNotCreateHref: true,
-                }
-              );
-            }}
+            onClick={onStartPlaygroundClick}
           >
             <FormattedMessage
               id="xpack.enterpriseSearch.whatsNextBox.searchPlaygroundButtonLabel"

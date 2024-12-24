@@ -50,7 +50,7 @@ export function registerAnalyticsRoutes({
 }: AnalyticsRouteDependencies) {
   router.get(
     {
-      path: '/internal/enterprise_search/analytics/collections',
+      path: '/internal/elasticsearch/analytics/collections',
       validate: {
         query: schema.object({
           query: schema.maybe(schema.string()),
@@ -75,7 +75,7 @@ export function registerAnalyticsRoutes({
 
   router.get(
     {
-      path: '/internal/enterprise_search/analytics/collections/{name}',
+      path: '/internal/elasticsearch/analytics/collections/{name}',
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -101,7 +101,7 @@ export function registerAnalyticsRoutes({
 
   router.post(
     {
-      path: '/internal/enterprise_search/analytics/collections/{name}/api_key',
+      path: '/internal/elasticsearch/analytics/collections/{name}/api_key',
       validate: {
         body: schema.object({
           keyName: schema.string(),
@@ -127,7 +127,7 @@ export function registerAnalyticsRoutes({
 
   router.post(
     {
-      path: '/internal/enterprise_search/analytics/collections',
+      path: '/internal/elasticsearch/analytics/collections',
       validate: {
         body: schema.object({
           name: schema.string(),
@@ -172,7 +172,7 @@ export function registerAnalyticsRoutes({
 
   router.delete(
     {
-      path: '/internal/enterprise_search/analytics/collections/{name}',
+      path: '/internal/elasticsearch/analytics/collections/{name}',
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -195,7 +195,7 @@ export function registerAnalyticsRoutes({
 
   router.get(
     {
-      path: '/internal/enterprise_search/analytics/collection/{name}/events/exist',
+      path: '/internal/elasticsearch/analytics/collection/{name}/events/exist',
       validate: {
         params: schema.object({
           name: schema.string(),

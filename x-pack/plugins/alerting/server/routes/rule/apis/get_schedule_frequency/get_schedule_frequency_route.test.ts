@@ -38,6 +38,12 @@ describe('getScheduleFrequencyRoute', () => {
           "access": "internal",
         },
         "path": "/internal/alerting/rules/_schedule_frequency",
+        "security": Object {
+          "authz": Object {
+            "enabled": false,
+            "reason": "This route is opted out from authorization because alerting uses it's own authorization model inside the alerts client.",
+          },
+        },
         "validate": Object {},
       }
     `);

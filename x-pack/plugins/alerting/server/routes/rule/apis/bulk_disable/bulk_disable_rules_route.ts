@@ -18,6 +18,7 @@ import {
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { Rule } from '../../../../application/rule/types';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const bulkDisableRulesRoute = ({
   router,
@@ -29,6 +30,7 @@ export const bulkDisableRulesRoute = ({
   router.patch(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_disable`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
         body: bulkDisableRulesRequestBodySchemaV1,

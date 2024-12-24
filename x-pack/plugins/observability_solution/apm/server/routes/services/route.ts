@@ -80,7 +80,6 @@ import {
 import { getThroughput, ServiceThroughputResponse } from './get_throughput';
 import { getServiceEntitySummary } from '../entities/services/get_service_entity_summary';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { createEntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -104,15 +103,9 @@ const servicesRoute = createApmServerRoute({
       ]),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   async handler(resources): Promise<ServicesItemsResponse> {
-    const {
-      context,
-      params,
-      logger,
-      request,
-      plugins: { security },
-    } = resources;
+    const { context, params, logger, request, core } = resources;
 
     const {
       searchQuery,
@@ -128,6 +121,7 @@ const servicesRoute = createApmServerRoute({
     } = params.query;
     const savedObjectsClient = (await context.core).savedObjects.client;
 
+    const coreStart = await core.start();
     const [mlClient, apmEventClient, apmAlertsClient, serviceGroup, randomSampler] =
       await Promise.all([
         getMlClient(resources),
@@ -136,7 +130,7 @@ const servicesRoute = createApmServerRoute({
         serviceGroupId
           ? getServiceGroup({ savedObjectsClient, serviceGroupId })
           : Promise.resolve(null),
-        getRandomSampler({ security, request, probability }),
+        getRandomSampler({ coreStart, request, probability }),
       ]);
 
     return getServicesItems({
@@ -172,13 +166,9 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
     ]),
     body: t.type({ serviceNames: jsonRt.pipe(t.array(t.string)) }),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceTransactionDetailedStatPeriodsResponse> => {
-    const {
-      params,
-      request,
-      plugins: { security },
-    } = resources;
+    const { params, request, core } = resources;
 
     const {
       environment,
@@ -194,9 +184,10 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
 
     const { serviceNames } = params.body;
 
+    const coreStart = await core.start();
     const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(resources),
-      getRandomSampler({ security, request, probability }),
+      getRandomSampler({ coreStart, request, probability }),
     ]);
 
     if (!serviceNames.length) {
@@ -225,7 +216,7 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([rangeRt, environmentRt]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceMetadataDetails> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -262,7 +253,7 @@ const serviceMetadataIconsRoute = createApmServerRoute({
     path: t.type({ serviceName: t.string }),
     query: rangeRt,
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceMetadataIcons> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, config } = resources;
@@ -295,18 +286,13 @@ const serviceAgentRoute = createApmServerRoute({
     }),
     query: rangeRt,
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceAgentResponse> => {
-    const { context, request } = resources;
-    const coreContext = await context.core;
+    const { request, plugins } = resources;
+    const entityManagerStart = await plugins.entityManager.start();
 
-    const [apmEventClient, entitiesESClient] = await Promise.all([
-      getApmEventClient(resources),
-      createEntitiesESClient({
-        request,
-        esClient: coreContext.elasticsearch.client.asCurrentUser,
-      }),
-    ]);
+    const apmEventClient = await getApmEventClient(resources);
+    const entityManagerClient = await entityManagerStart.getScopedClient({ request });
     const { params } = resources;
     const { serviceName } = params.path;
     const { start, end } = params.query;
@@ -320,7 +306,7 @@ const serviceAgentRoute = createApmServerRoute({
       }),
       getServiceEntitySummary({
         serviceName,
-        entitiesESClient,
+        entityManagerClient,
         environment: ENVIRONMENT_ALL.value,
       }),
     ]);
@@ -339,7 +325,7 @@ const serviceTransactionTypesRoute = createApmServerRoute({
     }),
     query: t.intersection([rangeRt, serviceTransactionDataSourceRt]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceTransactionTypesResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -366,7 +352,7 @@ const serviceNodeMetadataRoute = createApmServerRoute({
     }),
     query: t.intersection([kueryRt, rangeRt, environmentRt, serviceTransactionDataSourceRt]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceNodeMetadataResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -395,7 +381,12 @@ const serviceAnnotationsRoute = createApmServerRoute({
     }),
     query: t.intersection([environmentRt, rangeRt]),
   }),
-  options: { tags: ['access:apm', 'oas-tag:APM annotations'] },
+  options: { tags: ['oas-tag:APM annotations'] },
+  security: {
+    authz: {
+      requiredPrivileges: ['apm'],
+    },
+  },
   handler: async (resources): Promise<ServiceAnnotationResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, plugins, context, request, logger, config } = resources;
@@ -439,7 +430,12 @@ const serviceAnnotationsRoute = createApmServerRoute({
 const serviceAnnotationsCreateRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/services/{serviceName}/annotation 2023-10-31',
   options: {
-    tags: ['access:apm', 'access:apm_write', 'oas-tag:APM annotations'],
+    tags: ['oas-tag:APM annotations'],
+  },
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'apm_write'],
+    },
   },
   params: t.type({
     path: t.type({
@@ -523,7 +519,7 @@ const serviceThroughputRoute = createApmServerRoute({
       t.intersection([environmentRt, kueryRt, rangeRt, offsetRt, serviceTransactionDataSourceRt]),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -605,7 +601,7 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
       rangeRt,
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -678,7 +674,7 @@ const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
       offsetRt,
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceInstancesDetailedStatisticsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, config } = resources;
@@ -730,7 +726,7 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
     }),
     query: rangeRt,
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<
@@ -780,19 +776,14 @@ export const serviceDependenciesRoute = createApmServerRoute({
       offsetRt,
     ]),
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   async handler(resources): Promise<{ serviceDependencies: ServiceDependenciesResponse }> {
-    const {
-      params,
-      request,
-      plugins: { security },
-    } = resources;
+    const { params, request, core } = resources;
 
+    const coreStart = await core.start();
     const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(resources),
-      getRandomSampler({ security, request, probability: 1 }),
+      getRandomSampler({ coreStart, request, probability: 1 }),
     ]);
 
     const { serviceName } = params.path;
@@ -821,23 +812,18 @@ export const serviceDependenciesBreakdownRoute = createApmServerRoute({
     }),
     query: t.intersection([environmentRt, rangeRt, kueryRt]),
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
     breakdown: ServiceDependenciesBreakdownResponse;
   }> => {
-    const {
-      params,
-      request,
-      plugins: { security },
-    } = resources;
+    const { params, request, core } = resources;
 
+    const coreStart = await core.start();
     const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(resources),
-      getRandomSampler({ security, request, probability: 1 }),
+      getRandomSampler({ coreStart, request, probability: 1 }),
     ]);
 
     const { serviceName } = params.path;
@@ -867,9 +853,7 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
     }),
     query: t.intersection([rangeRt, environmentRt, t.type({ transactionType: t.string })]),
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -921,7 +905,7 @@ const serviceAlertsRoute = createApmServerRoute({
     }),
     query: t.intersection([rangeRt, environmentRt]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceAlertsResponse[number]> => {
     const { params } = resources;
     const {

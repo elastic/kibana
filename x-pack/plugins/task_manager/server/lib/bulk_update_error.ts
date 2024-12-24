@@ -43,3 +43,10 @@ export function getBulkUpdateErrorType(error: Error | BulkUpdateError): string |
     return (error as BulkUpdateError).type;
   }
 }
+
+export function isClusterBlockException(error: Error | BulkUpdateError): boolean {
+  return (
+    getBulkUpdateErrorType(error) === 'cluster_block_exception' ||
+    error.message.includes('cluster_block_exception')
+  );
+}
