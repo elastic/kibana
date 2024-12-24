@@ -1,0 +1,88 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies the load of a driver with an original file name and signature values that were observed for the first time during the last 30 days. This rule type can help baseline drivers installation within your environment.",
+        "from": "now-9m",
+        "history_window_start": "now-30d",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "First Time Seen Driver Loaded",
+        "new_terms_fields": [
+            "dll.pe.original_file_name",
+            "dll.code_signature.subject_name"
+        ],
+        "note": "## Triage and analysis\n\n### Investigating First Time Seen Driver Loaded\n\nA driver is a software component that allows the operating system to communicate with hardware devices. It works at a high privilege level, the kernel level, having high control over the system's security and stability.\n\nAttackers may exploit known good but vulnerable drivers to execute code in their context because once an attacker can execute code in the kernel, security tools can no longer effectively protect the host. They can leverage these drivers to tamper, bypass and terminate security software, elevate privileges, create persistence mechanisms, and disable operating system protections and monitoring features. Attackers were seen in the wild conducting these actions before acting on their objectives, such as ransomware.\n\nRead the complete research on \"Stopping Vulnerable Driver Attacks\" done by Elastic Security Labs [here](https://www.elastic.co/kr/security-labs/stopping-vulnerable-driver-attacks).\n\nThis rule identifies the load of a driver with an original file name and signature values observed for the first time during the last 30 days. This rule type can help baseline drivers installation within your environment.\n\n\u003e **Note**:\n\u003e This investigation guide uses the [Osquery Markdown Plugin](https://www.elastic.co/guide/en/security/master/invest-guide-run-osquery.html) introduced in Elastic Stack version 8.5.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n\n#### Possible investigation steps\n\n- Examine the driver loaded to identify potentially suspicious characteristics. The following actions can help you gain context:\n  - Identify the path that the driver was loaded from. If using Elastic Defend, this information can be found in the `dll.path` field.\n  - Examine the digital signature of the driver, and check if it's valid.\n  - Examine the creation and modification timestamps of the file:\n    - On Elastic Defend, those can be found in the `dll.Ext.relative_file_creation_time` and `\"dll.Ext.relative_file_name_modify_time\"` fields, with the values being seconds.\n    - Search for file creation events sharing the same file name as the `dll.name` field and identify the process responsible for the operation.\n      - Investigate any other abnormal behavior by the subject process, such as network connections, registry or file modifications, and any spawned child processes.\n  - Use the driver SHA-256 (`dll.hash.sha256` field) hash value to search for the existence and reputation in resources like VirusTotal, Hybrid-Analysis, CISCO Talos, Any.run, etc.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Assess whether this behavior is prevalent in the environment by looking for similar occurrences across hosts.\n- Use Osquery to investigate the drivers loaded into the system.\n  - !{osquery{\"label\":\"Osquery - Retrieve All Non-Microsoft Drivers with Virustotal Link\",\"query\":\"SELECT concat('https://www.virustotal.com/gui/file/', sha1) AS VtLink, class, description, directory, image, issuer_name, manufacturer, service, signed, subject_name FROM drivers JOIN authenticode ON drivers.image = authenticode.path JOIN hash ON drivers.image = hash.path WHERE NOT (provider == \\\"Microsoft\\\" AND signed == \\\"1\\\")\\n\"}}\n  - !{osquery{\"label\":\"Osquery - Retrieve All Unsigned Drivers with Virustotal Link\",\"query\":\"SELECT concat('https://www.virustotal.com/gui/file/', sha1) AS VtLink, class, description, directory, image, issuer_name, manufacturer, service, signed, subject_name FROM drivers JOIN authenticode ON drivers.image = authenticode.path JOIN hash ON drivers.image = hash.path WHERE signed == \\\"0\\\"\\n\"}}\n- Identify the driver's `Device Name` and `Service Name`.\n- Check for alerts from the rules specified in the `Related Rules` section.\n\n### False positive analysis\n\n- Matches derived from these rules are not inherently malicious. The security team should investigate them to ensure they are legitimate and needed, then include them in an allowlist only if required. The security team should address any vulnerable driver installation as it can put the user and the domain at risk.\n\n### Related Rules\n\n- Untrusted Driver Loaded - d8ab1ec1-feeb-48b9-89e7-c12e189448aa\n- Code Signing Policy Modification Through Registry - da7733b1-fe08-487e-b536-0a04c6d8b0cd\n- Code Signing Policy Modification Through Built-in tools - b43570de-a908-4f7f-8bdb-b2df6ffd8c80\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- Disable and uninstall all suspicious drivers found in the system. This can be done via Device Manager. (Note that this step may require you to boot the system into Safe Mode)\n- Remove the related services and registry keys found in the system. Note that the service will probably not stop if the driver is still installed.\n  - This can be done via PowerShell `Remove-Service` cmdlet.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors like reverse shells, reverse proxies, or droppers that attackers could use to reinfect the system.\n- Remove and block malicious artifacts identified during triage.\n- Ensure that the Driver Signature Enforcement is enabled on the system.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+        "query": "event.category:\"driver\" and host.os.type:windows and event.action:\"load\"\n",
+        "references": [
+            "https://www.elastic.co/kr/security-labs/stopping-vulnerable-driver-attacks"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "df0fd41e-5590-4965-ad5e-cd079ec22fa9",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Resources: Investigation Guide",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1543",
+                        "name": "Create or Modify System Process",
+                        "reference": "https://attack.mitre.org/techniques/T1543/",
+                        "subtechnique": [
+                            {
+                                "id": "T1543.003",
+                                "name": "Windows Service",
+                                "reference": "https://attack.mitre.org/techniques/T1543/003/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "new_terms",
+        "version": 5
+    },
+    "id": "df0fd41e-5590-4965-ad5e-cd079ec22fa9_5",
+    "type": "security-rule"
+}

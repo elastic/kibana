@@ -1,0 +1,117 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies attempts to open a remote desktop file from suspicious paths. Adversaries may abuse RDP files for initial access.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-endpoint.events.process-*",
+      "logs-windows.forwarded*",
+      "logs-windows.sysmon_operational-*",
+      "endgame-*",
+      "logs-system.security*",
+      "logs-m365_defender.event-*",
+      "logs-sentinel_one_cloud_funnel.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Remote Desktop File Opened from Suspicious Path",
+    "query": "process where host.os.type == \"windows\" and event.type == \"start\" and  \n process.name : \"mstsc.exe\" and\n process.args : (\"?:\\\\Users\\\\*\\\\Downloads\\\\*.rdp\", \n                 \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Temp\\\\Temp?_*.rdp\", \n                 \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Temp\\\\7z*.rdp\", \n                 \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Temp\\\\Rar$*\\\\*.rdp\", \n                 \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Temp\\\\BNZ.*.rdp\",\n                 \"C:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Microsoft\\\\Windows\\\\INetCache\\\\Content.Outlook\\\\*.rdp\")\n",
+    "references": [
+      "https://www.microsoft.com/en-us/security/blog/2024/10/29/midnight-blizzard-conducts-large-scale-spear-phishing-campaign-using-rdp-files/",
+      "https://www.blackhillsinfosec.com/rogue-rdp-revisiting-initial-access-methods/",
+      "https://shorsec.io/blog/malrdp-implementing-rouge-rdp-manually/"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^1.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "f401a0e3-5eeb-4591-969a-f435488e7d12",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Initial Access",
+      "Tactic: Command and Control",
+      "Data Source: Elastic Endgame",
+      "Data Source: Elastic Defend",
+      "Data Source: System",
+      "Data Source: Microsoft Defender for Endpoint",
+      "Data Source: Sysmon",
+      "Data Source: SentinelOne"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0001",
+          "name": "Initial Access",
+          "reference": "https://attack.mitre.org/tactics/TA0001/"
+        },
+        "technique": [
+          {
+            "id": "T1566",
+            "name": "Phishing",
+            "reference": "https://attack.mitre.org/techniques/T1566/",
+            "subtechnique": [
+              {
+                "id": "T1566.001",
+                "name": "Spearphishing Attachment",
+                "reference": "https://attack.mitre.org/techniques/T1566/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "f401a0e3-5eeb-4591-969a-f435488e7d12_1",
+  "type": "security-rule"
+}

@@ -1,0 +1,86 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Attackers may try to access private keys, e.g. ssh, in order to gain further authenticated access to the environment.",
+        "from": "now-119m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Attempted Private Key Access",
+        "query": "process where host.os.type == \"windows\" and event.type == \"start\" and process.args : (\"*.pem*\", \"*.id_rsa*\") and\n  not process.executable : (\n    \"?:\\\\ProgramData\\\\Logishrd\\\\LogiOptions\\\\Software\\\\*\\\\LogiLuUpdater.exe\",\n    \"?:\\\\Program Files\\\\Logi\\\\LogiBolt\\\\LogiBoltUpdater.exe\",\n    \"?:\\\\Windows\\\\system32\\\\icacls.exe\",\n    \"?:\\\\Program Files\\\\Splunk\\\\bin\\\\openssl.exe\",\n    \"?:\\\\Program Files\\\\Elastic\\\\Agent\\\\data\\\\*\\\\components\\\\osqueryd.exe\",\n    \"?:\\\\Windows\\\\System32\\\\OpenSSH\\\\*\"\n  )\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "c55badd3-3e61-4292-836f-56209dc8a601",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Credential Access",
+            "Data Source: Elastic Defend",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1552",
+                        "name": "Unsecured Credentials",
+                        "reference": "https://attack.mitre.org/techniques/T1552/",
+                        "subtechnique": [
+                            {
+                                "id": "T1552.004",
+                                "name": "Private Keys",
+                                "reference": "https://attack.mitre.org/techniques/T1552/004/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "c55badd3-3e61-4292-836f-56209dc8a601_1",
+    "type": "security-rule"
+}

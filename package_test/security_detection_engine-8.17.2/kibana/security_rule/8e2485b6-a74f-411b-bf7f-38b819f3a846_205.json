@@ -1,0 +1,122 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies a potential Windows Server Update Services (WSUS) abuse to execute psexec to enable for lateral movement. WSUS is limited to executing Microsoft signed binaries, which limits the executables that can be used to tools published by Microsoft.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.process-*",
+      "logs-windows.sysmon_operational-*",
+      "endgame-*",
+      "logs-sentinel_one_cloud_funnel.*",
+      "logs-m365_defender.event-*",
+      "logs-system.security-*",
+      "winlogbeat-*",
+      "logs-crowdstrike.fdr*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Potential WSUS Abuse for Lateral Movement",
+    "query": "process where host.os.type == \"windows\" and event.type == \"start\" and process.parent.name : \"wuauclt.exe\" and\nprocess.executable : (\n    \"?:\\\\Windows\\\\SoftwareDistribution\\\\Download\\\\Install\\\\*\",\n    \"\\\\Device\\\\HarddiskVolume?\\\\Windows\\\\SoftwareDistribution\\\\Download\\\\Install\\\\*\"\n) and\n(process.name : \"psexec64.exe\" or ?process.pe.original_file_name : \"psexec.c\")\n",
+    "references": [
+      "https://www.thehacker.recipes/a-d/movement/mitm-and-coerced-authentications/wsus-spoofing"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^1.0.0"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "crowdstrike",
+        "version": "^1.1.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.executable",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.pe.original_file_name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "8e2485b6-a74f-411b-bf7f-38b819f3a846",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Lateral Movement",
+      "Data Source: Elastic Endgame",
+      "Data Source: Elastic Defend",
+      "Data Source: Sysmon",
+      "Data Source: SentinelOne",
+      "Data Source: Microsoft Defender for Endpoint",
+      "Data Source: System",
+      "Data Source: Crowdstrike"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0008",
+          "name": "Lateral Movement",
+          "reference": "https://attack.mitre.org/tactics/TA0008/"
+        },
+        "technique": [
+          {
+            "id": "T1210",
+            "name": "Exploitation of Remote Services",
+            "reference": "https://attack.mitre.org/techniques/T1210/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 205
+  },
+  "id": "8e2485b6-a74f-411b-bf7f-38b819f3a846_205",
+  "type": "security-rule"
+}

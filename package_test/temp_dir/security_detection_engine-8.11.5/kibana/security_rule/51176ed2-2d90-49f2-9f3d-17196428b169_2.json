@@ -1,0 +1,97 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Detects the execution of commands used to discover information about the system, which attackers may use after compromising a system to gain situational awareness.",
+        "from": "now-119m",
+        "index": [
+            "winlogbeat-*",
+            "logs-endpoint.events.*",
+            "logs-windows.*",
+            "endgame-*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Windows System Information Discovery",
+        "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n(\n  (\n    process.name : \"cmd.exe\" and process.args : \"ver*\" and not\n    process.parent.executable : (\n        \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Keybase\\\\upd.exe\",\n        \"?:\\\\Users\\\\*\\\\python*.exe\"\n    )\n  ) or \n  process.name : (\"systeminfo.exe\", \"hostname.exe\") or \n  (process.name : \"wmic.exe\" and process.args : \"os\" and process.args : \"get\")\n) and not\nprocess.parent.executable : (\n    \"?:\\\\Program Files\\\\*\",\n    \"?:\\\\Program Files (x86)\\\\*\",\n    \"?:\\\\ProgramData\\\\*\"\n) and not user.id : \"S-1-5-18\"\n",
+        "related_integrations": [
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            },
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "51176ed2-2d90-49f2-9f3d-17196428b169",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Discovery",
+            "Data Source: Elastic Endgame",
+            "Rule Type: BBR",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0007",
+                    "name": "Discovery",
+                    "reference": "https://attack.mitre.org/tactics/TA0007/"
+                },
+                "technique": [
+                    {
+                        "id": "T1082",
+                        "name": "System Information Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1082/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "51176ed2-2d90-49f2-9f3d-17196428b169_2",
+    "type": "security-rule"
+}

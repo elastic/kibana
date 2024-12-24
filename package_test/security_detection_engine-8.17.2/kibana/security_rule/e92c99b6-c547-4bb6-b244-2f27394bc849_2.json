@@ -1,0 +1,60 @@
+{
+  "attributes": {
+    "anomaly_threshold": 75,
+    "author": [
+      "Elastic"
+    ],
+    "description": "A machine learning job has detected high bytes of data written to an external device via Airdrop. In a typical operational setting, there is usually a predictable pattern or a certain range of data that is written to external devices. An unusually large amount of data being written is anomalous and can signal illicit data copying or transfer activities.",
+    "from": "now-2h",
+    "interval": "15m",
+    "license": "Elastic License v2",
+    "machine_learning_job_id": "ded_high_bytes_written_to_external_device_airdrop",
+    "name": "Spike in Bytes Sent to an External Device via Airdrop",
+    "references": [
+      "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html",
+      "https://docs.elastic.co/en/integrations/ded",
+      "https://www.elastic.co/blog/detect-data-exfiltration-activity-with-kibanas-new-integration"
+    ],
+    "related_integrations": [
+      {
+        "package": "ded",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "e92c99b6-c547-4bb6-b244-2f27394bc849",
+    "setup": "The rule requires the Data Exfiltration Detection integration assets to be installed, as well as network and file events collected by integrations such as Elastic Defend and Network Packet Capture (for network events only).  \n\n### Data Exfiltration Detection Setup\nThe Data Exfiltration Detection integration detects data exfiltration activity by identifying abnormalities in network and file events. Anomalies are detected using Elastic's Anomaly Detection feature. \n\n#### Prerequisite Requirements:\n- Fleet is required for Data Exfiltration Detection.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n- File events collected by the Elastic Defend integration.\n- To install Elastic Defend, refer to the [documentation](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n\n#### The following steps should be executed to install assets associated with the Data Exfiltration Detection integration:\n- Go to the Kibana homepage. Under Management, click Integrations.\n- In the query bar, search for Data Exfiltration Detection and select the integration to see more details about it.\n- Under Settings, click Install Data Exfiltration Detection assets and follow the prompts to install the assets.\n\n#### Anomaly Detection Setup\nBefore you can enable rules for Data Exfiltration Detection, you'll need to enable the corresponding Anomaly Detection jobs. \n- Go to the Kibana homepage. Under Analytics, click Machine Learning.\n- Under Anomaly Detection, click Jobs, and then click \"Create job\". Select the Data View containing your file events. For example, this would be `logs-endpoint.events.*` if you used Elastic Defend to collect events.\n- If the selected Data View contains events that match the query in [this](https://github.com/elastic/integrations/blob/main/packages/ded/kibana/ml_module/ded-ml.json) configuration file, you will see a card for Data Exfiltration Detection under \"Use preconfigured jobs\".\n- Keep the default settings and click \"Create jobs\" to start the anomaly detection jobs and datafeeds.\n",
+    "severity": "low",
+    "tags": [
+      "Use Case: Data Exfiltration Detection",
+      "Rule Type: ML",
+      "Rule Type: Machine Learning",
+      "Tactic: Exfiltration"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0010",
+          "name": "Exfiltration",
+          "reference": "https://attack.mitre.org/tactics/TA0010/"
+        },
+        "technique": [
+          {
+            "id": "T1011",
+            "name": "Exfiltration Over Other Network Medium",
+            "reference": "https://attack.mitre.org/techniques/T1011/"
+          }
+        ]
+      }
+    ],
+    "type": "machine_learning",
+    "version": 2
+  },
+  "id": "e92c99b6-c547-4bb6-b244-2f27394bc849_2",
+  "type": "security-rule"
+}

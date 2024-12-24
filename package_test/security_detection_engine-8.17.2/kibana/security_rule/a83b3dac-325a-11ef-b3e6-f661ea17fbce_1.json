@@ -1,0 +1,99 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies device code authentication with an Azure broker client for Entra ID. Adversaries abuse Primary Refresh Tokens (PRTs) to bypass multi-factor authentication (MFA) and gain unauthorized access to Azure resources. PRTs are used in Conditional Access policies to enforce device-based controls. Compromising PRTs allows attackers to bypass these policies and gain unauthorized access. This rule detects successful sign-ins using device code authentication with the Entra ID broker client application ID (29d9ed98-a469-4536-ade2-f981bc1d605e).",
+    "from": "now-9m",
+    "index": [
+      "filebeat-*",
+      "logs-azure.signinlogs-*",
+      "logs-azure.activitylogs-*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Entra ID Device Code Auth with Broker Client",
+    "query": " event.dataset:(azure.activitylogs or azure.signinlogs)\n    and azure.signinlogs.properties.authentication_protocol:deviceCode\n    and azure.signinlogs.properties.conditional_access_audiences.application_id:29d9ed98-a469-4536-ade2-f981bc1d605e\n    and event.outcome:success or (\n        azure.activitylogs.properties.appId:29d9ed98-a469-4536-ade2-f981bc1d605e\n        and azure.activitylogs.properties.authentication_protocol:deviceCode)\n",
+    "references": [
+      "https://dirkjanm.io/assets/raw/Phishing%20the%20Phishing%20Resistant.pdf",
+      "https://learn.microsoft.com/en-us/troubleshoot/azure/entra/entra-id/governance/verify-first-party-apps-sign-in",
+      "https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/signinlogs"
+    ],
+    "related_integrations": [
+      {
+        "integration": "activitylogs",
+        "package": "azure",
+        "version": "^1.0.0"
+      },
+      {
+        "package": "azure",
+        "version": "^1.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "azure.activitylogs.properties.appId",
+        "type": "unknown"
+      },
+      {
+        "ecs": false,
+        "name": "azure.activitylogs.properties.authentication_protocol",
+        "type": "unknown"
+      },
+      {
+        "ecs": false,
+        "name": "azure.signinlogs.properties.authentication_protocol",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "azure.signinlogs.properties.conditional_access_audiences.application_id",
+        "type": "unknown"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "a83b3dac-325a-11ef-b3e6-f661ea17fbce",
+    "setup": "This rule optionally requires Azure Sign-In logs from the Azure integration. Ensure that the Azure integration is correctly set up and that the required data is being collected.\n",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: Azure",
+      "Data Source: Microsoft Entra ID",
+      "Use Case: Identity and Access Audit",
+      "Tactic: Credential Access"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1528",
+            "name": "Steal Application Access Token",
+            "reference": "https://attack.mitre.org/techniques/T1528/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 1
+  },
+  "id": "a83b3dac-325a-11ef-b3e6-f661ea17fbce_1",
+  "type": "security-rule"
+}
