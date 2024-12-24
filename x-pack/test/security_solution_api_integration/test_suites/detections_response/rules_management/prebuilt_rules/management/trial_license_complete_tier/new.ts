@@ -6,37 +6,27 @@
  */
 import expect from 'expect';
 import {
-  CommonFieldsDiff,
-  ThreatMatchFieldsDiff,
-  NewTermsFieldsDiff,
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { SINGLE_LINE_STRING_FIELDS } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/logic/diff/calculation/calculate_rule_fields_diff';
+import { Client } from '@elastic/elasticsearch';
+import TestAgent from 'supertest/lib/agent';
+import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllTimelines,
   deleteAllPrebuiltRuleAssets,
-  createRuleAssetSavedObject,
   installPrebuiltRules,
   createPrebuiltRuleAssetSavedObjects,
   reviewPrebuiltRulesToUpgrade,
   updateRule,
   fetchRule,
-  patchRule,
   createHistoricalPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObjectOfType,
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
-
-type DiffFieldsForType<T> = CommonFieldsDiff & T;
-
-type RuleTypeToDiffType = {
-  query: ThreatMatchFieldsDiff;
-  threat_match: ThreatMatchFieldsDiff;
-  new_terms: NewTermsFieldsDiff;
-};
 
 interface SingleLineStringFieldTestValues {
   baseValue: string;
@@ -78,11 +68,13 @@ const RULE_TYPE_FIELD_MAPPING = {
 
 type RuleTypeToFields = typeof RULE_TYPE_FIELD_MAPPING;
 
+type FieldDiffs = Record<SINGLE_LINE_STRING_FIELDS, unknown>;
+
 const createTestSuite = (
   ruleType: keyof RuleTypeToFields,
   field: SINGLE_LINE_STRING_FIELDS,
   testValues: SingleLineStringFieldTestValues,
-  services: { es: any; supertest: any; log: any }
+  services: { es: Client; supertest: TestAgent; log: ToolingLog }
 ) => {
   const { es, supertest, log } = services;
   const { baseValue, customValue, updatedValue } = testValues;
@@ -111,13 +103,7 @@ const createTestSuite = (
         await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
 
         const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-        expect(
-          (
-            reviewResponse.rules[0].diff.fields as DiffFieldsForType<
-              RuleTypeToDiffType[typeof ruleType]
-            >
-          )[field]
-        ).toBeUndefined();
+        expect((reviewResponse.rules[0].diff.fields as FieldDiffs)[field]).toBeUndefined();
 
         expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
         expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
@@ -151,7 +137,7 @@ const createTestSuite = (
         await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
 
         const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-        expect(reviewResponse.rules[0].diff.fields[field]).toEqual({
+        expect((reviewResponse.rules[0].diff.fields as FieldDiffs)[field]).toEqual({
           base_version: baseValue,
           current_version: customValue,
           target_version: baseValue,
@@ -188,7 +174,7 @@ const createTestSuite = (
         await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
 
         const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-        expect(reviewResponse.rules[0].diff.fields[field]).toEqual({
+        expect((reviewResponse.rules[0].diff.fields as FieldDiffs)[field]).toEqual({
           base_version: baseValue,
           current_version: baseValue,
           target_version: updatedValue,
@@ -232,7 +218,7 @@ const createTestSuite = (
         await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
 
         const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-        expect(reviewResponse.rules[0].diff.fields[field]).toEqual({
+        expect((reviewResponse.rules[0].diff.fields as FieldDiffs)[field]).toEqual({
           base_version: baseValue,
           current_version: customValue,
           target_version: customValue,
@@ -276,7 +262,7 @@ const createTestSuite = (
         await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
 
         const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-        expect(reviewResponse.rules[0].diff.fields[field]).toEqual({
+        expect((reviewResponse.rules[0].diff.fields as FieldDiffs)[field]).toEqual({
           base_version: baseValue,
           current_version: customValue,
           target_version: updatedValue,
@@ -315,7 +301,7 @@ const createTestSuite = (
           ];
           await createPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
           const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-          expect(reviewResponse.rules[0].diff.fields[field]).toBeUndefined();
+          expect((reviewResponse.rules[0].diff.fields as FieldDiffs)[field]).toBeUndefined();
 
           expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
           expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
@@ -351,7 +337,7 @@ const createTestSuite = (
           await createPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
 
           const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-          expect(reviewResponse.rules[0].diff.fields[field]).toEqual({
+          expect((reviewResponse.rules[0].diff.fields as FieldDiffs)[field]).toEqual({
             current_version: customValue,
             target_version: updatedValue,
             merged_version: updatedValue,
