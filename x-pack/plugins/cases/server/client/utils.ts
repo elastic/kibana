@@ -16,8 +16,10 @@ import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 
+import { escapeQuotes } from '@kbn/es-query/src/kuery/utils/escape_kuery';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common/constants';
+
 import type {
   CaseCustomField,
   CaseSeverity,
@@ -663,6 +665,26 @@ export const transformTemplateCustomFields = ({
       caseFields: { ...template.caseFields, customFields: transformedTemplateCustomFields },
     };
   });
+};
+
+export const buildObservablesFieldsFilter = (observables: Record<string, string[]>) => {
+  // NOTE: empty observables mean that we should not construct the filter and it should lead
+  // to early return in the calling context (it is required).
+  if (!Object.keys(observables).length) {
+    return;
+  }
+
+  const filterExpressions = Object.keys(observables).flatMap((typeKey) => {
+    return Object.values(observables[typeKey]).map((observableValue) => {
+      return fromKueryExpression(
+        `cases.attributes.observables:{value: "${escapeQuotes(
+          observableValue
+        )}" AND typeKey: "${typeKey}"}`
+      );
+    });
+  });
+
+  return nodeBuilder.or(filterExpressions);
 };
 
 export const buildAttachmentRequestFromFileJSON = ({
