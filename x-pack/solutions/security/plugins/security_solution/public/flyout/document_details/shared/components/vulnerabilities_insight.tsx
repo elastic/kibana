@@ -87,14 +87,17 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
 
   const vulnerabilitiesStats = useMemo(
     () =>
-      getVulnerabilityStats({
-        critical: CRITICAL,
-        high: HIGH,
-        medium: MEDIUM,
-        low: LOW,
-        none: NONE,
-      }),
-    [CRITICAL, HIGH, MEDIUM, LOW, NONE]
+      getVulnerabilityStats(
+        {
+          critical: CRITICAL,
+          high: HIGH,
+          medium: MEDIUM,
+          low: LOW,
+          none: NONE,
+        },
+        euiTheme
+      ),
+    [CRITICAL, HIGH, MEDIUM, LOW, NONE, euiTheme]
   );
 
   const count = useMemo(

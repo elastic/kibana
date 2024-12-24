@@ -7,6 +7,8 @@
 
 import { euiThemeVars } from '@kbn/ui-theme';
 import { getCvsScoreColor, getSeverityStatusColor } from './get_vulnerability_colors';
+
+// TODO: fix tests
 describe('getSeverityStatusColor', () => {
   it('should return the correct color for LOW severity', () => {
     expect(getSeverityStatusColor('LOW')).toBe(euiThemeVars.euiColorVis0);
@@ -29,6 +31,7 @@ describe('getSeverityStatusColor', () => {
   });
 });
 
+// TODO: fix tests
 describe('getCvsScoreColor', () => {
   it('returns correct color for low severity score', () => {
     expect(getCvsScoreColor(1.5)).toBe(euiThemeVars.euiColorVis0);
