@@ -184,18 +184,18 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   const pageTitle = useMemo(() => <PageTitle />, []);
 
-  const { sourcererDataView } = useSourcererDataView();
+  const { indexPattern } = useSourcererDataView();
 
   // filterQuery is the combined search bar query and filters in ES format:
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: sourcererDataView,
+        indexPattern,
         queries: [query ?? getDefaultQuery()], // <-- search bar query
         filters: filters ?? [], // <-- search bar filters
       }),
-    [filters, query, sourcererDataView, uiSettings]
+    [filters, indexPattern, query, uiSettings]
   );
 
   // renders a toast if the filter query is invalid:

@@ -14,7 +14,7 @@ export const useDataView = ({
   dataViewSpec,
   loading,
 }: {
-  dataViewSpec: DataViewSpec;
+  dataViewSpec: DataViewSpec | undefined;
   loading: boolean;
 }): DataView | undefined => {
   const { dataViews } = useKibana().services;
@@ -25,7 +25,7 @@ export const useDataView = ({
     let active = true;
 
     async function createDataView() {
-      if (!loading) {
+      if (dataViewSpec != null && !loading) {
         try {
           const dv = await dataViews.create(dataViewSpec);
 
