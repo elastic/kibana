@@ -285,21 +285,47 @@ export const RuleMigrationTranslationStats = z.object({
    */
   rules: z.object({
     /**
-     * The total number of rules to migrate.
+     * The total number of rules in the migration.
      */
     total: z.number().int(),
     /**
-     * The number of rules that matched Elastic prebuilt rules.
+     * The number of rules that have been successfully translated.
      */
-    prebuilt: z.number().int(),
+    success: z.object({
+      /**
+       * The total number of rules that have been successfully translated.
+       */
+      total: z.number().int(),
+      /**
+       * The translation results
+       */
+      result: z.object({
+        /**
+         * The number of rules that have been fully translated.
+         */
+        full: z.number().int(),
+        /**
+         * The number of rules that have been partially translated.
+         */
+        partial: z.number().int(),
+        /**
+         * The number of rules that could not be translated.
+         */
+        untranslatable: z.number().int(),
+      }),
+      /**
+       * The number of rules that have been successfully translated and can be installed.
+       */
+      installable: z.number().int(),
+      /**
+       * The number of rules that have been successfully translated and matched Elastic prebuilt rules.
+       */
+      prebuilt: z.number().int(),
+    }),
     /**
-     * The number of rules that did not match Elastic prebuilt rules and will be installed as custom rules.
+     * The number of rules that have failed translation.
      */
-    custom: z.number().int(),
-    /**
-     * The number of rules that can be installed.
-     */
-    installable: z.number().int(),
+    failed: z.number().int(),
   }),
 });
 
